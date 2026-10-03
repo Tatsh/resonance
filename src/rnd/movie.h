@@ -65,14 +65,16 @@ public:
      * compiler's virtual-base construction flag, which the factory passes as 1.
      *
      * @param name The registry key for this object.
-     * @ghidraAddress 0x005ce3d0
+     * @ghidraAddress NTSC-U/C: 0x005ce3d0
+     * @ghidraAddress PAL: 0x00610330
      */
     explicit Movie(const HxStr &name);
 
     /**
      * Close the file and release every track texture.
      *
-     * @ghidraAddress 0x005ce930
+     * @ghidraAddress NTSC-U/C: 0x005ce930
+     * @ghidraAddress PAL: 0x006108a8
      */
     virtual ~Movie();
 
@@ -86,7 +88,8 @@ public:
      * file is reopened from the name just read.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x005d22f8
+     * @ghidraAddress NTSC-U/C: 0x005d22f8
+     * @ghidraAddress PAL: 0x00614328
      */
     virtual void Load(Stream &stream);
 
@@ -98,7 +101,8 @@ public:
      * `0x005d15e0`.
      *
      * @param sink The text sink.
-     * @ghidraAddress 0x005d21e0
+     * @ghidraAddress NTSC-U/C: 0x005d21e0
+     * @ghidraAddress PAL: 0x00614210
      */
     virtual void DumpText(FailSink &sink);
 
@@ -109,7 +113,8 @@ public:
      * and mTrackTextures through the writer at `0x005d1790`.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x005d2280
+     * @ghidraAddress NTSC-U/C: 0x005d2280
+     * @ghidraAddress PAL: 0x006142b0
      */
     virtual void Save(Stream &stream);
 
@@ -121,7 +126,8 @@ public:
      *
      * @param pFrom The object being replaced.
      * @param pTo The object to point at, which may be null.
-     * @ghidraAddress 0x005ced80
+     * @ghidraAddress NTSC-U/C: 0x005ced80
+     * @ghidraAddress PAL: 0x00610d08
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -129,7 +135,8 @@ public:
      * Report the class key a `.rnd` file writes for a movie.
      *
      * @return g_movieClassName.
-     * @ghidraAddress 0x005d2078
+     * @ghidraAddress NTSC-U/C: 0x005d2078
+     * @ghidraAddress PAL: 0x006140a8
      */
     virtual const HxStr &ClassName() const;
 
@@ -142,7 +149,8 @@ public:
      *
      * @param pSource The source object.
      * @param nFlags The copy flags, passed to the base.
-     * @ghidraAddress 0x005d23c8
+     * @ghidraAddress NTSC-U/C: 0x005d23c8
+     * @ghidraAddress PAL: 0x006143f8
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -151,7 +159,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x005d1eb8
+     * @ghidraAddress NTSC-U/C: 0x005d1eb8
+     * @ghidraAddress PAL: 0x00613ee8
      */
     static void *operator new(size_t nSize);
 
@@ -159,7 +168,8 @@ public:
      * Release a movie block under the same tag.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x005d1ed8
+     * @ghidraAddress NTSC-U/C: 0x005d1ed8
+     * @ghidraAddress PAL: 0x00613f08
      */
     static void operator delete(void *pBlock);
 
@@ -170,7 +180,8 @@ public:
      *
      * @param nTrackId The track to look up.
      * @return The track's texture, or null when no entry plays it.
-     * @ghidraAddress 0x005d2480
+     * @ghidraAddress NTSC-U/C: 0x005d2480
+     * @ghidraAddress PAL: 0x006144b0
      */
     Tex *FindTrackTexture(int nTrackId) const;
 
@@ -180,7 +191,8 @@ public:
      * The routine has no caller in the shipped build, and its name is inferred.
      *
      * @return The relative path, valid until the next relative path is taken.
-     * @ghidraAddress 0x005d2058
+     * @ghidraAddress NTSC-U/C: 0x005d2058
+     * @ghidraAddress PAL: 0x00614088
      */
     const HxStr &GetRelativeFilename() const;
 
@@ -190,7 +202,8 @@ public:
      * Animatable vtable slot 3.
      *
      * @param flFrame The frame to animate to, after this object's filter chain.
-     * @ghidraAddress 0x005cef88
+     * @ghidraAddress NTSC-U/C: 0x005cef88
+     * @ghidraAddress PAL: 0x00610f10
      */
     virtual void SetFrameSelf(float flFrame);
 
@@ -201,7 +214,8 @@ public:
      * followed by OpenMovieFile() and it takes no argument, so the routine reloads rather than
      * assigning a name. Nothing in the image calls it or overrides it.
      *
-     * @ghidraAddress 0x005d21b0
+     * @ghidraAddress NTSC-U/C: 0x005d21b0
+     * @ghidraAddress PAL: 0x006141e0
      */
     virtual void Reopen();
 
@@ -213,7 +227,8 @@ public:
      * the file; Reopen() does that.
      *
      * @param name The file name, without the `.mmv` extension the open path appends.
-     * @ghidraAddress 0x005d2190
+     * @ghidraAddress NTSC-U/C: 0x005d2190
+     * @ghidraAddress PAL: 0x006141c0
      */
     void SetFilename(const HxStr &name);
 
@@ -228,14 +243,16 @@ public:
      * `0x007a8400`, indexed by the negative error code, into "Couldn't load movie file %s: %s",
      * then destroys the reader and clears the member.
      *
-     * @ghidraAddress 0x005cebe0
+     * @ghidraAddress NTSC-U/C: 0x005cebe0
+     * @ghidraAddress PAL: 0x00610b68
      */
     void OpenMovieFile();
 
     /**
      * Release every track texture and destroy the stream reader.
      *
-     * @ghidraAddress 0x005cef00
+     * @ghidraAddress NTSC-U/C: 0x005cef00
+     * @ghidraAddress PAL: 0x00610e88
      */
     void CloseMovieFile();
 
@@ -245,7 +262,8 @@ public:
      * Installs ChunkHandler() with this movie as its data. Does nothing when no file is open.
      *
      * @param nTrackId The track.
-     * @ghidraAddress 0x005d24d8
+     * @ghidraAddress NTSC-U/C: 0x005d24d8
+     * @ghidraAddress PAL: 0x00614508
      */
     void AttachTrack(int nTrackId);
 
@@ -253,7 +271,8 @@ public:
      * Stop routing one track's chunks anywhere. Does nothing when no file is open.
      *
      * @param nTrackId The track.
-     * @ghidraAddress 0x005d2508
+     * @ghidraAddress NTSC-U/C: 0x005d2508
+     * @ghidraAddress PAL: 0x00614538
      */
     void DetachTrack(int nTrackId);
 
@@ -267,7 +286,8 @@ public:
      *
      * @param nTrackId The track.
      * @param pTex The texture, or null.
-     * @ghidraAddress 0x005cf1f8
+     * @ghidraAddress NTSC-U/C: 0x005cf1f8
+     * @ghidraAddress PAL: 0x006111a0
      */
     void SetTrackTexture(int nTrackId, Tex *pTex);
 
@@ -276,7 +296,8 @@ public:
      * the track. The name is inferred.
      *
      * @param nTrackId The track.
-     * @ghidraAddress 0x005cf3f8
+     * @ghidraAddress NTSC-U/C: 0x005cf3f8
+     * @ghidraAddress PAL: 0x006113c0
      */
     void RemoveTrackTexture(int nTrackId);
 
@@ -289,7 +310,8 @@ public:
      *
      * @param pHeader The chunk.
      * @param pPayload The chunk's payload.
-     * @ghidraAddress 0x005cf4c0
+     * @ghidraAddress NTSC-U/C: 0x005cf4c0
+     * @ghidraAddress PAL: 0x00611488
      */
     void OnChunk(MovieStream::ChunkHeader *pHeader, void *pPayload);
 
@@ -301,7 +323,8 @@ public:
      * @param pHeader The chunk.
      * @param pPayload The chunk's payload.
      * @param pData The movie.
-     * @ghidraAddress 0x005d2530
+     * @ghidraAddress NTSC-U/C: 0x005d2530
+     * @ghidraAddress PAL: 0x00614560
      */
     static void ChunkHandler(MovieStream::ChunkHeader *pHeader, void *pPayload, void *pData);
 
@@ -318,7 +341,8 @@ public:
      *
      * @param stream The stream to read from.
      * @param textures Receives the entries.
-     * @ghidraAddress 0x005d1a90
+     * @ghidraAddress NTSC-U/C: 0x005d1a90
+     * @ghidraAddress PAL: 0x00613a80
      */
     static void ReadTrackTextures(Stream &stream, std::list<TrackTexture> &textures);
 
@@ -360,7 +384,8 @@ private:
  *
  * @param name The object name.
  * @return The new movie, as its Rnd::Object subobject.
- * @ghidraAddress 0x005d20b8
+ * @ghidraAddress NTSC-U/C: 0x005d20b8
+ * @ghidraAddress PAL: 0x006140e8
  */
 Object *CreateRegisteredMovie(const HxStr &name);
 
@@ -373,7 +398,8 @@ Object *CreateRegisteredMovie(const HxStr &name);
  *
  * @param name The object name.
  * @return The new movie, or null.
- * @ghidraAddress 0x005d1f28
+ * @ghidraAddress NTSC-U/C: 0x005d1f28
+ * @ghidraAddress PAL: 0x00613f58
  */
 inline Movie *NewMovie(const HxStr &name) {
     try {
@@ -386,7 +412,8 @@ inline Movie *NewMovie(const HxStr &name) {
 /**
  * Registered class name of Rnd::Movie, the string "Movie".
  *
- * @ghidraAddress 0x0077a590
+ * @ghidraAddress NTSC-U/C: 0x0077a590
+ * @ghidraAddress PAL: 0x007be350
  */
 extern HxStr g_movieClassName;
 
@@ -396,7 +423,8 @@ extern HxStr g_movieClassName;
  * The class has no creator hook, so the body is the registration alone. The out-of-line copy has
  * no caller, and Rnd::Manager::Init() registers the class itself. The name is inferred.
  *
- * @ghidraAddress 0x005d1ef8
+ * @ghidraAddress NTSC-U/C: 0x005d1ef8
+ * @ghidraAddress PAL: 0x00613f28
  */
 inline void RegisterMovieClass() {
     g_manager.RegisterClass(g_movieClassName, CreateRegisteredMovie);

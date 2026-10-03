@@ -14,7 +14,7 @@ constexpr char kLevelFormat[] = "%s.%d";
 
 } // namespace
 
-// 0x00476b28
+// NTSC-U/C: 0x00476b28, PAL: 0x004b47a0
 void TunnelMeshChain::DeleteMeshes() {
     for (Mesh *pMesh : *this) {
         if (pMesh != nullptr) {
@@ -24,7 +24,7 @@ void TunnelMeshChain::DeleteMeshes() {
     erase(begin(), end());
 }
 
-// 0x004694a0
+// NTSC-U/C: 0x004694a0, PAL: 0x004a6f60
 void TunnelMeshChain::Build(const HxStr &name, int nCount, bool bInternal) {
     DeleteMeshes();
     resize(nCount);
@@ -49,14 +49,14 @@ void TunnelMeshChain::Build(const HxStr &name, int nCount, bool bInternal) {
     SetTransOwner(front());
 }
 
-// 0x00476e48
+// NTSC-U/C: 0x00476e48, PAL: 0x004b4ac0
 void TunnelMeshChain::SetTransOwner(Mesh *pOwner) {
     for (Mesh *pMesh : *this) {
         pMesh->SetTransOwner(pOwner);
     }
 }
 
-// 0x00469820
+// NTSC-U/C: 0x00469820, PAL: 0x004a7318
 void TunnelMeshChain::CopyScreenSizes(const TunnelMeshChain &source) {
     for (unsigned i = 0; i < size(); ++i) {
         Mesh *pMesh = (*this)[i];
@@ -64,7 +64,7 @@ void TunnelMeshChain::CopyScreenSizes(const TunnelMeshChain &source) {
     }
 }
 
-// 0x00476c50
+// NTSC-U/C: 0x00476c50, PAL: 0x004b48c8
 void TunnelMeshChain::SetScreenSizes(const std::vector<float> &screenSizes) {
     for (unsigned i = 0; i < size(); ++i) {
         if (i < screenSizes.size()) {
@@ -75,7 +75,7 @@ void TunnelMeshChain::SetScreenSizes(const std::vector<float> &screenSizes) {
     }
 }
 
-// 0x00476d28
+// NTSC-U/C: 0x00476d28, PAL: 0x004b49a0
 void TunnelMeshChain::ShareFaces(const TunnelMeshChain &templates) {
     for (unsigned i = 0; i < size(); ++i) {
         (*this)[i]->SetFacesOwner(templates[i]->mFacesOwner);
@@ -83,21 +83,21 @@ void TunnelMeshChain::ShareFaces(const TunnelMeshChain &templates) {
     }
 }
 
-// 0x00476de8
+// NTSC-U/C: 0x00476de8, PAL: 0x004b4a60
 void TunnelMeshChain::Sync() {
     for (Mesh *pMesh : *this) {
         pMesh->Sync();
     }
 }
 
-// 0x00476ec0
+// NTSC-U/C: 0x00476ec0, PAL: 0x004b4b38
 void TunnelMeshChain::Collide(const Ray &ray, Collideable::HitSink &sink) {
     for (Mesh *pMesh : *this) {
         pMesh->Collide(ray, sink);
     }
 }
 
-// 0x004698e8
+// NTSC-U/C: 0x004698e8, PAL: 0x004a73e0
 void TunnelMeshChain::SetVertexCount(unsigned nCount) {
     MeshVert blank;
     blank.mPoint.x = 0.0f;
@@ -119,7 +119,7 @@ void TunnelMeshChain::SetVertexCount(unsigned nCount) {
     front()->mVertsOwner->mVerts.resize(nCount, blank);
 }
 
-// 0x00476bc8
+// NTSC-U/C: 0x00476bc8, PAL: 0x004b4840
 void TunnelMeshChain::Draw(float flScreenSize) {
     if (empty() || !front()->GetShowing()) {
         return;

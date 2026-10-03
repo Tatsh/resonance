@@ -75,12 +75,14 @@ public:
      * fog start at 0.0, the fog end and the fog density at 1.0, and the fog mode at None.
      *
      * @param name The registry key for this object.
-     * @ghidraAddress 0x00515890
+     * @ghidraAddress NTSC-U/C: 0x00515890
+     * @ghidraAddress PAL: 0x00555bc0
      */
     explicit Environ(const HxStr &name);
 
     /**
-     * @ghidraAddress 0x00518fe0
+     * @ghidraAddress NTSC-U/C: 0x00518fe0
+     * @ghidraAddress PAL: 0x00559378
      */
     virtual ~Environ();
 
@@ -91,7 +93,8 @@ public:
      * "Environ".
      *
      * @return The class key.
-     * @ghidraAddress 0x00519258
+     * @ghidraAddress NTSC-U/C: 0x00519258
+     * @ghidraAddress PAL: 0x005595f0
      */
     virtual const HxStr &ClassName() const;
 
@@ -102,7 +105,8 @@ public:
      * level.
      *
      * @param sink The diagnostic sink to write to.
-     * @ghidraAddress 0x00515ce0
+     * @ghidraAddress NTSC-U/C: 0x00515ce0
+     * @ghidraAddress PAL: 0x00556010
      */
     virtual void DumpText(FailSink &sink);
 
@@ -113,7 +117,8 @@ public:
      * changed.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00516028
+     * @ghidraAddress NTSC-U/C: 0x00516028
+     * @ghidraAddress PAL: 0x00556358
      */
     virtual void Save(Stream &stream);
 
@@ -126,7 +131,8 @@ public:
      *
      * @param pFrom The object going away.
      * @param pTo The object to store instead, or null.
-     * @ghidraAddress 0x005156b0
+     * @ghidraAddress NTSC-U/C: 0x005156b0
+     * @ghidraAddress PAL: 0x005559e0
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -142,7 +148,8 @@ public:
      *
      * @param pSource The environment to copy from.
      * @param nFlags The set of fields to copy.
-     * @ghidraAddress 0x00516560
+     * @ghidraAddress NTSC-U/C: 0x00516560
+     * @ghidraAddress PAL: 0x00556890
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -153,7 +160,8 @@ public:
      * plain word and is assigned to the enumeration afterwards.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00516260
+     * @ghidraAddress NTSC-U/C: 0x00516260
+     * @ghidraAddress PAL: 0x00556590
      */
     virtual void Load(Stream &stream);
 
@@ -162,7 +170,8 @@ public:
      *
      * @param name The registry key for the new environment.
      * @return The new environment.
-     * @ghidraAddress 0x00519308
+     * @ghidraAddress NTSC-U/C: 0x00519308
+     * @ghidraAddress PAL: 0x005596a0
      */
     static Environ *NewEnviron(const HxStr &name);
 
@@ -171,7 +180,8 @@ public:
      *
      * @param nSize The block size.
      * @return The block.
-     * @ghidraAddress 0x00518df0
+     * @ghidraAddress NTSC-U/C: 0x00518df0
+     * @ghidraAddress PAL: 0x00559188
      */
     static void *operator new(size_t nSize);
 
@@ -179,7 +189,8 @@ public:
      * Release a block operator new() allocated.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x00518e10
+     * @ghidraAddress NTSC-U/C: 0x00518e10
+     * @ghidraAddress PAL: 0x005591a8
      */
     static void operator delete(void *pBlock);
 
@@ -191,7 +202,8 @@ public:
      * when it is not null, and the light is appended.
      *
      * @param pLight The light to add.
-     * @ghidraAddress 0x005166d0
+     * @ghidraAddress NTSC-U/C: 0x005166d0
+     * @ghidraAddress PAL: 0x00556a00
      */
     void AddLight(Light *pLight);
 
@@ -203,7 +215,8 @@ public:
      * shipped program, and the name is inferred from AddLight().
      *
      * @param pLight The light to remove.
-     * @ghidraAddress 0x00516850
+     * @ghidraAddress NTSC-U/C: 0x00516850
+     * @ghidraAddress PAL: 0x00556b80
      */
     void RemoveLight(Light *pLight);
 
@@ -212,7 +225,8 @@ public:
      *
      * AppTunnel's constructor calls it on "tunnel.env". The title is inferred.
      *
-     * @ghidraAddress 0x00519568
+     * @ghidraAddress NTSC-U/C: 0x00519568
+     * @ghidraAddress PAL: 0x00559900
      */
     void ClearLights();
 
@@ -266,7 +280,8 @@ protected:
      * also programs the fog registers and builds the light records.
      *
      * @return Non-zero, which draws the children as well.
-     * @ghidraAddress 0x00518e60
+     * @ghidraAddress NTSC-U/C: 0x00518e60
+     * @ghidraAddress PAL: 0x005591f8
      */
     virtual int DrawSelf();
 
@@ -288,7 +303,8 @@ private:
  * with Rnd::PsEnviron::NewEnviron(), which is how the PlayStation 2 layer substitutes its subclass
  * under the unchanged class key.
  *
- * @ghidraAddress 0x00718d10
+ * @ghidraAddress NTSC-U/C: 0x00718d10
+ * @ghidraAddress PAL: 0x0075cc00
  */
 extern Environ *(*g_pfnNewEnviron)(const HxStr &name);
 
@@ -300,7 +316,8 @@ extern Environ *(*g_pfnNewEnviron)(const HxStr &name);
  *
  * @param name The object name.
  * @return The new environment, as its Rnd::Object subobject.
- * @ghidraAddress 0x00519278
+ * @ghidraAddress NTSC-U/C: 0x00519278
+ * @ghidraAddress PAL: 0x00559610
  */
 Object *CreateRegisteredEnviron(const HxStr &name);
 
@@ -312,14 +329,16 @@ Object *CreateRegisteredEnviron(const HxStr &name);
  *
  * @param name The object name.
  * @return The new environment.
- * @ghidraAddress 0x00518eb0
+ * @ghidraAddress NTSC-U/C: 0x00518eb0
+ * @ghidraAddress PAL: 0x00559248
  */
 Environ *NewEnvironThroughHook(const HxStr &name);
 
 /**
  * Registered class name of Rnd::Environ, the string "Environ".
  *
- * @ghidraAddress 0x00718d18
+ * @ghidraAddress NTSC-U/C: 0x00718d18
+ * @ghidraAddress PAL: 0x0075cc08
  */
 extern HxStr g_environClassName;
 
@@ -332,7 +351,8 @@ extern HxStr g_environClassName;
  *
  * Rnd::Manager::Init() also expands this inline.
  *
- * @ghidraAddress 0x00518e70
+ * @ghidraAddress NTSC-U/C: 0x00518e70
+ * @ghidraAddress PAL: 0x00559208
  */
 inline void RegisterEnvironClass() {
     g_pfnNewEnviron = Environ::NewEnviron;
@@ -345,7 +365,8 @@ inline void RegisterEnvironClass() {
  * Rnd::Environ::DrawSelf() stores itself here, and Rnd::PsEnviron::DrawSelf() stores its own
  * environment the same way.
  *
- * @ghidraAddress 0x00718d20
+ * @ghidraAddress NTSC-U/C: 0x00718d20
+ * @ghidraAddress PAL: 0x0075cc10
  */
 extern Environ *g_pCurrentEnviron;
 

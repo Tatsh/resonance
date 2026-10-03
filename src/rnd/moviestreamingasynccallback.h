@@ -22,7 +22,8 @@ public:
      * @param pBuffer The buffer the read filled.
      * @param nLength The bytes read.
      * @param nStatus Zero on success, or a positive failure code.
-     * @ghidraAddress 0x005809f0
+     * @ghidraAddress NTSC-U/C: 0x005809f0
+     * @ghidraAddress PAL: 0x005c3a28
      */
     virtual void Done(int nHandle, int nFile, void *pBuffer, int nLength, int nStatus);
 };

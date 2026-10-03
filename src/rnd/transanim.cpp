@@ -108,7 +108,7 @@ struct LegacyRotKey {
     float mFrame;
 };
 
-// 0x004f9f80
+// NTSC-U/C: 0x004f9f80, PAL: 0x00538c50
 static Stream &operator>>(Stream &stream, LegacyRotKey &key) {
     stream.Read(&key.mValue.x, sizeof(float));
     stream.Read(&key.mValue.y, sizeof(float));
@@ -118,7 +118,7 @@ static Stream &operator>>(Stream &stream, LegacyRotKey &key) {
     return stream;
 }
 
-// 0x004fd6b8
+// NTSC-U/C: 0x004fd6b8, PAL: 0x0053c3b8
 static Stream &operator>>(Stream &stream, std::list<LegacyRotKey> &keys) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -129,7 +129,7 @@ static Stream &operator>>(Stream &stream, std::list<LegacyRotKey> &keys) {
     return stream;
 }
 
-// 0x004fa500
+// NTSC-U/C: 0x004fa500, PAL: 0x005391d0
 // The same order the writer uses, with the padding float of each vector left as it was.
 static Stream &operator>>(Stream &stream, TransAnim::TransKey &key) {
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
@@ -156,7 +156,7 @@ static inline void ReadQuat(Stream &stream, Quat &quat) {
     stream.Read(&quat.w, sizeof(float));
 }
 
-// 0x004fa948
+// NTSC-U/C: 0x004fa948, PAL: 0x00539618
 static Stream &operator>>(Stream &stream, TransAnim::RotKey &key) {
     ReadQuat(stream, key.mQuat);
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
@@ -168,7 +168,7 @@ static Stream &operator>>(Stream &stream, TransAnim::RotKey &key) {
     return stream;
 }
 
-// 0x004fa6a8
+// NTSC-U/C: 0x004fa6a8, PAL: 0x00539378
 // Every new element starts from a keyframe whose three vectors have a padding float of 1.0.
 static Stream &operator>>(Stream &stream, std::list<TransAnim::TransKey> &keys) {
     int nCount = 0;
@@ -184,7 +184,7 @@ static Stream &operator>>(Stream &stream, std::list<TransAnim::TransKey> &keys) 
     return stream;
 }
 
-// 0x004fab40
+// NTSC-U/C: 0x004fab40, PAL: 0x00539810
 static Stream &operator>>(Stream &stream, std::list<TransAnim::RotKey> &keys) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -273,7 +273,7 @@ static void AppendLegacyRotKey(std::list<TransAnim::RotKey> &keys, const LegacyR
     RebuildRotTangents(keys);
 }
 
-// 0x004fd348
+// NTSC-U/C: 0x004fd348, PAL: 0x0053c030
 // A mode outside the two below writes nothing rather than a fallback title.
 static FailSink &operator<<(FailSink &sink, TransAnim::Interp nInterp) {
     switch (nInterp) {
@@ -287,7 +287,7 @@ static FailSink &operator<<(FailSink &sink, TransAnim::Interp nInterp) {
     return sink;
 }
 
-// 0x004f9160
+// NTSC-U/C: 0x004f9160, PAL: 0x00537e30
 static FailSink &operator<<(FailSink &sink, const TransAnim::RotKey &key) {
     sink.Print("(frame:");
     sink.Format(kFloatFormat, key.mFrame);
@@ -312,7 +312,7 @@ static FailSink &operator<<(FailSink &sink, const TransAnim::RotKey &key) {
     return sink;
 }
 
-// 0x004f9480
+// NTSC-U/C: 0x004f9480, PAL: 0x00538150
 static FailSink &operator<<(FailSink &sink, const TransAnim::TransKey &key) {
     sink.Print("(frame:");
     sink.Format(kFloatFormat, key.mFrame);
@@ -336,7 +336,7 @@ static FailSink &operator<<(FailSink &sink, const TransAnim::TransKey &key) {
     return sink;
 }
 
-// 0x004f9360
+// NTSC-U/C: 0x004f9360, PAL: 0x00538030
 static FailSink &operator<<(FailSink &sink, const std::list<TransAnim::RotKey> &keys) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, keys.size());
@@ -353,7 +353,7 @@ static FailSink &operator<<(FailSink &sink, const std::list<TransAnim::RotKey> &
     return sink;
 }
 
-// 0x004f9668
+// NTSC-U/C: 0x004f9668, PAL: 0x00538338
 static FailSink &operator<<(FailSink &sink, const std::list<TransAnim::TransKey> &keys) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, keys.size());
@@ -370,7 +370,7 @@ static FailSink &operator<<(FailSink &sink, const std::list<TransAnim::TransKey>
     return sink;
 }
 
-// 0x004f9788
+// NTSC-U/C: 0x004f9788, PAL: 0x00538458
 // The padding float of each vector is not written, and the shape triple is written ahead of the
 // two tangents rather than after them.
 static Stream &operator<<(Stream &stream, const TransAnim::TransKey &key) {
@@ -396,7 +396,7 @@ static Stream &operator<<(Stream &stream, const TransAnim::TransKey &key) {
     return stream;
 }
 
-// 0x004f9a68
+// NTSC-U/C: 0x004f9a68, PAL: 0x00538738
 // Unlike the vector channels, the rotation channel writes the fourth float of the quaternion and
 // of both tangents.
 static Stream &operator<<(Stream &stream, const TransAnim::RotKey &key) {
@@ -413,7 +413,7 @@ static Stream &operator<<(Stream &stream, const TransAnim::RotKey &key) {
     return stream;
 }
 
-// 0x004f99b0
+// NTSC-U/C: 0x004f99b0, PAL: 0x00538680
 static Stream &operator<<(Stream &stream, const std::list<TransAnim::TransKey> &keys) {
     int nCount = keys.size();
     stream.Write(&nCount, sizeof(nCount));
@@ -424,7 +424,7 @@ static Stream &operator<<(Stream &stream, const std::list<TransAnim::TransKey> &
     return stream;
 }
 
-// 0x004f9d00
+// NTSC-U/C: 0x004f9d00, PAL: 0x005389d0
 static Stream &operator<<(Stream &stream, const std::list<TransAnim::RotKey> &keys) {
     int nCount = keys.size();
     stream.Write(&nCount, sizeof(nCount));
@@ -435,7 +435,7 @@ static Stream &operator<<(Stream &stream, const std::list<TransAnim::RotKey> &ke
     return stream;
 }
 
-// 0x004f4020
+// NTSC-U/C: 0x004f4020, PAL: 0x00532c58
 float TransAnim::EndFrame() {
     const float flTrans =
         mFramesOwner->mTransKeys.size() != 0 ? mFramesOwner->mTransKeys.back().mFrame : 0.0f;
@@ -446,7 +446,7 @@ float TransAnim::EndFrame() {
     return std::max(flTrans, std::max(flRot, flScale));
 }
 
-// 0x004f4188
+// NTSC-U/C: 0x004f4188, PAL: 0x00532dc0
 float TransAnim::StartFrame() {
     const float flTrans =
         mFramesOwner->mTransKeys.size() != 0 ? mFramesOwner->mTransKeys.front().mFrame : 0.0f;
@@ -457,7 +457,7 @@ float TransAnim::StartFrame() {
     return std::min(flTrans, std::min(flRot, flScale));
 }
 
-// 0x004f2ab0
+// NTSC-U/C: 0x004f2ab0, PAL: 0x005316a0
 void TransAnim::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
@@ -501,7 +501,7 @@ void TransAnim::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
-// 0x004f2d50
+// NTSC-U/C: 0x004f2d50, PAL: 0x00531940
 //
 // The three channels are written interleaved with the flags rather than in one block, and the
 // order below is the order the reader has to expect.
@@ -535,7 +535,7 @@ void TransAnim::Save(Stream &stream) {
     stream.WriteBytes(&cFollowPath, sizeof(cFollowPath));
 }
 
-// 0x004f28c8
+// NTSC-U/C: 0x004f28c8, PAL: 0x005314b8
 void TransAnim::Replace(Object *pFrom, Object *pTo) {
     Animatable::Replace(pFrom, pTo);
     Drawable::Replace(pFrom, pTo);
@@ -576,7 +576,7 @@ void TransAnim::Replace(Object *pFrom, Object *pTo) {
     mFramesOwner = this;
 }
 
-// 0x004f3e90
+// NTSC-U/C: 0x004f3e90, PAL: 0x00532ac8
 void TransAnim::Copy(const Object *pSource, unsigned nFlags) {
     const TransAnim *pSourceAnim = dynamic_cast<const TransAnim *>(pSource);
 
@@ -619,7 +619,7 @@ void TransAnim::Copy(const Object *pSource, unsigned nFlags) {
     }
 }
 
-// 0x004fd000
+// NTSC-U/C: 0x004fd000, PAL: 0x0053bce8
 void TransAnim::SetTrans(Transformable *pTrans) {
     if (mTrans != nullptr) {
         mTrans->RemoveRef(this);
@@ -630,7 +630,7 @@ void TransAnim::SetTrans(Transformable *pTrans) {
     }
 }
 
-// 0x004fd2c8
+// NTSC-U/C: 0x004fd2c8, PAL: 0x0053bfb0
 void TransAnim::SetFrameSelf(float flFrame) {
     if (mTrans == nullptr) {
         return;
@@ -737,7 +737,7 @@ static inline bool BuildFollowPathBasis(const std::list<TransAnim::TransKey> &pa
     return true;
 }
 
-// 0x004f42f0
+// NTSC-U/C: 0x004f42f0, PAL: 0x00532f28
 void TransAnim::EvalFrame(float flFrame, float *pXfm, int nResetEmpty) {
     float *const pTranslation = XfmRowOf(pXfm, kXfmRowTranslation);
     if (!mFramesOwner->mTransKeys.empty()) {
@@ -835,7 +835,7 @@ void TransAnim::EvalFrame(float flFrame, float *pXfm, int nResetEmpty) {
     Vec3Scale(pBasisZ, scale.z, pBasisZ);
 }
 
-// 0x00552588
+// NTSC-U/C: 0x00552588, PAL: 0x00592bc8
 void TransAnim::RotKey::ComputeSplineTangents(const RotKey *pPrev, const RotKey *pNext) {
     const float flTension = mShape[kShapeTension];
     const float flContinuity = mShape[kShapeContinuity];
@@ -863,7 +863,7 @@ void TransAnim::RotKey::ComputeSplineTangents(const RotKey *pPrev, const RotKey 
     }
 }
 
-// 0x00552748
+// NTSC-U/C: 0x00552748, PAL: 0x00592d88
 void TransAnim::TransKey::ComputeSplineTangents(const TransKey *pPrev, const TransKey *pNext) {
     const float flTension = mShape[kShapeTension];
     const float flContinuity = mShape[kShapeContinuity];
@@ -910,7 +910,7 @@ void TransAnim::TransKey::ComputeSplineTangents(const TransKey *pPrev, const Tra
 
 // The coefficients below are those of the cubic Hermite basis and of its derivative.
 
-// 0x00552af8
+// NTSC-U/C: 0x00552af8, PAL: 0x00593138
 void TransAnim::TransKey::EvaluateSpline(const TransKey *pNext, float *pOut, float flT) const {
     if (flT == 0.0f) {
         std::copy(std::begin(mValue), std::end(mValue), pOut);
@@ -937,7 +937,7 @@ void TransAnim::TransKey::EvaluateSpline(const TransKey *pNext, float *pOut, flo
     std::copy(std::begin(afSum), std::end(afSum), pOut);
 }
 
-// 0x00552cb8
+// NTSC-U/C: 0x00552cb8, PAL: 0x005932f8
 Vector3 TransAnim::TransKey::EvaluateSplineDerivative(const TransKey *pNext, float flT) const {
     const float flT2 = flT * flT;
     const float flSixT = flT * 6.0f;
@@ -964,7 +964,7 @@ static inline float KeyVectorLength(const float *pVec) {
     return std::sqrt((pVec[0] * pVec[0]) + (pVec[1] * pVec[1]) + (pVec[2] * pVec[2]));
 }
 
-// 0x00554d90
+// NTSC-U/C: 0x00554d90, PAL: 0x00595418
 float TransAnim::TransKey::SplineLength(const TransKey *pNext) const {
     float flLength = 0.0f;
     float flT = 0.0f;
@@ -976,7 +976,7 @@ float TransAnim::TransKey::SplineLength(const TransKey *pNext) const {
     return flLength;
 }
 
-// 0x00554c68
+// NTSC-U/C: 0x00554c68, PAL: 0x005952f0
 void TransAnim::RotKey::EvaluateSpline(const RotKey *pNext, Quat &out, float flT) const {
     if (flT == 0.0f) {
         out = mQuat;
@@ -1026,7 +1026,7 @@ static inline void SpreadFramesByChordLength(std::list<TransAnim::TransKey> &key
     }
 }
 
-// 0x004f4c48
+// NTSC-U/C: 0x004f4c48, PAL: 0x00533880
 void TransAnim::Normalize() {
     std::list<TransKey> &keys = mFramesOwner->mTransKeys;
     if (keys.size() < kMinNormalizeKeys) {
@@ -1098,7 +1098,7 @@ void TransAnim::Normalize() {
     }
 }
 
-// 0x004fb7e0
+// NTSC-U/C: 0x004fb7e0, PAL: 0x0053a4c8
 void TransAnim::SetRepeatTrans(int nRepeat) {
     mRepeatTrans = nRepeat;
     if (nRepeat == 0) {
@@ -1108,24 +1108,24 @@ void TransAnim::SetRepeatTrans(int nRepeat) {
     }
 }
 
-// 0x004fc000
+// NTSC-U/C: 0x004fc000, PAL: 0x0053ace8
 TransAnim::TransAnim(const HxStr &name)
     : Object(name), mTrans(nullptr), mRotInterp(kInterpLinear), mTransInterp(kInterpTCB),
       mScaleInterp(kInterpLinear), mFramesOwner(this), mRepeatTrans(0), mFollowPath(0) {
 }
 
-// 0x004fbb78
+// NTSC-U/C: 0x004fbb78, PAL: 0x0053a860
 TransAnim::~TransAnim() {
     RemoveObjectRefs();
     ReleaseAllRefs();
 }
 
-// 0x004fbf60
+// NTSC-U/C: 0x004fbf60, PAL: 0x0053ac48
 const HxStr &TransAnim::ClassName() const {
     return g_transAnimClassName;
 }
 
-// 0x004fd058
+// NTSC-U/C: 0x004fd058, PAL: 0x0053bd40
 void TransAnim::ClearKeys() {
     if (mFramesOwner == this) {
         return;
@@ -1135,7 +1135,7 @@ void TransAnim::ClearKeys() {
     mScaleKeys.clear();
 }
 
-// 0x004fd168
+// NTSC-U/C: 0x004fd168, PAL: 0x0053be50
 void TransAnim::AddObjectRefs() {
     if (mTrans != nullptr) {
         mTrans->AddRef(this);
@@ -1145,7 +1145,7 @@ void TransAnim::AddObjectRefs() {
     }
 }
 
-// 0x004fd118
+// NTSC-U/C: 0x004fd118, PAL: 0x0053be00
 void TransAnim::RemoveObjectRefs() {
     if (mTrans != nullptr) {
         mTrans->RemoveRef(this);
@@ -1155,7 +1155,7 @@ void TransAnim::RemoveObjectRefs() {
     }
 }
 
-// 0x004fd0a0
+// NTSC-U/C: 0x004fd0a0, PAL: 0x0053bd88
 void TransAnim::SetFramesOwner(TransAnim *pOwner) {
     if (mFramesOwner != nullptr) {
         mFramesOwner->RemoveRef(this);
@@ -1167,10 +1167,10 @@ void TransAnim::SetFramesOwner(TransAnim *pOwner) {
     ClearKeys();
 }
 
-// 0x00706828
+// NTSC-U/C: 0x00706828, PAL: 0x0074a348
 HxStr g_transAnimClassName("TransAnim");
 
-// 0x004fc740
+// NTSC-U/C: 0x004fc740, PAL: 0x0053b428
 TransAnim *NewTransAnim(const HxStr &name) {
     try {
         return new TransAnim(name);
@@ -1179,10 +1179,10 @@ TransAnim *NewTransAnim(const HxStr &name) {
     }
 }
 
-// 0x00706820
+// NTSC-U/C: 0x00706820, PAL: 0x0074a340
 TransAnim *(*g_pfnNewTransAnim)(const HxStr &name) = NewTransAnim;
 
-// 0x004fba90
+// NTSC-U/C: 0x004fba90, PAL: 0x0053a778
 TransAnim *NewTransAnimThroughHook(const HxStr &name) {
     try {
         return g_pfnNewTransAnim(name);
@@ -1191,7 +1191,7 @@ TransAnim *NewTransAnimThroughHook(const HxStr &name) {
     }
 }
 
-// 0x004fbf70
+// NTSC-U/C: 0x004fbf70, PAL: 0x0053ac58
 Object *CreateRegisteredTransAnim(const HxStr &name) {
     try {
         return g_pfnNewTransAnim(name);
@@ -1200,13 +1200,13 @@ Object *CreateRegisteredTransAnim(const HxStr &name) {
     }
 }
 
-// 0x004fba50
+// NTSC-U/C: 0x004fba50, PAL: 0x0053a738
 void RegisterTransAnimClass() {
     g_pfnNewTransAnim = NewTransAnim;
     g_manager.RegisterClass(g_transAnimClassName, CreateRegisteredTransAnim);
 }
 
-// 0x004f2f68
+// NTSC-U/C: 0x004f2f68, PAL: 0x00531b58
 void TransAnim::Load(Stream &stream) {
     int nRevision = 0;
     stream.Read(&nRevision, sizeof(nRevision));

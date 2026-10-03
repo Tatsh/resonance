@@ -24,21 +24,21 @@ inline unsigned int FourCc(const char *pszCode) {
 }
 
 // Streams whose first read has not yet completed.
-// 0x00767938
+// NTSC-U/C: 0x00767938, PAL: 0x007ab668
 std::list<Rnd::MovieStream *> g_pendingStreams;
 
-// 0x00767940
+// NTSC-U/C: 0x00767940, PAL: 0x007ab670
 MovieAsyncCallback g_movieAsyncCallback;
 
-// 0x00767948
+// NTSC-U/C: 0x00767948, PAL: 0x007ab678
 MovieStreamingAsyncCallback g_movieStreamingAsyncCallback;
 
 // Non-zero while a streaming read is outstanding; only one may be.
-// 0x0076794c
+// NTSC-U/C: 0x0076794c, PAL: 0x007ab67c
 int g_nStreamingReadPending;
 
 // The stream the streaming callback commits to.
-// 0x007679a4
+// NTSC-U/C: 0x007679a4, PAL: 0x007ab6d4
 Rnd::MovieStream *g_pStreamingMovie;
 
 // Sizes the stream reads with. A streaming file's first read and a rewind read 0x8000 bytes, a
@@ -80,7 +80,7 @@ const unsigned int g_nSndhTag = FourCc("SNDH");
 const unsigned int g_nSndbTag = FourCc("SNDB");
 const unsigned int g_nSndpTag = FourCc("SNDP");
 
-// 0x007a8400
+// NTSC-U/C: 0x007a8400, PAL: 0x007ec100
 const char *const g_apszMovieStreamErrors[] = {"NO ERROR",
                                                "Out of memory",
                                                "Can't open file",
@@ -94,7 +94,7 @@ const char *const g_apszMovieStreamErrors[] = {"NO ERROR",
                                                "Can't access device",
                                                "Exceeded limit"};
 
-// 0x0057f7b8
+// NTSC-U/C: 0x0057f7b8, PAL: 0x005c27f0
 MovieStream::MovieStream(const char *pszPath, int bStreaming, int *pnError) {
     *pnError = 0;
     mBuffer = nullptr;
@@ -155,7 +155,7 @@ MovieStream::MovieStream(const char *pszPath, int bStreaming, int *pnError) {
     g_pendingStreams.push_back(this);
 }
 
-// 0x00580858
+// NTSC-U/C: 0x00580858, PAL: 0x005c3890
 MovieStream::~MovieStream() {
     if (mFile >= 0) {
         FileClose(mFile);
@@ -166,7 +166,7 @@ MovieStream::~MovieStream() {
     delete mCircBuff;
 }
 
-// 0x005808e8
+// NTSC-U/C: 0x005808e8, PAL: 0x005c3920
 inline int MovieStream::RequestRead(int nBytes) {
     if (mStreaming == 0 || mLoaded == 0 || g_nStreamingReadPending != 0) {
         return 0;
@@ -198,7 +198,7 @@ inline int MovieStream::RequestRead(int nBytes) {
     return nBytes;
 }
 
-// 0x0057fac8
+// NTSC-U/C: 0x0057fac8, PAL: 0x005c2b00
 void MovieStream::Update(int nTick, int nReadSize) {
     if (mSoundHold > 0) {
         --mSoundHold;
@@ -318,7 +318,7 @@ void MovieStream::Update(int nTick, int nReadSize) {
     }
 }
 
-// 0x0057ffd0
+// NTSC-U/C: 0x0057ffd0, PAL: 0x005c3008
 int MovieStream::ParseHeader(char *pBuffer, int nBytes) {
     mBuffer = pBuffer;
     ChunkHeader *pHeader = reinterpret_cast<ChunkHeader *>(pBuffer);
@@ -350,7 +350,7 @@ int MovieStream::ParseHeader(char *pBuffer, int nBytes) {
     return 0;
 }
 
-// 0x005808d0
+// NTSC-U/C: 0x005808d0, PAL: 0x005c3908
 void MovieStream::SetTrackHandler(int nTrackId, ChunkHandler pfnHandler, void *pData) {
     mHandlers[nTrackId] = pfnHandler;
     mHandlerData[nTrackId] = pData;
@@ -358,7 +358,7 @@ void MovieStream::SetTrackHandler(int nTrackId, ChunkHandler pfnHandler, void *p
 
 } // namespace Rnd
 
-// 0x00580178
+// NTSC-U/C: 0x00580178, PAL: 0x005c31b0
 void MovieAsyncCallback::Done(
     int nHandle, [[maybe_unused]] int nFile, void *pBuffer, int nLength, int nStatus) {
     for (auto it = g_pendingStreams.begin(); it != g_pendingStreams.end(); ++it) {
@@ -382,7 +382,7 @@ void MovieAsyncCallback::Done(
     Fatal("HEY - MOVIE LOAD CALLBACK CAN'T FIND HANDLE %d\n", nHandle);
 }
 
-// 0x005809f0
+// NTSC-U/C: 0x005809f0, PAL: 0x005c3a28
 void MovieStreamingAsyncCallback::Done(int nHandle,
                                        [[maybe_unused]] int nFile,
                                        [[maybe_unused]] void *pBuffer,

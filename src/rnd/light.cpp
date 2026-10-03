@@ -44,7 +44,7 @@ void PrintColor(FailSink &sink, const Color &color) {
     sink.Print(")");
 }
 
-// 0x005454a0
+// NTSC-U/C: 0x005454a0, PAL: 0x00585218
 FailSink &PrintLightType(FailSink &sink, LightType type) {
     switch (type) {
     case kLightTypePoint:
@@ -62,15 +62,15 @@ FailSink &PrintLightType(FailSink &sink, LightType type) {
 
 } // namespace
 
-// 0x00720bd0
+// NTSC-U/C: 0x00720bd0, PAL: 0x00764660
 HxStr g_lightClassName("Light");
 
-// 0x005445c8
+// NTSC-U/C: 0x005445c8, PAL: 0x00584340
 const HxStr &Light::ClassName() const {
     return g_lightClassName;
 }
 
-// 0x0053ffd8
+// NTSC-U/C: 0x0053ffd8, PAL: 0x0057fcb0
 Light::Light(const HxStr &name)
     : Object(name), mDiffuse{1.0f, 1.0f, 1.0f, 1.0f},
       mAmbient{kDefaultAmbientLevel, kDefaultAmbientLevel, kDefaultAmbientLevel, 1.0f},
@@ -79,46 +79,46 @@ Light::Light(const HxStr &name)
       mLinearAtten(0.0f), mQuadraticAtten(0.0f), mType(kLightTypeDirectional) {
 }
 
-// 0x005445d8
+// NTSC-U/C: 0x005445d8, PAL: 0x00584350
 Light::~Light() {
     ReleaseAllRefs();
 }
 
-// 0x00544400
+// NTSC-U/C: 0x00544400, PAL: 0x00584178
 void Light::SetColors(const Color &ambient, const Color &diffuse, const Color &specular) {
     mAmbient = ambient;
     mDiffuse = diffuse;
     mSpecular = specular;
 }
 
-// 0x00544420
+// NTSC-U/C: 0x00544420, PAL: 0x00584198
 void Light::SetType(LightType type) {
     mType = type;
 }
 
-// 0x00544428
+// NTSC-U/C: 0x00544428, PAL: 0x005841a0
 void Light::SetRange(float flRange) {
     mRange = flRange;
 }
 
-// 0x00544430
+// NTSC-U/C: 0x00544430, PAL: 0x005841a8
 void Light::SetAngles(float flInner, float flOuter) {
     mOuterAngle = flOuter;
     mInnerAngle = flInner;
 }
 
-// 0x00544440
+// NTSC-U/C: 0x00544440, PAL: 0x005841b8
 void Light::SetAttenuation(float flConstant, float flLinear, float flQuadratic) {
     mQuadraticAtten = flQuadratic;
     mConstantAtten = flConstant;
     mLinearAtten = flLinear;
 }
 
-// 0x00544818
+// NTSC-U/C: 0x00544818, PAL: 0x00584590
 void Light::SyncLight() {
 }
 
-// 0x00540420
+// NTSC-U/C: 0x00540420, PAL: 0x005800f8
 void Light::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Transformable::DumpText(sink);
@@ -154,7 +154,7 @@ void Light::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
-// 0x005408b8
+// NTSC-U/C: 0x005408b8, PAL: 0x00580590
 void Light::Save(Stream &stream) {
     const int nRevision = kLightRevision;
     stream.Write(&nRevision, sizeof(nRevision));
@@ -208,7 +208,7 @@ void Light::Save(Stream &stream) {
     stream.Write(&nType, sizeof(nType));
 }
 
-// 0x00540be8
+// NTSC-U/C: 0x00540be8, PAL: 0x005808c0
 void Light::Load(Stream &stream) {
     int nRevision = 0;
     stream.Read(&nRevision, sizeof(nRevision));
@@ -248,12 +248,12 @@ void Light::Load(Stream &stream) {
     SyncLight();
 }
 
-// 0x00545480
+// NTSC-U/C: 0x00545480, PAL: 0x005851f8
 void Light::Replace(Object *pFrom, Object *pTo) {
     Transformable::Replace(pFrom, pTo);
 }
 
-// 0x00545390
+// NTSC-U/C: 0x00545390, PAL: 0x00585108
 void Light::Copy(const Object *pSource, unsigned nFlags) {
     const Light *pSourceLight = dynamic_cast<const Light *>(pSource);
 
@@ -273,25 +273,25 @@ void Light::Copy(const Object *pSource, unsigned nFlags) {
     SyncLight();
 }
 
-// 0x005448b8
+// NTSC-U/C: 0x005448b8, PAL: 0x00584630
 Light *NewLight(const HxStr &name) {
     return new Light(name);
 }
 
-// 0x00720bc8
+// NTSC-U/C: 0x00720bc8, PAL: 0x00764658
 Light *(*g_pfnNewLight)(const HxStr &name) = NewLight;
 
-// 0x005443c0
+// NTSC-U/C: 0x005443c0, PAL: 0x00584138
 void *Light::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kLightTag);
 }
 
-// 0x005443e0
+// NTSC-U/C: 0x005443e0, PAL: 0x00584158
 void Light::operator delete(void *pBlock) {
     FreeTaggedMemory(pBlock, kLightTag);
 }
 
-// 0x00544490
+// NTSC-U/C: 0x00544490, PAL: 0x00584208
 Light *NewLightThroughHook(const HxStr &name) {
     try {
         return g_pfnNewLight(name);
@@ -300,7 +300,7 @@ Light *NewLightThroughHook(const HxStr &name) {
     }
 }
 
-// 0x00544828
+// NTSC-U/C: 0x00544828, PAL: 0x005845a0
 Object *CreateRegisteredLight(const HxStr &name) {
     try {
         return g_pfnNewLight(name);
@@ -309,7 +309,7 @@ Object *CreateRegisteredLight(const HxStr &name) {
     }
 }
 
-// 0x00544450
+// NTSC-U/C: 0x00544450, PAL: 0x005841c8
 void RegisterLightClass() {
     g_pfnNewLight = NewLight;
     g_manager.RegisterClass(g_lightClassName, CreateRegisteredLight);

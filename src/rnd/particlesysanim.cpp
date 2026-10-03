@@ -86,15 +86,15 @@ void BlendColorRange(const std::list<ColorKey> &keys, float flFrame, Color &low,
 
 } // namespace
 
-// 0x0071af00
+// NTSC-U/C: 0x0071af00, PAL: 0x0075ee28
 HxStr g_particleSysAnimClassName("ParticleSysAnim");
 
-// 0x0052bc90
+// NTSC-U/C: 0x0052bc90, PAL: 0x0056c308
 const HxStr &ParticleSysAnim::ClassName() const {
     return g_particleSysAnimClassName;
 }
 
-// 0x00526980
+// NTSC-U/C: 0x00526980, PAL: 0x00566f58
 void ParticleSysAnim::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
@@ -121,7 +121,7 @@ void ParticleSysAnim::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
-// 0x00527128
+// NTSC-U/C: 0x00527128, PAL: 0x00567750
 float ParticleSysAnim::EndFrame() {
     const float flStartColor = ChannelEndFrame(mFramesOwner->mStartColorKeys);
     const float flEndColor = ChannelEndFrame(mFramesOwner->mEndColorKeys);
@@ -129,7 +129,7 @@ float ParticleSysAnim::EndFrame() {
     return std::max(flStartColor, std::max(flEndColor, flEmitRate));
 }
 
-// 0x00527290
+// NTSC-U/C: 0x00527290, PAL: 0x005678b8
 void ParticleSysAnim::SetFrameSelf(float flFrame) {
     if (mParticleSys == nullptr) {
         return;
@@ -162,7 +162,7 @@ void ParticleSysAnim::SetFrameSelf(float flFrame) {
     mParticleSys->mEmitRateHigh = flRate * mEmitRateRatio;
 }
 
-// 0x00526b68
+// NTSC-U/C: 0x00526b68, PAL: 0x00567140
 void ParticleSysAnim::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.Write(&nVersion, sizeof(nVersion));
@@ -177,7 +177,7 @@ void ParticleSysAnim::Save(Stream &stream) {
     stream.Write(&mEmitRateRatio, sizeof(mEmitRateRatio));
 }
 
-// 0x00526fc8
+// NTSC-U/C: 0x00526fc8, PAL: 0x005675f0
 void ParticleSysAnim::Copy(const Object *pSource, unsigned nFlags) {
     const ParticleSysAnim *pSourceAnim = dynamic_cast<const ParticleSysAnim *>(pSource);
 
@@ -214,18 +214,18 @@ void ParticleSysAnim::Copy(const Object *pSource, unsigned nFlags) {
     }
 }
 
-// 0x0052bca0
+// NTSC-U/C: 0x0052bca0, PAL: 0x0056c318
 ParticleSysAnim::ParticleSysAnim(const HxStr &name)
     : Object(name), mParticleSys(nullptr), mFramesOwner(this), mEmitRateRatio(0.0f) {
 }
 
-// 0x0052b9c0
+// NTSC-U/C: 0x0052b9c0, PAL: 0x0056c038
 ParticleSysAnim::~ParticleSysAnim() {
     RemoveObjectRefs();
     ReleaseAllRefs();
 }
 
-// 0x005267a8
+// NTSC-U/C: 0x005267a8, PAL: 0x00566d80
 void ParticleSysAnim::Replace(Object *pFrom, Object *pTo) {
     Animatable::Replace(pFrom, pTo);
 
@@ -265,7 +265,7 @@ void ParticleSysAnim::Replace(Object *pFrom, Object *pTo) {
     mFramesOwner = this;
 }
 
-// 0x00526ce8
+// NTSC-U/C: 0x00526ce8, PAL: 0x005672c0
 void ParticleSysAnim::Load(Stream &stream) {
     int nRevision = 0;
     stream.Read(&nRevision, sizeof(nRevision));
@@ -289,7 +289,7 @@ void ParticleSysAnim::Load(Stream &stream) {
     AddObjectRefs();
 }
 
-// 0x0052c700
+// NTSC-U/C: 0x0052c700, PAL: 0x0056cd78
 void ParticleSysAnim::SetParticleSys(ParticleSys *pParticleSys) {
     if (mParticleSys != nullptr) {
         mParticleSys->RemoveRef(this);
@@ -300,7 +300,7 @@ void ParticleSysAnim::SetParticleSys(ParticleSys *pParticleSys) {
     }
 }
 
-// 0x0052c758
+// NTSC-U/C: 0x0052c758, PAL: 0x0056cdd0
 void ParticleSysAnim::ClearKeys() {
     if (mFramesOwner == this) {
         return;
@@ -310,7 +310,7 @@ void ParticleSysAnim::ClearKeys() {
     mEmitRateKeys.clear();
 }
 
-// 0x0052c7a0
+// NTSC-U/C: 0x0052c7a0, PAL: 0x0056ce18
 void ParticleSysAnim::SetFramesOwner(ParticleSysAnim *pOwner) {
     if (mFramesOwner != nullptr) {
         mFramesOwner->RemoveRef(this);
@@ -322,7 +322,7 @@ void ParticleSysAnim::SetFramesOwner(ParticleSysAnim *pOwner) {
     ClearKeys();
 }
 
-// 0x0052c818
+// NTSC-U/C: 0x0052c818, PAL: 0x0056ce90
 void ParticleSysAnim::RemoveObjectRefs() {
     if (mParticleSys != nullptr) {
         mParticleSys->RemoveRef(this);
@@ -332,7 +332,7 @@ void ParticleSysAnim::RemoveObjectRefs() {
     }
 }
 
-// 0x0052c868
+// NTSC-U/C: 0x0052c868, PAL: 0x0056cee0
 void ParticleSysAnim::AddObjectRefs() {
     if (mParticleSys != nullptr) {
         mParticleSys->AddRef(this);
@@ -342,7 +342,7 @@ void ParticleSysAnim::AddObjectRefs() {
     }
 }
 
-// 0x0052c180
+// NTSC-U/C: 0x0052c180, PAL: 0x0056c7f8
 Object *CreateRegisteredParticleSysAnim(const HxStr &name) {
     return NewParticleSysAnim(name);
 }

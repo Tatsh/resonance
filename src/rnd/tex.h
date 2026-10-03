@@ -48,14 +48,16 @@ public:
      * The mip selector starts at -0x80 and mZone at -1, which selects the tagged heap.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
-     * @ghidraAddress 0x004e3dc8
+     * @ghidraAddress NTSC-U/C: 0x004e3dc8
+     * @ghidraAddress PAL: 0x00522698
      */
     Tex(const HxStr &name);
 
     /**
      * Free the loaded bitmaps and drop every reference to this texture.
      *
-     * @ghidraAddress 0x004e7628
+     * @ghidraAddress NTSC-U/C: 0x004e7628
+     * @ghidraAddress PAL: 0x005260c8
      */
     virtual ~Tex();
 
@@ -64,7 +66,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x004e7388
+     * @ghidraAddress NTSC-U/C: 0x004e7388
+     * @ghidraAddress PAL: 0x00525e28
      */
     static void *operator new(size_t nSize);
 
@@ -72,7 +75,8 @@ public:
      * Release a texture block under the same tag.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x004e73a8
+     * @ghidraAddress NTSC-U/C: 0x004e73a8
+     * @ghidraAddress PAL: 0x00525e48
      */
     static void operator delete(void *pBlock);
 
@@ -89,7 +93,8 @@ public:
      * @param nBitsPerPixel Receives the depth of level 0.
      * @param nBytes Receives the bytes of every level.
      * @return Non-zero on success.
-     * @ghidraAddress 0x004e3e48
+     * @ghidraAddress NTSC-U/C: 0x004e3e48
+     * @ghidraAddress PAL: 0x00522720
      */
     int GetBitmapInfo(int &nWidth, int &nHeight, int &nBitsPerPixel, int &nBytes);
 
@@ -100,7 +105,8 @@ public:
      * has no caller in the shipped build. The name is inferred.
      *
      * @return The relative path.
-     * @ghidraAddress 0x004e7568
+     * @ghidraAddress NTSC-U/C: 0x004e7568
+     * @ghidraAddress PAL: 0x00526008
      */
     const HxStr &GetRelativeBitmapPath() const;
 
@@ -117,7 +123,8 @@ public:
      * the image reuses the one string for both.
      *
      * @param sink The text sink.
-     * @ghidraAddress 0x004e4738
+     * @ghidraAddress NTSC-U/C: 0x004e4738
+     * @ghidraAddress PAL: 0x00523010
      */
     virtual void DumpText(FailSink &sink);
 
@@ -127,7 +134,8 @@ public:
      * Rnd::Object::Save() is not called.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x004e4910
+     * @ghidraAddress NTSC-U/C: 0x004e4910
+     * @ghidraAddress PAL: 0x005231e8
      */
     virtual void Save(Stream &stream);
 
@@ -136,7 +144,8 @@ public:
      *
      * @param pFrom Unused.
      * @param pTo Unused.
-     * @ghidraAddress 0x004e7610
+     * @ghidraAddress NTSC-U/C: 0x004e7610
+     * @ghidraAddress PAL: 0x005260b0
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -144,7 +153,8 @@ public:
      * Report the registered class name, "Tex".
      *
      * @return g_texClassName.
-     * @ghidraAddress 0x004e7618
+     * @ghidraAddress NTSC-U/C: 0x004e7618
+     * @ghidraAddress PAL: 0x005260b8
      */
     virtual const HxStr &ClassName() const;
 
@@ -156,7 +166,8 @@ public:
      *
      * @param pSource The texture to copy, which has to be a Rnd::Tex.
      * @param nFlags Unused.
-     * @ghidraAddress 0x004e79f0
+     * @ghidraAddress NTSC-U/C: 0x004e79f0
+     * @ghidraAddress PAL: 0x005264a0
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -170,7 +181,8 @@ public:
      * Rnd::Object::Load() is not called.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x004e4a20
+     * @ghidraAddress NTSC-U/C: 0x004e4a20
+     * @ghidraAddress PAL: 0x005232f8
      */
     virtual void Load(Stream &stream);
 
@@ -178,7 +190,8 @@ public:
      * Report whether every requested mip level has finished loading.
      *
      * @return True when no level is outstanding.
-     * @ghidraAddress 0x004e7878
+     * @ghidraAddress NTSC-U/C: 0x004e7878
+     * @ghidraAddress PAL: 0x00526328
      */
     bool IsLoadComplete();
 
@@ -195,7 +208,8 @@ public:
      * @param path The bitmap path.
      * @param nMipSelect The mip selector, which starts at -0x80.
      * @param nFlags The flag word, recorded in mFlags.
-     * @ghidraAddress 0x004e7908
+     * @ghidraAddress NTSC-U/C: 0x004e7908
+     * @ghidraAddress PAL: 0x005263b8
      */
     void SetBitmapConfig(
         int nWidth, int nHeight, int nBitsPerPixel, const HxStr &path, int nMipSelect, int nFlags);
@@ -209,7 +223,8 @@ public:
      * finish. RestoreSurfaces() runs once the mask empties.
      *
      * @return True once no level is outstanding, including after a failure.
-     * @ghidraAddress 0x004e4410
+     * @ghidraAddress NTSC-U/C: 0x004e4410
+     * @ghidraAddress PAL: 0x00522ce8
      */
     bool PollAsyncMips();
 
@@ -225,7 +240,8 @@ public:
      * doubles the height of that level. The level is recorded as loaded and RestoreSurfaces()
      * runs.
      *
-     * @ghidraAddress 0x004e3fe8
+     * @ghidraAddress NTSC-U/C: 0x004e3fe8
+     * @ghidraAddress PAL: 0x005228c0
      */
     void AllocateBitmapFromStream();
 
@@ -234,7 +250,8 @@ public:
      *
      * The pending mask is left as it was, so a later poll still waits on the cancelled levels.
      *
-     * @ghidraAddress 0x004e4648
+     * @ghidraAddress NTSC-U/C: 0x004e4648
+     * @ghidraAddress PAL: 0x00522f20
      */
     void CancelPendingMips();
 
@@ -245,7 +262,8 @@ public:
      * Rnd::PsTex's table addresses a byte-identical per-unit copy at `0x0059a8c8`. Rnd::Movie's
      * SetFrameSelf() calls it after SetBitmapConfig(). The name is inferred.
      *
-     * @ghidraAddress 0x004e73c8
+     * @ghidraAddress NTSC-U/C: 0x004e73c8
+     * @ghidraAddress PAL: 0x00525e68
      */
     virtual void ReloadBitmaps();
 
@@ -270,7 +288,8 @@ public:
      *                  recovered caller passes 0.
      * @param nFlags Bit 1 requests a read-back from GS memory.
      * @return The canvas over the level, or null when the class has none.
-     * @ghidraAddress 0x004e75a0
+     * @ghidraAddress NTSC-U/C: 0x004e75a0
+     * @ghidraAddress PAL: 0x00526040
      */
     virtual ACanvas *LockMipBitmap(int nMip, int nReserved, int nFlags);
 
@@ -279,7 +298,8 @@ public:
      *
      * Vtable slot 10. Empty in Rnd::Tex. The name is inferred as above.
      *
-     * @ghidraAddress 0x004e75f8
+     * @ghidraAddress NTSC-U/C: 0x004e75f8
+     * @ghidraAddress PAL: 0x00526098
      */
     virtual void UnlockMipBitmap();
 
@@ -291,7 +311,8 @@ public:
      * @param pPalette The replacement palette.
      * @param nReserved A second word, unread by every recovered implementation. Rnd::Movie's
      *                  palette chunk handler passes -1 explicitly at `0x005cf55c`.
-     * @ghidraAddress 0x004e7600
+     * @ghidraAddress NTSC-U/C: 0x004e7600
+     * @ghidraAddress PAL: 0x005260a0
      */
     virtual void SetPalette(APalette *pPalette, int nReserved);
 
@@ -302,7 +323,8 @@ public:
      * mip 0 against eviction, or releases the pin. The name is inferred.
      *
      * @param bInUse Whether the page is in use.
-     * @ghidraAddress 0x004e7608
+     * @ghidraAddress NTSC-U/C: 0x004e7608
+     * @ghidraAddress PAL: 0x005260a8
      */
     virtual void SetGsPageInUse(bool bInUse);
 
@@ -313,7 +335,8 @@ public:
      * tagged heap, while mZone is -1, is released, and the release is billed to `rndtex.cpp` line
      * 610.
      *
-     * @ghidraAddress 0x004e7aa8
+     * @ghidraAddress NTSC-U/C: 0x004e7aa8
+     * @ghidraAddress PAL: 0x00526558
      */
     virtual void FreeLoadedBitmaps();
 
@@ -324,7 +347,8 @@ protected:
      * Rnd::PsTex open-codes the body in BindToGsSlot(), LockMipBitmap(), SetGsPageInUse(), and the
      * routine at `0x00596d68`. The out-of-line copy has no caller.
      *
-     * @ghidraAddress 0x004e75a8
+     * @ghidraAddress NTSC-U/C: 0x004e75a8
+     * @ghidraAddress PAL: 0x00526048
      */
     void WaitForMipsLoaded() {
         if (!IsLoadComplete()) {
@@ -343,7 +367,8 @@ protected:
      * `"ERROR - RestoreSurfaces(%s), mipmap %d has no bm!"`, and the helper it calls reports
      * `"Got NULL Palette in RestoreSurfaces"`.
      *
-     * @ghidraAddress 0x004e4598
+     * @ghidraAddress NTSC-U/C: 0x004e4598
+     * @ghidraAddress PAL: 0x00522e70
      */
     virtual void RestoreSurfaces();
 
@@ -363,7 +388,8 @@ protected:
      *
      * @param nMip The level that arrived, which both implementations use to index the loaded
      * bitmaps.
-     * @ghidraAddress 0x004e5928
+     * @ghidraAddress NTSC-U/C: 0x004e5928
+     * @ghidraAddress PAL: 0x00524378
      */
     virtual void OnMipLoaded(int nMip);
 
@@ -424,14 +450,16 @@ protected:
  * The default creator allocates 0x58 bytes and constructs a Rnd::Tex. GfxDevice::Init() and the
  * PlayStation 2 texture layer both overwrite the hook with the Rnd::PsTex creator.
  *
- * @ghidraAddress 0x007033a8
+ * @ghidraAddress NTSC-U/C: 0x007033a8
+ * @ghidraAddress PAL: 0x00746e58
  */
 extern Tex *(*g_pfnNewTex)(const HxStr &name);
 
 /**
  * Registered class name of Rnd::Tex, the string "Tex".
  *
- * @ghidraAddress 0x007033b0
+ * @ghidraAddress NTSC-U/C: 0x007033b0
+ * @ghidraAddress PAL: 0x00746e60
  */
 extern HxStr g_texClassName;
 
@@ -440,7 +468,8 @@ extern HxStr g_texClassName;
  *
  * @param name The object name.
  * @return The new texture.
- * @ghidraAddress 0x004e77f0
+ * @ghidraAddress NTSC-U/C: 0x004e77f0
+ * @ghidraAddress PAL: 0x005262a0
  */
 Tex *NewTex(const HxStr &name);
 
@@ -452,7 +481,8 @@ Tex *NewTex(const HxStr &name);
  *
  * @param name The object name.
  * @return The new texture.
- * @ghidraAddress 0x004e7448
+ * @ghidraAddress NTSC-U/C: 0x004e7448
+ * @ghidraAddress PAL: 0x00525ee8
  */
 Tex *NewTexThroughHook(const HxStr &name);
 
@@ -461,7 +491,8 @@ Tex *NewTexThroughHook(const HxStr &name);
  *
  * @param name The object name.
  * @return The new texture, as its Rnd::Object subobject.
- * @ghidraAddress 0x004e7770
+ * @ghidraAddress NTSC-U/C: 0x004e7770
+ * @ghidraAddress PAL: 0x00526220
  */
 Object *CreateRegisteredTex(const HxStr &name);
 
@@ -473,7 +504,8 @@ Object *CreateRegisteredTex(const HxStr &name);
  *
  * Rnd::Manager::Init() also expands this inline.
  *
- * @ghidraAddress 0x004e7408
+ * @ghidraAddress NTSC-U/C: 0x004e7408
+ * @ghidraAddress PAL: 0x00525ea8
  */
 inline void RegisterTexClass() {
     g_pfnNewTex = NewTex;

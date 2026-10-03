@@ -55,12 +55,12 @@ constexpr int kMovieBitsPerPixel = 8;
 constexpr int kSetPaletteReservedArg = -1;
 
 // The last time SetFrameSelf() converted.
-// 0x0077a59c
+// NTSC-U/C: 0x0077a59c, PAL: 0x007be35c
 float g_flMovieBeatCached = -9999.999f;
 
 // SetFrameSelf() returns early while it is positive. It only ever stores zero, and the test never
 // fires.
-// 0x0077a598
+// NTSC-U/C: 0x0077a598, PAL: 0x007be358
 int g_nMovieBeatCacheAge;
 
 // Reconfigure a texture whose size or depth differs from its track's frame, logging the change.
@@ -78,7 +78,7 @@ MatchTextureToTrack(Tex *pTex, const MovieStream::Track &track, const char *pszM
     pTex->ReloadBitmaps();
 }
 
-// 0x005d15e0
+// NTSC-U/C: 0x005d15e0, PAL: 0x006135d0
 FailSink &operator<<(FailSink &sink, const std::list<Movie::TrackTexture> &textures) {
     sink.Print("(size:")->Format("%u", textures.size())->Print(")");
 
@@ -97,7 +97,7 @@ FailSink &operator<<(FailSink &sink, const std::list<Movie::TrackTexture> &textu
     return sink;
 }
 
-// 0x005d1790
+// NTSC-U/C: 0x005d1790, PAL: 0x00613780
 Stream &operator<<(Stream &stream, const std::list<Movie::TrackTexture> &textures) {
     const int nCount = textures.size();
     stream.Write(&nCount, sizeof(nCount));
@@ -118,18 +118,18 @@ Stream &operator<<(Stream &stream, const std::list<Movie::TrackTexture> &texture
 
 } // namespace
 
-// 0x005ce3d0
+// NTSC-U/C: 0x005ce3d0, PAL: 0x00610330
 Movie::Movie(const HxStr &name) : Object(name), mStream(nullptr), mTexturesMatched(0), mZone(-1) {
     memset(static_cast<void *>(&mPalette), 0, sizeof(mPalette)); // Yes, after constructing it.
 }
 
-// 0x005ce930
+// NTSC-U/C: 0x005ce930, PAL: 0x006108a8
 Movie::~Movie() {
     CloseMovieFile();
     ReleaseAllRefs();
 }
 
-// 0x005cebe0
+// NTSC-U/C: 0x005cebe0, PAL: 0x00610b68
 void Movie::OpenMovieFile() {
     for (auto &entry : mTrackTextures) {
         if (entry.mTex != nullptr) {
@@ -162,7 +162,7 @@ void Movie::OpenMovieFile() {
     mStartPending = 1;
 }
 
-// 0x005cef00
+// NTSC-U/C: 0x005cef00, PAL: 0x00610e88
 void Movie::CloseMovieFile() {
     for (auto &entry : mTrackTextures) {
         if (entry.mTex != nullptr) {
@@ -175,7 +175,7 @@ void Movie::CloseMovieFile() {
     }
 }
 
-// 0x005ced80
+// NTSC-U/C: 0x005ced80, PAL: 0x00610d08
 void Movie::Replace(Object *pFrom, Object *pTo) {
     Animatable::Replace(pFrom, pTo);
     for (auto it = mTrackTextures.begin(); it != mTrackTextures.end();) {
@@ -206,7 +206,7 @@ void Movie::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// 0x005cef88
+// NTSC-U/C: 0x005cef88, PAL: 0x00610f10
 void Movie::SetFrameSelf(float flFrame) {
     const float flTime = flFrame + kFrameTimeOffset;
     if (mStream == nullptr) {
@@ -246,21 +246,21 @@ void Movie::SetFrameSelf(float flFrame) {
     }
 }
 
-// 0x005d24d8
+// NTSC-U/C: 0x005d24d8, PAL: 0x00614508
 void Movie::AttachTrack(int nTrackId) {
     if (mStream != nullptr) {
         mStream->SetTrackHandler(nTrackId, ChunkHandler, this);
     }
 }
 
-// 0x005d2508
+// NTSC-U/C: 0x005d2508, PAL: 0x00614538
 void Movie::DetachTrack(int nTrackId) {
     if (mStream != nullptr) {
         mStream->SetTrackHandler(nTrackId, nullptr, nullptr);
     }
 }
 
-// 0x005cf1f8
+// NTSC-U/C: 0x005cf1f8, PAL: 0x006111a0
 void Movie::SetTrackTexture(int nTrackId, Tex *pTex) {
     RemoveTrackTexture(nTrackId);
     if (pTex == nullptr) {
@@ -276,7 +276,7 @@ void Movie::SetTrackTexture(int nTrackId, Tex *pTex) {
     AttachTrack(nTrackId);
 }
 
-// 0x005cf3f8
+// NTSC-U/C: 0x005cf3f8, PAL: 0x006113c0
 void Movie::RemoveTrackTexture(int nTrackId) {
     for (auto it = mTrackTextures.begin(); it != mTrackTextures.end(); ++it) {
         if (it->mTrackId == nTrackId) {
@@ -290,7 +290,7 @@ void Movie::RemoveTrackTexture(int nTrackId) {
     DetachTrack(nTrackId);
 }
 
-// 0x005cf4c0
+// NTSC-U/C: 0x005cf4c0, PAL: 0x00611488
 void Movie::OnChunk(MovieStream::ChunkHeader *pHeader, void *pPayload) {
     Tex *pTex = nullptr;
     for (const auto &entry : mTrackTextures) {
@@ -330,12 +330,12 @@ void Movie::OnChunk(MovieStream::ChunkHeader *pHeader, void *pPayload) {
     }
 }
 
-// 0x005d2530
+// NTSC-U/C: 0x005d2530, PAL: 0x00614560
 void Movie::ChunkHandler(MovieStream::ChunkHeader *pHeader, void *pPayload, void *pData) {
     static_cast<Movie *>(pData)->OnChunk(pHeader, pPayload);
 }
 
-// 0x005d1a90
+// NTSC-U/C: 0x005d1a90, PAL: 0x00613a80
 void Movie::ReadTrackTextures(Stream &stream, std::list<TrackTexture> &textures) {
     int nCount;
     stream.Read(&nCount, sizeof(nCount));
@@ -350,13 +350,13 @@ void Movie::ReadTrackTextures(Stream &stream, std::list<TrackTexture> &textures)
     }
 }
 
-// 0x005d21b0
+// NTSC-U/C: 0x005d21b0, PAL: 0x006141e0
 void Movie::Reopen() {
     CloseMovieFile();
     OpenMovieFile();
 }
 
-// 0x005d21e0
+// NTSC-U/C: 0x005d21e0, PAL: 0x00614210
 void Movie::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
@@ -370,7 +370,7 @@ void Movie::DumpText(FailSink &sink) {
     (*sink.Print(" trackTextures:") << mTrackTextures).Print("\n");
 }
 
-// 0x005d2280
+// NTSC-U/C: 0x005d2280, PAL: 0x006142b0
 void Movie::Save(Stream &stream) {
     const int nRevision = kMovieRevision;
     stream.Write(&nRevision, sizeof(nRevision));
@@ -379,7 +379,7 @@ void Movie::Save(Stream &stream) {
     stream << mTrackTextures;
 }
 
-// 0x005d22f8
+// NTSC-U/C: 0x005d22f8, PAL: 0x00614328
 void Movie::Load(Stream &stream) {
     int nRevision;
     stream.Read(&nRevision, sizeof(nRevision));
@@ -399,12 +399,12 @@ void Movie::Load(Stream &stream) {
     OpenMovieFile();
 }
 
-// 0x005d2078
+// NTSC-U/C: 0x005d2078, PAL: 0x006140a8
 const HxStr &Movie::ClassName() const {
     return g_movieClassName;
 }
 
-// 0x005d23c8
+// NTSC-U/C: 0x005d23c8, PAL: 0x006143f8
 void Movie::Copy(const Object *pSource, unsigned nFlags) {
     const Movie *pMovie = dynamic_cast<const Movie *>(pSource);
     Animatable::Copy(pSource, nFlags);
@@ -414,17 +414,17 @@ void Movie::Copy(const Object *pSource, unsigned nFlags) {
     OpenMovieFile();
 }
 
-// 0x005d1eb8
+// NTSC-U/C: 0x005d1eb8, PAL: 0x00613ee8
 void *Movie::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kMovieTag);
 }
 
-// 0x005d1ed8
+// NTSC-U/C: 0x005d1ed8, PAL: 0x00613f08
 void Movie::operator delete(void *pBlock) {
     FreeTaggedMemory(pBlock, kMovieTag);
 }
 
-// 0x005d2480
+// NTSC-U/C: 0x005d2480, PAL: 0x006144b0
 Tex *Movie::FindTrackTexture(int nTrackId) const {
     for (const auto &entry : mTrackTextures) {
         if (entry.mTrackId == nTrackId) {
@@ -434,22 +434,22 @@ Tex *Movie::FindTrackTexture(int nTrackId) const {
     return nullptr;
 }
 
-// 0x005d2058
+// NTSC-U/C: 0x005d2058, PAL: 0x00614088
 const HxStr &Movie::GetRelativeFilename() const {
     return mFilename.RelativeToRoot();
 }
 
-// 0x005d2190
+// NTSC-U/C: 0x005d2190, PAL: 0x006141c0
 void Movie::SetFilename(const HxStr &name) {
     mFilename.SetFromRoot(name);
 }
 
-// 0x005d20b8
+// NTSC-U/C: 0x005d20b8, PAL: 0x006140e8
 Object *CreateRegisteredMovie(const HxStr &name) {
     return NewMovie(name);
 }
 
-// 0x0077a590
+// NTSC-U/C: 0x0077a590, PAL: 0x007be350
 HxStr g_movieClassName("Movie");
 
 } // namespace Rnd

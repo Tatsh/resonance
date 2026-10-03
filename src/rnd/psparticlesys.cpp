@@ -151,15 +151,15 @@ inline bool IsSpriteOffScreen(const DrawVert &nearCorner, const DrawVert &farCor
 
 } // namespace
 
-// 0x005fcdf0
+// NTSC-U/C: 0x005fcdf0, PAL: 0x0063db00
 PsParticleSys::PsParticleSys(const HxStr &name) : Object(name), ParticleSys(name) {
 }
 
-// 0x005ff878
+// NTSC-U/C: 0x005ff878, PAL: 0x006405f0
 PsParticleSys::~PsParticleSys() {
 }
 
-// 0x005ffaf0
+// NTSC-U/C: 0x005ffaf0, PAL: 0x00640868
 inline void PsParticleSys::EmitGifPoints(int nVertCount) {
     g_renderStats.mnPoints += nVertCount;
     g_gfxDevice.SetGsReg(kGsRegPrim, kGsPrimPoint | kGsPrimAbe, kGsPrimFieldMask);
@@ -170,7 +170,7 @@ inline void PsParticleSys::EmitGifPoints(int nVertCount) {
     }
 }
 
-// 0x005fcb18
+// NTSC-U/C: 0x005fcb18, PAL: 0x0063d828
 int PsParticleSys::DrawSelf() {
     ++g_renderStats.mnMeshDraws;
     if (mLiveParticles == nullptr) {
@@ -233,7 +233,7 @@ int PsParticleSys::DrawSelf() {
     return 1;
 }
 
-// 0x005fc570
+// NTSC-U/C: 0x005fc570, PAL: 0x0063d280
 void PsParticleSys::EmitGifLines(int nVertCount) {
     // The counter advances by the whole vertex count before any line is built, so it records what
     // was offered rather than what was drawn.
@@ -248,7 +248,7 @@ void PsParticleSys::EmitGifLines(int nVertCount) {
     }
 }
 
-// 0x005fc6d0
+// NTSC-U/C: 0x005fc6d0, PAL: 0x0063d3e0
 void PsParticleSys::EmitGifSprites(int nVertCount) {
     const int nTextured = g_nStageTextureBound;
     const unsigned long long qwPrim =
@@ -284,7 +284,7 @@ void PsParticleSys::EmitGifSprites(int nVertCount) {
     }
 }
 
-// 0x005fc940
+// NTSC-U/C: 0x005fc940, PAL: 0x0063d650
 void PsParticleSys::DrawSpritesDmaKicked() {
     g_gfxDevice.CloseGifTag(1);
     g_gfxDevice.SwapGifWrite();
@@ -363,7 +363,7 @@ void PsParticleSys::DrawSpritesDmaKicked() {
     }
 }
 
-// 0x005ffa78
+// NTSC-U/C: 0x005ffa78, PAL: 0x006407f0
 ParticleSys *NewPsParticleSys(const HxStr &name) {
     // The binary bills the allocation to the tag "Rnd::ParticleSys" and the object is 0x220 bytes,
     // the same size as the base, because the subclass adds no member.

@@ -74,14 +74,16 @@ public:
      * Both transforms become the identity, mOrigin becomes `(0, 0, 0, 1)`, and mBillboard
      * becomes kBillboardNone. Every row is first built with a padding float of 1.0.
      *
-     * @ghidraAddress 0x004fb3f8
+     * @ghidraAddress NTSC-U/C: 0x004fb3f8
+     * @ghidraAddress PAL: 0x0053a0d8
      */
     Transformable();
 
     /**
      * Drop this object's references on its children.
      *
-     * @ghidraAddress 0x004fb2a8
+     * @ghidraAddress NTSC-U/C: 0x004fb2a8
+     * @ghidraAddress PAL: 0x00539f88
      */
     virtual ~Transformable();
 
@@ -92,7 +94,8 @@ public:
      * report "%s already in %s" and no insertion.
      *
      * @param pTrans The transformable to position from this one.
-     * @ghidraAddress 0x004f0838
+     * @ghidraAddress NTSC-U/C: 0x004f0838
+     * @ghidraAddress PAL: 0x0052f428
      */
     void AddTrans(Transformable *pTrans);
 
@@ -102,14 +105,16 @@ public:
      * Drops this object's reference on pTrans first. A pTrans absent from mTransList does nothing.
      *
      * @param pTrans The transformable to remove.
-     * @ghidraAddress 0x004f09c0
+     * @ghidraAddress NTSC-U/C: 0x004f09c0
+     * @ghidraAddress PAL: 0x0052f5b0
      */
     void RemoveTrans(Transformable *pTrans);
 
     /**
      * Drop this object's reference on every mTransList entry and empty the list.
      *
-     * @ghidraAddress 0x004f0a80
+     * @ghidraAddress NTSC-U/C: 0x004f0a80
+     * @ghidraAddress PAL: 0x0052f670
      */
     void ClearTransList();
 
@@ -121,7 +126,8 @@ public:
      * text in the shipped build, so the routine produces no output on this target.
      *
      * @param sink The diagnostic sink to write to.
-     * @ghidraAddress 0x004f12e0
+     * @ghidraAddress NTSC-U/C: 0x004f12e0
+     * @ghidraAddress PAL: 0x0052fed0
      */
     virtual void DumpText(FailSink &sink);
 
@@ -131,7 +137,8 @@ public:
      * Each transform row writes only its first three floats, so the padding word is not stored.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x004f1a58
+     * @ghidraAddress NTSC-U/C: 0x004f1a58
+     * @ghidraAddress PAL: 0x00530648
      */
     virtual void Save(Stream &stream);
 
@@ -143,7 +150,8 @@ public:
      * table, and revisions below 1 store neither the billboard nor the origin.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x004f1f18
+     * @ghidraAddress NTSC-U/C: 0x004f1f18
+     * @ghidraAddress PAL: 0x00530b08
      */
     virtual void Load(Stream &stream);
 
@@ -155,7 +163,8 @@ public:
      *
      * @param pFrom The object being replaced.
      * @param pTo The replacement, or null.
-     * @ghidraAddress 0x004f2510
+     * @ghidraAddress NTSC-U/C: 0x004f2510
+     * @ghidraAddress PAL: 0x00531100
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -167,7 +176,8 @@ public:
      *
      * @param pSource The object to copy from.
      * @param nFlags The set of fields to copy; see kCopyChildLists.
-     * @ghidraAddress 0x004fce30
+     * @ghidraAddress NTSC-U/C: 0x004fce30
+     * @ghidraAddress PAL: 0x0053bb18
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -179,7 +189,8 @@ public:
      * parent in the transform hierarchy rather than a plain cast.
      *
      * @return The parent transformable, or null when no referrer positions this one.
-     * @ghidraAddress 0x004f0770
+     * @ghidraAddress NTSC-U/C: 0x004f0770
+     * @ghidraAddress PAL: 0x0052f360
      */
     Transformable *Parent();
 
@@ -189,7 +200,8 @@ public:
      * Vtable slot 1.
      *
      * @param nBillboard The billboard mode.
-     * @ghidraAddress 0x004fce08
+     * @ghidraAddress NTSC-U/C: 0x004fce08
+     * @ghidraAddress PAL: 0x0053baf0
      */
     virtual void SetBillboard(int nBillboard);
 
@@ -208,7 +220,8 @@ public:
      * @param pParent The transformable this one hangs off, or null for a root.
      * @param nForce Non-zero to recompose even when nothing is marked dirty.
      * @return Non-zero when the world transform was recomposed.
-     * @ghidraAddress 0x004f0b18
+     * @ghidraAddress NTSC-U/C: 0x004f0b18
+     * @ghidraAddress PAL: 0x0052f708
      */
     virtual int UpdateWorldXfm(Transformable *pParent, int nForce);
 
@@ -218,7 +231,8 @@ public:
      * The row is copied as one 128-bit quadword, so pOrigin has to be 16-byte aligned.
      *
      * @param pOrigin Four floats, of which the first three are x, y, and z.
-     * @ghidraAddress 0x004fce18
+     * @ghidraAddress NTSC-U/C: 0x004fce18
+     * @ghidraAddress PAL: 0x0053bb00
      */
     void SetOrigin(const float *pOrigin);
 
@@ -235,7 +249,8 @@ public:
      * The result is the one shared scratch buffer g_drawXfm. It is valid only until the next call.
      *
      * @return The shared draw transform, four rows of four floats.
-     * @ghidraAddress 0x004f0cc0
+     * @ghidraAddress NTSC-U/C: 0x004f0cc0
+     * @ghidraAddress PAL: 0x0052f8b0
      */
     float *GetDrawXfm();
 
@@ -263,7 +278,8 @@ protected:
      * directly, twenty call sites among them `Rnd::Mesh`, `Rnd::Cam`, `Rnd::View`, `Rnd::Light`,
      * and `Rnd::ParticleSys`.
      *
-     * @ghidraAddress 0x004fcf18
+     * @ghidraAddress NTSC-U/C: 0x004fcf18
+     * @ghidraAddress PAL: 0x0053bc00
      */
     void ReleaseTransRefs();
 
@@ -312,7 +328,7 @@ protected:
     int mBillboard; // +0xa4
 
 private:
-    // 0x004fcf88
+    // NTSC-U/C: 0x004fcf88, PAL: 0x0053bc70
     // Marks this object dirty and registers it as a referrer of every mTransList
     // entry. Copy() invokes it and Load() inlines the same body.
     void AcquireTransRefs();
@@ -328,7 +344,8 @@ private:
  * One buffer serves every caller, which is why the value it returns survives only until the next
  * call.
  *
- * @ghidraAddress 0x007067e0
+ * @ghidraAddress NTSC-U/C: 0x007067e0
+ * @ghidraAddress PAL: 0x0074a300
  */
 extern float g_drawXfm[kXfmRowCount][kXfmRowFloatCount];
 

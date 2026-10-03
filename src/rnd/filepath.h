@@ -42,7 +42,8 @@ public:
      * The name is inferred.
      *
      * @param name The file name, relative to sRoot.
-     * @ghidraAddress 0x004e4bd8
+     * @ghidraAddress NTSC-U/C: 0x004e4bd8
+     * @ghidraAddress PAL: 0x005234b0
      */
     void SetFromRoot(const HxStr &name);
 
@@ -50,7 +51,8 @@ public:
      * Set the path to path verbatim, then normalise it. The name is inferred.
      *
      * @param path The full path.
-     * @ghidraAddress 0x004e7b70
+     * @ghidraAddress NTSC-U/C: 0x004e7b70
+     * @ghidraAddress PAL: 0x00526620
      */
     void Set(const HxStr &path);
 
@@ -62,7 +64,8 @@ public:
      * treats a name such as `.hidden` the same way. The remaining components are joined with single
      * slashes, so a leading slash is not preserved. The name is inferred.
      *
-     * @ghidraAddress 0x004e4d88
+     * @ghidraAddress NTSC-U/C: 0x004e4d88
+     * @ghidraAddress PAL: 0x005236d8
      */
     void Normalize();
 
@@ -75,7 +78,8 @@ public:
      * returned unchanged. The name is inferred.
      *
      * @return The relative path.
-     * @ghidraAddress 0x004e5168
+     * @ghidraAddress NTSC-U/C: 0x004e5168
+     * @ghidraAddress PAL: 0x00523af0
      */
     const HxStr &RelativeToRoot() const;
 
@@ -83,7 +87,8 @@ public:
      * Write the path to sink in double quotes.
      *
      * @param sink The text sink.
-     * @ghidraAddress 0x004e7bc0
+     * @ghidraAddress NTSC-U/C: 0x004e7bc0
+     * @ghidraAddress PAL: 0x00526680
      */
     void Print(FailSink &sink) const;
 
@@ -91,7 +96,8 @@ public:
      * Write the path relative to sRoot, with its terminator, to stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x004e7bf8
+     * @ghidraAddress NTSC-U/C: 0x004e7bf8
+     * @ghidraAddress PAL: 0x005266b8
      */
     void Save(Stream &stream) const;
 
@@ -99,7 +105,8 @@ public:
      * Read a name from stream and set the path to it under sRoot.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x004e7c50
+     * @ghidraAddress NTSC-U/C: 0x004e7c50
+     * @ghidraAddress PAL: 0x00526710
      */
     void Load(Stream &stream);
 
@@ -110,7 +117,8 @@ public:
      * The name is inferred.
      *
      * @param root The new root directory.
-     * @ghidraAddress 0x004e78d8
+     * @ghidraAddress NTSC-U/C: 0x004e78d8
+     * @ghidraAddress PAL: 0x00526388
      */
     static void SetRoot(const HxStr &root);
 
@@ -123,7 +131,8 @@ public:
      *
      * @param path The path to test.
      * @return True for an absolute path.
-     * @ghidraAddress 0x004e7cd8
+     * @ghidraAddress NTSC-U/C: 0x004e7cd8
+     * @ghidraAddress PAL: 0x005267c8
      */
     static bool IsAbsolute(const HxStr &path);
 
@@ -132,7 +141,8 @@ public:
      *
      * The Rnd::Tex unit's static initialiser constructs it after Rnd::g_texClassName.
      *
-     * @ghidraAddress 0x007033b8
+     * @ghidraAddress NTSC-U/C: 0x007033b8
+     * @ghidraAddress PAL: 0x00746e68
      */
     static FilePath sRoot;
 };

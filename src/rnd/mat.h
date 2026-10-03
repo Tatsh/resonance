@@ -100,7 +100,8 @@ public:
          * mMat on it. The head-up display's FreQ icon is one caller. The title is inferred.
          *
          * @param pTex The new texture, or null.
-         * @ghidraAddress 0x004dd0a0
+         * @ghidraAddress NTSC-U/C: 0x004dd0a0
+         * @ghidraAddress PAL: 0x0051b640
          */
         void SetTex(Tex *pTex);
 
@@ -112,7 +113,8 @@ public:
          * routine returns nothing, so it is an initialiser rather than a constructor. The name is
          * inferred.
          *
-         * @ghidraAddress 0x004dd020
+         * @ghidraAddress NTSC-U/C: 0x004dd020
+         * @ghidraAddress PAL: 0x0051b5c0
          */
         void InitDefaults();
 
@@ -120,7 +122,8 @@ public:
          * Write the stage to the engine text sink.
          *
          * @param sink The text sink.
-         * @ghidraAddress 0x004d2270
+         * @ghidraAddress NTSC-U/C: 0x004d2270
+         * @ghidraAddress PAL: 0x005106c0
          */
         void Dump(FailSink &sink) const;
 
@@ -132,7 +135,8 @@ public:
          * reference is not written.
          *
          * @param stream The stream to write to.
-         * @ghidraAddress 0x004d26f8
+         * @ghidraAddress NTSC-U/C: 0x004d26f8
+         * @ghidraAddress PAL: 0x00510b48
          */
         void Save(Stream &stream) const;
 
@@ -147,7 +151,8 @@ public:
          * the stage belongs to, and every revision ends with the texture.
          *
          * @param stream The stream to read from.
-         * @ghidraAddress 0x004d2a20
+         * @ghidraAddress NTSC-U/C: 0x004d2a20
+         * @ghidraAddress PAL: 0x00510e70
          */
         void Load(Stream &stream);
     };
@@ -162,11 +167,15 @@ public:
      * blend starts at kBlendModeSrcAlpha, and lighting starts enabled.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
-     * @ghidraAddress 0x004d0ea8
+     * @ghidraAddress NTSC-U/C: 0x004d0ea8
+     * @ghidraAddress PAL: 0x0050f2f8
      */
     Mat(const HxStr &name);
 
-    /** @ghidraAddress 0x004dbb10 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004dbb10
+     * @ghidraAddress PAL: 0x0051a0b0
+     */
     virtual ~Mat();
 
     /**
@@ -174,7 +183,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x004db900
+     * @ghidraAddress NTSC-U/C: 0x004db900
+     * @ghidraAddress PAL: 0x00519ea0
      */
     static void *operator new(size_t nSize);
 
@@ -182,7 +192,8 @@ public:
      * Release a material block under the same tag.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x004db920
+     * @ghidraAddress NTSC-U/C: 0x004db920
+     * @ghidraAddress PAL: 0x00519ec0
      */
     static void operator delete(void *pBlock);
 
@@ -191,7 +202,8 @@ public:
      *
      * The routine has no caller in the shipped build. The name is inferred.
      *
-     * @ghidraAddress 0x004d2198
+     * @ghidraAddress NTSC-U/C: 0x004d2198
+     * @ghidraAddress PAL: 0x005105e8
      */
     void AddStage();
 
@@ -202,7 +214,8 @@ public:
      * inferred.
      *
      * @param nIndex The position of the stage.
-     * @ghidraAddress 0x004dcf60
+     * @ghidraAddress NTSC-U/C: 0x004dcf60
+     * @ghidraAddress PAL: 0x0051b500
      */
     void RemoveStage(int nIndex);
 
@@ -214,7 +227,8 @@ public:
      * title is inferred.
      *
      * @param meshes The vector to append to.
-     * @ghidraAddress 0x00406010
+     * @ghidraAddress NTSC-U/C: 0x00406010
+     * @ghidraAddress PAL: 0x0043f910
      */
     void GetMeshReferrers(std::vector<Mesh *> &meshes);
 
@@ -231,7 +245,8 @@ public:
      * Write the material to the engine text sink.
      *
      * @param sink The text sink.
-     * @ghidraAddress 0x004d0f78
+     * @ghidraAddress NTSC-U/C: 0x004d0f78
+     * @ghidraAddress PAL: 0x0050f3c8
      */
     virtual void DumpText(FailSink &sink);
 
@@ -239,7 +254,8 @@ public:
      * Serialise the material.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x004d1638
+     * @ghidraAddress NTSC-U/C: 0x004d1638
+     * @ghidraAddress PAL: 0x0050fa88
      */
     virtual void Save(Stream &stream);
 
@@ -251,7 +267,8 @@ public:
      *
      * @param pFrom The object being replaced.
      * @param pTo The object to point at, which may be null.
-     * @ghidraAddress 0x004dcc20
+     * @ghidraAddress NTSC-U/C: 0x004dcc20
+     * @ghidraAddress PAL: 0x0051b1c0
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -262,7 +279,8 @@ public:
      * `Rnd::Manager::Init()` maps to the creator at 0x004dbc80.
      *
      * @return The class name.
-     * @ghidraAddress 0x004dbc70
+     * @ghidraAddress NTSC-U/C: 0x004dbc70
+     * @ghidraAddress PAL: 0x0051a210
      */
     virtual const HxStr &ClassName() const;
 
@@ -272,7 +290,8 @@ public:
      * @param pSource The source object, which has to be a material for the copy to have any
      *                effect.
      * @param nFlags The copy flags.
-     * @ghidraAddress 0x004dce18
+     * @ghidraAddress NTSC-U/C: 0x004dce18
+     * @ghidraAddress PAL: 0x0051b3b8
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -284,7 +303,8 @@ public:
      * instead of a blend mode, and the loader folds the pair into the nearest blend mode.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x004d1a90
+     * @ghidraAddress NTSC-U/C: 0x004d1a90
+     * @ghidraAddress PAL: 0x0050fee0
      */
     virtual void Load(Stream &stream);
 
@@ -296,7 +316,8 @@ public:
      *
      * @param nStage The stage index. Ignored by the body. Refresh() passes the index of each stage
      *               in turn, and TnlCatcher::SetMultiplied() passes 0 (`0x004552ac`).
-     * @ghidraAddress 0x004db958
+     * @ghidraAddress NTSC-U/C: 0x004db958
+     * @ghidraAddress PAL: 0x00519ef8
      */
     virtual void SyncMat(int nStage);
 
@@ -306,7 +327,8 @@ public:
      * Rnd::PsMat overrides the setter to invalidate the cached hardware material state.
      *
      * @param color The new ambient colour.
-     * @ghidraAddress 0x004db970
+     * @ghidraAddress NTSC-U/C: 0x004db970
+     * @ghidraAddress PAL: 0x00519f10
      */
     virtual void SetAmbient(const Color &color);
 
@@ -321,7 +343,8 @@ public:
      * instead. The argument is therefore a Color and not a Vector3.
      *
      * @param color The new diffuse colour, whose alpha is discarded.
-     * @ghidraAddress 0x004db980
+     * @ghidraAddress NTSC-U/C: 0x004db980
+     * @ghidraAddress PAL: 0x00519f20
      */
     virtual void SetDiffuse(const Color &color);
 
@@ -329,7 +352,8 @@ public:
      * Set the emissive colour.
      *
      * @param color The new emissive colour.
-     * @ghidraAddress 0x004db9a0
+     * @ghidraAddress NTSC-U/C: 0x004db9a0
+     * @ghidraAddress PAL: 0x00519f40
      */
     virtual void SetEmissive(const Color &color);
 
@@ -337,7 +361,8 @@ public:
      * Set the diffuse alpha.
      *
      * @param flAlpha The new alpha.
-     * @ghidraAddress 0x004db9b0
+     * @ghidraAddress NTSC-U/C: 0x004db9b0
+     * @ghidraAddress PAL: 0x00519f50
      */
     virtual void SetAlpha(float flAlpha);
 
@@ -351,7 +376,8 @@ public:
      *
      * @param color The new specular colour, whose alpha is discarded.
      * @param flAlpha The new specular alpha.
-     * @ghidraAddress 0x004db9b8
+     * @ghidraAddress NTSC-U/C: 0x004db9b8
+     * @ghidraAddress PAL: 0x00519f58
      */
     virtual void SetSpecular(const Color &color, float flAlpha);
 
@@ -365,7 +391,8 @@ public:
      * @param nVertEmissive Whether the emissive term comes from the vertex.
      * @param nVertAlpha Whether the alpha comes from the vertex.
      * @param nNormalize Whether normals are renormalised.
-     * @ghidraAddress 0x004dcbc0
+     * @ghidraAddress NTSC-U/C: 0x004dcbc0
+     * @ghidraAddress PAL: 0x0051b160
      */
     virtual void SetLighting(int nEnable,
                              int nVertAmbient,
@@ -381,7 +408,8 @@ public:
      * Copy() finishes with this call. The name is inferred from the position of the call and
      * from the stage vector the routine walks.
      *
-     * @ghidraAddress 0x004dcd88
+     * @ghidraAddress NTSC-U/C: 0x004dcd88
+     * @ghidraAddress PAL: 0x0051b328
      */
     virtual void Refresh();
 
@@ -389,7 +417,8 @@ public:
      * Set the multi-pass count.
      *
      * @param nMultiPass The new count.
-     * @ghidraAddress 0x004db960
+     * @ghidraAddress NTSC-U/C: 0x004db960
+     * @ghidraAddress PAL: 0x00519f00
      */
     void SetMultiPass(int nMultiPass);
 
@@ -397,7 +426,8 @@ public:
      * Set whether the surface shades flat.
      *
      * @param nFlat Non-zero for flat shading.
-     * @ghidraAddress 0x004db968
+     * @ghidraAddress NTSC-U/C: 0x004db968
+     * @ghidraAddress PAL: 0x00519f08
      */
     void SetFlat(int nFlat);
 
@@ -501,7 +531,8 @@ public:
 /**
  * Registered class name of Rnd::Mat, the string "Mat".
  *
- * @ghidraAddress 0x00700420
+ * @ghidraAddress NTSC-U/C: 0x00700420
+ * @ghidraAddress PAL: 0x00743e48
  */
 extern HxStr g_matClassName;
 
@@ -512,7 +543,8 @@ extern HxStr g_matClassName;
  * Rnd::Mesh uses with its own word at `0x00894d68`. The two are distinct globals, so a material
  * loaded inside a mesh record does not disturb the mesh version.
  *
- * @ghidraAddress 0x00894e2c
+ * @ghidraAddress NTSC-U/C: 0x00894e2c
+ * @ghidraAddress PAL: 0x008d9e3c
  */
 extern int g_nRndMatLoadVersion;
 
@@ -522,7 +554,8 @@ extern int g_nRndMatLoadVersion;
  * Rnd::PsMat::InstallCreator() overwrites the hook with the Rnd::PsMat creator at `0x005914b8`,
  * the same arrangement Rnd::Tex uses.
  *
- * @ghidraAddress 0x00700418
+ * @ghidraAddress NTSC-U/C: 0x00700418
+ * @ghidraAddress PAL: 0x00743e40
  */
 extern Mat *(*g_pfnNewMat)(const HxStr &name);
 
@@ -531,7 +564,8 @@ extern Mat *(*g_pfnNewMat)(const HxStr &name);
  *
  * @param name The object name.
  * @return The new material.
- * @ghidraAddress 0x004dbd00
+ * @ghidraAddress NTSC-U/C: 0x004dbd00
+ * @ghidraAddress PAL: 0x0051a2a0
  */
 Mat *NewMat(const HxStr &name);
 
@@ -543,7 +577,8 @@ Mat *NewMat(const HxStr &name);
  *
  * @param name The object name.
  * @return The new material.
- * @ghidraAddress 0x004dba28
+ * @ghidraAddress NTSC-U/C: 0x004dba28
+ * @ghidraAddress PAL: 0x00519fc8
  */
 Mat *NewMatThroughHook(const HxStr &name);
 
@@ -552,7 +587,8 @@ Mat *NewMatThroughHook(const HxStr &name);
  *
  * @param name The object name.
  * @return The new material, as its Rnd::Object subobject.
- * @ghidraAddress 0x004dbc80
+ * @ghidraAddress NTSC-U/C: 0x004dbc80
+ * @ghidraAddress PAL: 0x0051a220
  */
 Object *CreateRegisteredMat(const HxStr &name);
 
@@ -564,7 +600,8 @@ Object *CreateRegisteredMat(const HxStr &name);
  *
  * Rnd::Manager::Init() also expands this inline.
  *
- * @ghidraAddress 0x004db9e8
+ * @ghidraAddress NTSC-U/C: 0x004db9e8
+ * @ghidraAddress PAL: 0x00519f88
  */
 inline void RegisterMatClass() {
     g_pfnNewMat = NewMat;
@@ -579,7 +616,8 @@ inline void RegisterMatClass() {
  * applies the change, and Rnd::PsMat's destructor clears it when the dying material is the
  * selected one.
  *
- * @ghidraAddress 0x0076d658
+ * @ghidraAddress NTSC-U/C: 0x0076d658
+ * @ghidraAddress PAL: 0x007b13b0
  */
 extern Mat *g_pSelectedMat;
 
@@ -590,7 +628,8 @@ extern Mat *g_pSelectedMat;
  * choose how much of each vertex to upload, which is what identifies Rnd::MeshVert's fourth
  * quadword as the texture coordinate.
  *
- * @ghidraAddress 0x0076d668
+ * @ghidraAddress NTSC-U/C: 0x0076d668
+ * @ghidraAddress PAL: 0x007b13c0
  */
 extern int g_nStageTextureBound;
 

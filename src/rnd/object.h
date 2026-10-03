@@ -42,7 +42,8 @@ public:
      * mInternal, mMerge, and mDeleting are not written, so an object built this way starts with
      * three indeterminate fields. The named constructor does initialise all three.
      *
-     * @ghidraAddress 0x0053fc08
+     * @ghidraAddress NTSC-U/C: 0x0053fc08
+     * @ghidraAddress PAL: 0x0057f8c0
      */
     Object();
 
@@ -54,14 +55,16 @@ public:
      * object either way.
      *
      * @param name The registry key for this object.
-     * @ghidraAddress 0x0053e0d8
+     * @ghidraAddress NTSC-U/C: 0x0053e0d8
+     * @ghidraAddress PAL: 0x0057dd08
      */
     explicit Object(const HxStr &name);
 
     /**
      * Erase the registry entry and release the name buffer.
      *
-     * @ghidraAddress 0x0053e348
+     * @ghidraAddress NTSC-U/C: 0x0053e348
+     * @ghidraAddress PAL: 0x0057dfa8
      */
     virtual ~Object();
 
@@ -72,7 +75,8 @@ public:
      * Rnd::g_manager produces the report "%s already exists" and no change.
      *
      * @param name The new registry key.
-     * @ghidraAddress 0x0053e400
+     * @ghidraAddress NTSC-U/C: 0x0053e400
+     * @ghidraAddress PAL: 0x0057e070
      */
     void SetName(const HxStr &name);
 
@@ -83,7 +87,8 @@ public:
      * once, and ReleaseAllRefs() collapses the duplicates.
      *
      * @param pReferrer The object that stores a pointer to this one.
-     * @ghidraAddress 0x0053e720
+     * @ghidraAddress NTSC-U/C: 0x0053e720
+     * @ghidraAddress PAL: 0x0057e3b0
      */
     void AddRef(Object *pReferrer);
 
@@ -93,7 +98,8 @@ public:
      * Does nothing while mDeleting is set, because ReleaseAllRefs() is already walking the list.
      *
      * @param pReferrer The object whose registration is to be dropped.
-     * @ghidraAddress 0x0053e7d0
+     * @ghidraAddress NTSC-U/C: 0x0053e7d0
+     * @ghidraAddress PAL: 0x0057e460
      */
     void RemoveRef(Object *pReferrer);
 
@@ -106,7 +112,8 @@ public:
      * regardless, which is where the recovered member titles came from.
      *
      * @param sink The diagnostic sink to write to.
-     * @ghidraAddress 0x0053e5a8
+     * @ghidraAddress NTSC-U/C: 0x0053e5a8
+     * @ghidraAddress PAL: 0x0057e238
      */
     virtual void DumpText(FailSink &sink);
 
@@ -167,7 +174,8 @@ protected:
      * with a null replacement, then empties mRefs. Every derived destructor runs this immediately
      * before the object goes away.
      *
-     * @ghidraAddress 0x0053fca0
+     * @ghidraAddress NTSC-U/C: 0x0053fca0
+     * @ghidraAddress PAL: 0x0057f960
      */
     void ReleaseAllRefs();
 
@@ -202,7 +210,8 @@ private:
  * Both the destructor and SetName() call this before erasing the old key. The hook is optional and
  * starts null.
  *
- * @ghidraAddress 0x00719860
+ * @ghidraAddress NTSC-U/C: 0x00719860
+ * @ghidraAddress PAL: 0x0075d760
  */
 extern void (*g_pfnNameChanged)(Object *pObject);
 

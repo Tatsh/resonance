@@ -7,16 +7,16 @@
 
 namespace Rnd {
 
-// 0x0050f288
+// NTSC-U/C: 0x0050f288, PAL: 0x0054e870
 MemStream::MemStream() : mEof(0), mFail(0), mPos(0) {
     mBuffer.reserve(kMemStreamReserve);
 }
 
-// 0x0050fca0
+// NTSC-U/C: 0x0050fca0, PAL: 0x0054f288
 MemStream::~MemStream() {
 }
 
-// 0x005100c0
+// NTSC-U/C: 0x005100c0, PAL: 0x0054f6a8
 Stream &MemStream::ReadBytes(void *pDest, int nSize) {
     const int nAvailable = mBuffer.size();
     if (static_cast<unsigned>(nAvailable) < static_cast<unsigned>(mPos + nSize)) {
@@ -30,7 +30,7 @@ Stream &MemStream::ReadBytes(void *pDest, int nSize) {
     return *this;
 }
 
-// 0x0050f448
+// NTSC-U/C: 0x0050f448, PAL: 0x0054ea30
 Stream &MemStream::WriteBytes(const void *pSrc, int nSize) {
     const unsigned nEnd = static_cast<unsigned>(mPos + nSize);
     if (mBuffer.capacity() < nEnd) {
@@ -45,12 +45,12 @@ Stream &MemStream::WriteBytes(const void *pSrc, int nSize) {
     return *this;
 }
 
-// 0x0050fd48
+// NTSC-U/C: 0x0050fd48, PAL: 0x0054f330
 Stream &MemStream::Flush() {
     return *this;
 }
 
-// 0x00510140
+// NTSC-U/C: 0x00510140, PAL: 0x0054f728
 Stream &MemStream::Seek(int nOffset, int nWhence) {
     switch (nWhence) {
     case kSeekSet:
@@ -73,22 +73,22 @@ Stream &MemStream::Seek(int nOffset, int nWhence) {
     return *this;
 }
 
-// 0x0050fd50
+// NTSC-U/C: 0x0050fd50, PAL: 0x0054f338
 int MemStream::Tell() {
     return mPos;
 }
 
-// 0x0050fd58
+// NTSC-U/C: 0x0050fd58, PAL: 0x0054f340
 int MemStream::Eof() {
     return mEof;
 }
 
-// 0x0050fd60
+// NTSC-U/C: 0x0050fd60, PAL: 0x0054f348
 int MemStream::Fail() {
     return mFail;
 }
 
-// 0x005101c8
+// NTSC-U/C: 0x005101c8, PAL: 0x0054f7b0
 void MemStream::DiscardReadBytes() {
     mBuffer.erase(mBuffer.begin(), mBuffer.begin() + mPos);
     mPos = 0;

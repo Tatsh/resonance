@@ -45,14 +45,16 @@ public:
      * produces by requesting four bytes and then inserting one null.
      *
      * @param name The registry key for this object.
-     * @ghidraAddress 0x00530eb8
+     * @ghidraAddress NTSC-U/C: 0x00530eb8
+     * @ghidraAddress PAL: 0x005706b0
      */
     explicit Button(const HxStr &name);
 
     /**
      * Drop this object's reference on both targets and on every palette entry.
      *
-     * @ghidraAddress 0x00530cd0
+     * @ghidraAddress NTSC-U/C: 0x00530cd0
+     * @ghidraAddress PAL: 0x005704c8
      */
     virtual ~Button();
 
@@ -61,7 +63,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x005344b8
+     * @ghidraAddress NTSC-U/C: 0x005344b8
+     * @ghidraAddress PAL: 0x00573d38
      */
     static void *operator new(size_t nSize);
 
@@ -69,7 +72,8 @@ public:
      * Release a button block under the same tag.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x005344d8
+     * @ghidraAddress NTSC-U/C: 0x005344d8
+     * @ghidraAddress PAL: 0x00573d58
      */
     static void operator delete(void *pBlock);
 
@@ -77,7 +81,8 @@ public:
      * Write a description of this button to sink.
      *
      * @param sink The diagnostic sink to write to.
-     * @ghidraAddress 0x005304f0
+     * @ghidraAddress NTSC-U/C: 0x005304f0
+     * @ghidraAddress PAL: 0x0056fc98
      */
     virtual void DumpText(FailSink &sink);
 
@@ -85,7 +90,8 @@ public:
      * Write this button to stream at revision 0.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00530690
+     * @ghidraAddress NTSC-U/C: 0x00530690
+     * @ghidraAddress PAL: 0x0056fe38
      */
     virtual void Save(Stream &stream);
 
@@ -97,7 +103,8 @@ public:
      *
      * @param pFrom The object being replaced.
      * @param pTo The replacement, or null.
-     * @ghidraAddress 0x00530a20
+     * @ghidraAddress NTSC-U/C: 0x00530a20
+     * @ghidraAddress PAL: 0x00570218
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -108,7 +115,8 @@ public:
      * "Button".
      *
      * @return The class key.
-     * @ghidraAddress 0x00534620
+     * @ghidraAddress NTSC-U/C: 0x00534620
+     * @ghidraAddress PAL: 0x00573ea0
      */
     virtual const HxStr &ClassName() const;
 
@@ -121,7 +129,8 @@ public:
      *
      * @param pSource The button to copy from.
      * @param nFlags Unread.
-     * @ghidraAddress 0x00534780
+     * @ghidraAddress NTSC-U/C: 0x00534780
+     * @ghidraAddress PAL: 0x00574000
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -133,7 +142,8 @@ public:
      * the abort handler of g_failSink afterwards.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x005307f8
+     * @ghidraAddress NTSC-U/C: 0x005307f8
+     * @ghidraAddress PAL: 0x0056ffa0
      */
     virtual void Load(Stream &stream);
 
@@ -145,7 +155,8 @@ public:
      * ordinary method rather than an override.
      *
      * @param nShowing Whether the button draws.
-     * @ghidraAddress 0x005349e0
+     * @ghidraAddress NTSC-U/C: 0x005349e0
+     * @ghidraAddress PAL: 0x00574260
      */
     void SetShowing(int nShowing);
 
@@ -156,7 +167,8 @@ public:
      * shipped build.
      *
      * @param pMesh The new mesh, or null.
-     * @ghidraAddress 0x00534ad0
+     * @ghidraAddress NTSC-U/C: 0x00534ad0
+     * @ghidraAddress PAL: 0x00574350
      */
     void SetMesh(Mesh *pMesh);
 
@@ -167,7 +179,8 @@ public:
      * build. The name is inferred from SetMesh().
      *
      * @param pText The new text, or null.
-     * @ghidraAddress 0x00534b48
+     * @ghidraAddress NTSC-U/C: 0x00534b48
+     * @ghidraAddress PAL: 0x005743c8
      */
     void SetText(Text *pText);
 
@@ -179,7 +192,8 @@ public:
      *
      * @param nState The palette entry.
      * @param pMat The new material, or null.
-     * @ghidraAddress 0x00534bd0
+     * @ghidraAddress NTSC-U/C: 0x00534bd0
+     * @ghidraAddress PAL: 0x00574450
      */
     void SetMat(int nState, Mat *pMat);
 
@@ -191,7 +205,8 @@ public:
      *
      * @param nState The palette entry.
      * @param pFont The new font, or null.
-     * @ghidraAddress 0x00534c78
+     * @ghidraAddress NTSC-U/C: 0x00534c78
+     * @ghidraAddress PAL: 0x005744f8
      */
     void SetFont(int nState, Font *pFont);
 
@@ -200,7 +215,8 @@ public:
      *
      * @param nState The state index. MetButtonList passes over an entry whose state is 3, which
      * is how a disabled button is skipped.
-     * @ghidraAddress 0x00534a48
+     * @ghidraAddress NTSC-U/C: 0x00534a48
+     * @ghidraAddress PAL: 0x005742c8
      */
     void SetState(int nState);
 
@@ -267,7 +283,8 @@ public:
  *
  * @param name The object name.
  * @return The new button.
- * @ghidraAddress 0x005346f8
+ * @ghidraAddress NTSC-U/C: 0x005346f8
+ * @ghidraAddress PAL: 0x00573f78
  */
 Button *NewButton(const HxStr &name);
 
@@ -277,7 +294,8 @@ Button *NewButton(const HxStr &name);
  * Rnd::Manager::Init() writes NewButton() into the hook directly rather than calling
  * RegisterButtonClass().
  *
- * @ghidraAddress 0x0071d900
+ * @ghidraAddress NTSC-U/C: 0x0071d900
+ * @ghidraAddress PAL: 0x00761370
  */
 extern Button *(*g_pfnNewButton)(const HxStr &name);
 
@@ -286,7 +304,8 @@ extern Button *(*g_pfnNewButton)(const HxStr &name);
  *
  * @param name The object name.
  * @return The new button.
- * @ghidraAddress 0x00534538
+ * @ghidraAddress NTSC-U/C: 0x00534538
+ * @ghidraAddress PAL: 0x00573db8
  */
 Button *NewButtonThroughHook(const HxStr &name);
 
@@ -295,7 +314,8 @@ Button *NewButtonThroughHook(const HxStr &name);
  *
  * @param name The object name.
  * @return The new button, as its Rnd::Object subobject.
- * @ghidraAddress 0x00534678
+ * @ghidraAddress NTSC-U/C: 0x00534678
+ * @ghidraAddress PAL: 0x00573ef8
  */
 Object *CreateRegisteredButton(const HxStr &name);
 
@@ -305,7 +325,8 @@ Object *CreateRegisteredButton(const HxStr &name);
  * No call site survives in the shipped program, because Rnd::Manager::Init() performs both steps
  * itself. The routine is dead code in the original rather than an unfinished analysis.
  *
- * @ghidraAddress 0x005344f8
+ * @ghidraAddress NTSC-U/C: 0x005344f8
+ * @ghidraAddress PAL: 0x00573d78
  */
 void RegisterButtonClass();
 
@@ -317,7 +338,8 @@ void RegisterButtonClass();
  * "Button" at `0x00828320`, and called to finalise it frees the buffer. The compiler emits the
  * stub, so this tree writes no body for it, only the constructor argument above.
  *
- * @ghidraAddress 0x0071d8f8
+ * @ghidraAddress NTSC-U/C: 0x0071d8f8
+ * @ghidraAddress PAL: 0x00761368
  */
 extern HxStr g_buttonClassName;
 
@@ -327,7 +349,8 @@ extern HxStr g_buttonClassName;
  * Load() reads the revision out of the file into this global and then tests it, which is why no
  * store to it appears in the routine. The store happens through the pointer the stream receives.
  *
- * @ghidraAddress 0x0089e060
+ * @ghidraAddress NTSC-U/C: 0x0089e060
+ * @ghidraAddress PAL: 0x008e2ffc
  */
 extern int g_nRndButtonLoadVersion;
 

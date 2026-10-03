@@ -62,7 +62,8 @@ public:
      * once mip 0 has arrived.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
-     * @ghidraAddress 0x00596f80
+     * @ghidraAddress NTSC-U/C: 0x00596f80
+     * @ghidraAddress PAL: 0x005da388
      */
     PsTex(const HxStr &name);
 
@@ -71,7 +72,8 @@ public:
      *
      * Vtable slot 1. The Rnd::Tex destructor body is inlined into this one in the shipped build.
      *
-     * @ghidraAddress 0x0059a558
+     * @ghidraAddress NTSC-U/C: 0x0059a558
+     * @ghidraAddress PAL: 0x005dd9c8
      */
     virtual ~PsTex();
 
@@ -86,7 +88,8 @@ public:
      * @param nReserved The second parameter. This override does not read it.
      * @param nFlags Bit 1 requests the read-back.
      * @return The canvas to draw into, or null.
-     * @ghidraAddress 0x0059aa48
+     * @ghidraAddress NTSC-U/C: 0x0059aa48
+     * @ghidraAddress PAL: 0x005ddec8
      */
     virtual ACanvas *LockMipBitmap(int nMip, int nReserved, int nFlags);
 
@@ -96,7 +99,8 @@ public:
      * Vtable slot 10, empty in Rnd::Tex. Marks the recorded level dirty. The next bind uploads
      * that level again.
      *
-     * @ghidraAddress 0x0059ab30
+     * @ghidraAddress NTSC-U/C: 0x0059ab30
+     * @ghidraAddress PAL: 0x005ddfb0
      */
     virtual void UnlockMipBitmap();
 
@@ -109,7 +113,8 @@ public:
      *
      * @param pPalette The replacement palette, or null to rebuild from the current entries.
      * @param nReserved Not read.
-     * @ghidraAddress 0x0059ab78
+     * @ghidraAddress NTSC-U/C: 0x0059ab78
+     * @ghidraAddress PAL: 0x005ddff8
      */
     virtual void SetPalette(APalette *pPalette, int nReserved);
 
@@ -120,7 +125,8 @@ public:
      * inferred.
      *
      * @param bInUse True to pin the block, false to release it.
-     * @ghidraAddress 0x0059a818
+     * @ghidraAddress NTSC-U/C: 0x0059a818
+     * @ghidraAddress PAL: 0x005ddc98
      */
     virtual void SetGsPageInUse(bool bInUse);
 
@@ -129,7 +135,8 @@ public:
      *
      * Vtable slot 13.
      *
-     * @ghidraAddress 0x0059a7e8
+     * @ghidraAddress NTSC-U/C: 0x0059a7e8
+     * @ghidraAddress PAL: 0x005ddc68
      */
     virtual void FreeLoadedBitmaps();
 
@@ -145,7 +152,8 @@ public:
      * level dirty, builds its canvas, and allocates its GS block. A level that fails validation is
      * blanked but still made resident. The Rnd::Tex body runs last.
      *
-     * @ghidraAddress 0x00597210
+     * @ghidraAddress NTSC-U/C: 0x00597210
+     * @ghidraAddress PAL: 0x005da618
      */
     virtual void RestoreSurfaces();
 
@@ -163,7 +171,8 @@ public:
      *
      * @param nTexFunc The Rnd::Tex::TexFunc, of which the low two bits go into TEX0.
      * @return True once the texture is resident and bound.
-     * @ghidraAddress 0x00598000
+     * @ghidraAddress NTSC-U/C: 0x00598000
+     * @ghidraAddress PAL: 0x005db408
      */
     bool BindToGsSlot(unsigned nTexFunc);
 
@@ -179,7 +188,8 @@ public:
      * Rnd::PsCam::DrawSelf() is the one caller. The routine was previously labelled after surface
      * restoration.
      *
-     * @ghidraAddress 0x00596d68
+     * @ghidraAddress NTSC-U/C: 0x00596d68
+     * @ghidraAddress PAL: 0x005da170
      */
     void BindAsRenderTarget();
 
@@ -192,7 +202,8 @@ public:
      *
      * @param nMip The mip level.
      * @return The first block of the level in video memory.
-     * @ghidraAddress 0x00597d50
+     * @ghidraAddress NTSC-U/C: 0x00597d50
+     * @ghidraAddress PAL: 0x005db158
      */
     int UploadBitmapMipToGs(int nMip);
 
@@ -208,7 +219,8 @@ public:
      * @param nMip The mip level.
      * @param bSkipIfResident True to upload only a level whose block was evicted.
      * @return The first block of the level, or zero when the texture has no residency.
-     * @ghidraAddress 0x005982a0
+     * @ghidraAddress NTSC-U/C: 0x005982a0
+     * @ghidraAddress PAL: 0x005db6a8
      */
     int UploadMipAndBuildMipTbp(int nMip, bool bSkipIfResident);
 
@@ -220,7 +232,8 @@ public:
      * bit, but no pPaletteVram.. rgba %p" instead. A clean CLUT has its block refreshed and is
      * uploaded again only when found evicted.
      *
-     * @ghidraAddress 0x00597e38
+     * @ghidraAddress NTSC-U/C: 0x00597e38
+     * @ghidraAddress PAL: 0x005db240
      */
     void UploadPendingMips();
 
@@ -230,7 +243,8 @@ public:
      * Writes NewPsTex() into Rnd::g_pfnNewTex, then programs the MXL, MMAG, and MMIN fields of GS
      * TEX1_1. GfxDevice::Init() is the one caller.
      *
-     * @ghidraAddress 0x0059a888
+     * @ghidraAddress NTSC-U/C: 0x0059a888
+     * @ghidraAddress PAL: 0x005ddd08
      */
     static void StaticInit();
 
@@ -243,7 +257,8 @@ protected:
      * and a 32-bit level texel by texel. A level of any other unpaletted format is not converted.
      *
      * @param nMip The mip level that arrived.
-     * @ghidraAddress 0x00596fd8
+     * @ghidraAddress NTSC-U/C: 0x00596fd8
+     * @ghidraAddress PAL: 0x005da3e0
      */
     virtual void OnMipLoaded(int nMip);
 
@@ -261,7 +276,8 @@ private:
      * Empties the residency vector without releasing its storage. The destructor and
      * FreeLoadedBitmaps() are the callers.
      *
-     * @ghidraAddress 0x00597130
+     * @ghidraAddress NTSC-U/C: 0x00597130
+     * @ghidraAddress PAL: 0x005da538
      */
     void FreeGsSurfaces();
 
@@ -272,7 +288,8 @@ private:
      * other format copies all 256 entries in 32-byte groups permuted by g_anClutSwizzleBlocks,
      * which gives the GS CSM1 layout.
      *
-     * @ghidraAddress 0x00597c68
+     * @ghidraAddress NTSC-U/C: 0x00597c68
+     * @ghidraAddress PAL: 0x005db070
      */
     void RebuildClut();
 
@@ -282,7 +299,8 @@ private:
      * Does nothing once a slot exists or while mip 0 is missing. Reports "Got NULL Palette in
      * RestoreSurfaces" when the manager has none to give. RestoreSurfaces() is the one caller.
      *
-     * @ghidraAddress 0x0059abe8
+     * @ghidraAddress NTSC-U/C: 0x0059abe8
+     * @ghidraAddress PAL: 0x005de068
      */
     void AllocPaletteVram();
 
@@ -294,7 +312,8 @@ private:
      * and the out-of-line copy has no caller.
      *
      * @return The first block of the slot.
-     * @ghidraAddress 0x0059ac68
+     * @ghidraAddress NTSC-U/C: 0x0059ac68
+     * @ghidraAddress PAL: 0x005de0e8
      */
     int UploadPaletteClut();
 
@@ -307,7 +326,8 @@ private:
      * @param pPage The block to upload into.
      * @param nMip The mip level to upload.
      * @param nBlockOffset The blocks past the start of pPage to write at.
-     * @ghidraAddress 0x0059acc0
+     * @ghidraAddress NTSC-U/C: 0x0059acc0
+     * @ghidraAddress PAL: 0x005de140
      */
     void UploadBitmapMipToSubImage(VramTableEntry *pPage, int nMip, int nBlockOffset);
 
@@ -343,14 +363,16 @@ private:
  *
  * @param name The object name.
  * @return The new texture.
- * @ghidraAddress 0x0059a770
+ * @ghidraAddress NTSC-U/C: 0x0059a770
+ * @ghidraAddress PAL: 0x005ddbf0
  */
 Tex *NewPsTex(const HxStr &name);
 
 /**
  * The palette entry a level that fails validation is left with, an opaque 8888 colour.
  *
- * @ghidraAddress 0x0076f360
+ * @ghidraAddress NTSC-U/C: 0x0076f360
+ * @ghidraAddress PAL: 0x007b30c0
  */
 extern const unsigned int g_dwDefaultClutEntry;
 
@@ -359,7 +381,8 @@ extern const unsigned int g_dwDefaultClutEntry;
  *
  * RebuildClut() permutes each run of four 32-byte groups by it.
  *
- * @ghidraAddress 0x0076f368
+ * @ghidraAddress NTSC-U/C: 0x0076f368
+ * @ghidraAddress PAL: 0x007b30c8
  */
 extern const int g_anClutSwizzleBlocks[4];
 
@@ -370,7 +393,8 @@ extern const int g_anClutSwizzleBlocks[4];
  * and 24. The words after them are zero and have no recovered reader, so the length is a lower
  * bound.
  *
- * @ghidraAddress 0x0076f378
+ * @ghidraAddress NTSC-U/C: 0x0076f378
+ * @ghidraAddress PAL: 0x007b30d8
  */
 extern const int g_anPackedMipPageOffsets[6];
 

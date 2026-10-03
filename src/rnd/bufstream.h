@@ -24,29 +24,51 @@ public:
      *
      * @param pBuffer The buffer, which the caller retains.
      * @param nSize The buffer size in bytes.
-     * @ghidraAddress 0x005104b8
+     * @ghidraAddress NTSC-U/C: 0x005104b8
+     * @ghidraAddress PAL: 0x0054faa0
      */
     BufStream(char *pBuffer, int nSize);
 
-    /** @ghidraAddress 0x005104e0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x005104e0
+     * @ghidraAddress PAL: 0x0054fac8
+     */
     virtual Stream &ReadBytes(void *pDest, int nSize);
 
-    /** @ghidraAddress 0x00510558 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00510558
+     * @ghidraAddress PAL: 0x0054fb40
+     */
     virtual Stream &WriteBytes(const void *pSrc, int nSize);
 
-    /** @ghidraAddress 0x0050fe68 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0050fe68
+     * @ghidraAddress PAL: 0x0054f450
+     */
     virtual Stream &Flush();
 
-    /** @ghidraAddress 0x005105c8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x005105c8
+     * @ghidraAddress PAL: 0x0054fbb0
+     */
     virtual Stream &Seek(int nOffset, int nWhence);
 
-    /** @ghidraAddress 0x0050fe70 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0050fe70
+     * @ghidraAddress PAL: 0x0054f458
+     */
     virtual int Tell();
 
-    /** @ghidraAddress 0x0050fe78 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0050fe78
+     * @ghidraAddress PAL: 0x0054f460
+     */
     virtual int Eof();
 
-    /** @ghidraAddress 0x0050fe90 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0050fe90
+     * @ghidraAddress PAL: 0x0054f478
+     */
     virtual int Fail();
 
 private:

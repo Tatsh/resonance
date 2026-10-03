@@ -40,14 +40,14 @@ void ReadObjectRef(Stream &stream, T *&refOut) {
 
 } // namespace
 
-// 0x00477768
+// NTSC-U/C: 0x00477768, PAL: 0x004b53e0
 TunnelSeeker::TunnelSeeker()
     : mTrans(nullptr), mTargetRing(0), mMeshFrameOffset(0.0f),
       mTransFrameOffset(kDefaultTransFrameOffset), mLookFrameOffset(0.0f), mMesh(nullptr),
       mTunnel(nullptr), mLane(0.0f), mFrame(0.0f) {
 }
 
-// 0x004777c0
+// NTSC-U/C: 0x004777c0, PAL: 0x004b5438
 void TunnelSeeker::ReleaseRefs() {
     if (mTrans != nullptr) {
         mTrans->RemoveRef(mTunnel);
@@ -58,7 +58,7 @@ void TunnelSeeker::ReleaseRefs() {
     mStrip.Clear();
 }
 
-// 0x00477830
+// NTSC-U/C: 0x00477830, PAL: 0x004b54a8
 void TunnelSeeker::SetTunnel(Tunnel *pTunnel, int nIndex) {
     mTunnel = pTunnel;
     mFrame = pTunnel->mFilteredFrame;
@@ -71,7 +71,7 @@ void TunnelSeeker::SetTunnel(Tunnel *pTunnel, int nIndex) {
     mStrip.Build(mTunnel, this, nIndex);
 }
 
-// 0x00477a48
+// NTSC-U/C: 0x00477a48, PAL: 0x004b56c0
 void TunnelSeeker::SetTrans(Transformable *pTrans) {
     if (mTrans != nullptr) {
         mTrans->RemoveRef(mTunnel);
@@ -82,12 +82,12 @@ void TunnelSeeker::SetTrans(Transformable *pTrans) {
     }
 }
 
-// 0x00477ab8
+// NTSC-U/C: 0x00477ab8, PAL: 0x004b5730
 void TunnelSeeker::SetTargetRing(int nRing) {
     mTargetRing = nRing;
 }
 
-// 0x00477ac0
+// NTSC-U/C: 0x00477ac0, PAL: 0x004b5738
 void TunnelSeeker::SetMesh(Mesh *pMesh) {
     if (mMesh != nullptr) {
         mMesh->RemoveRef(mTunnel);
@@ -98,49 +98,49 @@ void TunnelSeeker::SetMesh(Mesh *pMesh) {
     }
 }
 
-// 0x00477b30
+// NTSC-U/C: 0x00477b30, PAL: 0x004b57a8
 void TunnelSeeker::SetMeshFrameOffset(float flOffset) {
     mMeshFrameOffset = flOffset;
 }
 
-// 0x00477b38
+// NTSC-U/C: 0x00477b38, PAL: 0x004b57b0
 void TunnelSeeker::SetTransFrameOffset(float flOffset) {
     mTransFrameOffset = flOffset;
 }
 
-// 0x00477b40
+// NTSC-U/C: 0x00477b40, PAL: 0x004b57b8
 void TunnelSeeker::SetLookFrameOffset(float flOffset) {
     mLookFrameOffset = flOffset;
 }
 
-// 0x00477b48
+// NTSC-U/C: 0x00477b48, PAL: 0x004b57c0
 void TunnelSeeker::SetRange(int nFirstSlice, int nSliceCount, int nRing) {
     mStrip.SetRange(nFirstSlice, nSliceCount, nRing);
 }
 
-// 0x00477b68
+// NTSC-U/C: 0x00477b68, PAL: 0x004b57e0
 void TunnelSeeker::SetColor(const Color &color) {
     mStrip.SetColor(color);
 }
 
-// 0x00477b88
+// NTSC-U/C: 0x00477b88, PAL: 0x004b5800
 void TunnelSeeker::SetMat(Mat *pMat) {
     mStrip.SetMat(pMat);
 }
 
-// 0x00477bd8
+// NTSC-U/C: 0x00477bd8, PAL: 0x004b5850
 void TunnelSeeker::DrawSection(int nSlice, float flScreenSize) {
     mStrip.DrawSection(nSlice, flScreenSize);
 }
 
-// 0x00477bf8
+// NTSC-U/C: 0x00477bf8, PAL: 0x004b5870
 void TunnelSeeker::DrawMesh() {
     if (mMesh != nullptr) {
         mMesh->Draw();
     }
 }
 
-// 0x0046e6a0
+// NTSC-U/C: 0x0046e6a0, PAL: 0x004ac280
 float TunnelSeeker::UpdateLane() {
     const float flTarget = static_cast<float>(mTargetRing);
     if (mLane != flTarget) {
@@ -167,7 +167,7 @@ float TunnelSeeker::UpdateLane() {
     return mLane;
 }
 
-// 0x00477c20
+// NTSC-U/C: 0x00477c20, PAL: 0x004b5898
 void TunnelSeeker::SetTransXfm(const Transform &xfm) {
     if (mTrans != nullptr) {
         memcpy(mTrans->mLocalXfm, &xfm, sizeof(mTrans->mLocalXfm));
@@ -175,7 +175,7 @@ void TunnelSeeker::SetTransXfm(const Transform &xfm) {
     }
 }
 
-// 0x00477c58
+// NTSC-U/C: 0x00477c58, PAL: 0x004b58d0
 void TunnelSeeker::SetMeshXfm(const Transform &xfm) {
     if (mMesh != nullptr) {
         memcpy(mMesh->mLocalXfm, &xfm, sizeof(mMesh->mLocalXfm));
@@ -184,7 +184,7 @@ void TunnelSeeker::SetMeshXfm(const Transform &xfm) {
     }
 }
 
-// 0x004778c0
+// NTSC-U/C: 0x004778c0, PAL: 0x004b5538
 void TunnelSeeker::Replace(Object *pFrom, Object *pTo, Object *pReferrer) {
     if (mTrans == pFrom && mTrans != nullptr) {
         pFrom->RemoveRef(pReferrer);
@@ -203,7 +203,7 @@ void TunnelSeeker::Replace(Object *pFrom, Object *pTo, Object *pReferrer) {
     mStrip.Replace(pFrom, pTo, pReferrer);
 }
 
-// 0x0046df88
+// NTSC-U/C: 0x0046df88, PAL: 0x004abaf8
 void TunnelSeeker::Save(Stream &stream) const {
     WriteObjectRef(stream, mTrans);
     stream.Write(&mTargetRing, sizeof(mTargetRing));
@@ -224,7 +224,7 @@ void TunnelSeeker::Save(Stream &stream) const {
         .Write(&mStrip.mColor.a, sizeof(mStrip.mColor.a));
 }
 
-// 0x0046e2d8
+// NTSC-U/C: 0x0046e2d8, PAL: 0x004abe48
 void TunnelSeeker::Load(Stream &stream) {
     ReadObjectRef(stream, mTrans);
     stream.Read(&mTargetRing, sizeof(mTargetRing));

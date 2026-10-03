@@ -86,7 +86,8 @@ struct Vector3Key {
  * @param sink The text sink.
  * @param keys The channel.
  * @return The sink.
- * @ghidraAddress 0x004d8de8
+ * @ghidraAddress NTSC-U/C: 0x004d8de8
+ * @ghidraAddress PAL: 0x00517300
  */
 FailSink &DumpColorKeys(FailSink &sink, const std::list<ColorKey> &keys);
 
@@ -99,7 +100,8 @@ FailSink &DumpColorKeys(FailSink &sink, const std::list<ColorKey> &keys);
  * @param sink The text sink.
  * @param keys The channel.
  * @return The sink.
- * @ghidraAddress 0x004d8f08
+ * @ghidraAddress NTSC-U/C: 0x004d8f08
+ * @ghidraAddress PAL: 0x00517420
  */
 FailSink &DumpFloatKeys(FailSink &sink, const std::list<FloatKey> &keys);
 
@@ -113,7 +115,8 @@ FailSink &DumpFloatKeys(FailSink &sink, const std::list<FloatKey> &keys);
  * @param stream The stream to read from.
  * @param keys The channel to fill.
  * @return The stream.
- * @ghidraAddress 0x004dd9b0
+ * @ghidraAddress NTSC-U/C: 0x004dd9b0
+ * @ghidraAddress PAL: 0x0051bf68
  */
 Stream &ReadColorKeys(Stream &stream, std::list<ColorKey> &keys);
 
@@ -125,7 +128,8 @@ Stream &ReadColorKeys(Stream &stream, std::list<ColorKey> &keys);
  * @param stream The stream to write to.
  * @param keys The channel.
  * @return The stream.
- * @ghidraAddress 0x004d9180
+ * @ghidraAddress NTSC-U/C: 0x004d9180
+ * @ghidraAddress PAL: 0x00517698
  */
 Stream &WriteColorKeys(Stream &stream, const std::list<ColorKey> &keys);
 
@@ -135,7 +139,8 @@ Stream &WriteColorKeys(Stream &stream, const std::list<ColorKey> &keys);
  * @param stream The stream to write to.
  * @param keys The channel.
  * @return The stream.
- * @ghidraAddress 0x004d9238
+ * @ghidraAddress NTSC-U/C: 0x004d9238
+ * @ghidraAddress PAL: 0x00517750
  */
 Stream &WriteFloatKeys(Stream &stream, const std::list<FloatKey> &keys);
 
@@ -148,7 +153,8 @@ Stream &WriteFloatKeys(Stream &stream, const std::list<FloatKey> &keys);
  * @param stream The stream to read from.
  * @param keys The channel to fill.
  * @return The stream.
- * @ghidraAddress 0x004d98d8
+ * @ghidraAddress NTSC-U/C: 0x004d98d8
+ * @ghidraAddress PAL: 0x00517df0
  */
 Stream &ReadFloatKeys(Stream &stream, std::list<FloatKey> &keys);
 
@@ -161,7 +167,8 @@ Stream &ReadFloatKeys(Stream &stream, std::list<FloatKey> &keys);
  * @param sink The text sink.
  * @param keys The channel.
  * @return The sink.
- * @ghidraAddress 0x004da9b0
+ * @ghidraAddress NTSC-U/C: 0x004da9b0
+ * @ghidraAddress PAL: 0x00518ec8
  */
 FailSink &DumpVector3Keys(FailSink &sink, const std::list<Vector3Key> &keys);
 
@@ -174,7 +181,8 @@ FailSink &DumpVector3Keys(FailSink &sink, const std::list<Vector3Key> &keys);
  * @param stream The stream to read from.
  * @param keys The channel to fill.
  * @return The stream.
- * @ghidraAddress 0x004db3d0
+ * @ghidraAddress NTSC-U/C: 0x004db3d0
+ * @ghidraAddress PAL: 0x00519918
  */
 Stream &ReadVector3Keys(Stream &stream, std::list<Vector3Key> &keys);
 
@@ -186,7 +194,8 @@ Stream &ReadVector3Keys(Stream &stream, std::list<Vector3Key> &keys);
  * @param stream The stream to write to.
  * @param keys The channel.
  * @return The stream.
- * @ghidraAddress 0x004dac80
+ * @ghidraAddress NTSC-U/C: 0x004dac80
+ * @ghidraAddress PAL: 0x00519198
  */
 Stream &WriteVector3Keys(Stream &stream, const std::list<Vector3Key> &keys);
 

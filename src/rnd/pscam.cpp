@@ -403,7 +403,7 @@ inline void PushColorScale() {
 
 } // namespace
 
-// 0x00583358
+// NTSC-U/C: 0x00583358, PAL: 0x005c6550
 int EmitFaceVu1Setup(const float *pXfm, const Sphere &sphere) {
     PushVifUnpack(kFaceSetupQuadwords);
     PushQuadword(&g_invGuardBandScale);
@@ -451,7 +451,7 @@ int EmitFaceVu1Setup(const float *pXfm, const Sphere &sphere) {
     return nEntry;
 }
 
-// 0x00583ba0
+// NTSC-U/C: 0x00583ba0, PAL: 0x005c6d98
 int PsMesh::EmitMultiMeshFaceRun() {
     // The runs belong to whichever mesh owns the faces, a PsMesh on this target.
     const PsMesh *pOwner = static_cast<const PsMesh *>(mFacesOwner);
@@ -511,7 +511,7 @@ int PsMesh::EmitMultiMeshFaceRun() {
     return nIndexEnd;
 }
 
-// 0x005837d0
+// NTSC-U/C: 0x005837d0, PAL: 0x005c69c8
 void EmitEdgeVu1Setup(const float *pXfm, const Color &color) {
     PushVifUnpack(kEdgeSetupQuadwords);
 
@@ -542,7 +542,7 @@ void EmitEdgeVu1Setup(const float *pXfm, const Color &color) {
               static_cast<unsigned>(color.a * kAlphaScale));
 }
 
-// 0x00584040
+// NTSC-U/C: 0x00584040, PAL: 0x005c7238
 void TransformAndLightMeshVerts(DrawVert *pOutVerts,
                                 const float *pXfm,
                                 MeshVert *pVerts,
@@ -735,7 +735,7 @@ void TransformAndLightMeshVerts(DrawVert *pOutVerts,
     }
 }
 
-// 0x00584980
+// NTSC-U/C: 0x00584980, PAL: 0x005c7b78
 int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, int nLineLength) {
     if (pFirst == nullptr) {
         return 0;
@@ -846,7 +846,7 @@ int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, in
     return nVerts;
 }
 
-// 0x00584700
+// NTSC-U/C: 0x00584700, PAL: 0x005c78f8
 void TransformMeshVertsNoLight(DrawVert *pOutVerts,
                                MeshVert *pVerts,
                                int nCount,
@@ -908,7 +908,7 @@ constexpr int kClipVertCapacity = 9;
 constexpr float kFogFixed4Max = 4080.0f;
 constexpr float kFixed4Inverse = 1.0f / kFixed4Scale;
 
-// 0x008e4010
+// NTSC-U/C: 0x008e4010, PAL: 0x00929390
 // The unit's static initialiser builds it with nine zeroed vertices.
 std::vector<DrawVert> g_clipVerts(kClipVertCapacity);
 
@@ -1029,7 +1029,7 @@ inline void NearPlaneIntersection(DrawVert &out, const DrawVert &from, const Dra
 
 } // namespace
 
-// 0x00584cc8
+// NTSC-U/C: 0x00584cc8, PAL: 0x005c7ec0
 void ClipTriangleToFrustum(
     unsigned nIdx0, unsigned nIdx1, unsigned nIdx2, DrawVert *pVerts, int *pnNextIndex) {
     DrawVert &vert0 = pVerts[nIdx0];
@@ -1100,7 +1100,7 @@ void ClipTriangleToFrustum(
     }
 }
 
-// 0x005839d0
+// NTSC-U/C: 0x005839d0, PAL: 0x005c6bc8
 void EmitParticleVu1Setup() {
     PushVifUnpack(kParticleSetupQuadwords);
     PushTransform(g_viewProjectXfm);
@@ -1121,63 +1121,63 @@ void EmitParticleVu1Setup() {
     PushQuadword(&g_particleProjectScale);
 }
 
-// 0x00768410
+// NTSC-U/C: 0x00768410, PAL: 0x007ac160
 PsCam *g_pDefaultCam;
 
-// 0x00768420
+// NTSC-U/C: 0x00768420, PAL: 0x007ac170
 Frustum g_drawFrustum;
 
-// 0x008e4020
+// NTSC-U/C: 0x008e4020, PAL: 0x009293a0
 Transform g_viewProjectXfm;
 
-// 0x008e4060
+// NTSC-U/C: 0x008e4060, PAL: 0x009293e0
 Transform g_viewProjectUnscaledXfm;
 
-// 0x008e40a0
+// NTSC-U/C: 0x008e40a0, PAL: 0x00929420
 Transform g_viewportXfm;
 
-// 0x008e40e0
+// NTSC-U/C: 0x008e40e0, PAL: 0x00929460
 Transform g_viewportUnscaledXfm;
 
-// 0x008e4120
+// NTSC-U/C: 0x008e4120, PAL: 0x009294a0
 Transform g_viewportBiasedXfm;
 
-// 0x008e4160
+// NTSC-U/C: 0x008e4160, PAL: 0x009294e0
 Vector3 g_particleScreenScale;
 
-// 0x008e4170
+// NTSC-U/C: 0x008e4170, PAL: 0x009294f0
 Vector3 g_particleProjectScale;
 
-// 0x008e4180
+// NTSC-U/C: 0x008e4180, PAL: 0x00929500
 Vector3 g_guardBandScale;
 
-// 0x008e4190
+// NTSC-U/C: 0x008e4190, PAL: 0x00929510
 Vector3 g_invGuardBandScale;
 
-// 0x008e41a0
+// NTSC-U/C: 0x008e41a0, PAL: 0x00929520
 float g_flCamNear;
 
-// 0x008e41a4
+// NTSC-U/C: 0x008e41a4, PAL: 0x00929524
 int g_nScissorX0;
 
-// 0x008e41a8
+// NTSC-U/C: 0x008e41a8, PAL: 0x00929528
 int g_nScissorX1;
 
-// 0x008e41ac
+// NTSC-U/C: 0x008e41ac, PAL: 0x0092952c
 int g_nScissorY0;
 
-// 0x008e41b0
+// NTSC-U/C: 0x008e41b0, PAL: 0x00929530
 int g_nScissorY1;
 
-// 0x00582558
+// NTSC-U/C: 0x00582558, PAL: 0x005c5750
 PsCam::PsCam(const HxStr &name) : Object(name), Cam(name) {
 }
 
-// 0x005826e0
+// NTSC-U/C: 0x005826e0, PAL: 0x005c58d8
 PsCam::~PsCam() {
 }
 
-// 0x00582830
+// NTSC-U/C: 0x00582830, PAL: 0x005c5a28
 int PsCam::DrawSelf() {
     int nTargetWidth;
     int nTargetHeight;
@@ -1329,7 +1329,7 @@ int PsCam::DrawSelf() {
     return 1;
 }
 
-// 0x005885b0
+// NTSC-U/C: 0x005885b0, PAL: 0x005cb810
 Vector2 PsCam::ScreenToPixels(const Vector2 &ptScreen) {
     Vector2 ptPixels;
     ptPixels.x = mScreenRect.x + ptScreen.x * mScreenRect.w;
@@ -1344,7 +1344,7 @@ Vector2 PsCam::ScreenToPixels(const Vector2 &ptScreen) {
     return ptPixels;
 }
 
-// 0x00588578
+// NTSC-U/C: 0x00588578, PAL: 0x005cb7d8
 void PsCam::UpdateTargetAspect() {
     if (mpTargetTex == nullptr) {
         mYRatio = kDisplayYRatio;
@@ -1352,7 +1352,7 @@ void PsCam::UpdateTargetAspect() {
     Cam::UpdateTargetAspect();
 }
 
-// 0x00588498
+// NTSC-U/C: 0x00588498, PAL: 0x005cb6f8
 void PsCam::SetTargetTex(Tex *pTex) {
     Cam::SetTargetTex(pTex);
     if (pTex == nullptr) {
@@ -1360,13 +1360,13 @@ void PsCam::SetTargetTex(Tex *pTex) {
     }
 }
 
-// 0x00588500
+// NTSC-U/C: 0x00588500, PAL: 0x005cb760
 Cam *PsCam::NewCam(const HxStr &name) {
     // The binary bills the allocation to the tag "Rnd::Cam" and the object is 0x330 bytes.
     return new PsCam(name);
 }
 
-// 0x00582430
+// NTSC-U/C: 0x00582430, PAL: 0x005c5608
 void PsCam::Init() {
     g_pfnNewCam = NewCam;
     g_pDefaultCam = new PsCam(HxStr("[default cam]"));

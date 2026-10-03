@@ -63,69 +63,69 @@ constexpr unsigned long long kClampModeMask = 0x0f;
 // mMultiPass value that makes a later stage modulate rather than replace.
 constexpr int kMultiPassModulate = 2;
 
-// 0x0076d688
+// NTSC-U/C: 0x0076d688, PAL: 0x007b13e0
 // Rnd::Mat::BlendMode to GS TEX0.TFX, where 0 is MODULATE, 1 DECAL, 2 HIGHLIGHT, and
 // 3 HIGHLIGHT2. Every mode this table does not distinguish modulates.
 int g_anStageBlendTexFunc[] = {0, 1, 3, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0};
 
-// 0x0076d65c
+// NTSC-U/C: 0x0076d65c, PAL: 0x007b13b4
 int g_nSelectedStage;
 
 // Set by PsMat::SelectAlphaBlend() and cleared once PsMat::Select() has restored the material
 // blend.
-// 0x0076d680
+// NTSC-U/C: 0x0076d680, PAL: 0x007b13d8
 int g_nBlendOverridden;
 
 // The identity halved with V flipped and the translation moved to the texture centre, which is
 // the transform a sphere map needs.
-// 0x008e41c0
+// NTSC-U/C: 0x008e41c0, PAL: 0x00929540
 Transform g_sphereMapUvXfm;
 
 // Scratch the non-sphere path composes a stage transform into.
-// 0x008e4200
+// NTSC-U/C: 0x008e4200, PAL: 0x00929580
 Transform g_stageUvXfm;
 
 } // namespace
 
-// 0x0076d658
+// NTSC-U/C: 0x0076d658, PAL: 0x007b13b0
 Mat *g_pSelectedMat;
 
-// 0x0076d660
+// NTSC-U/C: 0x0076d660, PAL: 0x007b13b8
 int g_nSelectedGenMode;
 
-// 0x0076d664
+// NTSC-U/C: 0x0076d664, PAL: 0x007b13bc
 int g_nSelectedFlat;
 
-// 0x0076d668
+// NTSC-U/C: 0x0076d668, PAL: 0x007b13c0
 int g_nStageTextureBound;
 
-// 0x0076d66c
+// NTSC-U/C: 0x0076d66c, PAL: 0x007b13c4
 int g_nAlphaBlendEnabled;
 
-// 0x0076d670
+// NTSC-U/C: 0x0076d670, PAL: 0x007b13c8
 int g_nStageBlendDoubles;
 
-// 0x0076d674
+// NTSC-U/C: 0x0076d674, PAL: 0x007b13cc
 Transform *g_pSelectedUvXfm;
 
-// 0x0076d678
+// NTSC-U/C: 0x0076d678, PAL: 0x007b13d0
 Transform *g_pSelectedStageXfm;
 
-// 0x0076d67c
+// NTSC-U/C: 0x0076d67c, PAL: 0x007b13d4
 int g_nLightingEnabled;
 
 // The constructor body is empty. 0x005914b8 inlines the whole of it.
 PsMat::PsMat(const HxStr &name) : Mat(name) {
 }
 
-// 0x00591590
+// NTSC-U/C: 0x00591590, PAL: 0x005d4928
 PsMat::~PsMat() {
     if (g_pSelectedMat == this) {
         g_pSelectedMat = nullptr;
     }
 }
 
-// 0x00591240
+// NTSC-U/C: 0x00591240, PAL: 0x005d45c0
 void PsMat::InstallCreator() {
     g_pfnNewMat = NewPsMat;
     g_pSelectedMat = nullptr;
@@ -150,13 +150,13 @@ void PsMat::InstallCreator() {
     g_sphereMapUvXfm.mTranslation.y = 0.5f;
 }
 
-// 0x005916b0
+// NTSC-U/C: 0x005916b0, PAL: 0x005d4a48
 void PsMat::SetAmbient(const Color &color) {
     mAmbient = color;
     g_pSelectedMat = nullptr;
 }
 
-// 0x005916c8
+// NTSC-U/C: 0x005916c8, PAL: 0x005d4a60
 void PsMat::SetDiffuse(const Color &color) {
     mDiffuse.r = color.r;
     mDiffuse.g = color.g;
@@ -164,19 +164,19 @@ void PsMat::SetDiffuse(const Color &color) {
     g_pSelectedMat = nullptr;
 }
 
-// 0x005916f0
+// NTSC-U/C: 0x005916f0, PAL: 0x005d4a88
 void PsMat::SetEmissive(const Color &color) {
     mEmissive = color;
     g_pSelectedMat = nullptr;
 }
 
-// 0x00591730
+// NTSC-U/C: 0x00591730, PAL: 0x005d4ac8
 void PsMat::SetAlpha(float flAlpha) {
     mDiffuse.a = flAlpha;
     g_pSelectedMat = nullptr;
 }
 
-// 0x00591708
+// NTSC-U/C: 0x00591708, PAL: 0x005d4aa0
 void PsMat::SetSpecular(const Color &color, float flAlpha) {
     mSpecular.r = color.r;
     mSpecular.g = color.g;
@@ -185,7 +185,7 @@ void PsMat::SetSpecular(const Color &color, float flAlpha) {
     g_pSelectedMat = nullptr;
 }
 
-// 0x005914b8
+// NTSC-U/C: 0x005914b8, PAL: 0x005d4850
 Mat *NewPsMat(const HxStr &name) {
     // The binary bills the allocation to the tag "Rnd::Mat" and rounds the object up to 0xa0
     // bytes.
@@ -194,7 +194,7 @@ Mat *NewPsMat(const HxStr &name) {
 
 Mat *(*g_pfnNewMat)(const HxStr &name) = nullptr;
 
-// 0x0058eb40
+// NTSC-U/C: 0x0058eb40, PAL: 0x005d1e98
 int PsMat::Select() {
     if (this == g_pSelectedMat && mStages.size() < 2) {
         if (g_nBlendOverridden != 0) {
@@ -217,7 +217,7 @@ int PsMat::Select() {
     return static_cast<unsigned>(g_nSelectedStage) < mStages.size();
 }
 
-// 0x005910b0
+// NTSC-U/C: 0x005910b0, PAL: 0x005d4430
 void PsMat::SelectDefault() {
     ++g_renderStats.mnMatSelects;
     g_nAlphaBlendEnabled = 1;
@@ -231,7 +231,7 @@ void PsMat::SelectDefault() {
     g_gfxDevice.SetGsReg(kGsRegDimx, kDimxStandard, kDimxMask);
 }
 
-// 0x00591170
+// NTSC-U/C: 0x00591170, PAL: 0x005d44f0
 void PsMat::SelectAlphaBlend() {
     if (this == g_pSelectedMat && g_nAlphaBlendEnabled != 0) {
         return;
@@ -241,7 +241,7 @@ void PsMat::SelectAlphaBlend() {
     g_nBlendOverridden = 1;
 }
 
-// 0x0058ec80
+// NTSC-U/C: 0x0058ec80, PAL: 0x005d1fd8
 void PsMat::SelectBlendMode() {
     BlendMode nBlend = mBlend;
     if (g_nSelectedStage != 0) {
@@ -305,7 +305,7 @@ void PsMat::SelectBlendMode() {
     }
 }
 
-// 0x0058eef8
+// NTSC-U/C: 0x0058eef8, PAL: 0x005d2250
 void PsMat::BindStageTexture() {
     g_nLightingEnabled = mEnable;
     if (mStages.size() == 0) {
@@ -333,7 +333,7 @@ void PsMat::BindStageTexture() {
     SelectStageClamp(stage);
 }
 
-// 0x0058f038
+// NTSC-U/C: 0x0058f038, PAL: 0x005d2390
 void PsMat::SetupUvXfm() {
     if (g_nStageTextureBound == 0) {
         g_pSelectedUvXfm = nullptr;
@@ -366,7 +366,7 @@ void PsMat::SetupUvXfm() {
     g_pSelectedUvXfm = &g_stageUvXfm;
 }
 
-// 0x005911d8
+// NTSC-U/C: 0x005911d8, PAL: 0x005d4558
 // The compiler inlined this into BindStageTexture(), and nothing calls the out-of-line body, so it
 // is dead in the shipped image. Its own receiver is unused, which is what identifies
 // it as an instance method rather than a free function.

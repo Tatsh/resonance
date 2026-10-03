@@ -34,14 +34,16 @@ public:
     /**
      * Construct a visible drawable with no children.
      *
-     * @ghidraAddress 0x005066f8
+     * @ghidraAddress NTSC-U/C: 0x005066f8
+     * @ghidraAddress PAL: 0x005455b8
      */
     Drawable();
 
     /**
      * Drop this object's references on its children.
      *
-     * @ghidraAddress 0x00506590
+     * @ghidraAddress NTSC-U/C: 0x00506590
+     * @ghidraAddress PAL: 0x00545450
      */
     virtual ~Drawable();
 
@@ -51,7 +53,8 @@ public:
      * Draws nothing when mShowing is clear, and skips the children when DrawSelf() reports that
      * the subtree is invisible.
      *
-     * @ghidraAddress 0x00506920
+     * @ghidraAddress NTSC-U/C: 0x00506920
+     * @ghidraAddress PAL: 0x005457e8
      */
     void Draw();
 
@@ -63,7 +66,8 @@ public:
      * parent in the draw hierarchy rather than a plain cast.
      *
      * @return The parent drawable, or null when no referrer draws this one.
-     * @ghidraAddress 0x00502d78
+     * @ghidraAddress NTSC-U/C: 0x00502d78
+     * @ghidraAddress PAL: 0x00541ba0
      */
     Drawable *Parent();
 
@@ -75,7 +79,8 @@ public:
      *
      * @param pDraw The drawable to add.
      * @param pBefore The drawable to insert in front of.
-     * @ghidraAddress 0x00503188
+     * @ghidraAddress NTSC-U/C: 0x00503188
+     * @ghidraAddress PAL: 0x00541fb0
      */
     void AddDraw(Drawable *pDraw, Drawable *pBefore);
 
@@ -83,7 +88,8 @@ public:
      * Insert pDraw at the front of mDraws.
      *
      * @param pDraw The drawable to add.
-     * @ghidraAddress 0x005064e0
+     * @ghidraAddress NTSC-U/C: 0x005064e0
+     * @ghidraAddress PAL: 0x005453a0
      */
     void AddDraw(Drawable *pDraw);
 
@@ -93,14 +99,16 @@ public:
      * Drops this object's reference on pDraw first. A pDraw absent from mDraws does nothing.
      *
      * @param pDraw The drawable to remove.
-     * @ghidraAddress 0x00503360
+     * @ghidraAddress NTSC-U/C: 0x00503360
+     * @ghidraAddress PAL: 0x00542188
      */
     void RemoveDraw(Drawable *pDraw);
 
     /**
      * Empty mDraws, dropping this object's reference on every entry.
      *
-     * @ghidraAddress 0x00503420
+     * @ghidraAddress NTSC-U/C: 0x00503420
+     * @ghidraAddress PAL: 0x00542248
      */
     void ClearDraws();
 
@@ -113,7 +121,8 @@ public:
      *
      * @param pDraw The drawable to move.
      * @param nSteps The number of places to move it.
-     * @ghidraAddress 0x005034b8
+     * @ghidraAddress NTSC-U/C: 0x005034b8
+     * @ghidraAddress PAL: 0x005422e0
      */
     void MoveDraw(Drawable *pDraw, int nSteps);
 
@@ -123,7 +132,8 @@ public:
      * Drawable vtable slot 1.
      *
      * @param nShowing Non-zero to draw.
-     * @ghidraAddress 0x005066d8
+     * @ghidraAddress NTSC-U/C: 0x005066d8
+     * @ghidraAddress PAL: 0x00545598
      */
     virtual void SetShowing(int nShowing);
 
@@ -135,7 +145,8 @@ public:
      * FreqAppearance::AttachToBurnSlot() expands the first level of the recursion.
      *
      * @param nShowing Non-zero to draw.
-     * @ghidraAddress 0x00174480
+     * @ghidraAddress NTSC-U/C: 0x00174480
+     * @ghidraAddress PAL: 0x00176e58
      */
     void SetShowingRecursive(int nShowing) {
         SetShowing(nShowing);
@@ -150,7 +161,8 @@ public:
      * Drawable vtable slot 2.
      *
      * @param nHighlight Non-zero to highlight.
-     * @ghidraAddress 0x00506c88
+     * @ghidraAddress NTSC-U/C: 0x00506c88
+     * @ghidraAddress PAL: 0x00545b50
      */
     virtual void SetHighlight(int nHighlight);
 
@@ -158,7 +170,8 @@ public:
      * Report the highlight flag.
      *
      * @return Non-zero when this object draws with its highlight treatment.
-     * @ghidraAddress 0x005066e0
+     * @ghidraAddress NTSC-U/C: 0x005066e0
+     * @ghidraAddress PAL: 0x005455a0
      */
     int GetHighlight() const {
         return mHighlight;
@@ -170,7 +183,8 @@ public:
      * The out-of-line copy has no callers. Rnd::TunnelMeshChain::Draw() inlines it.
      *
      * @return Non-zero when this object draws at all.
-     * @ghidraAddress 0x00506520
+     * @ghidraAddress NTSC-U/C: 0x00506520
+     * @ghidraAddress PAL: 0x005453e0
      */
     int GetShowing() const {
         return mShowing;
@@ -184,7 +198,8 @@ public:
      *
      * @param name The registry key to resolve.
      * @return The drawable, or null.
-     * @ghidraAddress 0x00506528
+     * @ghidraAddress NTSC-U/C: 0x00506528
+     * @ghidraAddress PAL: 0x005453e8
      */
     static Drawable *Find(const HxStr &name);
 
@@ -192,7 +207,8 @@ public:
      * Report the child list.
      *
      * @return The list of drawables this object draws after itself.
-     * @ghidraAddress 0x005066e8
+     * @ghidraAddress NTSC-U/C: 0x005066e8
+     * @ghidraAddress PAL: 0x005455a8
      */
     std::list<Drawable *> &GetDraws() {
         return mDraws;
@@ -206,7 +222,8 @@ public:
      * the routine produces no output on this target either way.
      *
      * @param sink The diagnostic sink to write to.
-     * @ghidraAddress 0x005069a8
+     * @ghidraAddress NTSC-U/C: 0x005069a8
+     * @ghidraAddress PAL: 0x00545870
      */
     virtual void DumpText(FailSink &sink);
 
@@ -223,7 +240,8 @@ protected:
      * are still to be drawn. Only Draw() invokes it.
      *
      * @return Non-zero when the children are to be drawn as well.
-     * @ghidraAddress 0x005066f0
+     * @ghidraAddress NTSC-U/C: 0x005066f0
+     * @ghidraAddress PAL: 0x005455b0
      */
     virtual int DrawSelf();
 
@@ -232,7 +250,8 @@ protected:
      *
      * Every derived destructor invokes this before its own teardown.
      *
-     * @ghidraAddress 0x00506ba8
+     * @ghidraAddress NTSC-U/C: 0x00506ba8
+     * @ghidraAddress PAL: 0x00545a70
      */
     void ReleaseDrawsRefs();
 
@@ -243,7 +262,7 @@ public:
     int mShowing; // +0x04
 
 private:
-    // 0x00506c18
+    // NTSC-U/C: 0x00506c18, PAL: 0x00545ae0
     // Only Copy() and Load() invoke this.
     void AcquireDrawsRefs();
 

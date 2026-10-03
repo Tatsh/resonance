@@ -103,20 +103,20 @@ inline Vector3 UnitToFarNdc(float flX, float flY) {
 
 Cam *g_pCurrentCam;
 
-// 0x006f958c
+// NTSC-U/C: 0x006f958c, PAL: 0x0073cfdc
 Cam *(*g_pfnNewCam)(const HxStr &name) = Cam::NewCam;
 
-// 0x004b1e90
+// NTSC-U/C: 0x004b1e90, PAL: 0x004f00b8
 void *Cam::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kCamTag);
 }
 
-// 0x004b1eb0
+// NTSC-U/C: 0x004b1eb0, PAL: 0x004f00d8
 void Cam::operator delete(void *pBlock) {
     FreeTaggedMemory(pBlock, kCamTag);
 }
 
-// 0x004b1f20
+// NTSC-U/C: 0x004b1f20, PAL: 0x004f0148
 Cam *NewCamThroughHook(const HxStr &name) {
     try {
         return g_pfnNewCam(name);
@@ -125,7 +125,7 @@ Cam *NewCamThroughHook(const HxStr &name) {
     }
 }
 
-// 0x004b23e0
+// NTSC-U/C: 0x004b23e0, PAL: 0x004f0608
 Object *CreateRegisteredCam(const HxStr &name) {
     try {
         return g_pfnNewCam(name);
@@ -134,7 +134,7 @@ Object *CreateRegisteredCam(const HxStr &name) {
     }
 }
 
-// 0x004aeb70
+// NTSC-U/C: 0x004aeb70, PAL: 0x004ecd60
 Cam::Cam(const HxStr &name)
     : Object(name), mNearPlane(1.0f), mFarPlane(kDefaultFarPlane), mFov(kDefaultFov),
       mYRatio(kDefaultYRatio), mZRange{0.0f, 1.0f}, mScreenRect{0.0f, 0.0f, 1.0f, 1.0f},
@@ -147,7 +147,7 @@ Cam::Cam(const HxStr &name)
     AcquireTargetTex();
 }
 
-// 0x004af668
+// NTSC-U/C: 0x004af668, PAL: 0x004ed858
 Cam::~Cam() {
     if (g_pCurrentCam == this) {
         g_pCurrentCam = nullptr;
@@ -156,7 +156,7 @@ Cam::~Cam() {
     ReleaseAllRefs();
 }
 
-// 0x004ad6f8
+// NTSC-U/C: 0x004ad6f8, PAL: 0x004eb898
 void Cam::SetTargetTex(Tex *pTex) {
     if (mpTargetTex != nullptr) {
         mpTargetTex->RemoveRef(this);
@@ -176,7 +176,7 @@ void Cam::SetTargetTex(Tex *pTex) {
     UpdateTargetAspect();
 }
 
-// 0x004ad820
+// NTSC-U/C: 0x004ad820, PAL: 0x004eb9e0
 void Cam::CollideScreen(const Ray &ray, HitSink &sink) {
     if (mShowing != 0 && mScreenRect.x < ray.mStart[0] &&
         ray.mStart[0] < mScreenRect.x + mScreenRect.w && mScreenRect.y < ray.mStart[1] &&
@@ -187,7 +187,7 @@ void Cam::CollideScreen(const Ray &ray, HitSink &sink) {
     Collideable::CollideScreen(ray, sink);
 }
 
-// 0x004ad980
+// NTSC-U/C: 0x004ad980, PAL: 0x004ebb40
 void Cam::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Transformable::DumpText(sink);
@@ -254,7 +254,7 @@ void Cam::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
-// 0x004b2000
+// NTSC-U/C: 0x004b2000, PAL: 0x004f0228
 Vector2 Cam::ScreenToPixels([[maybe_unused]] const Vector2 &ptScreen) {
     Vector2 ptPixels; // Yes, the binary returns this unset.
 #pragma GCC diagnostic push
@@ -263,7 +263,7 @@ Vector2 Cam::ScreenToPixels([[maybe_unused]] const Vector2 &ptScreen) {
 #pragma GCC diagnostic pop
 }
 
-// 0x004b2738
+// NTSC-U/C: 0x004b2738, PAL: 0x004f0960
 void Cam::UpdateTargetAspect() {
     if (mpTargetTex != nullptr) {
         mYRatio =
@@ -272,17 +272,17 @@ void Cam::UpdateTargetAspect() {
     UpdateProjection();
 }
 
-// 0x004b23d0
+// NTSC-U/C: 0x004b23d0, PAL: 0x004f05f8
 const HxStr &Cam::ClassName() const {
     return g_camClassName;
 }
 
-// 0x004b2470
+// NTSC-U/C: 0x004b2470, PAL: 0x004f0698
 Cam *Cam::NewCam(const HxStr &name) {
     return new Cam(name);
 }
 
-// 0x004b2608
+// NTSC-U/C: 0x004b2608, PAL: 0x004f0830
 void Cam::Replace(Object *pFrom, Object *pTo) {
     Transformable::Replace(pFrom, pTo);
     Drawable::Replace(pFrom, pTo);
@@ -302,13 +302,13 @@ void Cam::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// 0x004b1fe0
+// NTSC-U/C: 0x004b1fe0, PAL: 0x004f0208
 int Cam::DrawSelf() {
     g_pCurrentCam = this;
     return 1;
 }
 
-// 0x004b27a8
+// NTSC-U/C: 0x004b27a8, PAL: 0x004f09d0
 void Cam::AcquireTargetTex() {
     if (mpTargetTex != nullptr) {
         mpTargetTex->AddRef(this);
@@ -316,14 +316,14 @@ void Cam::AcquireTargetTex() {
     UpdateTargetAspect();
 }
 
-// 0x004b2778
+// NTSC-U/C: 0x004b2778, PAL: 0x004f09a0
 void Cam::ReleaseTargetTex() {
     if (mpTargetTex != nullptr) {
         mpTargetTex->RemoveRef(this);
     }
 }
 
-// 0x004b1fa0
+// NTSC-U/C: 0x004b1fa0, PAL: 0x004f01c8
 int Cam::UpdateWorldXfm(Transformable *pParent, int nForce) {
     if (Transformable::UpdateWorldXfm(pParent, nForce) == 0) {
         return 0;
@@ -332,7 +332,7 @@ int Cam::UpdateWorldXfm(Transformable *pParent, int nForce) {
     return 1;
 }
 
-// 0x004ae630
+// NTSC-U/C: 0x004ae630, PAL: 0x004ec7f0
 void Cam::Save(Stream &stream) {
     const int nRevision = kCamRevision;
     stream.Write(&nRevision, sizeof(nRevision));
@@ -362,7 +362,7 @@ void Cam::Save(Stream &stream) {
     }
 }
 
-// 0x004ae870
+// NTSC-U/C: 0x004ae870, PAL: 0x004eca30
 void Cam::Load(Stream &stream) {
     int nRevision = 0;
     stream.Read(&nRevision, sizeof(nRevision));
@@ -416,7 +416,7 @@ void Cam::Load(Stream &stream) {
     AcquireTargetTex();
 }
 
-// 0x004b24f8
+// NTSC-U/C: 0x004b24f8, PAL: 0x004f0720
 void Cam::Copy(const Object *pSource, unsigned nFlags) {
     const Cam *pSourceCam = dynamic_cast<const Cam *>(pSource);
 
@@ -436,7 +436,7 @@ void Cam::Copy(const Object *pSource, unsigned nFlags) {
     AcquireTargetTex();
 }
 
-// 0x004afac0
+// NTSC-U/C: 0x004afac0, PAL: 0x004edcb0
 void Cam::UpdateProjection() {
     const float flAspect = (mYRatio * mScreenRect.h) / mScreenRect.w;
     BuildFrustum(mLocalFrustum, mNearPlane, mFarPlane, mFov, flAspect);
@@ -467,7 +467,7 @@ void Cam::UpdateProjection() {
     UpdateWorldProject();
 }
 
-// 0x004afc18
+// NTSC-U/C: 0x004afc18, PAL: 0x004ede08
 void Cam::UpdateWorldProject() {
     sceVu0InversMatrix(&mWorldToCam[0].x, &mWorldXfm[0][0]);
 
@@ -494,7 +494,7 @@ void Cam::UpdateWorldProject() {
     }
 }
 
-// 0x004afe00
+// NTSC-U/C: 0x004afe00, PAL: 0x004edff0
 Ray Cam::ScreenToRay(const Vector2 &ptScreen, float flLength) {
     Ray ray;
     ray.mStart[3] = 1.0f;
@@ -519,20 +519,20 @@ Ray Cam::ScreenToRay(const Vector2 &ptScreen, float flLength) {
     return ray;
 }
 
-// 0x004b2118
+// NTSC-U/C: 0x004b2118, PAL: 0x004f0340
 Vector3 Cam::UnprojectFar(const Vector2 &ptUnit) {
     Vector3 pt;
     XfmPoint(UnitToFarNdc(ptUnit.x, ptUnit.y), mInvWorldProject, pt);
     return pt;
 }
 
-// 0x004b2190
+// NTSC-U/C: 0x004b2190, PAL: 0x004f03b8
 void Cam::SetScreenRect(const Rect &rect) {
     mScreenRect = rect;
     UpdateProjection();
 }
 
-// 0x004b26e0
+// NTSC-U/C: 0x004b26e0, PAL: 0x004f0908
 void Cam::SetFrustum(float flNear, float flFar, float flFov) {
     const float flMinNear = flFar / kFarToMinNearRatio;
     mFov = flFov;

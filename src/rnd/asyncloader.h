@@ -35,7 +35,8 @@ public:
      * no zone.
      * The image lists no caller for the out-of-line body.
      *
-     * @ghidraAddress 0x003f7e50
+     * @ghidraAddress NTSC-U/C: 0x003f7e50
+     * @ghidraAddress PAL: 0x00430688
      */
     RndAsyncLoader();
 
@@ -45,14 +46,16 @@ public:
      * @param directory The directory to load from.
      * @param file The file to load.
      * @param nZone The zone PollAsyncLoads() selects while it reads the objects, or kNoZone.
-     * @ghidraAddress 0x003f7c00
+     * @ghidraAddress NTSC-U/C: 0x003f7c00
+     * @ghidraAddress PAL: 0x00430428
      */
     RndAsyncLoader(const HxStr &directory, const HxStr &file, int nZone);
 
     /**
      * Release the request and any partially loaded data.
      *
-     * @ghidraAddress 0x003f8178
+     * @ghidraAddress NTSC-U/C: 0x003f8178
+     * @ghidraAddress PAL: 0x004309b8
      */
     ~RndAsyncLoader();
 
@@ -64,7 +67,8 @@ public:
      * request is then marked not pending, not read, and not finished, and appended to
      * g_pendingLoads.
      *
-     * @ghidraAddress 0x003f8308
+     * @ghidraAddress NTSC-U/C: 0x003f8308
+     * @ghidraAddress PAL: 0x00430b68
      */
     void Enqueue();
 
@@ -74,7 +78,8 @@ public:
      * A request whose file has been read is not affected. Otherwise its read is cancelled and its
      * entry removed from g_activeLoads, and it is removed from g_pendingLoads.
      *
-     * @ghidraAddress 0x003f8030
+     * @ghidraAddress NTSC-U/C: 0x003f8030
+     * @ghidraAddress PAL: 0x00430870
      */
     void Cancel();
 
@@ -87,7 +92,8 @@ public:
      *
      * @param directory The directory to load from.
      * @param file The file to load.
-     * @ghidraAddress 0x003fc708
+     * @ghidraAddress NTSC-U/C: 0x003fc708
+     * @ghidraAddress PAL: 0x00435108
      */
     void Restart(const HxStr &directory, const HxStr &file);
 
@@ -99,7 +105,8 @@ public:
      * pending, not read, and not finished. The destructor runs it first, and
      * Renderer::UnloadCommon() runs it before each delete as well. The title is inferred.
      *
-     * @ghidraAddress 0x003f8240
+     * @ghidraAddress NTSC-U/C: 0x003f8240
+     * @ghidraAddress PAL: 0x00430aa0
      */
     void Unload();
 
@@ -136,7 +143,8 @@ public:
      *
      * @param pfProgress Receives a fraction between 0 and 1.
      * @return Non-zero once the request is complete.
-     * @ghidraAddress 0x003f8fc0
+     * @ghidraAddress NTSC-U/C: 0x003f8fc0
+     * @ghidraAddress PAL: 0x00431908
      */
     int Poll(float *pfProgress);
 
@@ -154,7 +162,8 @@ public:
      * finished read selects the request's zone, loads the objects through Rnd::g_manager, marks
      * the file read, and ends the collection. Only one file is loaded per call.
      *
-     * @ghidraAddress 0x003f8930
+     * @ghidraAddress NTSC-U/C: 0x003f8930
+     * @ghidraAddress PAL: 0x00431190
      */
     static void PollAsyncLoads();
 
@@ -182,7 +191,7 @@ private:
     // Copy Rnd::g_manager.mLoaded into mLoadedObjects, then append every `Tex` in mLoaded and then
     // in mMergeObjects to mObjects and every `Text` to mDrawables. PollAsyncLoads() is the one
     // caller, and the name is inferred.
-    // 0x003f8460
+    // NTSC-U/C: 0x003f8460, PAL: 0x00430cc0
     void HarvestLoadedObjects();
 
     // Every object the request loaded, copied from Rnd::g_manager.mLoaded.
@@ -223,20 +232,23 @@ struct RndActiveLoadEntry {
 /**
  * Zone the file reads are allocated from, kNoZone until the first Enqueue().
  *
- * @ghidraAddress 0x006dba38
+ * @ghidraAddress NTSC-U/C: 0x006dba38
+ * @ghidraAddress PAL: 0x0071f228
  */
 extern int g_nRndLoaderZone;
 
 /**
  * Requests waiting for their file read to be issued, in queue order.
  *
- * @ghidraAddress 0x006dba40
+ * @ghidraAddress NTSC-U/C: 0x006dba40
+ * @ghidraAddress PAL: 0x0071f230
  */
 extern std::vector<RndAsyncLoader *> g_pendingLoads;
 
 /**
  * File reads issued and not yet collected, in issue order.
  *
- * @ghidraAddress 0x006dba50
+ * @ghidraAddress NTSC-U/C: 0x006dba50
+ * @ghidraAddress PAL: 0x0071f240
  */
 extern std::vector<RndActiveLoadEntry> g_activeLoads;

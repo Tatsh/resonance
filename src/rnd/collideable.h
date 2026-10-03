@@ -80,14 +80,16 @@ public:
      * The constructor writes the two vtable pointers and allocates the mCollides sentinel. It
      * therefore has no written body of its own.
      *
-     * @ghidraAddress 0x00502668
+     * @ghidraAddress NTSC-U/C: 0x00502668
+     * @ghidraAddress PAL: 0x00541470
      */
     Collideable();
 
     /**
      * Drop this object's references on its children.
      *
-     * @ghidraAddress 0x00502518
+     * @ghidraAddress NTSC-U/C: 0x00502518
+     * @ghidraAddress PAL: 0x00541320
      */
     virtual ~Collideable();
 
@@ -99,7 +101,8 @@ public:
      * the parent in the collision hierarchy rather than a plain cast.
      *
      * @return The parent collideable, or null when no referrer hit-tests this one.
-     * @ghidraAddress 0x00500348
+     * @ghidraAddress NTSC-U/C: 0x00500348
+     * @ghidraAddress PAL: 0x0053f0f8
      */
     Collideable *Parent();
 
@@ -111,7 +114,8 @@ public:
      * loaded scene.
      *
      * @param pCollide The collideable to add.
-     * @ghidraAddress 0x00500858
+     * @ghidraAddress NTSC-U/C: 0x00500858
+     * @ghidraAddress PAL: 0x0053f608
      */
     void AddCollide(Collideable *pCollide);
 
@@ -122,7 +126,8 @@ public:
      * nothing.
      *
      * @param pCollide The collideable to remove.
-     * @ghidraAddress 0x005009d8
+     * @ghidraAddress NTSC-U/C: 0x005009d8
+     * @ghidraAddress PAL: 0x0053f788
      */
     void RemoveCollide(Collideable *pCollide);
 
@@ -135,7 +140,8 @@ public:
      *
      * @param ray The segment to test along.
      * @param sink The collector to append intersections to.
-     * @ghidraAddress 0x00502a28
+     * @ghidraAddress NTSC-U/C: 0x00502a28
+     * @ghidraAddress PAL: 0x00541838
      */
     virtual void Collide(const Ray &ray, HitSink &sink);
 
@@ -151,7 +157,8 @@ public:
      *
      * @param ray The segment to test along.
      * @param sink The collector to append intersections to.
-     * @ghidraAddress 0x00502ab8
+     * @ghidraAddress NTSC-U/C: 0x00502ab8
+     * @ghidraAddress PAL: 0x005418c8
      */
     virtual void CollideScreen(const Ray &ray, HitSink &sink);
 
@@ -163,7 +170,8 @@ public:
      * produces no output on this target in any case.
      *
      * @param sink The diagnostic sink to write to.
-     * @ghidraAddress 0x00502880
+     * @ghidraAddress NTSC-U/C: 0x00502880
+     * @ghidraAddress PAL: 0x00541690
      */
     virtual void DumpText(FailSink &sink);
 
@@ -171,7 +179,8 @@ public:
      * Write the revision and the mCollides list to stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x005028f0
+     * @ghidraAddress NTSC-U/C: 0x005028f0
+     * @ghidraAddress PAL: 0x00541700
      */
     virtual void Save(Stream &stream);
 
@@ -180,7 +189,8 @@ public:
      *
      * @param pFrom The object being replaced.
      * @param pTo The replacement, or null.
-     * @ghidraAddress 0x00500410
+     * @ghidraAddress NTSC-U/C: 0x00500410
+     * @ghidraAddress PAL: 0x0053f1c0
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -192,7 +202,8 @@ public:
      *
      * @param pSource The object to copy from.
      * @param nFlags The set of fields to copy; see kCopyChildLists.
-     * @ghidraAddress 0x00500730
+     * @ghidraAddress NTSC-U/C: 0x00500730
+     * @ghidraAddress PAL: 0x0053f4e0
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -203,7 +214,8 @@ public:
      * followed by the abort handler of g_failSink.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x005005f0
+     * @ghidraAddress NTSC-U/C: 0x005005f0
+     * @ghidraAddress PAL: 0x0053f3a0
      */
     virtual void Load(Stream &stream);
 
@@ -214,12 +226,13 @@ protected:
      * Every derived destructor invokes this before its own teardown, `Rnd::Mesh` and `Rnd::View`
      * among them.
      *
-     * @ghidraAddress 0x00502948
+     * @ghidraAddress NTSC-U/C: 0x00502948
+     * @ghidraAddress PAL: 0x00541758
      */
     void ReleaseCollidesRefs();
 
 private:
-    // 0x005029b8
+    // NTSC-U/C: 0x005029b8, PAL: 0x005417c8
     // Only Copy() and Load() invoke this, and both inline it.
     void AcquireCollidesRefs();
 

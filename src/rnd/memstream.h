@@ -21,32 +21,57 @@ public:
     /**
      * Construct an empty stream with kMemStreamReserve bytes reserved.
      *
-     * @ghidraAddress 0x0050f288
+     * @ghidraAddress NTSC-U/C: 0x0050f288
+     * @ghidraAddress PAL: 0x0054e870
      */
     MemStream();
 
-    /** @ghidraAddress 0x0050fca0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0050fca0
+     * @ghidraAddress PAL: 0x0054f288
+     */
     virtual ~MemStream();
 
-    /** @ghidraAddress 0x005100c0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x005100c0
+     * @ghidraAddress PAL: 0x0054f6a8
+     */
     virtual Stream &ReadBytes(void *pDest, int nSize);
 
-    /** @ghidraAddress 0x0050f448 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0050f448
+     * @ghidraAddress PAL: 0x0054ea30
+     */
     virtual Stream &WriteBytes(const void *pSrc, int nSize);
 
-    /** @ghidraAddress 0x0050fd48 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0050fd48
+     * @ghidraAddress PAL: 0x0054f330
+     */
     virtual Stream &Flush();
 
-    /** @ghidraAddress 0x00510140 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00510140
+     * @ghidraAddress PAL: 0x0054f728
+     */
     virtual Stream &Seek(int nOffset, int nWhence);
 
-    /** @ghidraAddress 0x0050fd50 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0050fd50
+     * @ghidraAddress PAL: 0x0054f338
+     */
     virtual int Tell();
 
-    /** @ghidraAddress 0x0050fd58 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0050fd58
+     * @ghidraAddress PAL: 0x0054f340
+     */
     virtual int Eof();
 
-    /** @ghidraAddress 0x0050fd60 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0050fd60
+     * @ghidraAddress PAL: 0x0054f348
+     */
     virtual int Fail();
 
     /**
@@ -56,7 +81,8 @@ public:
      * position. No call site survives in the shipped program. The name follows the
      * IOBMemStream counterpart.
      *
-     * @ghidraAddress 0x005101c8
+     * @ghidraAddress NTSC-U/C: 0x005101c8
+     * @ghidraAddress PAL: 0x0054f7b0
      */
     void DiscardReadBytes();
 

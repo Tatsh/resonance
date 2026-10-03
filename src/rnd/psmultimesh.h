@@ -24,11 +24,15 @@ public:
      * construction site.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
-     * @ghidraAddress 0x005b2fd8
+     * @ghidraAddress NTSC-U/C: 0x005b2fd8
+     * @ghidraAddress PAL: 0x005f55c0
      */
     PsMultiMesh(const HxStr &name);
 
-    /** @ghidraAddress 0x005b5a40 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x005b5a40
+     * @ghidraAddress PAL: 0x005f8090
+     */
     virtual ~PsMultiMesh();
 
 protected:
@@ -42,7 +46,8 @@ protected:
      * instance run.
      *
      * @return Non-zero, always, so the children are drawn as well.
-     * @ghidraAddress 0x005b2ed0
+     * @ghidraAddress NTSC-U/C: 0x005b2ed0
+     * @ghidraAddress PAL: 0x005f54b8
      */
     virtual int DrawSelf();
 
@@ -55,7 +60,8 @@ protected:
      * the face run leaves, unpacked behind a count quadword. The first batch calls the instanced
      * microprogram and every later one continues it.
      *
-     * @ghidraAddress 0x005b2c60
+     * @ghidraAddress NTSC-U/C: 0x005b2c60
+     * @ghidraAddress PAL: 0x005f5248
      */
     void SubmitInstanceGifPackets();
 };
@@ -68,7 +74,8 @@ protected:
  *
  * @param name The object name.
  * @return The new multi-mesh.
- * @ghidraAddress 0x005b5c28
+ * @ghidraAddress NTSC-U/C: 0x005b5c28
+ * @ghidraAddress PAL: 0x005f8278
  */
 MultiMesh *NewPsMultiMesh(const HxStr &name);
 

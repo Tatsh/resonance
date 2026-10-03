@@ -28,7 +28,8 @@ struct TriangleTest {
  * @param sphere The sphere to test.
  * @param pflDistance Receives the distance to the strike.
  * @return Non-zero when the ray strikes the sphere.
- * @ghidraAddress 0x005501b0
+ * @ghidraAddress NTSC-U/C: 0x005501b0
+ * @ghidraAddress PAL: 0x005907f0
  */
 int TestRayAgainstSphere(const Ray &ray, const Sphere &sphere, float *pflDistance);
 
@@ -43,7 +44,8 @@ int TestRayAgainstSphere(const Ray &ray, const Sphere &sphere, float *pflDistanc
  * @param nCull The cull mode to apply.
  * @param pflDistance Receives the distance to the strike.
  * @return Non-zero when the ray strikes the triangle.
- * @ghidraAddress 0x0054fe98
+ * @ghidraAddress NTSC-U/C: 0x0054fe98
+ * @ghidraAddress PAL: 0x005904d8
  */
 int TestRayAgainstTriangle(const Ray &ray, const TriangleTest &tri, int nCull, float *pflDistance);
 

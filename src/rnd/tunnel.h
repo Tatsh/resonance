@@ -78,11 +78,15 @@ public:
      * and allocates the sentinel node of each list member.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
-     * @ghidraAddress 0x00466620
+     * @ghidraAddress NTSC-U/C: 0x00466620
+     * @ghidraAddress PAL: 0x004a4050
      */
     Tunnel(const HxStr &name);
 
-    /** @ghidraAddress 0x004676b0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004676b0
+     * @ghidraAddress PAL: 0x004a50e0
+     */
     virtual ~Tunnel();
 
     /**
@@ -90,7 +94,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x00476218
+     * @ghidraAddress NTSC-U/C: 0x00476218
+     * @ghidraAddress PAL: 0x004b3e90
      */
     static void *operator new(size_t nSize);
 
@@ -98,7 +103,8 @@ public:
      * Release a tunnel under the tag "Rnd::Tunnel".
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x00476238
+     * @ghidraAddress NTSC-U/C: 0x00476238
+     * @ghidraAddress PAL: 0x004b3eb0
      */
     static void operator delete(void *pBlock);
 
@@ -110,7 +116,8 @@ public:
      * suppressed while the dump level of the sink is not positive.
      *
      * @param sink The text sink.
-     * @ghidraAddress 0x004768b8
+     * @ghidraAddress NTSC-U/C: 0x004768b8
+     * @ghidraAddress PAL: 0x004b4530
      */
     virtual void DumpText(FailSink &sink);
 
@@ -118,7 +125,8 @@ public:
      * Serialise the tunnel.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x004682a8
+     * @ghidraAddress NTSC-U/C: 0x004682a8
+     * @ghidraAddress PAL: 0x004a5cd8
      */
     virtual void Save(Stream &stream);
 
@@ -127,7 +135,8 @@ public:
      *
      * @param pFrom The object being replaced.
      * @param pTo The object to point at, which may be null.
-     * @ghidraAddress 0x004680e0
+     * @ghidraAddress NTSC-U/C: 0x004680e0
+     * @ghidraAddress PAL: 0x004a5b10
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -135,7 +144,8 @@ public:
      * Return the registered class name, "Tunnel".
      *
      * @return The class name.
-     * @ghidraAddress 0x004763b8
+     * @ghidraAddress NTSC-U/C: 0x004763b8
+     * @ghidraAddress PAL: 0x004b4030
      */
     virtual const HxStr &ClassName() const;
 
@@ -144,7 +154,8 @@ public:
      *
      * @param pSource The source object, which has to be a tunnel for the copy to have any effect.
      * @param nFlags The copy flags.
-     * @ghidraAddress 0x00476788
+     * @ghidraAddress NTSC-U/C: 0x00476788
+     * @ghidraAddress PAL: 0x004b4400
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -155,7 +166,8 @@ public:
      * it and "Can't load old Tunnel" below it.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00468538
+     * @ghidraAddress NTSC-U/C: 0x00468538
+     * @ghidraAddress PAL: 0x004a5f68
      */
     virtual void Load(Stream &stream);
 
@@ -166,14 +178,16 @@ public:
      *
      * @param ray The segment to test along.
      * @param sink The collector to append intersections to.
-     * @ghidraAddress 0x00476a10
+     * @ghidraAddress NTSC-U/C: 0x00476a10
+     * @ghidraAddress PAL: 0x004b4688
      */
     virtual void Collide(const Ray &ray, HitSink &sink);
 
     /**
      * Regenerate the geometry that the current state calls for.
      *
-     * @ghidraAddress 0x00467f48
+     * @ghidraAddress NTSC-U/C: 0x00467f48
+     * @ghidraAddress PAL: 0x004a5978
      */
     void Update();
 
@@ -185,7 +199,8 @@ public:
      *
      * @param nSlice The slice index, taken modulo mSliceCount.
      * @return The first mesh of the slice.
-     * @ghidraAddress 0x004773e8
+     * @ghidraAddress NTSC-U/C: 0x004773e8
+     * @ghidraAddress PAL: 0x004b5060
      */
     Mesh *GetRingSection(int nSlice);
 
@@ -198,7 +213,8 @@ public:
      * @param nRing The ring index, taken modulo mRingCount.
      * @param nSlice The slice index, taken modulo mSliceCount.
      * @return The first mesh of the ring.
-     * @ghidraAddress 0x00477388
+     * @ghidraAddress NTSC-U/C: 0x00477388
+     * @ghidraAddress PAL: 0x004b5000
      */
     Mesh *GetRingSection(int nRing, int nSlice);
 
@@ -212,7 +228,8 @@ public:
      * @param nRing The ring index.
      * @param pOut The vector to write the blend into.
      * @param flWeight The weight of the successor, with the complement applied to entry nRing.
-     * @ghidraAddress 0x00477538
+     * @ghidraAddress NTSC-U/C: 0x00477538
+     * @ghidraAddress PAL: 0x004b51b0
      */
     void LerpRingSectionTangent(int nRing, Vector3 *pOut, float flWeight);
 
@@ -228,7 +245,8 @@ public:
      * @param pOut The transform to write.
      * @param flFrame The path frame.
      * @param flBlend The weight of the next ring's translation.
-     * @ghidraAddress 0x0046da40
+     * @ghidraAddress NTSC-U/C: 0x0046da40
+     * @ghidraAddress PAL: 0x004ab580
      */
     void GetRingXfm(int nRing, Transform *pOut, float flFrame, float flBlend);
 
@@ -246,7 +264,8 @@ public:
      * @param flAnimFrame The path frame.
      * @param flRingBlend The weight of the next ring's translation.
      * @param flTangentScale The scale applied to both translations.
-     * @ghidraAddress 0x0046db80
+     * @ghidraAddress NTSC-U/C: 0x0046db80
+     * @ghidraAddress PAL: 0x004ab6c0
      */
     void ProjectSectionToCameraSpace(
         int nRing, Transform *pOut, float flAnimFrame, float flRingBlend, float flTangentScale);
@@ -257,7 +276,8 @@ public:
      * Walks the mSliceCount slices starting at mWindowStartSlice and calls AdvanceRing() for each
      * one whose mPlacedSlices entry differs from its index.
      *
-     * @ghidraAddress 0x00476f48
+     * @ghidraAddress NTSC-U/C: 0x00476f48
+     * @ghidraAddress PAL: 0x004b4bc0
      */
     void ScrollRings();
 
@@ -270,7 +290,8 @@ public:
      * the slice as current, or decrements and accumulates one step into mPlacingFrame.
      *
      * @param nSlice The slice to advance to.
-     * @ghidraAddress 0x00476fe0
+     * @ghidraAddress NTSC-U/C: 0x00476fe0
+     * @ghidraAddress PAL: 0x004b4c58
      */
     void AdvanceRing(int nSlice);
 
@@ -287,7 +308,8 @@ public:
      * equally well.
      *
      * @param screenSizes One threshold per ring, applied in index order.
-     * @ghidraAddress 0x0046d180
+     * @ghidraAddress NTSC-U/C: 0x0046d180
+     * @ghidraAddress PAL: 0x004aacc0
      */
     void ApplyMeshLodScreenSizes(const std::vector<float> &screenSizes);
 
@@ -301,7 +323,8 @@ public:
      * @param flFrame The frame to schedule at.
      * @param nId The identifier MoveEvent() and RemoveEvent() match on.
      * @param nUser A word stored with the event.
-     * @ghidraAddress 0x0046d400
+     * @ghidraAddress NTSC-U/C: 0x0046d400
+     * @ghidraAddress PAL: 0x004aaf40
      */
     void AddEvent(Drawable *pObject, float flFrame, int nId, int nUser);
 
@@ -315,7 +338,8 @@ public:
      * @param nId The identifier to match.
      * @param flFrame The new frame.
      * @return One when an event matched, zero otherwise.
-     * @ghidraAddress 0x0046d540
+     * @ghidraAddress NTSC-U/C: 0x0046d540
+     * @ghidraAddress PAL: 0x004ab080
      */
     int MoveEvent(int nId, float flFrame);
 
@@ -326,7 +350,8 @@ public:
      *
      * @param nId The identifier to match.
      * @return One when an event matched, zero otherwise.
-     * @ghidraAddress 0x0046d5d8
+     * @ghidraAddress NTSC-U/C: 0x0046d5d8
+     * @ghidraAddress PAL: 0x004ab118
      */
     int RemoveEvent(int nId);
 
@@ -336,7 +361,8 @@ public:
      * @param flFrom The first frame removed.
      * @param flTo The frame the range stops before.
      * @return The number of events removed.
-     * @ghidraAddress 0x0046d680
+     * @ghidraAddress NTSC-U/C: 0x0046d680
+     * @ghidraAddress PAL: 0x004ab1c0
      */
     int RemoveEventsInRange(float flFrom, float flTo);
 
@@ -347,7 +373,8 @@ public:
      *
      * @param pfnVisit The function, given the drawable, the frame, the identifier, and pUser.
      * @param pUser Passed through to pfnVisit.
-     * @ghidraAddress 0x00477310
+     * @ghidraAddress NTSC-U/C: 0x00477310
+     * @ghidraAddress PAL: 0x004b4f88
      */
     void ForEachEvent(void (*pfnVisit)(Drawable *pObject, float flFrame, int nId, void *pUser),
                       void *pUser);
@@ -360,7 +387,8 @@ public:
      * rebuild of every slice.
      *
      * @param pPath The path, or null.
-     * @ghidraAddress 0x004770d0
+     * @ghidraAddress NTSC-U/C: 0x004770d0
+     * @ghidraAddress PAL: 0x004b4d48
      */
     void SetPath(TransAnim *pPath);
 
@@ -372,7 +400,8 @@ public:
      *
      * @param pOut The transform to write.
      * @param flFrame The path frame.
-     * @ghidraAddress 0x004775b0
+     * @ghidraAddress NTSC-U/C: 0x004775b0
+     * @ghidraAddress PAL: 0x004b5228
      */
     void GetPathXfm(Transform *pOut, float flFrame);
 
@@ -380,7 +409,8 @@ public:
      * Set mLaneChangeFrames.
      *
      * @param flFrames The tunnel frames a seeker takes to move one ring.
-     * @ghidraAddress 0x004772c8
+     * @ghidraAddress NTSC-U/C: 0x004772c8
+     * @ghidraAddress PAL: 0x004b4f40
      */
     void SetLaneChangeFrames(float flFrames);
 
@@ -389,7 +419,8 @@ public:
      *
      * @param nIndex The seeker index.
      * @return The seeker, or null when nIndex is out of range.
-     * @ghidraAddress 0x00477298
+     * @ghidraAddress NTSC-U/C: 0x00477298
+     * @ghidraAddress PAL: 0x004b4f10
      */
     TunnelSeeker *GetSeeker(unsigned nIndex);
 
@@ -399,7 +430,8 @@ public:
      * Every existing seeker releases its references first. New seekers are default constructed.
      *
      * @param nCount The seeker count.
-     * @ghidraAddress 0x0046cfd8
+     * @ghidraAddress NTSC-U/C: 0x0046cfd8
+     * @ghidraAddress PAL: 0x004aab18
      */
     void ResizeSeekers(unsigned nCount);
 
@@ -417,7 +449,8 @@ public:
      * @param flLaneEdgeGap The value of mLaneEdgeGap.
      * @param flFloorEdgeWeight The value of mFloorEdgeWeight.
      * @param flCellEdgeBlendPerStep The value of mCellEdgeBlendPerStep.
-     * @ghidraAddress 0x00477160
+     * @ghidraAddress NTSC-U/C: 0x00477160
+     * @ghidraAddress PAL: 0x004b4dd8
      */
     void Configure(float flRingRadius,
                    int nRingCount,
@@ -435,7 +468,8 @@ public:
      *
      * @param flFrame The frame.
      * @return The slice.
-     * @ghidraAddress 0x00476540
+     * @ghidraAddress NTSC-U/C: 0x00476540
+     * @ghidraAddress PAL: 0x004b41b8
      */
     int FrameToSlice(float flFrame);
 
@@ -448,7 +482,8 @@ public:
      * @param nRing The lane.
      * @param nSlice The slice.
      * @param color The colour.
-     * @ghidraAddress 0x0046d788
+     * @ghidraAddress NTSC-U/C: 0x0046d788
+     * @ghidraAddress PAL: 0x004ab2c8
      */
     void SetLaneDividerColor(int nRing, int nSlice, const Color &color);
 
@@ -456,7 +491,8 @@ public:
      * Colour the floor and the second end cap of every lane on every slice.
      *
      * @param color The colour.
-     * @ghidraAddress 0x0046d8e8
+     * @ghidraAddress NTSC-U/C: 0x0046d8e8
+     * @ghidraAddress PAL: 0x004ab428
      */
     void SetLaneFloorColor(const Color &color);
 
@@ -467,7 +503,8 @@ protected:
      * Rnd::Drawable vtable slot 3.
      *
      * @return Non-zero when the children are to be drawn as well.
-     * @ghidraAddress 0x00468850
+     * @ghidraAddress NTSC-U/C: 0x00468850
+     * @ghidraAddress PAL: 0x004a62b0
      */
     virtual int DrawSelf();
 
@@ -477,14 +514,15 @@ protected:
      * Rnd::Animatable vtable slot 3.
      *
      * @param flFrame The filtered frame to animate to.
-     * @ghidraAddress 0x00469180
+     * @ghidraAddress NTSC-U/C: 0x00469180
+     * @ghidraAddress PAL: 0x004a6c40
      */
     virtual void SetFrameSelf(float flFrame);
 
 private:
     // Drop every reference Update() takes (the path, each event drawable, and each seeker's
     // objects) and delete the generated meshes. The destructor, Load(), and Copy() call it.
-    // 0x00468020
+    // NTSC-U/C: 0x00468020, PAL: 0x004a5a50
     void ReleaseRefs();
 
     // Write the material and the first vertex colour of every chain of both grids. 0x00468a78.
@@ -670,7 +708,8 @@ private:
  *
  * @param name The object name.
  * @return The new tunnel.
- * @ghidraAddress 0x00476288
+ * @ghidraAddress NTSC-U/C: 0x00476288
+ * @ghidraAddress PAL: 0x004b3f00
  */
 Tunnel *NewTunnel(const HxStr &name);
 
@@ -682,14 +721,16 @@ Tunnel *NewTunnel(const HxStr &name);
  *
  * @param name The object name.
  * @return The new tunnel, as its Rnd::Object subobject.
- * @ghidraAddress 0x00476468
+ * @ghidraAddress NTSC-U/C: 0x00476468
+ * @ghidraAddress PAL: 0x004b40e0
  */
 Object *CreateRegisteredTunnel(const HxStr &name);
 
 /**
  * Registered class name of Rnd::Tunnel, the string "Tunnel".
  *
- * @ghidraAddress 0x006eab10
+ * @ghidraAddress NTSC-U/C: 0x006eab10
+ * @ghidraAddress PAL: 0x0072e510
  */
 extern HxStr g_tunnelClassName;
 
@@ -699,7 +740,8 @@ extern HxStr g_tunnelClassName;
  * An inline function. The out-of-line copy has no callers, and Rnd::Manager::Init() performs the
  * same registration itself.
  *
- * @ghidraAddress 0x00476258
+ * @ghidraAddress NTSC-U/C: 0x00476258
+ * @ghidraAddress PAL: 0x004b3ed0
  */
 inline void RegisterTunnelClass() {
     g_manager.RegisterClass(g_tunnelClassName, CreateRegisteredTunnel);
@@ -711,7 +753,8 @@ inline void RegisterTunnelClass() {
  * Load() stores the revision here, and the element loaders of Rnd::TunnelEvent and
  * Rnd::TunnelSeeker test it.
  *
- * @ghidraAddress 0x00894d64
+ * @ghidraAddress NTSC-U/C: 0x00894d64
+ * @ghidraAddress PAL: 0x008d9d74
  */
 extern int g_nTunnelLoadVersion;
 

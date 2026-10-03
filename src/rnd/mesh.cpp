@@ -247,7 +247,7 @@ void TrimKeys(std::list<Key> &keys, int nRemoved, const Value &fill) {
     }
 }
 
-// 0x00493f00
+// NTSC-U/C: 0x00493f00, PAL: 0x004d1db0
 FailSink &PrintZMode(FailSink &sink, Mesh::ZMode nZMode) {
     switch (nZMode) {
     case Mesh::kZModeDisable:
@@ -269,7 +269,7 @@ FailSink &PrintZMode(FailSink &sink, Mesh::ZMode nZMode) {
     return sink;
 }
 
-// 0x00482f18
+// NTSC-U/C: 0x00482f18, PAL: 0x004c0ce8
 FailSink &PrintZFunc(FailSink &sink, Mesh::ZFunc nZFunc) {
     switch (nZFunc) {
     case Mesh::kZFuncNever:
@@ -365,7 +365,7 @@ void PrintElementIndex(FailSink &sink, unsigned nIndex) {
     sink.Print("\t");
 }
 
-// 0x004809f0
+// NTSC-U/C: 0x004809f0, PAL: 0x004be6e8
 FailSink &DumpVert(FailSink &sink, const MeshVert &vert) {
     sink.Print("\n\tp:");
     PrintVector3(sink, vert.mPoint);
@@ -388,7 +388,7 @@ FailSink &DumpVert(FailSink &sink, const MeshVert &vert) {
     return sink;
 }
 
-// 0x0048a5d8
+// NTSC-U/C: 0x0048a5d8, PAL: 0x004c8460
 FailSink &DumpVertVector(FailSink &sink, const std::vector<MeshVert> &verts) {
     PrintVectorHeader(sink, verts.size());
     for (unsigned nIndex = 0; nIndex < verts.size(); ++nIndex) {
@@ -398,7 +398,7 @@ FailSink &DumpVertVector(FailSink &sink, const std::vector<MeshVert> &verts) {
     return sink;
 }
 
-// 0x0048a6c8
+// NTSC-U/C: 0x0048a6c8, PAL: 0x004c8550
 FailSink &DumpFaceVector(FailSink &sink, const std::vector<MeshFace> &faces) {
     PrintVectorHeader(sink, faces.size());
     for (unsigned nIndex = 0; nIndex < faces.size(); ++nIndex) {
@@ -411,7 +411,7 @@ FailSink &DumpFaceVector(FailSink &sink, const std::vector<MeshFace> &faces) {
     return sink;
 }
 
-// 0x0048a858
+// NTSC-U/C: 0x0048a858, PAL: 0x004c86e0
 FailSink &DumpEdgeVector(FailSink &sink, const std::vector<MeshEdge> &edges) {
     PrintVectorHeader(sink, edges.size());
     for (unsigned nIndex = 0; nIndex < edges.size(); ++nIndex) {
@@ -423,7 +423,7 @@ FailSink &DumpEdgeVector(FailSink &sink, const std::vector<MeshEdge> &edges) {
     return sink;
 }
 
-// 0x0048a9b0
+// NTSC-U/C: 0x0048a9b0, PAL: 0x004c8838
 Stream &WriteVertVector(Stream &stream, const std::vector<MeshVert> &verts) {
     const int nCount = static_cast<int>(verts.size());
     stream.Write(&nCount, sizeof(nCount));
@@ -446,7 +446,7 @@ Stream &WriteVertVector(Stream &stream, const std::vector<MeshVert> &verts) {
     return stream;
 }
 
-// 0x0048ac40
+// NTSC-U/C: 0x0048ac40, PAL: 0x004c8ac8
 Stream &WriteFaceVector(Stream &stream, const std::vector<MeshFace> &faces) {
     const int nCount = static_cast<int>(faces.size());
     stream.Write(&nCount, sizeof(nCount));
@@ -458,7 +458,7 @@ Stream &WriteFaceVector(Stream &stream, const std::vector<MeshFace> &faces) {
     return stream;
 }
 
-// 0x004945e0
+// NTSC-U/C: 0x004945e0, PAL: 0x004d24a8
 Stream &WriteEdgeVector(Stream &stream, const std::vector<MeshEdge> &edges) {
     const int nCount = static_cast<int>(edges.size());
     stream.Write(&nCount, sizeof(nCount));
@@ -469,7 +469,7 @@ Stream &WriteEdgeVector(Stream &stream, const std::vector<MeshEdge> &edges) {
     return stream;
 }
 
-// 0x00482368
+// NTSC-U/C: 0x00482368, PAL: 0x004c0138
 Stream &ReadVert(Stream &stream, MeshVert &vert) {
     stream.Read(&vert.mPoint.x, sizeof(float));
     stream.Read(&vert.mPoint.y, sizeof(float));
@@ -493,7 +493,7 @@ Stream &ReadVert(Stream &stream, MeshVert &vert) {
     return stream;
 }
 
-// 0x0048ad48
+// NTSC-U/C: 0x0048ad48, PAL: 0x004c8bd0
 Stream &ReadVertVector(Stream &stream, std::vector<MeshVert> &verts) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -504,7 +504,7 @@ Stream &ReadVertVector(Stream &stream, std::vector<MeshVert> &verts) {
     return stream;
 }
 
-// 0x00482e28
+// NTSC-U/C: 0x00482e28, PAL: 0x004c0bf8
 Stream &ReadFace(Stream &stream, MeshFace &face) {
     stream.Read(&face.mV1, sizeof(face.mV1))
         .Read(&face.mV2, sizeof(face.mV2))
@@ -520,7 +520,7 @@ Stream &ReadFace(Stream &stream, MeshFace &face) {
     return stream;
 }
 
-// 0x0048ae78
+// NTSC-U/C: 0x0048ae78, PAL: 0x004c8d00
 Stream &ReadFaceVector(Stream &stream, std::vector<MeshFace> &faces) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -531,7 +531,7 @@ Stream &ReadFaceVector(Stream &stream, std::vector<MeshFace> &faces) {
     return stream;
 }
 
-// 0x0048af78
+// NTSC-U/C: 0x0048af78, PAL: 0x004c8e00
 Stream &ReadEdgeVector(Stream &stream, std::vector<MeshEdge> &edges) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -600,7 +600,7 @@ inline void InvertXfm(const float aflWorld[kXfmRowCount][kXfmRowFloatCount],
         aflInverse[0][2] * negated.x + aflInverse[1][2] * negated.y + aflInverse[2][2] * negated.z;
 }
 
-// 0x0048c040
+// NTSC-U/C: 0x0048c040, PAL: 0x004c9ec8
 Stream &ReadIndexRun(Stream &stream, std::vector<unsigned short> &run) {
     int nIndexCount;
     stream.Read(&nIndexCount, sizeof(nIndexCount));
@@ -611,7 +611,7 @@ Stream &ReadIndexRun(Stream &stream, std::vector<unsigned short> &run) {
     return stream;
 }
 
-// 0x0048c138
+// NTSC-U/C: 0x0048c138, PAL: 0x004c9fc0
 // Versions 1 through 3 stored a run of vertex indices per record. The renderer no longer uses
 // them, and the loader releases the vector as soon as it has been read.
 Stream &ReadIndexRunVector(Stream &stream, std::vector<std::vector<unsigned short> > &runs) {
@@ -626,7 +626,7 @@ Stream &ReadIndexRunVector(Stream &stream, std::vector<std::vector<unsigned shor
 
 } // namespace
 
-// 0x00492ff0
+// NTSC-U/C: 0x00492ff0, PAL: 0x004d0ea0
 Mesh *NewMesh(const HxStr &name) {
     // The binary bills the allocation to the tag "Rnd::Mesh" and rounds the 0x16c-byte object up
     // to 0x170 bytes.
@@ -637,20 +637,20 @@ Mesh *NewMesh(const HxStr &name) {
     }
 }
 
-// 0x00492590
+// NTSC-U/C: 0x00492590, PAL: 0x004d0440
 void *Mesh::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kMeshAllocationTag);
 }
 
-// 0x004925b0
+// NTSC-U/C: 0x004925b0, PAL: 0x004d0460
 void Mesh::operator delete(void *pBlock) {
     FreeTaggedMemory(pBlock, kMeshAllocationTag);
 }
 
-// 0x006eed60
+// NTSC-U/C: 0x006eed60, PAL: 0x00732780
 Mesh *(*g_pfnNewMesh)(const HxStr &name) = NewMesh;
 
-// 0x004926f0
+// NTSC-U/C: 0x004926f0, PAL: 0x004d05a0
 Mesh *NewMeshThroughHook(const HxStr &name) {
     try {
         return g_pfnNewMesh(name);
@@ -659,7 +659,7 @@ Mesh *NewMeshThroughHook(const HxStr &name) {
     }
 }
 
-// 0x00492f50
+// NTSC-U/C: 0x00492f50, PAL: 0x004d0e00
 Object *CreateRegisteredMesh(const HxStr &name) {
     try {
         return g_pfnNewMesh(name);
@@ -668,13 +668,13 @@ Object *CreateRegisteredMesh(const HxStr &name) {
     }
 }
 
-// 0x006eed68
+// NTSC-U/C: 0x006eed68, PAL: 0x00732788
 HxStr g_meshClassName("Mesh");
 
-// 0x00894d68
+// NTSC-U/C: 0x00894d68, PAL: 0x008d9d78
 int g_nRndMeshLoadVersion;
 
-// 0x0047ff20
+// NTSC-U/C: 0x0047ff20, PAL: 0x004bdc18
 Mesh::Mesh(const HxStr &name)
     : Object(name), mZMode(kZModeZReadWrite), mZFunc(kZFuncLess), mMat(nullptr), mVertsOwner(this),
       mFacesOwner(this), mTransOwner(this), mTrans1Owner(nullptr), mTrans2Owner(nullptr),
@@ -687,13 +687,13 @@ Mesh::Mesh(const HxStr &name)
     mSphere.mRadius = 0.0f;
 }
 
-// 0x00492838
+// NTSC-U/C: 0x00492838, PAL: 0x004d06e8
 Mesh::~Mesh() {
     RemoveObjectRefs();
     ReleaseAllRefs();
 }
 
-// 0x00480d80
+// NTSC-U/C: 0x00480d80, PAL: 0x004bea78
 void Mesh::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Transformable::DumpText(sink);
@@ -752,7 +752,7 @@ void Mesh::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
-// 0x00481300
+// NTSC-U/C: 0x00481300, PAL: 0x004beff8
 void Mesh::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.Write(&nVersion, sizeof(nVersion));
@@ -785,7 +785,7 @@ void Mesh::Save(Stream &stream) {
     WriteEdgeVector(stream, mEdges);
 }
 
-// 0x00482810
+// NTSC-U/C: 0x00482810, PAL: 0x004c05e0
 void Mesh::Replace(Object *pFrom, Object *pTo) {
     Transformable::Replace(pFrom, pTo);
     Drawable::Replace(pFrom, pTo);
@@ -872,12 +872,12 @@ void Mesh::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// 0x00492f00
+// NTSC-U/C: 0x00492f00, PAL: 0x004d0db0
 const HxStr &Mesh::ClassName() const {
     return g_meshClassName;
 }
 
-// 0x00482568
+// NTSC-U/C: 0x00482568, PAL: 0x004c0338
 void Mesh::Copy(const Object *pSource, unsigned nFlags) {
     const Mesh *pMesh = dynamic_cast<const Mesh *>(pSource);
 
@@ -925,7 +925,7 @@ void Mesh::Copy(const Object *pSource, unsigned nFlags) {
     Refresh();
 }
 
-// 0x004817d0
+// NTSC-U/C: 0x004817d0, PAL: 0x004bf4c8
 void Mesh::Load(Stream &stream) {
     stream.Read(&g_nRndMeshLoadVersion, sizeof(g_nRndMeshLoadVersion));
     if (g_nRndMeshLoadVersion > kSerialVersion) {
@@ -1015,27 +1015,27 @@ void Mesh::Load(Stream &stream) {
     Refresh();
 }
 
-// 0x00492770
+// NTSC-U/C: 0x00492770, PAL: 0x004d0620
 void Mesh::Sync() {
 }
 
-// 0x00492778
+// NTSC-U/C: 0x00492778, PAL: 0x004d0628
 void Mesh::SyncChanged([[maybe_unused]] int nMask) {
 }
 
-// 0x00492780
+// NTSC-U/C: 0x00492780, PAL: 0x004d0630
 void Mesh::SyncAll() {
     SyncChanged(kSyncAllMask);
 }
 
-// 0x00493e10
+// NTSC-U/C: 0x00493e10, PAL: 0x004d1cc0
 void Mesh::Refresh() {
     AddObjectRefs();
     SyncAll();
     Sync();
 }
 
-// 0x0047f950
+// NTSC-U/C: 0x0047f950, PAL: 0x004bd648
 void Mesh::Collide(const Ray &ray, HitSink &sink) {
     if (Drawable::mShowing == 0) {
         return;
@@ -1088,7 +1088,7 @@ void Mesh::Collide(const Ray &ray, HitSink &sink) {
     Collideable::Collide(ray, sink);
 }
 
-// 0x00493a78
+// NTSC-U/C: 0x00493a78, PAL: 0x004d1928
 void Mesh::SetMaterial(Mat *pMat) {
     if (mMat != nullptr) {
         mMat->RemoveRef(this);
@@ -1099,7 +1099,7 @@ void Mesh::SetMaterial(Mat *pMat) {
     }
 }
 
-// 0x00493c98
+// NTSC-U/C: 0x00493c98, PAL: 0x004d1b48
 void Mesh::SetTrans1Owner(Transformable *pOwner) {
     if (mTrans1Owner != nullptr) {
         mTrans1Owner->RemoveRef(this);
@@ -1110,7 +1110,7 @@ void Mesh::SetTrans1Owner(Transformable *pOwner) {
     }
 }
 
-// 0x00493cf0
+// NTSC-U/C: 0x00493cf0, PAL: 0x004d1ba0
 void Mesh::SetTrans2Owner(Transformable *pOwner) {
     if (mTrans2Owner != nullptr) {
         mTrans2Owner->RemoveRef(this);
@@ -1121,7 +1121,7 @@ void Mesh::SetTrans2Owner(Transformable *pOwner) {
     }
 }
 
-// 0x00492e98
+// NTSC-U/C: 0x00492e98, PAL: 0x004d0d48
 Sphere Mesh::WorldSphere() {
     const auto &xfm = mTransOwner->mWorldXfm;
     const Vector3 &center = mSphere.mCenter;
@@ -1137,12 +1137,12 @@ Sphere Mesh::WorldSphere() {
     return sphere;
 }
 
-// 0x004940a8
+// NTSC-U/C: 0x004940a8, PAL: 0x004d1f58
 void Mesh::ForwardSync() {
     Sync();
 }
 
-// 0x00483030
+// NTSC-U/C: 0x00483030, PAL: 0x004c0e00
 Sphere Mesh::BoundingSphere() {
     Sphere sphere;
     const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
@@ -1186,7 +1186,7 @@ Sphere Mesh::BoundingSphere() {
     return sphere;
 }
 
-// 0x004832d0
+// NTSC-U/C: 0x004832d0, PAL: 0x004c10a0
 bool Mesh::JoinFlatFace(FlatFace &primary, FlatFace &face) {
     face.mPrimaryFace = primary.mFace;
     const MeshFace &faceCorners = mFacesOwner->mFaces[face.mFace];
@@ -1229,7 +1229,7 @@ bool Mesh::JoinFlatFace(FlatFace &primary, FlatFace &face) {
     return false;
 }
 
-// 0x00483438
+// NTSC-U/C: 0x00483438, PAL: 0x004c1208
 void Mesh::AssignFlatVerts(std::list<MeshAnim *> &anims) {
     std::vector<MeshFace> &faces = mFacesOwner->mFaces;
     std::list<FlatFace> heads;
@@ -1321,7 +1321,7 @@ void Mesh::AssignFlatVerts(std::list<MeshAnim *> &anims) {
     Sync();
 }
 
-// 0x00483e70
+// NTSC-U/C: 0x00483e70, PAL: 0x004c1c40
 void Mesh::WeldVerts(bool bAverageColors) {
     if (mVertsOwner->mVerts.empty()) {
         return;
@@ -1506,7 +1506,7 @@ void Mesh::WeldVerts(bool bAverageColors) {
     Sync();
 }
 
-// 0x00485978
+// NTSC-U/C: 0x00485978, PAL: 0x004c3748
 void Mesh::MakeCube(float flHalfSize) {
     const float flLow = -flHalfSize;
     const float flHigh = flHalfSize;
@@ -1534,7 +1534,7 @@ void Mesh::MakeCube(float flHalfSize) {
     Sync();
 }
 
-// 0x00485ef0
+// NTSC-U/C: 0x00485ef0, PAL: 0x004c3cc0
 void Mesh::ComputeNormals(bool bPositionOnly) {
     Vector3 axisCross{};
     CrossVec3(mWorldXfm[kXfmRowX], mWorldXfm[kXfmRowY], &axisCross.x);
@@ -1618,7 +1618,7 @@ void Mesh::ComputeNormals(bool bPositionOnly) {
     SyncChanged(kSyncNorms);
 }
 
-// 0x00493fb8
+// NTSC-U/C: 0x00493fb8, PAL: 0x004d1e68
 Box Mesh::BoundingBox() {
     const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
     Box box;
@@ -1630,7 +1630,7 @@ Box Mesh::BoundingBox() {
     return box;
 }
 
-// 0x00493c40
+// NTSC-U/C: 0x00493c40, PAL: 0x004d1af0
 void Mesh::SetTransOwner(Transformable *pOwner) {
     if (mTransOwner != nullptr) {
         mTransOwner->RemoveRef(this);
@@ -1641,7 +1641,7 @@ void Mesh::SetTransOwner(Transformable *pOwner) {
     }
 }
 
-// 0x004925d8
+// NTSC-U/C: 0x004925d8, PAL: 0x004d0488
 void Mesh::SetNext(Mesh *pNext, float flMinScreen) {
     mMinScreen = flMinScreen;
     if (mNext != nullptr) {
@@ -1653,7 +1653,7 @@ void Mesh::SetNext(Mesh *pNext, float flMinScreen) {
     }
 }
 
-// 0x00493b60
+// NTSC-U/C: 0x00493b60, PAL: 0x004d1a10
 void Mesh::SetVertsOwner(Mesh *pOwner) {
     if (mVertsOwner != nullptr) {
         mVertsOwner->RemoveRef(this);
@@ -1666,7 +1666,7 @@ void Mesh::SetVertsOwner(Mesh *pOwner) {
     SyncAll();
 }
 
-// 0x00493bd0
+// NTSC-U/C: 0x00493bd0, PAL: 0x004d1a80
 void Mesh::SetFacesOwner(Mesh *pOwner) {
     if (mFacesOwner != nullptr) {
         mFacesOwner->RemoveRef(this);
@@ -1679,7 +1679,7 @@ void Mesh::SetFacesOwner(Mesh *pOwner) {
     Sync();
 }
 
-// 0x00493ac8
+// NTSC-U/C: 0x00493ac8, PAL: 0x004d1978
 void Mesh::SetMaterialChain(Mat *pMat) {
     if (mMat != nullptr) {
         mMat->RemoveRef(this);
@@ -1693,7 +1693,7 @@ void Mesh::SetMaterialChain(Mat *pMat) {
     }
 }
 
-// 0x00493b30
+// NTSC-U/C: 0x00493b30, PAL: 0x004d19e0
 void Mesh::SetDepthChain(ZMode zMode, ZFunc zFunc) {
     mZMode = zMode;
     mZFunc = zFunc;
@@ -1702,7 +1702,7 @@ void Mesh::SetDepthChain(ZMode zMode, ZFunc zFunc) {
     }
 }
 
-// 0x00494048
+// NTSC-U/C: 0x00494048, PAL: 0x004d1ef8
 void Mesh::SetVertexColor(const Color &color) {
     for (MeshVert &vert : mVertsOwner->mVerts) {
         vert.mColor = color;
@@ -1735,7 +1735,7 @@ void Mesh::AddObjectRefs() {
     }
 }
 
-// 0x00493d48
+// NTSC-U/C: 0x00493d48, PAL: 0x004d1bf8
 void Mesh::RemoveObjectRefs() {
     if (mNext != nullptr) {
         mNext->RemoveRef(this);
@@ -1760,7 +1760,7 @@ void Mesh::RemoveObjectRefs() {
     }
 }
 
-// 0x0047fe68
+// NTSC-U/C: 0x0047fe68, PAL: 0x004bdb60
 void Mesh::ClearSharedGeometry() {
     if (mVertsOwner != this) {
         mVerts.clear();
@@ -1771,7 +1771,7 @@ void Mesh::ClearSharedGeometry() {
     }
 }
 
-// 0x00480818
+// NTSC-U/C: 0x00480818, PAL: 0x004be510
 int Mesh::PrepareDraw(Sphere &worldSphere) {
     if (mFacesOwner->mFaces.size() == 0 && mFacesOwner->mEdges.size() == 0) {
         return 0;

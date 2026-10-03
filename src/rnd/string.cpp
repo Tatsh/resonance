@@ -101,7 +101,7 @@ void WriteObjectName(Stream &stream, const Object *pObject) {
     }
 }
 
-// 0x004be168
+// NTSC-U/C: 0x004be168, PAL: 0x004fc1c0
 // Writes the point count and then one line per point, its index, its position, and
 // its colour.
 FailSink &DumpPointVector(FailSink &sink, const std::vector<String::Point> &points) {
@@ -134,7 +134,7 @@ FailSink &DumpPointVector(FailSink &sink, const std::vector<String::Point> &poin
     return sink;
 }
 
-// 0x004be408
+// NTSC-U/C: 0x004be408, PAL: 0x004fc460
 // Writes the point count and then seven floats per point. The padding word of the
 // position never arrives at a file.
 Stream &WritePointVector(Stream &stream, const std::vector<String::Point> &points) {
@@ -152,7 +152,7 @@ Stream &WritePointVector(Stream &stream, const std::vector<String::Point> &point
     return stream;
 }
 
-// 0x004be5a8
+// NTSC-U/C: 0x004be5a8, PAL: 0x004fc600
 // The reader counterpart of WritePointVector(). The resize fills every new element
 // with a default-constructed point before the seven floats overwrite its first two members.
 Stream &ReadPointVector(Stream &stream, std::vector<String::Point> &points) {
@@ -173,10 +173,10 @@ Stream &ReadPointVector(Stream &stream, std::vector<String::Point> &points) {
 
 } // namespace
 
-// 0x006fc348
+// NTSC-U/C: 0x006fc348, PAL: 0x0073fd28
 HxStr g_stringClassName("String");
 
-// 0x004bf440
+// NTSC-U/C: 0x004bf440, PAL: 0x004fd4c8
 // The creator the class registry stores. NewString() is inlined into it, and the null
 // test the compiler emits there is the conversion of a Rnd::String pointer to its Rnd::Object
 // virtual base rather than a check the source requests.
@@ -198,14 +198,14 @@ String::Point::Point() {
     mCamPos.w = 1.0f;
 }
 
-// 0x004ba898
+// NTSC-U/C: 0x004ba898, PAL: 0x004f88c8
 String::String(const HxStr &name)
     : Object(name), mpMat(nullptr), mWidth(1.0f), mHasCaps(1), mLinePairs(0),
       mFoldAngle(kDefaultFoldAngle) {
     CreateMesh();
 }
 
-// 0x004beee8
+// NTSC-U/C: 0x004beee8, PAL: 0x004fcf70
 String::~String() {
     DeleteMesh();
     ReleaseAllRefs();
@@ -256,7 +256,7 @@ static inline Vector3 CapEdge(const String::Point &point, bool bFarEdge, const V
     return edge;
 }
 
-// 0x004b9008
+// NTSC-U/C: 0x004b9008, PAL: 0x004f6f80
 void String::EmitRibbonVerts(Point *pFirst, Point *pLast) {
     Point *pPoint;
     for (pPoint = pFirst; pPoint != pLast; ++pPoint) {
@@ -318,7 +318,7 @@ void String::EmitRibbonVerts(Point *pFirst, Point *pLast) {
     }
 }
 
-// 0x004b95f8
+// NTSC-U/C: 0x004b95f8, PAL: 0x004f7570
 int String::DrawSelf() {
     Cam *pCam = g_pCurrentCam;
     if (pCam == nullptr || mPoints.size() < kMinRibbonPoints) {
@@ -415,7 +415,7 @@ int String::DrawSelf() {
     return 1;
 }
 
-// 0x004b9a68
+// NTSC-U/C: 0x004b9a68, PAL: 0x004f79e0
 void String::ResolvePointVertexSlot(unsigned nIndex, VertexSlot &slot) {
     std::vector<MeshVert> &verts = mpMesh->mVertsOwner->mVerts;
 
@@ -448,7 +448,7 @@ void String::ResolvePointVertexSlot(unsigned nIndex, VertexSlot &slot) {
     slot.mpVert = &verts[(nIndex + 1) * kVertsPerRung];
 }
 
-// 0x004b9b30
+// NTSC-U/C: 0x004b9b30, PAL: 0x004f7aa8
 void String::SetNumPoints(int nCount) {
     mPoints.resize(nCount);
     if (nCount <= 0) {
@@ -530,22 +530,22 @@ void String::SetNumPoints(int nCount) {
     mpMesh->Sync();
 }
 
-// 0x004bf3c0
+// NTSC-U/C: 0x004bf3c0, PAL: 0x004fd448
 int String::GetNumPoints() const {
     return static_cast<int>(mPoints.size());
 }
 
-// 0x004bf738
+// NTSC-U/C: 0x004bf738, PAL: 0x004fd7c0
 void String::SetPointPos(int nIndex, const Vector3 &pos) {
     mPoints[nIndex].mPos = pos;
 }
 
-// 0x004bf400
+// NTSC-U/C: 0x004bf400, PAL: 0x004fd488
 Vector3 *String::GetPointPos(int nIndex) {
     return &mPoints[nIndex].mPos;
 }
 
-// 0x004bf758
+// NTSC-U/C: 0x004bf758, PAL: 0x004fd7e0
 void String::SetPointColor(int nIndex, const Color &color) {
     mPoints[nIndex].mColor = color;
 
@@ -565,65 +565,65 @@ void String::SetPointColor(int nIndex, const Color &color) {
     mpMesh->SyncChanged(Mesh::kSyncColors);
 }
 
-// 0x004bf418
+// NTSC-U/C: 0x004bf418, PAL: 0x004fd4a0
 Color *String::GetPointColor(int nIndex) {
     return &mPoints[nIndex].mColor;
 }
 
-// 0x004bf668
+// NTSC-U/C: 0x004bf668, PAL: 0x004fd6f0
 void String::SetMat(Mat *pMat) {
     mpMesh->SetMaterial(pMat);
 }
 
-// 0x004bf500
+// NTSC-U/C: 0x004bf500, PAL: 0x004fd588
 Mat *String::GetMat() const {
     return mpMesh->mMat;
 }
 
-// 0x004bf3e0
+// NTSC-U/C: 0x004bf3e0, PAL: 0x004fd468
 float String::GetWidth() const {
     return mWidth;
 }
 
-// 0x004bf708
+// NTSC-U/C: 0x004bf708, PAL: 0x004fd790
 void String::SetFoldAngle(float flAngle) {
     mFoldAngle = flAngle;
     mFoldCos = cosf(flAngle);
 }
 
-// 0x004bf3f8
+// NTSC-U/C: 0x004bf3f8, PAL: 0x004fd480
 float String::GetFoldAngle() const {
     return mFoldAngle;
 }
 
-// 0x004bf688
+// NTSC-U/C: 0x004bf688, PAL: 0x004fd710
 void String::SetHasCaps(int nHasCaps) {
     mHasCaps = nHasCaps;
     SetNumPoints(GetNumPoints());
 }
 
-// 0x004bf3e8
+// NTSC-U/C: 0x004bf3e8, PAL: 0x004fd470
 int String::GetHasCaps() const {
     return mHasCaps;
 }
 
-// 0x004bf6c8
+// NTSC-U/C: 0x004bf6c8, PAL: 0x004fd750
 void String::SetLinePairs(int nLinePairs) {
     mLinePairs = nLinePairs;
     SetNumPoints(GetNumPoints());
 }
 
-// 0x004bf3f0
+// NTSC-U/C: 0x004bf3f0, PAL: 0x004fd478
 int String::GetLinePairs() const {
     return mLinePairs;
 }
 
-// 0x004bf638
+// NTSC-U/C: 0x004bf638, PAL: 0x004fd6c0
 void String::SetHighlight(int nHighlight) {
     mpMesh->SetHighlight(nHighlight);
 }
 
-// 0x004bf570
+// NTSC-U/C: 0x004bf570, PAL: 0x004fd5f8
 void String::Collide(const Ray &ray, HitSink &sink) {
     if (mShowing == 0) {
         return;
@@ -644,7 +644,7 @@ void String::Collide(const Ray &ray, HitSink &sink) {
     Collideable::Collide(ray, sink);
 }
 
-// 0x004ba038
+// NTSC-U/C: 0x004ba038, PAL: 0x004f7fb0
 void String::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
@@ -679,7 +679,7 @@ void String::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
-// 0x004ba258
+// NTSC-U/C: 0x004ba258, PAL: 0x004f81d0
 void String::Save(Stream &stream) {
     const int nVersion = kStringVersion;
     stream.Write(&nVersion, sizeof(nVersion));
@@ -699,19 +699,19 @@ void String::Save(Stream &stream) {
     stream.WriteBytes(&cLinePairs, sizeof(cLinePairs));
 }
 
-// 0x004bf510
+// NTSC-U/C: 0x004bf510, PAL: 0x004fd598
 void String::Replace(Object *pFrom, Object *pTo) {
     Drawable::Replace(pFrom, pTo);
     Collideable::Replace(pFrom, pTo);
     Transformable::Replace(pFrom, pTo);
 }
 
-// 0x004bf430
+// NTSC-U/C: 0x004bf430, PAL: 0x004fd4b8
 const HxStr &String::ClassName() const {
     return g_stringClassName;
 }
 
-// 0x004bf858
+// NTSC-U/C: 0x004bf858, PAL: 0x004fd8e0
 void String::Copy(const Object *pSource, unsigned nFlags) {
     const String *pSourceString = dynamic_cast<const String *>(pSource);
 
@@ -731,7 +731,7 @@ void String::Copy(const Object *pSource, unsigned nFlags) {
     CreateMesh();
 }
 
-// 0x004ba678
+// NTSC-U/C: 0x004ba678, PAL: 0x004f8678
 void String::Load(Stream &stream) {
     int nVersion = 0;
     stream.Read(&nVersion, sizeof(nVersion));
@@ -769,7 +769,7 @@ void String::Load(Stream &stream) {
     CreateMesh();
 }
 
-// 0x004ba3d0
+// NTSC-U/C: 0x004ba3d0, PAL: 0x004f8348
 void String::CreateMesh() {
     mpMesh = NewMeshThroughHook(HxStr("[") + mName + "_mesh]");
     mpMesh->mInternal = 1;
@@ -780,7 +780,7 @@ void String::CreateMesh() {
     SetNumPoints(GetNumPoints());
 }
 
-// 0x004bf810
+// NTSC-U/C: 0x004bf810, PAL: 0x004fd898
 void String::DeleteMesh() {
     if (mpMesh != nullptr) {
         delete mpMesh;
@@ -788,7 +788,7 @@ void String::DeleteMesh() {
     mpMesh = nullptr;
 }
 
-// 0x004bedc8
+// NTSC-U/C: 0x004bedc8, PAL: 0x004fce50
 String *String::NewString(const HxStr &name) {
     try {
         return new String(name);
@@ -797,7 +797,7 @@ String *String::NewString(const HxStr &name) {
     }
 }
 
-// 0x004bed98
+// NTSC-U/C: 0x004bed98, PAL: 0x004fce20
 void String::Init() {
     g_manager.RegisterClass(g_stringClassName, NewStringObject);
 }

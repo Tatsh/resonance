@@ -73,11 +73,15 @@ public:
      * The body is empty. Rnd::NewPsMesh() is the only construction site.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
-     * @ghidraAddress 0x00602600
+     * @ghidraAddress NTSC-U/C: 0x00602600
+     * @ghidraAddress PAL: 0x006431f0
      */
     PsMesh(const HxStr &name);
 
-    /** @ghidraAddress 0x00605f48 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00605f48
+     * @ghidraAddress PAL: 0x00646ba0
+     */
     virtual ~PsMesh();
 
     /**
@@ -91,7 +95,8 @@ public:
      *
      * @param mesh The mesh whose depth mode and depth function decide the registers.
      * @param nPass The material pass index, counted from zero.
-     * @ghidraAddress 0x00606d38
+     * @ghidraAddress NTSC-U/C: 0x00606d38
+     * @ghidraAddress PAL: 0x00647990
      */
     static void SelectDepthRegsForPass(const Mesh &mesh, int nPass);
 
@@ -110,7 +115,8 @@ public:
      *
      * @return The VU address just past the index data, the vertex quadwords plus 16 plus the
      *         triangle count.
-     * @ghidraAddress 0x00583ba0
+     * @ghidraAddress NTSC-U/C: 0x00583ba0
+     * @ghidraAddress PAL: 0x005c6d98
      */
     int EmitMultiMeshFaceRun();
 
@@ -127,7 +133,8 @@ protected:
      * forced to source-alpha blending.
      *
      * @return Non-zero when the children are to be drawn as well.
-     * @ghidraAddress 0x00602128
+     * @ghidraAddress NTSC-U/C: 0x00602128
+     * @ghidraAddress PAL: 0x00642d18
      */
     virtual int DrawSelf();
 
@@ -144,14 +151,16 @@ protected:
      *
      * The runs are built on mFacesOwner, so a mesh that shares its geometry shares them.
      *
-     * @ghidraAddress 0x00600590
+     * @ghidraAddress NTSC-U/C: 0x00600590
+     * @ghidraAddress PAL: 0x00641180
      */
     virtual void Sync();
 
     /**
      * Restore the references, resynchronise, and clamp every vertex colour to the unit range.
      *
-     * @ghidraAddress 0x00606a00
+     * @ghidraAddress NTSC-U/C: 0x00606a00
+     * @ghidraAddress PAL: 0x00647658
      */
     virtual void Refresh();
 
@@ -200,7 +209,8 @@ private:
          * in Sync() expand the body. The out-of-line copy has no caller.
          *
          * @param nIndexCount Halfwords of index data the block is to receive.
-         * @ghidraAddress 0x006069a0
+         * @ghidraAddress NTSC-U/C: 0x006069a0
+         * @ghidraAddress PAL: 0x006475f8
          */
         void ReserveIndices(int nIndexCount);
     };
@@ -256,7 +266,8 @@ private:
  *
  * @param name The object name.
  * @return The new mesh.
- * @ghidraAddress 0x00606928
+ * @ghidraAddress NTSC-U/C: 0x00606928
+ * @ghidraAddress PAL: 0x00647580
  */
 Mesh *NewPsMesh(const HxStr &name);
 

@@ -83,11 +83,15 @@ public:
      * parameters, and then threads the free list through AddObjectRefs().
      *
      * @param name The object name, passed to the Rnd::Object constructor.
-     * @ghidraAddress 0x005254a0
+     * @ghidraAddress NTSC-U/C: 0x005254a0
+     * @ghidraAddress PAL: 0x00565a78
      */
     ParticleSys(const HxStr &name);
 
-    /** @ghidraAddress 0x00524f58 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00524f58
+     * @ghidraAddress PAL: 0x00565530
+     */
     virtual ~ParticleSys();
 
     /**
@@ -95,7 +99,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x0052b340
+     * @ghidraAddress NTSC-U/C: 0x0052b340
+     * @ghidraAddress PAL: 0x0056b9b8
      */
     static void *operator new(size_t nSize);
 
@@ -103,7 +108,8 @@ public:
      * Release a particle system block under the same tag.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x0052b360
+     * @ghidraAddress NTSC-U/C: 0x0052b360
+     * @ghidraAddress PAL: 0x0056b9d8
      */
     static void operator delete(void *pBlock);
 
@@ -111,7 +117,8 @@ public:
      * Write the system to the engine text sink.
      *
      * @param sink The text sink.
-     * @ghidraAddress 0x00521f40
+     * @ghidraAddress NTSC-U/C: 0x00521f40
+     * @ghidraAddress PAL: 0x005624c8
      */
     virtual void DumpText(FailSink &sink);
 
@@ -119,7 +126,8 @@ public:
      * Serialise the system.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00522d60
+     * @ghidraAddress NTSC-U/C: 0x00522d60
+     * @ghidraAddress PAL: 0x005632e8
      */
     virtual void Save(Stream &stream);
 
@@ -131,7 +139,8 @@ public:
      *
      * @param pFrom The object being replaced.
      * @param pTo The object to point at, which may be null.
-     * @ghidraAddress 0x00524318
+     * @ghidraAddress NTSC-U/C: 0x00524318
+     * @ghidraAddress PAL: 0x005648f0
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -139,7 +148,8 @@ public:
      * Return the registered class name, "ParticleSys".
      *
      * @return The class name.
-     * @ghidraAddress 0x0052b4a8
+     * @ghidraAddress NTSC-U/C: 0x0052b4a8
+     * @ghidraAddress PAL: 0x0056bb20
      */
     virtual const HxStr &ClassName() const;
 
@@ -155,7 +165,8 @@ public:
      * @param pSource The source object. The binary dereferences the cast result without a null
      * check, so a source that is not a system faults.
      * @param nFlags The copy flags.
-     * @ghidraAddress 0x00521d38
+     * @ghidraAddress NTSC-U/C: 0x00521d38
+     * @ghidraAddress PAL: 0x005622c0
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -166,7 +177,8 @@ public:
      * what this build writes.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00523718
+     * @ghidraAddress NTSC-U/C: 0x00523718
+     * @ghidraAddress PAL: 0x00563ca0
      */
     virtual void Load(Stream &stream);
 
@@ -177,7 +189,8 @@ public:
      * Rnd::Animatable::StartAnim(). This is the only override of that slot in the shipped build,
      * so it is also the evidence the slot's title rests on.
      *
-     * @ghidraAddress 0x0052c490
+     * @ghidraAddress NTSC-U/C: 0x0052c490
+     * @ghidraAddress PAL: 0x0056cb08
      */
     virtual void StartAnim();
 
@@ -195,7 +208,8 @@ public:
      * "Tried to refree particle from " with the name of the system. The head of the live list
      * stores its own address in mPrev as the marker that distinguishes it from a free particle.
      *
-     * @ghidraAddress 0x00524a70
+     * @ghidraAddress NTSC-U/C: 0x00524a70
+     * @ghidraAddress PAL: 0x00565048
      */
     void FreeAllParticles();
 
@@ -207,7 +221,8 @@ public:
      * becomes the head of the live list and stores its own address in mPrev.
      *
      * @return The particle, or null once the pool is exhausted.
-     * @ghidraAddress 0x0052c378
+     * @ghidraAddress NTSC-U/C: 0x0052c378
+     * @ghidraAddress PAL: 0x0056c9f0
      */
     Particle *AllocParticle();
 
@@ -221,7 +236,8 @@ public:
      *
      * @param pParticle The particle to release, or null.
      * @return The live particle that followed it, which lets a caller release while walking.
-     * @ghidraAddress 0x0052c3c0
+     * @ghidraAddress NTSC-U/C: 0x0052c3c0
+     * @ghidraAddress PAL: 0x0056ca38
      */
     Particle *FreeParticle(Particle *pParticle);
 
@@ -235,7 +251,8 @@ public:
      * touched.
      *
      * @param pParticle The particle to write.
-     * @ghidraAddress 0x0052c530
+     * @ghidraAddress NTSC-U/C: 0x0052c530
+     * @ghidraAddress PAL: 0x0056cba8
      */
     void RandomizeColorAndSize(Particle *pParticle);
 
@@ -246,7 +263,8 @@ public:
      * and the name is inferred.
      *
      * @param pMat The material, or null.
-     * @ghidraAddress 0x0052c658
+     * @ghidraAddress NTSC-U/C: 0x0052c658
+     * @ghidraAddress PAL: 0x0056ccd0
      */
     void SetMat(Mat *pMat);
 
@@ -258,7 +276,8 @@ public:
      * copy in the image is an out-of-line emission with no caller, and the name is inferred.
      *
      * @param pOwner The system whose particles to draw.
-     * @ghidraAddress 0x0052c288
+     * @ghidraAddress NTSC-U/C: 0x0052c288
+     * @ghidraAddress PAL: 0x0056c900
      */
     void SetParticlesOwner(ParticleSys *pOwner);
 
@@ -269,7 +288,8 @@ public:
      * Rnd::Generator::DrawSelf() inline it.
      *
      * @return The first live particle, or null.
-     * @ghidraAddress 0x0052b4b8
+     * @ghidraAddress NTSC-U/C: 0x0052b4b8
+     * @ghidraAddress PAL: 0x0056bb30
      */
     Particle *GetLiveParticles() const {
         return mLiveParticles;
@@ -281,7 +301,8 @@ public:
      * The out-of-line copy has no callers. TnlEmitter inlines it.
      *
      * @param force The force.
-     * @ghidraAddress 0x0052b690
+     * @ghidraAddress NTSC-U/C: 0x0052b690
+     * @ghidraAddress PAL: 0x0056bd08
      */
     void SetForce(const Vector3 &force) {
         mForce = force;
@@ -293,7 +314,8 @@ public:
      * The out-of-line copy has no callers. TnlEmitter inlines it.
      *
      * @return The force.
-     * @ghidraAddress 0x0052b6a0
+     * @ghidraAddress NTSC-U/C: 0x0052b6a0
+     * @ghidraAddress PAL: 0x0056bd18
      */
     Vector3 &GetForce() {
         return mForce;
@@ -308,7 +330,8 @@ protected:
      * whatever the emission rate calls for.
      *
      * @param flFrame The filtered frame to animate to.
-     * @ghidraAddress 0x0052c4c0
+     * @ghidraAddress NTSC-U/C: 0x0052c4c0
+     * @ghidraAddress PAL: 0x0056cb38
      */
     virtual void SetFrameSelf(float flFrame);
 
@@ -321,7 +344,8 @@ protected:
      * name is inferred from the dump label.
      *
      * @param nCount The new pool size.
-     * @ghidraAddress 0x00521c58
+     * @ghidraAddress NTSC-U/C: 0x00521c58
+     * @ghidraAddress PAL: 0x005621e0
      */
     void SetNumParticles(int nCount);
 
@@ -331,19 +355,19 @@ private:
     void UpdateParticles(float flDeltaFrames);
 
     // Allocate and initialise the particles the emission rate calls for over a span of frames.
-    // 0x005244b0
+    // NTSC-U/C: 0x005244b0, PAL: 0x00564a88
     void SpawnParticles(float flDeltaFrames);
 
     // Drop the reference on the material and on the particle owner, and remove this system from
     // the owner's sharer list. Copy() calls it, and the destructor and Replace() open-code it.
-    // 0x0052c318
+    // NTSC-U/C: 0x0052c318, PAL: 0x0056c990
     void RemoveObjectRefs();
 
     // Take the references RemoveObjectRefs() drops. A system that is its own owner also threads
     // the whole pool onto its free list and empties the live list of every sharer, and any other
     // system joins the sharer list of its owner. Either way this system's live list starts empty
     // and mEmitAccumulator is cleared. The constructor, Copy(), Replace(), and Load() call it.
-    // 0x005241a8
+    // NTSC-U/C: 0x005241a8, PAL: 0x00564780
     void AddObjectRefs();
 
     // Data members follow the recovered offset order.
@@ -454,7 +478,8 @@ public:
  *
  * @param name The object name.
  * @return The new system.
- * @ghidraAddress 0x0052b768
+ * @ghidraAddress NTSC-U/C: 0x0052b768
+ * @ghidraAddress PAL: 0x0056bde0
  */
 ParticleSys *NewParticleSys(const HxStr &name);
 
@@ -466,7 +491,8 @@ ParticleSys *NewParticleSys(const HxStr &name);
  *
  * @param name The object name.
  * @return The new system, as its Rnd::Object subobject.
- * @ghidraAddress 0x0052b6d8
+ * @ghidraAddress NTSC-U/C: 0x0052b6d8
+ * @ghidraAddress PAL: 0x0056bd50
  */
 Object *CreateRegisteredParticleSys(const HxStr &name);
 
@@ -476,7 +502,8 @@ Object *CreateRegisteredParticleSys(const HxStr &name);
  * GfxDevice::Init() overwrites the hook with the Rnd::PsParticleSys creator, so a system loaded
  * from a file on the PlayStation 2 is a PsParticleSys.
  *
- * @ghidraAddress 0x0071aef8
+ * @ghidraAddress NTSC-U/C: 0x0071aef8
+ * @ghidraAddress PAL: 0x0075ee20
  */
 extern ParticleSys *(*g_pfnNewParticleSys)(const HxStr &name);
 
@@ -488,14 +515,16 @@ extern ParticleSys *(*g_pfnNewParticleSys)(const HxStr &name);
  *
  * @param name The object name.
  * @return The new system.
- * @ghidraAddress 0x0052b3c0
+ * @ghidraAddress NTSC-U/C: 0x0052b3c0
+ * @ghidraAddress PAL: 0x0056ba38
  */
 ParticleSys *NewParticleSysThroughHook(const HxStr &name);
 
 /**
  * Registered class name of Rnd::ParticleSys, the string "ParticleSys".
  *
- * @ghidraAddress 0x0071aef0
+ * @ghidraAddress NTSC-U/C: 0x0071aef0
+ * @ghidraAddress PAL: 0x0075ee18
  */
 extern HxStr g_particleSysClassName;
 
@@ -508,7 +537,8 @@ extern HxStr g_particleSysClassName;
  *
  * Rnd::Manager::Init() also expands this inline.
  *
- * @ghidraAddress 0x0052b380
+ * @ghidraAddress NTSC-U/C: 0x0052b380
+ * @ghidraAddress PAL: 0x0056b9f8
  */
 inline void RegisterParticleSysClass() {
     g_pfnNewParticleSys = NewParticleSys;

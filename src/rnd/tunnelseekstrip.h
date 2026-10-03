@@ -33,7 +33,8 @@ struct TunnelSeekStrip {
      *
      * The step counters at `+0x30` and `+0x34` are left unset until Build().
      *
-     * @ghidraAddress 0x0046e7d8
+     * @ghidraAddress NTSC-U/C: 0x0046e7d8
+     * @ghidraAddress PAL: 0x004ac3b8
      */
     TunnelSeekStrip();
 
@@ -52,7 +53,8 @@ struct TunnelSeekStrip {
      *
      * mTunnel is cleared as well, and mMat is not.
      *
-     * @ghidraAddress 0x0046ea98
+     * @ghidraAddress NTSC-U/C: 0x0046ea98
+     * @ghidraAddress PAL: 0x004ac698
      */
     void Clear();
 
@@ -66,14 +68,16 @@ struct TunnelSeekStrip {
      * @param nFirstSlice The first slice of the run.
      * @param nSliceCount The number of slices.
      * @param nRing The ring.
-     * @ghidraAddress 0x0046eb48
+     * @ghidraAddress NTSC-U/C: 0x0046eb48
+     * @ghidraAddress PAL: 0x004ac748
      */
     void SetRange(int nFirstSlice, int nSliceCount, int nRing);
 
     /**
      * Place the strip again on the run it last received.
      *
-     * @ghidraAddress 0x00477ff0
+     * @ghidraAddress NTSC-U/C: 0x00477ff0
+     * @ghidraAddress PAL: 0x004b5c68
      */
     void Refresh();
 
@@ -87,7 +91,8 @@ struct TunnelSeekStrip {
      * @param pTunnel The tunnel.
      * @param pOwner The seeker that owns the strip.
      * @param nIndex The index of the seeker, used in the mesh titles.
-     * @ghidraAddress 0x0046e830
+     * @ghidraAddress NTSC-U/C: 0x0046e830
+     * @ghidraAddress PAL: 0x004ac410
      */
     void Build(Tunnel *pTunnel, TunnelSeeker *pOwner, int nIndex);
 
@@ -95,7 +100,8 @@ struct TunnelSeekStrip {
      * Replace the material and hand it to the finest mesh of every section.
      *
      * @param pMat The material, or null.
-     * @ghidraAddress 0x00477f18
+     * @ghidraAddress NTSC-U/C: 0x00477f18
+     * @ghidraAddress PAL: 0x004b5b90
      */
     void SetMat(Mat *pMat);
 
@@ -105,7 +111,8 @@ struct TunnelSeekStrip {
      * A dirty section takes the colour when Update() next copies its geometry.
      *
      * @param color The colour.
-     * @ghidraAddress 0x00477e68
+     * @ghidraAddress NTSC-U/C: 0x00477e68
+     * @ghidraAddress PAL: 0x004b5ae0
      */
     void SetColor(const Color &color);
 
@@ -118,7 +125,8 @@ struct TunnelSeekStrip {
      *
      * @param nSlice The slice being drawn.
      * @param flScreenSize The screen size used to pick the level of detail.
-     * @ghidraAddress 0x0046ec40
+     * @ghidraAddress NTSC-U/C: 0x0046ec40
+     * @ghidraAddress PAL: 0x004ac840
      */
     void DrawSection(int nSlice, float flScreenSize);
 
@@ -128,7 +136,8 @@ struct TunnelSeekStrip {
      * @param pFrom The object being replaced.
      * @param pTo The replacement, which must be a Rnd::Mat or null.
      * @param pReferrer The object the reference is held on behalf of.
-     * @ghidraAddress 0x00477db8
+     * @ghidraAddress NTSC-U/C: 0x00477db8
+     * @ghidraAddress PAL: 0x004b5a30
      */
     void Replace(Object *pFrom, Object *pTo, Object *pReferrer);
 

@@ -9,12 +9,12 @@ constexpr int kNameBufferSize = 0x100;
 
 static char g_szNameBuffer[kNameBufferSize];
 
-// 0x0050fb60
+// NTSC-U/C: 0x0050fb60, PAL: 0x0054f148
 Stream &Stream::Read(void *pDest, int nSize) {
     return ReadBytes(pDest, nSize);
 }
 
-// 0x0050fb88
+// NTSC-U/C: 0x0050fb88, PAL: 0x0054f170
 Stream &Stream::Write(const void *pSrc, int nSize) {
     return WriteBytes(pSrc, nSize);
 }
@@ -24,7 +24,7 @@ Stream &Stream::Write(const void *pSrc, int nSize) {
 Stream::~Stream() {
 }
 
-// 0x0050f140
+// NTSC-U/C: 0x0050f140, PAL: 0x0054e6e8
 Stream &Stream::ReadString(HxStr &name) {
     name.Clear();
 

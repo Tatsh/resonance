@@ -22,7 +22,7 @@ static const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-// 0x0053fa40
+// NTSC-U/C: 0x0053fa40, PAL: 0x0057f6f8
 static FailSink &operator<<(FailSink &sink, const std::list<Object *> &refs) {
     sink.Print("(size:");
     sink.Format(kCountFormat, refs.size());
@@ -45,14 +45,14 @@ static FailSink &operator<<(FailSink &sink, const std::list<Object *> &refs) {
 
 void (*g_pfnNameChanged)(Object *pObject);
 
-// 0x0053fc08
+// NTSC-U/C: 0x0053fc08, PAL: 0x0057f8c0
 //
 // mInternal, mMerge, and mDeleting are not written here. The named constructor below does set all
 // three.
 Object::Object() : mName(nullptr) {
 }
 
-// 0x0053e0d8
+// NTSC-U/C: 0x0053e0d8, PAL: 0x0057dd08
 Object::Object(const HxStr &name) : mName(name), mInternal(0), mMerge(1), mDeleting(0) {
     if (g_manager.Find(name) != nullptr) {
         g_failSink.Report(kAlreadyExistsFormat, name.mStr != nullptr ? name.mStr : "");
@@ -67,7 +67,7 @@ Object::Object(const HxStr &name) : mName(name), mInternal(0), mMerge(1), mDelet
     g_manager.mObjects[mName] = this;
 }
 
-// 0x0053e348
+// NTSC-U/C: 0x0053e348, PAL: 0x0057dfa8
 Object::~Object() {
     if (g_pfnNameChanged != nullptr) {
         g_pfnNameChanged(this);
@@ -75,7 +75,7 @@ Object::~Object() {
     g_manager.mObjects.erase(mName);
 }
 
-// 0x0053e400
+// NTSC-U/C: 0x0053e400, PAL: 0x0057e070
 void Object::SetName(const HxStr &name) {
     if (mName == name) {
         return;
@@ -93,7 +93,7 @@ void Object::SetName(const HxStr &name) {
     g_manager.mObjects[mName] = this;
 }
 
-// 0x0053e720
+// NTSC-U/C: 0x0053e720, PAL: 0x0057e3b0
 void Object::AddRef(Object *pReferrer) {
     if (pReferrer == this) {
         return;
@@ -101,7 +101,7 @@ void Object::AddRef(Object *pReferrer) {
     mRefs.push_front(pReferrer);
 }
 
-// 0x0053e7d0
+// NTSC-U/C: 0x0053e7d0, PAL: 0x0057e460
 void Object::RemoveRef(Object *pReferrer) {
     if (mDeleting != 0) {
         return;
@@ -114,7 +114,7 @@ void Object::RemoveRef(Object *pReferrer) {
     }
 }
 
-// 0x0053fca0
+// NTSC-U/C: 0x0053fca0, PAL: 0x0057f960
 void Object::ReleaseAllRefs() {
     mDeleting = 1;
     mRefs.unique();
@@ -124,7 +124,7 @@ void Object::ReleaseAllRefs() {
     mRefs.clear();
 }
 
-// 0x0053e5a8
+// NTSC-U/C: 0x0053e5a8, PAL: 0x0057e238
 void Object::DumpText(FailSink &sink) {
     sink.Print("[Object]\n");
     sink.Print("name:");

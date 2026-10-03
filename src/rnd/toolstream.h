@@ -28,7 +28,8 @@ public:
     /**
      * Construct an empty stream over a 0x4000-byte buffer from the untagged heap.
      *
-     * @ghidraAddress 0x00510238
+     * @ghidraAddress NTSC-U/C: 0x00510238
+     * @ghidraAddress PAL: 0x0054f820
      */
     ToolStream();
 
@@ -39,32 +40,57 @@ public:
      * and of the buffer, so the host tool can write into them. No call site survives in the
      * shipped program, and the name is inferred from the text.
      *
-     * @ghidraAddress 0x00510480
+     * @ghidraAddress NTSC-U/C: 0x00510480
+     * @ghidraAddress PAL: 0x0054fa68
      */
     void Connect();
 
-    /** @ghidraAddress 0x00510288 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00510288
+     * @ghidraAddress PAL: 0x0054f870
+     */
     virtual ~ToolStream();
 
-    /** @ghidraAddress 0x00510308 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00510308
+     * @ghidraAddress PAL: 0x0054f8f0
+     */
     virtual Stream &ReadBytes(void *pDest, int nSize);
 
-    /** @ghidraAddress 0x00510400 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00510400
+     * @ghidraAddress PAL: 0x0054f9e8
+     */
     virtual Stream &WriteBytes(const void *pSrc, int nSize);
 
-    /** @ghidraAddress 0x00510468 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00510468
+     * @ghidraAddress PAL: 0x0054fa50
+     */
     virtual Stream &Flush();
 
-    /** @ghidraAddress 0x0050fde0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0050fde0
+     * @ghidraAddress PAL: 0x0054f3c8
+     */
     virtual Stream &Seek(int nOffset, int nWhence);
 
-    /** @ghidraAddress 0x0050fde8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0050fde8
+     * @ghidraAddress PAL: 0x0054f3d0
+     */
     virtual int Tell();
 
-    /** @ghidraAddress 0x005102f0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x005102f0
+     * @ghidraAddress PAL: 0x0054f8d8
+     */
     virtual int Eof();
 
-    /** @ghidraAddress 0x005102e8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x005102e8
+     * @ghidraAddress PAL: 0x0054f8d0
+     */
     virtual int Fail();
 
 private:

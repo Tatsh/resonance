@@ -96,14 +96,16 @@ public:
      * writes the mesh pointer; the CreateMesh() call it ends with is what fills it.
      *
      * @param name The registry key for this object.
-     * @ghidraAddress 0x004ba898
+     * @ghidraAddress NTSC-U/C: 0x004ba898
+     * @ghidraAddress PAL: 0x004f88c8
      */
     explicit String(const HxStr &name);
 
     /**
      * Release the owned mesh and the point vector.
      *
-     * @ghidraAddress 0x004beee8
+     * @ghidraAddress NTSC-U/C: 0x004beee8
+     * @ghidraAddress PAL: 0x004fcf70
      */
     virtual ~String();
 
@@ -120,7 +122,8 @@ public:
      * geometry it already had.
      *
      * @param nCount The number of points.
-     * @ghidraAddress 0x004b9b30
+     * @ghidraAddress NTSC-U/C: 0x004b9b30
+     * @ghidraAddress PAL: 0x004f7aa8
      */
     void SetNumPoints(int nCount);
 
@@ -128,7 +131,8 @@ public:
      * Report how many points the ribbon runs through.
      *
      * @return The point count.
-     * @ghidraAddress 0x004bf3c0
+     * @ghidraAddress NTSC-U/C: 0x004bf3c0
+     * @ghidraAddress PAL: 0x004fd448
      */
     int GetNumPoints() const;
 
@@ -141,7 +145,8 @@ public:
      *
      * @param nIndex The point to move.
      * @param pos The new position.
-     * @ghidraAddress 0x004bf738
+     * @ghidraAddress NTSC-U/C: 0x004bf738
+     * @ghidraAddress PAL: 0x004fd7c0
      */
     void SetPointPos(int nIndex, const Vector3 &pos);
 
@@ -154,7 +159,8 @@ public:
      *
      * @param nIndex The point to address.
      * @return The position.
-     * @ghidraAddress 0x004bf400
+     * @ghidraAddress NTSC-U/C: 0x004bf400
+     * @ghidraAddress PAL: 0x004fd488
      */
     Vector3 *GetPointPos(int nIndex);
 
@@ -166,7 +172,8 @@ public:
      *
      * @param nIndex The point to colour.
      * @param color The new colour.
-     * @ghidraAddress 0x004bf758
+     * @ghidraAddress NTSC-U/C: 0x004bf758
+     * @ghidraAddress PAL: 0x004fd7e0
      */
     void SetPointColor(int nIndex, const Color &color);
 
@@ -177,7 +184,8 @@ public:
      *
      * @param nIndex The point to read.
      * @return The colour.
-     * @ghidraAddress 0x004bf418
+     * @ghidraAddress NTSC-U/C: 0x004bf418
+     * @ghidraAddress PAL: 0x004fd4a0
      */
     Color *GetPointColor(int nIndex);
 
@@ -188,7 +196,8 @@ public:
      * later CreateMesh() therefore restores the material a load or a copy supplied.
      *
      * @param pMat The material, or null for none.
-     * @ghidraAddress 0x004bf668
+     * @ghidraAddress NTSC-U/C: 0x004bf668
+     * @ghidraAddress PAL: 0x004fd6f0
      */
     void SetMat(Mat *pMat);
 
@@ -198,7 +207,8 @@ public:
      * The value comes from the owned mesh rather than from the stored material.
      *
      * @return The material, or null when none is set.
-     * @ghidraAddress 0x004bf500
+     * @ghidraAddress NTSC-U/C: 0x004bf500
+     * @ghidraAddress PAL: 0x004fd588
      */
     Mat *GetMat() const;
 
@@ -206,7 +216,8 @@ public:
      * Report the width of the ribbon in screen units.
      *
      * @return The width.
-     * @ghidraAddress 0x004bf3e0
+     * @ghidraAddress NTSC-U/C: 0x004bf3e0
+     * @ghidraAddress PAL: 0x004fd468
      */
     float GetWidth() const;
 
@@ -216,7 +227,8 @@ public:
      * Only the stored width changes. The ribbon is not rebuilt.
      *
      * @param flWidth The width.
-     * @ghidraAddress 0x004bee78
+     * @ghidraAddress NTSC-U/C: 0x004bee78
+     * @ghidraAddress PAL: 0x004fcf00
      */
     void SetWidth(float flWidth) {
         mWidth = flWidth;
@@ -226,7 +238,8 @@ public:
      * Set the bend the ribbon folds at and cache its cosine.
      *
      * @param flAngle The angle in radians.
-     * @ghidraAddress 0x004bf708
+     * @ghidraAddress NTSC-U/C: 0x004bf708
+     * @ghidraAddress PAL: 0x004fd790
      */
     void SetFoldAngle(float flAngle);
 
@@ -234,7 +247,8 @@ public:
      * Report the bend the ribbon folds at.
      *
      * @return The angle in radians.
-     * @ghidraAddress 0x004bf3f8
+     * @ghidraAddress NTSC-U/C: 0x004bf3f8
+     * @ghidraAddress PAL: 0x004fd480
      */
     float GetFoldAngle() const;
 
@@ -245,7 +259,8 @@ public:
      * the current point count.
      *
      * @param nHasCaps Non-zero for capped ends.
-     * @ghidraAddress 0x004bf688
+     * @ghidraAddress NTSC-U/C: 0x004bf688
+     * @ghidraAddress PAL: 0x004fd710
      */
     void SetHasCaps(int nHasCaps);
 
@@ -253,7 +268,8 @@ public:
      * Report the cap flag.
      *
      * @return Non-zero when the ribbon ends in caps.
-     * @ghidraAddress 0x004bf3e8
+     * @ghidraAddress NTSC-U/C: 0x004bf3e8
+     * @ghidraAddress PAL: 0x004fd470
      */
     int GetHasCaps() const;
 
@@ -263,7 +279,8 @@ public:
      * The mesh is rebuilt at the current point count, on the same grounds as SetHasCaps().
      *
      * @param nLinePairs Non-zero to draw each pair of points as its own segment.
-     * @ghidraAddress 0x004bf6c8
+     * @ghidraAddress NTSC-U/C: 0x004bf6c8
+     * @ghidraAddress PAL: 0x004fd750
      */
     void SetLinePairs(int nLinePairs);
 
@@ -271,7 +288,8 @@ public:
      * Report the line-pair flag.
      *
      * @return Non-zero when each pair of points is its own segment.
-     * @ghidraAddress 0x004bf3f0
+     * @ghidraAddress NTSC-U/C: 0x004bf3f0
+     * @ghidraAddress PAL: 0x004fd478
      */
     int GetLinePairs() const;
 
@@ -282,7 +300,8 @@ public:
      * string therefore never reports the value that was set. The behaviour matches the binary.
      *
      * @param nHighlight Non-zero to highlight.
-     * @ghidraAddress 0x004bf638
+     * @ghidraAddress NTSC-U/C: 0x004bf638
+     * @ghidraAddress PAL: 0x004fd6c0
      */
     virtual void SetHighlight(int nHighlight);
 
@@ -295,7 +314,8 @@ public:
      *
      * @param ray The segment to test along.
      * @param sink The collector to append intersections to.
-     * @ghidraAddress 0x004bf570
+     * @ghidraAddress NTSC-U/C: 0x004bf570
+     * @ghidraAddress PAL: 0x004fd5f8
      */
     virtual void Collide(const Ray &ray, HitSink &sink);
 
@@ -306,7 +326,8 @@ public:
      * dump level. The mesh name follows at dump level 2 or above.
      *
      * @param sink The diagnostic sink to write to.
-     * @ghidraAddress 0x004ba038
+     * @ghidraAddress NTSC-U/C: 0x004ba038
+     * @ghidraAddress PAL: 0x004f7fb0
      */
     virtual void DumpText(FailSink &sink);
 
@@ -314,7 +335,8 @@ public:
      * Write this ribbon's serialised form to stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x004ba258
+     * @ghidraAddress NTSC-U/C: 0x004ba258
+     * @ghidraAddress PAL: 0x004f81d0
      */
     virtual void Save(Stream &stream);
 
@@ -326,7 +348,8 @@ public:
      *
      * @param pFrom The object going away.
      * @param pTo The object to store instead, or null.
-     * @ghidraAddress 0x004bf510
+     * @ghidraAddress NTSC-U/C: 0x004bf510
+     * @ghidraAddress PAL: 0x004fd598
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -337,7 +360,8 @@ public:
      * with "String".
      *
      * @return The class key.
-     * @ghidraAddress 0x004bf430
+     * @ghidraAddress NTSC-U/C: 0x004bf430
+     * @ghidraAddress PAL: 0x004fd4b8
      */
     virtual const HxStr &ClassName() const;
 
@@ -349,7 +373,8 @@ public:
      *
      * @param pSource The ribbon to copy from.
      * @param nFlags The set of fields to copy; see kCopyChildLists.
-     * @ghidraAddress 0x004bf858
+     * @ghidraAddress NTSC-U/C: 0x004bf858
+     * @ghidraAddress PAL: 0x004fd8e0
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -361,7 +386,8 @@ public:
      * resolved by name through Rnd::g_manager.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x004ba678
+     * @ghidraAddress NTSC-U/C: 0x004ba678
+     * @ghidraAddress PAL: 0x004f8678
      */
     virtual void Load(Stream &stream);
 
@@ -370,7 +396,8 @@ public:
      *
      * @param name The registry key for the new ribbon.
      * @return The new ribbon.
-     * @ghidraAddress 0x004bedc8
+     * @ghidraAddress NTSC-U/C: 0x004bedc8
+     * @ghidraAddress PAL: 0x004fce50
      */
     static String *NewString(const HxStr &name);
 
@@ -381,7 +408,8 @@ public:
      * shipped program, because `Rnd::Manager::Init` performs the same registration inline at
      * `0x00519eac`.
      *
-     * @ghidraAddress 0x004bed98
+     * @ghidraAddress NTSC-U/C: 0x004bed98
+     * @ghidraAddress PAL: 0x004fce20
      */
     static void Init();
 
@@ -403,7 +431,8 @@ protected:
      * update, and a draw.
      *
      * @return Non-zero. The children are drawn as well.
-     * @ghidraAddress 0x004b95f8
+     * @ghidraAddress NTSC-U/C: 0x004b95f8
+     * @ghidraAddress PAL: 0x004f7570
      */
     virtual int DrawSelf();
 
@@ -422,23 +451,23 @@ private:
     // A point that is neither end of a run governs two vertices, and a cap point governs four.
     enum { kVertexSlotBody = 0, kVertexSlotStartCap = 1, kVertexSlotEndCap = 2 };
 
-    // 0x004b9a68
+    // NTSC-U/C: 0x004b9a68, PAL: 0x004f79e0
     // Reports the mode of point nIndex and the first mesh vertex it governs.
     void ResolvePointVertexSlot(unsigned nIndex, VertexSlot &slot);
 
-    // 0x004ba3d0
+    // NTSC-U/C: 0x004ba3d0, PAL: 0x004f8348
     // Builds the owned mesh, applies the stored material and the depth state to it,
     // caches the cosine of the fold angle, and sizes the geometry to the current point count. The
     // constructor, Load(), and Copy() are the callers. The binary has a catch-all handler inside it
     // that returns null.
     void CreateMesh();
 
-    // 0x004bf810
+    // NTSC-U/C: 0x004bf810, PAL: 0x004fd898
     // Releases the owned mesh and clears the pointer. The destructor is the only
     // out-of-line caller, and Load() and Copy() inline the same body.
     void DeleteMesh();
 
-    // 0x004b9008
+    // NTSC-U/C: 0x004b9008, PAL: 0x004f6f80
     // Builds the screen direction and the perpendicular of every point in the closed
     // range, widens each by mWidth, and folds the ribbon wherever the turn between two segments
     // passes mFoldCos. A corner sharper than a near-straight turn is mitred at the crossing of the
@@ -468,7 +497,8 @@ private:
 /**
  * Class key a `.rnd` file writes for a ribbon.
  *
- * @ghidraAddress 0x006fc348
+ * @ghidraAddress NTSC-U/C: 0x006fc348
+ * @ghidraAddress PAL: 0x0073fd28
  */
 extern HxStr g_stringClassName;
 

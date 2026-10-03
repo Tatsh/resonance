@@ -115,7 +115,7 @@ inline void ApplyLightColor(GifQuadword *pQuad, const Color &light, int bFromVer
 
 } // namespace
 
-// 0x005af0c8
+// NTSC-U/C: 0x005af0c8, PAL: 0x005f1670
 int TransformLightRecords(DirectionalLightRecord *&pDirectionalBegin,
                           DirectionalLightRecord *&pDirectionalEnd,
                           PointLightRecord *&pPointBegin,
@@ -143,7 +143,7 @@ int TransformLightRecords(DirectionalLightRecord *&pDirectionalBegin,
     return nActive;
 }
 
-// 0x005af2c0
+// NTSC-U/C: 0x005af2c0, PAL: 0x005f1868
 int SelectLightForVertex(GifQuadword *pLight,
                          GifQuadword *pAmbient,
                          GifQuadword *pDiffuse,
@@ -180,38 +180,38 @@ int SelectLightForVertex(GifQuadword *pLight,
     return kVu1EntryNoLight;
 }
 
-// 0x00776118
+// NTSC-U/C: 0x00776118, PAL: 0x007b9ff0
 int g_nFogEnabled;
 
-// 0x00776120
+// NTSC-U/C: 0x00776120, PAL: 0x007b9ff8
 std::vector<DirectionalLightRecord> g_directionalLightRecords;
 
-// 0x00776130
+// NTSC-U/C: 0x00776130, PAL: 0x007ba008
 std::vector<PointLightRecord> g_pointLightRecords;
 
-// 0x0077613c
+// NTSC-U/C: 0x0077613c, PAL: 0x007ba014
 PsEnviron *g_pDefaultEnviron;
 
-// 0x00776140
+// NTSC-U/C: 0x00776140, PAL: 0x007ba018
 Light *g_pDefaultLight;
 
-// 0x00776110
+// NTSC-U/C: 0x00776110, PAL: 0x007b9fe8
 float g_flFogScale;
 
-// 0x00776114
+// NTSC-U/C: 0x00776114, PAL: 0x007b9fec
 float g_flFogOffset = 255.0f;
 
-// 0x005b2200
+// NTSC-U/C: 0x005b2200, PAL: 0x005f47d0
 PsEnviron::~PsEnviron() {
 }
 
-// 0x005b27b0
+// NTSC-U/C: 0x005b27b0, PAL: 0x005f4d80
 Environ *PsEnviron::NewEnviron(const HxStr &name) {
     // The binary bills the allocation to the tag "Rnd::Environ" and the object is 0x80 bytes.
     return new PsEnviron(name);
 }
 
-// 0x005aea68
+// NTSC-U/C: 0x005aea68, PAL: 0x005f0fd0
 void PsEnviron::Init() {
     g_pfnNewEnviron = NewEnviron;
     g_pDefaultEnviron = new PsEnviron(HxStr("[default environ]"));
@@ -232,14 +232,14 @@ void PsEnviron::Init() {
     g_pDefaultCam->AddTrans(g_pDefaultLight);
 }
 
-// 0x005b2888
+// NTSC-U/C: 0x005b2888, PAL: 0x005f4e58
 void PsEnviron::Terminate() {
     delete g_pDefaultEnviron;
     delete g_pDefaultLight;
     RegisterEnvironClass();
 }
 
-// 0x005aecb8
+// NTSC-U/C: 0x005aecb8, PAL: 0x005f1260
 int PsEnviron::DrawSelf() {
     g_nFogEnabled = mFogMode != kFogModeNone;
     if (g_nFogEnabled != 0) {

@@ -19,7 +19,7 @@ constexpr char kNoObject[] = "no object";
 // The allocation tag every material block is billed to.
 constexpr char kMatTag[] = "Rnd::Mat";
 
-// 0x004d2e68
+// NTSC-U/C: 0x004d2e68, PAL: 0x00511308
 // The same printer serves the material blend and the stage blend.
 FailSink &PrintBlendMode(FailSink &sink, Mat::BlendMode nBlend) {
     switch (nBlend) {
@@ -66,7 +66,7 @@ FailSink &PrintBlendMode(FailSink &sink, Mat::BlendMode nBlend) {
     return sink;
 }
 
-// 0x004dd0f0
+// NTSC-U/C: 0x004dd0f0, PAL: 0x0051b690
 FailSink &PrintCullMode(FailSink &sink, Mat::CullMode nCull) {
     switch (nCull) {
     case Mat::kCullModeCw:
@@ -82,7 +82,7 @@ FailSink &PrintCullMode(FailSink &sink, Mat::CullMode nCull) {
     return sink;
 }
 
-// 0x004dd188
+// NTSC-U/C: 0x004dd188, PAL: 0x0051b728
 FailSink &PrintGenMode(FailSink &sink, Mat::Stage::GenMode nGenMode) {
     switch (nGenMode) {
     case Mat::Stage::kGenModeFixed:
@@ -104,7 +104,7 @@ FailSink &PrintGenMode(FailSink &sink, Mat::Stage::GenMode nGenMode) {
     return sink;
 }
 
-// 0x004dd240
+// NTSC-U/C: 0x004dd240, PAL: 0x0051b7e0
 FailSink &PrintWrapMode(FailSink &sink, Mat::Stage::WrapMode nWrap) {
     switch (nWrap) {
     case Mat::Stage::kWrapModeClamp:
@@ -196,7 +196,7 @@ constexpr int kStageBlendModeRevision = 3;
 // The last revision in which a stage names the material it belongs to.
 constexpr int kStageMatRefRevision = 0;
 
-// 0x004d75c8
+// NTSC-U/C: 0x004d75c8, PAL: 0x00515ae0
 // The vector dump opens with the element count and then writes the index of every stage on its
 // own line, the same shape the mesh vector dumps use.
 FailSink &DumpStageVector(FailSink &sink, const std::vector<Mat::Stage> &stages) {
@@ -212,7 +212,7 @@ FailSink &DumpStageVector(FailSink &sink, const std::vector<Mat::Stage> &stages)
     return sink;
 }
 
-// 0x004dd860
+// NTSC-U/C: 0x004dd860, PAL: 0x0051be18
 Stream &WriteStageVector(Stream &stream, const std::vector<Mat::Stage> &stages) {
     const int nCount = static_cast<int>(stages.size());
     stream.Write(&nCount, sizeof(nCount));
@@ -222,7 +222,7 @@ Stream &WriteStageVector(Stream &stream, const std::vector<Mat::Stage> &stages) 
     return stream;
 }
 
-// 0x004d76d8
+// NTSC-U/C: 0x004d76d8, PAL: 0x00515bf0
 // Every new stage is a copy of one default stage, and each stage then reads itself.
 Stream &ReadStageVector(Stream &stream, std::vector<Mat::Stage> &stages) {
     int nCount = 0;
@@ -277,13 +277,13 @@ Mat::BlendMode MapLegacyBlendFactors(Mat::BlendMode current, int nSrc, int nDst)
 
 } // namespace
 
-// 0x00700420
+// NTSC-U/C: 0x00700420, PAL: 0x00743e48
 HxStr g_matClassName("Mat");
 
-// 0x00894e2c
+// NTSC-U/C: 0x00894e2c, PAL: 0x008d9e3c
 int g_nRndMatLoadVersion;
 
-// 0x004d0ea8
+// NTSC-U/C: 0x004d0ea8, PAL: 0x0050f2f8
 Mat::Mat(const HxStr &name)
     : Object(name), mBlend(kBlendModeSrcAlpha), mEnable(1), mVertAmbient(0), mVertDiffuse(0),
       mVertSpecular(0), mVertEmissive(0), mVertAlpha(0), mNormalize(0), mCull(kCullModeCw),
@@ -306,7 +306,7 @@ Mat::Mat(const HxStr &name)
     mSpecular.a = 1.0f;
 }
 
-// 0x004dcd20
+// NTSC-U/C: 0x004dcd20, PAL: 0x0051b2c0
 void Mat::RemoveStageTexRefs() {
     for (auto &stage : mStages) {
         if (stage.mTex != nullptr) {
@@ -315,7 +315,7 @@ void Mat::RemoveStageTexRefs() {
     }
 }
 
-// 0x004dd0a0
+// NTSC-U/C: 0x004dd0a0, PAL: 0x0051b640
 void Mat::Stage::SetTex(Tex *pTex) {
     if (mTex != nullptr) {
         mTex->RemoveRef(mMat);
@@ -326,7 +326,7 @@ void Mat::Stage::SetTex(Tex *pTex) {
     }
 }
 
-// 0x004dd020
+// NTSC-U/C: 0x004dd020, PAL: 0x0051b5c0
 void Mat::Stage::InitDefaults() {
     mBlend = kBlendModeMultiply;
     mCoordIndex = 0;
@@ -353,7 +353,7 @@ void Mat::Stage::InitDefaults() {
     mMat = nullptr;
 }
 
-// 0x004d2270
+// NTSC-U/C: 0x004d2270, PAL: 0x005106c0
 void Mat::Stage::Dump(FailSink &sink) const {
     sink.Print("\n\tblend:");
     PrintBlendMode(sink, mBlend);
@@ -379,7 +379,7 @@ void Mat::Stage::Dump(FailSink &sink) const {
     PrintObjectRef(sink, mTex);
 }
 
-// 0x004d26f8
+// NTSC-U/C: 0x004d26f8, PAL: 0x00510b48
 void Mat::Stage::Save(Stream &stream) const {
     stream.Write(&mBlend, sizeof(mBlend));
     stream.Write(&mCoordIndex, sizeof(mCoordIndex));
@@ -402,7 +402,7 @@ void Mat::Stage::Save(Stream &stream) const {
     WriteObjectRef(stream, mTex);
 }
 
-// 0x004d2a20
+// NTSC-U/C: 0x004d2a20, PAL: 0x00510e70
 void Mat::Stage::Load(Stream &stream) {
     if (g_nRndMatLoadVersion >= kStageBlendModeRevision) {
         stream.Read(&mBlend, sizeof(mBlend));
@@ -442,17 +442,17 @@ void Mat::Stage::Load(Stream &stream) {
     ReadObjectRef(stream, mTex);
 }
 
-// 0x004db900
+// NTSC-U/C: 0x004db900, PAL: 0x00519ea0
 void *Mat::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kMatTag);
 }
 
-// 0x004db920
+// NTSC-U/C: 0x004db920, PAL: 0x00519ec0
 void Mat::operator delete(void *pBlock) {
     FreeTaggedMemory(pBlock, kMatTag);
 }
 
-// 0x004d2198
+// NTSC-U/C: 0x004d2198, PAL: 0x005105e8
 void Mat::AddStage() {
     Stage stage;
     stage.InitDefaults();
@@ -460,7 +460,7 @@ void Mat::AddStage() {
     mStages.back().mMat = this;
 }
 
-// 0x004dcf60
+// NTSC-U/C: 0x004dcf60, PAL: 0x0051b500
 void Mat::RemoveStage(int nIndex) {
     Stage &stage = mStages[nIndex];
     if (stage.mTex != nullptr) {
@@ -469,7 +469,7 @@ void Mat::RemoveStage(int nIndex) {
     mStages.erase(mStages.begin() + nIndex);
 }
 
-// 0x004dba28
+// NTSC-U/C: 0x004dba28, PAL: 0x00519fc8
 Mat *NewMatThroughHook(const HxStr &name) {
     try {
         return g_pfnNewMat(name);
@@ -478,12 +478,12 @@ Mat *NewMatThroughHook(const HxStr &name) {
     }
 }
 
-// 0x004dbd00
+// NTSC-U/C: 0x004dbd00, PAL: 0x0051a2a0
 Mat *NewMat(const HxStr &name) {
     return new Mat(name);
 }
 
-// 0x004dbc80
+// NTSC-U/C: 0x004dbc80, PAL: 0x0051a220
 Object *CreateRegisteredMat(const HxStr &name) {
     try {
         return g_pfnNewMat(name);
@@ -492,14 +492,14 @@ Object *CreateRegisteredMat(const HxStr &name) {
     }
 }
 
-// 0x004dbb10
+// NTSC-U/C: 0x004dbb10, PAL: 0x0051a0b0
 Mat::~Mat() {
     // The stage textures are the only references a material takes.
     RemoveStageTexRefs();
     ReleaseAllRefs();
 }
 
-// 0x004d0f78
+// NTSC-U/C: 0x004d0f78, PAL: 0x0050f3c8
 void Mat::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     if (sink.mDumpLevel <= 0) {
@@ -552,7 +552,7 @@ void Mat::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
-// 0x004d1638
+// NTSC-U/C: 0x004d1638, PAL: 0x0050fa88
 void Mat::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.Write(&nVersion, sizeof(nVersion));
@@ -595,7 +595,7 @@ void Mat::Save(Stream &stream) {
     stream.WriteBytes(&chFlat, sizeof(chFlat));
 }
 
-// 0x004dcc20
+// NTSC-U/C: 0x004dcc20, PAL: 0x0051b1c0
 void Mat::Replace(Object *pFrom, Object *pTo) {
     for (auto &stage : mStages) {
         if (stage.mTex != pFrom) {
@@ -613,12 +613,12 @@ void Mat::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// 0x004dbc70
+// NTSC-U/C: 0x004dbc70, PAL: 0x0051a210
 const HxStr &Mat::ClassName() const {
     return g_matClassName;
 }
 
-// 0x004dce18
+// NTSC-U/C: 0x004dce18, PAL: 0x0051b3b8
 void Mat::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
     const Mat *pMat = dynamic_cast<const Mat *>(pSource);
 
@@ -646,7 +646,7 @@ void Mat::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
     Refresh();
 }
 
-// 0x004d1a90
+// NTSC-U/C: 0x004d1a90, PAL: 0x0050fee0
 void Mat::Load(Stream &stream) {
     stream.Read(&g_nRndMatLoadVersion, sizeof(g_nRndMatLoadVersion));
     if (g_nRndMatLoadVersion > kSerialVersion) {
@@ -731,11 +731,11 @@ void Mat::Load(Stream &stream) {
     Refresh();
 }
 
-// 0x004db958
+// NTSC-U/C: 0x004db958, PAL: 0x00519ef8
 void Mat::SyncMat([[maybe_unused]] int nStage) {
 }
 
-// 0x004dcd88
+// NTSC-U/C: 0x004dcd88, PAL: 0x0051b328
 void Mat::Refresh() {
     int nStage = 0;
     for (std::vector<Stage>::iterator it = mStages.begin(); it != mStages.end(); ++it) {
@@ -747,29 +747,29 @@ void Mat::Refresh() {
     }
 }
 
-// 0x004db970
+// NTSC-U/C: 0x004db970, PAL: 0x00519f10
 void Mat::SetAmbient(const Color &color) {
     mAmbient = color;
 }
 
-// 0x004db980
+// NTSC-U/C: 0x004db980, PAL: 0x00519f20
 void Mat::SetDiffuse(const Color &color) {
     mDiffuse.r = color.r;
     mDiffuse.g = color.g;
     mDiffuse.b = color.b;
 }
 
-// 0x004db9a0
+// NTSC-U/C: 0x004db9a0, PAL: 0x00519f40
 void Mat::SetEmissive(const Color &color) {
     mEmissive = color;
 }
 
-// 0x004db9b0
+// NTSC-U/C: 0x004db9b0, PAL: 0x00519f50
 void Mat::SetAlpha(float flAlpha) {
     mDiffuse.a = flAlpha;
 }
 
-// 0x004db9b8
+// NTSC-U/C: 0x004db9b8, PAL: 0x00519f58
 void Mat::SetSpecular(const Color &color, float flAlpha) {
     mSpecular.r = color.r;
     mSpecular.g = color.g;
@@ -777,7 +777,7 @@ void Mat::SetSpecular(const Color &color, float flAlpha) {
     mSpecular.a = flAlpha; // Yes, the binary discards color.a and stores the argument instead.
 }
 
-// 0x004dcbc0
+// NTSC-U/C: 0x004dcbc0, PAL: 0x0051b160
 void Mat::SetLighting(int nEnable,
                       int nVertAmbient,
                       int nVertDiffuse,
@@ -794,12 +794,12 @@ void Mat::SetLighting(int nEnable,
     mVertAlpha = nVertAlpha;
 }
 
-// 0x004db960
+// NTSC-U/C: 0x004db960, PAL: 0x00519f00
 void Mat::SetMultiPass(int nMultiPass) {
     mMultiPass = nMultiPass;
 }
 
-// 0x004db968
+// NTSC-U/C: 0x004db968, PAL: 0x00519f08
 void Mat::SetFlat(int nFlat) {
     mFlat = nFlat;
 }

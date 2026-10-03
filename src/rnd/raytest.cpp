@@ -33,7 +33,7 @@ inline void PointAlongRay(const Ray &ray, const float *pDir, float flT, float *p
 
 } // namespace
 
-// 0x0054fe98
+// NTSC-U/C: 0x0054fe98, PAL: 0x005904d8
 int TestRayAgainstTriangle(const Ray &ray, const TriangleTest &tri, int nCull, float *pflDistance) {
     if (nCull != Mat::kCullModeNone) {
         float dir[kLaneCount];
@@ -101,7 +101,7 @@ int TestRayAgainstTriangle(const Ray &ray, const TriangleTest &tri, int nCull, f
     return !(1.0f < flU + flV);
 }
 
-// 0x005501b0
+// NTSC-U/C: 0x005501b0, PAL: 0x005907f0
 int TestRayAgainstSphere(const Ray &ray, const Sphere &sphere, float *pflDistance) {
     float dir[kLaneCount];
     RayDirection(ray, dir);

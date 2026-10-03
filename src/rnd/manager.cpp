@@ -96,7 +96,7 @@ inline void SkipPastRecordMarker(Stream &stream) {
     }
 }
 
-// 0x0051f798
+// NTSC-U/C: 0x0051f798, PAL: 0x0055fcc0
 // Writes the class registry as its entry count and then one indented line per entry.
 // The factory is reported as a truth value rather than as an address, which is what the two
 // literals "true" and "false" at 0x00826e20 and 0x00826e28 are for. Only DumpText() calls it.
@@ -128,16 +128,16 @@ void MoveClassToFront(std::list<Object *> &objects, T *) {
     }
 }
 
-// 0x0051f938
+// NTSC-U/C: 0x0051f938, PAL: 0x0055fe60
 template void MoveClassToFront<Font>(std::list<Object *> &objects, Font *);
 
-// 0x0051fa80
+// NTSC-U/C: 0x0051fa80, PAL: 0x0055ffa8
 template void MoveClassToFront<Mat>(std::list<Object *> &objects, Mat *);
 
-// 0x0051fbc8
+// NTSC-U/C: 0x0051fbc8, PAL: 0x005600f0
 template void MoveClassToFront<Tex>(std::list<Object *> &objects, Tex *);
 
-// 0x0051fd10
+// NTSC-U/C: 0x0051fd10, PAL: 0x00560238
 template void MoveClassToFront<TransAnim>(std::list<Object *> &objects, TransAnim *);
 
 // The table version Write() stores, and the marker it writes after every object record.
@@ -152,17 +152,17 @@ inline Stream &WriteTerminatedName(Stream &stream, const HxStr &name) {
 
 } // namespace
 
-// 0x0089df90
+// NTSC-U/C: 0x0089df90, PAL: 0x008e2fd0
 int g_nRndManagerFileVersion;
 
-// 0x00719888
+// NTSC-U/C: 0x00719888, PAL: 0x0075d788
 int g_nRndManagerLoadFrameCounter;
 
-// 0x005200c0
+// NTSC-U/C: 0x005200c0, PAL: 0x00560618
 Manager::Manager() {
 }
 
-// 0x00519bb8
+// NTSC-U/C: 0x00519bb8, PAL: 0x00559f88
 void Manager::Init() {
     ResetFrameTimer();
 
@@ -198,12 +198,12 @@ void Manager::Init() {
     RegisterMultiMeshClass();
 }
 
-// 0x00519a98
+// NTSC-U/C: 0x00519a98, PAL: 0x00559e48
 void Manager::RegisterClass(const HxStr &name, ClassFactory pfnCreate) {
     mClasses[name] = pfnCreate;
 }
 
-// 0x005205b0
+// NTSC-U/C: 0x005205b0, PAL: 0x00560b08
 Object *Manager::Create(const HxStr &className, const HxStr &objectName) {
     const auto it = mClasses.find(className);
     if (it != mClasses.end()) {
@@ -213,13 +213,13 @@ Object *Manager::Create(const HxStr &className, const HxStr &objectName) {
     return nullptr;
 }
 
-// 0x00520498
+// NTSC-U/C: 0x00520498, PAL: 0x005609f0
 Object *Manager::Find(const HxStr &name) {
     const auto it = mObjects.find(name);
     return it != mObjects.end() ? it->second : nullptr;
 }
 
-// 0x0051be08
+// NTSC-U/C: 0x0051be08, PAL: 0x0055c2c8
 void Manager::RemapLegacyClassName(HxStr &name) {
     if (g_nRndManagerFileVersion < kMixInRenameVersion) {
         if (name == "AnimObject") {
@@ -243,7 +243,7 @@ void Manager::RemapLegacyClassName(HxStr &name) {
     }
 }
 
-// 0x0051b450
+// NTSC-U/C: 0x0051b450, PAL: 0x0055b888
 void Manager::Read(Stream &stream) {
     stream.Read(&g_nRndManagerFileVersion, sizeof(g_nRndManagerFileVersion));
     if (g_nRndManagerFileVersion > kManagerFileVersion) {
@@ -344,7 +344,7 @@ void Manager::Read(Stream &stream) {
     }
 }
 
-// 0x00520648
+// NTSC-U/C: 0x00520648, PAL: 0x00560ba0
 void Manager::LoadFile(const HxStr &path) {
     FileStream stream(path, kOpenForReading);
     if (stream.Fail()) {
@@ -356,11 +356,11 @@ void Manager::LoadFile(const HxStr &path) {
     Read(stream);
 }
 
-// 0x00520348
+// NTSC-U/C: 0x00520348, PAL: 0x005608a0
 Manager::~Manager() {
 }
 
-// 0x0051aff8
+// NTSC-U/C: 0x0051aff8, PAL: 0x0055b430
 void Manager::Write(Stream &stream) {
     std::list<Object *> objects;
     for (const auto &entry : mObjects) {
@@ -388,7 +388,7 @@ void Manager::Write(Stream &stream) {
     }
 }
 
-// 0x005199d8
+// NTSC-U/C: 0x005199d8, PAL: 0x00559d88
 bool Manager::Contains(const Object *pObject) {
     for (const auto &entry : mObjects) {
         if (entry.second == pObject) {
@@ -398,7 +398,7 @@ bool Manager::Contains(const Object *pObject) {
     return false;
 }
 
-// 0x005204e8
+// NTSC-U/C: 0x005204e8, PAL: 0x00560a40
 void Manager::SaveFile(const HxStr &path) {
     FileStream stream(path, kOpenForWriting);
     if (stream.Fail()) {
@@ -409,7 +409,7 @@ void Manager::SaveFile(const HxStr &path) {
     Write(stream);
 }
 
-// 0x0051ad98
+// NTSC-U/C: 0x0051ad98, PAL: 0x0055b1d0
 void Manager::DumpText(FailSink &sink) {
     sink.Print("[Manager]\n");
     DumpRegisteredClasses(sink.Print("registeredClasses:"), mClasses)->Print("\n");
@@ -435,7 +435,7 @@ void Manager::DumpText(FailSink &sink) {
     }
 }
 
-// 0x0051a428
+// NTSC-U/C: 0x0051a428, PAL: 0x0055a820
 Object *Manager::ResolveAndLinkObject(
     Object *pSource, const HxStr &prefix, unsigned nFlags, int bRecurse, int bLink) {
     const HxStr &className = pSource->ClassName();
@@ -520,7 +520,7 @@ Object *Manager::ResolveAndLinkObject(
     return pClone;
 }
 
-// 0x0051bf70
+// NTSC-U/C: 0x0051bf70, PAL: 0x0055c430
 void Manager::DeleteLoadedObjects() {
     for (;;) {
         auto entry = mObjects.begin();

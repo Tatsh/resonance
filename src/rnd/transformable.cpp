@@ -45,7 +45,7 @@ static const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-// 0x004f8530
+// NTSC-U/C: 0x004f8530, PAL: 0x005371d0
 static FailSink &operator<<(FailSink &sink, const std::list<Transformable *> &transList) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, transList.size());
@@ -67,7 +67,7 @@ static FailSink &operator<<(FailSink &sink, const std::list<Transformable *> &tr
     return sink;
 }
 
-// 0x004f26f0
+// NTSC-U/C: 0x004f26f0, PAL: 0x005312e0
 // Only Transformable::DumpText() invokes this. A mode outside the set below writes nothing rather
 // than a fallback title.
 static FailSink &operator<<(FailSink &sink, Transformable::Billboard nBillboard) {
@@ -131,7 +131,7 @@ static inline FailSink &DumpXfmRow(FailSink &sink, const float *pRow) {
     return sink;
 }
 
-// 0x004f88a0
+// NTSC-U/C: 0x004f88a0, PAL: 0x00537540
 //
 // Each entry is written as the referenced object's name including its terminator. A reader has to
 // resolve the names through Rnd::g_manager. An empty entry writes one zero byte.
@@ -152,7 +152,7 @@ static Stream &operator<<(Stream &stream, const std::list<Transformable *> &tran
     return stream;
 }
 
-// 0x004f8b78
+// NTSC-U/C: 0x004f8b78, PAL: 0x00537818
 static Stream &operator>>(Stream &stream, std::list<Transformable *> &transList) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -202,7 +202,7 @@ static inline void SetIdentityXfm(float (&aflXfm)[kXfmRowCount][kXfmRowFloatCoun
               aflXfm[kXfmTranslationRow]);
 }
 
-// 0x004fb3f8
+// NTSC-U/C: 0x004fb3f8, PAL: 0x0053a0d8
 Transformable::Transformable() : mDirty(1), mBillboard(kBillboardNone) {
     for (auto &aflRow : mLocalXfm) {
         aflRow[kXfmPaddingFloat] = 1.0f;
@@ -215,7 +215,7 @@ Transformable::Transformable() : mDirty(1), mBillboard(kBillboardNone) {
     std::copy(std::begin(kIdentityTranslation), std::end(kIdentityTranslation), mOrigin);
 }
 
-// 0x004fb2a8
+// NTSC-U/C: 0x004fb2a8, PAL: 0x00539f88
 Transformable::~Transformable() {
     ReleaseTransRefs();
 }
@@ -223,10 +223,10 @@ Transformable::~Transformable() {
 // The mBillboard bit that selects the scaling variant of a mode.
 constexpr int kBillboardScaleBit = 0x80;
 
-// 0x007067e0
+// NTSC-U/C: 0x007067e0, PAL: 0x0074a300
 float g_drawXfm[kXfmRowCount][kXfmRowFloatCount];
 
-// 0x004faf48
+// NTSC-U/C: 0x004faf48, PAL: 0x00539c28
 // Take the reciprocal of each of three components. A zero component writes nothing at all.
 static void ReciprocalVec3(const float *pSrc, float *pOut) {
     if (pSrc[0] == 0.0f || pSrc[1] == 0.0f || pSrc[2] == 0.0f) {
@@ -243,7 +243,7 @@ static inline void CameraToDrawTranslation(const Cam &cam, float *pOut) {
     Vec3Sub(g_drawXfm[kXfmTranslationRow], cam.mWorldXfm[kXfmTranslationRow], pOut);
 }
 
-// 0x004f0cc0
+// NTSC-U/C: 0x004f0cc0, PAL: 0x0052f8b0
 float *Transformable::GetDrawXfm() {
     if (mBillboard == kBillboardNone || g_pCurrentCam == nullptr) {
         memcpy(g_drawXfm, mWorldXfm, sizeof(g_drawXfm));
@@ -355,7 +355,7 @@ static inline void TransformRow(const float (&aflXfm)[kXfmRowCount][kXfmRowFloat
     std::copy(std::begin(afOut), std::end(afOut), pOut);
 }
 
-// 0x004f0770
+// NTSC-U/C: 0x004f0770, PAL: 0x0052f360
 Transformable *Transformable::Parent() {
     for (std::list<Object *>::iterator it = mRefs.begin(); it != mRefs.end(); ++it) {
         Transformable *pCandidate = dynamic_cast<Transformable *>(*it);
@@ -370,7 +370,7 @@ Transformable *Transformable::Parent() {
     return nullptr;
 }
 
-// 0x004f0b18
+// NTSC-U/C: 0x004f0b18, PAL: 0x0052f708
 int Transformable::UpdateWorldXfm(Transformable *pParent, int nForce) {
     if (nForce != 0 || mDirty != 0 || (pParent != nullptr && pParent->mDirty != 0)) {
         if (pParent == nullptr) {
@@ -402,7 +402,7 @@ int Transformable::UpdateWorldXfm(Transformable *pParent, int nForce) {
     return nRecomposed;
 }
 
-// 0x004f0838
+// NTSC-U/C: 0x004f0838, PAL: 0x0052f428
 void Transformable::AddTrans(Transformable *pTrans) {
     if (std::find(mTransList.begin(), mTransList.end(), pTrans) != mTransList.end()) {
         g_failSink.Report(kAlreadyInFormat, NameText(pTrans), NameText(this));
@@ -416,7 +416,7 @@ void Transformable::AddTrans(Transformable *pTrans) {
     pTrans->mDirty = 1; // Yes, the binary dereferences pTrans here with no null test.
 }
 
-// 0x004f09c0
+// NTSC-U/C: 0x004f09c0, PAL: 0x0052f5b0
 void Transformable::RemoveTrans(Transformable *pTrans) {
     if (std::find(mTransList.begin(), mTransList.end(), pTrans) == mTransList.end()) {
         return;
@@ -427,19 +427,19 @@ void Transformable::RemoveTrans(Transformable *pTrans) {
     mTransList.remove(pTrans);
 }
 
-// 0x004fce08
+// NTSC-U/C: 0x004fce08, PAL: 0x0053baf0
 void Transformable::SetBillboard(int nBillboard) {
     mBillboard = nBillboard;
     mDirty = 1;
 }
 
-// 0x004fce18
+// NTSC-U/C: 0x004fce18, PAL: 0x0053bb00
 void Transformable::SetOrigin(const float *pOrigin) {
     std::copy(pOrigin, pOrigin + kXfmRowFloatCount, mOrigin);
     mDirty = 1;
 }
 
-// 0x004f0a80
+// NTSC-U/C: 0x004f0a80, PAL: 0x0052f670
 void Transformable::ClearTransList() {
     for (std::list<Transformable *>::iterator it = mTransList.begin(); it != mTransList.end();) {
         if (*it != nullptr) {
@@ -449,7 +449,7 @@ void Transformable::ClearTransList() {
     }
 }
 
-// 0x004fcf18
+// NTSC-U/C: 0x004fcf18, PAL: 0x0053bc00
 void Transformable::ReleaseTransRefs() {
     for (std::list<Transformable *>::iterator it = mTransList.begin(); it != mTransList.end();
          ++it) {
@@ -459,7 +459,7 @@ void Transformable::ReleaseTransRefs() {
     }
 }
 
-// 0x004fcf88
+// NTSC-U/C: 0x004fcf88, PAL: 0x0053bc70
 void Transformable::AcquireTransRefs() {
     mDirty = 1;
     for (std::list<Transformable *>::iterator it = mTransList.begin(); it != mTransList.end();
@@ -470,7 +470,7 @@ void Transformable::AcquireTransRefs() {
     }
 }
 
-// 0x004f12e0
+// NTSC-U/C: 0x004f12e0, PAL: 0x0052fed0
 void Transformable::DumpText(FailSink &sink) {
     if (sink.mDumpLevel <= 0) {
         return;
@@ -502,7 +502,7 @@ void Transformable::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
-// 0x004f1a58
+// NTSC-U/C: 0x004f1a58, PAL: 0x00530648
 void Transformable::Save(Stream &stream) {
     int nRevision = kTransformableRevision;
     stream.Write(&nRevision, sizeof(nRevision));
@@ -531,7 +531,7 @@ void Transformable::Save(Stream &stream) {
     }
 }
 
-// 0x004f1f18
+// NTSC-U/C: 0x004f1f18, PAL: 0x00530b08
 void Transformable::Load(Stream &stream) {
     int nRevision = 0;
     stream.Read(&nRevision, sizeof(nRevision));
@@ -587,7 +587,7 @@ void Transformable::Load(Stream &stream) {
     AcquireTransRefs();
 }
 
-// 0x004f2510
+// NTSC-U/C: 0x004f2510, PAL: 0x00531100
 void Transformable::Replace(Object *pFrom, Object *pTo) {
     for (std::list<Transformable *>::iterator it = mTransList.begin(); it != mTransList.end();) {
         if (*it == pTo) {
@@ -614,7 +614,7 @@ void Transformable::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// 0x004fce30
+// NTSC-U/C: 0x004fce30, PAL: 0x0053bb18
 void Transformable::Copy(const Object *pSource, unsigned nFlags) {
     const Transformable *pSourceTrans = dynamic_cast<const Transformable *>(pSource);
 

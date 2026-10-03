@@ -92,7 +92,7 @@ void WriteObjectRef(Stream &stream, const Object *pObject) {
     stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
 }
 
-// 0x004d0450
+// NTSC-U/C: 0x004d0450, PAL: 0x0050e888
 FailSink &PrintAlign(FailSink &sink, int nAlign) {
     if ((nAlign & kTextAlignTop) != 0) {
         sink.Print("Top");
@@ -145,7 +145,7 @@ MeshFace BlankFace() {
 
 } // namespace
 
-// 0x004c89c0
+// NTSC-U/C: 0x004c89c0, PAL: 0x00506bc8
 Text::Text(const HxStr &name)
     : Object(name), mAlign(kDefaultAlign), mFont(nullptr), mWordWrap(0),
       mWrapWidth(kDefaultWrapWidth), mMesh(nullptr), mZTest(0) {
@@ -155,7 +155,7 @@ Text::Text(const HxStr &name)
     mColor.a = 1.0f;
 }
 
-// 0x004cf958
+// NTSC-U/C: 0x004cf958, PAL: 0x0050dcd0
 void Text::RemoveObjectRefs() {
     if (mFont != nullptr) {
         mFont->RemoveRef(this);
@@ -164,7 +164,7 @@ void Text::RemoveObjectRefs() {
     mMesh = nullptr;
 }
 
-// 0x004cf9b8
+// NTSC-U/C: 0x004cf9b8, PAL: 0x0050dd30
 void Text::AddObjectRefs() {
     if (mFont != nullptr) {
         mFont->AddRef(this);
@@ -172,18 +172,18 @@ void Text::AddObjectRefs() {
     RebuildText();
 }
 
-// 0x004cf2b8
+// NTSC-U/C: 0x004cf2b8, PAL: 0x0050d618
 Text::~Text() {
     RemoveObjectRefs();
     ReleaseAllRefs();
 }
 
-// 0x004cf760
+// NTSC-U/C: 0x004cf760, PAL: 0x0050dad8
 const HxStr &Text::ClassName() const {
     return g_textClassName;
 }
 
-// 0x004cf9f8
+// NTSC-U/C: 0x004cf9f8, PAL: 0x0050dd70
 void Text::RebuildText() {
     if (mWordWrap != 0 && mFont != nullptr) {
         mText = ApplyWordWrap(mPreWrapText);
@@ -193,31 +193,31 @@ void Text::RebuildText() {
     BuildGlyphMesh();
 }
 
-// 0x004cff48
+// NTSC-U/C: 0x004cff48, PAL: 0x0050e340
 void Text::SetAlign(int nAlign) {
     mAlign = nAlign;
     RebuildText();
 }
 
-// 0x004d0168
+// NTSC-U/C: 0x004d0168, PAL: 0x0050e580
 void Text::SetText(const HxStr &text) {
     mPreWrapText = text;
     RebuildText();
 }
 
-// 0x004cfab8
+// NTSC-U/C: 0x004cfab8, PAL: 0x0050de50
 void Text::SetWordWrap(int nWordWrap) {
     mWordWrap = nWordWrap;
     RebuildText();
 }
 
-// 0x004cfb78
+// NTSC-U/C: 0x004cfb78, PAL: 0x0050df30
 void Text::SetWrapWidth(float flWrapWidth) {
     mWrapWidth = flWrapWidth;
     RebuildText();
 }
 
-// 0x004cfde0
+// NTSC-U/C: 0x004cfde0, PAL: 0x0050e1b8
 void Text::SetFont(Font *pFont) {
     if (mFont != nullptr) {
         mFont->RemoveRef(this);
@@ -229,7 +229,7 @@ void Text::SetFont(Font *pFont) {
     RebuildText();
 }
 
-// 0x004cfec8
+// NTSC-U/C: 0x004cfec8, PAL: 0x0050e2c0
 void Text::SetColor(const Color &color) {
     mColor = color;
     if (mMesh == nullptr) {
@@ -242,7 +242,7 @@ void Text::SetColor(const Color &color) {
     mMesh->SyncChanged(Mesh::kSyncColors);
 }
 
-// 0x004d0378
+// NTSC-U/C: 0x004d0378, PAL: 0x0050e7b0
 void Text::SetShowing(int nShowing) {
     if (nShowing == mShowing) {
         return;
@@ -256,7 +256,7 @@ void Text::SetShowing(int nShowing) {
     BuildGlyphMesh();
 }
 
-// 0x004d0328
+// NTSC-U/C: 0x004d0328, PAL: 0x0050e760
 void Text::SetHighlight(int nHighlight) {
     Drawable::SetHighlight(nHighlight);
     if (mMesh != nullptr) {
@@ -264,7 +264,7 @@ void Text::SetHighlight(int nHighlight) {
     }
 }
 
-// 0x004d02f8
+// NTSC-U/C: 0x004d02f8, PAL: 0x0050e730
 int Text::DrawSelf() {
     if (mMesh != nullptr) {
         mMesh->Draw();
@@ -272,7 +272,7 @@ int Text::DrawSelf() {
     return 1;
 }
 
-// 0x004d02a0
+// NTSC-U/C: 0x004d02a0, PAL: 0x0050e6d8
 void Text::SetBillboard(int nBillboard) {
     Transformable::SetBillboard(nBillboard);
     if (mMesh != nullptr) {
@@ -280,7 +280,7 @@ void Text::SetBillboard(int nBillboard) {
     }
 }
 
-// 0x004d03e0
+// NTSC-U/C: 0x004d03e0, PAL: 0x0050e818
 int Text::UpdateWorldXfm(Transformable *pParent, int nForce) {
     const int nMoved = Transformable::UpdateWorldXfm(pParent, nForce);
     if (mMesh != nullptr) {
@@ -289,7 +289,7 @@ int Text::UpdateWorldXfm(Transformable *pParent, int nForce) {
     return nMoved;
 }
 
-// 0x004c7ef8
+// NTSC-U/C: 0x004c7ef8, PAL: 0x005060d0
 void Text::Collide(const Ray &ray, HitSink &sink) {
     if (mShowing == 0) {
         return;
@@ -308,7 +308,7 @@ void Text::Collide(const Ray &ray, HitSink &sink) {
     Collideable::Collide(ray, sink);
 }
 
-// 0x004c7fc0
+// NTSC-U/C: 0x004c7fc0, PAL: 0x00506198
 void Text::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
@@ -356,7 +356,7 @@ void Text::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
-// 0x004c8330
+// NTSC-U/C: 0x004c8330, PAL: 0x00506508
 void Text::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.Write(&nVersion, sizeof(nVersion));
@@ -381,7 +381,7 @@ void Text::Save(Stream &stream) {
     stream.WriteBytes(&chZTest, sizeof(chZTest));
 }
 
-// 0x004cf888
+// NTSC-U/C: 0x004cf888, PAL: 0x0050dc00
 void Text::Replace(Object *pFrom, Object *pTo) {
     Drawable::Replace(pFrom, pTo);
     Collideable::Replace(pFrom, pTo);
@@ -401,7 +401,7 @@ void Text::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// 0x004cfca8
+// NTSC-U/C: 0x004cfca8, PAL: 0x0050e080
 void Text::Copy(const Object *pSource, unsigned nFlags) {
     // The cast result is dereferenced with no null check, so a pSource of another class faults here
     // rather than being rejected.
@@ -424,7 +424,7 @@ void Text::Copy(const Object *pSource, unsigned nFlags) {
     AddObjectRefs();
 }
 
-// 0x004c8560
+// NTSC-U/C: 0x004c8560, PAL: 0x00506738
 void Text::Load(Stream &stream) {
     int nVersion = 0;
     stream.Read(&nVersion, sizeof(nVersion));
@@ -522,7 +522,7 @@ float Text::MeasureRun(const char *pText, int nCount) {
     return static_cast<float>(static_cast<int>(flWidth));
 }
 
-// 0x004d0010
+// NTSC-U/C: 0x004d0010, PAL: 0x0050e428
 float Text::MeasureText(const char *pText, int nCount) {
     float flWidth = 0.0f;
     if (mFont == nullptr) {
@@ -534,7 +534,7 @@ float Text::MeasureText(const char *pText, int nCount) {
     return flWidth;
 }
 
-// 0x004d0088
+// NTSC-U/C: 0x004d0088, PAL: 0x0050e4a0
 void Text::GetVerticalBounds(float &flTop, float &flBottom) {
     if (mFont == nullptr) {
         flTop = 0.0f;
@@ -556,7 +556,7 @@ void Text::GetVerticalBounds(float &flTop, float &flBottom) {
     }
 }
 
-// 0x004d0238
+// NTSC-U/C: 0x004d0238, PAL: 0x0050e670
 int Text::CountLines() {
     int nNewlines = 0;
     for (int nFound = mText.Find('\n', 0); static_cast<unsigned>(nFound) != g_nHxStrNoPosition;
@@ -566,7 +566,7 @@ int Text::CountLines() {
     return nNewlines + 1;
 }
 
-// 0x004c9278
+// NTSC-U/C: 0x004c9278, PAL: 0x00507490
 int Text::FindLineBreak(const char *pText) {
     if (*pText == '\n') {
         return 0;
@@ -624,7 +624,7 @@ int Text::FindLineBreak(const char *pText) {
     }
 }
 
-// 0x004c95d0
+// NTSC-U/C: 0x004c95d0, PAL: 0x005077e8
 HxStr Text::ApplyWordWrap(const HxStr &text) {
     char szLine[kWrapBufferSize];
     strcpy(szLine, StringText(text));
@@ -659,7 +659,7 @@ HxStr Text::ApplyWordWrap(const HxStr &text) {
     return HxStr(szLine);
 }
 
-// 0x004c9ca0
+// NTSC-U/C: 0x004c9ca0, PAL: 0x00507f08
 void Text::EmitLineGlyphs(
     float flLineY, float flLineWidth, int nCharBase, const char *pBegin, const char *pEnd) {
     float flX = 0.0f;
@@ -725,7 +725,7 @@ void Text::EmitLineGlyphs(
     }
 }
 
-// 0x004c9780
+// NTSC-U/C: 0x004c9780, PAL: 0x005079c8
 void Text::BuildGlyphMesh() {
     delete mMesh;
     mMesh = nullptr;
@@ -801,7 +801,7 @@ void Text::BuildGlyphMesh() {
     mMesh->UpdateWorldXfm(this, 1);
 }
 
-// 0x004c9e98
+// NTSC-U/C: 0x004c9e98, PAL: 0x00508100
 Vector3 Text::CharPosition(int nIndex) {
     if (mMesh == nullptr || mFont == nullptr || mMesh->mVertsOwner->mVerts.empty()) {
         return Vector3{0.0f, 0.0f, 0.0f, 1.0f};
@@ -829,25 +829,25 @@ Vector3 Text::CharPosition(int nIndex) {
     return pos;
 }
 
-// 0x004cf150
+// NTSC-U/C: 0x004cf150, PAL: 0x0050d4b0
 void *Text::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kTextTag);
 }
 
-// 0x004cf170
+// NTSC-U/C: 0x004cf170, PAL: 0x0050d4d0
 void Text::operator delete(void *pBlock) {
     FreeTaggedMemory(pBlock, kTextTag);
 }
 
-// 0x004cf800
+// NTSC-U/C: 0x004cf800, PAL: 0x0050db78
 Text *NewText(const HxStr &name) {
     return new Text(name);
 }
 
-// 0x006feca8
+// NTSC-U/C: 0x006feca8, PAL: 0x007426a8
 Text *(*g_pfnNewText)(const HxStr &name) = NewText;
 
-// 0x004cf1d0
+// NTSC-U/C: 0x004cf1d0, PAL: 0x0050d530
 Text *NewTextThroughHook(const HxStr &name) {
     try {
         return g_pfnNewText(name);
@@ -856,7 +856,7 @@ Text *NewTextThroughHook(const HxStr &name) {
     }
 }
 
-// 0x004cf770
+// NTSC-U/C: 0x004cf770, PAL: 0x0050dae8
 Object *CreateRegisteredText(const HxStr &name) {
     try {
         return g_pfnNewText(name);
@@ -865,13 +865,13 @@ Object *CreateRegisteredText(const HxStr &name) {
     }
 }
 
-// 0x004cf190
+// NTSC-U/C: 0x004cf190, PAL: 0x0050d4f0
 void RegisterTextClass() {
     g_pfnNewText = NewText;
     g_manager.RegisterClass(g_textClassName, CreateRegisteredText);
 }
 
-// 0x006feca0
+// NTSC-U/C: 0x006feca0, PAL: 0x007426a0
 HxStr g_textClassName("Text");
 
 } // namespace Rnd

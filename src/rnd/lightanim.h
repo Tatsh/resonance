@@ -62,11 +62,15 @@ public:
      * invoking it.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
-     * @ghidraAddress 0x00544df0
+     * @ghidraAddress NTSC-U/C: 0x00544df0
+     * @ghidraAddress PAL: 0x00584b68
      */
     explicit LightAnim(const HxStr &name);
 
-    /** @ghidraAddress 0x00544b10 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00544b10
+     * @ghidraAddress PAL: 0x00584888
+     */
     virtual ~LightAnim();
 
     /**
@@ -76,7 +80,8 @@ public:
      * member only because the image emits it out of line at its own address.
      *
      * @return The light, or null while none is set.
-     * @ghidraAddress 0x00544dd0
+     * @ghidraAddress NTSC-U/C: 0x00544dd0
+     * @ghidraAddress PAL: 0x00584b48
      */
     Light *GetLight();
 
@@ -84,7 +89,8 @@ public:
      * Report the animation whose channels this one reads.
      *
      * @return The keys owner, which is this object for an animation that owns its keys.
-     * @ghidraAddress 0x00544dd8
+     * @ghidraAddress NTSC-U/C: 0x00544dd8
+     * @ghidraAddress PAL: 0x00584b50
      */
     LightAnim *GetKeysOwner();
 
@@ -96,7 +102,8 @@ public:
      * program, and the name follows GetKeysOwner().
      *
      * @param pOwner The new keys owner, or null.
-     * @ghidraAddress 0x005455b8
+     * @ghidraAddress NTSC-U/C: 0x005455b8
+     * @ghidraAddress PAL: 0x00585330
      */
     void SetKeysOwner(LightAnim *pOwner);
 
@@ -107,7 +114,8 @@ public:
      * while the dump level of the sink is not positive.
      *
      * @param sink The text sink.
-     * @ghidraAddress 0x00541078
+     * @ghidraAddress NTSC-U/C: 0x00541078
+     * @ghidraAddress PAL: 0x00580d50
      */
     virtual void DumpText(FailSink &sink);
 
@@ -118,7 +126,8 @@ public:
      * and finally mKeysOwner as a name.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00541230
+     * @ghidraAddress NTSC-U/C: 0x00541230
+     * @ghidraAddress PAL: 0x00580f08
      */
     virtual void Save(Stream &stream);
 
@@ -130,7 +139,8 @@ public:
      *
      * @param pFrom The object being replaced.
      * @param pTo The replacement, or null.
-     * @ghidraAddress 0x00540ea0
+     * @ghidraAddress NTSC-U/C: 0x00540ea0
+     * @ghidraAddress PAL: 0x00580b78
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -138,7 +148,8 @@ public:
      * Report the registered class name, "LightAnim".
      *
      * @return The class name.
-     * @ghidraAddress 0x00544de0
+     * @ghidraAddress NTSC-U/C: 0x00544de0
+     * @ghidraAddress PAL: 0x00584b58
      */
     virtual const HxStr &ClassName() const;
 
@@ -150,7 +161,8 @@ public:
      *
      * @param pSource The object to copy from.
      * @param nFlags The set of fields to copy.
-     * @ghidraAddress 0x00541638
+     * @ghidraAddress NTSC-U/C: 0x00541638
+     * @ghidraAddress PAL: 0x00581360
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -160,7 +172,8 @@ public:
      * A revision above 0 produces the report "Can't load new LightAnim" and no further reading.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00541388
+     * @ghidraAddress NTSC-U/C: 0x00541388
+     * @ghidraAddress PAL: 0x00581060
      */
     virtual void Load(Stream &stream);
 
@@ -173,7 +186,8 @@ public:
      * proves the two calls.
      *
      * @return The last frame.
-     * @ghidraAddress 0x00541790
+     * @ghidraAddress NTSC-U/C: 0x00541790
+     * @ghidraAddress PAL: 0x005814b8
      */
     virtual float EndFrame();
 
@@ -189,13 +203,14 @@ protected:
      * colour. Rnd::Light::SetColors() receives the three results.
      *
      * @param flFrame The filtered frame to animate to.
-     * @ghidraAddress 0x005418f8
+     * @ghidraAddress NTSC-U/C: 0x005418f8
+     * @ghidraAddress PAL: 0x00581620
      */
     virtual void SetFrameSelf(float flFrame);
 
 private:
     // Empty the three channels unless this animation owns its keys. SetKeysOwner() inlines it.
-    // 0x00545570
+    // NTSC-U/C: 0x00545570, PAL: 0x005852e8
     void ClearKeys();
 
     // No class derives from Rnd::LightAnim and no access from outside it is recovered. Every
@@ -217,7 +232,8 @@ private:
 /**
  * Registered class name of Rnd::LightAnim, the string "LightAnim".
  *
- * @ghidraAddress 0x00720bd8
+ * @ghidraAddress NTSC-U/C: 0x00720bd8
+ * @ghidraAddress PAL: 0x00764668
  */
 extern HxStr g_lightAnimClassName;
 
@@ -229,7 +245,8 @@ extern HxStr g_lightAnimClassName;
  *
  * @param name The object name.
  * @return The new animation.
- * @ghidraAddress 0x005449f8
+ * @ghidraAddress NTSC-U/C: 0x005449f8
+ * @ghidraAddress PAL: 0x00584770
  */
 LightAnim *NewLightAnim(const HxStr &name);
 
@@ -241,7 +258,8 @@ LightAnim *NewLightAnim(const HxStr &name);
  *
  * @param name The object name.
  * @return The new animation, as its Rnd::Object subobject.
- * @ghidraAddress 0x005452d0
+ * @ghidraAddress NTSC-U/C: 0x005452d0
+ * @ghidraAddress PAL: 0x00585048
  */
 Object *CreateRegisteredLightAnim(const HxStr &name);
 
@@ -251,7 +269,8 @@ Object *CreateRegisteredLightAnim(const HxStr &name);
  * The out-of-line copy has no caller, and Rnd::Manager::Init() expands the same registration. The
  * name is inferred.
  *
- * @ghidraAddress 0x005449c8
+ * @ghidraAddress NTSC-U/C: 0x005449c8
+ * @ghidraAddress PAL: 0x00584740
  */
 void RegisterLightAnimClass();
 

@@ -53,20 +53,20 @@ inline void PrintColor(FailSink &sink, const Color &color) {
 
 } // namespace
 
-// 0x00718d18
+// NTSC-U/C: 0x00718d18, PAL: 0x0075cc08
 HxStr g_environClassName("Environ");
 
 Environ *g_pCurrentEnviron;
 
 Environ *(*g_pfnNewEnviron)(const HxStr &name);
 
-// 0x00515890
+// NTSC-U/C: 0x00515890, PAL: 0x00555bc0
 Environ::Environ(const HxStr &name)
     : Object(name), mAmbient{0.0f, 0.0f, 0.0f, 0.0f}, mFogStart(0.0f), mFogEnd(1.0f),
       mFogDensity(1.0f), mFogColor{1.0f, 1.0f, 1.0f, 1.0f}, mFogMode(kFogModeNone) {
 }
 
-// 0x00518fe0
+// NTSC-U/C: 0x00518fe0, PAL: 0x00559378
 Environ::~Environ() {
     if (g_pCurrentEnviron == this) {
         g_pCurrentEnviron = nullptr;
@@ -75,12 +75,12 @@ Environ::~Environ() {
     ReleaseAllRefs();
 }
 
-// 0x00519258
+// NTSC-U/C: 0x00519258, PAL: 0x005595f0
 const HxStr &Environ::ClassName() const {
     return g_environClassName;
 }
 
-// 0x00519470
+// NTSC-U/C: 0x00519470, PAL: 0x00559808
 //
 // A mode outside the enumeration produces no text at all rather than a fallback name.
 FailSink &operator<<(FailSink &sink, FogMode nMode) {
@@ -102,7 +102,7 @@ FailSink &operator<<(FailSink &sink, FogMode nMode) {
     return sink;
 }
 
-// 0x005185b0
+// NTSC-U/C: 0x005185b0, PAL: 0x00558908
 FailSink &operator<<(FailSink &sink, const std::list<Light *> &lights) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, lights.size());
@@ -124,7 +124,7 @@ FailSink &operator<<(FailSink &sink, const std::list<Light *> &lights) {
     return sink;
 }
 
-// 0x00518718
+// NTSC-U/C: 0x00518718, PAL: 0x00558a70
 //
 // Each entry is written as the referenced object's name including its terminator. An empty entry
 // writes one zero byte.
@@ -144,7 +144,7 @@ static Stream &operator<<(Stream &stream, const std::list<Light *> &lights) {
     return stream;
 }
 
-// 0x005189f0
+// NTSC-U/C: 0x005189f0, PAL: 0x00558d48
 static Stream &operator>>(Stream &stream, std::list<Light *> &lights) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -158,7 +158,7 @@ static Stream &operator>>(Stream &stream, std::list<Light *> &lights) {
     return stream;
 }
 
-// 0x00515ce0
+// NTSC-U/C: 0x00515ce0, PAL: 0x00556010
 void Environ::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
@@ -187,13 +187,13 @@ void Environ::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
-// 0x00518e60
+// NTSC-U/C: 0x00518e60, PAL: 0x005591f8
 int Environ::DrawSelf() {
     g_pCurrentEnviron = this;
     return 1;
 }
 
-// 0x00519400
+// NTSC-U/C: 0x00519400, PAL: 0x00559798
 void Environ::AcquireLightsRefs() {
     for (std::list<Light *>::iterator it = mLights.begin(); it != mLights.end(); ++it) {
         Object *pObject = *it;
@@ -203,7 +203,7 @@ void Environ::AcquireLightsRefs() {
     }
 }
 
-// 0x00519390
+// NTSC-U/C: 0x00519390, PAL: 0x00559728
 void Environ::ReleaseLightsRefs() {
     for (std::list<Light *>::iterator it = mLights.begin(); it != mLights.end(); ++it) {
         Object *pObject = *it;
@@ -213,7 +213,7 @@ void Environ::ReleaseLightsRefs() {
     }
 }
 
-// 0x00516028
+// NTSC-U/C: 0x00516028, PAL: 0x00556358
 void Environ::Save(Stream &stream) {
     const int nRevision = kEnvironRevision;
     stream.Write(&nRevision, sizeof(nRevision));
@@ -238,7 +238,7 @@ void Environ::Save(Stream &stream) {
     stream.Write(&mFogMode, sizeof(mFogMode));
 }
 
-// 0x00516260
+// NTSC-U/C: 0x00516260, PAL: 0x00556590
 void Environ::Load(Stream &stream) {
     int nRevision = 0;
     stream.Read(&nRevision, sizeof(nRevision));
@@ -273,7 +273,7 @@ void Environ::Load(Stream &stream) {
     AcquireLightsRefs();
 }
 
-// 0x00516560
+// NTSC-U/C: 0x00516560, PAL: 0x00556890
 void Environ::Copy(const Object *pSource, unsigned nFlags) {
     const Environ *pSourceEnviron = dynamic_cast<const Environ *>(pSource);
 
@@ -294,7 +294,7 @@ void Environ::Copy(const Object *pSource, unsigned nFlags) {
     AcquireLightsRefs();
 }
 
-// 0x005156b0
+// NTSC-U/C: 0x005156b0, PAL: 0x005559e0
 void Environ::Replace(Object *pFrom, Object *pTo) {
     Drawable::Replace(pFrom, pTo);
 
@@ -323,22 +323,22 @@ void Environ::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// 0x00519308
+// NTSC-U/C: 0x00519308, PAL: 0x005596a0
 Environ *Environ::NewEnviron(const HxStr &name) {
     return new Environ(name);
 }
 
-// 0x00518df0
+// NTSC-U/C: 0x00518df0, PAL: 0x00559188
 void *Environ::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kEnvironTag);
 }
 
-// 0x00518e10
+// NTSC-U/C: 0x00518e10, PAL: 0x005591a8
 void Environ::operator delete(void *pBlock) {
     FreeTaggedMemory(pBlock, kEnvironTag);
 }
 
-// 0x005166d0
+// NTSC-U/C: 0x005166d0, PAL: 0x00556a00
 void Environ::AddLight(Light *pLight) {
     if (std::find(mLights.begin(), mLights.end(), pLight) != mLights.end()) {
         g_failSink.Report(kAlreadyInFormat, NameText(pLight), NameText(this));
@@ -350,7 +350,7 @@ void Environ::AddLight(Light *pLight) {
     mLights.push_back(pLight);
 }
 
-// 0x00516850
+// NTSC-U/C: 0x00516850, PAL: 0x00556b80
 void Environ::RemoveLight(Light *pLight) {
     const auto it = std::find(mLights.begin(), mLights.end(), pLight);
     if (it == mLights.end()) {
@@ -362,7 +362,7 @@ void Environ::RemoveLight(Light *pLight) {
     mLights.erase(it);
 }
 
-// 0x00518eb0
+// NTSC-U/C: 0x00518eb0, PAL: 0x00559248
 Environ *NewEnvironThroughHook(const HxStr &name) {
     try {
         return g_pfnNewEnviron(name);
@@ -371,7 +371,7 @@ Environ *NewEnvironThroughHook(const HxStr &name) {
     }
 }
 
-// 0x00519278
+// NTSC-U/C: 0x00519278, PAL: 0x00559610
 Object *CreateRegisteredEnviron(const HxStr &name) {
     try {
         return g_pfnNewEnviron(name);
@@ -380,7 +380,7 @@ Object *CreateRegisteredEnviron(const HxStr &name) {
     }
 }
 
-// 0x00519568
+// NTSC-U/C: 0x00519568, PAL: 0x00559900
 void Environ::ClearLights() {
     ReleaseLightsRefs();
     mLights.clear();

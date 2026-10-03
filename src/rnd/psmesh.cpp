@@ -213,7 +213,7 @@ inline void AppendDrawVert(const DrawVert &vert, int nFirstQuadword, int nQuadwo
     }
 }
 
-// 0x00606a60
+// NTSC-U/C: 0x00606a60, PAL: 0x006476b8
 // Submit one triangle of transformed vertices, clipping it first when asked.
 //
 // Rnd::PsMesh::DrawFacesSoftware() inlines one level of this and the recursion uses the body here.
@@ -281,7 +281,7 @@ inline void SelectDepthRegs(int nZMask, int nZTest) {
 
 } // namespace
 
-// 0x00606d38
+// NTSC-U/C: 0x00606d38, PAL: 0x00647990
 void PsMesh::SelectDepthRegsForPass(const Mesh &mesh, int nPass) {
     if (g_pCurrentCam->mpTargetTex != nullptr || nPass >= kDepthProgramPassLimit) {
         return;
@@ -302,15 +302,15 @@ void PsMesh::SelectDepthRegsForPass(const Mesh &mesh, int nPass) {
     SelectDepthRegs(nZMask, nZTest);
 }
 
-// 0x00602600
+// NTSC-U/C: 0x00602600, PAL: 0x006431f0
 PsMesh::PsMesh(const HxStr &name) : Object(name), Mesh(name) {
 }
 
-// 0x00605f48
+// NTSC-U/C: 0x00605f48, PAL: 0x00646ba0
 PsMesh::~PsMesh() {
 }
 
-// 0x00602128
+// NTSC-U/C: 0x00602128, PAL: 0x00642d18
 int PsMesh::DrawSelf() {
     ++g_renderStats.mnMeshDraws;
 
@@ -419,7 +419,7 @@ int PsMesh::DrawSelf() {
     return 1;
 }
 
-// 0x00606a00
+// NTSC-U/C: 0x00606a00, PAL: 0x00647658
 void PsMesh::Refresh() {
     Mesh::Refresh();
     for (auto &vert : mVerts) {
@@ -427,7 +427,7 @@ void PsMesh::Refresh() {
     }
 }
 
-// 0x006019e0
+// NTSC-U/C: 0x006019e0, PAL: 0x006425d0
 void PsMesh::DrawFacesVU1(const float *pXfm, int nClip) {
     g_renderStats.mnTriangles += static_cast<int>(mFacesOwner->mFaces.size());
     g_gfxDevice.CloseGifTag(1);
@@ -524,7 +524,7 @@ void PsMesh::DrawFacesVU1(const float *pXfm, int nClip) {
     }
 }
 
-// 0x00601de0
+// NTSC-U/C: 0x00601de0, PAL: 0x006429d0
 void PsMesh::DrawEdgesVU1(const float *pXfm) {
     g_renderStats.mnLines += static_cast<int>(mFacesOwner->mEdges.size());
     g_gfxDevice.CloseGifTag(1);
@@ -590,7 +590,7 @@ void PsMesh::DrawEdgesVU1(const float *pXfm) {
     }
 }
 
-// 0x00601410
+// NTSC-U/C: 0x00601410, PAL: 0x00642000
 void PsMesh::DrawFacesSoftware(int nClip) {
     const int nTextured = g_nStageTextureBound;
     const unsigned long long qwPrim =
@@ -617,7 +617,7 @@ void PsMesh::DrawFacesSoftware(int nClip) {
     }
 }
 
-// 0x006017c0
+// NTSC-U/C: 0x006017c0, PAL: 0x006423b0
 void PsMesh::DrawEdgesSoftware(int nClip) {
     const unsigned long long qwPrim =
         kGsPrimLine | kGsPrimAa1 |
@@ -666,7 +666,7 @@ void PsMesh::DrawEdgesSoftware(int nClip) {
     }
 }
 
-// 0x006069a0
+// NTSC-U/C: 0x006069a0, PAL: 0x006475f8
 inline void PsMesh::DrawRun::ReserveIndices(int nIndexCount) {
     // The binary rounds with a plain arithmetic shift rather than a signed division.
     const int nQuadwords = (nIndexCount + kIndexHalfwordsPerQuadword - 1) >> kIndexHalfwordShift;
@@ -701,7 +701,7 @@ void PsMesh::AppendRun(std::list<DrawRun> &runs,
     std::copy(primIndices.begin(), primIndices.end(), run.mIndices);
 }
 
-// 0x00600590
+// NTSC-U/C: 0x00600590, PAL: 0x00641180
 void PsMesh::Sync() {
     // Both scratch lists start at the largest run either pass can produce and are emptied before
     // each run, so no run reallocates them.
@@ -789,7 +789,7 @@ void PsMesh::Sync() {
     }
 }
 
-// 0x00606928
+// NTSC-U/C: 0x00606928, PAL: 0x00647580
 Mesh *NewPsMesh(const HxStr &name) {
     // The binary bills the allocation to the tag "Rnd::Mesh" and rounds the 0x170-byte object up
     // to 0x180 bytes.

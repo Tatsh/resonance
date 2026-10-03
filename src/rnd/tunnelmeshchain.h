@@ -31,7 +31,8 @@ public:
     /**
      * Delete every mesh of the chain.
      *
-     * @ghidraAddress 0x00476a80
+     * @ghidraAddress NTSC-U/C: 0x00476a80
+     * @ghidraAddress PAL: 0x004b46f8
      */
     ~TunnelMeshChain() {
         DeleteMeshes();
@@ -42,7 +43,8 @@ public:
      *
      * A null entry is skipped.
      *
-     * @ghidraAddress 0x00476b28
+     * @ghidraAddress NTSC-U/C: 0x00476b28
+     * @ghidraAddress PAL: 0x004b47a0
      */
     void DeleteMeshes();
 
@@ -60,7 +62,8 @@ public:
      * @param name The base title.
      * @param nCount The number of levels.
      * @param bInternal Whether the meshes are marked Rnd::Object::mInternal.
-     * @ghidraAddress 0x004694a0
+     * @ghidraAddress NTSC-U/C: 0x004694a0
+     * @ghidraAddress PAL: 0x004a6f60
      */
     void Build(const HxStr &name, int nCount, bool bInternal);
 
@@ -68,7 +71,8 @@ public:
      * Point the transform owner of every mesh at one mesh.
      *
      * @param pOwner The mesh whose transform every level draws with, which may be null.
-     * @ghidraAddress 0x00476e48
+     * @ghidraAddress NTSC-U/C: 0x00476e48
+     * @ghidraAddress PAL: 0x004b4ac0
      */
     void SetTransOwner(Mesh *pOwner);
 
@@ -80,7 +84,8 @@ public:
      * retakes the same reference.
      *
      * @param source The chain to copy from.
-     * @ghidraAddress 0x00469820
+     * @ghidraAddress NTSC-U/C: 0x00469820
+     * @ghidraAddress PAL: 0x004a7318
      */
     void CopyScreenSizes(const TunnelMeshChain &source);
 
@@ -92,7 +97,8 @@ public:
      * inlines the body.
      *
      * @param screenSizes The thresholds, finest level first.
-     * @ghidraAddress 0x00476c50
+     * @ghidraAddress NTSC-U/C: 0x00476c50
+     * @ghidraAddress PAL: 0x004b48c8
      */
     void SetScreenSizes(const std::vector<float> &screenSizes);
 
@@ -102,7 +108,8 @@ public:
      * The out-of-line copy has no callers, and Rnd::TunnelSeekSection::Build() inlines the body.
      *
      * @param templates The chain whose triangles to share, at least as long as this one.
-     * @ghidraAddress 0x00476d28
+     * @ghidraAddress NTSC-U/C: 0x00476d28
+     * @ghidraAddress PAL: 0x004b49a0
      */
     void ShareFaces(const TunnelMeshChain &templates);
 
@@ -111,7 +118,8 @@ public:
      *
      * The out-of-line copy has no callers.
      *
-     * @ghidraAddress 0x00476de8
+     * @ghidraAddress NTSC-U/C: 0x00476de8
+     * @ghidraAddress PAL: 0x004b4a60
      */
     void Sync();
 
@@ -120,7 +128,8 @@ public:
      *
      * @param ray The segment to test along.
      * @param sink The collector to append intersections to.
-     * @ghidraAddress 0x00476ec0
+     * @ghidraAddress NTSC-U/C: 0x00476ec0
+     * @ghidraAddress PAL: 0x004b4b38
      */
     void Collide(const Ray &ray, Collideable::HitSink &sink);
 
@@ -131,7 +140,8 @@ public:
      * coordinates.
      *
      * @param nCount The vertex count.
-     * @ghidraAddress 0x004698e8
+     * @ghidraAddress NTSC-U/C: 0x004698e8
+     * @ghidraAddress PAL: 0x004a73e0
      */
     void SetVertexCount(unsigned nCount);
 
@@ -143,7 +153,8 @@ public:
      * Mesh::mMinScreen is below flScreenSize, and the level it stops on is drawn.
      *
      * @param flScreenSize The projected screen size.
-     * @ghidraAddress 0x00476bc8
+     * @ghidraAddress NTSC-U/C: 0x00476bc8
+     * @ghidraAddress PAL: 0x004b4840
      */
     void Draw(float flScreenSize);
 };

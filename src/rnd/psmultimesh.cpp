@@ -58,21 +58,21 @@ inline const GifQuadword *AsQuadwords(const void *pRecord) {
 
 } // namespace
 
-// 0x005b5c28
+// NTSC-U/C: 0x005b5c28, PAL: 0x005f8278
 MultiMesh *NewPsMultiMesh(const HxStr &name) {
     // The binary allocates the 0x38 bytes the object occupies.
     return new PsMultiMesh(name);
 }
 
-// 0x005b2fd8
+// NTSC-U/C: 0x005b2fd8, PAL: 0x005f55c0
 PsMultiMesh::PsMultiMesh(const HxStr &name) : Object(name), MultiMesh(name) {
 }
 
-// 0x005b5a40
+// NTSC-U/C: 0x005b5a40, PAL: 0x005f8090
 PsMultiMesh::~PsMultiMesh() {
 }
 
-// 0x005b2ed0
+// NTSC-U/C: 0x005b2ed0, PAL: 0x005f54b8
 int PsMultiMesh::DrawSelf() {
     ++g_renderStats.mnMeshDraws;
     if (g_gfxDevice.mnUseVu1 == 0) {
@@ -108,7 +108,7 @@ int PsMultiMesh::DrawSelf() {
     return 1;
 }
 
-// 0x005b2c60
+// NTSC-U/C: 0x005b2c60, PAL: 0x005f5248
 void PsMultiMesh::SubmitInstanceGifPackets() {
     const int nInstances = static_cast<int>(mTransforms.size());
     g_renderStats.mnTriangles += nInstances * static_cast<int>(mMesh->mFacesOwner->mFaces.size());

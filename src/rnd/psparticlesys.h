@@ -40,11 +40,15 @@ public:
      * The body is empty. Rnd::NewPsParticleSys() is the only construction site.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
-     * @ghidraAddress 0x005fcdf0
+     * @ghidraAddress NTSC-U/C: 0x005fcdf0
+     * @ghidraAddress PAL: 0x0063db00
      */
     PsParticleSys(const HxStr &name);
 
-    /** @ghidraAddress 0x005ff878 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x005ff878
+     * @ghidraAddress PAL: 0x006405f0
+     */
     virtual ~PsParticleSys();
 
 protected:
@@ -57,7 +61,8 @@ protected:
      * material pass. The software path packs the particles first and dispatches on the mode.
      *
      * @return Always non-zero, so the children always draw.
-     * @ghidraAddress 0x005fcb18
+     * @ghidraAddress NTSC-U/C: 0x005fcb18
+     * @ghidraAddress PAL: 0x0063d828
      */
     virtual int DrawSelf();
 
@@ -77,7 +82,7 @@ private:
     // is the near corner and the second the far one, and a pair is rejected when the near corner
     // falls below zero or the far corner passes 0xffff in either axis. A textured sprite sends
     // three quadwords per vertex, and an untextured one sends the colour and both positions.
-    // 0x005fc6d0
+    // NTSC-U/C: 0x005fc6d0, PAL: 0x0063d3e0
     void EmitGifSprites(int nVertCount);
 
     // Upload the live list to VU1 as sprite records and call the microprogram. Two quadwords
@@ -85,7 +90,7 @@ private:
     // fourth word of the position first because a GS sprite takes a centre and a half extent.
     // A batch closes at 162 particles or at 254 destination quadwords, whichever comes first, and
     // the first batch enters through MSCAL 0x258 while every batch after it uses MSCNT.
-    // 0x005fc940
+    // NTSC-U/C: 0x005fc940, PAL: 0x0063d650
     void DrawSpritesDmaKicked();
 };
 
@@ -96,7 +101,8 @@ private:
  *
  * @param name The object name.
  * @return The new system.
- * @ghidraAddress 0x005ffa78
+ * @ghidraAddress NTSC-U/C: 0x005ffa78
+ * @ghidraAddress PAL: 0x006407f0
  */
 ParticleSys *NewPsParticleSys(const HxStr &name);
 

@@ -78,7 +78,8 @@ constexpr int kDrawVertClipOtherPlanes = 0x2f;
  * not the size of the allocation: the clipper appends beyond that index and the triangle fan reads
  * its results back from there.
  *
- * @ghidraAddress 0x00784960
+ * @ghidraAddress NTSC-U/C: 0x00784960
+ * @ghidraAddress PAL: 0x007c8660
  */
 extern DrawVert g_aDrawVerts[];
 
@@ -89,7 +90,8 @@ extern DrawVert g_aDrawVerts[];
  * band. Rnd::Cam retains a second, per-camera set that Rnd::Mesh::PrepareDraw() uses instead. The
  * two tests do not share a plane set.
  *
- * @ghidraAddress 0x00768420
+ * @ghidraAddress NTSC-U/C: 0x00768420
+ * @ghidraAddress PAL: 0x007ac170
  */
 extern Frustum g_drawFrustum;
 
@@ -103,7 +105,8 @@ extern Frustum g_drawFrustum;
  * @param sphere The sphere, in the space the planes are expressed in.
  * @param frustum The view volume.
  * @return Non-zero when no plane gives a negative distance.
- * @ghidraAddress 0x005514a0
+ * @ghidraAddress NTSC-U/C: 0x005514a0
+ * @ghidraAddress PAL: 0x00591ae0
  */
 int IsSphereInsideFrustum(const Sphere &sphere, const Frustum &frustum);
 
@@ -116,7 +119,8 @@ int IsSphereInsideFrustum(const Sphere &sphere, const Frustum &frustum);
  *
  * @param sphere The sphere, in world space.
  * @return Non-zero when no plane gives a negative distance.
- * @ghidraAddress 0x005884e0
+ * @ghidraAddress NTSC-U/C: 0x005884e0
+ * @ghidraAddress PAL: 0x005cb740
  */
 inline int IsSphereInDrawFrustum(const Sphere &sphere) {
     return IsSphereInsideFrustum(sphere, g_drawFrustum);
@@ -144,7 +148,8 @@ inline int IsSphereInDrawFrustum(const Sphere &sphere) {
  * @param nCount How many vertices to transform.
  * @param bWriteClipFlags Non-zero to record per-vertex clip flags.
  * @param sphere The bounds the point lights are culled against.
- * @ghidraAddress 0x00584040
+ * @ghidraAddress NTSC-U/C: 0x00584040
+ * @ghidraAddress PAL: 0x005c7238
  */
 void TransformAndLightMeshVerts(DrawVert *pOutVerts,
                                 const float *pXfm,
@@ -163,7 +168,8 @@ void TransformAndLightMeshVerts(DrawVert *pOutVerts,
  * @param pVerts The source vertices.
  * @param nCount How many vertices to transform.
  * @param pXfm The transform, four rows of four floats.
- * @ghidraAddress 0x00584700
+ * @ghidraAddress NTSC-U/C: 0x00584700
+ * @ghidraAddress PAL: 0x005c78f8
  */
 void TransformMeshVertsNoLight(DrawVert *pOutVerts,
                                MeshVert *pVerts,
@@ -193,7 +199,8 @@ void TransformMeshVertsNoLight(DrawVert *pOutVerts,
  * @param nIdx2 Third vertex.
  * @param pVerts The vertex buffer, indexed by the three arguments above.
  * @param pnNextIndex Where the next vertex is written, advanced by this call.
- * @ghidraAddress 0x00584cc8
+ * @ghidraAddress NTSC-U/C: 0x00584cc8
+ * @ghidraAddress PAL: 0x005c7ec0
  */
 void ClipTriangleToFrustum(
     unsigned nIdx0, unsigned nIdx1, unsigned nIdx2, DrawVert *pVerts, int *pnNextIndex);
@@ -213,7 +220,8 @@ void ClipTriangleToFrustum(
  * @param pXfm The draw transform.
  * @param sphere The mesh bounding sphere.
  * @return The VU1 program entry, 0x2ee for an unlit pass.
- * @ghidraAddress 0x00583358
+ * @ghidraAddress NTSC-U/C: 0x00583358
+ * @ghidraAddress PAL: 0x005c6550
  */
 int EmitFaceVu1Setup(const float *pXfm, const Sphere &sphere);
 
@@ -224,7 +232,8 @@ int EmitFaceVu1Setup(const float *pXfm, const Sphere &sphere);
  *
  * @param pXfm The draw transform.
  * @param color The line colour.
- * @ghidraAddress 0x005837d0
+ * @ghidraAddress NTSC-U/C: 0x005837d0
+ * @ghidraAddress PAL: 0x005c69c8
  */
 void EmitEdgeVu1Setup(const float *pXfm, const Color &color);
 
@@ -236,7 +245,8 @@ void EmitEdgeVu1Setup(const float *pXfm, const Color &color);
  * returns nothing: the single exit leaves the advanced write pointer in the return register as a
  * by-product of storing it, and the caller discards it.
  *
- * @ghidraAddress 0x005839d0
+ * @ghidraAddress NTSC-U/C: 0x005839d0
+ * @ghidraAddress PAL: 0x005c6bc8
  */
 void EmitParticleVu1Setup();
 
@@ -252,7 +262,8 @@ void EmitParticleVu1Setup();
  * @param pFirst Head of the live particle list.
  * @param nLineLength Rnd::ParticleSys::mLineLength of the emitting system.
  * @return Vertices packed, one per point particle and two per line or sprite particle.
- * @ghidraAddress 0x00584980
+ * @ghidraAddress NTSC-U/C: 0x00584980
+ * @ghidraAddress PAL: 0x005c7b78
  */
 int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, int nLineLength);
 
@@ -262,7 +273,8 @@ int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, in
  * Both software draw paths shift it into the GS PRIM fog-enable bit, which is what identifies it
  * as fog rather than a general flag. Rnd::PsEnviron::DrawSelf() is the one writer.
  *
- * @ghidraAddress 0x00776118
+ * @ghidraAddress NTSC-U/C: 0x00776118
+ * @ghidraAddress PAL: 0x007b9ff0
  */
 extern int g_nFogEnabled;
 

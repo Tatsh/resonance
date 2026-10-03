@@ -51,7 +51,8 @@ public:
      *
      * @param nSize The object size, which the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x004e2048
+     * @ghidraAddress NTSC-U/C: 0x004e2048
+     * @ghidraAddress PAL: 0x00520900
      */
     void *operator new(size_t nSize);
 
@@ -59,7 +60,8 @@ public:
      * Release a view to the tagged heap.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x004e2068
+     * @ghidraAddress NTSC-U/C: 0x004e2068
+     * @ghidraAddress PAL: 0x00520920
      */
     void operator delete(void *pBlock);
 
@@ -70,29 +72,51 @@ public:
      * against the one shared `Rnd::Object` subobject at `+0x100`.
      *
      * @param name The registry key for this object.
-     * @ghidraAddress 0x004e2740
+     * @ghidraAddress NTSC-U/C: 0x004e2740
+     * @ghidraAddress PAL: 0x00520ff8
      */
     explicit View(const HxStr &name);
 
-    /** @ghidraAddress 0x004e21b8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004e21b8
+     * @ghidraAddress PAL: 0x00520a70
+     */
     virtual ~View();
 
-    /** @ghidraAddress 0x004e3768 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004e3768
+     * @ghidraAddress PAL: 0x00522020
+     */
     virtual void DumpText(FailSink &sink);
 
-    /** @ghidraAddress 0x004e37d0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004e37d0
+     * @ghidraAddress PAL: 0x00522088
+     */
     virtual void Save(Stream &stream);
 
-    /** @ghidraAddress 0x004e36f8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004e36f8
+     * @ghidraAddress PAL: 0x00521fb0
+     */
     virtual void Replace(Object *pFrom, Object *pTo);
 
-    /** @ghidraAddress 0x004e2720 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004e2720
+     * @ghidraAddress PAL: 0x00520fd8
+     */
     virtual const HxStr &ClassName() const;
 
-    /** @ghidraAddress 0x004e3850 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004e3850
+     * @ghidraAddress PAL: 0x00522108
+     */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
-    /** @ghidraAddress 0x004e0128 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004e0128
+     * @ghidraAddress PAL: 0x0051e978
+     */
     virtual void Load(Stream &stream);
 
     /**
@@ -100,7 +124,8 @@ public:
      *
      * @param name The registry key for the new view.
      * @return The new view.
-     * @ghidraAddress 0x004e2088
+     * @ghidraAddress NTSC-U/C: 0x004e2088
+     * @ghidraAddress PAL: 0x00520940
      */
     static View *NewView(const HxStr &name);
 
@@ -110,7 +135,8 @@ public:
      * The four mix-in keys are registered from temporary strings the routine builds from literals,
      * and only the "View" key uses a string global.
      *
-     * @ghidraAddress 0x004dff48
+     * @ghidraAddress NTSC-U/C: 0x004dff48
+     * @ghidraAddress PAL: 0x0051e720
      */
     static void Init();
 
@@ -122,7 +148,8 @@ public:
      * The title is inferred.
      *
      * @param pChild The view to add.
-     * @ghidraAddress 0x0040f660
+     * @ghidraAddress NTSC-U/C: 0x0040f660
+     * @ghidraAddress PAL: 0x004490e8
      */
     void AddView(View *pChild);
 
@@ -134,7 +161,8 @@ public:
      * is inferred.
      *
      * @param pChild The view to remove.
-     * @ghidraAddress 0x0040f5f8
+     * @ghidraAddress NTSC-U/C: 0x0040f5f8
+     * @ghidraAddress PAL: 0x00449080
      */
     void RemoveView(View *pChild);
 
@@ -158,7 +186,8 @@ public:
 /**
  * Class key a `.rnd` file writes for a view.
  *
- * @ghidraAddress 0x00702b20
+ * @ghidraAddress NTSC-U/C: 0x00702b20
+ * @ghidraAddress PAL: 0x007465c0
  */
 extern HxStr g_viewClassName;
 

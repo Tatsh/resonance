@@ -64,11 +64,15 @@ public:
      * mEmitRateRatio starts at zero. Rnd::NewParticleSysAnim() is the only construction site.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
-     * @ghidraAddress 0x0052bca0
+     * @ghidraAddress NTSC-U/C: 0x0052bca0
+     * @ghidraAddress PAL: 0x0056c318
      */
     ParticleSysAnim(const HxStr &name);
 
-    /** @ghidraAddress 0x0052b9c0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0052b9c0
+     * @ghidraAddress PAL: 0x0056c038
+     */
     virtual ~ParticleSysAnim();
 
     /**
@@ -78,7 +82,8 @@ public:
      * suppressed while the dump level of the sink is not positive.
      *
      * @param sink The text sink.
-     * @ghidraAddress 0x00526980
+     * @ghidraAddress NTSC-U/C: 0x00526980
+     * @ghidraAddress PAL: 0x00566f58
      */
     virtual void DumpText(FailSink &sink);
 
@@ -89,7 +94,8 @@ public:
      * channels, mFramesOwner as a name, and finally mEmitRateRatio.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00526b68
+     * @ghidraAddress NTSC-U/C: 0x00526b68
+     * @ghidraAddress PAL: 0x00567140
      */
     virtual void Save(Stream &stream);
 
@@ -98,7 +104,8 @@ public:
      *
      * @param pFrom The object being replaced.
      * @param pTo The object to point at, which may be null.
-     * @ghidraAddress 0x005267a8
+     * @ghidraAddress NTSC-U/C: 0x005267a8
+     * @ghidraAddress PAL: 0x00566d80
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -106,7 +113,8 @@ public:
      * Return the registered class name, "ParticleSysAnim".
      *
      * @return The class name.
-     * @ghidraAddress 0x0052bc90
+     * @ghidraAddress NTSC-U/C: 0x0052bc90
+     * @ghidraAddress PAL: 0x0056c308
      */
     virtual const HxStr &ClassName() const;
 
@@ -120,7 +128,8 @@ public:
      * @param pSource The source object, which has to be an animation for the copy to have any
      *                effect.
      * @param nFlags The copy flags.
-     * @ghidraAddress 0x00526fc8
+     * @ghidraAddress NTSC-U/C: 0x00526fc8
+     * @ghidraAddress PAL: 0x005675f0
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -131,7 +140,8 @@ public:
      * exceeds what this build writes.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00526ce8
+     * @ghidraAddress NTSC-U/C: 0x00526ce8
+     * @ghidraAddress PAL: 0x005672c0
      */
     virtual void Load(Stream &stream);
 
@@ -143,7 +153,8 @@ public:
      * each. An empty channel contributes zero.
      *
      * @return The last frame.
-     * @ghidraAddress 0x00527128
+     * @ghidraAddress NTSC-U/C: 0x00527128
+     * @ghidraAddress PAL: 0x00567750
      */
     virtual float EndFrame();
 
@@ -163,7 +174,8 @@ protected:
      * mEmitRateRatio to mEmitRateHigh. An empty rate channel finishes the routine.
      *
      * @param flFrame The filtered frame to animate to.
-     * @ghidraAddress 0x00527290
+     * @ghidraAddress NTSC-U/C: 0x00527290
+     * @ghidraAddress PAL: 0x005678b8
      */
     virtual void SetFrameSelf(float flFrame);
 
@@ -174,7 +186,8 @@ protected:
      * survives in the shipped program, and the name is inferred.
      *
      * @param pParticleSys The new system, or null.
-     * @ghidraAddress 0x0052c700
+     * @ghidraAddress NTSC-U/C: 0x0052c700
+     * @ghidraAddress PAL: 0x0056cd78
      */
     void SetParticleSys(ParticleSys *pParticleSys);
 
@@ -186,7 +199,8 @@ protected:
      * program, and the name follows the Rnd::TransAnim counterpart.
      *
      * @param pOwner The new frames owner, or null.
-     * @ghidraAddress 0x0052c7a0
+     * @ghidraAddress NTSC-U/C: 0x0052c7a0
+     * @ghidraAddress PAL: 0x0056ce18
      */
     void SetFramesOwner(ParticleSysAnim *pOwner);
 
@@ -196,7 +210,7 @@ private:
     void ClearKeys();
 
     // Register this animation as a referrer of mParticleSys and mFramesOwner. Load() inlines it.
-    // 0x0052c868
+    // NTSC-U/C: 0x0052c868, PAL: 0x0056cee0
     void AddObjectRefs();
 
     // Drop the references AddObjectRefs() took. The destructor calls it. 0x0052c818.
@@ -229,7 +243,8 @@ private:
  *
  * @param name The object name.
  * @return The new animation, or null.
- * @ghidraAddress 0x0052b8a8
+ * @ghidraAddress NTSC-U/C: 0x0052b8a8
+ * @ghidraAddress PAL: 0x0056bf20
  */
 inline ParticleSysAnim *NewParticleSysAnim(const HxStr &name) {
     try {
@@ -248,14 +263,16 @@ inline ParticleSysAnim *NewParticleSysAnim(const HxStr &name) {
  *
  * @param name The object name.
  * @return The new animation, as its Rnd::Object subobject.
- * @ghidraAddress 0x0052c180
+ * @ghidraAddress NTSC-U/C: 0x0052c180
+ * @ghidraAddress PAL: 0x0056c7f8
  */
 Object *CreateRegisteredParticleSysAnim(const HxStr &name);
 
 /**
  * Registered class name of Rnd::ParticleSysAnim, the string "ParticleSysAnim".
  *
- * @ghidraAddress 0x0071af00
+ * @ghidraAddress NTSC-U/C: 0x0071af00
+ * @ghidraAddress PAL: 0x0075ee28
  */
 extern HxStr g_particleSysAnimClassName;
 
@@ -267,7 +284,8 @@ extern HxStr g_particleSysAnimClassName;
  *
  * Rnd::Manager::Init() also expands this inline.
  *
- * @ghidraAddress 0x0052b878
+ * @ghidraAddress NTSC-U/C: 0x0052b878
+ * @ghidraAddress PAL: 0x0056bef0
  */
 inline void RegisterParticleSysAnimClass() {
     g_manager.RegisterClass(g_particleSysAnimClassName, CreateRegisteredParticleSysAnim);

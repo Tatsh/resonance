@@ -29,30 +29,30 @@ inline const char *NameText(const HxStr &name) {
 
 } // namespace
 
-// 0x006dba38
+// NTSC-U/C: 0x006dba38, PAL: 0x0071f228
 int g_nRndLoaderZone = kNoZone;
 
-// 0x006dba40
+// NTSC-U/C: 0x006dba40, PAL: 0x0071f230
 std::vector<RndAsyncLoader *> g_pendingLoads;
 
-// 0x006dba50
+// NTSC-U/C: 0x006dba50, PAL: 0x0071f240
 std::vector<RndActiveLoadEntry> g_activeLoads;
 
-// 0x003f7c00
+// NTSC-U/C: 0x003f7c00, PAL: 0x00430428
 RndAsyncLoader::RndAsyncLoader(const HxStr &directory, const HxStr &file, int nZone)
     : mDirectory(directory), mFile(file), mPending(1), mFileRead(0), mFinished(0), mZone(nZone) {
 }
 
-// 0x003f7e50
+// NTSC-U/C: 0x003f7e50, PAL: 0x00430688
 RndAsyncLoader::RndAsyncLoader() : mPending(1), mFileRead(0), mFinished(0), mZone(kNoZone) {
 }
 
-// 0x003f8178
+// NTSC-U/C: 0x003f8178, PAL: 0x004309b8
 RndAsyncLoader::~RndAsyncLoader() {
     Unload();
 }
 
-// 0x003f8030
+// NTSC-U/C: 0x003f8030, PAL: 0x00430870
 void RndAsyncLoader::Cancel() {
     if (mFileRead != 0) {
         return;
@@ -74,7 +74,7 @@ void RndAsyncLoader::Cancel() {
     }
 }
 
-// 0x003f8240
+// NTSC-U/C: 0x003f8240, PAL: 0x00430aa0
 void RndAsyncLoader::Unload() {
     Cancel();
     if (mPending != 0) {
@@ -92,7 +92,7 @@ void RndAsyncLoader::Unload() {
     mFileRead = 0;
 }
 
-// 0x003f8308
+// NTSC-U/C: 0x003f8308, PAL: 0x00430b68
 void RndAsyncLoader::Enqueue() {
     for (const auto &entry : g_activeLoads) {
         if (entry.mRequest == this) {
@@ -116,7 +116,7 @@ void RndAsyncLoader::Enqueue() {
     g_pendingLoads.push_back(this);
 }
 
-// 0x003f8460
+// NTSC-U/C: 0x003f8460, PAL: 0x00430cc0
 void RndAsyncLoader::HarvestLoadedObjects() {
     mLoadedObjects = Rnd::g_manager.mLoaded;
 
@@ -140,7 +140,7 @@ void RndAsyncLoader::HarvestLoadedObjects() {
     }
 }
 
-// 0x003f8930
+// NTSC-U/C: 0x003f8930, PAL: 0x00431190
 void RndAsyncLoader::PollAsyncLoads() {
     const int nPreviousZone = ZoneGetCurrent();
     ZoneSetCurrent(g_nRndLoaderZone);
@@ -209,7 +209,7 @@ void RndAsyncLoader::PollAsyncLoads() {
     ZoneSetCurrent(nPreviousZone);
 }
 
-// 0x003f8fc0
+// NTSC-U/C: 0x003f8fc0, PAL: 0x00431908
 int RndAsyncLoader::Poll(float *pfProgress) {
     if (mPending != 0) {
         *pfProgress = 0;
@@ -240,7 +240,7 @@ int RndAsyncLoader::Poll(float *pfProgress) {
     return 0;
 }
 
-// 0x003fc708
+// NTSC-U/C: 0x003fc708, PAL: 0x00435108
 void RndAsyncLoader::Restart(const HxStr &directory, const HxStr &file) {
     Cancel();
     mDirectory = directory;

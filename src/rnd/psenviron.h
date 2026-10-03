@@ -69,7 +69,8 @@ struct PointLightRecord {
  * @param pXfm The object transform, four rows of four floats.
  * @param pSphere The object bounds, or null.
  * @return The directional lights plus the point lights not culled.
- * @ghidraAddress 0x005af0c8
+ * @ghidraAddress NTSC-U/C: 0x005af0c8
+ * @ghidraAddress PAL: 0x005f1670
  */
 int TransformLightRecords(DirectionalLightRecord *&pDirectionalBegin,
                           DirectionalLightRecord *&pDirectionalEnd,
@@ -96,7 +97,8 @@ int TransformLightRecords(DirectionalLightRecord *&pDirectionalBegin,
  * @param pSphere The object bounds, or null.
  * @return The VU1 program entry: 0x2ee unlit, 0x2f8 directional, 0x35c point, or 0x3d4 when lit
  *         by no light.
- * @ghidraAddress 0x005af2c0
+ * @ghidraAddress NTSC-U/C: 0x005af2c0
+ * @ghidraAddress PAL: 0x005f1868
  */
 int SelectLightForVertex(GifQuadword *pLight,
                          GifQuadword *pAmbient,
@@ -124,13 +126,15 @@ public:
      * NewEnviron() and Init() both open-code the body. The out-of-line copy has no caller.
      *
      * @param name The registry key for this object.
-     * @ghidraAddress 0x005b2648
+     * @ghidraAddress NTSC-U/C: 0x005b2648
+     * @ghidraAddress PAL: 0x005f4c18
      */
     explicit PsEnviron(const HxStr &name) : Object(name), Environ(name) {
     }
 
     /**
-     * @ghidraAddress 0x005b2200
+     * @ghidraAddress NTSC-U/C: 0x005b2200
+     * @ghidraAddress PAL: 0x005f47d0
      */
     virtual ~PsEnviron();
 
@@ -142,7 +146,8 @@ public:
      *
      * @param name The registry key for the new environment.
      * @return The new environment.
-     * @ghidraAddress 0x005b27b0
+     * @ghidraAddress NTSC-U/C: 0x005b27b0
+     * @ghidraAddress PAL: 0x005f4d80
      */
     static Environ *NewEnviron(const HxStr &name);
 
@@ -156,7 +161,8 @@ public:
      * Rnd::g_pfnNewLight, marked internal, added to the environment, and made a transform child of
      * Rnd::g_pDefaultCam.
      *
-     * @ghidraAddress 0x005aea68
+     * @ghidraAddress NTSC-U/C: 0x005aea68
+     * @ghidraAddress PAL: 0x005f0fd0
      */
     static void Init();
 
@@ -168,7 +174,8 @@ public:
      * out-of-line copy is at `0x00518e70`. GfxDevice::Terminate() is the one caller. The name is
      * inferred from GfxDevice::Terminate().
      *
-     * @ghidraAddress 0x005b2888
+     * @ghidraAddress NTSC-U/C: 0x005b2888
+     * @ghidraAddress PAL: 0x005f4e58
      */
     static void Terminate();
 
@@ -189,7 +196,8 @@ protected:
      * making this environment Rnd::g_pCurrentEnviron.
      *
      * @return Non-zero, which draws the children as well.
-     * @ghidraAddress 0x005aecb8
+     * @ghidraAddress NTSC-U/C: 0x005aecb8
+     * @ghidraAddress PAL: 0x005f1260
      */
     virtual int DrawSelf();
 };
@@ -197,14 +205,16 @@ protected:
 /**
  * Environment the renderer falls back on when a scene selects none.
  *
- * @ghidraAddress 0x0077613c
+ * @ghidraAddress NTSC-U/C: 0x0077613c
+ * @ghidraAddress PAL: 0x007ba014
  */
 extern PsEnviron *g_pDefaultEnviron;
 
 /**
  * Light the default environment applies when a scene supplies none.
  *
- * @ghidraAddress 0x00776140
+ * @ghidraAddress NTSC-U/C: 0x00776140
+ * @ghidraAddress PAL: 0x007ba018
  */
 extern Light *g_pDefaultLight;
 
@@ -212,28 +222,32 @@ extern Light *g_pDefaultLight;
  * Scale a camera space depth is multiplied by to arrive at the byte range of the GS fog
  * register.
  *
- * @ghidraAddress 0x00776110
+ * @ghidraAddress NTSC-U/C: 0x00776110
+ * @ghidraAddress PAL: 0x007b9fe8
  */
 extern float g_flFogScale;
 
 /**
  * Offset added after g_flFogScale has been applied.
  *
- * @ghidraAddress 0x00776114
+ * @ghidraAddress NTSC-U/C: 0x00776114
+ * @ghidraAddress PAL: 0x007b9fec
  */
 extern float g_flFogOffset;
 
 /**
  * Directional lights of the current environment, rebuilt by PsEnviron::DrawSelf().
  *
- * @ghidraAddress 0x00776120
+ * @ghidraAddress NTSC-U/C: 0x00776120
+ * @ghidraAddress PAL: 0x007b9ff8
  */
 extern std::vector<DirectionalLightRecord> g_directionalLightRecords;
 
 /**
  * Point lights of the current environment, rebuilt by PsEnviron::DrawSelf().
  *
- * @ghidraAddress 0x00776130
+ * @ghidraAddress NTSC-U/C: 0x00776130
+ * @ghidraAddress PAL: 0x007ba008
  */
 extern std::vector<PointLightRecord> g_pointLightRecords;
 

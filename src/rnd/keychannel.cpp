@@ -11,7 +11,7 @@ namespace Rnd {
 
 namespace {
 
-// 0x004d8c88
+// NTSC-U/C: 0x004d8c88, PAL: 0x005171a0
 FailSink &DumpColorKey(FailSink &sink, const ColorKey &key) {
     sink.Print("(frame:");
     sink.Format("%.2f", key.mFrame);
@@ -29,7 +29,7 @@ FailSink &DumpColorKey(FailSink &sink, const ColorKey &key) {
     return sink;
 }
 
-// 0x004d9658
+// NTSC-U/C: 0x004d9658, PAL: 0x00517b70
 Stream &ReadColorKey(Stream &stream, ColorKey &key) {
     stream.Read(&key.mValue.r, sizeof(float));
     stream.Read(&key.mValue.g, sizeof(float));
@@ -41,7 +41,7 @@ Stream &ReadColorKey(Stream &stream, ColorKey &key) {
 
 // Each component reaches the stream as a stack copy rather than as the address of the member, so
 // the original moved every float through a by-value parameter.
-// 0x004d9098
+// NTSC-U/C: 0x004d9098, PAL: 0x005175b0
 Stream &WriteColorKey(Stream &stream, const ColorKey &key) {
     stream.Write(&key.mValue.r, sizeof(float));
     stream.Write(&key.mValue.g, sizeof(float));
@@ -51,7 +51,7 @@ Stream &WriteColorKey(Stream &stream, const ColorKey &key) {
     return stream;
 }
 
-// 0x004da880
+// NTSC-U/C: 0x004da880, PAL: 0x00518d98
 FailSink &DumpVector3Key(FailSink &sink, const Vector3Key &key) {
     sink.Print("(frame:");
     sink.Format("%.2f", key.mFrame);
@@ -69,7 +69,7 @@ FailSink &DumpVector3Key(FailSink &sink, const Vector3Key &key) {
 
 } // namespace
 
-// 0x004d8de8
+// NTSC-U/C: 0x004d8de8, PAL: 0x00517300
 FailSink &DumpColorKeys(FailSink &sink, const std::list<ColorKey> &keys) {
     sink.Print("(size:");
     sink.Format("%u", keys.size());
@@ -86,7 +86,7 @@ FailSink &DumpColorKeys(FailSink &sink, const std::list<ColorKey> &keys) {
     return sink;
 }
 
-// 0x004d8f08
+// NTSC-U/C: 0x004d8f08, PAL: 0x00517420
 FailSink &DumpFloatKeys(FailSink &sink, const std::list<FloatKey> &keys) {
     sink.Print("(size:");
     sink.Format("%u", keys.size());
@@ -107,7 +107,7 @@ FailSink &DumpFloatKeys(FailSink &sink, const std::list<FloatKey> &keys) {
     return sink;
 }
 
-// 0x004dd9b0
+// NTSC-U/C: 0x004dd9b0, PAL: 0x0051bf68
 Stream &ReadColorKeys(Stream &stream, std::list<ColorKey> &keys) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -118,7 +118,7 @@ Stream &ReadColorKeys(Stream &stream, std::list<ColorKey> &keys) {
     return stream;
 }
 
-// 0x004d9180
+// NTSC-U/C: 0x004d9180, PAL: 0x00517698
 Stream &WriteColorKeys(Stream &stream, const std::list<ColorKey> &keys) {
     const int nCount = keys.size();
     stream.Write(&nCount, sizeof(nCount));
@@ -128,7 +128,7 @@ Stream &WriteColorKeys(Stream &stream, const std::list<ColorKey> &keys) {
     return stream;
 }
 
-// 0x004d9238
+// NTSC-U/C: 0x004d9238, PAL: 0x00517750
 Stream &WriteFloatKeys(Stream &stream, const std::list<FloatKey> &keys) {
     const int nCount = keys.size();
     stream.Write(&nCount, sizeof(nCount));
@@ -139,7 +139,7 @@ Stream &WriteFloatKeys(Stream &stream, const std::list<FloatKey> &keys) {
     return stream;
 }
 
-// 0x004d98d8
+// NTSC-U/C: 0x004d98d8, PAL: 0x00517df0
 Stream &ReadFloatKeys(Stream &stream, std::list<FloatKey> &keys) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -151,7 +151,7 @@ Stream &ReadFloatKeys(Stream &stream, std::list<FloatKey> &keys) {
     return stream;
 }
 
-// 0x004da9b0
+// NTSC-U/C: 0x004da9b0, PAL: 0x00518ec8
 FailSink &DumpVector3Keys(FailSink &sink, const std::list<Vector3Key> &keys) {
     sink.Print("(size:");
     sink.Format("%u", keys.size());
@@ -168,7 +168,7 @@ FailSink &DumpVector3Keys(FailSink &sink, const std::list<Vector3Key> &keys) {
     return sink;
 }
 
-// 0x004db3d0
+// NTSC-U/C: 0x004db3d0, PAL: 0x00519918
 Stream &ReadVector3Keys(Stream &stream, std::list<Vector3Key> &keys) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -182,7 +182,7 @@ Stream &ReadVector3Keys(Stream &stream, std::list<Vector3Key> &keys) {
     return stream;
 }
 
-// 0x004dac80
+// NTSC-U/C: 0x004dac80, PAL: 0x00519198
 Stream &WriteVector3Keys(Stream &stream, const std::list<Vector3Key> &keys) {
     const int nCount = keys.size();
     stream.Write(&nCount, sizeof(nCount));

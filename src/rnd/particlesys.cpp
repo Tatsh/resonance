@@ -125,7 +125,7 @@ inline void ReadPlane(Stream &stream, Plane &plane) {
     plane.d = -(point.x * plane.a + point.y * plane.b + point.z * plane.c);
 }
 
-// 0x00529ee0
+// NTSC-U/C: 0x00529ee0, PAL: 0x0056a530
 Stream &operator>>(Stream &stream, std::list<Plane> &planes) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -208,7 +208,7 @@ inline void PrintObjectRef(FailSink &sink, const Object *pObject) {
     sink.Format("\"%s\"", pObject->mName.mStr != nullptr ? pObject->mName.mStr : g_szEmptyString);
 }
 
-// 0x00526308
+// NTSC-U/C: 0x00526308, PAL: 0x005668e0
 FailSink &operator<<(FailSink &sink, const Particle &particle) {
     sink.Print("\n\tpos:");
     PrintVector3(sink, particle.mPos);
@@ -230,7 +230,7 @@ FailSink &operator<<(FailSink &sink, const Particle &particle) {
     return sink;
 }
 
-// 0x00529c30
+// NTSC-U/C: 0x00529c30, PAL: 0x0056a280
 FailSink &operator<<(FailSink &sink, const std::vector<Particle> &particles) {
     sink.Print("(size:")->Format("%u", static_cast<unsigned>(particles.size()))->Print(")");
     for (std::vector<Particle>::const_iterator it = particles.begin(); it != particles.end();
@@ -248,16 +248,16 @@ inline float DistanceToPlane(const Plane &plane, const Vector3 &point) {
 
 } // namespace
 
-// 0x0071aef0
+// NTSC-U/C: 0x0071aef0, PAL: 0x0075ee18
 HxStr g_particleSysClassName("ParticleSys");
 
-// 0x0089dfb8
+// NTSC-U/C: 0x0089dfb8, PAL: 0x008e2ff8
 int g_nParticleSysLoadRevision;
 
-// 0x0071aef8
+// NTSC-U/C: 0x0071aef8, PAL: 0x0075ee20
 ParticleSys *(*g_pfnNewParticleSys)(const HxStr &name) = NewParticleSys;
 
-// 0x0052c6a8
+// NTSC-U/C: 0x0052c6a8, PAL: 0x0056cd20
 // The printer has no case for kModeSprite, so a sprite system writes no mode at all. The gap is in
 // the shipped build.
 FailSink &PrintParticleMode(FailSink &sink, ParticleSys::Mode nMode) {
@@ -269,7 +269,7 @@ FailSink &PrintParticleMode(FailSink &sink, ParticleSys::Mode nMode) {
     return sink;
 }
 
-// 0x005254a0
+// NTSC-U/C: 0x005254a0, PAL: 0x00565a78
 // The binary sizes the pool from a temporary particle whose four vector padding words are 1.0.
 ParticleSys::ParticleSys(const HxStr &name)
     : Object(name), mParticlesOwner(this), mParticles(kDefaultPoolSize), mLastFrame(kUnsetFrame),
@@ -302,13 +302,13 @@ ParticleSys::ParticleSys(const HxStr &name)
     AddObjectRefs();
 }
 
-// 0x00524f58
+// NTSC-U/C: 0x00524f58, PAL: 0x00565530
 ParticleSys::~ParticleSys() {
     RemoveObjectRefs();
     ReleaseAllRefs();
 }
 
-// 0x00521d38
+// NTSC-U/C: 0x00521d38, PAL: 0x005622c0
 void ParticleSys::Copy(const Object *pSource, unsigned nFlags) {
     const ParticleSys *pSys = dynamic_cast<const ParticleSys *>(pSource);
 
@@ -353,7 +353,7 @@ void ParticleSys::Copy(const Object *pSource, unsigned nFlags) {
     AddObjectRefs();
 }
 
-// 0x00524318
+// NTSC-U/C: 0x00524318, PAL: 0x005648f0
 void ParticleSys::Replace(Object *pFrom, Object *pTo) {
     Animatable::Replace(pFrom, pTo);
     Transformable::Replace(pFrom, pTo);
@@ -381,7 +381,7 @@ void ParticleSys::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// 0x005241a8
+// NTSC-U/C: 0x005241a8, PAL: 0x00564780
 void ParticleSys::AddObjectRefs() {
     if (mMat != nullptr) {
         mMat->AddRef(this);
@@ -406,7 +406,7 @@ void ParticleSys::AddObjectRefs() {
     mLiveParticles = nullptr;
 }
 
-// 0x00524a70
+// NTSC-U/C: 0x00524a70, PAL: 0x00565048
 void ParticleSys::FreeAllParticles() {
     Particle *pParticle = mLiveParticles;
     while (pParticle != nullptr) {
@@ -414,7 +414,7 @@ void ParticleSys::FreeAllParticles() {
     }
 }
 
-// 0x0052c378
+// NTSC-U/C: 0x0052c378, PAL: 0x0056c9f0
 Particle *ParticleSys::AllocParticle() {
     ParticleSys *pOwner = mParticlesOwner;
     Particle *pParticle = pOwner->mFreeParticles;
@@ -432,7 +432,7 @@ Particle *ParticleSys::AllocParticle() {
     return pParticle;
 }
 
-// 0x0052c3c0
+// NTSC-U/C: 0x0052c3c0, PAL: 0x0056ca38
 Particle *ParticleSys::FreeParticle(Particle *pParticle) {
     if (pParticle == nullptr) {
         return nullptr;
@@ -462,7 +462,7 @@ Particle *ParticleSys::FreeParticle(Particle *pParticle) {
     return pNext;
 }
 
-// 0x00521f40
+// NTSC-U/C: 0x00521f40, PAL: 0x005624c8
 void ParticleSys::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
@@ -545,7 +545,7 @@ void ParticleSys::DumpText(FailSink &sink) {
     }
 }
 
-// 0x00522d60
+// NTSC-U/C: 0x00522d60, PAL: 0x005632e8
 void ParticleSys::Save(Stream &stream) {
     WriteInt(stream, kParticleSysRevision);
     Animatable::Save(stream);
@@ -596,7 +596,7 @@ void ParticleSys::Save(Stream &stream) {
     WriteObjectRef(stream, mParticlesOwner);
 }
 
-// 0x00523718
+// NTSC-U/C: 0x00523718, PAL: 0x00563ca0
 void ParticleSys::Load(Stream &stream) {
     stream.Read(&g_nParticleSysLoadRevision, sizeof(g_nParticleSysLoadRevision));
     if (g_nParticleSysLoadRevision > kParticleSysRevision) {
@@ -687,18 +687,18 @@ void ParticleSys::Load(Stream &stream) {
     AddObjectRefs();
 }
 
-// 0x0052b4a8
+// NTSC-U/C: 0x0052b4a8, PAL: 0x0056bb20
 const HxStr &ParticleSys::ClassName() const {
     return g_particleSysClassName;
 }
 
-// 0x0052c490
+// NTSC-U/C: 0x0052c490, PAL: 0x0056cb08
 void ParticleSys::StartAnim() {
     FreeAllParticles();
     Animatable::StartAnim();
 }
 
-// 0x00521c58
+// NTSC-U/C: 0x00521c58, PAL: 0x005621e0
 void ParticleSys::SetNumParticles(int nCount) {
     mParticlesOwner->RemoveObjectRefs();
     // Only the vector padding words are written in the image. The rest of the record is stack
@@ -712,7 +712,7 @@ void ParticleSys::SetNumParticles(int nCount) {
     mParticlesOwner->AddObjectRefs();
 }
 
-// 0x0052c4c0
+// NTSC-U/C: 0x0052c4c0, PAL: 0x0056cb38
 void ParticleSys::SetFrameSelf(float flFrame) {
     if (mLastFrame != kUnsetFrame) {
         const float flDeltaFrames = flFrame - mLastFrame;
@@ -722,7 +722,7 @@ void ParticleSys::SetFrameSelf(float flFrame) {
     mLastFrame = flFrame;
 }
 
-// 0x00524b70
+// NTSC-U/C: 0x00524b70, PAL: 0x00565148
 void ParticleSys::UpdateParticles(float flDeltaFrames) {
     if (flDeltaFrames == 0.0f) {
         return;
@@ -794,7 +794,7 @@ void ParticleSys::UpdateParticles(float flDeltaFrames) {
     }
 }
 
-// 0x005244b0
+// NTSC-U/C: 0x005244b0, PAL: 0x00564a88
 void ParticleSys::SpawnParticles(float flDeltaFrames) {
     if (flDeltaFrames <= 0.0f) {
         return;
@@ -865,7 +865,7 @@ void ParticleSys::SpawnParticles(float flDeltaFrames) {
     }
 }
 
-// 0x0052c530
+// NTSC-U/C: 0x0052c530, PAL: 0x0056cba8
 void ParticleSys::RandomizeColorAndSize(Particle *pParticle) {
     pParticle->mCol.r = RandomInRange(mStartColorLow.r, mStartColorHigh.r);
     pParticle->mCol.g = RandomInRange(mStartColorLow.g, mStartColorHigh.g);
@@ -874,7 +874,7 @@ void ParticleSys::RandomizeColorAndSize(Particle *pParticle) {
     pParticle->mSize = RandomInRange(mSizeLow, mSizeHigh);
 }
 
-// 0x0052c318
+// NTSC-U/C: 0x0052c318, PAL: 0x0056c990
 void ParticleSys::RemoveObjectRefs() {
     if (mMat != nullptr) {
         mMat->RemoveRef(this);
@@ -885,23 +885,23 @@ void ParticleSys::RemoveObjectRefs() {
     mParticlesOwner->mSharers.remove(this);
 }
 
-// 0x0052b340
+// NTSC-U/C: 0x0052b340, PAL: 0x0056b9b8
 void *ParticleSys::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kParticleSysTag);
 }
 
-// 0x0052b360
+// NTSC-U/C: 0x0052b360, PAL: 0x0056b9d8
 void ParticleSys::operator delete(void *pBlock) {
     FreeTaggedMemory(pBlock, kParticleSysTag);
 }
 
-// 0x0052b768
+// NTSC-U/C: 0x0052b768, PAL: 0x0056bde0
 ParticleSys *NewParticleSys(const HxStr &name) {
     // The object is 0x220 bytes.
     return new ParticleSys(name);
 }
 
-// 0x0052b3c0
+// NTSC-U/C: 0x0052b3c0, PAL: 0x0056ba38
 ParticleSys *NewParticleSysThroughHook(const HxStr &name) {
     try {
         return g_pfnNewParticleSys(name);
@@ -910,7 +910,7 @@ ParticleSys *NewParticleSysThroughHook(const HxStr &name) {
     }
 }
 
-// 0x0052b6d8
+// NTSC-U/C: 0x0052b6d8, PAL: 0x0056bd50
 Object *CreateRegisteredParticleSys(const HxStr &name) {
     try {
         return g_pfnNewParticleSys(name);
@@ -919,7 +919,7 @@ Object *CreateRegisteredParticleSys(const HxStr &name) {
     }
 }
 
-// 0x0052c658
+// NTSC-U/C: 0x0052c658, PAL: 0x0056ccd0
 inline void ParticleSys::SetMat(Mat *pMat) {
     if (mMat != nullptr) {
         mMat->RemoveRef(this);
@@ -930,7 +930,7 @@ inline void ParticleSys::SetMat(Mat *pMat) {
     }
 }
 
-// 0x0052c288
+// NTSC-U/C: 0x0052c288, PAL: 0x0056c900
 inline void ParticleSys::SetParticlesOwner(ParticleSys *pOwner) {
     RemoveObjectRefs();
     mParticlesOwner = pOwner;

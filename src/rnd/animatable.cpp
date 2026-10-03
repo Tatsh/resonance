@@ -29,7 +29,7 @@ static const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-// 0x00497ed8
+// NTSC-U/C: 0x00497ed8, PAL: 0x004d5e08
 static FailSink &operator<<(FailSink &sink, const std::list<Animatable::Filter *> &filters) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, filters.size());
@@ -51,7 +51,7 @@ static FailSink &operator<<(FailSink &sink, const std::list<Animatable::Filter *
     return sink;
 }
 
-// 0x00498078
+// NTSC-U/C: 0x00498078, PAL: 0x004d5fa8
 static FailSink &operator<<(FailSink &sink, const std::list<Animatable *> &anims) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, anims.size());
@@ -72,7 +72,7 @@ static FailSink &operator<<(FailSink &sink, const std::list<Animatable *> &anims
     return sink;
 }
 
-// 0x0049a8a8
+// NTSC-U/C: 0x0049a8a8, PAL: 0x004d8810
 // No call site survives in the shipped build, and the five literals below are the only
 // record of the FilterType names. The routine is not static: an out-of-line copy with no caller is
 // what external linkage produces, where internal linkage would have let the compiler discard it.
@@ -97,7 +97,7 @@ FailSink &operator<<(FailSink &sink, Animatable::FilterType nType) {
     return sink;
 }
 
-// 0x004981e0
+// NTSC-U/C: 0x004981e0, PAL: 0x004d6110
 //
 // Each entry is written as its type tag followed by whatever that filter's own Save() emits. The
 // reader has to build the object before it can read the payload.
@@ -114,7 +114,7 @@ static Stream &operator<<(Stream &stream, const std::list<Animatable::Filter *> 
     return stream;
 }
 
-// 0x004982e8
+// NTSC-U/C: 0x004982e8, PAL: 0x004d6218
 //
 // Each entry is written as the referenced object's name including its terminator. A reader has to
 // resolve the names through Rnd::g_manager. An empty entry writes one zero byte.
@@ -134,7 +134,7 @@ static Stream &operator<<(Stream &stream, const std::list<Animatable *> &anims) 
     return stream;
 }
 
-// 0x0049a838
+// NTSC-U/C: 0x0049a838, PAL: 0x004d87a0
 // The list reader below inlines this body rather than calling it.
 static Stream &operator>>(Stream &stream, Animatable::Filter *&pFilter) {
     int nType = 0;
@@ -144,7 +144,7 @@ static Stream &operator>>(Stream &stream, Animatable::Filter *&pFilter) {
     return stream;
 }
 
-// 0x004985c0
+// NTSC-U/C: 0x004985c0, PAL: 0x004d64f0
 static Stream &operator>>(Stream &stream, std::list<Animatable::Filter *> &filters) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -157,7 +157,7 @@ static Stream &operator>>(Stream &stream, std::list<Animatable::Filter *> &filte
     return stream;
 }
 
-// 0x00498860
+// NTSC-U/C: 0x00498860, PAL: 0x004d6790
 static Stream &operator>>(Stream &stream, std::list<Animatable *> &anims) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -172,22 +172,22 @@ static Stream &operator>>(Stream &stream, std::list<Animatable *> &anims) {
     return stream;
 }
 
-// 0x0049a560
+// NTSC-U/C: 0x0049a560, PAL: 0x004d84c8
 float Animatable::Filter::Inverse(float flValue) {
     return flValue;
 }
 
-// 0x00498ef0
+// NTSC-U/C: 0x00498ef0, PAL: 0x004d6e50
 float Animatable::ScaleOffset::Apply(float flValue) {
     return (flValue * mScale) + mOffset;
 }
 
-// 0x00498f08
+// NTSC-U/C: 0x00498f08, PAL: 0x004d6e68
 float Animatable::ScaleOffset::Inverse(float flValue) {
     return (flValue - mOffset) / mScale;
 }
 
-// 0x00498f20
+// NTSC-U/C: 0x00498f20, PAL: 0x004d6e80
 void Animatable::ScaleOffset::Dump(FailSink &sink) {
     sink.Print("(scale:");
     sink.Format(kFloatFormat, mScale);
@@ -196,7 +196,7 @@ void Animatable::ScaleOffset::Dump(FailSink &sink) {
     sink.Print(")");
 }
 
-// 0x00498fc0
+// NTSC-U/C: 0x00498fc0, PAL: 0x004d6f20
 void Animatable::ScaleOffset::Save(Stream &stream) {
     float flScale = mScale;
     stream.Write(&flScale, sizeof(flScale));
@@ -204,24 +204,24 @@ void Animatable::ScaleOffset::Save(Stream &stream) {
     stream.Write(&flOffset, sizeof(flOffset));
 }
 
-// 0x00499030
+// NTSC-U/C: 0x00499030, PAL: 0x004d6f90
 void Animatable::ScaleOffset::Load(Stream &stream) {
     stream.Read(&mScale, sizeof(mScale));
     stream.Read(&mOffset, sizeof(mOffset));
 }
 
-// 0x00499090
+// NTSC-U/C: 0x00499090, PAL: 0x004d6ff0
 int Animatable::ScaleOffset::Type() {
     return kFilterScaleOffset;
 }
 
-// 0x00499098
+// NTSC-U/C: 0x00499098, PAL: 0x004d6ff8
 // Compiled as a block copy of all twelve bytes, the vtable pointer included.
 void Animatable::ScaleOffset::Copy(const Filter *pSource) {
     *this = *static_cast<const ScaleOffset *>(pSource);
 }
 
-// 0x0049a4b8
+// NTSC-U/C: 0x0049a4b8, PAL: 0x004d8420
 float Animatable::MinMaxLoop::Apply(float flValue) {
     if (mLoop != 0) {
         const float flSpan = mMax - mMin;
@@ -234,7 +234,7 @@ float Animatable::MinMaxLoop::Apply(float flValue) {
     return std::max(std::min(flValue, mMax), mMin);
 }
 
-// 0x004990f0
+// NTSC-U/C: 0x004990f0, PAL: 0x004d7050
 void Animatable::MinMaxLoop::Dump(FailSink &sink) {
     sink.Print("(min:");
     sink.Format(kFloatFormat, mMin);
@@ -245,7 +245,7 @@ void Animatable::MinMaxLoop::Dump(FailSink &sink) {
     sink.Print(")");
 }
 
-// 0x004991c8
+// NTSC-U/C: 0x004991c8, PAL: 0x004d7128
 void Animatable::MinMaxLoop::Save(Stream &stream) {
     float flMin = mMin;
     stream.Write(&flMin, sizeof(flMin));
@@ -256,7 +256,7 @@ void Animatable::MinMaxLoop::Save(Stream &stream) {
     stream.WriteBytes(&cLoop, sizeof(cLoop));
 }
 
-// 0x00499258
+// NTSC-U/C: 0x00499258, PAL: 0x004d71b8
 void Animatable::MinMaxLoop::Load(Stream &stream) {
     stream.Read(&mMin, sizeof(mMin));
     stream.Read(&mMax, sizeof(mMax));
@@ -266,18 +266,18 @@ void Animatable::MinMaxLoop::Load(Stream &stream) {
     mLoop = cLoop != 0 ? 1 : 0;
 }
 
-// 0x004992e0
+// NTSC-U/C: 0x004992e0, PAL: 0x004d7240
 int Animatable::MinMaxLoop::Type() {
     return kFilterMinMaxLoop;
 }
 
-// 0x004992e8
+// NTSC-U/C: 0x004992e8, PAL: 0x004d7248
 // Compiled as a block copy of all sixteen bytes, the vtable pointer included.
 void Animatable::MinMaxLoop::Copy(const Filter *pSource) {
     *this = *static_cast<const MinMaxLoop *>(pSource);
 }
 
-// 0x0049a568
+// NTSC-U/C: 0x0049a568, PAL: 0x004d84d0
 float Animatable::ZeroOrder::Apply(float flValue) {
     const float flDelta = flValue - mLevel;
     if (mMaxDelta < flDelta) {
@@ -290,7 +290,7 @@ float Animatable::ZeroOrder::Apply(float flValue) {
     return mLevel;
 }
 
-// 0x0049a5b8
+// NTSC-U/C: 0x0049a5b8, PAL: 0x004d8520
 float Animatable::ZeroOrder::Inverse(float flValue) {
     if (flValue < mLevel) {
         return mLevel + mMaxDelta;
@@ -301,7 +301,7 @@ float Animatable::ZeroOrder::Inverse(float flValue) {
     return mLevel;
 }
 
-// 0x00499348
+// NTSC-U/C: 0x00499348, PAL: 0x004d72a8
 void Animatable::ZeroOrder::Dump(FailSink &sink) {
     sink.Print("(level:");
     sink.Format(kFloatFormat, mLevel);
@@ -310,7 +310,7 @@ void Animatable::ZeroOrder::Dump(FailSink &sink) {
     sink.Print(")");
 }
 
-// 0x004993e8
+// NTSC-U/C: 0x004993e8, PAL: 0x004d7348
 void Animatable::ZeroOrder::Save(Stream &stream) {
     float flLevel = mLevel;
     stream.Write(&flLevel, sizeof(flLevel));
@@ -318,35 +318,35 @@ void Animatable::ZeroOrder::Save(Stream &stream) {
     stream.Write(&flMaxDelta, sizeof(flMaxDelta));
 }
 
-// 0x00499458
+// NTSC-U/C: 0x00499458, PAL: 0x004d73b8
 void Animatable::ZeroOrder::Load(Stream &stream) {
     stream.Read(&mLevel, sizeof(mLevel));
     stream.Read(&mMaxDelta, sizeof(mMaxDelta));
 }
 
-// 0x004994b8
+// NTSC-U/C: 0x004994b8, PAL: 0x004d7418
 int Animatable::ZeroOrder::Type() {
     return kFilterZeroOrder;
 }
 
-// 0x004994c0
+// NTSC-U/C: 0x004994c0, PAL: 0x004d7420
 // Compiled as a block copy of all twelve bytes, the vtable pointer included.
 void Animatable::ZeroOrder::Copy(const Filter *pSource) {
     *this = *static_cast<const ZeroOrder *>(pSource);
 }
 
-// 0x004994e0
+// NTSC-U/C: 0x004994e0, PAL: 0x004d7440
 float Animatable::FirstOrder::Apply(float flValue) {
     mLevel += (flValue - mLevel) * mRatio;
     return mLevel;
 }
 
-// 0x00499500
+// NTSC-U/C: 0x00499500, PAL: 0x004d7460
 float Animatable::FirstOrder::Inverse(float flValue) {
     return (mLevel - (flValue * mRatio)) / (1.0f - mRatio);
 }
 
-// 0x00499528
+// NTSC-U/C: 0x00499528, PAL: 0x004d7488
 void Animatable::FirstOrder::Dump(FailSink &sink) {
     sink.Print("(level:");
     sink.Format(kFloatFormat, mLevel);
@@ -355,7 +355,7 @@ void Animatable::FirstOrder::Dump(FailSink &sink) {
     sink.Print(")");
 }
 
-// 0x004995c8
+// NTSC-U/C: 0x004995c8, PAL: 0x004d7528
 void Animatable::FirstOrder::Save(Stream &stream) {
     float flLevel = mLevel;
     stream.Write(&flLevel, sizeof(flLevel));
@@ -363,36 +363,36 @@ void Animatable::FirstOrder::Save(Stream &stream) {
     stream.Write(&flRatio, sizeof(flRatio));
 }
 
-// 0x00499638
+// NTSC-U/C: 0x00499638, PAL: 0x004d7598
 void Animatable::FirstOrder::Load(Stream &stream) {
     stream.Read(&mLevel, sizeof(mLevel));
     stream.Read(&mRatio, sizeof(mRatio));
 }
 
-// 0x00499698
+// NTSC-U/C: 0x00499698, PAL: 0x004d75f8
 int Animatable::FirstOrder::Type() {
     return kFilterFirstOrder;
 }
 
-// 0x004996a0
+// NTSC-U/C: 0x004996a0, PAL: 0x004d7600
 // Compiled as a block copy of all twelve bytes, the vtable pointer included.
 void Animatable::FirstOrder::Copy(const Filter *pSource) {
     *this = *static_cast<const FirstOrder *>(pSource);
 }
 
-// 0x0049a5f8
+// NTSC-U/C: 0x0049a5f8, PAL: 0x004d8560
 float Animatable::SecondOrder::Apply(float flValue) {
     mVel += (mSpring * (flValue - mLevel)) - (mDamper * mVel);
     mLevel += mVel;
     return mLevel;
 }
 
-// 0x0049a630
+// NTSC-U/C: 0x0049a630, PAL: 0x004d8598
 float Animatable::SecondOrder::Inverse([[maybe_unused]] float flValue) {
     return mLevel - mVel;
 }
 
-// 0x00499700
+// NTSC-U/C: 0x00499700, PAL: 0x004d7660
 void Animatable::SecondOrder::Dump(FailSink &sink) {
     sink.Print("(level:");
     sink.Format(kFloatFormat, mLevel);
@@ -405,7 +405,7 @@ void Animatable::SecondOrder::Dump(FailSink &sink) {
     sink.Format(kFloatFormat, mVel);
 }
 
-// 0x00499800
+// NTSC-U/C: 0x00499800, PAL: 0x004d7760
 void Animatable::SecondOrder::Save(Stream &stream) {
     float flLevel = mLevel;
     stream.Write(&flLevel, sizeof(flLevel));
@@ -417,34 +417,34 @@ void Animatable::SecondOrder::Save(Stream &stream) {
     // reading object already had.
 }
 
-// 0x00499890
+// NTSC-U/C: 0x00499890, PAL: 0x004d77f0
 void Animatable::SecondOrder::Load(Stream &stream) {
     stream.Read(&mLevel, sizeof(mLevel));
     stream.Read(&mSpring, sizeof(mSpring));
     stream.Read(&mDamper, sizeof(mDamper));
 }
 
-// 0x00499908
+// NTSC-U/C: 0x00499908, PAL: 0x004d7868
 int Animatable::SecondOrder::Type() {
     return kFilterSecondOrder;
 }
 
-// 0x00499910
+// NTSC-U/C: 0x00499910, PAL: 0x004d7870
 // Compiled as a block copy of all twenty bytes, the vtable pointer included.
 void Animatable::SecondOrder::Copy(const Filter *pSource) {
     *this = *static_cast<const SecondOrder *>(pSource);
 }
 
-// 0x0049a108
+// NTSC-U/C: 0x0049a108, PAL: 0x004d8068
 Animatable::Animatable() : mFrame(0.0f), mFilteredFrame(0.0f) {
 }
 
-// 0x00499f48
+// NTSC-U/C: 0x00499f48, PAL: 0x004d7ea8
 Animatable::~Animatable() {
     ReleaseAnimsAndFilters();
 }
 
-// 0x00494cb0
+// NTSC-U/C: 0x00494cb0, PAL: 0x004d2b78
 void Animatable::ReleaseAnimsAndFilters() {
     // Unlike ReleaseAnimsRefs(), the walk leaves mAnims populated.
     for (std::list<Animatable *>::iterator it = mAnims.begin(); it != mAnims.end(); ++it) {
@@ -466,7 +466,7 @@ void Animatable::ReleaseAnimsAndFilters() {
     mFilters.clear();
 }
 
-// 0x00494a88
+// NTSC-U/C: 0x00494a88, PAL: 0x004d2950
 Animatable *Animatable::Parent() {
     for (std::list<Object *>::iterator it = mRefs.begin(); it != mRefs.end(); ++it) {
         Animatable *pCandidate = dynamic_cast<Animatable *>(*it);
@@ -481,7 +481,7 @@ Animatable *Animatable::Parent() {
     return nullptr;
 }
 
-// 0x004953c0
+// NTSC-U/C: 0x004953c0, PAL: 0x004d3288
 void Animatable::AddAnim(Animatable *pAnim) {
     if (std::find(mAnims.begin(), mAnims.end(), pAnim) != mAnims.end()) {
         g_failSink.Report(kAlreadyInFormat, NameText(pAnim), NameText(this));
@@ -494,7 +494,7 @@ void Animatable::AddAnim(Animatable *pAnim) {
     mAnims.push_back(pAnim);
 }
 
-// 0x00495540
+// NTSC-U/C: 0x00495540, PAL: 0x004d3408
 void Animatable::RemoveAnim(Animatable *pAnim) {
     if (std::find(mAnims.begin(), mAnims.end(), pAnim) == mAnims.end()) {
         return;
@@ -506,7 +506,7 @@ void Animatable::RemoveAnim(Animatable *pAnim) {
     mAnims.remove(pAnim);
 }
 
-// 0x0049a428
+// NTSC-U/C: 0x0049a428, PAL: 0x004d8390
 void Animatable::SetFrame(float flFrame) {
     mFrame = flFrame;
     mFilteredFrame = ApplyFilters(flFrame);
@@ -517,11 +517,11 @@ void Animatable::SetFrame(float flFrame) {
     }
 }
 
-// 0x0049a100
+// NTSC-U/C: 0x0049a100, PAL: 0x004d8060
 void Animatable::SetFrameSelf([[maybe_unused]] float flFrame) {
 }
 
-// 0x00494b50
+// NTSC-U/C: 0x00494b50, PAL: 0x004d2a18
 float Animatable::EndFrame() {
     float flEnd = 0.0f;
     for (std::list<Animatable *>::iterator it = mAnims.begin(); it != mAnims.end(); ++it) {
@@ -530,14 +530,14 @@ float Animatable::EndFrame() {
     return flEnd;
 }
 
-// 0x0049a3b8
+// NTSC-U/C: 0x0049a3b8, PAL: 0x004d8320
 void Animatable::StartAnim() {
     for (std::list<Animatable *>::iterator it = mAnims.begin(); it != mAnims.end(); ++it) {
         (*it)->StartAnim();
     }
 }
 
-// 0x0049a7c0
+// NTSC-U/C: 0x0049a7c0, PAL: 0x004d8728
 float Animatable::ApplyFilters(float flValue) {
     for (std::list<Filter *>::iterator it = mFilters.begin(); it != mFilters.end(); ++it) {
         flValue = (*it)->Apply(flValue);
@@ -545,7 +545,7 @@ float Animatable::ApplyFilters(float flValue) {
     return flValue;
 }
 
-// 0x00495050
+// NTSC-U/C: 0x00495050, PAL: 0x004d2f18
 float Animatable::InverseFilters(float flValue) {
     for (std::list<Filter *>::reverse_iterator it = mFilters.rbegin(); it != mFilters.rend();
          ++it) {
@@ -554,37 +554,37 @@ float Animatable::InverseFilters(float flValue) {
     return flValue;
 }
 
-// 0x00499940
+// NTSC-U/C: 0x00499940, PAL: 0x004d78a0
 void Animatable::AddFilter(Filter *pFilter) {
     mFilters.push_back(pFilter);
 }
 
-// 0x004999e8
+// NTSC-U/C: 0x004999e8, PAL: 0x004d7948
 void Animatable::AddScaleOffset(float flScale, float flOffset) {
     mFilters.push_back(new ScaleOffset(flScale, flOffset));
 }
 
-// 0x00499ae0
+// NTSC-U/C: 0x00499ae0, PAL: 0x004d7a40
 void Animatable::AddMinMaxLoop(float flMin, float flMax, int nLoop) {
     mFilters.push_back(new MinMaxLoop(flMin, flMax, nLoop));
 }
 
-// 0x00499be8
+// NTSC-U/C: 0x00499be8, PAL: 0x004d7b48
 void Animatable::AddZeroOrder(float flLevel, float flMaxDelta) {
     mFilters.push_back(new ZeroOrder(flLevel, flMaxDelta));
 }
 
-// 0x00499ce0
+// NTSC-U/C: 0x00499ce0, PAL: 0x004d7c40
 void Animatable::AddFirstOrder(float flLevel, float flRatio) {
     mFilters.push_back(new FirstOrder(flLevel, flRatio));
 }
 
-// 0x00499dd8
+// NTSC-U/C: 0x00499dd8, PAL: 0x004d7d38
 void Animatable::AddSecondOrder(float flLevel, float flSpring, float flDamper) {
     mFilters.push_back(new SecondOrder(flLevel, flSpring, flDamper));
 }
 
-// 0x00494c00
+// NTSC-U/C: 0x00494c00, PAL: 0x004d2ac8
 void Animatable::RemoveFilter(int nIndex) {
     std::list<Filter *>::iterator it = mFilters.begin();
     for (int i = 0; i < nIndex && it != mFilters.end(); ++i) {
@@ -602,7 +602,7 @@ void Animatable::RemoveFilter(int nIndex) {
     mFilters.erase(it);
 }
 
-// 0x0049a0b0
+// NTSC-U/C: 0x0049a0b0, PAL: 0x004d8010
 Animatable::Filter *Animatable::FilterAt(int nIndex) {
     std::list<Filter *>::iterator it = mFilters.begin();
     // Yes, the binary counts the index down to zero. A negative index walks forward.
@@ -612,7 +612,7 @@ Animatable::Filter *Animatable::FilterAt(int nIndex) {
     return *it;
 }
 
-// 0x004950e8
+// NTSC-U/C: 0x004950e8, PAL: 0x004d2fb0
 Animatable::Filter *Animatable::NewFilter(int nType) {
     switch (nType) {
     case kFilterScaleOffset:
@@ -636,7 +636,7 @@ Animatable::Filter *Animatable::NewFilter(int nType) {
     return nullptr;
 }
 
-// 0x0049a960
+// NTSC-U/C: 0x0049a960, PAL: 0x004d88c8
 void Animatable::ReleaseAnimsRefs() {
     for (std::list<Animatable *>::iterator it = mAnims.begin(); it != mAnims.end(); ++it) {
         if (*it != nullptr) {
@@ -646,7 +646,7 @@ void Animatable::ReleaseAnimsRefs() {
     mAnims.clear();
 }
 
-// 0x0049a750
+// NTSC-U/C: 0x0049a750, PAL: 0x004d86b8
 void Animatable::AcquireAnimsRefs() {
     for (std::list<Animatable *>::iterator it = mAnims.begin(); it != mAnims.end(); ++it) {
         if (*it != nullptr) {
@@ -655,7 +655,7 @@ void Animatable::AcquireAnimsRefs() {
     }
 }
 
-// 0x0049a640
+// NTSC-U/C: 0x0049a640, PAL: 0x004d85a8
 void Animatable::DumpText(FailSink &sink) {
     if (sink.mDumpLevel <= 0) {
         return;
@@ -669,7 +669,7 @@ void Animatable::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
-// 0x0049a6e8
+// NTSC-U/C: 0x0049a6e8, PAL: 0x004d8650
 void Animatable::Save(Stream &stream) {
     int nRevision = kAnimatableRevision;
     stream.Write(&nRevision, sizeof(nRevision));
@@ -678,7 +678,7 @@ void Animatable::Save(Stream &stream) {
     stream << mAnims;
 }
 
-// 0x00494d68
+// NTSC-U/C: 0x00494d68, PAL: 0x004d2c30
 void Animatable::Load(Stream &stream) {
     int nRevision = 0;
     stream.Read(&nRevision, sizeof(nRevision));
@@ -698,7 +698,7 @@ void Animatable::Load(Stream &stream) {
     AcquireAnimsRefs();
 }
 
-// 0x00494e70
+// NTSC-U/C: 0x00494e70, PAL: 0x004d2d38
 void Animatable::Copy(const Object *pSource, unsigned nFlags) {
     const Animatable *pSourceAnim = dynamic_cast<const Animatable *>(pSource);
 
@@ -720,7 +720,7 @@ void Animatable::Copy(const Object *pSource, unsigned nFlags) {
     AcquireAnimsRefs();
 }
 
-// 0x004951e0
+// NTSC-U/C: 0x004951e0, PAL: 0x004d30a8
 void Animatable::Replace(Object *pFrom, Object *pTo) {
     for (std::list<Animatable *>::iterator it = mAnims.begin(); it != mAnims.end();) {
         if (*it == pTo) {

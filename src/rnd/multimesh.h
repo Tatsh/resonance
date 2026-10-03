@@ -45,11 +45,15 @@ public:
      * Construct an empty multi-mesh.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
-     * @ghidraAddress 0x004e8830
+     * @ghidraAddress NTSC-U/C: 0x004e8830
+     * @ghidraAddress PAL: 0x00527368
      */
     MultiMesh(const HxStr &name);
 
-    /** @ghidraAddress 0x004e85c0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004e85c0
+     * @ghidraAddress PAL: 0x005270f8
+     */
     virtual ~MultiMesh();
 
     /**
@@ -59,7 +63,8 @@ public:
      * suppressed while the dump level of the sink is zero or negative.
      *
      * @param sink The text sink.
-     * @ghidraAddress 0x004e81a0
+     * @ghidraAddress NTSC-U/C: 0x004e81a0
+     * @ghidraAddress PAL: 0x00526ca8
      */
     virtual void DumpText(FailSink &sink);
 
@@ -70,7 +75,8 @@ public:
      * transform list.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x004ebd10
+     * @ghidraAddress NTSC-U/C: 0x004ebd10
+     * @ghidraAddress PAL: 0x0052a880
      */
     virtual void Save(Stream &stream);
 
@@ -82,7 +88,8 @@ public:
      *
      * @param pFrom The object being replaced.
      * @param pTo The object to point at, which may be null.
-     * @ghidraAddress 0x004ebe40
+     * @ghidraAddress NTSC-U/C: 0x004ebe40
+     * @ghidraAddress PAL: 0x0052a9b0
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -90,7 +97,8 @@ public:
      * Return the registered class name, "MultiMesh".
      *
      * @return The class name.
-     * @ghidraAddress 0x004eba80
+     * @ghidraAddress NTSC-U/C: 0x004eba80
+     * @ghidraAddress PAL: 0x0052a5f0
      */
     virtual const HxStr &ClassName() const;
 
@@ -103,7 +111,8 @@ public:
      * @param pSource The source object, which has to be a multi-mesh for the copy to have any
      *                effect.
      * @param nFlags The copy flags, forwarded to Rnd::Drawable.
-     * @ghidraAddress 0x004ebc60
+     * @ghidraAddress NTSC-U/C: 0x004ebc60
+     * @ghidraAddress PAL: 0x0052a7d0
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -115,7 +124,8 @@ public:
      * with a checked cast.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x004e8288
+     * @ghidraAddress NTSC-U/C: 0x004e8288
+     * @ghidraAddress PAL: 0x00526d90
      */
     virtual void Load(Stream &stream);
 
@@ -124,7 +134,8 @@ public:
      *
      * Does nothing when mMesh is null.
      *
-     * @ghidraAddress 0x004ebde0
+     * @ghidraAddress NTSC-U/C: 0x004ebde0
+     * @ghidraAddress PAL: 0x0052a950
      */
     void AcquireMeshRef();
 
@@ -133,7 +144,8 @@ public:
      *
      * The mirror of AcquireMeshRef().
      *
-     * @ghidraAddress 0x004ebe10
+     * @ghidraAddress NTSC-U/C: 0x004ebe10
+     * @ghidraAddress PAL: 0x0052a980
      */
     void ReleaseMeshRef();
 
@@ -144,7 +156,8 @@ public:
      * from outside this hierarchy.
      *
      * @return The transform list.
-     * @ghidraAddress 0x004eba98
+     * @ghidraAddress NTSC-U/C: 0x004eba98
+     * @ghidraAddress PAL: 0x0052a608
      */
     std::list<Transform> &GetTransforms() {
         return mTransforms;
@@ -156,7 +169,8 @@ public:
      * The out-of-line copy has no callers. TnlGemMeshKind's constructor inlines it.
      *
      * @return The mesh, or null.
-     * @ghidraAddress 0x004eba90
+     * @ghidraAddress NTSC-U/C: 0x004eba90
+     * @ghidraAddress PAL: 0x0052a600
      */
     Mesh *GetMesh() const {
         return mMesh;
@@ -170,7 +184,8 @@ public:
      *
      * @param nIndex The position of the instance.
      * @return The instance transform.
-     * @ghidraAddress 0x004ebaa0
+     * @ghidraAddress NTSC-U/C: 0x004ebaa0
+     * @ghidraAddress PAL: 0x0052a610
      */
     Transform &GetTransform(int nIndex);
 
@@ -181,7 +196,8 @@ public:
      * inferred.
      *
      * @param nIndex The position of the instance.
-     * @ghidraAddress 0x004ebae8
+     * @ghidraAddress NTSC-U/C: 0x004ebae8
+     * @ghidraAddress PAL: 0x0052a658
      */
     void RemoveTransform(int nIndex);
 
@@ -191,7 +207,8 @@ public:
      * The routine has no caller in the shipped build. The name is inferred.
      *
      * @param pMesh The new mesh, or null.
-     * @ghidraAddress 0x004ebf18
+     * @ghidraAddress NTSC-U/C: 0x004ebf18
+     * @ghidraAddress PAL: 0x0052aa88
      */
     void SetMesh(Mesh *pMesh);
 
@@ -204,7 +221,8 @@ protected:
      * transform in turn, and the mesh draws itself at each one. The saved state is then restored.
      *
      * @return Non-zero, always, so the children are drawn as well.
-     * @ghidraAddress 0x004e83d0
+     * @ghidraAddress NTSC-U/C: 0x004e83d0
+     * @ghidraAddress PAL: 0x00526f08
      */
     virtual int DrawSelf();
 
@@ -222,7 +240,8 @@ protected:
  *
  * @param name The object name.
  * @return The new multi-mesh.
- * @ghidraAddress 0x004ebbe8
+ * @ghidraAddress NTSC-U/C: 0x004ebbe8
+ * @ghidraAddress PAL: 0x0052a758
  */
 MultiMesh *NewMultiMesh(const HxStr &name);
 
@@ -235,7 +254,8 @@ MultiMesh *NewMultiMesh(const HxStr &name);
  *
  * @param name The object name.
  * @return The new multi-mesh, as its Rnd::Object subobject.
- * @ghidraAddress 0x004ebb58
+ * @ghidraAddress NTSC-U/C: 0x004ebb58
+ * @ghidraAddress PAL: 0x0052a6c8
  */
 Object *CreateRegisteredMultiMesh(const HxStr &name);
 
@@ -245,14 +265,16 @@ Object *CreateRegisteredMultiMesh(const HxStr &name);
  * GfxDevice::Init() overwrites the hook at `0x0049af88` with Rnd::NewPsMultiMesh, so a multi-mesh
  * loaded from a file on the PlayStation 2 is a PsMultiMesh.
  *
- * @ghidraAddress 0x00704070
+ * @ghidraAddress NTSC-U/C: 0x00704070
+ * @ghidraAddress PAL: 0x00747b40
  */
 extern MultiMesh *(*g_pfnNewMultiMesh)(const HxStr &name);
 
 /**
  * Registered class name of Rnd::MultiMesh, the string "MultiMesh".
  *
- * @ghidraAddress 0x00704068
+ * @ghidraAddress NTSC-U/C: 0x00704068
+ * @ghidraAddress PAL: 0x00747b38
  */
 extern HxStr g_multiMeshClassName;
 
@@ -265,7 +287,8 @@ extern HxStr g_multiMeshClassName;
  *
  * Rnd::Manager::Init() also expands this inline.
  *
- * @ghidraAddress 0x004eb958
+ * @ghidraAddress NTSC-U/C: 0x004eb958
+ * @ghidraAddress PAL: 0x0052a4c8
  */
 inline void RegisterMultiMeshClass() {
     g_pfnNewMultiMesh = NewMultiMesh;
@@ -279,7 +302,8 @@ inline void RegisterMultiMeshClass() {
  * receives, which is why no store to it appears in the routine. The arrangement matches
  * Rnd::g_nRndMeshLoadVersion.
  *
- * @ghidraAddress 0x00895038
+ * @ghidraAddress NTSC-U/C: 0x00895038
+ * @ghidraAddress PAL: 0x008da048
  */
 extern int g_nRndMultiMeshLoadVersion;
 

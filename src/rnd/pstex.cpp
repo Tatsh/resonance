@@ -191,7 +191,7 @@ inline int BufferWidthUnits(const ABitmap &bitmap) {
     return nUnits;
 }
 
-// 0x0059a908
+// NTSC-U/C: 0x0059a908, PAL: 0x005ddd88
 // Compare the palette of one level against that of level 0 entry by entry.
 inline bool
 CheckPalEqual(const APalette *pPalMip0, const APalette *pPalMip, const char *pszName, int nMip) {
@@ -227,7 +227,7 @@ CheckPalEqual(const APalette *pPalMip0, const APalette *pPalMip, const char *psz
     return true;
 }
 
-// 0x0059a9e8
+// NTSC-U/C: 0x0059a9e8, PAL: 0x005dde68
 // Blank a level that failed validation. A run-length level is not modified.
 inline void ClearBitmapPixels(ABitmap *pBitmap) {
     if (pBitmap->mFormat == kABitmapFormatRle8) {
@@ -241,25 +241,25 @@ inline void ClearBitmapPixels(ABitmap *pBitmap) {
 
 } // namespace
 
-// 0x0076f360
+// NTSC-U/C: 0x0076f360, PAL: 0x007b30c0
 const unsigned int g_dwDefaultClutEntry = 0xff8080ff;
 
-// 0x0076f368
+// NTSC-U/C: 0x0076f368, PAL: 0x007b30c8
 const int g_anClutSwizzleBlocks[4] = {0, 2, 1, 3};
 
-// 0x0076f378
+// NTSC-U/C: 0x0076f378, PAL: 0x007b30d8
 const int g_anPackedMipPageOffsets[6] = {16, 20, 21, 22, 23, 24};
 
-// 0x00596f80
+// NTSC-U/C: 0x00596f80, PAL: 0x005da388
 PsTex::PsTex(const HxStr &name) : Tex(name), mPaletteVram(nullptr) {
 }
 
-// 0x0059a558
+// NTSC-U/C: 0x0059a558, PAL: 0x005dd9c8
 PsTex::~PsTex() {
     FreeGsSurfaces();
 }
 
-// 0x00596fd8
+// NTSC-U/C: 0x00596fd8, PAL: 0x005da3e0
 void PsTex::OnMipLoaded(int nMip) {
     Tex::OnMipLoaded(nMip);
     if (mLoadedBitmaps.empty()) {
@@ -289,7 +289,7 @@ void PsTex::OnMipLoaded(int nMip) {
     }
 }
 
-// 0x00597210
+// NTSC-U/C: 0x00597210, PAL: 0x005da618
 void PsTex::RestoreSurfaces() {
     if (mLoadedBitmaps.empty() || mLoadedBitmaps[0] == nullptr) {
         Tex::RestoreSurfaces();
@@ -451,7 +451,7 @@ void PsTex::RestoreSurfaces() {
     Tex::RestoreSurfaces();
 }
 
-// 0x00597130
+// NTSC-U/C: 0x00597130, PAL: 0x005da538
 void PsTex::FreeGsSurfaces() {
     if (mPaletteVram != nullptr) {
         mPaletteVram->FreeSelf();
@@ -470,7 +470,7 @@ void PsTex::FreeGsSurfaces() {
     mGsMips.clear();
 }
 
-// 0x00597c68
+// NTSC-U/C: 0x00597c68, PAL: 0x005db070
 void PsTex::RebuildClut() {
     if (mLoadedBitmaps.empty()) {
         return;
@@ -494,7 +494,7 @@ void PsTex::RebuildClut() {
     }
 }
 
-// 0x00597d50
+// NTSC-U/C: 0x00597d50, PAL: 0x005db158
 int PsTex::UploadBitmapMipToGs(int nMip) {
     const ABitmap *pBitmap = mLoadedBitmaps[nMip];
     GsMip &mip = mGsMips[nMip];
@@ -518,7 +518,7 @@ int PsTex::UploadBitmapMipToGs(int nMip) {
         pIndices, pBitmap->mWidth, pBitmap->mHeight, kRleBitsPerPixel, kGsPsmT8);
 }
 
-// 0x0059ac68
+// NTSC-U/C: 0x0059ac68, PAL: 0x005de0e8
 inline int PsTex::UploadPaletteClut() {
     int nWidth = kClut256Width;
     int nHeight = kClut256Height;
@@ -529,7 +529,7 @@ inline int PsTex::UploadPaletteClut() {
     return mPaletteVram->UploadClut(mClut.mEntries, nWidth, nHeight, kClutBitsPerEntry, kGsPsmCt32);
 }
 
-// 0x0059acc0
+// NTSC-U/C: 0x0059acc0, PAL: 0x005de140
 inline void PsTex::UploadBitmapMipToSubImage(VramTableEntry *pPage, int nMip, int nBlockOffset) {
     const ABitmap *pBitmap = mLoadedBitmaps[nMip];
 
@@ -557,7 +557,7 @@ inline void PsTex::UploadBitmapMipToSubImage(VramTableEntry *pPage, int nMip, in
         pIndices, pBitmap->mWidth, pBitmap->mHeight, kRleBitsPerPixel, kGsPsmT8, nBlockOffset);
 }
 
-// 0x00597e38
+// NTSC-U/C: 0x00597e38, PAL: 0x005db240
 void PsTex::UploadPendingMips() {
     if (mDirtyMips == 0) {
         return;
@@ -592,7 +592,7 @@ void PsTex::UploadPendingMips() {
     mDirtyMips = 0;
 }
 
-// 0x00598000
+// NTSC-U/C: 0x00598000, PAL: 0x005db408
 bool PsTex::BindToGsSlot(unsigned nTexFunc) {
     WaitForMipsLoaded();
     if (mLoadedBitmaps.empty() || mLoadedBitmaps[0] == nullptr) {
@@ -640,7 +640,7 @@ bool PsTex::BindToGsSlot(unsigned nTexFunc) {
     return true;
 }
 
-// 0x00596d68
+// NTSC-U/C: 0x00596d68, PAL: 0x005da170
 void PsTex::BindAsRenderTarget() {
     WaitForMipsLoaded();
     GsMip &mip = mGsMips[0];
@@ -678,7 +678,7 @@ void PsTex::BindAsRenderTarget() {
     g_gfxDevice.SetGsReg(kGsRegTest1, kTestZtstAlways, kTestZtstMask);
 }
 
-// 0x005982a0
+// NTSC-U/C: 0x005982a0, PAL: 0x005db6a8
 int PsTex::UploadMipAndBuildMipTbp(int nMip, bool bSkipIfResident) {
     if (mLoadedBitmaps.empty() || mLoadedBitmaps[0] == nullptr) {
         return 0;
@@ -739,31 +739,31 @@ int PsTex::UploadMipAndBuildMipTbp(int nMip, bool bSkipIfResident) {
     return nBlockAddr;
 }
 
-// 0x0059a7e8
+// NTSC-U/C: 0x0059a7e8, PAL: 0x005ddc68
 void PsTex::FreeLoadedBitmaps() {
     FreeGsSurfaces();
     Tex::FreeLoadedBitmaps();
 }
 
-// 0x0059a818
+// NTSC-U/C: 0x0059a818, PAL: 0x005ddc98
 void PsTex::SetGsPageInUse(bool bInUse) {
     WaitForMipsLoaded();
     mGsMips[0].mPage->SetPinned(bInUse);
 }
 
-// 0x0059a770
+// NTSC-U/C: 0x0059a770, PAL: 0x005ddbf0
 Tex *NewPsTex(const HxStr &name) {
     // The binary bills the 0x4b0-byte allocation to the tag "Rnd::Tex".
     return new PsTex(name);
 }
 
-// 0x0059a888
+// NTSC-U/C: 0x0059a888, PAL: 0x005ddd08
 void PsTex::StaticInit() {
     g_pfnNewTex = NewPsTex;
     g_gfxDevice.SetGsReg(kGsRegTex1, kTex1DefaultFilter, kTex1FilterMask);
 }
 
-// 0x0059aa48
+// NTSC-U/C: 0x0059aa48, PAL: 0x005ddec8
 ACanvas *PsTex::LockMipBitmap(int nMip, [[maybe_unused]] int nReserved, int nFlags) {
     WaitForMipsLoaded();
     if (static_cast<unsigned>(nMip) >= mLoadedBitmaps.size() || mLoadedBitmaps[nMip] == nullptr) {
@@ -781,7 +781,7 @@ ACanvas *PsTex::LockMipBitmap(int nMip, [[maybe_unused]] int nReserved, int nFla
     return mGsMips[nMip].mVramBitmap;
 }
 
-// 0x0059ab30
+// NTSC-U/C: 0x0059ab30, PAL: 0x005ddfb0
 void PsTex::UnlockMipBitmap() {
     if (mLoadedBitmaps.empty()) {
         return;
@@ -793,7 +793,7 @@ void PsTex::UnlockMipBitmap() {
     mDirtyMips |= 1u << mLockedMip;
 }
 
-// 0x0059ab78
+// NTSC-U/C: 0x0059ab78, PAL: 0x005ddff8
 void PsTex::SetPalette(APalette *pPalette, [[maybe_unused]] int nReserved) {
     if (mLoadedBitmaps.empty() || mLoadedBitmaps[0] == nullptr) {
         return;
@@ -805,7 +805,7 @@ void PsTex::SetPalette(APalette *pPalette, [[maybe_unused]] int nReserved) {
     mDirtyMips |= kDirtyClut;
 }
 
-// 0x0059abe8
+// NTSC-U/C: 0x0059abe8, PAL: 0x005de068
 void PsTex::AllocPaletteVram() {
     if (mPaletteVram != nullptr) {
         return;

@@ -91,7 +91,8 @@ public:
          *
          * @param pPrev The preceding keyframe, or null at the start of the channel.
          * @param pNext The following keyframe, or null at the end of the channel.
-         * @ghidraAddress 0x00552748
+         * @ghidraAddress NTSC-U/C: 0x00552748
+         * @ghidraAddress PAL: 0x00592d88
          */
         void ComputeSplineTangents(const TransKey *pPrev, const TransKey *pNext);
 
@@ -105,7 +106,8 @@ public:
          * @param pNext The keyframe that ends the segment.
          * @param pOut Receives the position, four floats.
          * @param flT The segment parameter, zero at this keyframe and one at pNext.
-         * @ghidraAddress 0x00552af8
+         * @ghidraAddress NTSC-U/C: 0x00552af8
+         * @ghidraAddress PAL: 0x00593138
          */
         void EvaluateSpline(const TransKey *pNext, float *pOut, float flT) const;
 
@@ -118,7 +120,8 @@ public:
          * @param pNext The keyframe that ends the segment.
          * @param flT The segment parameter, zero at this keyframe and one at pNext.
          * @return The derivative with respect to the segment parameter.
-         * @ghidraAddress 0x00552cb8
+         * @ghidraAddress NTSC-U/C: 0x00552cb8
+         * @ghidraAddress PAL: 0x005932f8
          */
         Vector3 EvaluateSplineDerivative(const TransKey *pNext, float flT) const;
 
@@ -130,7 +133,8 @@ public:
          *
          * @param pNext The keyframe that ends the segment.
          * @return The approximate length.
-         * @ghidraAddress 0x00554d90
+         * @ghidraAddress NTSC-U/C: 0x00554d90
+         * @ghidraAddress PAL: 0x00595418
          */
         float SplineLength(const TransKey *pNext) const;
 
@@ -178,7 +182,8 @@ public:
          *
          * @param pPrev The preceding keyframe, or null at the start of the channel.
          * @param pNext The following keyframe, or null at the end of the channel.
-         * @ghidraAddress 0x00552588
+         * @ghidraAddress NTSC-U/C: 0x00552588
+         * @ghidraAddress PAL: 0x00592bc8
          */
         void ComputeSplineTangents(const RotKey *pPrev, const RotKey *pNext);
 
@@ -193,7 +198,8 @@ public:
          * @param pNext The keyframe that ends the segment.
          * @param out Receives the rotation.
          * @param flT The segment parameter, zero at this keyframe and one at pNext.
-         * @ghidraAddress 0x00554c68
+         * @ghidraAddress NTSC-U/C: 0x00554c68
+         * @ghidraAddress PAL: 0x005952f0
          */
         void EvaluateSpline(const RotKey *pNext, Quat &out, float flT) const;
 
@@ -223,14 +229,16 @@ public:
      * The translation channel starts as kInterpTCB and the other two as kInterpLinear.
      *
      * @param name The object name, passed to the Rnd::Object constructor.
-     * @ghidraAddress 0x004fc000
+     * @ghidraAddress NTSC-U/C: 0x004fc000
+     * @ghidraAddress PAL: 0x0053ace8
      */
     explicit TransAnim(const HxStr &name);
 
     /**
      * Drop this object's references and every reference held on it.
      *
-     * @ghidraAddress 0x004fbb78
+     * @ghidraAddress NTSC-U/C: 0x004fbb78
+     * @ghidraAddress PAL: 0x0053a860
      */
     virtual ~TransAnim();
 
@@ -238,7 +246,8 @@ public:
      * Report the registered class name, "TransAnim".
      *
      * @return The class name.
-     * @ghidraAddress 0x004fbf60
+     * @ghidraAddress NTSC-U/C: 0x004fbf60
+     * @ghidraAddress PAL: 0x0053ac48
      */
     virtual const HxStr &ClassName() const;
 
@@ -250,7 +259,8 @@ public:
      * contributes zero.
      *
      * @return The largest last-key frame across the three channels, never below zero.
-     * @ghidraAddress 0x004f4020
+     * @ghidraAddress NTSC-U/C: 0x004f4020
+     * @ghidraAddress PAL: 0x00532c58
      */
     virtual float EndFrame();
 
@@ -262,7 +272,8 @@ public:
      * `0x0045e920` calls it.
      *
      * @return The smallest first-key frame across the three channels.
-     * @ghidraAddress 0x004f4188
+     * @ghidraAddress NTSC-U/C: 0x004f4188
+     * @ghidraAddress PAL: 0x00532dc0
      */
     virtual float StartFrame();
 
@@ -270,7 +281,8 @@ public:
      * Write a description of this object to sink.
      *
      * @param sink The diagnostic sink to write to.
-     * @ghidraAddress 0x004f2ab0
+     * @ghidraAddress NTSC-U/C: 0x004f2ab0
+     * @ghidraAddress PAL: 0x005316a0
      */
     virtual void DumpText(FailSink &sink);
 
@@ -281,7 +293,8 @@ public:
      * resolve them through Rnd::g_manager.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x004f2d50
+     * @ghidraAddress NTSC-U/C: 0x004f2d50
+     * @ghidraAddress PAL: 0x00531940
      */
     virtual void Save(Stream &stream);
 
@@ -297,7 +310,8 @@ public:
      * An animation that does not own its frames then empties its own three channels.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x004f2f68
+     * @ghidraAddress NTSC-U/C: 0x004f2f68
+     * @ghidraAddress PAL: 0x00531b58
      */
     virtual void Load(Stream &stream);
 
@@ -311,7 +325,8 @@ public:
      *
      * @param pFrom The object being replaced.
      * @param pTo The replacement, or null.
-     * @ghidraAddress 0x004f28c8
+     * @ghidraAddress NTSC-U/C: 0x004f28c8
+     * @ghidraAddress PAL: 0x005314b8
      */
     virtual void Replace(Object *pFrom, Object *pTo);
 
@@ -320,7 +335,8 @@ public:
      *
      * @param pSource The object to copy from.
      * @param nFlags The set of fields to copy; see kCopyShareFrames.
-     * @ghidraAddress 0x004f3e90
+     * @ghidraAddress NTSC-U/C: 0x004f3e90
+     * @ghidraAddress PAL: 0x00532ac8
      */
     virtual void Copy(const Object *pSource, unsigned nFlags);
 
@@ -346,7 +362,8 @@ public:
      * nothing to its rows unless nResetEmpty is set.
      * @param nResetEmpty Non-zero to reset the rows of an empty translation or rotation channel to
      * the identity.
-     * @ghidraAddress 0x004f42f0
+     * @ghidraAddress NTSC-U/C: 0x004f42f0
+     * @ghidraAddress PAL: 0x00532f28
      */
     void EvalFrame(float flFrame, float *pXfm, int nResetEmpty);
 
@@ -371,7 +388,8 @@ public:
      * No call site outside the routine itself survives in the shipped program. The name is
      * inferred from the report text.
      *
-     * @ghidraAddress 0x004f4c48
+     * @ghidraAddress NTSC-U/C: 0x004f4c48
+     * @ghidraAddress PAL: 0x00533880
      */
     void Normalize();
 
@@ -384,7 +402,8 @@ public:
      * name is inferred from the member it sets.
      *
      * @param nRepeat Non-zero to repeat.
-     * @ghidraAddress 0x004fb7e0
+     * @ghidraAddress NTSC-U/C: 0x004fb7e0
+     * @ghidraAddress PAL: 0x0053a4c8
      */
     void SetRepeatTrans(int nRepeat);
 
@@ -395,7 +414,8 @@ public:
      * reference on it. A null target clears mTrans.
      *
      * @param pTrans The new target, or null.
-     * @ghidraAddress 0x004fd000
+     * @ghidraAddress NTSC-U/C: 0x004fd000
+     * @ghidraAddress PAL: 0x0053bce8
      */
     void SetTrans(Transformable *pTrans);
 
@@ -407,7 +427,8 @@ public:
      * build. The name is inferred.
      *
      * @param pOwner The new frames owner, or null.
-     * @ghidraAddress 0x004fd0a0
+     * @ghidraAddress NTSC-U/C: 0x004fd0a0
+     * @ghidraAddress PAL: 0x0053bd88
      */
     void SetFramesOwner(TransAnim *pOwner);
 
@@ -417,7 +438,8 @@ public:
      * The out-of-line copy has no callers. TnlBumpFX::Start() inlines it.
      *
      * @return mFramesOwner, which is this object when it owns its frames.
-     * @ghidraAddress 0x004fbf58
+     * @ghidraAddress NTSC-U/C: 0x004fbf58
+     * @ghidraAddress PAL: 0x0053ac40
      */
     TransAnim *GetFramesOwner() const {
         return mFramesOwner;
@@ -432,7 +454,8 @@ protected:
      * local transform rather than the composed one.
      *
      * @param flFrame The filtered frame to animate to.
-     * @ghidraAddress 0x004fd2c8
+     * @ghidraAddress NTSC-U/C: 0x004fd2c8
+     * @ghidraAddress PAL: 0x0053bfb0
      */
     virtual void SetFrameSelf(float flFrame);
 
@@ -446,7 +469,7 @@ private:
     void AddObjectRefs();
 
     // Drop the references AddObjectRefs() took. The destructor is the one out-of-line caller.
-    // 0x004fd118
+    // NTSC-U/C: 0x004fd118, PAL: 0x0053be00
     void RemoveObjectRefs();
 
     // Declared in recovered offset order. The transformable this animation drives.
@@ -482,7 +505,8 @@ private:
  *
  * @param name The object name.
  * @return The new animation.
- * @ghidraAddress 0x004fc740
+ * @ghidraAddress NTSC-U/C: 0x004fc740
+ * @ghidraAddress PAL: 0x0053b428
  */
 TransAnim *NewTransAnim(const HxStr &name);
 
@@ -491,7 +515,8 @@ TransAnim *NewTransAnim(const HxStr &name);
  *
  * RegisterTransAnimClass() points it at NewTransAnim().
  *
- * @ghidraAddress 0x00706820
+ * @ghidraAddress NTSC-U/C: 0x00706820
+ * @ghidraAddress PAL: 0x0074a340
  */
 extern TransAnim *(*g_pfnNewTransAnim)(const HxStr &name);
 
@@ -503,7 +528,8 @@ extern TransAnim *(*g_pfnNewTransAnim)(const HxStr &name);
  *
  * @param name The object name.
  * @return The new animation.
- * @ghidraAddress 0x004fba90
+ * @ghidraAddress NTSC-U/C: 0x004fba90
+ * @ghidraAddress PAL: 0x0053a778
  */
 TransAnim *NewTransAnimThroughHook(const HxStr &name);
 
@@ -515,7 +541,8 @@ TransAnim *NewTransAnimThroughHook(const HxStr &name);
  *
  * @param name The object name.
  * @return The new animation, as its Rnd::Object subobject.
- * @ghidraAddress 0x004fbf70
+ * @ghidraAddress NTSC-U/C: 0x004fbf70
+ * @ghidraAddress PAL: 0x0053ac58
  */
 Object *CreateRegisteredTransAnim(const HxStr &name);
 
@@ -526,14 +553,16 @@ Object *CreateRegisteredTransAnim(const HxStr &name);
  *
  * Rnd::Manager::Init() also expands this inline.
  *
- * @ghidraAddress 0x004fba50
+ * @ghidraAddress NTSC-U/C: 0x004fba50
+ * @ghidraAddress PAL: 0x0053a738
  */
 void RegisterTransAnimClass();
 
 /**
  * Registered class name of Rnd::TransAnim, the string "TransAnim".
  *
- * @ghidraAddress 0x00706828
+ * @ghidraAddress NTSC-U/C: 0x00706828
+ * @ghidraAddress PAL: 0x0074a348
  */
 extern HxStr g_transAnimClassName;
 

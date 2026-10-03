@@ -45,7 +45,10 @@ public:
      */
     PsMat(const HxStr &name);
 
-    /** @ghidraAddress 0x00591590 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00591590
+     * @ghidraAddress PAL: 0x005d4928
+     */
     virtual ~PsMat();
 
     /**
@@ -54,23 +57,39 @@ public:
      * GfxDevice::Init() invokes this at `0x0049af48`. The title is inferred from the creator hook
      * the routine overwrites.
      *
-     * @ghidraAddress 0x00591240
+     * @ghidraAddress NTSC-U/C: 0x00591240
+     * @ghidraAddress PAL: 0x005d45c0
      */
     static void InstallCreator();
 
-    /** @ghidraAddress 0x005916b0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x005916b0
+     * @ghidraAddress PAL: 0x005d4a48
+     */
     virtual void SetAmbient(const Color &color);
 
-    /** @ghidraAddress 0x005916c8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x005916c8
+     * @ghidraAddress PAL: 0x005d4a60
+     */
     virtual void SetDiffuse(const Color &color);
 
-    /** @ghidraAddress 0x005916f0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x005916f0
+     * @ghidraAddress PAL: 0x005d4a88
+     */
     virtual void SetEmissive(const Color &color);
 
-    /** @ghidraAddress 0x00591730 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00591730
+     * @ghidraAddress PAL: 0x005d4ac8
+     */
     virtual void SetAlpha(float flAlpha);
 
-    /** @ghidraAddress 0x00591708 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00591708
+     * @ghidraAddress PAL: 0x005d4aa0
+     */
     virtual void SetSpecular(const Color &color, float flAlpha);
 
     /**
@@ -81,7 +100,8 @@ public:
      * the blend mode, the stage texture, and the UV transform are all reselected.
      *
      * @return Non-zero while further stages remain, which asks the caller to draw again.
-     * @ghidraAddress 0x0058eb40
+     * @ghidraAddress NTSC-U/C: 0x0058eb40
+     * @ghidraAddress PAL: 0x005d1e98
      */
     int Select();
 
@@ -91,7 +111,8 @@ public:
      * GfxDevice::BeginFrame() invokes this once per frame, and a draw of a mesh with no material
      * invokes it in place of Select().
      *
-     * @ghidraAddress 0x005910b0
+     * @ghidraAddress NTSC-U/C: 0x005910b0
+     * @ghidraAddress PAL: 0x005d4430
      */
     static void SelectDefault();
 
@@ -101,7 +122,8 @@ public:
      * The override is recorded, so the next Select() on the same material restores the material
      * blend. The edge pass of Rnd::PsMesh::DrawSelf() is the only call site.
      *
-     * @ghidraAddress 0x00591170
+     * @ghidraAddress NTSC-U/C: 0x00591170
+     * @ghidraAddress PAL: 0x005d44f0
      */
     void SelectAlphaBlend();
 
@@ -130,35 +152,40 @@ private:
  *
  * @param name The object name.
  * @return The new material.
- * @ghidraAddress 0x005914b8
+ * @ghidraAddress NTSC-U/C: 0x005914b8
+ * @ghidraAddress PAL: 0x005d4850
  */
 Mat *NewPsMat(const HxStr &name);
 
 /**
  * Coordinate generation mode of the stage Rnd::PsMat::SetupUvXfm() last processed.
  *
- * @ghidraAddress 0x0076d660
+ * @ghidraAddress NTSC-U/C: 0x0076d660
+ * @ghidraAddress PAL: 0x007b13b8
  */
 extern int g_nSelectedGenMode;
 
 /**
  * Flat shading flag of the selected material.
  *
- * @ghidraAddress 0x0076d664
+ * @ghidraAddress NTSC-U/C: 0x0076d664
+ * @ghidraAddress PAL: 0x007b13bc
  */
 extern int g_nSelectedFlat;
 
 /**
  * Non-zero once the GS ALPHA_1 register holds a blending equation rather than an opaque copy.
  *
- * @ghidraAddress 0x0076d66c
+ * @ghidraAddress NTSC-U/C: 0x0076d66c
+ * @ghidraAddress PAL: 0x007b13c4
  */
 extern int g_nAlphaBlendEnabled;
 
 /**
  * Non-zero when the bound stage blend is Rnd::Mat::kBlendModeMultiply2.
  *
- * @ghidraAddress 0x0076d670
+ * @ghidraAddress NTSC-U/C: 0x0076d670
+ * @ghidraAddress PAL: 0x007b13c8
  */
 extern int g_nStageBlendDoubles;
 
@@ -168,7 +195,8 @@ extern int g_nStageBlendDoubles;
  * A sphere generation mode yields the sphere-map transform, and any other mode with a stage
  * transform yields the composed transform.
  *
- * @ghidraAddress 0x0076d674
+ * @ghidraAddress NTSC-U/C: 0x0076d674
+ * @ghidraAddress PAL: 0x007b13cc
  */
 extern Transform *g_pSelectedUvXfm;
 
@@ -178,14 +206,16 @@ extern Transform *g_pSelectedUvXfm;
  * Only a sphere generation mode publishes a value here, because the other modes fold the stage
  * transform into g_pSelectedUvXfm instead.
  *
- * @ghidraAddress 0x0076d678
+ * @ghidraAddress NTSC-U/C: 0x0076d678
+ * @ghidraAddress PAL: 0x007b13d0
  */
 extern Transform *g_pSelectedStageXfm;
 
 /**
  * Lighting enable flag of the selected material, cleared when the stage texture function is decal.
  *
- * @ghidraAddress 0x0076d67c
+ * @ghidraAddress NTSC-U/C: 0x0076d67c
+ * @ghidraAddress PAL: 0x007b13d4
  */
 extern int g_nLightingEnabled;
 

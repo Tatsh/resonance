@@ -36,7 +36,8 @@ struct TunnelSeeker {
      *
      * mTransFrameOffset starts at -500. mSavedFlag is not set.
      *
-     * @ghidraAddress 0x00477768
+     * @ghidraAddress NTSC-U/C: 0x00477768
+     * @ghidraAddress PAL: 0x004b53e0
      */
     TunnelSeeker();
 
@@ -45,7 +46,8 @@ struct TunnelSeeker {
      *
      * The two pointers are not cleared.
      *
-     * @ghidraAddress 0x004777c0
+     * @ghidraAddress NTSC-U/C: 0x004777c0
+     * @ghidraAddress PAL: 0x004b5438
      */
     void ReleaseRefs();
 
@@ -57,7 +59,8 @@ struct TunnelSeeker {
      *
      * @param pTunnel The tunnel.
      * @param nIndex The index of the seeker in the tunnel.
-     * @ghidraAddress 0x00477830
+     * @ghidraAddress NTSC-U/C: 0x00477830
+     * @ghidraAddress PAL: 0x004b54a8
      */
     void SetTunnel(Tunnel *pTunnel, int nIndex);
 
@@ -65,7 +68,8 @@ struct TunnelSeeker {
      * Replace the transformable the seeker drives.
      *
      * @param pTrans The transformable, or null.
-     * @ghidraAddress 0x00477a48
+     * @ghidraAddress NTSC-U/C: 0x00477a48
+     * @ghidraAddress PAL: 0x004b56c0
      */
     void SetTrans(Transformable *pTrans);
 
@@ -73,7 +77,8 @@ struct TunnelSeeker {
      * Set the ring the lane moves towards.
      *
      * @param nRing The ring.
-     * @ghidraAddress 0x00477ab8
+     * @ghidraAddress NTSC-U/C: 0x00477ab8
+     * @ghidraAddress PAL: 0x004b5730
      */
     void SetTargetRing(int nRing);
 
@@ -81,7 +86,8 @@ struct TunnelSeeker {
      * Replace the mesh the seeker draws.
      *
      * @param pMesh The mesh, or null.
-     * @ghidraAddress 0x00477ac0
+     * @ghidraAddress NTSC-U/C: 0x00477ac0
+     * @ghidraAddress PAL: 0x004b5738
      */
     void SetMesh(Mesh *pMesh);
 
@@ -89,7 +95,8 @@ struct TunnelSeeker {
      * Set the path frame offset used to place the mesh.
      *
      * @param flOffset The offset from the tunnel frame.
-     * @ghidraAddress 0x00477b30
+     * @ghidraAddress NTSC-U/C: 0x00477b30
+     * @ghidraAddress PAL: 0x004b57a8
      */
     void SetMeshFrameOffset(float flOffset);
 
@@ -97,7 +104,8 @@ struct TunnelSeeker {
      * Set the path frame offset used to place the transformable.
      *
      * @param flOffset The offset from the tunnel frame.
-     * @ghidraAddress 0x00477b38
+     * @ghidraAddress NTSC-U/C: 0x00477b38
+     * @ghidraAddress PAL: 0x004b57b0
      */
     void SetTransFrameOffset(float flOffset);
 
@@ -105,7 +113,8 @@ struct TunnelSeeker {
      * Set the path frame offset the transformable is oriented towards.
      *
      * @param flOffset The offset from the tunnel frame.
-     * @ghidraAddress 0x00477b40
+     * @ghidraAddress NTSC-U/C: 0x00477b40
+     * @ghidraAddress PAL: 0x004b57b8
      */
     void SetLookFrameOffset(float flOffset);
 
@@ -115,7 +124,8 @@ struct TunnelSeeker {
      * @param nFirstSlice The first slice of the run.
      * @param nSliceCount The number of slices.
      * @param nRing The ring.
-     * @ghidraAddress 0x00477b48
+     * @ghidraAddress NTSC-U/C: 0x00477b48
+     * @ghidraAddress PAL: 0x004b57c0
      */
     void SetRange(int nFirstSlice, int nSliceCount, int nRing);
 
@@ -123,7 +133,8 @@ struct TunnelSeeker {
      * Set the colour of the strip.
      *
      * @param color The colour.
-     * @ghidraAddress 0x00477b68
+     * @ghidraAddress NTSC-U/C: 0x00477b68
+     * @ghidraAddress PAL: 0x004b57e0
      */
     void SetColor(const Color &color);
 
@@ -131,7 +142,8 @@ struct TunnelSeeker {
      * Set the material of the strip.
      *
      * @param pMat The material, or null.
-     * @ghidraAddress 0x00477b88
+     * @ghidraAddress NTSC-U/C: 0x00477b88
+     * @ghidraAddress PAL: 0x004b5800
      */
     void SetMat(Mat *pMat);
 
@@ -141,7 +153,8 @@ struct TunnelSeeker {
      * Report the first slice of the strip.
      *
      * @return The first slice.
-     * @ghidraAddress 0x00477ba8
+     * @ghidraAddress NTSC-U/C: 0x00477ba8
+     * @ghidraAddress PAL: 0x004b5820
      */
     int GetFirstSlice() const {
         return mStrip.mFirstSlice;
@@ -151,7 +164,8 @@ struct TunnelSeeker {
      * Report the slice count of the strip.
      *
      * @return The number of slices.
-     * @ghidraAddress 0x00477bb0
+     * @ghidraAddress NTSC-U/C: 0x00477bb0
+     * @ghidraAddress PAL: 0x004b5828
      */
     int GetSliceCount() const {
         return mStrip.mSliceCount;
@@ -161,7 +175,8 @@ struct TunnelSeeker {
      * Report the ring of the strip.
      *
      * @return The ring.
-     * @ghidraAddress 0x00477bb8
+     * @ghidraAddress NTSC-U/C: 0x00477bb8
+     * @ghidraAddress PAL: 0x004b5830
      */
     int GetRing() const {
         return mStrip.mRing;
@@ -171,7 +186,8 @@ struct TunnelSeeker {
      * Report the colour of the strip.
      *
      * @return The colour, by value.
-     * @ghidraAddress 0x00477bc0
+     * @ghidraAddress NTSC-U/C: 0x00477bc0
+     * @ghidraAddress PAL: 0x004b5838
      */
     Color GetColor() const {
         return mStrip.mColor;
@@ -181,7 +197,8 @@ struct TunnelSeeker {
      * Report the material of the strip.
      *
      * @return The material, or null.
-     * @ghidraAddress 0x00477bd0
+     * @ghidraAddress NTSC-U/C: 0x00477bd0
+     * @ghidraAddress PAL: 0x004b5848
      */
     Mat *GetMat() const {
         return mStrip.mMat;
@@ -192,14 +209,16 @@ struct TunnelSeeker {
      *
      * @param nSlice The slice being drawn.
      * @param flScreenSize The screen size used to pick the level of detail.
-     * @ghidraAddress 0x00477bd8
+     * @ghidraAddress NTSC-U/C: 0x00477bd8
+     * @ghidraAddress PAL: 0x004b5850
      */
     void DrawSection(int nSlice, float flScreenSize);
 
     /**
      * Draw the mesh, when there is one.
      *
-     * @ghidraAddress 0x00477bf8
+     * @ghidraAddress NTSC-U/C: 0x00477bf8
+     * @ghidraAddress PAL: 0x004b5870
      */
     void DrawMesh();
 
@@ -212,7 +231,8 @@ struct TunnelSeeker {
      * target snaps onto it.
      *
      * @return The new lane.
-     * @ghidraAddress 0x0046e6a0
+     * @ghidraAddress NTSC-U/C: 0x0046e6a0
+     * @ghidraAddress PAL: 0x004ac280
      */
     float UpdateLane();
 
@@ -220,7 +240,8 @@ struct TunnelSeeker {
      * Install a transform as the local transform of mTrans and mark it dirty.
      *
      * @param xfm The transform.
-     * @ghidraAddress 0x00477c20
+     * @ghidraAddress NTSC-U/C: 0x00477c20
+     * @ghidraAddress PAL: 0x004b5898
      */
     void SetTransXfm(const Transform &xfm);
 
@@ -228,7 +249,8 @@ struct TunnelSeeker {
      * Install a transform as the local transform of mMesh and recompose its world transform.
      *
      * @param xfm The transform.
-     * @ghidraAddress 0x00477c58
+     * @ghidraAddress NTSC-U/C: 0x00477c58
+     * @ghidraAddress PAL: 0x004b58d0
      */
     void SetMeshXfm(const Transform &xfm);
 
@@ -238,7 +260,8 @@ struct TunnelSeeker {
      * @param pFrom The object being replaced.
      * @param pTo The replacement.
      * @param pReferrer The object the references are held on behalf of.
-     * @ghidraAddress 0x004778c0
+     * @ghidraAddress NTSC-U/C: 0x004778c0
+     * @ghidraAddress PAL: 0x004b5538
      */
     void Replace(Object *pFrom, Object *pTo, Object *pReferrer);
 
@@ -249,7 +272,8 @@ struct TunnelSeeker {
      * three frame offsets, the strip run, the strip material by name, and the strip colour.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x0046df88
+     * @ghidraAddress NTSC-U/C: 0x0046df88
+     * @ghidraAddress PAL: 0x004abaf8
      */
     void Save(Stream &stream) const;
 
@@ -260,7 +284,8 @@ struct TunnelSeeker {
      * reference is taken on the objects read by name.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x0046e2d8
+     * @ghidraAddress NTSC-U/C: 0x0046e2d8
+     * @ghidraAddress PAL: 0x004abe48
      */
     void Load(Stream &stream);
 

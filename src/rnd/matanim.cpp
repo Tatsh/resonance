@@ -138,7 +138,7 @@ bool BlendChannelFloat(const std::list<FloatKey> &keys, float flFrame, float &re
 }
 
 // A texture channel does not blend. The earlier key's texture holds until the next key.
-// 0x004dd550
+// NTSC-U/C: 0x004dd550, PAL: 0x0051baf0
 void InterpolateTex(Tex *pFrom,
                     [[maybe_unused]] Tex *pTo,
                     [[maybe_unused]] float flBlend,
@@ -146,14 +146,14 @@ void InterpolateTex(Tex *pFrom,
     pOut = pFrom;
 }
 
-// 0x004db6b0
+// NTSC-U/C: 0x004db6b0, PAL: 0x00519bf8
 Stream &ReadTexKey(Stream &stream, MatAnim::StageAnim::TexKey &key) {
     ReadObjectRef(stream, key.mValue);
     stream.Read(&key.mFrame, sizeof(key.mFrame));
     return stream;
 }
 
-// 0x004dda98
+// NTSC-U/C: 0x004dda98, PAL: 0x0051c050
 Stream &ReadTexKeys(Stream &stream, std::list<MatAnim::StageAnim::TexKey> &keys) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -165,7 +165,7 @@ Stream &ReadTexKeys(Stream &stream, std::list<MatAnim::StageAnim::TexKey> &keys)
 }
 
 // The texture channel as the first revision wrote it, a list of textures without frames.
-// 0x004db0c0
+// NTSC-U/C: 0x004db0c0, PAL: 0x005195d8
 Stream &ReadTexList(Stream &stream, std::list<Tex *> &textures) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -176,7 +176,7 @@ Stream &ReadTexList(Stream &stream, std::list<Tex *> &textures) {
     return stream;
 }
 
-// 0x004dadc8
+// NTSC-U/C: 0x004dadc8, PAL: 0x005192e0
 Stream &WriteTexKeys(Stream &stream, const std::list<MatAnim::StageAnim::TexKey> &keys) {
     const int nCount = keys.size();
     stream.Write(&nCount, sizeof(nCount));
@@ -187,7 +187,7 @@ Stream &WriteTexKeys(Stream &stream, const std::list<MatAnim::StageAnim::TexKey>
     return stream;
 }
 
-// 0x004daad0
+// NTSC-U/C: 0x004daad0, PAL: 0x00518fe8
 FailSink &DumpTexKeys(FailSink &sink, const std::list<MatAnim::StageAnim::TexKey> &keys) {
     sink.Print("(size:");
     sink.Format("%u", keys.size());
@@ -208,7 +208,7 @@ FailSink &DumpTexKeys(FailSink &sink, const std::list<MatAnim::StageAnim::TexKey
     return sink;
 }
 
-// 0x004d8b78
+// NTSC-U/C: 0x004d8b78, PAL: 0x00517090
 FailSink &DumpStageAnims(FailSink &sink, std::vector<MatAnim::StageAnim> &stages) {
     sink.Print("(size:");
     sink.Format("%u", stages.size());
@@ -225,7 +225,7 @@ FailSink &DumpStageAnims(FailSink &sink, std::vector<MatAnim::StageAnim> &stages
     return sink;
 }
 
-// 0x004d9338
+// NTSC-U/C: 0x004d9338, PAL: 0x00517850
 Stream &ReadStageAnims(Stream &stream, std::vector<MatAnim::StageAnim> &stages) {
     int nCount = 0;
     stream.Read(&nCount, sizeof(nCount));
@@ -236,7 +236,7 @@ Stream &ReadStageAnims(Stream &stream, std::vector<MatAnim::StageAnim> &stages) 
     return stream;
 }
 
-// 0x004dd908
+// NTSC-U/C: 0x004dd908, PAL: 0x0051bec0
 Stream &WriteStageAnims(Stream &stream, std::vector<MatAnim::StageAnim> &stages) {
     const int nCount = stages.size();
     stream.Write(&nCount, sizeof(nCount));
@@ -248,10 +248,10 @@ Stream &WriteStageAnims(Stream &stream, std::vector<MatAnim::StageAnim> &stages)
 
 } // namespace
 
-// 0x00700428
+// NTSC-U/C: 0x00700428, PAL: 0x00743e50
 HxStr g_matAnimClassName("MatAnim");
 
-// 0x004dd500
+// NTSC-U/C: 0x004dd500, PAL: 0x0051baa0
 void MatAnim::StageAnim::Save(Stream &stream) {
     WriteVector3Keys(stream, mTranslateKeys);
     WriteVector3Keys(stream, mScaleKeys);
@@ -259,7 +259,7 @@ void MatAnim::StageAnim::Save(Stream &stream) {
     WriteTexKeys(stream, mTexKeys);
 }
 
-// 0x004d4068
+// NTSC-U/C: 0x004d4068, PAL: 0x00512558
 void MatAnim::StageAnim::Load(Stream &stream) {
     if (g_nRndMatLoadVersion < kStageTexKeyRevision) {
         std::list<Tex *> textures;
@@ -285,7 +285,7 @@ void MatAnim::StageAnim::Load(Stream &stream) {
     }
 }
 
-// 0x004d3f70
+// NTSC-U/C: 0x004d3f70, PAL: 0x00512460
 void MatAnim::StageAnim::Dump(FailSink &sink) {
     sink.Print(" transKeys:");
     DumpVector3Keys(sink, mTranslateKeys);
@@ -299,7 +299,7 @@ void MatAnim::StageAnim::Dump(FailSink &sink) {
     PrintObjectRef(sink, mOwner);
 }
 
-// 0x004d3d30
+// NTSC-U/C: 0x004d3d30, PAL: 0x00512220
 void MatAnim::StageAnim::AddTexKey(Tex *pTex, float flFrame) {
     if (pTex != nullptr) {
         pTex->AddRef(mOwner);
@@ -311,7 +311,7 @@ void MatAnim::StageAnim::AddTexKey(Tex *pTex, float flFrame) {
     mTexKeys.sort();
 }
 
-// 0x004d3e30
+// NTSC-U/C: 0x004d3e30, PAL: 0x00512320
 void MatAnim::StageAnim::RemoveTexKey(int nIndex) {
     auto it = mTexKeys.begin();
     // Yes, the binary counts the index down to zero. A negative index walks forward.
@@ -325,7 +325,7 @@ void MatAnim::StageAnim::RemoveTexKey(int nIndex) {
     mTexKeys.sort(); // Yes, the binary sorts a channel that erasing cannot have unsorted.
 }
 
-// 0x004dd4a0
+// NTSC-U/C: 0x004dd4a0, PAL: 0x0051ba40
 void MatAnim::StageAnim::SetTexKeyFrame(int nIndex, float flFrame) {
     auto it = mTexKeys.begin();
     std::advance(it, nIndex);
@@ -333,22 +333,22 @@ void MatAnim::StageAnim::SetTexKeyFrame(int nIndex, float flFrame) {
     mTexKeys.sort();
 }
 
-// 0x004dc4f0
+// NTSC-U/C: 0x004dc4f0, PAL: 0x0051aa90
 MatAnim::MatAnim(const HxStr &name) : Object(name), mMat(nullptr), mKeysOwner(this) {
 }
 
-// 0x004dc0c8
+// NTSC-U/C: 0x004dc0c8, PAL: 0x0051a668
 MatAnim::~MatAnim() {
     RemoveObjectRefs();
     ReleaseAllRefs();
 }
 
-// 0x004dc4e0
+// NTSC-U/C: 0x004dc4e0, PAL: 0x0051aa80
 const HxStr &MatAnim::ClassName() const {
     return g_matAnimClassName;
 }
 
-// 0x004dcb00
+// NTSC-U/C: 0x004dcb00, PAL: 0x0051b0a0
 Object *CreateRegisteredMatAnim(const HxStr &name) {
     try {
         return new MatAnim(name);
@@ -357,7 +357,7 @@ Object *CreateRegisteredMatAnim(const HxStr &name) {
     }
 }
 
-// 0x004dbfb0
+// NTSC-U/C: 0x004dbfb0, PAL: 0x0051a550
 MatAnim *NewMatAnim(const HxStr &name) {
     try {
         return new MatAnim(name);
@@ -366,12 +366,12 @@ MatAnim *NewMatAnim(const HxStr &name) {
     }
 }
 
-// 0x004dbf80
+// NTSC-U/C: 0x004dbf80, PAL: 0x0051a520
 void RegisterMatAnimClass() {
     g_manager.RegisterClass(g_matAnimClassName, CreateRegisteredMatAnim);
 }
 
-// 0x004d33b8
+// NTSC-U/C: 0x004d33b8, PAL: 0x00511858
 void MatAnim::DumpText(FailSink &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
@@ -405,7 +405,7 @@ void MatAnim::DumpText(FailSink &sink) {
     sink.Print("\n");
 }
 
-// 0x004d30c8
+// NTSC-U/C: 0x004d30c8, PAL: 0x00511568
 void MatAnim::Replace(Object *pFrom, Object *pTo) {
     Animatable::Replace(pFrom, pTo);
 
@@ -431,7 +431,7 @@ void MatAnim::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// 0x004d38e8
+// NTSC-U/C: 0x004d38e8, PAL: 0x00511d88
 void MatAnim::Load(Stream &stream) {
     // Yes, the binary reads the revision into the material's global rather than one of its own.
     stream.Read(&g_nRndMatLoadVersion, sizeof(g_nRndMatLoadVersion));
@@ -460,7 +460,7 @@ void MatAnim::Load(Stream &stream) {
     AddObjectRefs();
 }
 
-// 0x004d42f0
+// NTSC-U/C: 0x004d42f0, PAL: 0x005127e0
 float MatAnim::EndFrame() {
     float flEnd = 0.0f;
     for (const auto &stage : mKeysOwner->mStages) {
@@ -485,7 +485,7 @@ float MatAnim::EndFrame() {
     return std::max(flEnd, flAlpha);
 }
 
-// 0x004d4820
+// NTSC-U/C: 0x004d4820, PAL: 0x00512d10
 void MatAnim::SetFrameSelf(float flFrame) {
     if (mMat == nullptr) {
         return;
@@ -540,7 +540,7 @@ void MatAnim::SetFrameSelf(float flFrame) {
     }
 }
 
-// 0x004d35d0
+// NTSC-U/C: 0x004d35d0, PAL: 0x00511a70
 void MatAnim::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.Write(&nVersion, sizeof(nVersion));
@@ -557,7 +557,7 @@ void MatAnim::Save(Stream &stream) {
     WriteFloatKeys(stream, mAlphaKeys);
 }
 
-// 0x004dd2d8
+// NTSC-U/C: 0x004dd2d8, PAL: 0x0051b878
 void MatAnim::SetMat(Mat *pMat) {
     if (mMat != nullptr) {
         mMat->RemoveRef(this);
@@ -568,7 +568,7 @@ void MatAnim::SetMat(Mat *pMat) {
     }
 }
 
-// 0x004dd328
+// NTSC-U/C: 0x004dd328, PAL: 0x0051b8c8
 void MatAnim::SetKeysOwner(MatAnim *pOwner) {
     if (mKeysOwner != nullptr) {
         mKeysOwner->RemoveRef(this);
@@ -580,7 +580,7 @@ void MatAnim::SetKeysOwner(MatAnim *pOwner) {
     ClearKeys();
 }
 
-// 0x004d3b58
+// NTSC-U/C: 0x004d3b58, PAL: 0x00512048
 void MatAnim::SetNumStages(int nCount) {
     std::vector<StageAnim> &stages = mKeysOwner->mStages;
     if (static_cast<unsigned>(nCount) < stages.size()) {
@@ -598,7 +598,7 @@ void MatAnim::SetNumStages(int nCount) {
     }
 }
 
-// 0x004dd388
+// NTSC-U/C: 0x004dd388, PAL: 0x0051b928
 void MatAnim::Copy(const Object *pSource, unsigned nFlags) {
     const MatAnim *pSourceAnim = dynamic_cast<const MatAnim *>(pSource);
 
@@ -622,7 +622,7 @@ void MatAnim::Copy(const Object *pSource, unsigned nFlags) {
     AddObjectRefs();
 }
 
-// 0x004d2fe0
+// NTSC-U/C: 0x004d2fe0, PAL: 0x00511480
 void MatAnim::ClearKeys() {
     if (mKeysOwner == this) {
         return;
@@ -636,7 +636,7 @@ void MatAnim::ClearKeys() {
     mAlphaKeys.clear();
 }
 
-// 0x004d3818
+// NTSC-U/C: 0x004d3818, PAL: 0x00511cb8
 void MatAnim::AddObjectRefs() {
     if (mMat != nullptr) {
         mMat->AddRef(this);
@@ -654,7 +654,7 @@ void MatAnim::AddObjectRefs() {
     }
 }
 
-// 0x004d3750
+// NTSC-U/C: 0x004d3750, PAL: 0x00511bf0
 void MatAnim::RemoveObjectRefs() {
     if (mMat != nullptr) {
         mMat->RemoveRef(this);

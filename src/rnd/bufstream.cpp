@@ -6,12 +6,12 @@
 
 namespace Rnd {
 
-// 0x005104b8
+// NTSC-U/C: 0x005104b8, PAL: 0x0054faa0
 BufStream::BufStream(char *pBuffer, int nSize)
     : mBuffer(pBuffer), mFail(pBuffer == nullptr), mPos(0), mSize(nSize) {
 }
 
-// 0x005104e0
+// NTSC-U/C: 0x005104e0, PAL: 0x0054fac8
 Stream &BufStream::ReadBytes(void *pDest, int nSize) {
     if (mSize < mPos + nSize) {
         mFail = 1;
@@ -23,7 +23,7 @@ Stream &BufStream::ReadBytes(void *pDest, int nSize) {
     return *this;
 }
 
-// 0x00510558
+// NTSC-U/C: 0x00510558, PAL: 0x0054fb40
 Stream &BufStream::WriteBytes(const void *pSrc, int nSize) {
     if (mSize < mPos + nSize) {
         mFail = 1;
@@ -35,12 +35,12 @@ Stream &BufStream::WriteBytes(const void *pSrc, int nSize) {
     return *this;
 }
 
-// 0x0050fe68
+// NTSC-U/C: 0x0050fe68, PAL: 0x0054f450
 Stream &BufStream::Flush() {
     return *this;
 }
 
-// 0x005105c8
+// NTSC-U/C: 0x005105c8, PAL: 0x0054fbb0
 Stream &BufStream::Seek(int nOffset, int nWhence) {
     switch (nWhence) {
     case kSeekSet:
@@ -63,17 +63,17 @@ Stream &BufStream::Seek(int nOffset, int nWhence) {
     return *this;
 }
 
-// 0x0050fe70
+// NTSC-U/C: 0x0050fe70, PAL: 0x0054f458
 int BufStream::Tell() {
     return mPos;
 }
 
-// 0x0050fe78
+// NTSC-U/C: 0x0050fe78, PAL: 0x0054f460
 int BufStream::Eof() {
     return mPos == mSize;
 }
 
-// 0x0050fe90
+// NTSC-U/C: 0x0050fe90, PAL: 0x0054f478
 int BufStream::Fail() {
     return mFail;
 }

@@ -94,7 +94,8 @@ public:
      * @param bStreaming Non-zero to stream rather than read the whole file.
      * @param pnError Receives 0, -1 when the buffer could not be allocated, or -2 when the file
      *                has no length.
-     * @ghidraAddress 0x0057f7b8
+     * @ghidraAddress NTSC-U/C: 0x0057f7b8
+     * @ghidraAddress PAL: 0x005c27f0
      */
     MovieStream(const char *pszPath, int bStreaming, int *pnError);
 
@@ -104,7 +105,8 @@ public:
      * The data buffer belongs to its zone and is not released, and a stream destroyed before its
      * header arrives stays in the pending list.
      *
-     * @ghidraAddress 0x00580858
+     * @ghidraAddress NTSC-U/C: 0x00580858
+     * @ghidraAddress PAL: 0x005c3890
      */
     ~MovieStream();
 
@@ -118,7 +120,8 @@ public:
      *
      * @param nTick The current tick.
      * @param nReadSize The largest streaming read to queue.
-     * @ghidraAddress 0x0057fac8
+     * @ghidraAddress NTSC-U/C: 0x0057fac8
+     * @ghidraAddress PAL: 0x005c2b00
      */
     void Update(int nTick, int nReadSize);
 
@@ -131,7 +134,8 @@ public:
      * @param nBytes The bytes read.
      * @return 0, -1 when the ring buffer could not be allocated, or -6 when the file does not begin
      *         with a MOVS chunk.
-     * @ghidraAddress 0x0057ffd0
+     * @ghidraAddress NTSC-U/C: 0x0057ffd0
+     * @ghidraAddress PAL: 0x005c3008
      */
     int ParseHeader(char *pBuffer, int nBytes);
 
@@ -141,7 +145,8 @@ public:
      * @param nTrackId The track.
      * @param pfnHandler The handler, or null to drop the track's chunks.
      * @param pData The value passed to the handler.
-     * @ghidraAddress 0x005808d0
+     * @ghidraAddress NTSC-U/C: 0x005808d0
+     * @ghidraAddress PAL: 0x005c3908
      */
     void SetTrackHandler(int nTrackId, ChunkHandler pfnHandler, void *pData);
 
@@ -155,7 +160,8 @@ public:
      *
      * @param nBytes The largest read to queue.
      * @return The bytes queued, or 0.
-     * @ghidraAddress 0x005808e8
+     * @ghidraAddress NTSC-U/C: 0x005808e8
+     * @ghidraAddress PAL: 0x005c3920
      */
     int RequestRead(int nBytes);
 
@@ -188,24 +194,49 @@ public:
  *
  * Rnd::Movie's chunk handler compares against the three video codes as well.
  *
- * @ghidraAddress 0x007678f0
+ * @ghidraAddress NTSC-U/C: 0x007678f0
+ * @ghidraAddress PAL: 0x007ab620
  */
 extern const unsigned int g_nMovsTag;
-/** @ghidraAddress 0x007678f8 */
+/**
+ * @ghidraAddress NTSC-U/C: 0x007678f8
+ * @ghidraAddress PAL: 0x007ab628
+ */
 extern const unsigned int g_nMovtTag;
-/** @ghidraAddress 0x00767900 */
+/**
+ * @ghidraAddress NTSC-U/C: 0x00767900
+ * @ghidraAddress PAL: 0x007ab630
+ */
 extern const unsigned int g_nPallTag;
-/** @ghidraAddress 0x00767908 */
+/**
+ * @ghidraAddress NTSC-U/C: 0x00767908
+ * @ghidraAddress PAL: 0x007ab638
+ */
 extern const unsigned int g_nFramTag;
-/** @ghidraAddress 0x00767910 */
+/**
+ * @ghidraAddress NTSC-U/C: 0x00767910
+ * @ghidraAddress PAL: 0x007ab640
+ */
 extern const unsigned int g_nBlakTag;
-/** @ghidraAddress 0x00767918 */
+/**
+ * @ghidraAddress NTSC-U/C: 0x00767918
+ * @ghidraAddress PAL: 0x007ab648
+ */
 extern const unsigned int g_nLoopTag;
-/** @ghidraAddress 0x00767920 */
+/**
+ * @ghidraAddress NTSC-U/C: 0x00767920
+ * @ghidraAddress PAL: 0x007ab650
+ */
 extern const unsigned int g_nSndhTag;
-/** @ghidraAddress 0x00767928 */
+/**
+ * @ghidraAddress NTSC-U/C: 0x00767928
+ * @ghidraAddress PAL: 0x007ab658
+ */
 extern const unsigned int g_nSndbTag;
-/** @ghidraAddress 0x00767930 */
+/**
+ * @ghidraAddress NTSC-U/C: 0x00767930
+ * @ghidraAddress PAL: 0x007ab660
+ */
 extern const unsigned int g_nSndpTag;
 
 /**
@@ -216,7 +247,8 @@ extern const unsigned int g_nSndpTag;
  * "Invalid mode", "Can't access device", and "Exceeded limit". Rnd::Movie::OpenMovieFile() is the
  * one reader.
  *
- * @ghidraAddress 0x007a8400
+ * @ghidraAddress NTSC-U/C: 0x007a8400
+ * @ghidraAddress PAL: 0x007ec100
  */
 extern const char *const g_apszMovieStreamErrors[];
 

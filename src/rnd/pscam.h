@@ -36,12 +36,14 @@ public:
      * Construct a camera with the default projection.
      *
      * @param name The registry key for this object.
-     * @ghidraAddress 0x00582558
+     * @ghidraAddress NTSC-U/C: 0x00582558
+     * @ghidraAddress PAL: 0x005c5750
      */
     explicit PsCam(const HxStr &name);
 
     /**
-     * @ghidraAddress 0x005826e0
+     * @ghidraAddress NTSC-U/C: 0x005826e0
+     * @ghidraAddress PAL: 0x005c58d8
      */
     virtual ~PsCam();
 
@@ -57,7 +59,8 @@ public:
      * g_pCurrentCam. It does not call the base implementation.
      *
      * @return Non-zero, which draws the children as well.
-     * @ghidraAddress 0x00582830
+     * @ghidraAddress NTSC-U/C: 0x00582830
+     * @ghidraAddress PAL: 0x005c5a28
      */
     virtual int DrawSelf();
 
@@ -70,7 +73,8 @@ public:
      *
      * @param ptScreen The point, in the coordinates the screen rectangle is expressed in.
      * @return The same point in render target pixels.
-     * @ghidraAddress 0x005885b0
+     * @ghidraAddress NTSC-U/C: 0x005885b0
+     * @ghidraAddress PAL: 0x005cb810
      */
     virtual Vector2 ScreenToPixels(const Vector2 &ptScreen);
 
@@ -81,7 +85,8 @@ public:
      * the 0.75 of a four by three display, which is the default the base implementation has no way
      * to supply. The base then runs.
      *
-     * @ghidraAddress 0x00588578
+     * @ghidraAddress NTSC-U/C: 0x00588578
+     * @ghidraAddress PAL: 0x005cb7d8
      */
     virtual void UpdateTargetAspect();
 
@@ -93,7 +98,8 @@ public:
      * target then restores the vertical ratio of a four by three display.
      *
      * @param pTex The render target, or null to draw into the frame buffer.
-     * @ghidraAddress 0x00588498
+     * @ghidraAddress NTSC-U/C: 0x00588498
+     * @ghidraAddress PAL: 0x005cb6f8
      */
     virtual void SetTargetTex(Tex *pTex);
 
@@ -105,7 +111,8 @@ public:
      *
      * @param name The registry key for the new camera.
      * @return The new camera.
-     * @ghidraAddress 0x00588500
+     * @ghidraAddress NTSC-U/C: 0x00588500
+     * @ghidraAddress PAL: 0x005cb760
      */
     static Cam *NewCam(const HxStr &name);
 
@@ -117,7 +124,8 @@ public:
      * and placed at the translation (0, -150, 0) with its dirty flag set, which puts the default
      * viewpoint 150 units back along the axis this engine looks down.
      *
-     * @ghidraAddress 0x00582430
+     * @ghidraAddress NTSC-U/C: 0x00582430
+     * @ghidraAddress PAL: 0x005c5608
      */
     static void Init();
 
@@ -129,7 +137,8 @@ public:
      * GfxDevice::Terminate() expands the body at `0x0049b01c`. The name is inferred from
      * GfxDevice::Terminate().
      *
-     * @ghidraAddress 0x00588428
+     * @ghidraAddress NTSC-U/C: 0x00588428
+     * @ghidraAddress PAL: 0x005cb688
      */
     static void Terminate();
 };
@@ -140,7 +149,8 @@ public:
  * Rnd::GfxDevice::BeginFrame() reads it, and Rnd::PsEnviron::Init() makes the default environment
  * and the default light children of it.
  *
- * @ghidraAddress 0x00768410
+ * @ghidraAddress NTSC-U/C: 0x00768410
+ * @ghidraAddress PAL: 0x007ac160
  */
 extern PsCam *g_pDefaultCam;
 
@@ -157,49 +167,56 @@ inline void PsCam::Terminate() {
  * Camera to clip transform, the local projection widened by the guard band and then preceded by
  * the camera's world to camera transform.
  *
- * @ghidraAddress 0x008e4020
+ * @ghidraAddress NTSC-U/C: 0x008e4020
+ * @ghidraAddress PAL: 0x009293a0
  */
 extern Transform g_viewProjectXfm;
 
 /**
  * The same transform without the guard band widening.
  *
- * @ghidraAddress 0x008e4060
+ * @ghidraAddress NTSC-U/C: 0x008e4060
+ * @ghidraAddress PAL: 0x009293e0
  */
 extern Transform g_viewProjectUnscaledXfm;
 
 /**
  * Clip to GS coordinate transform, scaled by the guard band.
  *
- * @ghidraAddress 0x008e40a0
+ * @ghidraAddress NTSC-U/C: 0x008e40a0
+ * @ghidraAddress PAL: 0x00929420
  */
 extern Transform g_viewportXfm;
 
 /**
  * The same transform without the guard band scaling.
  *
- * @ghidraAddress 0x008e40e0
+ * @ghidraAddress NTSC-U/C: 0x008e40e0
+ * @ghidraAddress PAL: 0x00929460
  */
 extern Transform g_viewportUnscaledXfm;
 
 /**
  * g_viewportXfm with a small depth bias added to the translation.
  *
- * @ghidraAddress 0x008e4120
+ * @ghidraAddress NTSC-U/C: 0x008e4120
+ * @ghidraAddress PAL: 0x009294a0
  */
 extern Transform g_viewportBiasedXfm;
 
 /**
  * Screen scale of a particle's extent, the widened projection scale times the viewport scale.
  *
- * @ghidraAddress 0x008e4160
+ * @ghidraAddress NTSC-U/C: 0x008e4160
+ * @ghidraAddress PAL: 0x009294e0
  */
 extern Vector3 g_particleScreenScale;
 
 /**
  * The widened projection scale on each axis, with y negated.
  *
- * @ghidraAddress 0x008e4170
+ * @ghidraAddress NTSC-U/C: 0x008e4170
+ * @ghidraAddress PAL: 0x009294f0
  */
 extern Vector3 g_particleProjectScale;
 
@@ -210,21 +227,24 @@ extern Vector3 g_particleProjectScale;
  * divided by the rectangle's extent with a 2 per cent margin. Primitives inside the widened view
  * need no clipping, because the GS scissors them.
  *
- * @ghidraAddress 0x008e4180
+ * @ghidraAddress NTSC-U/C: 0x008e4180
+ * @ghidraAddress PAL: 0x00929500
  */
 extern Vector3 g_guardBandScale;
 
 /**
  * Reciprocal of g_guardBandScale, left unchanged when either axis of it is zero.
  *
- * @ghidraAddress 0x008e4190
+ * @ghidraAddress NTSC-U/C: 0x008e4190
+ * @ghidraAddress PAL: 0x00929510
  */
 extern Vector3 g_invGuardBandScale;
 
 /**
  * Near plane distance of the camera last drawn through.
  *
- * @ghidraAddress 0x008e41a0
+ * @ghidraAddress NTSC-U/C: 0x008e41a0
+ * @ghidraAddress PAL: 0x00929520
  */
 extern float g_flCamNear;
 
@@ -233,17 +253,27 @@ extern float g_flCamNear;
  *
  * DrawSelf() first stores pixel bounds here to program SCISSOR_1 and then converts them.
  *
- * @ghidraAddress 0x008e41a4
+ * @ghidraAddress NTSC-U/C: 0x008e41a4
+ * @ghidraAddress PAL: 0x00929524
  */
 extern int g_nScissorX0;
 
-/** @ghidraAddress 0x008e41a8 */
+/**
+ * @ghidraAddress NTSC-U/C: 0x008e41a8
+ * @ghidraAddress PAL: 0x00929528
+ */
 extern int g_nScissorX1;
 
-/** @ghidraAddress 0x008e41ac */
+/**
+ * @ghidraAddress NTSC-U/C: 0x008e41ac
+ * @ghidraAddress PAL: 0x0092952c
+ */
 extern int g_nScissorY0;
 
-/** @ghidraAddress 0x008e41b0 */
+/**
+ * @ghidraAddress NTSC-U/C: 0x008e41b0
+ * @ghidraAddress PAL: 0x00929530
+ */
 extern int g_nScissorY1;
 
 } // namespace Rnd

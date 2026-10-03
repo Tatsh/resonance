@@ -33,7 +33,8 @@ struct TunnelSeekSection {
      *
      * Sets mRing to -1 and mSlice to kTunnelSeekNoSlice. The other scalar members are left unset.
      *
-     * @ghidraAddress 0x0046ed38
+     * @ghidraAddress NTSC-U/C: 0x0046ed38
+     * @ghidraAddress PAL: 0x004ac938
      */
     TunnelSeekSection();
 
@@ -44,14 +45,16 @@ struct TunnelSeekSection {
      * @param nRing The ring.
      * @param bEndCap Whether the section is the last of its strip.
      * @param bStartCap Whether the section is the first of its strip.
-     * @ghidraAddress 0x004780d0
+     * @ghidraAddress NTSC-U/C: 0x004780d0
+     * @ghidraAddress PAL: 0x004b5d48
      */
     void Set(int nSlice, int nRing, int bEndCap, int bStartCap);
 
     /**
      * Remove the section from its slice, marking it dirty.
      *
-     * @ghidraAddress 0x004780f0
+     * @ghidraAddress NTSC-U/C: 0x004780f0
+     * @ghidraAddress PAL: 0x004b5d68
      */
     void Invalidate();
 
@@ -64,7 +67,8 @@ struct TunnelSeekSection {
      *
      * @param name The base title of the meshes.
      * @param templates The chain whose triangles and thresholds to share.
-     * @ghidraAddress 0x0046ed78
+     * @ghidraAddress NTSC-U/C: 0x0046ed78
+     * @ghidraAddress PAL: 0x004ac978
      */
     void Build(const HxStr &name, const TunnelMeshChain &templates);
 
@@ -80,7 +84,8 @@ struct TunnelSeekSection {
      *
      * @param pTunnel The tunnel.
      * @param color The vertex colour.
-     * @ghidraAddress 0x0046ee80
+     * @ghidraAddress NTSC-U/C: 0x0046ee80
+     * @ghidraAddress PAL: 0x004aca80
      */
     void Update(Tunnel *pTunnel, const Color &color);
 
