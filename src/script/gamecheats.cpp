@@ -74,8 +74,8 @@ Py::Object ScriptWinWithPointsCheat(const Py::Tuple &args) {
 
 // Free every track of its requirements.
 //
-// Each track stays free until bar -1, which never arrives, so every track is enabled. Jam
-// sessions keep their requirements.
+// Each track stays free until bar -1, a bar that never arrives. Jam sessions retain their
+// requirements.
 // NTSC-U/C: 0x0014a6d8, PAL: 0x0014b308
 Py::Object ScriptEnableAllTracksCheat([[maybe_unused]] const Py::Tuple &args) {
     PlayActivateSound();
@@ -116,7 +116,7 @@ Py::Object ScriptSaveRnd([[maybe_unused]] const Py::Tuple &args) {
 // Empty the album caches.
 //
 // The binary expands the three steps of ClearAlbumCache() inline; calling it repeats them
-// without duplicating the body, which met/albumcache.h records.
+// without duplicating the body. met/albumcache.h records the expansion.
 // NTSC-U/C: 0x003f6860, PAL: 0x0042f070
 Py::Object ScriptEmptyAlbumCaches([[maybe_unused]] Py::Tuple args) {
     ClearAlbumCache();
@@ -124,17 +124,25 @@ Py::Object ScriptEmptyAlbumCaches([[maybe_unused]] Py::Tuple args) {
 }
 
 // Enter practice mode.
+// NTSC-U/C: 0x0014e848, PAL: 0x0014f510
+// PyInvokeActivatePracticeMode() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptActivatePracticeMode([[maybe_unused]] const Py::Tuple &args) {
+    PlayActivateSound();
+    GrooveWorld *pWorld = Application::shared()->GetWorld();
+    if (pWorld != nullptr) {
+        pWorld->mGamer->mJuiceFrozen = 1;
+        pWorld->mGamer->mCheated = 1;
+    }
+    return Py::Object();
+}
+
+// Run ScriptActivatePracticeMode() on the interpreter's argument tuple.
 // NTSC-U/C: 0x00148f98, PAL: 0x00149ba8
 PyObject *PyInvokeActivatePracticeMode(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        PlayActivateSound();
-        GrooveWorld *pWorld = Application::shared()->GetWorld();
-        if (pWorld != nullptr) {
-            pWorld->mGamer->mJuiceFrozen = 1;
-            pWorld->mGamer->mCheated = 1;
-        }
-        return Py::new_reference_to(Py::Object());
+        Py::Object result = ScriptActivatePracticeMode(args);
+        return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
     } catch (std::exception &error) {
@@ -144,16 +152,24 @@ PyObject *PyInvokeActivatePracticeMode(PyObject *, PyObject *pArgs) {
 }
 
 // Unlock every stage.
+// NTSC-U/C: 0x0014e8d0, PAL: 0x0014f598
+// PyInvokeActivateAllAccessMode() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptActivateAllAccessMode([[maybe_unused]] const Py::Tuple &args) {
+    MetRenderer *pRenderer =
+        dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
+    if (pRenderer != nullptr) {
+        pRenderer->UnlockAllStages();
+    }
+    return Py::Object();
+}
+
+// Run ScriptActivateAllAccessMode() on the interpreter's argument tuple.
 // NTSC-U/C: 0x00149230, PAL: 0x00149e40
 PyObject *PyInvokeActivateAllAccessMode(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        MetRenderer *pRenderer =
-            dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
-        if (pRenderer != nullptr) {
-            pRenderer->UnlockAllStages();
-        }
-        return Py::new_reference_to(Py::Object());
+        Py::Object result = ScriptActivateAllAccessMode(args);
+        return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
     } catch (std::exception &error) {
@@ -165,17 +181,25 @@ PyObject *PyInvokeActivateAllAccessMode(PyObject *, PyObject *pArgs) {
 // Offer the team identities.
 //
 // Only from the logo screen, where the cheat is entered.
+// NTSC-U/C: 0x0014e980, PAL: 0x0014f648
+// PyInvokeEnableTeamFreqs() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptEnableTeamFreqs([[maybe_unused]] const Py::Tuple &args) {
+    MetRenderer *pRenderer =
+        dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
+    if (pRenderer->IsLogoScreenActive() != 0) {
+        PlayActivateSound();
+        GlobalSettings::shared()->mTeamFreqUnlocked = 1;
+    }
+    return Py::Object();
+}
+
+// Run ScriptEnableTeamFreqs() on the interpreter's argument tuple.
 // NTSC-U/C: 0x001494f8, PAL: 0x0014a108
 PyObject *PyInvokeEnableTeamFreqs(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        MetRenderer *pRenderer =
-            dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
-        if (pRenderer->IsLogoScreenActive() != 0) {
-            PlayActivateSound();
-            GlobalSettings::shared()->mTeamFreqUnlocked = 1;
-        }
-        return Py::new_reference_to(Py::Object());
+        Py::Object result = ScriptEnableTeamFreqs(args);
+        return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
     } catch (std::exception &error) {
@@ -187,17 +211,25 @@ PyObject *PyInvokeEnableTeamFreqs(PyObject *, PyObject *pArgs) {
 // Grant a powerup through its script template.
 //
 // Only from the logo screen, where the cheat is entered.
+// NTSC-U/C: 0x0014ea48, PAL: 0x0014f710
+// PyInvokeEnablePowerupCheats() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptEnablePowerupCheats([[maybe_unused]] const Py::Tuple &args) {
+    MetRenderer *pRenderer =
+        dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
+    if (pRenderer->IsLogoScreenActive() != 0) {
+        PlayActivateSound();
+        CallScriptTemplate(kPowerupCheatTemplate);
+    }
+    return Py::Object();
+}
+
+// Run ScriptEnablePowerupCheats() on the interpreter's argument tuple.
 // NTSC-U/C: 0x001497d8, PAL: 0x0014a3e8
 PyObject *PyInvokeEnablePowerupCheats(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        MetRenderer *pRenderer =
-            dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
-        if (pRenderer->IsLogoScreenActive() != 0) {
-            PlayActivateSound();
-            CallScriptTemplate(kPowerupCheatTemplate);
-        }
-        return Py::new_reference_to(Py::Object());
+        Py::Object result = ScriptEnablePowerupCheats(args);
+        return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
     } catch (std::exception &error) {
@@ -207,12 +239,20 @@ PyObject *PyInvokeEnablePowerupCheats(PyObject *, PyObject *pArgs) {
 }
 
 // Play the powerup cheat sound.
+// NTSC-U/C: 0x0014eb08, PAL: 0x0014f7d0
+// PyInvokeDoPowerupCheat() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptDoPowerupCheat([[maybe_unused]] const Py::Tuple &args) {
+    PlayActivateSound();
+    return Py::Object();
+}
+
+// Run ScriptDoPowerupCheat() on the interpreter's argument tuple.
 // NTSC-U/C: 0x00149ab0, PAL: 0x0014a6c0
 PyObject *PyInvokeDoPowerupCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        PlayActivateSound();
-        return Py::new_reference_to(Py::Object());
+        Py::Object result = ScriptDoPowerupCheat(args);
+        return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
     } catch (std::exception &error) {
@@ -222,12 +262,20 @@ PyObject *PyInvokeDoPowerupCheat(PyObject *, PyObject *pArgs) {
 }
 
 // Play the big-gem cheat sound.
+// NTSC-U/C: 0x0014eb60, PAL: 0x0014f828
+// PyInvokeDoBigGemModeCheat() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptDoBigGemModeCheat([[maybe_unused]] const Py::Tuple &args) {
+    PlayActivateSound();
+    return Py::Object();
+}
+
+// Run ScriptDoBigGemModeCheat() on the interpreter's argument tuple.
 // NTSC-U/C: 0x00149d20, PAL: 0x0014a930
 PyObject *PyInvokeDoBigGemModeCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        PlayActivateSound();
-        return Py::new_reference_to(Py::Object());
+        Py::Object result = ScriptDoBigGemModeCheat(args);
+        return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
     } catch (std::exception &error) {
@@ -237,12 +285,20 @@ PyObject *PyInvokeDoBigGemModeCheat(PyObject *, PyObject *pArgs) {
 }
 
 // Play the no-lattice cheat sound.
+// NTSC-U/C: 0x0014ebb8, PAL: 0x0014f880
+// PyInvokeDoNoLatticeModeCheat() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptDoNoLatticeModeCheat([[maybe_unused]] const Py::Tuple &args) {
+    PlayActivateSound();
+    return Py::Object();
+}
+
+// Run ScriptDoNoLatticeModeCheat() on the interpreter's argument tuple.
 // NTSC-U/C: 0x00149f90, PAL: 0x0014aba0
 PyObject *PyInvokeDoNoLatticeModeCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        PlayActivateSound();
-        return Py::new_reference_to(Py::Object());
+        Py::Object result = ScriptDoNoLatticeModeCheat(args);
+        return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
     } catch (std::exception &error) {
@@ -252,12 +308,20 @@ PyObject *PyInvokeDoNoLatticeModeCheat(PyObject *, PyObject *pArgs) {
 }
 
 // Play the arena-cycle cheat sound.
+// NTSC-U/C: 0x0014ec60, PAL: 0x0014f928
+// PyInvokeDoArenaStateCycleCheat() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptDoArenaStateCycleCheat([[maybe_unused]] const Py::Tuple &args) {
+    PlayActivateSound();
+    return Py::Object();
+}
+
+// Run ScriptDoArenaStateCycleCheat() on the interpreter's argument tuple.
 // NTSC-U/C: 0x0014aa58, PAL: 0x0014b688
 PyObject *PyInvokeDoArenaStateCycleCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        PlayActivateSound();
-        return Py::new_reference_to(Py::Object());
+        Py::Object result = ScriptDoArenaStateCycleCheat(args);
+        return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
     } catch (std::exception &error) {
@@ -269,17 +333,26 @@ PyObject *PyInvokeDoArenaStateCycleCheat(PyObject *, PyObject *pArgs) {
 // Flip the expansion-pack flag.
 //
 // Only from the logo screen, where the cheat is entered.
+// NTSC-U/C: 0x0014ecb8, PAL: 0x0014f980
+// PyInvokeDoExpansionPackToggleCheat() expands this inline, and the out-of-line copy has no
+// caller.
+inline Py::Object ScriptDoExpansionPackToggleCheat([[maybe_unused]] const Py::Tuple &args) {
+    MetRenderer *pRenderer =
+        dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
+    if (pRenderer->IsLogoScreenActive() != 0) {
+        PlayActivateSound();
+        GlobalSettings::shared()->mGameOptions.mExpansionPack ^= 1;
+    }
+    return Py::Object();
+}
+
+// Run ScriptDoExpansionPackToggleCheat() on the interpreter's argument tuple.
 // NTSC-U/C: 0x0014acc8, PAL: 0x0014b8f8
 PyObject *PyInvokeDoExpansionPackToggleCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        MetRenderer *pRenderer =
-            dynamic_cast<MetRenderer *>(Application::shared()->GetMetaWorld()->GetRenderer());
-        if (pRenderer->IsLogoScreenActive() != 0) {
-            PlayActivateSound();
-            GlobalSettings::shared()->mGameOptions.mExpansionPack ^= 1;
-        }
-        return Py::new_reference_to(Py::Object());
+        Py::Object result = ScriptDoExpansionPackToggleCheat(args);
+        return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
     } catch (std::exception &error) {
@@ -289,12 +362,20 @@ PyObject *PyInvokeDoExpansionPackToggleCheat(PyObject *, PyObject *pArgs) {
 }
 
 // Flag the win sequence to run.
+// NTSC-U/C: 0x0014ed88, PAL: 0x0014fa50
+// PyInvokeDoWinSequenceCheat() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptDoWinSequenceCheat([[maybe_unused]] const Py::Tuple &args) {
+    SetDoWinSequence(1);
+    return Py::Object();
+}
+
+// Run ScriptDoWinSequenceCheat() on the interpreter's argument tuple.
 // NTSC-U/C: 0x0014afa8, PAL: 0x0014bbd8
 PyObject *PyInvokeDoWinSequenceCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        SetDoWinSequence(1);
-        return Py::new_reference_to(Py::Object());
+        Py::Object result = ScriptDoWinSequenceCheat(args);
+        return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
     } catch (std::exception &error) {
@@ -435,10 +516,6 @@ const ScriptFunc kDoArenaStateCycleCheatFunc("do_arena_state_cycle_cheat",
 const ScriptFunc kDoExpansionPackToggleCheatFunc("do_expansion_pack_toggle_cheat",
                                                  PyInvokeDoExpansionPackToggleCheat);
 const ScriptFunc kDoWinSequenceCheatFunc("do_win_sequence_cheat", PyInvokeDoWinSequenceCheat);
-// NTSC-U/C: 0x00150580, PAL: 0x001512d0
-const ScriptFunc kCheatUnlockstagesFunc(
-    "cheat_unlockstages",
-    PyInvokeActivateAllAccessMode); // The binary has an identical copy of the body at 0x0014f0c8.
 // NTSC-U/C: 0x003f6760, PAL: 0x0042ef48
 const ScriptFunc kClearAlbumCacheFunc("clear_album_cache", PyInvokeEmptyAlbumCaches);
 

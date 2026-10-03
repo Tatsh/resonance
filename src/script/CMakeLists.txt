@@ -3,6 +3,7 @@
 # anything upstream with the same name.
 set(RESONANCE_SCRIPT_SRCS
     apptunnelscript.cpp
+    cheatunlockstages.cpp
     cmdpostscript.cpp
     configquery.cpp
     cxx/extensionmodulebase.cpp

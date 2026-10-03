@@ -46,7 +46,7 @@
 
 namespace {
 
-// Calls the memlog terminator has made, which names it. The name is inferred.
+// The number of calls the memlog terminator has made. The name is inferred from the count.
 // NTSC-U/C: 0x00676750, PAL: 0x006b75a8
 int g_nMemlogTermCalls = 1;
 
@@ -74,12 +74,20 @@ PyObject *PyInvokeGetFreqRoot(PyObject *, PyObject *pArgs) {
 }
 
 // Record the watchdog's snapshot.
+// NTSC-U/C: 0x00119048, PAL: 0x001195a8
+// PyInvokeKillSch() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptKillSch([[maybe_unused]] const Py::Tuple &args) {
+    Application::shared()->GetWatchdog()->Snapshot();
+    return Py::Object();
+}
+
+// Run ScriptKillSch() on the interpreter's argument tuple.
 // NTSC-U/C: 0x00117388, PAL: 0x00117830
 PyObject *PyInvokeKillSch(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        Application::shared()->GetWatchdog()->Snapshot();
-        return Py::new_reference_to(Py::Object());
+        Py::Object result = ScriptKillSch(args);
+        return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
     } catch (std::exception &error) {
@@ -291,7 +299,7 @@ PyObject *PyInvokeTrace(PyObject *, PyObject *pArgs) {
 
 // Withdraw a scheduled command.
 //
-// The tuple carries the command handle.
+// The tuple includes the command handle.
 // NTSC-U/C: 0x00159a90, PAL: 0x0015b7b0
 Py::Object ScriptCancelCmd(const Py::Tuple &args) {
     if (args.length() != 1) {
@@ -449,7 +457,7 @@ PyObject *PyInvokeSelectPowerup(PyObject *, PyObject *pArgs) {
 
 // Post script text to run at a song position.
 //
-// Returns the posted command's handle. The tuple carries the position and the text.
+// Returns the posted command's handle. The tuple includes the position and the text.
 // NTSC-U/C: 0x00159538, PAL: 0x0015b218
 Py::Object ScriptPostScript(const Py::Tuple &args) {
     if (args.length() != 2) {
@@ -571,11 +579,11 @@ PyObject *PyInvokeSetVolume(PyObject *, PyObject *pArgs) {
 
 // Send MIDI messages.
 //
-// The tuple carries a device name, a command, and four values. Voice and fx select their
+// The tuple includes a device name, a command, and four values. Voice and fx select their
 // channels, then any command with a last value of 1 sends bank selects on every channel.
 // Otherwise play sends a note on, stop a note off, and bank_swap moves the stream. The
-// channel nibble reads 0 where it is consumed: voice and fx never reach play or stop with
-// their values, so the status is always channel 0 there.
+// channel nibble reads 0 where it is consumed, because voice and fx never arrive at play or
+// stop with their values.
 // NTSC-U/C: 0x00157578, PAL: 0x001591a8
 Py::Object ScriptMidi(const Py::Tuple &args) {
     if (args.length() != 6) {
@@ -718,7 +726,7 @@ constexpr int kTicksPerMeasure = 1920;
 
 // Drive the song clock.
 //
-// Pause and start hold and release it, step advances it by milliseconds, tempo reports or sets
+// Pause and start halt and release it, step advances it by milliseconds, tempo reports or sets
 // the microseconds per quarter, tick reports the song position, and song_bar reports the
 // play map's section there.
 // NTSC-U/C: 0x00150d88, PAL: 0x00151ad8
@@ -784,12 +792,19 @@ PyObject *PyInvokeClock(PyObject *, PyObject *pArgs) {
 }
 
 // Dump the zone table.
+// NTSC-U/C: 0x00163a10, PAL: 0x00165ac0
+// PyInvokeZoneDump() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptZoneDump([[maybe_unused]] const Py::Tuple &args) {
+    ZoneDump();
+    return Py::Object();
+}
+
+// Run ScriptZoneDump() on the interpreter's argument tuple.
 // NTSC-U/C: 0x00163660, PAL: 0x00165710
 PyObject *PyInvokeZoneDump(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        ZoneDump();
-        Py::Object result;
+        Py::Object result = ScriptZoneDump(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
@@ -800,12 +815,19 @@ PyObject *PyInvokeZoneDump(PyObject *, PyObject *pArgs) {
 }
 
 // Start a recording capture.
+// NTSC-U/C: 0x0015c420, PAL: 0x0015e200
+// PyInvokeCapture() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptCapture([[maybe_unused]] const Py::Tuple &args) {
+    Application::shared()->GetGameManager()->StartRecording();
+    return Py::Object();
+}
+
+// Run ScriptCapture() on the interpreter's argument tuple.
 // NTSC-U/C: 0x0015bdf8, PAL: 0x0015dbd8
 PyObject *PyInvokeCapture(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        Application::shared()->GetGameManager()->StartRecording();
-        Py::Object result;
+        Py::Object result = ScriptCapture(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
@@ -816,15 +838,22 @@ PyObject *PyInvokeCapture(PyObject *, PyObject *pArgs) {
 }
 
 // Silence every channel.
+// NTSC-U/C: 0x00159410, PAL: 0x0015b0f0
+// PyInvokeStopAllMidi() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptStopAllMidi([[maybe_unused]] const Py::Tuple &args) {
+    if (Application::shared()->GetSynth() != nullptr) {
+        // Yes, the binary fetches the synthesiser a second time.
+        Application::shared()->GetSynth()->AllNotesOff();
+    }
+    return Py::Object();
+}
+
+// Run ScriptStopAllMidi() on the interpreter's argument tuple.
 // NTSC-U/C: 0x00158af0, PAL: 0x0015a7d0
 PyObject *PyInvokeStopAllMidi(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        Ps2HardSynth *pSynth = Application::shared()->GetSynth();
-        if (pSynth != nullptr) {
-            pSynth->AllNotesOff();
-        }
-        Py::Object result;
+        Py::Object result = ScriptStopAllMidi(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
@@ -835,15 +864,22 @@ PyObject *PyInvokeStopAllMidi(PyObject *, PyObject *pArgs) {
 }
 
 // Win with five hundred points.
+// NTSC-U/C: 0x00150cc0, PAL: 0x00151a10
+// PyInvokeCheatWin() expands this inline, and the out-of-line copy has no caller.
+inline Py::Object ScriptCheatWin([[maybe_unused]] const Py::Tuple &args) {
+    GrooveWorld *pWorld = Application::shared()->GetWorld();
+    if (pWorld != nullptr) {
+        pWorld->mGamer->EndWithScore(500);
+    }
+    return Py::Object();
+}
+
+// Run ScriptCheatWin() on the interpreter's argument tuple.
 // NTSC-U/C: 0x001508f8, PAL: 0x00151648
 PyObject *PyInvokeCheatWin(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
-        GrooveWorld *pWorld = Application::shared()->GetWorld();
-        if (pWorld != nullptr) {
-            pWorld->mGamer->EndWithScore(500);
-        }
-        Py::Object result;
+        Py::Object result = ScriptCheatWin(args);
         return Py::new_reference_to(result);
     } catch (Py::Exception &) {
         return nullptr;
