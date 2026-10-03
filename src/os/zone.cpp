@@ -317,10 +317,16 @@ void ZoneDump() {
 
 Zone g_adZones[kZoneCount];
 
+// The European release enlarges rndglobal for the fonts and screens of its five languages.
+// NTSC-U/C: 0x006e9810, PAL: 0x0072d1a8
 ZoneConfig g_aZoneConfigs[] = {
     {"seccache", 512},
     {"rndfile", 660},
+#ifdef VIDEO_STANDARD_PAL
+    {"rndglobal", 1590},
+#else
     {"rndglobal", 1290},
+#endif
     {"rndCommon", 1350},
     {"rndTnlLevel", 450},
     {"rndTnlArena", 490},
