@@ -30,8 +30,8 @@ void *LoadWholeFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, un
  * in one call. Whether the query and the read address an ark stream or a loose file depends on
  * UsingArkFiles().
  *
- * A supplied buffer that is too small is fatal here rather than a null report, which is the one
- * behavioural difference from LoadWholeFile(). The file is not closed on the success path.
+ * A supplied buffer that is too small is fatal here rather than a null report, the one behavioural
+ * difference from LoadWholeFile(). The file is not closed on the success path.
  *
  * @param pszPath The file to read.
  * @param pBuffer The destination, or null to have one allocated.
@@ -75,8 +75,7 @@ void ReadStreamChunk(int nFile, int nSector, void *pBuffer, unsigned nLength);
  * Append a component to a device path.
  *
  * A backslash is appended first when the component is not empty, and the component is normalised
- * as it is copied. The argument order is the component before the buffer, which is the image's own
- * order rather than a transcription slip.
+ * as it is copied. The argument order (the component before the buffer) matches the image.
  *
  * @param pszComponent The component to append.
  * @param pszPath The buffer to append to.
@@ -102,7 +101,7 @@ void CloseLoadFile(int nFile);
  * The routine clears bit 0x4000 from the handle, finds the matching record in the stream table,
  * and reports its directory entry's decompressed size. Nothing about it is specific to
  * compression. LoadGzFile() simply needs that size, and the ark reader at 0x0055a280 uses the same
- * entry's stored size to measure how much of the stream is left.
+ * entry's stored size to measure how much of the stream remains.
  *
  * @param nStream The ark stream handle.
  * @return The decompressed size in bytes, or -1 when no record has that handle.
@@ -128,8 +127,8 @@ unsigned GetGzFileSize(int nFile);
  * input-descriptor global at `0x00761488`, copies `unknown` into its input-name global at
  * `0x00761490`, and drives the gzip routines at `0x006125b8`, `0x00612468`, `0x00562f88`,
  * `0x0061d778`, and `0x006125d0`. Both exits close the file with FileClose() unless the descriptor
- * reads -1. The failure exit leaves -1 in the result register, which LoadGzFile(), the one caller,
- * ignores.
+ * reads -1. The failure exit puts -1 in the result register. LoadGzFile(), the one caller, ignores
+ * the result.
  *
  * @param nFile The file to read.
  * @param pBuffer The destination, which must take the whole decompressed size.
@@ -141,10 +140,9 @@ extern "C" void InflateGzFileWhole(int nFile, void *pBuffer);
 /**
  * Inflate a gzip member that is already in memory.
  *
- * The routine belongs to another agent's subsystem and is declared here so async.cpp can call it.
  * The source and destination windows may overlap, and every caller in the async layer relies on
- * that: the stored bytes sit against the end of the destination and the inflate runs forward over
- * the whole of it.
+ * the overlap. The stored bytes sit against the end of the destination, and the inflate runs
+ * forward over the whole destination.
  *
  * The name is inferred from its arguments and from the gzip state it writes.
  *
@@ -174,8 +172,7 @@ int GetStoredFileLength(const char *pszPath);
  * Report the uncompressed length of a file.
  *
  * It opens the path, measures it from the ark directory record, the gzip trailer, or the file size,
- * and reports the length without reporting the handle, which is why a caller that needs the file
- * opens it again.
+ * and reports the length without reporting the handle. A caller that needs the file opens it again.
  *
  * @param pszPath The file to measure.
  * @return The uncompressed length, or zero or less when the file could not be opened.
@@ -186,6 +183,8 @@ int GetUncompressedFileLength(const char *pszPath);
 
 /** The window length the decompressor fills before each flush. */
 constexpr unsigned kGzipWindowSize = 0x8000;
+
+extern "C" {
 
 /**
  * The decompressor window.
@@ -219,7 +218,7 @@ extern unsigned char g_bGzipInputBuffer[];
  * @ghidraAddress NTSC-U/C: 0x00761468
  * @ghidraAddress PAL: 0x007a4398
  */
-extern int g_nGzipInputLength;
+extern unsigned g_nGzipInputLength;
 
 /**
  * The read position in g_bGzipInputBuffer.
@@ -227,7 +226,7 @@ extern int g_nGzipInputLength;
  * @ghidraAddress NTSC-U/C: 0x0076146c
  * @ghidraAddress PAL: 0x007a439c
  */
-extern int g_nGzipInputPosition;
+extern unsigned g_nGzipInputPosition;
 
 /**
  * Refill the staging buffer from the memory source or the file and report its first byte.
@@ -248,6 +247,8 @@ int GzipRefillInputBuffer(int nSilentEof);
  * @ghidraAddress PAL: 0x00652e88
  */
 void GzipFlushWindow();
+
+} // extern "C"
 
 /**
  * Read one byte through the staging buffer, refilling the buffer when it is exhausted.

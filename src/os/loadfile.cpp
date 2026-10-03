@@ -33,7 +33,7 @@ constexpr int kGzipInitialised = 1;
 // The memory inflate path writes this value to the output enable word.
 constexpr int kGzipOutputEnabled = 1;
 
-// The staging buffer holds one refill of deflate input.
+// The staging buffer stores one refill of deflate input.
 constexpr int kGzipInputBufferSize = 0x2000;
 
 // The header parser returns this method for deflate members.
@@ -76,8 +76,8 @@ constexpr unsigned long long kCrcInitial = 0xffffffff;
 constexpr unsigned kCrcByteBits = 8;
 constexpr unsigned kCrcIndexMask = 0xff;
 
-// NTSC-U/C: 0x007a3ea8, PAL: 0x007e7ba8, crc_32_tab: the reflected CRC-32 table. The image
-// stores each entry in 64 bits.
+// NTSC-U/C: 0x007a3ea8, PAL: 0x007e7ba8
+// The reflected CRC-32 table (upstream crc_32_tab). The image stores each entry in 64 bits.
 constexpr unsigned kCrc32Table[] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
     0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91,
@@ -147,7 +147,7 @@ int GzipInflatedSize();
 int g_nGzipInputDescriptor = 0;
 
 // NTSC-U/C: 0x00761490, PAL: 0x007a43c0
-// The inflate input name holds the memory name during a memory run.
+// The inflate input name stores the memory name during a memory run.
 char g_szGzipInputName[12] = {};
 
 // NTSC-U/C: 0x00761594, PAL: 0x007a44c4
@@ -180,11 +180,11 @@ unsigned char g_bGzipInputBuffer[kGzipInputBufferSize] = {};
 
 // NTSC-U/C: 0x00761468, PAL: 0x007a4398
 // The valid byte count in the staging buffer.
-int g_nGzipInputLength = 0;
+unsigned g_nGzipInputLength = 0;
 
 // NTSC-U/C: 0x0076146c, PAL: 0x007a439c
 // The read position in the staging buffer.
-int g_nGzipInputPosition = 0;
+unsigned g_nGzipInputPosition = 0;
 
 // NTSC-U/C: 0x00761470, PAL: 0x007a43a0
 unsigned g_nGzipWindowPosition = 0;
@@ -370,7 +370,7 @@ int GetUncompressedFileLength(const char *pszPath) {
     }
     FileClose(nFile);
 
-    // The larger of the two is reported, so a file that compressed badly reports its stored size.
+    // The larger of the two is reported. A file that compressed badly reports its stored size.
     return (nSize < nStored) ? nStored : nSize;
 }
 

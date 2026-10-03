@@ -126,6 +126,7 @@ cdrom
 ceval
 chcr
 chdir
+cheatunlockstages
 checkinfoop
 choosepowerupmsg
 chrg
@@ -193,6 +194,7 @@ cyclable
 daddu
 dashcam
 datarootdir
+dbits
 dbuild
 dbut
 dcmake
@@ -469,15 +471,18 @@ idablebase
 ifdef
 ifndef
 immediates
+inbuf
 ingame
 initfunc
 initps
 inittab
+inptr
 inputcheatdetector
 inputcheatdetectorgs
 inputcheatdetectormet
 inputmap
 inputpollerps
+insize
 internel
 intobject
 intr
@@ -845,6 +850,7 @@ nodoubt
 nolattice
 nomacro
 nomemcard
+nomemcpy
 nonterminal
 noone
 noreorder
@@ -879,6 +885,7 @@ openreadop
 openwriteop
 ordblks
 orthonormalize
+outcnt
 overcutting
 pabe
 padc
