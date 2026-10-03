@@ -20,6 +20,10 @@ jobs:
       - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         with:
           persist-credentials: false
+      # The checkout belongs to another user inside the container. Without this, git refuses the
+      # repository and the build identification on the title screen reads "unknown".
+      - name: 'Trust the checkout'
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: 'Toolchain versions'
         run: |
           echo "PS2SDK=$PS2SDK"
@@ -51,8 +55,6 @@ jobs:
           if [ "$GITHUB_REF_TYPE" = 'tag' ]; then
             VERSION="${GITHUB_REF_NAME#v}"
           else
-            # The checkout belongs to another user inside the container.
-            git config --global --add safe.directory "$GITHUB_WORKSPACE"
             VERSION="$(git rev-parse --short=7 HEAD)"
           fi
           if [ -z "$VERSION" ]; then

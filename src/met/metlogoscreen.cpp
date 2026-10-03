@@ -49,7 +49,7 @@ static const char *const kVersionLabel = "Version:";
 #ifdef ENABLE_PATCHES
 // Heads the legal text of a patched build, so it is never mistaken for the retail disc.
 static const char *const kBuildTag =
-    "github.com/Tatsh/resonance " RESONANCE_GIT_SHA " " RESONANCE_BUILD_TIME;
+    "github.com/Tatsh/resonance " RESONANCE_GIT_REVISION " " RESONANCE_BUILD_TIME;
 #endif
 
 // Sounds.
