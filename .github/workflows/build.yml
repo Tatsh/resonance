@@ -11,7 +11,7 @@ jobs:
       matrix:
         video-standard: ['NTSC', 'PAL']
     container:
-      image: 'ghcr.io/ps2dev/ps2dev:latest'
+      image: 'ghcr.io/ps2dev/ps2dev:latest@sha256:06ace7056f19de9bb96608fc261c050c770686a8cc79e0488ac07cc055131777'
     steps:
       - name: 'Install build dependencies'
         run: |
