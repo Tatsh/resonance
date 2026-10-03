@@ -10,6 +10,7 @@
 #include "met/metfrontendstate.h"
 #include "met/metloadgamescreen.h"
 #include "met/metrenderer.h"
+#include "met/metstrings.h"
 #include "msg/message.h"
 #include "msg/metunlockstagesmsg.h"
 #include "os/cycles.h"
@@ -128,13 +129,16 @@ void MetLogoScreen::UpdateBlink(float flTime) {
     mWaveView->SetFrame(flTime);
 }
 
-// 0x002ba6d0
+// NTSC-U/C: 0x002ba6d0, PAL: 0x002d9f00
 void MetLogoScreen::ResolveContainerViews() {
     ResolveAnimationViews();
     mView = FindObject<Rnd::View>(HxStr(kLogoView));
     mView->ReleaseAnimsRefs();
     mViewsUnresolved = 0;
     mStartText = FindObject<Rnd::Text>(HxStr(kStartText));
+#ifdef VIDEO_STANDARD_PAL
+    mStartText->SetText(GetMetString(kMetStrLogoStart));
+#endif
     mWaveView = FindObject<Rnd::View>(HxStr(kWaveView));
 
     Rnd::Text *pVersion = FindObject<Rnd::Text>(HxStr(kVersionText));
@@ -146,6 +150,9 @@ void MetLogoScreen::ResolveContainerViews() {
     for (int i = 1; i <= kLegalTextCount; ++i) {
         Rnd::Text *pLegal = FindObject<Rnd::Text>(HxStr(FormatString(kLegalTextFormat, i)));
         pLegal->SetShowing(0);
+#ifdef VIDEO_STANDARD_PAL
+        pLegal->SetText(GetMetString(kMetStrLegal1 + i - 1));
+#endif
         mLegalTexts.push_back(pLegal);
     }
 #ifdef ENABLE_PATCHES

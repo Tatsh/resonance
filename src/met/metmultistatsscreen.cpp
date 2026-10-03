@@ -12,6 +12,7 @@
 #include "met/metremixmanager.h"
 #include "met/metremixrecord.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
@@ -72,9 +73,9 @@ inline Rnd::Text *FindText(const char *pszName) {
 }
 
 // Yes, the binary does not test the text for null.
-inline void FillText(const char *pszText, const char *pszKey) {
+inline void FillText(const char *pszText, MetStringId nId, const char *pszKey) {
     Rnd::Text *pText = FindText(pszText);
-    HxStr text = QueryConfigString(kPromptConfigCode, pszKey);
+    HxStr text = MetConfigText(nId, kPromptConfigCode, pszKey);
     pText->SetText(text);
 }
 
@@ -86,15 +87,15 @@ MetMultiStatsScreen::MetMultiStatsScreen(MetRenderer *pRenderer, int nPriority)
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
 }
 
-// 0x002ff3f8
+// NTSC-U/C: 0x002ff3f8, PAL: 0x003239e8
 void MetMultiStatsScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    FillText(kSongHeading, kSongHeadingKey);
+    FillText(kSongHeading, kMetStrEgsSongLabel, kSongHeadingKey);
     mSongText = FindText(kSongValue);
     mDifficultyText = FindText(kSkillValue);
-    FillText(kGamePanel, kGamePanelKey);
-    FillText(kSkillHeading, kSkillHeadingKey);
-    FillText(kScoresPanel, kScoresPanelKey);
+    FillText(kGamePanel, kMetStrEgmGameLabel, kGamePanelKey);
+    FillText(kSkillHeading, kMetStrEgsSkillLabel, kSkillHeadingKey);
+    FillText(kScoresPanel, kMetStrEgmGamePlayerLabel, kScoresPanelKey);
 
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
         Rnd::Text *pScore = FindText(FormatString(kScoreTextFormat, nRow + 1));

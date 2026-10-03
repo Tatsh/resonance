@@ -210,12 +210,14 @@ public:
      * Save the playlist to the first memory-card slot.
      *
      * Records the caller's screens, raises the `mem_save` warning with the slot's name formatted
-     * into its text, and queues a SaveJukeboxPlayListMCT that reports to this manager.
+     * into its text, and queues a SaveJukeboxPlayListMCT that reports to this manager. The European
+     * release identifies the card in port 1, or `1` when GlobalSettings records another card.
      * MetJukeboxEditPlaylistScreenDone slot 36 and OnMsgScreenDismissed() call it. The title is
      * inferred.
      *
      * @param returnScreens The screens the caller wants restored.
-     * @ghidraAddress 0x00356508
+     * @ghidraAddress NTSC-U/C: 0x00356508
+     * @ghidraAddress PAL: 0x00382fc8
      */
     void SavePlayList(const std::vector<HxStr> &returnScreens);
 
@@ -231,7 +233,8 @@ public:
      * @param restoreScreens The screens mRestoreScreens receives.
      * @param record The remix to load.
      * @param nFactory Non-zero for a factory remix.
-     * @ghidraAddress 0x003548e8
+     * @ghidraAddress NTSC-U/C: 0x003548e8
+     * @ghidraAddress PAL: 0x00380cd8
      */
     void BeginRemixLoad(const std::vector<HxStr> &returnScreens,
                         const std::vector<HxStr> &restoreScreens,
@@ -249,7 +252,8 @@ public:
      * @param returnScreens The screens mReturnScreens receives.
      * @param slots The locations to list, the factory set having a port and slot of -1.
      * @param bLoadPlayList Non-zero to also load the playlist from the first slot.
-     * @ghidraAddress 0x00353350
+     * @ghidraAddress NTSC-U/C: 0x00353350
+     * @ghidraAddress PAL: 0x0037f5a8
      */
     void ListRemixes(const std::vector<HxStr> &returnScreens,
                      std::vector<MemcardConnectState> slots,
@@ -290,11 +294,14 @@ public:
      * The dialogue name selects the reaction. Most dismissals restore the screens in
      * mReturnScreens. A failed or unformatted save retries the playlist save on the first choice,
      * the format check queues a format on the second, a failed remix load abandons the jukebox
-     * game, and a finished format retries the save.
+     * game, and a finished format retries the save. In the European release the first choice of
+     * the format check raises `save_fail_no_format` instead, whose choices act as those of
+     * `format_fail` do.
      *
      * @param name The dialogue the screen requested, which the message screen reports back.
      * @param nChoice Which of the dialogue's buttons the user chose, counted from zero.
-     * @ghidraAddress 0x003555c0
+     * @ghidraAddress NTSC-U/C: 0x003555c0
+     * @ghidraAddress PAL: 0x00381b20
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -308,7 +315,8 @@ public:
      *
      * @param nPortSlot Which card port and slot reported, which the body does not read.
      * @param nStatus Zero on success, and 13 for the one failure the second path covers.
-     * @ghidraAddress 0x003569d0
+     * @ghidraAddress NTSC-U/C: 0x003569d0
+     * @ghidraAddress PAL: 0x00383638
      */
     virtual void OnCardFormatted(int nPortSlot, int nStatus);
 
@@ -317,11 +325,13 @@ public:
      *
      * A zero status exits `MetMsgScreen`. An unformatted card raises `mem_format_check`, a missing
      * card or a full one raises `playlist_save_failed_tryagain`, and any other status raises
-     * `playlist_save_failed`. The port and slot argument is not read.
+     * `playlist_save_failed`. The port and slot argument is not read. The European release calls
+     * the card `1` in the missing-card text.
      *
      * @param nPortSlot Which card port and slot reported, which the body does not read.
      * @param nStatus Zero on success.
-     * @ghidraAddress 0x003573e8
+     * @ghidraAddress NTSC-U/C: 0x003573e8
+     * @ghidraAddress PAL: 0x003841e0
      */
     virtual void OnJukeboxPlayListSaved(int nPortSlot, int nStatus);
 
@@ -347,11 +357,14 @@ public:
      * It opens by writing the status to the log through the literal at `0x00807a88`. A zero status
      * starts the remix or exits `MetMsgScreen`, as mAfterLoadAction selects. A non-zero status logs
      * `Failed to load remix from memory card slot %i.` and raises the `remix_load_failed`
-     * dialogue. The port and slot argument reaches the diagnostic message and nothing else.
+     * dialogue. The port and slot argument is used only by the diagnostic message. The
+     * European release shows `load_fail_jukebox` instead of `load_fail` when mAfterLoadAction
+     * selects starting the remix.
      *
      * @param nPortSlot Which card port and slot reported, which the failure message formats.
      * @param nStatus Zero on success.
-     * @ghidraAddress 0x00355ff0
+     * @ghidraAddress NTSC-U/C: 0x00355ff0
+     * @ghidraAddress PAL: 0x00382920
      */
     virtual void OnRemixLoaded(int nPortSlot, int nStatus);
 

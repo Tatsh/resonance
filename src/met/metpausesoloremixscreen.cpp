@@ -4,11 +4,11 @@
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
 #include "met/metfrontendstate.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/text.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -85,17 +85,24 @@ void MetPauseSoloRemixScreen::HandleCommand(const MetScreenCommand *pCommand) {
     BeginExit();
 }
 
-// 0x00324260
+// NTSC-U/C: 0x00324260, PAL: 0x0034b8a8
 void MetPauseSoloRemixScreen::EnterAndShow() {
     // Yes, the binary copies the settings and never reads the copy.
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kPausedText)));
 
-    HxStr heading = QueryConfigString(kPromptConfigCode, kHeadingKey);
+    HxStr heading = MetConfigText(kMetStrPauseRemix, kPromptConfigCode, kHeadingKey);
     pPaused->SetText(heading);
 
     mOptionLabels.clear();
+#ifdef VIDEO_STANDARD_PAL
+    mOptionLabels.push_back(GetMetString(kMetStrPauseResume));
+    mOptionLabels.push_back(GetMetString(kMetStrPauseQuit));
+    mOptionLabels.push_back(GetMetString(kMetStrPauseConfig));
+    mOptionLabels.push_back(GetMetString(kMetStrPauseSettings));
+#else
     QueryConfigStrings(&mOptionLabels, kLabelsConfigCode, kLabelsKey);
+#endif
     // Yes, the binary copies the labels here and again in the base slot.
     for (std::vector<HxStr>::size_type i = 0; i < mOptionLabels.size(); ++i) {
         mOptionTexts[i]->SetText(mOptionLabels[i]);

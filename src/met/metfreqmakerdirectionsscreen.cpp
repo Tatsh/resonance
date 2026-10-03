@@ -4,6 +4,7 @@
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "met/scrollinglist.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
@@ -165,7 +166,28 @@ HxStr g_acceptPage[kPageRowCount][kPageColumnCount] = {
 };
 
 // The FreQ maker mode names, built after the pages at 0x006a4150. ShowPage() posts the one for the
-// page it shows to the help screen.
+// page it shows to the help screen. The European release posts a text by identifier instead and
+// does not build the names.
+#ifdef VIDEO_STANDARD_PAL
+const MetStringId g_freqMakerModeTexts[] = {
+    kMetStrHFqmakChoosingMode,
+    kMetStrHFqmakColoringMode,
+    kMetStrHFqmakPositioningMode,
+    kMetStrHFqmakEditingMode,
+    kMetStrHFqmakRandomize,
+    kMetStrHFqmakMutate,
+    kMetStrHFqmakBody,
+    kMetStrHFqmakHead,
+    kMetStrHFqmakFace,
+    kMetStrHFqmakDetails,
+    kMetStrHFqmakLogos,
+    kMetStrHFqmakEdit,
+    kMetStrHFqmakName,
+    kMetStrHFqmakSave,
+    kMetStrHFqmakDone,
+    kMetStrHFqmakFreqfull,
+};
+#else
 HxStr g_freqMakerModeNames[] = {
     "fqmak_choosing_mode",
     "fqmak_coloring_mode",
@@ -184,6 +206,7 @@ HxStr g_freqMakerModeNames[] = {
     "fqmak_done",
     "fqmak_freqfull",
 };
+#endif
 
 // The values of mPage.
 enum {
@@ -229,6 +252,39 @@ static const char *const kStandardPreset = "standard_title";
 
 // The text the blank page shows.
 static const char *const kNoText = "";
+
+#ifdef VIDEO_STANDARD_PAL
+// The text object that receives the title, by name.
+static const char *const kTitleText = "HELP.txt";
+
+// The text column of each page and the identifier of its first row's text.
+constexpr int kTextColumn = 1;
+struct PageTexts {
+    HxStr (*pTable)[kPageColumnCount];
+    int nFirstId;
+    int nEndId;
+};
+
+// The pages in the order LoadPageTexts() fills them, each from consecutive identifiers.
+const PageTexts kPageTexts[] = {
+    {g_colorPanelPage, kMetStrFmEditingMode1, kMetStrFmPositioningMode1},
+    {g_colorPanelShortPage, kMetStrFmPositioningMode1, kMetStrFmColoringMode1},
+    {g_canvasPage, kMetStrFmColoringMode1, kMetStrFmChoosingMode1},
+    {g_selectStampPage, kMetStrFmChoosingMode1, kMetStrFmFreqFullMode1},
+    {g_freqFullPage, kMetStrFmFreqFullMode1, kMetStrFmEditButton1},
+    {g_editPage, kMetStrFmEditButton1, kMetStrFmBodyButton1},
+    {g_bodyPage, kMetStrFmBodyButton1, kMetStrFmHeadButton1},
+    {g_headPage, kMetStrFmHeadButton1, kMetStrFmFaceButton1},
+    {g_facePage, kMetStrFmFaceButton1, kMetStrFmDetailsButton1},
+    {g_detailsPage, kMetStrFmDetailsButton1, kMetStrFmLogosButton1},
+    {g_logosPage, kMetStrFmLogosButton1, kMetStrFmMutateButton1},
+    {g_mutatePage, kMetStrFmMutateButton1, kMetStrFmRandomizeButton1},
+    {g_randomizePage, kMetStrFmRandomizeButton1, kMetStrFmNameButton1},
+    {g_namePage, kMetStrFmNameButton1, kMetStrFmSaveButton1},
+    {g_savePage, kMetStrFmSaveButton1, kMetStrFmDoneButton1},
+    {g_acceptPage, kMetStrFmDoneButton1, kMetStrFmDoneButton2 + 1},
+};
+#endif
 
 // Reports the text of a string, or the shared empty string when it has no buffer.
 inline const char *TextOf(const HxStr &text) {
@@ -286,26 +342,48 @@ void MetFreqMakerDirectionsScreen::OnExitFinished() {
     mList->setEntriesShowing(0);
 }
 
-// 0x00262998
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x00278e00
+void MetFreqMakerDirectionsScreen::LoadPageTexts() {
+    // The binary expands this loop into one loop per page.
+    for (const auto &page : kPageTexts) {
+        for (int nId = page.nFirstId; nId < page.nEndId; ++nId) {
+            page.pTable[nId - page.nFirstId][kTextColumn] = GetMetString(nId);
+        }
+    }
+}
+#endif
+
+// NTSC-U/C: 0x00262998, PAL: 0x00279978
 void MetFreqMakerDirectionsScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
+#ifdef VIDEO_STANDARD_PAL
+    LoadPageTexts();
+    // Yes, the binary does not test the text for null.
+    dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kTitleText)))
+        ->SetText(GetMetString(kMetStrFmDirections));
+#endif
     mRowTemplate = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kRowTemplate)));
     mList = new ScrollingList(
         this, kRowPitch, kPageRowCount, mRowTemplate, nullptr, nullptr, nullptr, kListContext);
     mList->setItemCount(kPageRowCount);
 }
 
-// 0x00262ad8
+// NTSC-U/C: 0x00262ad8, PAL: 0x00279c40
 void MetFreqMakerDirectionsScreen::ShowPage(int nPage) {
     mPage = nPage;
     mList->refresh();
+#ifdef VIDEO_STANDARD_PAL
+    MetHelpScreen::SetText(GetMetString(g_freqMakerModeTexts[nPage]), mRenderer->mAnimationFrame);
+#else
     MetHelpScreen::SetText(g_freqMakerModeNames[nPage], mRenderer->mAnimationFrame);
+#endif
     if (nPage == kSavePage) {
-        MetHelpScreen::SelectPreset(HxStr(kSavePreset));
+        MetHelpScreen::SelectPreset(MetText(kMetStrHFreqMakerSaveButton, kSavePreset));
     } else if (nPage == kFreqFullPage) {
-        MetHelpScreen::SelectPreset(HxStr(kBackOnlyPreset));
+        MetHelpScreen::SelectPreset(MetText(kMetStrHOnlyBackTitle, kBackOnlyPreset));
     } else {
-        MetHelpScreen::SelectPreset(HxStr(kStandardPreset));
+        MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kStandardPreset));
     }
 }
 

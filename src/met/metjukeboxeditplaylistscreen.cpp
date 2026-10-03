@@ -6,6 +6,7 @@
 #include "met/methelpscreen.h"
 #include "met/metremixmanager.h"
 #include "met/metrenderer.h"
+#include "met/metstrings.h"
 #include "met/scrollinglist.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
@@ -255,10 +256,11 @@ void MetJukeboxEditPlaylistScreen::ShowRemixDetails() {
     mPicturesPending = 1;
 }
 
-// 0x0022c7f0
+// NTSC-U/C: 0x0022c7f0, PAL: 0x00240000
 void MetJukeboxEditPlaylistScreen::UpdateHelpText() {
-    MetHelpScreen::SelectPreset(HxStr(kHelpLayout));
-    MetHelpScreen::SetText(HxStr(kHelpText), mRenderer->mAnimationFrame);
+    MetHelpScreen::SelectPreset(MetText(kMetStrHMetJukeboxEditScreenHelpTab, kHelpLayout));
+    MetHelpScreen::SetText(MetText(kMetStrHMetJukeboxEditScreenTickerTape, kHelpText),
+                           mRenderer->mAnimationFrame);
 }
 
 // 0x00231228

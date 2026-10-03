@@ -12,6 +12,7 @@
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "mid/mbt.h"
 #include "os/hxstr.h"
 #include "rnd/button.h"
@@ -74,11 +75,6 @@ static const char *const kTitleScreen = "MetScreenTitleScreen";
 static const char *const kRightGizmoScreen = "MetRightGizmoScreen";
 static const char *const kOptionsButtonsScreen = "MetConfigOptionsButtonsScreen";
 
-inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text = QueryConfigString(nCode, pszKey);
-    return text;
-}
-
 inline Rnd::Button *FindArrow(const char *pszFormat, int nNumber) {
     char szName[kArrowNameBufferSize];
     sprintf(szName, pszFormat, nNumber);
@@ -87,28 +83,30 @@ inline Rnd::Button *FindArrow(const char *pszFormat, int nNumber) {
 
 } // namespace
 
-// 0x0020c3e0
+// NTSC-U/C: 0x0020c3e0, PAL: 0x00215828
 MetConfigGameOptionsScreen::MetConfigGameOptionsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreenMultiSoundBank(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mRows(nullptr) {
     mRows = new MetButtonList();
-    mHelpKeys.push_back(HxStr(kAudioRowKey));
-    mHelpKeys.push_back(HxStr(kForceFeedbackRowKey));
+    mHelpKeys.push_back(MetText(kMetStrHPangameAudio, kAudioRowKey));
+    mHelpKeys.push_back(MetText(kMetStrHPangameForceFeedback, kForceFeedbackRowKey));
 }
 
-// 0x0020c800
+// NTSC-U/C: 0x0020c800, PAL: 0x00215ce0
 void MetConfigGameOptionsScreen::ResolveContainerViews() {
     MetScreenMultiSoundBank::ResolveContainerViews();
 
     // Yes, the binary does not test either label for null.
     dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kAudioLabel)))
-        ->SetText(ConfigText(kPromptConfigCode, kAudioLabelKey));
+        ->SetText(MetConfigText(kMetStrPangameAudioLbl, kPromptConfigCode, kAudioLabelKey));
     dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kForceFeedbackLabel)))
-        ->SetText(ConfigText(kPromptConfigCode, kForceFeedbackLabelKey));
+        ->SetText(MetConfigText(kMetStrPangameForceLbl, kPromptConfigCode, kForceFeedbackLabelKey));
 
-    mRows->Add(HxStr(kAudioButton), ConfigText(kPromptConfigCode, kAudioRowKey));
-    mRows->Add(HxStr(kForceFeedbackButton), ConfigText(kPromptConfigCode, kForceFeedbackRowKey));
+    mRows->Add(HxStr(kAudioButton),
+               MetConfigText(kMetStrPangameAudio, kPromptConfigCode, kAudioRowKey));
+    mRows->Add(HxStr(kForceFeedbackButton),
+               MetConfigText(kMetStrPangameForceFeedback, kPromptConfigCode, kForceFeedbackRowKey));
 
     mLeftArrows.resize(kRowCount);
     mRightArrows.resize(kRowCount);
@@ -176,23 +174,35 @@ void MetConfigGameOptionsScreen::HandleCommand(const MetScreenCommand *pCommand)
     }
 }
 
-// 0x0020d310
+// NTSC-U/C: 0x0020d310, PAL: 0x00216980
 void MetConfigGameOptionsScreen::EnterAndShow() {
     mRows->SetSelected(kFirstRow);
-    MetScreenTitleScreen::SetTitle(ConfigText(kTitleConfigCode, kTitleKey));
+    MetScreenTitleScreen::SetTitle(
+        MetConfigText(kMetStrTPangameOptions, kTitleConfigCode, kTitleKey));
     MetHelpScreen::SetText(mHelpKeys[mRows->mSelected], mRenderer->mAnimationFrame);
+#ifdef VIDEO_STANDARD_PAL
+    if (MetFrontEndState::shared()->mReturnScreen == kPauseGameScreen ||
+        MetFrontEndState::shared()->mReturnScreen == kPauseRemixScreen) {
+        MetHelpScreen::SelectPreset(GetMetString(kMetStrHStandardTitle));
+    } else {
+        MetHelpScreen::SelectPreset(GetMetString(kMetStrHPangameTabText));
+    }
+#else
     MetHelpScreen::SelectPreset(HxStr(kTabPreset));
+#endif
     mOptions = GlobalSettings::shared()->mGameOptions;
     UpdateOptionLabels();
     MetScreenMultiSoundBank::EnterAndShow();
 }
 
-// 0x0020d448
+// NTSC-U/C: 0x0020d448, PAL: 0x00216b98
 void MetConfigGameOptionsScreen::UpdateOptionLabels() {
-    mRows->ButtonAt(kRowAudio)->mText->SetText(
-        HxStr(mOptions.mStereo != 0 ? kStereoText : kMonoText));
+    mRows->ButtonAt(kRowAudio)->mText->SetText(mOptions.mStereo != 0 ?
+                                                   MetText(kMetStrGsStereo, kStereoText) :
+                                                   MetText(kMetStrGsMono, kMonoText));
     mRows->ButtonAt(kRowForceFeedback)
-        ->mText->SetText(HxStr(mOptions.mForceFeedback != 0 ? kOnText : kOffText));
+        ->mText->SetText(mOptions.mForceFeedback != 0 ? MetText(kMetStrGsFfOn, kOnText) :
+                                                        MetText(kMetStrGsFfOff, kOffText));
 }
 
 // 0x0020d5a8

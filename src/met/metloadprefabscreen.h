@@ -55,7 +55,8 @@ public:
      *
      * Slot 5. The prompt layout is `standard_title` and the title `pick_char`.
      *
-     * @ghidraAddress 0x002a8aa0
+     * @ghidraAddress NTSC-U/C: 0x002a8aa0
+     * @ghidraAddress PAL: 0x002c6f18
      */
     virtual void EnterAndShow();
 
@@ -67,7 +68,8 @@ public:
      *
      * @param name The dialogue name.
      * @param nChoice The button that closed the dialogue, ignored.
-     * @ghidraAddress 0x002a9b38
+     * @ghidraAddress NTSC-U/C: 0x002a9b38
+     * @ghidraAddress PAL: 0x002c8270
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -75,8 +77,10 @@ public:
      * Show the selected identity's name.
      *
      * Slot 39. The name button shows the name, and the edit button shows `pf_edit` followed by it.
+     * The European release instead formats the name into its `pf_edit` text.
      *
-     * @ghidraAddress 0x002a8fe0
+     * @ghidraAddress NTSC-U/C: 0x002a8fe0
+     * @ghidraAddress PAL: 0x002c7580
      */
     virtual void UpdateNameLabel();
 
@@ -111,7 +115,8 @@ public:
      * shows `nomem_freq_limit`. Otherwise `MetLoadPreFabScreen` is recorded in
      * MetFrontEndState::mReturnScreen and MetLoadFreqBaseScreen::OnCreateButton() runs.
      *
-     * @ghidraAddress 0x002a9710
+     * @ghidraAddress NTSC-U/C: 0x002a9710
+     * @ghidraAddress PAL: 0x002c7d88
      */
     virtual void OnCreateButton();
 
@@ -130,7 +135,8 @@ public:
      * Slot 45. The name button has an empty label and the other two read `pf_edit` and
      * `pf_create`. The name button is selected.
      *
-     * @ghidraAddress 0x002a8b80
+     * @ghidraAddress NTSC-U/C: 0x002a8b80
+     * @ghidraAddress PAL: 0x002c7030
      */
     virtual void BuildButtonList();
 

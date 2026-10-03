@@ -5,6 +5,7 @@
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "script/configquery.h"
 
@@ -62,31 +63,31 @@ constexpr int kSelectAlternateCycles = 2;
 
 } // namespace
 
-// 0x002ad7e8
+// NTSC-U/C: 0x002ad7e8, PAL: 0x002cc120
 MetLocNumPlayScreen::MetLocNumPlayScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr) {
     mButtonList = new MetButtonList;
-    mHelpKeys.push_back(HxStr(kTwoPlayerKey));
-    mHelpKeys.push_back(HxStr(kThreePlayerKey));
-    mHelpKeys.push_back(HxStr(kFourPlayerKey));
-    mHelpKeys.push_back(HxStr(kTipsKey));
+    mHelpKeys.push_back(MetText(kMetStrHLoc2p, kTwoPlayerKey));
+    mHelpKeys.push_back(MetText(kMetStrHLoc3p, kThreePlayerKey));
+    mHelpKeys.push_back(MetText(kMetStrHLoc4p, kFourPlayerKey));
+    mHelpKeys.push_back(MetText(kMetStrHMultiTips, kTipsKey));
 }
 
-// 0x002adbf0
+// NTSC-U/C: 0x002adbf0, PAL: 0x002cc5f0
 void MetLocNumPlayScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
-    HxStr twoLabel = QueryConfigString(kLabelConfigCode, kTwoPlayerKey);
+    HxStr twoLabel = MetConfigText(kMetStrLoc2p, kLabelConfigCode, kTwoPlayerKey);
     mButtonList->Add(HxStr(kTwoPlayerButton), twoLabel);
 
-    HxStr threeLabel = QueryConfigString(kLabelConfigCode, kThreePlayerKey);
+    HxStr threeLabel = MetConfigText(kMetStrLoc3p, kLabelConfigCode, kThreePlayerKey);
     mButtonList->Add(HxStr(kThreePlayerButton), threeLabel);
 
-    HxStr fourLabel = QueryConfigString(kLabelConfigCode, kFourPlayerKey);
+    HxStr fourLabel = MetConfigText(kMetStrLoc4p, kLabelConfigCode, kFourPlayerKey);
     mButtonList->Add(HxStr(kFourPlayerButton), fourLabel);
 
-    HxStr tipsLabel = QueryConfigString(kLabelConfigCode, kTipsKey);
+    HxStr tipsLabel = MetConfigText(kMetStrMultiTips, kLabelConfigCode, kTipsKey);
     mButtonList->Add(HxStr(kTipsButton), tipsLabel);
 }
 
@@ -125,9 +126,9 @@ void MetLocNumPlayScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x002ae218
+// NTSC-U/C: 0x002ae218, PAL: 0x002ccd70
 void MetLocNumPlayScreen::EnterAndShow() {
-    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
+    HxStr title = MetConfigText(kMetStrTMNumP, kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
 
     mRenderer->mMaxPadIndex = kMaxControllers;
@@ -137,7 +138,7 @@ void MetLocNumPlayScreen::EnterAndShow() {
     }
     mButtonList->SetSelected(nIndex);
 
-    MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kStandardTitlePreset));
     MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
     MetScreen::EnterAndShow();
 }

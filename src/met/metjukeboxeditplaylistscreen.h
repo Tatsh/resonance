@@ -119,9 +119,11 @@ public:
      * Select the editor's help text.
      *
      * Slot 41. Selects the `met_jukebox_edit_screen_help_tab` layout and posts
-     * `met_jukebox_edit_screen_ticker_tape`.
+     * `met_jukebox_edit_screen_ticker_tape`. The European release looks the layout and the text up
+     * in the current language.
      *
-     * @ghidraAddress 0x0022c7f0
+     * @ghidraAddress NTSC-U/C: 0x0022c7f0
+     * @ghidraAddress PAL: 0x00240000
      */
     virtual void UpdateHelpText();
 

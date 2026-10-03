@@ -15,6 +15,7 @@
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "met/scrollinglist.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
@@ -153,21 +154,21 @@ inline const char *TextOrEmpty(const HxStr &text) {
 }
 
 // A dialogue text read by value from configuration.
-inline HxStr ConfigText(const char *pszKey) {
-    HxStr value = QueryConfigString(kPromptConfigCode, pszKey);
+inline HxStr ConfigText(MetStringId nId, const char *pszKey) {
+    HxStr value = MetConfigText(nId, kPromptConfigCode, pszKey);
     return value;
 }
 
 } // namespace
 
-// 0x003394a0
+// NTSC-U/C: 0x003394a0, PAL: 0x00363490
 MetRemixDelScreen::MetRemixDelScreen(MetRenderer *pRenderer, int nPriority)
     : MetSaveRemix(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mList(nullptr), mDeletePending(0), mCopyPending(0), mCopyRecord(nullptr), mRowFont(nullptr),
       mDimRowFont(nullptr) {
     mShowsLoadedDrawables = 0;
-    mHelpKeys.push_back(HxStr(kDeleteObjectName));
+    mHelpKeys.push_back(MetText(kMetStrHMemDelRemix, kDeleteObjectName));
 }
 
 // 0x003397a8
@@ -180,7 +181,7 @@ MetRemixDelScreen *MetRemixDelScreen::New(MetRenderer *pRenderer, int nPriority)
     return new MetRemixDelScreen(pRenderer, nPriority);
 }
 
-// 0x0033a098
+// NTSC-U/C: 0x0033a098, PAL: 0x003642d0
 void MetRemixDelScreen::EnterAndShow() {
     SetShowing(0);
     mKeyboardPending = 0;
@@ -192,20 +193,28 @@ void MetRemixDelScreen::EnterAndShow() {
     } else {
         if (MetRemixManager::shared()->mListStatus[mCardSlot.mPortSlot] == kMemcardStatusUnknown) {
             std::vector<HxStr> buttons;
-            buttons.push_back(HxStr(kOkButton));
-            const HxStr format(ConfigText(kNoCardText));
+            buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
+            const HxStr format(ConfigText(kMetStrMcLoadFailNoCard, kNoCardText));
             const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
-            MetMsgScreen::Show(
-                HxStr(kNoRemixDialogue), HxStr(kErrorTitle), text, kOneButton, buttons, this);
+            MetMsgScreen::Show(HxStr(kNoRemixDialogue),
+                               MetText(kMetStrMsgERROR, kErrorTitle),
+                               text,
+                               kOneButton,
+                               buttons,
+                               this);
             return;
         }
         if (mCatalogue == nullptr || mCatalogue->size() == 0) {
             std::vector<HxStr> buttons;
-            buttons.push_back(HxStr(kOkButton));
-            const HxStr format(ConfigText(kNoRemixOnCardText));
+            buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
+            const HxStr format(ConfigText(kMetStrNoRemixOnCard, kNoRemixOnCardText));
             const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
-            MetMsgScreen::Show(
-                HxStr(kNoRemixDialogue), HxStr(kErrorTitle), text, kOneButton, buttons, this);
+            MetMsgScreen::Show(HxStr(kNoRemixDialogue),
+                               MetText(kMetStrMsgERROR, kErrorTitle),
+                               text,
+                               kOneButton,
+                               buttons,
+                               this);
             return;
         }
         Rnd::View *pLine = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kLineView)));
@@ -223,20 +232,20 @@ void MetRemixDelScreen::EnterAndShow() {
     mList->setItemCount(mCatalogue->size());
     mList->refresh();
     PushNamedScreen(HxStr(kHelpScreen));
-    MetHelpScreen::SelectPreset(HxStr(kOnlyBackPreset));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHOnlyBackTitle, kOnlyBackPreset));
     MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
-    HxStr format = QueryConfigString(kTitleConfigCode, kTitleKey);
+    HxStr format = MetConfigText(kMetStrTMemDelType, kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(
         HxStr(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName))));
     PushNamedScreen(HxStr(kDataScreen));
     MetScreen::EnterAndShow();
 }
 
-// 0x00339880
+// NTSC-U/C: 0x00339880, PAL: 0x00363928
 void MetRemixDelScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     Rnd::Text *pTitle = FindText(kListTitleObject); // Yes, the binary does not test it for null.
-    HxStr title = QueryConfigString(kPromptConfigCode, kListTitleKey);
+    HxStr title = MetConfigText(kMetStrMcrfRemix, kPromptConfigCode, kListTitleKey);
     pTitle->SetText(title);
     pTitle->SetShowing(1);
     mRowFont = FindFont(kRowFont);
@@ -343,20 +352,24 @@ void MetRemixDelScreen::OnSaveDialogueClosed() {
 
 inline void MetRemixDelScreen::StartDelete() {
     std::vector<HxStr> buttons;
-    const HxStr first(ConfigText(kDeleteProgressFirst));
-    const HxStr second(ConfigText(kDeleteProgressSecond));
+    const HxStr first(ConfigText(kMetStrRemixDel1, kDeleteProgressFirst));
+    const HxStr second(ConfigText(kMetStrRemixDel2, kDeleteProgressSecond));
     const HxStr text(FormatString(kDeleteProgressFormat,
                                   TextOrEmpty(first),
                                   TextOrEmpty(mCardSlot.mSlotName),
                                   TextOrEmpty(second)));
-    MetMsgScreen::Show(
-        HxStr(kDeleteDialogue), HxStr(kDeleteTitle), text, kNoButtons, buttons, this);
+    MetMsgScreen::Show(HxStr(kDeleteDialogue),
+                       MetText(kMetStrMsgDELETE, kDeleteTitle),
+                       text,
+                       kNoButtons,
+                       buttons,
+                       this);
     const MetRemixRecord record((*mCatalogue)[mList->getSelected()]);
     MemcardManager::shared()->mUser = this;
     MemcardManager::shared()->CreateDeleteRemixTask(mCardSlot.mPortSlot, record.name);
 }
 
-// 0x0033b280
+// NTSC-U/C: 0x0033b280, PAL: 0x00365798
 void MetRemixDelScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kDeleteAskDialogue) {
         if (nChoice == kChoiceYes) {
@@ -424,7 +437,7 @@ void MetRemixDelScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     }
 }
 
-// 0x0033ce00
+// NTSC-U/C: 0x0033ce00, PAL: 0x00367898
 void MetRemixDelScreen::OnExitFinished() {
     if (mDeletePending == 0 && mCopyPending == 0) {
         delete mList;
@@ -436,34 +449,38 @@ void MetRemixDelScreen::OnExitFinished() {
     }
     if (mCopyPending != 0) {
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kNoButton));
-        buttons.push_back(HxStr(kYesButton));
-        const HxStr format(ConfigText(kCopyAskDialogue));
+        buttons.push_back(MetText(kMetStrMsgNO, kNoButton));
+        buttons.push_back(MetText(kMetStrMsgYES, kYesButton));
+        const HxStr format(ConfigText(kMetStrRemixCopyAsk, kCopyAskDialogue));
         const MemcardConnectState target(NextCardSlot(mCardSlot));
         const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(target.mSlotName)));
-        MetMsgScreen::Show(
-            HxStr(kCopyAskDialogue), HxStr(kCopyTitle), text, kTwoButtons, buttons, this);
+        MetMsgScreen::Show(HxStr(kCopyAskDialogue),
+                           MetText(kMetStrMsgCOPY, kCopyTitle),
+                           text,
+                           kTwoButtons,
+                           buttons,
+                           this);
         return;
     }
     std::vector<HxStr> buttons;
-    buttons.push_back(HxStr(kNoButton));
-    buttons.push_back(HxStr(kYesButton));
+    buttons.push_back(MetText(kMetStrMsgNO, kNoButton));
+    buttons.push_back(MetText(kMetStrMsgYES, kYesButton));
     MetMsgScreen::Show(HxStr(kDeleteAskDialogue),
-                       HxStr(kDeleteTitle),
-                       ConfigText(kDeleteAskText),
+                       MetText(kMetStrMsgDELETE, kDeleteTitle),
+                       ConfigText(kMetStrRemixDelAsk, kDeleteAskText),
                        kTwoButtons,
                        buttons,
                        this);
 }
 
-// 0x0033dec0
+// NTSC-U/C: 0x0033dec0, PAL: 0x00368ea0
 void MetRemixDelScreen::OnRemixLoaded([[maybe_unused]] int nPortSlot, int nStatus) {
     if (nStatus != kMemcardStatusOk) {
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kOkButton));
+        buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
         MetMsgScreen::Show(HxStr(kCopyFailDialogue),
-                           HxStr(kErrorTitle),
-                           ConfigText(kCopyFailText),
+                           MetText(kMetStrMsgERROR, kErrorTitle),
+                           ConfigText(kMetStrCopyFailGeneral, kCopyFailText),
                            kOneButton,
                            buttons,
                            this);
@@ -483,7 +500,7 @@ void MetRemixDelScreen::OnRemixLoaded([[maybe_unused]] int nPortSlot, int nStatu
                       mCopyRecord->albumNumber);
 }
 
-// 0x0033d768
+// NTSC-U/C: 0x0033d768, PAL: 0x003685d8
 void MetRemixDelScreen::OnRemixDeleted([[maybe_unused]] int nPortSlot, int nStatus) {
     if (nStatus == kMemcardStatusOk) {
         ExitScreenByName(HxStr(kMsgScreenName));
@@ -491,32 +508,39 @@ void MetRemixDelScreen::OnRemixDeleted([[maybe_unused]] int nPortSlot, int nStat
     }
     if (nStatus == kMemcardStatusUnknown) {
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kRetryButton));
-        buttons.push_back(HxStr(kCancelButton));
-        const HxStr format(ConfigText(kDeleteNoCardDialogue));
+        buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
+        buttons.push_back(MetText(kMetStrMsgCANCEL, kCancelButton));
+        const HxStr format(ConfigText(kMetStrDelFailNocard, kDeleteNoCardDialogue));
         const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
-        MetMsgScreen::ShowActive(
-            HxStr(kDeleteNoCardDialogue), HxStr(kErrorTitle), text, kTwoButtons, buttons, this);
+        MetMsgScreen::ShowActive(HxStr(kDeleteNoCardDialogue),
+                                 MetText(kMetStrMsgERROR, kErrorTitle),
+                                 text,
+                                 kTwoButtons,
+                                 buttons,
+                                 this);
         return;
     }
     std::vector<HxStr> buttons;
-    buttons.push_back(HxStr(kContinueButton));
+    buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
     MetMsgScreen::ShowActive(HxStr(kDeleteDialogue),
-                             HxStr(kErrorTitle),
-                             ConfigText(kDeleteFailText),
+                             MetText(kMetStrMsgERROR, kErrorTitle),
+                             ConfigText(kMetStrDelFail, kDeleteFailText),
                              kOneButton,
                              buttons,
                              this);
 }
 
-// 0x0033e7f0
+// NTSC-U/C: 0x0033e7f0, PAL: 0x00369938
 void MetRemixDelScreen::OnDuplicateNameDeclined() {
     mKeyboardPending = 1;
-    MetKeyboardRequest request(
-        HxStr(kOwnScreenName), HxStr(kKeyboardPrompt), mRemixName, kAnyPad, this);
+    MetKeyboardRequest request(HxStr(kOwnScreenName),
+                               MetText(kMetStrHKbRemixSave, kKeyboardPrompt),
+                               mRemixName,
+                               kAnyPad,
+                               this);
     request.mMaxWidth = kKeyboardMaxWidth;
     request.mMaxLength = kKeyboardMaxLength;
-    request.mTicker = kKeyboardTicker;
+    request.mTicker = MetText(kMetStrHMetSaveRemixScreenTickerTape, kKeyboardTicker);
     MetKeyboardScreen::Open(request);
 }
 

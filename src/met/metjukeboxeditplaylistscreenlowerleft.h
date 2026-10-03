@@ -77,9 +77,12 @@ public:
     /**
      * Resolve the container views.
      *
-     * Slot 38. Forwards to the MetScreen body and adds no behaviour.
+     * Slot 38. Forwards to the MetScreen body. The North American release does not add
+     * behaviour. The European release then fills the four instruction texts from the current
+     * language.
      *
-     * @ghidraAddress 0x0023aaf0
+     * @ghidraAddress NTSC-U/C: 0x0023aaf0
+     * @ghidraAddress PAL: 0x0024b988
      */
     virtual void ResolveContainerViews();
 

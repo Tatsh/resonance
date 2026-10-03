@@ -37,7 +37,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002ad7e8
+     * @ghidraAddress NTSC-U/C: 0x002ad7e8
+     * @ghidraAddress PAL: 0x002cc120
      */
     MetLocNumPlayScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -67,7 +68,8 @@ public:
      * outside two through four. The prompt layout is `standard_title` and the help text follows
      * the selection.
      *
-     * @ghidraAddress 0x002ae218
+     * @ghidraAddress NTSC-U/C: 0x002ae218
+     * @ghidraAddress PAL: 0x002ccd70
      */
     virtual void EnterAndShow();
 
@@ -127,7 +129,8 @@ public:
      * `3player.but`, `4player.but`, and `mnp_info.but` with the labels `loc_2p`, `loc_3p`,
      * `loc_4p`, and `multi_tips`.
      *
-     * @ghidraAddress 0x002adbf0
+     * @ghidraAddress NTSC-U/C: 0x002adbf0
+     * @ghidraAddress PAL: 0x002cc5f0
      */
     virtual void ResolveContainerViews();
 

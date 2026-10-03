@@ -74,7 +74,8 @@ public:
      * Slot 5. The save button reads `SAVE` when MetFrontEndState::mUsingMemcard is set and `DONE`
      * otherwise.
      *
-     * @ghidraAddress 0x00258c80
+     * @ghidraAddress NTSC-U/C: 0x00258c80
+     * @ghidraAddress PAL: 0x0026e8b8
      */
     virtual void EnterAndShow();
 
@@ -104,11 +105,13 @@ public:
      *
      * Slot 15. Only `check_if_changed` is handled. YES commits the persona on the canvas and
      * saves it, returning to the screen MetFrontEndState::mReturnScreen records and the help
-     * screen. NO brings back those two screens without saving.
+     * screen. NO brings back those two screens without saving. The European release saves
+     * towards the mode, left gizmo, and help screens instead.
      *
      * @param name The dialogue name.
      * @param nChoice The index of the button chosen.
-     * @ghidraAddress 0x00259ad0
+     * @ghidraAddress NTSC-U/C: 0x00259ad0
+     * @ghidraAddress PAL: 0x0026fa58
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -121,7 +124,8 @@ public:
      * alternation. Back exits without saving.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x002581c8
+     * @ghidraAddress NTSC-U/C: 0x002581c8
+     * @ghidraAddress PAL: 0x0026db18
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -171,9 +175,12 @@ public:
      * Slot 36. The inventory pages are hidden first. After the save button the persona is saved
      * and the mode screen, or the network portal in a network game, follows. After a back command
      * the save-before-leaving dialogue is raised when a save is possible and the canvas is
-     * modified, and otherwise the screen MetFrontEndState::mReturnScreen records returns.
+     * modified, and otherwise the screen MetFrontEndState::mReturnScreen records returns. The
+     * European release identifies the card slot of a save through FirstCardSlotName() and formats
+     * the dialogue text from the current language.
      *
-     * @ghidraAddress 0x00259040
+     * @ghidraAddress NTSC-U/C: 0x00259040
+     * @ghidraAddress PAL: 0x0026ed18
      */
     virtual void OnExitFinished();
 
@@ -182,7 +189,8 @@ public:
      *
      * Slot 38.
      *
-     * @ghidraAddress 0x00257b70
+     * @ghidraAddress NTSC-U/C: 0x00257b70
+     * @ghidraAddress PAL: 0x0026d320
      */
     virtual void ResolveContainerViews();
 
@@ -210,7 +218,7 @@ public:
     void SetEditing(int nEditing);
 
 private:
-    // 0x0025a228
+    // NTSC-U/C: 0x0025a228, PAL: 0x002702c8
     // Label `RANDOMIZE.txt` with `MUTATE` while editing and `RANDOMIZE` while creating.
     void UpdateRandomizeLabel();
 

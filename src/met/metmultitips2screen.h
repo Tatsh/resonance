@@ -54,7 +54,8 @@ public:
      *
      * Slot 38. The texts are not tested for null.
      *
-     * @ghidraAddress 0x00307f38
+     * @ghidraAddress NTSC-U/C: 0x00307f38
+     * @ghidraAddress PAL: 0x0032cf90
      */
     virtual void ResolveContainerViews();
 };

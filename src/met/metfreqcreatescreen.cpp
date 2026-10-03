@@ -12,11 +12,11 @@
 #include "met/metpersonadata.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "rnd/button.h"
 #include "rnd/manager.h"
 #include "rnd/mat.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -78,12 +78,6 @@ constexpr int kFreqMakerCreating = 0;
 constexpr int kFreqMakerEditing = 1;
 constexpr int kNoRandomize = 0;
 
-// A dialogue text read by value from configuration.
-inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text = QueryConfigString(nCode, pszKey);
-    return text;
-}
-
 } // namespace
 
 // 0x0029c130
@@ -108,15 +102,15 @@ MetFreqCreateScreen *MetFreqCreateScreen::New(MetRenderer *pRenderer, int nPrior
     return new MetFreqCreateScreen(pRenderer, nPriority);
 }
 
-// 0x0029ccb8
+// NTSC-U/C: 0x0029ccb8, PAL: 0x002ba6c0
 void MetFreqCreateScreen::EnterAndShow() {
     mIdentities = MetFreqMakerAssetManager::shared()->GetIdentityList();
     mButtonList->SetSelected(kPrefabButtonIndex);
     MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
     RefreshSelection();
-    MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kStandardTitlePreset));
     {
-        HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
+        HxStr title = MetConfigText(kMetStrTCreateNewChar, kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     }
     PushNamedScreen(HxStr(kLeftGizmoScreen));
@@ -235,18 +229,20 @@ void MetFreqCreateScreen::OnExitFinished() {
     mButtonList->SetSelected(kNoSelection);
 }
 
-// 0x0029c330
+// NTSC-U/C: 0x0029c330, PAL: 0x002b9bb8
 void MetFreqCreateScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mLeftArrow = dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(kLeftArrowObject)));
     mRightArrow = dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(kRightArrowObject)));
     mLeftArrow->SetState(kArrowShownState);
     mRightArrow->SetState(kArrowShownState);
-    mButtonList->Add(HxStr(kPrefabButtonObject), ConfigText(kPromptConfigCode, kPrefabPrompt));
-    mButtonList->Add(HxStr(kCreateButtonObject), ConfigText(kPromptConfigCode, kCreatePrompt));
+    mButtonList->Add(HxStr(kPrefabButtonObject),
+                     MetConfigText(kMetStrCreateFromPrefab, kPromptConfigCode, kPrefabPrompt));
+    mButtonList->Add(HxStr(kCreateButtonObject),
+                     MetConfigText(kMetStrCreateFromScratch, kPromptConfigCode, kCreatePrompt));
     mHelpKeys.clear();
-    mHelpKeys.push_back(HxStr(kPrefabPrompt));
-    mHelpKeys.push_back(HxStr(kCreatePrompt));
+    mHelpKeys.push_back(MetText(kMetStrHCreateFromPrefab, kPrefabPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHCreateFromScratch, kCreatePrompt));
 }
 
 // 0x0029cb30

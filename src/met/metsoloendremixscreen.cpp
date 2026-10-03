@@ -13,6 +13,7 @@
 #include "met/metrenderer.h"
 #include "met/metsaveremixscreen.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/datetime.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
@@ -89,6 +90,12 @@ constexpr int kFaceBurnStage = 1;
 constexpr int kSavePad = 1;
 constexpr int kClearSaveName = 1;
 
+#ifdef VIDEO_STANDARD_PAL
+// The card slot a save uses when the first card slot is missing or not in port 1.
+constexpr int kStandInPortSlot = 0;
+static const char *const kStandInSlotName = "1";
+#endif
+
 // Reports the text of a string, or the shared empty string when it has no buffer.
 inline const char *TextOf(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
@@ -108,13 +115,13 @@ MetSoloEndRemixScreen *MetSoloEndRemixScreen::New(MetRenderer *pRenderer, int nP
     return new MetSoloEndRemixScreen(pRenderer, nPriority);
 }
 
-// 0x00394728
+// NTSC-U/C: 0x00394728, PAL: 0x003c62b8
 void MetSoloEndRemixScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
     Rnd::Text *pPanelText = FindObject<Rnd::Text>(kRemixPanelText);
     {
-        HxStr label = QueryConfigString(kPromptConfigCode, kRemixPanelLabel);
+        HxStr label = MetConfigText(kMetStrRemixPanelLabel, kPromptConfigCode, kRemixPanelLabel);
         pPanelText->SetText(label); // The binary does not test the lookup for null.
     }
 
@@ -155,7 +162,7 @@ void MetSoloEndRemixScreen::EnterAndShow() {
     }
 }
 
-// 0x00395058
+// NTSC-U/C: 0x00395058, PAL: 0x003c6d68
 void MetSoloEndRemixScreen::ShowResults() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     MetPersonaData *pPersona = MetFrontEndState::shared()->GetFirstPersona();
@@ -193,10 +200,21 @@ void MetSoloEndRemixScreen::ShowResults() {
     std::vector<FreqAppearance> appearances;
     appearances.push_back(pPersona->mAppearance);
     {
-        HxStr caption = QueryConfigString(kCaptionConfigCode, kCaptionKey);
+        HxStr caption = MetConfigText(kMetStrTSoloRemixOver, kCaptionConfigCode, kCaptionKey);
         MetScreenTitleScreen::SetTitle(caption);
     }
     PushNamedScreen(HxStr(kHelpScreenName));
+#ifdef VIDEO_STANDARD_PAL
+    MemcardConnectState slot;
+    if (GlobalSettings::shared()->mCardSlots.size() != 0 &&
+        GlobalSettings::shared()->mCardSlots[0].mPortSlot == kStandInPortSlot) {
+        slot = GlobalSettings::shared()->mCardSlots[0];
+    } else {
+        slot.mPortSlot = kStandInPortSlot;
+        slot.mSlotName = kStandInSlotName;
+    }
+    MetSaveRemixScreen::Open(pPersona, kSavePad, this, slot, appearances, kClearSaveName);
+#else
     (void)GlobalSettings::shared(); // Yes, the binary discards this call's result.
     MetSaveRemixScreen::Open(pPersona,
                              kSavePad,
@@ -204,6 +222,7 @@ void MetSoloEndRemixScreen::ShowResults() {
                              GlobalSettings::shared()->mCardSlots[0],
                              appearances,
                              kClearSaveName);
+#endif
     MetScreen::EnterAndShow();
 }
 

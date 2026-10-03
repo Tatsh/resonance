@@ -61,9 +61,12 @@ public:
     /**
      * Resolve the container views and fill the page's three texts from configuration code 0x258.
      *
-     * Slot 38. The texts are not tested for null.
+     * Slot 38. The texts are not tested for null. The European release fills the texts from the
+     * current language instead and also labels the two track texts `tp5_track_01.txt` and
+     * `tp5_track_02.txt` with `SYNTH` and `BASS`.
      *
-     * @ghidraAddress 0x0030a170
+     * @ghidraAddress NTSC-U/C: 0x0030a170
+     * @ghidraAddress PAL: 0x0032f858
      */
     virtual void ResolveContainerViews();
 };

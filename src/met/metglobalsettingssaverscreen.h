@@ -88,11 +88,14 @@ public:
      * Slot 15. The second button of `mem_check` and every button of an unrecognised dialogue
      * exit. The second button of `mem_format_check` formats the first card and raises
      * `mem_format_go`, and its first button retries. `mem_format_done` retries, and the first
-     * button of `format_fail` retries while the second exits.
+     * button of `format_fail` retries while the second exits. In the European release the first
+     * button of `mem_format_check` raises `save_fail_no_format` with RETRY and CONTINUE instead,
+     * whose buttons act as those of `format_fail` do.
      *
      * @param name The dialogue name.
      * @param nChoice The index of the button chosen.
-     * @ghidraAddress 0x0027dc70
+     * @ghidraAddress NTSC-U/C: 0x0027dc70
+     * @ghidraAddress PAL: 0x002973a8
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -130,11 +133,13 @@ public:
      *
      * MemcardUser slot 2. A formatted card receives the save task, and `mem_save` is raised with
      * no buttons. An unformatted card raises `mem_format_check` with NO and YES, and a failed
-     * enquiry raises `mem_check` with RETRY and CONTINUE.
+     * enquiry raises `mem_check` with RETRY and CONTINUE. The European release also raises
+     * `mem_format_check` for an enquiry that reports kMemcardStatusNotFormatted.
      *
      * @param state The card's state.
      * @param nStatus The enquiry's MemcardStatus.
-     * @ghidraAddress 0x0027c7a8
+     * @ghidraAddress NTSC-U/C: 0x0027c7a8
+     * @ghidraAddress PAL: 0x002956b8
      */
     virtual void OnConnectState(MemcardConnectState state, int nStatus);
 
@@ -147,7 +152,8 @@ public:
      *
      * @param nPortSlot The packed port and slot, which the body does not read.
      * @param nStatus The format task's MemcardStatus.
-     * @ghidraAddress 0x0027d258
+     * @ghidraAddress NTSC-U/C: 0x0027d258
+     * @ghidraAddress PAL: 0x00296800
      */
     virtual void OnCardFormatted(int nPortSlot, int nStatus);
 
@@ -159,7 +165,8 @@ public:
      *
      * @param nPortSlot The packed port and slot, which the body does not read.
      * @param nStatus The save task's MemcardStatus.
-     * @ghidraAddress 0x0027e080
+     * @ghidraAddress NTSC-U/C: 0x0027e080
+     * @ghidraAddress PAL: 0x00297bc8
      */
     virtual void OnGlobalSettingsSaved(int nPortSlot, int nStatus);
 
@@ -182,10 +189,15 @@ private:
     // Replace mReturnScreens with the screens to return to.
     void SetReturnScreens(const std::vector<HxStr> &screens);
 
-    // 0x002820a8
+    // NTSC-U/C: 0x002820a8, PAL: 0x00295540
     // Become the memory card manager's user and ask for the state of the card
-    // GlobalSettings records. OnMsgScreenDismissed() expands it.
+    // GlobalSettings records. The North American OnMsgScreenDismissed() expands it. The European
+    // release enquires about port 1 whatever card GlobalSettings records.
     void RequestConnectState();
+
+    // Raise `mem_format_check` with NO and YES for the card in a state. OnConnectState() expands
+    // it.
+    void ShowFormatCheck(const MemcardConnectState &state);
 
     // The registry keys of the screens to return to after the save. +0x90
     std::vector<HxStr> mReturnScreens;

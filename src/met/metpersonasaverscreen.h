@@ -137,7 +137,8 @@ public:
      *
      * @param name The dialogue that was dismissed.
      * @param nChoice The button chosen.
-     * @ghidraAddress 0x003346c8
+     * @ghidraAddress NTSC-U/C: 0x003346c8
+     * @ghidraAddress PAL: 0x0035dbd8
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -158,9 +159,15 @@ public:
      * delete, or the copy is raised. An unformatted card raises `mem_format_check`, and a failed
      * enquiry `mem_check`.
      *
+     * The European release omits the free-space test, treats a status of
+     * kMemcardStatusNotFormatted as an unformatted card, and raises the deleting dialogue for a
+     * delete. The North American release raises the save dialogue for a delete. A save that finds
+     * no card identifies the first card slot through FirstCardSlotName().
+     *
      * @param state The card's state, passed by value.
      * @param nStatus The enquiry status.
-     * @ghidraAddress 0x0032f5a0
+     * @ghidraAddress NTSC-U/C: 0x0032f5a0
+     * @ghidraAddress PAL: 0x00357ca8
      */
     virtual void OnConnectState(MemcardConnectState state, int nStatus);
 
@@ -172,7 +179,8 @@ public:
      *
      * @param nPortSlot The packed port and slot, which is not read.
      * @param nStatus The format status.
-     * @ghidraAddress 0x00331358
+     * @ghidraAddress NTSC-U/C: 0x00331358
+     * @ghidraAddress PAL: 0x00359ed0
      */
     virtual void OnCardFormatted(int nPortSlot, int nStatus);
 
@@ -186,7 +194,8 @@ public:
      *
      * @param nPortSlot The packed port and slot the roster went to.
      * @param nStatus The save status.
-     * @ghidraAddress 0x00333210
+     * @ghidraAddress NTSC-U/C: 0x00333210
+     * @ghidraAddress PAL: 0x0035c120
      */
     virtual void OnPersonasSaved(int nPortSlot, int nStatus);
 
@@ -202,7 +211,8 @@ public:
      *
      * @param nPortSlot The packed port and slot, which is not read.
      * @param nStatus The load status, which is not read.
-     * @ghidraAddress 0x00332428
+     * @ghidraAddress NTSC-U/C: 0x00332428
+     * @ghidraAddress PAL: 0x0035b1a8
      */
     virtual void OnPersonasLoaded(int nPortSlot, int nStatus);
 
@@ -264,7 +274,8 @@ private:
      * A roster of eight raises `freq_limit`. The name is inferred.
      *
      * @return 1 when there is room, 0 when the dialogue was raised.
-     * @ghidraAddress 0x00331d48
+     * @ghidraAddress NTSC-U/C: 0x00331d48
+     * @ghidraAddress PAL: 0x0035aa48
      */
     int CheckPersonaLimit();
 
@@ -282,7 +293,8 @@ private:
      *
      * The name is inferred.
      *
-     * @ghidraAddress 0x003350f8
+     * @ghidraAddress NTSC-U/C: 0x003350f8
+     * @ghidraAddress PAL: 0x0035ee80
      */
     void AskToReplace();
 

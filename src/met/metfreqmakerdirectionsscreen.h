@@ -125,9 +125,11 @@ public:
      * Resolve the base views and build the seven-row directions list.
      *
      * Slot 38. The rows are cloned from `fmd_help_line_prototype.view` with a pitch of 22 and no
-     * highlight or arrows, and the list is given seven items.
+     * highlight or arrows, and the list is given seven items. The European release first fills the
+     * page texts with LoadPageTexts() and labels `HELP.txt` with the directions title.
      *
-     * @ghidraAddress 0x00262998
+     * @ghidraAddress NTSC-U/C: 0x00262998
+     * @ghidraAddress PAL: 0x00279978
      */
     virtual void ResolveContainerViews();
 
@@ -137,10 +139,12 @@ public:
      * The list is refreshed, the page's mode name is posted to the help screen, and the help
      * preset becomes `freq_maker_save_button` on the save page, `only_back_title` on the full
      * page, and `standard_title` otherwise. MetFreqMakerButtonsScreen's routine at `0x0025a5e0`
-     * calls it. The title is inferred.
+     * calls it. The title is inferred. The European release looks the mode text and the preset up
+     * in the current language.
      *
      * @param nPage The page, 0 through 16.
-     * @ghidraAddress 0x00262ad8
+     * @ghidraAddress NTSC-U/C: 0x00262ad8
+     * @ghidraAddress PAL: 0x00279c40
      */
     void ShowPage(int nPage);
 
@@ -175,6 +179,12 @@ public:
     virtual int ProvideMesh(int nItem, int nColumn, Rnd::Mesh *pMesh, int nContext);
 
 private:
+#ifdef VIDEO_STANDARD_PAL
+    // PAL: 0x00278e00
+    // Fill the text column of every page from the current language. The title is inferred.
+    void LoadPageTexts();
+#endif
+
     // 0x0026a008
     // The cell at one row and column of a page table. The body does not read this object.
     const HxStr &PageCell(int nRow, int nColumn, const HxStr (*pTable)[2]);

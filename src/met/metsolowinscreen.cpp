@@ -8,8 +8,8 @@
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -121,27 +121,28 @@ void MetSoloWinScreen::OnExitFinished() {
     mButtonList->SetSelected(kNoSelection);
 }
 
-// 0x003b5968
+// NTSC-U/C: 0x003b5968, PAL: 0x003ea068
 void MetSoloWinScreen::EnterAndShow() {
     mButtonList->Clear();
 
-    HxStr continueLabel = QueryConfigString(kPromptConfigCode, kContinuePrompt);
+    HxStr continueLabel = MetConfigText(kMetStrEgswContinue, kPromptConfigCode, kContinuePrompt);
     mButtonList->Add(HxStr(kContinueButtonObject), continueLabel);
 
-    HxStr exitLabel = QueryConfigString(kPromptConfigCode, kExitPrompt);
+    HxStr exitLabel = MetConfigText(kMetStrEgswExit, kPromptConfigCode, kExitPrompt);
     mButtonList->Add(HxStr(kExitButtonObject), exitLabel);
 
-    HxStr restartLabel = QueryConfigString(kPromptConfigCode, kRestartPrompt);
+    HxStr restartLabel = MetConfigText(kMetStrEgswRestart, kPromptConfigCode, kRestartPrompt);
     mButtonList->Add(HxStr(kRestartButtonObject), restartLabel);
 
     mButtonList->SetSelected(kContinueButtonIndex);
 
     mHelpKeys.clear();
-    mHelpKeys.push_back(HxStr(kContinuePrompt));
-    mHelpKeys.push_back(HxStr(kExitPrompt));
-    mHelpKeys.push_back(HxStr(kRestartPrompt));
+    // The European release stores the help texts themselves rather than their keys.
+    mHelpKeys.push_back(MetText(kMetStrHEgswContinue, kContinuePrompt));
+    mHelpKeys.push_back(MetText(kMetStrHEgswExit, kExitPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHEgswRestart, kRestartPrompt));
 
-    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
+    HxStr title = MetConfigText(kMetStrTSoloWin, kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
 
     PushNamedScreen(HxStr(kHelpScreen));
@@ -199,9 +200,9 @@ void MetSoloWinScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// 0x003b9d80
+// NTSC-U/C: 0x003b9d80, PAL: 0x003ee790
 void MetSoloWinScreen::OnEnterFinished() {
-    MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHNoBackTitle, kPromptLayout));
     MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
 }
 

@@ -43,9 +43,11 @@ public:
      * in front-end phase 5, `pause_remix` in jam mode, and `pause_game` otherwise. The labels come
      * from code 0x259 under `pause_multi_game` in phase 5 or in game mode, and `pause_multi_remix`
      * otherwise. The play mode is read from a copy of the game settings. The heading is not tested
-     * for null.
+     * for null. The European release looks the texts up in the current language, and its labels
+     * are `Resume` and `Quit`, followed by `Restart` in phase 5 or in game mode.
      *
-     * @ghidraAddress 0x0031c658
+     * @ghidraAddress NTSC-U/C: 0x0031c658
+     * @ghidraAddress PAL: 0x003428c8
      */
     virtual void EnterAndShow();
 

@@ -46,7 +46,8 @@ public:
      * Slot 5. The title is the `multi_tips` title (code 0x269) followed by the page number. The
      * MetScreen body runs between setting the title and selecting `multi_tips_tab`.
      *
-     * @ghidraAddress 0x003070f0
+     * @ghidraAddress NTSC-U/C: 0x003070f0
+     * @ghidraAddress PAL: 0x0032bbc8
      */
     virtual void EnterAndShow();
 
@@ -126,7 +127,8 @@ protected:
      * @param nPage The page number shown in the title, counted from 1.
      * @param previous The registry key of the previous page.
      * @param next The registry key of the next page.
-     * @ghidraAddress 0x00306cd8
+     * @ghidraAddress NTSC-U/C: 0x00306cd8
+     * @ghidraAddress PAL: 0x0032b700
      */
     MetMultiTipsBaseScreen(MetRenderer *pRenderer,
                            int nPriority,

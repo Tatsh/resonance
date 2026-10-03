@@ -14,6 +14,7 @@
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "met/texturepairrecord.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
@@ -24,6 +25,12 @@
 #include "rnd/text.h"
 #include "rnd/view.h"
 #include "script/configquery.h"
+
+#ifdef VIDEO_STANDARD_PAL
+#include <libscf.h>
+
+#include "os/hostmode.h"
+#endif
 
 namespace {
 
@@ -122,12 +129,12 @@ inline HxStr Concatenate(const HxStr &left, char ch) {
 
 } // namespace
 
-// 0x001f65a0
+// NTSC-U/C: 0x001f65a0, PAL: 0x001fcfc8
 MetArenasScreen::MetArenasScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mArenaButtons(nullptr), mScreenshots(nullptr) {
     mArenaButtons = new MetButtonList();
-    mHelpKeys.push_back(HxStr(kArenasObject));
+    mHelpKeys.push_back(MetText(kMetStrHArenas, kArenasObject));
 }
 
 // 0x001fc690
@@ -141,7 +148,7 @@ MetArenasScreen::~MetArenasScreen() {
     delete mScreenshots;
 }
 
-// 0x001f7750
+// NTSC-U/C: 0x001f7750, PAL: 0x001fe3b8
 void MetArenasScreen::EnterAndShow() {
     HxStr mode;
     HxStr kind;
@@ -150,23 +157,32 @@ void MetArenasScreen::EnterAndShow() {
 
     {
         const bool bSolo = Application::shared()->GetGameManager()->GetGameMode() == kSoloGameMode;
-        HxStr value = QueryConfigString(kTitleQuery, bSolo ? kSoloKey : kMultiKey);
+        HxStr value = bSolo ? MetConfigText(kMetStrTSolo, kTitleQuery, kSoloKey) :
+                              MetConfigText(kMetStrTMulti, kTitleQuery, kMultiKey);
         mode = value;
     }
     {
-        HxStr value = QueryConfigString(kTitleQuery,
-                                        params.mPlayMode == kGamePlayMode ? kGameKey : kRemixKey);
+        HxStr value = params.mPlayMode == kGamePlayMode ?
+                          MetConfigText(kMetStrTGame, kTitleQuery, kGameKey) :
+                          MetConfigText(kMetStrTRemix, kTitleQuery, kRemixKey);
         kind = value;
     }
 
+#ifdef VIDEO_STANDARD_PAL
+    // Spanish places the kind before the mode.
+    const bool bKindFirst = GetLanguage() == SCE_SPANISH_LANGUAGE;
+    const HxStr modeSpaced = Concatenate(bKindFirst ? kind : mode, ' ');
+    const HxStr modeKind = modeSpaced + (bKindFirst ? mode : kind);
+#else
     const HxStr modeSpaced = Concatenate(mode, ' ');
     const HxStr modeKind = modeSpaced + kind;
-    HxStr arenas = QueryConfigString(kTitleQuery, kArenasKey);
+#endif
+    HxStr arenas = MetConfigText(kMetStrTArenas, kTitleQuery, kArenasKey);
     MetScreenTitleScreen::SetTitle(modeKind + arenas);
 
     mScreenshots->invalidate();
     SetupArenaButtons(MetFrontEndState::shared()->mUnlockAll);
-    MetHelpScreen::SelectPreset(HxStr(kStandardTitleLayout));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kStandardTitleLayout));
     MetScreen::EnterAndShow();
 }
 
@@ -191,7 +207,7 @@ void MetArenasScreen::UpdateScreenshot() {
     mScreenshots->Load(TexturePairRecord::ArenaPath(name));
 }
 
-// 0x001f7d40
+// NTSC-U/C: 0x001f7d40, PAL: 0x001fee58
 void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
     mArenaButtons->SetSelected(kNoSelection);
     const int nArenaCount = GetArenaList()->size();
@@ -238,7 +254,7 @@ void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
     Rnd::Button *pNone = mArenaButtons->ButtonAt(mNoArenaIndex);
     pNone->SetState(kButtonStateNormal);
     {
-        HxStr text = QueryConfigString(kArenaNoneQuery, kArenaNoneKey);
+        HxStr text = MetConfigText(kMetStrArenaNone, kArenaNoneQuery, kArenaNoneKey);
         pNone->mText->SetText(text);
     }
 

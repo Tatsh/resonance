@@ -7,6 +7,7 @@
 #include "met/methelpscreen.h"
 #include "met/metremixmanager.h"
 #include "met/metrenderer.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "rnd/button.h"
 
@@ -63,12 +64,12 @@ MetJukeboxEditPlaylistScreenDone::MetJukeboxEditPlaylistScreenDone(MetRenderer *
     mButtons = new MetButtonList;
 }
 
-// 0x00231908
+// NTSC-U/C: 0x00231908, PAL: 0x002452a0
 void MetJukeboxEditPlaylistScreenDone::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    mButtons->Add(HxStr(kRandomButton), HxStr(kRandomLabel));
-    mButtons->Add(HxStr(kOrderButton), HxStr(kOrderLabel));
-    mButtons->Add(HxStr(kSaveButton), HxStr(kSaveLabel));
+    mButtons->Add(HxStr(kRandomButton), MetText(kMetStrJbdRandom, kRandomLabel));
+    mButtons->Add(HxStr(kOrderButton), MetText(kMetStrJbdOrder, kOrderLabel));
+    mButtons->Add(HxStr(kSaveButton), MetText(kMetStrJbdSave, kSaveLabel));
     mButtons->SetSelected(kButtonRandom);
 }
 

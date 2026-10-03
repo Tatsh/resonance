@@ -193,8 +193,11 @@ public:
      * eight-column grid, and its name is appended to that page's name list. The main view is hung
      * from `fm_grid.view` and shown, mCanvas is resolved, the palette, the inventory decorations,
      * and both panel highlights are turned off, and the palette cursor moves to column 0 and row 0.
+     * The European release first sets `COLOR.txt`, `fminv_limit.txt`, and `HEADING_ITEM.txt` to
+     * their texts in the current language.
      *
-     * @ghidraAddress 0x0026b518
+     * @ghidraAddress NTSC-U/C: 0x0026b518
+     * @ghidraAddress PAL: 0x00283008
      */
     virtual void ResolveContainerViews();
 
@@ -212,7 +215,8 @@ public:
      * Show the head page. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` calls it. The title
      * is inferred.
      *
-     * @ghidraAddress 0x0026d318
+     * @ghidraAddress NTSC-U/C: 0x0026d318
+     * @ghidraAddress PAL: 0x002853e8
      */
     void ShowHeadPage();
 
@@ -220,7 +224,8 @@ public:
      * Show the face page. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` calls it. The title
      * is inferred.
      *
-     * @ghidraAddress 0x0026d4c8
+     * @ghidraAddress NTSC-U/C: 0x0026d4c8
+     * @ghidraAddress PAL: 0x002855d8
      */
     void ShowFacePage();
 
@@ -228,7 +233,8 @@ public:
      * Show the body page. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` calls it. The title
      * is inferred.
      *
-     * @ghidraAddress 0x0026d678
+     * @ghidraAddress NTSC-U/C: 0x0026d678
+     * @ghidraAddress PAL: 0x002857c8
      */
     void ShowBodyPage();
 
@@ -236,7 +242,8 @@ public:
      * Show the details page. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` calls it. The
      * title is inferred.
      *
-     * @ghidraAddress 0x0026d828
+     * @ghidraAddress NTSC-U/C: 0x0026d828
+     * @ghidraAddress PAL: 0x002859b8
      */
     void ShowDetailsPage();
 
@@ -244,7 +251,8 @@ public:
      * Show the logos page. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` calls it. The title
      * is inferred.
      *
-     * @ghidraAddress 0x0026d9d8
+     * @ghidraAddress NTSC-U/C: 0x0026d9d8
+     * @ghidraAddress PAL: 0x00285ba8
      */
     void ShowLogosPage();
 
@@ -266,7 +274,8 @@ public:
      * becomes `FreQ`. MetFreqMakerButtonsScreen's routine at `0x0025a3e0` and slot 19 call it. The
      * title is inferred.
      *
-     * @ghidraAddress 0x0026ddc8
+     * @ghidraAddress NTSC-U/C: 0x0026ddc8
+     * @ghidraAddress PAL: 0x00286018
      */
     void ShowEditPage();
 
@@ -338,7 +347,7 @@ private:
     void SetHighlight(int nHighlight);
 
     // Show one part page with its row count and heading. The five page routines expand it.
-    void ShowPartPage(Rnd::View *pView, int nRowCount, const char *pszHeading);
+    void ShowPartPage(Rnd::View *pView, int nRowCount, const HxStr &heading);
 
     // Apply the palette colour on the canvas, move the cross to it, and on the edit page colour the
     // mesh under the grid cursor. Slot 19 expands it for each palette move.

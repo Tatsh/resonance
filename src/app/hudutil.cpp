@@ -1,5 +1,6 @@
 #include "app/hudutil.h"
 
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 
 namespace {
@@ -12,35 +13,35 @@ constexpr float kPurpleRed = 0.65f;
 // 0x006dfde8
 int g_nHudNameCounter;
 
-// 0x00415ed8
+// NTSC-U/C: 0x00415ed8, PAL: 0x0044fa40
 HxStr HudPowerupName(int nKind) {
     switch (nKind) {
     case kHudItemNeutralizer:
-        return HxStr("NEUTRALIZER");
+        return MetText(kMetStrIngNeutralizer, "NEUTRALIZER");
     case kHudItemCrippler:
-        return HxStr("CRIPPLER");
+        return MetText(kMetStrIngCrippler, "CRIPPLER");
     case kHudItemFreestyler:
-        return HxStr("FREESTYLER");
+        return MetText(kMetStrIngFreestyler, "FREESTYLER");
     case kHudItemAutocatcher:
-        return HxStr("AUTOCATCHER");
+        return MetText(kMetStrIngAutocatcher, "AUTOCATCHER");
     case kHudItemBumper:
-        return HxStr("BUMPER");
+        return MetText(kMetStrIngBumper, "BUMPER");
     case kHudItemVolume:
-        return HxStr("Volume");
+        return MetText(kMetStrIngVolume, "Volume");
     case kHudItemWah:
-        return HxStr("Wah");
+        return MetText(kMetStrIngWah, "Wah");
     case kHudItemStutter:
-        return HxStr("Stutter");
+        return MetText(kMetStrIngStutter, "Stutter");
     case kHudItemEcho:
-        return HxStr("Echo");
+        return MetText(kMetStrIngEcho, "Echo");
     case kHudItemFlange:
-        return HxStr("Flange");
+        return MetText(kMetStrIngFlange, "Flange");
     case kHudItemChorus:
-        return HxStr("Chorus");
+        return MetText(kMetStrIngChorus, "Chorus");
     case kHudItemGuides:
-        return HxStr("Guides");
+        return MetText(kMetStrIngGuides, "Guides");
     case kHudItemMultiplier:
-        return HxStr("MULTIPLIER");
+        return MetText(kMetStrIngMultiplier, "MULTIPLIER");
     default:
         return HxStr("");
     }

@@ -96,6 +96,7 @@ set(RESONANCE_MET_SRCS
     metsonglists.cpp
     metsonyscreen.cpp
     metstagefinishscreen.cpp
+    metstrings.cpp
     mettoplogoscreen.cpp
     mettutorialscreen.cpp
     scrollinglist.cpp

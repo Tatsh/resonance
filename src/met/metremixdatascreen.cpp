@@ -3,6 +3,7 @@
 #include "game/freqappearance.h"
 #include "met/albumcache.h"
 #include "met/metremixrecord.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
@@ -33,6 +34,9 @@ static const char *const kLogoMaterial = "mcrl_logo.mat";
 static const char *const kUnavailableText = "mcrl_remixunavail.txt";
 static const char *const kLabelMesh = "mcrl_label.mesh";
 static const char *const kLogoMesh = "mcrl_logo.mesh";
+#ifdef VIDEO_STANDARD_PAL
+static const char *const kPanelTitleText = "mcrl_remixpan_title.txt";
+#endif
 
 // Counted from 1.
 static const char *const kNameTextFormat = "mcrl_name_0%d.txt";
@@ -82,7 +86,7 @@ MetRemixDataScreen::MetRemixDataScreen(MetRenderer *pRenderer, int nPriority)
 MetRemixDataScreen::~MetRemixDataScreen() {
 }
 
-// 0x00344d70
+// NTSC-U/C: 0x00344d70, PAL: 0x00370198
 void MetRemixDataScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mSongTitleText = FindText(kSongTitleText);
@@ -93,6 +97,9 @@ void MetRemixDataScreen::ResolveContainerViews() {
     mUnavailableText->SetShowing(0);
     mLabelMesh = FindMesh(kLabelMesh);
     mLogoMesh = FindMesh(kLogoMesh);
+#ifdef VIDEO_STANDARD_PAL
+    FindText(kPanelTitleText)->SetText(GetMetString(kMetStrMcrfRemixdata)); // Not tested for null.
+#endif
 
     for (int nRow = 1; nRow <= kRowCount; ++nRow) {
         Rnd::Text *pName = FindText(FormatString(kNameTextFormat, nRow));
@@ -107,7 +114,7 @@ void MetRemixDataScreen::ResolveContainerViews() {
     }
 }
 
-// 0x003455a8
+// NTSC-U/C: 0x003455a8, PAL: 0x00370c50
 void MetRemixDataScreen::ShowRecord(MetRemixRecord *pRecord) {
     if (mViewsUnresolved != 0) {
         return;
@@ -128,7 +135,7 @@ void MetRemixDataScreen::ShowRecord(MetRemixRecord *pRecord) {
         mUnavailableText->SetShowing(0);
     } else {
         mUnavailableText->SetShowing(1);
-        HxStr notice = QueryConfigString(kPromptConfigCode, kUnavailableKey);
+        HxStr notice = MetConfigText(kMetStrRemixUnavailDisc, kPromptConfigCode, kUnavailableKey);
         mUnavailableText->SetText(notice);
         mSongTitleText->SetText(HxStr(kNoText));
         mLabelMesh->SetShowing(0);

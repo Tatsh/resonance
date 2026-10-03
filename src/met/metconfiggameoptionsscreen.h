@@ -42,7 +42,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0020c3e0
+     * @ghidraAddress NTSC-U/C: 0x0020c3e0
+     * @ghidraAddress PAL: 0x00215828
      */
     MetConfigGameOptionsScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -66,7 +67,11 @@ public:
     /**
      * Select the first row, copy the stored options, and enter.
      *
-     * @ghidraAddress 0x0020d310
+     * The European release selects the `standard_title` prompt layout in place of
+     * `pangame_tab_text` when MetFrontEndState::mReturnScreen records a pause screen.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0020d310
+     * @ghidraAddress PAL: 0x00216980
      */
     virtual void EnterAndShow();
 
@@ -100,12 +105,13 @@ public:
      *
      * The labels are not tested for null.
      *
-     * @ghidraAddress 0x0020c800
+     * @ghidraAddress NTSC-U/C: 0x0020c800
+     * @ghidraAddress PAL: 0x00215ce0
      */
     virtual void ResolveContainerViews();
 
 private:
-    // 0x0020d448
+    // NTSC-U/C: 0x0020d448, PAL: 0x00216b98
     // Shows the working copy's two settings on the two rows.
     void UpdateOptionLabels();
 

@@ -190,7 +190,8 @@ public:
      * Each of `egc_congrat1.txt` through `egc_congrat4.txt` receives the configuration string for
      * `end_game_congrats`. The text is not tested for null after the lookup.
      *
-     * @ghidraAddress 0x003be068
+     * @ghidraAddress NTSC-U/C: 0x003be068
+     * @ghidraAddress PAL: 0x003f2e40
      */
     virtual void ResolveContainerViews();
 
@@ -202,7 +203,8 @@ private:
      *
      * @param nPreviousScore The high score recorded before this game.
      * @param nScore The score of this game.
-     * @ghidraAddress 0x003bf8e8
+     * @ghidraAddress NTSC-U/C: 0x003bf8e8
+     * @ghidraAddress PAL: 0x003f49e0
      */
     void AddHighScoreMessage(int nPreviousScore, int nScore);
 
@@ -215,7 +217,8 @@ private:
      *
      * @param nPreviousCompleted The unlock level before this game.
      * @param nCompleted The unlock level now.
-     * @ghidraAddress 0x003bf9b8
+     * @ghidraAddress NTSC-U/C: 0x003bf9b8
+     * @ghidraAddress PAL: 0x003f4ac8
      */
     void AddArenaCompleteMessage(int nPreviousCompleted, int nCompleted);
 
@@ -226,7 +229,8 @@ private:
      *
      * @param nWasBeaten Non-zero when the target was already beaten.
      * @param nIsBeaten Non-zero when the target is beaten now.
-     * @ghidraAddress 0x003bfb78
+     * @ghidraAddress NTSC-U/C: 0x003bfb78
+     * @ghidraAddress PAL: 0x003f4cd0
      */
     void AddStageScoreBeatMessage(int nWasBeaten, int nIsBeaten);
 
@@ -241,7 +245,8 @@ private:
      *
      * @param nWasComplete Non-zero when the stage was already complete.
      * @param nIsComplete Non-zero when the stage is complete now.
-     * @ghidraAddress 0x003bfc48
+     * @ghidraAddress NTSC-U/C: 0x003bfc48
+     * @ghidraAddress PAL: 0x003f4db8
      */
     void AddStageCompleteMessage(int nWasComplete, int nIsComplete);
 
@@ -255,7 +260,8 @@ private:
      *
      * @param nWasUnlocked Non-zero when the difficulty was already unlocked.
      * @param nIsUnlocked Non-zero when the difficulty is unlocked now.
-     * @ghidraAddress 0x003c0008
+     * @ghidraAddress NTSC-U/C: 0x003c0008
+     * @ghidraAddress PAL: 0x003f5220
      */
     void AddDifficultyUnlockMessage(int nWasUnlocked, int nIsUnlocked);
 
@@ -279,7 +285,8 @@ private:
      *
      * @param nWasUnlocked Non-zero when the unlock already existed.
      * @param nIsUnlocked Non-zero when it exists now.
-     * @ghidraAddress 0x003c02c0
+     * @ghidraAddress NTSC-U/C: 0x003c02c0
+     * @ghidraAddress PAL: 0x003f5568
      */
     void AddSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked);
 
@@ -290,7 +297,8 @@ private:
      *
      * @param nWasUnlocked Non-zero when the unlock already existed.
      * @param nIsUnlocked Non-zero when it exists now.
-     * @ghidraAddress 0x003c0390
+     * @ghidraAddress NTSC-U/C: 0x003c0390
+     * @ghidraAddress PAL: 0x003f5650
      */
     void AddSuperSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked);
 
@@ -301,7 +309,8 @@ private:
      *
      * @param nWasUnlocked Non-zero when the unlock already existed.
      * @param nIsUnlocked Non-zero when it exists now.
-     * @ghidraAddress 0x003c0460
+     * @ghidraAddress NTSC-U/C: 0x003c0460
+     * @ghidraAddress PAL: 0x003f5738
      */
     void AddEndSuperSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked);
 

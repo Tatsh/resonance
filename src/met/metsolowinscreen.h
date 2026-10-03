@@ -74,7 +74,8 @@ public:
      * into MetScreen::mHelpKeys. The prompt the help screen displays for a button is therefore the
      * key its label was looked up under rather than the label itself.
      *
-     * @ghidraAddress 0x003b5968
+     * @ghidraAddress NTSC-U/C: 0x003b5968
+     * @ghidraAddress PAL: 0x003ea068
      */
     virtual void EnterAndShow();
 
@@ -130,7 +131,8 @@ public:
      *
      * MetScreen slot 32 runs the slot once the enter animation has finished.
      *
-     * @ghidraAddress 0x003b9d80
+     * @ghidraAddress NTSC-U/C: 0x003b9d80
+     * @ghidraAddress PAL: 0x003ee790
      */
     virtual void OnEnterFinished();
 

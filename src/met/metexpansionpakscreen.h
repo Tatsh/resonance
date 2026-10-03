@@ -83,7 +83,8 @@ public:
      * FadeUser slot 3, through the FadeUser table entry that adjusts `this`. The dialogue has no
      * buttons.
      *
-     * @ghidraAddress 0x00219e80
+     * @ghidraAddress NTSC-U/C: 0x00219e80
+     * @ghidraAddress PAL: 0x0022c7b8
      */
     virtual void OnFadeInDone();
 
@@ -119,7 +120,8 @@ public:
      *
      * @param name The message screen that was dismissed.
      * @param nChoice The response.
-     * @ghidraAddress 0x002193e8
+     * @ghidraAddress NTSC-U/C: 0x002193e8
+     * @ghidraAddress PAL: 0x0022bb70
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -165,7 +167,8 @@ public:
      * merges the level lists of every identity and persona again, and shows `expansion_done`.
      *
      * @param flTime The current renderer time.
-     * @ghidraAddress 0x00218518
+     * @ghidraAddress NTSC-U/C: 0x00218518
+     * @ghidraAddress PAL: 0x0022aaa8
      */
     virtual void UpdateIdle(float flTime);
 

@@ -35,7 +35,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002d23b8
+     * @ghidraAddress NTSC-U/C: 0x002d23b8
+     * @ghidraAddress PAL: 0x002f4680
      */
     MetMemCardTypeScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -62,7 +63,8 @@ public:
      *
      * Slot 5.
      *
-     * @ghidraAddress 0x002d2b50
+     * @ghidraAddress NTSC-U/C: 0x002d2b50
+     * @ghidraAddress PAL: 0x002f4fa8
      */
     virtual void EnterAndShow();
 
@@ -123,7 +125,8 @@ public:
      *
      * Slot 38.
      *
-     * @ghidraAddress 0x002d26b0
+     * @ghidraAddress NTSC-U/C: 0x002d26b0
+     * @ghidraAddress PAL: 0x002f4a18
      */
     virtual void ResolveContainerViews();
 

@@ -1,6 +1,7 @@
 #include "met/metsolostagesscreen.h"
 
 #include <list>
+#include <string.h>
 #include <vector>
 
 #include "app/application.h"
@@ -9,6 +10,7 @@
 #include "game/gameparams.h"
 #include "game/globalsettings.h"
 #include "math/color.h"
+#include "math/vector3.h"
 #include "memcard/memcardconnectstate.h"
 #include "met/albumcache.h"
 #include "met/metbuttonlist.h"
@@ -20,6 +22,7 @@
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/button.h"
@@ -35,6 +38,12 @@
 #include "rnd/view.h"
 #include "script/configquery.h"
 #include "script/scripthost.h"
+
+#ifdef VIDEO_STANDARD_PAL
+#include <libscf.h>
+
+#include "os/hostmode.h"
+#endif
 
 namespace {
 
@@ -261,6 +270,34 @@ inline HxStr ConfigText(int nCode, const char *pszKey) {
     return text;
 }
 
+#ifdef VIDEO_STANDARD_PAL
+// Row of Rnd::Transformable::mLocalXfm that stores the translation.
+constexpr int kTranslationRow = 3;
+
+// The space between the end of a heading and its value text.
+constexpr float kStageValueGap = 5.0f;
+
+// Fill a heading from the text table and move its value text to just past the heading's end.
+inline Rnd::Text *
+PlaceValueAfterHeading(const char *pszHeading, MetStringId nId, const char *pszValue) {
+    Rnd::Text *pHeading = FindObject<Rnd::Text>(pszHeading);
+    const HxStr text = GetMetString(nId);
+    pHeading->SetShowing(1);
+    pHeading->SetText(text);
+    Vector3 origin;
+    memcpy(&origin, pHeading->mLocalXfm[kTranslationRow], sizeof(origin));
+    const Vector3 end = pHeading->CharPosition(text.mLen);
+
+    Rnd::Text *pValue = FindObject<Rnd::Text>(pszValue);
+    Vector3 position;
+    memcpy(&position, pValue->mLocalXfm[kTranslationRow], sizeof(position));
+    position.x = origin.x + end.x + kStageValueGap;
+    memcpy(pValue->mLocalXfm[kTranslationRow], &position, sizeof(position));
+    pValue->mDirty = 1;
+    return pValue;
+}
+#endif
+
 // Points a material's first stage at a texture.
 inline void ShowTex(Rnd::Mat *pMat, Rnd::Tex *pTex) {
     pMat->mStages[kTexStage].SetTex(pTex);
@@ -313,7 +350,7 @@ inline void AddCardSlot(std::vector<MemcardConnectState> &slots) {
 
 } // namespace
 
-// 0x0039e308
+// NTSC-U/C: 0x0039e308, PAL: 0x003d0890
 MetSoloStagesScreen::MetSoloStagesScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mLeftArrow(nullptr), mRightArrow(nullptr), mScrollLeftTime(0.0f), mScrollRightTime(0.0f),
@@ -322,7 +359,7 @@ MetSoloStagesScreen::MetSoloStagesScreen(MetRenderer *pRenderer, int nPriority)
       mLabelPair(HxStr(kFirstLabelTex), HxStr(kSecondLabelTex)) {
     mStageList = new MetButtonList();
     mIndicatorList = new MetButtonList();
-    mHelpKeys.push_back(HxStr(kLevelsPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHLevels, kLevelsPrompt));
 }
 
 // 0x0039ef80
@@ -337,7 +374,7 @@ MetSoloStagesScreen *MetSoloStagesScreen::New(MetRenderer *pRenderer, int nPrior
     return new MetSoloStagesScreen(pRenderer, nPriority);
 }
 
-// 0x0039f720
+// NTSC-U/C: 0x0039f720, PAL: 0x003d1df0
 void MetSoloStagesScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     BuildButtons();
@@ -350,12 +387,18 @@ void MetSoloStagesScreen::ResolveContainerViews() {
     mWarningText = FindObject<Rnd::Text>(kWarningText);
     mWarningText->SetText(HxStr(kNoText));
     mStageBonusGroup = FindObject<Rnd::View>(kStageBonusGroup);
+#ifdef VIDEO_STANDARD_PAL
+    mStageBonusText =
+        PlaceValueAfterHeading(kStageBonusHeading, kMetStrStageScore, kStageBonusValue);
+    mStageBeatText = PlaceValueAfterHeading(kStageBeatHeading, kMetStrStageBeat, kStageBeatValue);
+#else
     FindObject<Rnd::Text>(kStageBonusHeading)
         ->SetText(ConfigText(kLabelConfigCode, kStageBonusLabel));
     FindObject<Rnd::Text>(kStageBeatHeading)
         ->SetText(ConfigText(kLabelConfigCode, kStageBeatLabel));
     mStageBonusText = FindObject<Rnd::Text>(kStageBonusValue);
     mStageBeatText = FindObject<Rnd::Text>(kStageBeatValue);
+#endif
     mTvView = FindObject<Rnd::View>(kTvView);
     mTvPanelAnim = FindObject<Rnd::TransAnim>(kTvPanelAnim);
     mTvPanelAnim->SetFrame(kPanelHiddenFrame);
@@ -387,20 +430,25 @@ void MetSoloStagesScreen::ResolveContainerViews() {
     mUnusedFirst = 0;
 }
 
-// 0x003a09d0
+// NTSC-U/C: 0x003a09d0, PAL: 0x003d34a8
 void MetSoloStagesScreen::BuildButtons() {
     mStageButtonsView = FindObject<Rnd::View>(kStageButtonsView);
 
     for (int i = 0; i < kNumberedStageCount; ++i) {
         const int nStage = i + 1;
         HxStr name(FormatString(kStageButtonFormat, nStage));
+#ifdef VIDEO_STANDARD_PAL
+        mStageList->Add(name, GetMetString(kMetStrStage1 + i));
+#else
         mStageList->Add(name,
                         ConfigText(kLabelConfigCode, FormatString(kStageLabelFormat, nStage)));
+#endif
         Rnd::Mesh *pWire = FindObject<Rnd::Mesh>(FormatString(kStageWireFormat, nStage));
         mStageWires.push_back(pWire);
         pWire->SetShowing(0);
     }
-    mStageList->Add(HxStr(kCustomStageButton), ConfigText(kLabelConfigCode, kCustomStageLabel));
+    mStageList->Add(HxStr(kCustomStageButton),
+                    MetConfigText(kMetStrSsCustom, kLabelConfigCode, kCustomStageLabel));
 
     for (int i = 0; i < static_cast<int>(mStageList->mButtons.size()); ++i) {
         mSelectedLevel[i] = 0;
@@ -803,17 +851,20 @@ void MetSoloStagesScreen::ShowLevelTexts(int nShowing) {
     mStatusSlots[kTvRight].mMesh->SetShowing(nShowing);
 }
 
-// 0x003a3310
+// NTSC-U/C: 0x003a3310, PAL: 0x003d64a8
 void MetSoloStagesScreen::ShowWarning(bool bShow) {
     if (bShow) {
         mWarningText->SetShowing(1);
         const int nStage = mStageList->mSelected + 1;
         if (nStage == kStage4) {
-            mWarningText->SetText(ConfigText(kLabelConfigCode, kStage4Warning));
+            mWarningText->SetText(
+                MetConfigText(kMetStrStage4easywarn, kLabelConfigCode, kStage4Warning));
         } else if (nStage == kStage5) {
-            mWarningText->SetText(ConfigText(kLabelConfigCode, kStage5Warning));
+            mWarningText->SetText(
+                MetConfigText(kMetStrStage5easywarn, kLabelConfigCode, kStage5Warning));
         } else {
-            mWarningText->SetText(ConfigText(kLabelConfigCode, kCustomWarning));
+            mWarningText->SetText(
+                MetConfigText(kMetStrCustomWarning, kLabelConfigCode, kCustomWarning));
         }
     } else {
         mWarningText->SetShowing(0);
@@ -869,7 +920,7 @@ void MetSoloStagesScreen::StyleLevel(int bStageLocked, const HxStr &levelName) {
     ShowTex(mStatusSlots[kTvRight].mMat, mLevelStateTexs[nState]);
 }
 
-// 0x003a3c68
+// NTSC-U/C: 0x003a3c68, PAL: 0x003d6f30
 void MetSoloStagesScreen::ShowLevelDetails() {
     if (mViewsUnresolved != 0) {
         return;
@@ -895,7 +946,7 @@ void MetSoloStagesScreen::ShowLevelDetails() {
     mLabelText->SetText(HxStr(FormatString(kLabelFormat, TextOf(artist), TextOf(title))));
 
     if (IsLevelLocked(nLevel) != 0) {
-        const HxStr message(ConfigText(kLabelConfigCode, kBonusMessage));
+        const HxStr message(MetConfigText(kMetStrBonusMsg, kLabelConfigCode, kBonusMessage));
         const int nAlbumValue = GetAlbumLevelValue(
             nStage, Application::shared()->GetGameManager()->GetParams()->mDifficulty);
         const int nStageLevelCount = GetStageList(nStage + 1)->size();
@@ -912,7 +963,12 @@ void MetSoloStagesScreen::ShowLevelDetails() {
         (Application::shared()->GetGameMode() == kGameModeSolo)) {
         const GameParams params(CurrentParams());
         const int nHighScore = FirstPersonaStats().GetLevelHighScore(params.mDifficulty, level);
+#ifdef VIDEO_STANDARD_PAL
+        const HxStr format(GetMetString(kMetStrHighscore));
+        mScoreText->SetText(HxStr(FormatString(TextOf(format), nHighScore)));
+#else
         mScoreText->SetText(HxStr(FormatString(kHighScoreFormat, nHighScore)));
+#endif
     } else {
         mScoreText->SetText(HxStr(kNoText));
     }
@@ -987,7 +1043,7 @@ void MetSoloStagesScreen::StartScroll() {
     }
 }
 
-// 0x003a5810
+// NTSC-U/C: 0x003a5810, PAL: 0x003d8f80
 void MetSoloStagesScreen::EnterAndShow() {
     SetShowing(0);
     bool bSaveFirst = false;
@@ -1011,7 +1067,7 @@ void MetSoloStagesScreen::EnterAndShow() {
         MetFrontEndState *pState = MetFrontEndState::shared();
         pState->mLastTransition = pState->mPendingTransition;
         pState->mPendingTransition = 0;
-        MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
+        MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kPromptLayout));
         PushNamedScreen(HxStr(kHelpScreen));
         mRenderer->SetActivePanel(this);
         GameParams params(CurrentParams());
@@ -1027,23 +1083,41 @@ void MetSoloStagesScreen::EnterAndShow() {
     HxStr title;
     const GameParams params(CurrentParams());
     if (Application::shared()->GetGameManager()->GetGameMode() == kGameModeSolo) {
-        mode = ConfigText(kCaptionConfigCode, kSoloCaption);
+        mode = MetConfigText(kMetStrTSolo, kCaptionConfigCode, kSoloCaption);
     } else {
-        mode = ConfigText(kCaptionConfigCode, kMultiCaption);
+        mode = MetConfigText(kMetStrTMulti, kCaptionConfigCode, kMultiCaption);
     }
     if (params.mPlayMode == kPlayModeGame) {
-        kind = ConfigText(kCaptionConfigCode, kGameCaption);
+        kind = MetConfigText(kMetStrTGame, kCaptionConfigCode, kGameCaption);
         difficulty = DifficultyName(params.mDifficulty);
     } else {
-        kind = ConfigText(kCaptionConfigCode, kRemixCaption);
+        kind = MetConfigText(kMetStrTRemix, kCaptionConfigCode, kRemixCaption);
     }
-    stages = ConfigText(kCaptionConfigCode, kStagesCaption);
+    stages = MetConfigText(kMetStrTStages, kCaptionConfigCode, kStagesCaption);
+#ifdef VIDEO_STANDARD_PAL
+    // The French and Spanish game titles omit the kind, and the Spanish remix title puts the kind
+    // first.
+    if (params.mPlayMode == kPlayModeGame) {
+        if ((GetLanguage() == SCE_SPANISH_LANGUAGE) || (GetLanguage() == SCE_FRENCH_LANGUAGE)) {
+            title =
+                FormatString(kRemixTitleFormat, TextOf(mode), TextOf(difficulty), TextOf(stages));
+        } else {
+            title = FormatString(
+                kGameTitleFormat, TextOf(mode), TextOf(kind), TextOf(difficulty), TextOf(stages));
+        }
+    } else if (GetLanguage() == SCE_SPANISH_LANGUAGE) {
+        title = FormatString(kRemixTitleFormat, TextOf(kind), TextOf(mode), TextOf(stages));
+    } else {
+        title = FormatString(kRemixTitleFormat, TextOf(mode), TextOf(kind), TextOf(stages));
+    }
+#else
     if (params.mPlayMode == kPlayModeGame) {
         title = FormatString(
             kGameTitleFormat, TextOf(mode), TextOf(kind), TextOf(difficulty), TextOf(stages));
     } else {
         title = FormatString(kRemixTitleFormat, TextOf(mode), TextOf(kind), TextOf(stages));
     }
+#endif
 
     ShowLevelTexts(0);
     ShowWarning(false);
@@ -1087,7 +1161,7 @@ void MetSoloStagesScreen::EnterAndShow() {
         }
     }
 
-    MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kPromptLayout));
     MetScreen::EnterAndShow();
 }
 

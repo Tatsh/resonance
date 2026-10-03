@@ -1,5 +1,6 @@
 #include "met/metjukeboxcustomremixesscreen.h"
 
+#include "met/metstrings.h"
 #include "met/scrollinglist.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
@@ -65,7 +66,7 @@ MetJukeboxCustomRemixesScreen::MetJukeboxCustomRemixesScreen(MetRenderer *pRende
     mCatalogueKey = 0;
 }
 
-// 0x002250c0
+// NTSC-U/C: 0x002250c0, PAL: 0x002380c8
 void MetJukeboxCustomRemixesScreen::ResolveContainerViews() {
     MetJukeboxBaseScreen::ResolveContainerViews();
 
@@ -109,9 +110,12 @@ void MetJukeboxCustomRemixesScreen::ResolveContainerViews() {
     mPictureMesh = dynamic_cast<Rnd::Mesh *>(Find(kPictureMesh));
     mLogoMesh = dynamic_cast<Rnd::Mesh *>(Find(kLogoMesh));
     mWarningText = dynamic_cast<Rnd::Text *>(Find(kWarningText));
-    HxStr warning = QueryConfigString(kPromptConfigCode, kWarningPrompt);
+    HxStr warning = MetConfigText(kMetStrRemixUnavailDisc, kPromptConfigCode, kWarningPrompt);
     mWarningText->SetText(warning);
     mPlayListCaption = dynamic_cast<Rnd::Text *>(Find(kPlayListCaption));
+#ifdef VIDEO_STANDARD_PAL
+    mPlayListCaption->SetText(GetMetString(kMetStrJbPlaylist));
+#endif
 }
 
 // 0x0022a850

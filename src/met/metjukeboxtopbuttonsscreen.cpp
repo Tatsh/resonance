@@ -6,6 +6,7 @@
 #include "met/metremixmanager.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/async.h"
 #include "os/hxstr.h"
 #include "rnd/asyncloader.h"
@@ -61,11 +62,6 @@ static const char *const kLeftGizmoScreen = "MetLeftGizmoScreen";
 static const char *const kTitleScreen = "MetScreenTitleScreen";
 static const char *const kRemixTypeScreen = "MetRemixTypeScreen";
 
-inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text = QueryConfigString(nCode, pszKey);
-    return text;
-}
-
 inline void ShowScreen(const char *pszName, int nShowing) {
     MetScreen::FindScreenByName(HxStr(pszName))->SetShowing(nShowing);
 }
@@ -92,13 +88,14 @@ MetJukeboxTopButtonsScreen *MetJukeboxTopButtonsScreen::New(MetRenderer *pRender
     return new MetJukeboxTopButtonsScreen(pRenderer, nPriority);
 }
 
-// 0x00240e28
+// NTSC-U/C: 0x00240e28, PAL: 0x00255950
 void MetJukeboxTopButtonsScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    mButtons->Add(HxStr(kSavedRemixesObject), HxStr(kSavedRemixesLabel));
-    mButtons->Add(HxStr(kFactoryRemixesObject), HxStr(kFactoryRemixesLabel));
-    mButtons->Add(HxStr(kEditPlaylistObject), HxStr(kEditPlaylistLabel));
-    mButtons->Add(HxStr(kDoneObject), HxStr(kDoneLabel));
+    mButtons->Add(HxStr(kSavedRemixesObject), MetText(kMetStrJbbSavedRemixes, kSavedRemixesLabel));
+    mButtons->Add(HxStr(kFactoryRemixesObject),
+                  MetText(kMetStrJbbFactoryRemixes, kFactoryRemixesLabel));
+    mButtons->Add(HxStr(kEditPlaylistObject), MetText(kMetStrJbbEditPlaylist, kEditPlaylistLabel));
+    mButtons->Add(HxStr(kDoneObject), MetText(kMetStrJbbDone, kDoneLabel));
     mButtons->SetSelected(kSavedRemixesButton);
 }
 
@@ -112,7 +109,7 @@ void MetJukeboxTopButtonsScreen::OnExitFinished() {
     }
 }
 
-// 0x00241320
+// NTSC-U/C: 0x00241320, PAL: 0x00255f98
 void MetJukeboxTopButtonsScreen::ShowSelectedPanel() {
     const int nSelected = mButtons->mSelected;
     ShowScreen(kCustomRemixesScreen, kHidden);
@@ -126,14 +123,16 @@ void MetJukeboxTopButtonsScreen::ShowSelectedPanel() {
         ShowScreen(kCustomRemixesScreen, kShown);
         FindScreenByName(HxStr(kCustomRemixesScreen))->OnPanelActivated();
         mCommandTargetScreen = kCustomRemixesScreen;
-        MetScreenTitleScreen::ReplaceTitle(ConfigText(kTitleConfigCode, kCreateTitleKey));
+        MetScreenTitleScreen::ReplaceTitle(
+            MetConfigText(kMetStrTMetJukeboxCreateTitle, kTitleConfigCode, kCreateTitleKey));
         break;
 
     case kFactoryRemixesButton:
         ShowScreen(kFactoryRemixesScreen, kShown);
         FindScreenByName(HxStr(kFactoryRemixesScreen))->OnPanelActivated();
         mCommandTargetScreen = kFactoryRemixesScreen;
-        MetScreenTitleScreen::ReplaceTitle(ConfigText(kTitleConfigCode, kCreateTitleKey));
+        MetScreenTitleScreen::ReplaceTitle(
+            MetConfigText(kMetStrTMetJukeboxCreateTitle, kTitleConfigCode, kCreateTitleKey));
         break;
 
     case kEditPlaylistButton:
@@ -141,14 +140,16 @@ void MetJukeboxTopButtonsScreen::ShowSelectedPanel() {
         FindScreenByName(HxStr(kEditPlaylistScreen))->OnPanelActivated();
         ShowScreen(kLowerLeftScreen, kShown);
         mCommandTargetScreen = kEditPlaylistScreen;
-        MetScreenTitleScreen::ReplaceTitle(ConfigText(kTitleConfigCode, kEditTitleKey));
+        MetScreenTitleScreen::ReplaceTitle(
+            MetConfigText(kMetStrTMetJukeboxEditTitle, kTitleConfigCode, kEditTitleKey));
         break;
 
     case kDoneButton:
         ShowScreen(kEditPlaylistScreen, kShown);
         ShowScreen(kDoneScreen, kShown);
         mCommandTargetScreen = kDoneScreen;
-        MetScreenTitleScreen::ReplaceTitle(ConfigText(kTitleConfigCode, kPlayTitleKey));
+        MetScreenTitleScreen::ReplaceTitle(
+            MetConfigText(kMetStrTMetJukeboxPlayTitle, kTitleConfigCode, kPlayTitleKey));
         break;
 
     default:
@@ -156,17 +157,18 @@ void MetJukeboxTopButtonsScreen::ShowSelectedPanel() {
     }
 }
 
-// 0x00241b08
+// NTSC-U/C: 0x00241b08, PAL: 0x00256940
 void MetJukeboxTopButtonsScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
     mExitChoice = kExitNotCancelled;
-    MetScreenTitleScreen::SetTitle(ConfigText(kTitleConfigCode, kTitleKey));
+    MetScreenTitleScreen::SetTitle(
+        MetConfigText(kMetStrTMetJukeboxTitle, kTitleConfigCode, kTitleKey));
 
     if (MetFrontEndState::shared()->mPendingTransition != 0) {
         MetFrontEndState *pState = MetFrontEndState::shared();
         pState->mLastTransition = pState->mPendingTransition;
         pState->mPendingTransition = 0;
-        MetHelpScreen::SelectPreset(HxStr(kStandardPreset));
+        MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kStandardPreset));
         PushNamedScreen(HxStr(kHelpScreen));
         mRenderer->SetActivePanel(this);
     }

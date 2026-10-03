@@ -17,7 +17,8 @@ class View;
  * Screen that picks a memory card to load from.
  *
  * Its RTTI descriptor is at `0x00901f20`. It has two public non-virtual bases at fixed offsets,
- * MetMemDetectScreen at `+0x00` and MetMemCardPickerUser at `+160`. New() allocates 0xe8 bytes.
+ * MetMemDetectScreen at `+0x00` and MetMemCardPickerUser at `+160`. New() allocates 0xe8 bytes,
+ * and 0xec in the European release.
  *
  * The class emits **two** vtables, the 44-entry primary at `0x007fbde8` and the 21-entry
  * MemcardUser table at `0x007fbd38` that adjusts `this` by `-140`. It emits none for
@@ -45,7 +46,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002cb8c8
+     * @ghidraAddress NTSC-U/C: 0x002cb8c8
+     * @ghidraAddress PAL: 0x002ec7c8
      */
     MetMemCardLoadScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -89,9 +91,12 @@ public:
     /**
      * Hide the screen, then probe again after MetConfigOptionsButtonsScreen or list the cards.
      *
-     * Slot 5.
+     * Slot 5. The European release first records MetFrontEndState::mUsingMemcard in
+     * mUsingMemcardOnEnter, and after MetConfigOptionsButtonsScreen it raises
+     * `new_card_warning` with CANCEL and OK instead of probing.
      *
-     * @ghidraAddress 0x002cc9c0
+     * @ghidraAddress NTSC-U/C: 0x002cc9c0
+     * @ghidraAddress PAL: 0x002ede18
      */
     virtual void EnterAndShow();
 
@@ -121,7 +126,8 @@ public:
      *
      * Slot 33.
      *
-     * @ghidraAddress 0x002d2018
+     * @ghidraAddress NTSC-U/C: 0x002d2018
+     * @ghidraAddress PAL: 0x002f41f0
      */
     virtual void OnEnterFinished();
 
@@ -141,7 +147,8 @@ public:
      *
      * Slot 38.
      *
-     * @ghidraAddress 0x002cbeb8
+     * @ghidraAddress NTSC-U/C: 0x002cbeb8
+     * @ghidraAddress PAL: 0x002ece58
      */
     virtual void ResolveContainerViews();
 
@@ -190,7 +197,8 @@ public:
      *
      * Slot 39.
      *
-     * @ghidraAddress 0x002ce2c0
+     * @ghidraAddress NTSC-U/C: 0x002ce2c0
+     * @ghidraAddress PAL: 0x002f0048
      */
     virtual void StartDetect();
 
@@ -200,26 +208,53 @@ public:
      * Slot 41. When the first card listed is in port 2 or slot `1-B`, the `mem_detect_special`
      * text names it together with NextCardSlot(). Otherwise the `mem_check12` text appears.
      *
-     * @ghidraAddress 0x002cd4e0
+     * @ghidraAddress NTSC-U/C: 0x002cd4e0
+     * @ghidraAddress PAL: 0x002ef098
      */
     virtual void OnNoCard();
 
     /**
      * Refresh the card list and bring the screen up.
      *
-     * Slot 42.
+     * Slot 42. The European release first restores MetFrontEndState::mUsingMemcard when
+     * mUsingMemcardOnEnter is 1.
      *
-     * @ghidraAddress 0x002cdce0
+     * @ghidraAddress NTSC-U/C: 0x002cdce0
+     * @ghidraAddress PAL: 0x002ef9b0
      */
     virtual void OnDetectFinished();
 
+#ifdef VIDEO_STANDARD_PAL
+    /**
+     * Act on the choice made in `new_card_warning`, and pass every other dialogue to the base.
+     *
+     * Slot 15. OK probes through Present(), and CANCEL returns to MetConfigOptionsButtonsScreen.
+     * The North American release does not override the slot.
+     *
+     * @param name The dialogue name.
+     * @param nChoice The index of the button chosen.
+     * @ghidraAddress PAL: 0x002f0368
+     */
+    virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
+
+    /**
+     * Close the probe's dialogue instead of offering to format an unformatted card.
+     *
+     * Slot 43. The North American release does not have the slot.
+     *
+     * @param slot The card, unread by the body.
+     * @ghidraAddress PAL: 0x002f4290
+     */
+    virtual void ShowFormatCheck(const MemcardConnectState &slot);
+#endif
+
 private:
-    // 0x002ccab8
+    // NTSC-U/C: 0x002ccab8, PAL: 0x002ee410
     // Sets the panel heading, refreshes the card list, the arrows, and the selection, and enters.
     // The title is inferred.
     void ShowCards();
 
-    // 0x002ccc48
+    // NTSC-U/C: 0x002ccc48, PAL: 0x002ee5f8
     // Shows the selected card's name and free space, or the no-card instructions. The title is
     // inferred.
     void ShowSelection();
@@ -244,8 +279,12 @@ private:
     std::vector<Rnd::Object *> mUnusedObjects2; // +0xc4
     int mSelected;                              // +0xd0, the index into mCards
     int mUnused;                                // +0xd4, zeroed by the constructor and never read
-    std::vector<MemcardConnectState> mCards;    // +0xd8
-    MetMemCardPickerUser *mPickerUser;          // +0xe4
+#ifdef VIDEO_STANDARD_PAL
+    // MetFrontEndState::mUsingMemcard as EnterAndShow() found it. The constructor does not set it.
+    int mUsingMemcardOnEnter; // +0xd8
+#endif
+    std::vector<MemcardConnectState> mCards; // +0xd8, +0xdc in the European release
+    MetMemCardPickerUser *mPickerUser;       // +0xe4, +0xe8 in the European release
 };
 
 inline void MetMemCardLoadScreen::OpenPicker(MetMemCardPickerUser *pUser) {

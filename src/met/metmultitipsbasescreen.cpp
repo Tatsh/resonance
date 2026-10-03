@@ -3,9 +3,9 @@
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -21,14 +21,9 @@ constexpr int kTitleConfigCode = 0x269;
 // A command code above MetScreenCommandCode's range, which the tip pages treat as a quit.
 constexpr int kCommandQuit = 8;
 
-inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text = QueryConfigString(nCode, pszKey);
-    return text;
-}
-
 } // namespace
 
-// 0x00306cd8
+// NTSC-U/C: 0x00306cd8, PAL: 0x0032b700
 MetMultiTipsBaseScreen::MetMultiTipsBaseScreen(MetRenderer *pRenderer,
                                                int nPriority,
                                                const HxStr &name,
@@ -38,7 +33,7 @@ MetMultiTipsBaseScreen::MetMultiTipsBaseScreen(MetRenderer *pRenderer,
                                                const HxStr &next)
     : MetScreen(pRenderer, nPriority, name, HxStr(kDirectory), file), mPreviousScreen(previous),
       mNextScreen(next), mPage(nPage) {
-    mHelpKeys.push_back(HxStr(kHelpPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHMultiTipHelp, kHelpPrompt));
 }
 
 // 0x00306ee0
@@ -68,12 +63,13 @@ void MetMultiTipsBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x003070f0
+// NTSC-U/C: 0x003070f0, PAL: 0x0032bbc8
 void MetMultiTipsBaseScreen::EnterAndShow() {
-    HxStr title = ConfigText(kTitleConfigCode, kTitleKey) + FormatString(kPageFormat, mPage);
+    HxStr title = MetConfigText(kMetStrTMultiTips, kTitleConfigCode, kTitleKey) +
+                  FormatString(kPageFormat, mPage);
     MetScreenTitleScreen::SetTitle(title);
     MetScreen::EnterAndShow();
-    MetHelpScreen::SelectPreset(HxStr(kHelpLayout));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHMultiTipsTab, kHelpLayout));
 }
 
 // 0x003072a0

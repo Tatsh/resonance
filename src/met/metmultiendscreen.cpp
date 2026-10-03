@@ -5,8 +5,8 @@
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -94,27 +94,28 @@ void MetMultiEndScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x002f6158
+// NTSC-U/C: 0x002f6158, PAL: 0x00319fd8
 void MetMultiEndScreen::EnterAndShow() {
     mButtonList->Clear();
 
     const HxStr againButton(kAgainButtonObject);
-    HxStr againLabel = QueryConfigString(kPromptConfigCode, kAgainPrompt);
+    HxStr againLabel = MetConfigText(kMetStrEgmgAgain, kPromptConfigCode, kAgainPrompt);
     mButtonList->Add(againButton, againLabel);
 
     const HxStr newButton(kNewButtonObject);
-    HxStr newLabel = QueryConfigString(kPromptConfigCode, kNewPrompt);
+    HxStr newLabel = MetConfigText(kMetStrEgmgNew, kPromptConfigCode, kNewPrompt);
     mButtonList->Add(newButton, newLabel);
 
     mHelpKeys.clear();
-    mHelpKeys.push_back(HxStr(kAgainPrompt));
-    mHelpKeys.push_back(HxStr(kNewPrompt));
+    // The European release stores the help texts themselves rather than their keys.
+    mHelpKeys.push_back(MetText(kMetStrHEgmgAgain, kAgainPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHEgmgNew, kNewPrompt));
 
     {
-        HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
+        HxStr title = MetConfigText(kMetStrTMultiGameOver, kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     }
-    MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHNoBackTitle, kPromptLayout));
     PushNamedScreen(HxStr(kHelpScreen));
     PushNamedScreen(HxStr(kMultiStatsScreen));
     mRenderer->SetActivePanel(this);

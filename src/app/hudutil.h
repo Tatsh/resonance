@@ -36,7 +36,8 @@ enum HudItemKind {
  *
  * @param nKind The item kind.
  * @return The name.
- * @ghidraAddress 0x00415ed8
+ * @ghidraAddress NTSC-U/C: 0x00415ed8
+ * @ghidraAddress PAL: 0x0044fa40
  */
 HxStr HudPowerupName(int nKind);
 

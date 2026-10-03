@@ -8,6 +8,7 @@
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "script/configquery.h"
 
@@ -77,16 +78,16 @@ MetModeScreen::MetModeScreen(MetRenderer *pRenderer, int nPriority)
       mButtonList(new MetButtonList()) {
 }
 
-// 0x002e7490
+// NTSC-U/C: 0x002e7490, PAL: 0x0030a520
 void MetModeScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
     const HxStr gameButton(kGameButtonObject);
-    HxStr gameLabel = QueryConfigString(kLabelConfigCode, kGameLabelKey);
+    HxStr gameLabel = MetConfigText(kMetStrMsGame, kLabelConfigCode, kGameLabelKey);
     mButtonList->Add(gameButton, gameLabel);
 
     const HxStr jamButton(kJamButtonObject);
-    HxStr jamLabel = QueryConfigString(kLabelConfigCode, kJamLabelKey);
+    HxStr jamLabel = MetConfigText(kMetStrMsJam, kLabelConfigCode, kJamLabelKey);
     mButtonList->Add(jamButton, jamLabel);
 }
 
@@ -126,7 +127,7 @@ void MetModeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x002e79b8
+// NTSC-U/C: 0x002e79b8, PAL: 0x0030ab70
 void MetModeScreen::EnterAndShow() {
     HxStr prefix;
     const GameParams params(*Application::shared()->GetGameManager()->GetParams());
@@ -134,20 +135,20 @@ void MetModeScreen::EnterAndShow() {
 
     mHelpKeys.clear();
     if (Application::shared()->GetGameManager()->GetGameMode() == kGameModeSolo) {
-        HxStr solo = QueryConfigString(kTitleConfigCode, kSoloTitleKey);
+        HxStr solo = MetConfigText(kMetStrTSolo, kTitleConfigCode, kSoloTitleKey);
         prefix = solo;
-        mHelpKeys.push_back(HxStr(kSoloGamePrompt));
-        mHelpKeys.push_back(HxStr(kSoloJamPrompt));
+        mHelpKeys.push_back(MetText(kMetStrHSmsGame, kSoloGamePrompt));
+        mHelpKeys.push_back(MetText(kMetStrHSmsJam, kSoloJamPrompt));
     } else {
-        HxStr multi = QueryConfigString(kTitleConfigCode, kMultiTitleKey);
+        HxStr multi = MetConfigText(kMetStrTMulti, kTitleConfigCode, kMultiTitleKey);
         prefix = multi;
-        mHelpKeys.push_back(HxStr(kMultiGamePrompt));
-        mHelpKeys.push_back(HxStr(kMultiJamPrompt));
+        mHelpKeys.push_back(MetText(kMetStrHMmsGame, kMultiGamePrompt));
+        mHelpKeys.push_back(MetText(kMetStrHMmsJam, kMultiJamPrompt));
     }
     MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
-    MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kPromptLayout));
 
-    HxStr mode = QueryConfigString(kTitleConfigCode, kModeTitleKey);
+    HxStr mode = MetConfigText(kMetStrTMode, kTitleConfigCode, kModeTitleKey);
     MetScreenTitleScreen::SetTitle(prefix + mode);
 
     MetScreen::EnterAndShow();

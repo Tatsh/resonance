@@ -111,9 +111,10 @@ public:
      *
      * Slot 33. On arrival from MetLogoScreen, or with nothing selected, the return screen is
      * cleared and the solo button is selected once the tutorial is complete, the tutorial button
-     * otherwise.
+     * otherwise. The European release then activates this screen's panel.
      *
-     * @ghidraAddress 0x002c72a0
+     * @ghidraAddress NTSC-U/C: 0x002c72a0
+     * @ghidraAddress PAL: 0x002e7e10
      */
     virtual void OnEnterFinished();
 
@@ -130,17 +131,20 @@ public:
     /**
      * Resolve the base views and add the four buttons with their labels and help texts.
      *
-     * Slot 38.
+     * Slot 38. The European release looks the labels and the help texts up in the current
+     * language, and the help list stores the help texts rather than their keys.
      *
-     * @ghidraAddress 0x002c62a0
+     * @ghidraAddress NTSC-U/C: 0x002c62a0
+     * @ghidraAddress PAL: 0x002e6ad0
      */
     virtual void ResolveContainerViews();
 
 private:
-    // 0x002c7030
+    // NTSC-U/C: 0x002c7030, PAL: 0x002e7b08
     // Promote a pending transition, bringing up the top logo, the small left gizmo, and
     // the help screen and activating this screen, then select the title preset and show the
-    // screen. The title is inferred.
+    // screen. The European release looks the preset up in the current language. The title is
+    // inferred.
     void EnterMenu();
 
     // 0x002c7520

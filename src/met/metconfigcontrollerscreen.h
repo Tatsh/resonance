@@ -56,7 +56,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x001ff1e0
+     * @ghidraAddress NTSC-U/C: 0x001ff1e0
+     * @ghidraAddress PAL: 0x002066c8
      */
     MetConfigControllerScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -83,9 +84,11 @@ public:
      * The title reads the localised player label, the one-based controller number, and the
      * localised options label. The help screen takes the first row's prompt and the
      * `cc_save_back` layout when MetFrontEndState::mUsingMemcard is set, otherwise
-     * `standard_title`.
+     * `standard_title`. The European release instead takes `standard_title` when
+     * MetFrontEndState::mReturnScreen is either solo pause screen, and `cc_save_back` otherwise.
      *
-     * @ghidraAddress 0x00201478
+     * @ghidraAddress NTSC-U/C: 0x00201478
+     * @ghidraAddress PAL: 0x00209bd0
      */
     virtual void EnterAndShow();
 
@@ -118,7 +121,8 @@ public:
      * without storing. Command 7 plays the slide sound and shows the default mapping.
      *
      * @param pCommand The command.
-     * @ghidraAddress 0x00200ba8
+     * @ghidraAddress NTSC-U/C: 0x00200ba8
+     * @ghidraAddress PAL: 0x00208f98
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -185,23 +189,26 @@ public:
     /**
      * Resolve the rows, the two instruction texts, the button meshes, and the value texts.
      *
-     * The instruction texts are not tested for null.
+     * The instruction texts are not tested for null. The European release also fills the five
+     * action labels ahead of the instructions, and after them the two panel titles and the two
+     * stick rows' values.
      *
-     * @ghidraAddress 0x001fff40
+     * @ghidraAddress NTSC-U/C: 0x001fff40
+     * @ghidraAddress PAL: 0x00207618
      */
     virtual void ResolveContainerViews();
 
 private:
-    // 0x00201eb8
+    // NTSC-U/C: 0x00201eb8, PAL: 0x0020a818
     // Clears every other row that shows the same button as nRow. On a stick row it places the
     // other stick on the other stick row instead.
     void ClearDuplicateAssignment(int nRow);
 
-    // 0x00202070
+    // NTSC-U/C: 0x00202070, PAL: 0x0020ab70
     // Highlights the button mesh of the selected row's button.
     void UpdateButtonHighlight();
 
-    // 0x002022a0
+    // NTSC-U/C: 0x002022a0, PAL: 0x0020afa8
     // Shows one mapping in the value texts.
     void ShowConfig(ControllerConfig &config);
 
@@ -214,7 +221,7 @@ private:
     // discards it.
     int StoreConfig();
 
-    // 0x00206b30
+    // NTSC-U/C: 0x00206b30, PAL: 0x0020ae38
     // Maps a value text to a button index, or -1.
     int ButtonIndexForText(const HxStr &text) const;
 

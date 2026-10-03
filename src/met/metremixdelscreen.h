@@ -86,7 +86,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x003394a0
+     * @ghidraAddress NTSC-U/C: 0x003394a0
+     * @ghidraAddress PAL: 0x00363490
      */
     MetRemixDelScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -120,7 +121,8 @@ public:
      * the first prompt of MetScreen::mHelpKeys, sets the title to `mem_del_type` formatted with
      * the slot name, pushes the data screen, and runs the MetScreen body.
      *
-     * @ghidraAddress 0x0033a098
+     * @ghidraAddress NTSC-U/C: 0x0033a098
+     * @ghidraAddress PAL: 0x003642d0
      */
     virtual void EnterAndShow();
 
@@ -149,7 +151,8 @@ public:
      *
      * @param name The dialogue the screen requested, which the message screen reports back.
      * @param nChoice Which of the dialogue's buttons the user chose, counted from zero.
-     * @ghidraAddress 0x0033b280
+     * @ghidraAddress NTSC-U/C: 0x0033b280
+     * @ghidraAddress PAL: 0x00365798
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -228,7 +231,8 @@ public:
      * NextCardSlot() gives for mCardSlot. With only mDeletePending set, it raises the
      * `del_remix_ask` confirmation. Both confirmations offer `NO` and `YES`.
      *
-     * @ghidraAddress 0x0033ce00
+     * @ghidraAddress NTSC-U/C: 0x0033ce00
+     * @ghidraAddress PAL: 0x00367898
      */
     virtual void OnExitFinished();
 
@@ -240,7 +244,8 @@ public:
      * It then resolves the Rnd::Font objects `font1_pink_2` into mRowFont and
      * `font1_pinkgrey_2` into mDimRowFont. The title is not tested for null.
      *
-     * @ghidraAddress 0x00339880
+     * @ghidraAddress NTSC-U/C: 0x00339880
+     * @ghidraAddress PAL: 0x00363928
      */
     virtual void ResolveContainerViews();
 
@@ -276,7 +281,8 @@ public:
      * This override replaces the MetSaveRemix body, which is an alias for the empty slot 40 rather
      * than a stub.
      *
-     * @ghidraAddress 0x0033e7f0
+     * @ghidraAddress NTSC-U/C: 0x0033e7f0
+     * @ghidraAddress PAL: 0x00369938
      */
     virtual void OnDuplicateNameDeclined();
 
@@ -292,7 +298,8 @@ public:
      *
      * @param nPortSlot Which card port and slot reported, which the body does not read.
      * @param nStatus Zero on success.
-     * @ghidraAddress 0x0033dec0
+     * @ghidraAddress NTSC-U/C: 0x0033dec0
+     * @ghidraAddress PAL: 0x00368ea0
      */
     virtual void OnRemixLoaded(int nPortSlot, int nStatus);
 
@@ -306,7 +313,8 @@ public:
      *
      * @param nPortSlot Which card port and slot reported, which the body does not read.
      * @param nStatus Zero on success, and 15 for the failure the retry dialogue covers.
-     * @ghidraAddress 0x0033d768
+     * @ghidraAddress NTSC-U/C: 0x0033d768
+     * @ghidraAddress PAL: 0x003685d8
      */
     virtual void OnRemixDeleted(int nPortSlot, int nStatus);
 

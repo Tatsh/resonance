@@ -10,6 +10,7 @@
 #include "met/metremixmanager.h"
 #include "met/metremixrecord.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
@@ -83,10 +84,11 @@ T *FindObject(const char *pszName) {
     return pObject != nullptr ? dynamic_cast<T *>(pObject) : nullptr;
 }
 
-// Labels one heading text from configuration code 0x258. The lookup is not tested for null.
-inline void LabelHeading(const char *pszTextName, const char *pszLabelKey) {
+// Labels one heading text from configuration code 0x258, or from the current language in the
+// European release. The lookup is not tested for null.
+inline void LabelHeading(const char *pszTextName, MetStringId nLabelId, const char *pszLabelKey) {
     Rnd::Text *pText = FindObject<Rnd::Text>(pszTextName);
-    HxStr label = QueryConfigString(kLabelConfigCode, pszLabelKey);
+    HxStr label = MetConfigText(nLabelId, kLabelConfigCode, pszLabelKey);
     pText->SetText(label);
 }
 
@@ -107,19 +109,19 @@ MetSoloStatsScreen *MetSoloStatsScreen::New(MetRenderer *pRenderer, int nPriorit
     return new MetSoloStatsScreen(pRenderer, nPriority);
 }
 
-// 0x003af450
+// NTSC-U/C: 0x003af450, PAL: 0x003e3498
 void MetSoloStatsScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
-    LabelHeading(kPanelHeading, kPanelLabel);
-    LabelHeading(kScoreHeading, kScoreLabel);
-    LabelHeading(kSongHeading, kSongLabel);
-    LabelHeading(kSkillHeading, kSkillLabel);
-    LabelHeading(kFirstCompleteHeading, kFirstCompleteLabel);
-    LabelHeading(kSecondCompleteHeading, kSecondCompleteLabel);
-    LabelHeading(kFirstPhraseHeading, kFirstPhraseLabel);
-    LabelHeading(kSecondPhraseHeading, kSecondPhraseLabel);
-    LabelHeading(kHotHeading, kHotLabel);
+    LabelHeading(kPanelHeading, kMetStrEgsPanelLabel, kPanelLabel);
+    LabelHeading(kScoreHeading, kMetStrEgsScoreLabel, kScoreLabel);
+    LabelHeading(kSongHeading, kMetStrEgsSongLabel, kSongLabel);
+    LabelHeading(kSkillHeading, kMetStrEgsSkillLabel, kSkillLabel);
+    LabelHeading(kFirstCompleteHeading, kMetStrEgsComplete1Label, kFirstCompleteLabel);
+    LabelHeading(kSecondCompleteHeading, kMetStrEgsComplete2Label, kSecondCompleteLabel);
+    LabelHeading(kFirstPhraseHeading, kMetStrEgsPhrase1Label, kFirstPhraseLabel);
+    LabelHeading(kSecondPhraseHeading, kMetStrEgsPhrase2Label, kSecondPhraseLabel);
+    LabelHeading(kHotHeading, kMetStrEgsHottestLabel, kHotLabel);
 
     mFreqMat = FindObject<Rnd::Mat>(kFreqMat);
     mBurnTex = FreqAppearance::FindPersonaBurnTexture(kFirstBurnTexture);

@@ -54,7 +54,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002be968
+     * @ghidraAddress NTSC-U/C: 0x002be968
+     * @ghidraAddress PAL: 0x002de6a8
      */
     MetMCFreqDelScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -89,7 +90,8 @@ public:
      *
      * Slot 7.
      *
-     * @ghidraAddress 0x002bf750
+     * @ghidraAddress NTSC-U/C: 0x002bf750
+     * @ghidraAddress PAL: 0x002df6a8
      */
     virtual void OnPanelActivated();
 
@@ -151,7 +153,8 @@ public:
      *
      * Slot 36.
      *
-     * @ghidraAddress 0x002c01c0
+     * @ghidraAddress NTSC-U/C: 0x002c01c0
+     * @ghidraAddress PAL: 0x002e0310
      */
     virtual void OnExitFinished();
 
@@ -160,7 +163,8 @@ public:
      *
      * Slot 38.
      *
-     * @ghidraAddress 0x002bee90
+     * @ghidraAddress NTSC-U/C: 0x002bee90
+     * @ghidraAddress PAL: 0x002dec68
      */
     virtual void ResolveContainerViews();
 
@@ -171,7 +175,8 @@ public:
      *
      * @param state The card that was queried. The body does not read it.
      * @param nStatus The result, 0 when the card is present.
-     * @ghidraAddress 0x002c1d10
+     * @ghidraAddress NTSC-U/C: 0x002c1d10
+     * @ghidraAddress PAL: 0x002e2310
      */
     virtual void OnConnectState(MemcardConnectState state, int nStatus);
 
@@ -183,7 +188,8 @@ public:
      *
      * @param nPortSlot The card the personas came from. The body does not read it.
      * @param nStatus The result.
-     * @ghidraAddress 0x002c1510
+     * @ghidraAddress NTSC-U/C: 0x002c1510
+     * @ghidraAddress PAL: 0x002e19f8
      */
     virtual void OnPersonasLoaded(int nPortSlot, int nStatus);
 
@@ -224,14 +230,15 @@ public:
     void SetCardSlot(MemcardConnectState slot);
 
 private:
-    // 0x002bfa88
+    // NTSC-U/C: 0x002bfa88, PAL: 0x002dfa50
     // Builds the list on first use, fills it from mPersonas, heads the panel with the card, and
     // enters. The title is inferred.
     void ShowList();
 
-    // 0x002bff98
+    // NTSC-U/C: 0x002bff98, PAL: 0x002e0030
     // Shows the selected persona's username, face, and birthday, or hides the details when the
-    // list is empty. The title is inferred.
+    // list is empty. The European release first labels the information text with `Born:`. The
+    // title is inferred.
     void ShowSelection();
 
     Rnd::Text *mNameText;     // +0x98

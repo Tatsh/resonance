@@ -6,6 +6,7 @@
 #include "app/application.h"
 #include "game/gamemanagerimpl.h"
 #include "game/globalsettings.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "script/configquery.h"
 
@@ -50,22 +51,22 @@ std::vector<HxStr> &LevelNameStorage() {
 
 } // namespace
 
-// 0x003cc498
+// NTSC-U/C: 0x003cc498, PAL: 0x00403d48
 HxStr DifficultyName(int nDifficulty) {
     HxStr name("");
     switch (nDifficulty) {
     case kDifficultyEasy: {
-        HxStr text = QueryConfigString(kStringConfigCode, "ms_easy");
+        HxStr text = MetConfigText(kMetStrMsEasy, kStringConfigCode, "ms_easy");
         name = text;
         break;
     }
     case kDifficultyNormal: {
-        HxStr text = QueryConfigString(kStringConfigCode, "ms_normal");
+        HxStr text = MetConfigText(kMetStrMsNormal, kStringConfigCode, "ms_normal");
         name = text;
         break;
     }
     case kDifficultyExpert: {
-        HxStr text = QueryConfigString(kStringConfigCode, "ms_expert");
+        HxStr text = MetConfigText(kMetStrMsExpert, kStringConfigCode, "ms_expert");
         name = text;
         break;
     }
@@ -169,10 +170,15 @@ MemcardConnectState NextCardSlot(const MemcardConnectState &slot) {
     return next;
 }
 
-// 0x003d0b98
+// NTSC-U/C: 0x003d0b98, PAL: 0x00408990
 HxStr FirstCardSlotName() {
     HxStr name;
+#ifdef VIDEO_STANDARD_PAL
+    if (GlobalSettings::shared()->mCardSlots.size() != 0 &&
+        GlobalSettings::shared()->mCardSlots[0].mPortSlot == kCardPort1) {
+#else
     if (GlobalSettings::shared()->mCardSlots.size() != 0) {
+#endif
         name = GlobalSettings::shared()->mCardSlots[0].mSlotName;
     } else {
         name = "1";

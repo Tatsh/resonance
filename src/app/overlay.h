@@ -45,7 +45,8 @@ public:
      * animation starts. Jam mode pulses every badge icon. Records itself in g_pOverlay at the end.
      *
      * @param pRenderer The renderer that constructs this object.
-     * @ghidraAddress 0x0041c940
+     * @ghidraAddress NTSC-U/C: 0x0041c940
+     * @ghidraAddress PAL: 0x004573a0
      */
     Overlay(Renderer *pRenderer);
 
@@ -80,7 +81,8 @@ public:
      * message shows the demo prompt. The title is inferred from the caller.
      *
      * @param flFrame The song position, in MIDI ticks.
-     * @ghidraAddress 0x0041dd20
+     * @ghidraAddress NTSC-U/C: 0x0041dd20
+     * @ghidraAddress PAL: 0x00458bf0
      */
     void SetFrame(float flFrame);
 
@@ -135,11 +137,12 @@ private:
     // inlined. GameOverMsg. Runs script template 1001 when mTutorial is set.
     void OnGameOver();
 
-    // 0x0041e020
+    // NTSC-U/C: 0x0041e020, PAL: 0x00458fb0
     // WinMsg. Resets every multiplier to 1. With the win sequence enabled in
     // kGameModeSolo and a winner, starts the win message. Otherwise shows `YOU WIN`, `GAME OVER`,
     // or `YOU LOSE` on each track display at scale 2 for 3000, over two lines when there are two
-    // or more displays, with the freestyle prompt for a solo winner.
+    // or more displays, with the freestyle prompt for a solo winner. The European release also
+    // uses two lines in French.
     void OnWin(Message *pMsg);
 
     // 0x0041e9b8
@@ -148,12 +151,12 @@ private:
     // mTutorial is set.
     void OnChoosePowerup(Message *pMsg);
 
-    // 0x0041eba0
+    // NTSC-U/C: 0x0041eba0, PAL: 0x00459d40
     // CaughtPowerbarMsg. Shows `<kind>\nCAPTURED` in the player's text message for
     // 1500. HandleMessage() ignores a PowerupCountMsg outright.
     void OnCaughtPowerbar(Message *pMsg);
 
-    // 0x0041eda8
+    // NTSC-U/C: 0x0041eda8, PAL: 0x00459ff8
     // DeployedPowerupMsg. In kPlayModeGame, shows `<kind>\nDEPLOYED`, sets the
     // display's mDeployedPowerup, and shows `YOU GOT\nBUMPED!` on the target's display for a
     // bumper.
@@ -179,23 +182,23 @@ private:
     // TextMsg. Shows the message's text in the first track display's text message.
     void OnText(Message *pMsg);
 
-    // 0x0041f708
+    // NTSC-U/C: 0x0041f708, PAL: 0x0045acd0
     // LoopToggleMsg. Outside kPlayModeGame, shows the player's loop indicator and,
     // once the song is under way, `LOOP ON` or `LOOP OFF`. Runs script template 1011 when
     // mTutorial is set.
     void OnLoopToggle(Message *pMsg);
 
-    // 0x0041f440
+    // NTSC-U/C: 0x0041f440, PAL: 0x0045a918
     // AdvanceSectionToggleMsg. Without mTutorial, restyles the section blocks and,
     // outside playback, shows `ADVANCE TO\nNEXT SECTION` or `REPEAT\nSECTION` on every display.
     void OnAdvanceSectionToggle(Message *pMsg);
 
-    // 0x0041fba0
+    // NTSC-U/C: 0x0041fba0, PAL: 0x0045b1a8
     // ShowEraseEffectMsg. Shows `BAR ERASED` for a range under two bars and
     // `TRACK ERASED` otherwise.
     void OnShowEraseEffect(Message *pMsg);
 
-    // 0x0041f9a8
+    // NTSC-U/C: 0x0041f9a8, PAL: 0x0045af98
     // PlaybackToggleMsg. Records the state in mPlaybackOn, shows or hides the edit
     // prompt, runs the assembly and letterbox animations the matching way, hides the FreQ icons
     // during playback, and hides every text message.
@@ -211,7 +214,7 @@ private:
     // is set. The message is not read.
     void OnJamEffect();
 
-    // 0x0041fed8
+    // NTSC-U/C: 0x0041fed8, PAL: 0x0045b508
     // CatchMsg. In kPlayModeGame before the last bar, pulses the points readout to
     // the share of the phrase caught. In an easy solo game without mTutorial, counts catches on
     // bars that cannot be captured and shows `ROTATE TO\nNEW TRACK` at the third.
@@ -232,7 +235,7 @@ private:
     // hides the win message's prompt when the game fades out.
     void OnFadeGame(Message *pMsg);
 
-    // 0x00420588
+    // NTSC-U/C: 0x00420588, PAL: 0x0045b808
     // PlayersTrackNeutralizedMsg. Shows `NEUTRALIZED!\n<points> POINTS`.
     void OnPlayersTrackNeutralized(Message *pMsg);
 
@@ -241,7 +244,7 @@ private:
     // plus the bonus multiplier and selects the hot material while a bonus applies.
     void OnMultiplierState(Message *pMsg);
 
-    // 0x0041f138
+    // NTSC-U/C: 0x0041f138, PAL: 0x0045a470
     // PowerupFailedMsg. Shows the failure text for the powerup kind at scale 0.8.
     void OnPowerupFailed(Message *pMsg);
 

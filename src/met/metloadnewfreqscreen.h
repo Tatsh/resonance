@@ -66,7 +66,8 @@ public:
      * prompt layout is `standard_title`. mNameEntered is cleared on both paths. The
      * MetLoadFreqBaseScreen body then runs as a direct call.
      *
-     * @ghidraAddress 0x002a3890
+     * @ghidraAddress NTSC-U/C: 0x002a3890
+     * @ghidraAddress PAL: 0x002c1698
      */
     virtual void EnterAndShow();
 
@@ -110,7 +111,8 @@ public:
      * Slot 39. Unlike the base and unlike MetLoadFreqScreen, the override shows no username. The
      * label comes from configuration code 0x258 under the key `nf_enter`.
      *
-     * @ghidraAddress 0x002a85c0
+     * @ghidraAddress NTSC-U/C: 0x002a85c0
+     * @ghidraAddress PAL: 0x002c69d8
      */
     virtual void UpdateNameLabel();
 
@@ -122,7 +124,8 @@ public:
      * receiver. The width is 176, the length 12, and the ticker `name_new_freq_ticker`, and the
      * request is then passed to MetKeyboardScreen::Open().
      *
-     * @ghidraAddress 0x002a4108
+     * @ghidraAddress NTSC-U/C: 0x002a4108
+     * @ghidraAddress PAL: 0x002c21e8
      */
     virtual void OnNameButton();
 
@@ -165,7 +168,8 @@ public:
      * which overwrites the first label with the same `nf_enter` string. That is what the binary
      * does. The three prompts are the same three the base appends.
      *
-     * @ghidraAddress 0x002a3b08
+     * @ghidraAddress NTSC-U/C: 0x002a3b08
+     * @ghidraAddress PAL: 0x002c1a98
      */
     virtual void BuildButtonList();
 

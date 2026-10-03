@@ -71,11 +71,13 @@ public:
      * Slot 15. A retry runs StartDetect(), and continuing ends the probe through
      * OnDetectFinished(). Confirming `mem_format_check` formats the card in port 1. Dismissing
      * `format_success` records the formatted card's free space and shows the autosave notice. A
-     * dialogue the screen does not recognise ends the probe.
+     * dialogue the screen does not recognise ends the probe. Declining `mem_format_check` clears
+     * MetFrontEndState::mUsingMemcard in the North American release only.
      *
      * @param name The message screen that was dismissed.
      * @param nChoice The chosen button, counted from zero.
-     * @ghidraAddress 0x002d9e40
+     * @ghidraAddress NTSC-U/C: 0x002d9e40
+     * @ghidraAddress PAL: 0x002fc220
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
@@ -93,9 +95,10 @@ public:
      * Load the global settings from the card in port 1, or offer to format it.
      *
      * MemcardUser slot 3. OnNoCard() runs instead when no card is listed or the first card listed
-     * is not in port 1.
+     * is not in port 1. The European release offers the format through ShowFormatCheck().
      *
-     * @ghidraAddress 0x002d8e98
+     * @ghidraAddress NTSC-U/C: 0x002d8e98
+     * @ghidraAddress PAL: 0x002fb458
      */
     virtual void OnAllConnectStates();
 
@@ -107,7 +110,8 @@ public:
      *
      * @param nPortSlot The card the check ran on. The body does not read it.
      * @param nSpace The free clusters a save needs.
-     * @ghidraAddress 0x002da868
+     * @ghidraAddress NTSC-U/C: 0x002da868
+     * @ghidraAddress PAL: 0x002fcd88
      */
     virtual void OnMinimumSaveSpace(int nPortSlot, int nSpace);
 
@@ -118,7 +122,8 @@ public:
      *
      * @param nPortSlot The card that was formatted. The body does not read it.
      * @param nStatus The result, 0 on success and 13 when the card was already formatted.
-     * @ghidraAddress 0x002d9628
+     * @ghidraAddress NTSC-U/C: 0x002d9628
+     * @ghidraAddress PAL: 0x002fb8c8
      */
     virtual void OnCardFormatted(int nPortSlot, int nStatus);
 
@@ -148,9 +153,11 @@ public:
      * Show the detection notice and list the connected cards.
      *
      * Slot 39. Clears mAutosaveNoticeTime and GlobalSettings::mCardSlots, and queues the listing
-     * with this screen as the receiver. The title is inferred.
+     * with this screen as the receiver. The European release does not show the notice. The title
+     * is inferred.
      *
-     * @ghidraAddress 0x002d8b80
+     * @ghidraAddress NTSC-U/C: 0x002d8b80
+     * @ghidraAddress PAL: 0x002fb390
      */
     virtual void StartDetect();
 
@@ -160,7 +167,8 @@ public:
      * Slot 40. Sets mPersonaLoadRequested and empties MetPersonaData::loadList() before the load
      * fills it. The title is inferred.
      *
-     * @ghidraAddress 0x002db328
+     * @ghidraAddress NTSC-U/C: 0x002db328
+     * @ghidraAddress PAL: 0x002fda28
      */
     virtual void StartLoadPersonas();
 
@@ -184,6 +192,21 @@ public:
      */
     virtual void OnDetectFinished() {
     }
+
+#ifdef VIDEO_STANDARD_PAL
+    /**
+     * Offer to format the card in port 1.
+     *
+     * Slot 43. Raises `mem_format_check` with NO and YES through MetMsgScreen::ShowActive(). The
+     * North American release expands the same dialogue in OnAllConnectStates() and does not
+     * have the slot, and its StartSaveSpaceCheck() is slot 43 rather than 44. The title is
+     * inferred.
+     *
+     * @param slot The card to offer the format for.
+     * @ghidraAddress PAL: 0x002fde10
+     */
+    virtual void ShowFormatCheck(const MemcardConnectState &slot);
+#endif
 
     /**
      * Check the free space on the card in port 1.

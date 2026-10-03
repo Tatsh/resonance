@@ -4,6 +4,7 @@
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
 #include "met/metfrontendstate.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
@@ -53,27 +54,39 @@ void MetPauseGameScreen::ResolveContainerViews() {
     }
 }
 
-// 0x0031c658
+// NTSC-U/C: 0x0031c658, PAL: 0x003428c8
 void MetPauseGameScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kPausedText)));
 
+    MetStringId nHeadingId;
     const char *pszHeadingKey;
     if (MetFrontEndState::shared()->mPendingTransition == kTutorialPhase) {
+        nHeadingId = kMetStrPauseTutorial;
         pszHeadingKey = kTutorialHeadingKey;
     } else if (params.mPlayMode == kPlayModeJam) {
+        nHeadingId = kMetStrPauseRemix;
         pszHeadingKey = kRemixHeadingKey;
     } else {
+        nHeadingId = kMetStrPauseGame;
         pszHeadingKey = kGameHeadingKey;
     }
-    HxStr heading = QueryConfigString(kPromptConfigCode, pszHeadingKey);
+    HxStr heading = MetConfigText(nHeadingId, kPromptConfigCode, pszHeadingKey);
     pPaused->SetText(heading);
 
     mOptionLabels.clear();
     const bool bGameLabels = MetFrontEndState::shared()->mPendingTransition == kTutorialPhase ||
                              params.mPlayMode == kPlayModeGame;
+#ifdef VIDEO_STANDARD_PAL
+    mOptionLabels.push_back(GetMetString(kMetStrPauseResume));
+    mOptionLabels.push_back(GetMetString(kMetStrPauseQuit));
+    if (bGameLabels) {
+        mOptionLabels.push_back(GetMetString(kMetStrPauseRestart));
+    }
+#else
     QueryConfigStrings(
         &mOptionLabels, kLabelsConfigCode, bGameLabels ? kGameLabelsKey : kRemixLabelsKey);
+#endif
     MetPauseBaseScreen::EnterAndShow();
 }
 

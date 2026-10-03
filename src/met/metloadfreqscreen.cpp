@@ -14,6 +14,7 @@
 #include "met/metpersonadata.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/text.h"
@@ -142,12 +143,12 @@ MetScreen *MetLoadFreqScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadFreqScreen(pRenderer, nPriority);
 }
 
-// 0x00297448
+// NTSC-U/C: 0x00297448, PAL: 0x002b5530
 void MetLoadFreqScreen::EnterAndShow() {
-    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
+    HxStr title = MetConfigText(kMetStrTLoadChar, kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
 
-    MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kPromptLayout));
 
     MetLoadFreqBaseScreen::EnterAndShow();
 }
@@ -172,14 +173,19 @@ void MetLoadFreqScreen::OnEnterFinished() {
     PlaySoundByName(kSelectFreqSound);
 }
 
-// 0x002976f8
+// NTSC-U/C: 0x002976f8, PAL: 0x002b5878
 void MetLoadFreqScreen::UpdateNameLabel() {
     HxStr username((*mIdentityList)[mSelectedIdentity]->mAppearance.mUserName);
     mButtonList->ButtonAt(kNameButtonIndex)->mText->SetText(username);
 
+#ifdef VIDEO_STANDARD_PAL
+    HxStr format = GetMetString(kMetStrLfEdit);
+    HxStr editText(FormatString(TextOrEmpty(format), TextOrEmpty(username)));
+#else
     HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
     HxStr editLabelWithName(editLabel);
     HxStr editText(editLabelWithName += username);
+#endif
     mButtonList->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
 }
 
@@ -221,21 +227,21 @@ void MetLoadFreqScreen::AcquireIdentityList() {
     mIdentityList = MetPersonaData::loadList();
 }
 
-// 0x00296fe8
+// NTSC-U/C: 0x00296fe8, PAL: 0x002b4fe0
 void MetLoadFreqScreen::BuildButtonList() {
     mButtonList->Clear();
     mButtonList->Add(HxStr(kNameButtonObject), HxStr(kNoLabel));
 
-    HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
+    HxStr editLabel = MetConfigText(kMetStrLfEdit, kLabelConfigCode, kEditLabelKey);
     mButtonList->Add(HxStr(kEditButtonObject), editLabel);
 
-    HxStr createLabel = QueryConfigString(kLabelConfigCode, kCreateLabelKey);
+    HxStr createLabel = MetConfigText(kMetStrLfCreate, kLabelConfigCode, kCreateLabelKey);
     mButtonList->Add(HxStr(kCreateButtonObject), createLabel);
 
     mHelpKeys.erase(mHelpKeys.begin(), mHelpKeys.end());
-    mHelpKeys.push_back(HxStr(kNamePrompt));
-    mHelpKeys.push_back(HxStr(kEditPrompt));
-    mHelpKeys.push_back(HxStr(kCreatePrompt));
+    mHelpKeys.push_back(MetText(kMetStrHIdName, kNamePrompt));
+    mHelpKeys.push_back(MetText(kMetStrHCidEdit, kEditPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHIdCreate, kCreatePrompt));
 
     mButtonList->SetSelected(kNameButtonIndex);
 }

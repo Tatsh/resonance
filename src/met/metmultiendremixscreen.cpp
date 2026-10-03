@@ -10,6 +10,7 @@
 #include "met/methelpscreen.h"
 #include "met/metpersonadata.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
@@ -88,13 +89,13 @@ MetMultiEndRemixScreen::MetMultiEndRemixScreen(MetRenderer *pRenderer, int nPrio
       mLabelTextures(HxStr(kSongLabelFirstTexture), HxStr(kSongLabelSecondTexture)) {
 }
 
-// 0x002f0da8
+// NTSC-U/C: 0x002f0da8, PAL: 0x00314838
 void MetMultiEndRemixScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
     Rnd::Text *pPanelText = FindObject<Rnd::Text>(kRemixPanelText);
     {
-        HxStr label = QueryConfigString(kPromptConfigCode, kRemixPanelLabel);
+        HxStr label = MetConfigText(kMetStrRemixPanelLabel, kPromptConfigCode, kRemixPanelLabel);
         pPanelText->SetText(label); // The binary does not test the lookup for null.
     }
 
@@ -116,7 +117,7 @@ void MetMultiEndRemixScreen::ResolveContainerViews() {
 MetMultiEndRemixScreen::~MetMultiEndRemixScreen() {
 }
 
-// 0x002f16a0
+// NTSC-U/C: 0x002f16a0, PAL: 0x00315248
 void MetMultiEndRemixScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     (void)MetFrontEndState::shared()->GetFirstPersona(); // Yes, the binary discards this result.
@@ -143,10 +144,10 @@ void MetMultiEndRemixScreen::EnterAndShow() {
     }
 
     {
-        HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
+        HxStr title = MetConfigText(kMetStrTMultiRemixOver, kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     }
-    MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHRemixSaveOptions, kPromptLayout));
     PushNamedScreen(HxStr(kHelpScreen));
     MetScreen::EnterAndShow();
 }

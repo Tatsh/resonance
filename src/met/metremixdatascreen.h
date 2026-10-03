@@ -65,7 +65,8 @@ public:
      * the remaining rows hidden and emptied. No view is tested for null.
      *
      * @param pRecord The record to show.
-     * @ghidraAddress 0x003455a8
+     * @ghidraAddress NTSC-U/C: 0x003455a8
+     * @ghidraAddress PAL: 0x00370c50
      */
     void ShowRecord(MetRemixRecord *pRecord);
 
@@ -112,9 +113,11 @@ public:
      * Resolve the container views, the seven single views, and the four player rows.
      *
      * Slot 38. The unavailable notice is hidden, and each row's `mcrl_name_0N.txt` is emptied.
-     * No view is tested for null.
+     * No view is tested for null. The European release also labels `mcrl_remixpan_title.txt` with
+     * the `REMIX DATA` text of the current language.
      *
-     * @ghidraAddress 0x00344d70
+     * @ghidraAddress NTSC-U/C: 0x00344d70
+     * @ghidraAddress PAL: 0x00370198
      */
     virtual void ResolveContainerViews();
 

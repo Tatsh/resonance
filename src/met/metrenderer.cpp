@@ -23,6 +23,7 @@
 #include "met/metremixmanager.h"
 #include "met/metscreen.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "msg/gameconnectionlostmsg.h"
 #include "msg/isrecordingmsg.h"
 #include "msg/lobbyconnectionlostmsg.h"
@@ -194,7 +195,7 @@ void MetRenderer::Start() {
     QueryConfigValue(kStartUpConfigCode); // Yes, the binary discards the result.
 }
 
-// 0x00369fb0
+// NTSC-U/C: 0x00369fb0, PAL: 0x00398428
 MetRenderer::MetRenderer()
     : mAnimationFrame(0.0f), mPanelActive(1), mTitlePromptShowing(0), mFrameRate(kFrameRate),
       mPreviousFrameNs(0), mRecording(0), mActivePanel(nullptr), mCommandMap(nullptr),
@@ -203,6 +204,9 @@ MetRenderer::MetRenderer()
       mUnreadValue(0), mPendingPanel(nullptr), mDiscProblemPending(0), mFade(nullptr), mFading(0),
       mMaxPadIndex(kHighestPadIndex) {
     sInstance = this;
+#ifdef VIDEO_STANDARD_PAL
+    LoadMetStrings();
+#endif
     MetFreqMakerAssetManager::Create();
     MetFreqMakerAssetManager::shared()->StartAssetLoad();
     MetFrontEndState::Create();

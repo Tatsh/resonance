@@ -10,12 +10,12 @@
 #include "met/metmsgscreen.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/mesh.h"
 #include "rnd/text.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -81,6 +81,31 @@ const char *const kRowKeys[] = {
     "controller_config_remix_fx",
 };
 
+// The European release's identifiers of each row's label and of its help text.
+const MetStringId kRowLabelIds[] = {
+    kMetStrControllerConfigLeftNote1,
+    kMetStrControllerConfigLeftNote2,
+    kMetStrControllerConfigCenterNote1,
+    kMetStrControllerConfigCenterNote2,
+    kMetStrControllerConfigRightNote1,
+    kMetStrControllerConfigRightNote2,
+    kMetStrControllerConfigEraseAndPower,
+    kMetStrControllerConfigExpression,
+    kMetStrControllerConfigRemixFx,
+};
+
+const MetStringId kRowHelpIds[] = {
+    kMetStrHControllerConfigLeftNote1,
+    kMetStrHControllerConfigLeftNote2,
+    kMetStrHControllerConfigCenterNote1,
+    kMetStrHControllerConfigCenterNote2,
+    kMetStrHControllerConfigRightNote1,
+    kMetStrHControllerConfigRightNote2,
+    kMetStrHControllerConfigEraseAndPower,
+    kMetStrHControllerConfigExpression,
+    kMetStrHControllerConfigRemixFx,
+};
+
 const char *const kRowButtons[] = {
     "psx_leftnote_01.but",
     "psx_leftnote_02.but",
@@ -118,6 +143,36 @@ const char *const kRowValueTexts[] = {
     "psx_remixfx_val.txt",
 };
 
+#ifdef VIDEO_STANDARD_PAL
+// A text object the European release fills from its text table.
+struct LabelText {
+    const char *pszObject;
+    MetStringId nId;
+};
+
+// The labels filled ahead of the instructions.
+const LabelText kActionLabels[] = {
+    {"psx_rotate.txt", kMetStrControllerConfigRotate},
+    {"psx_advance.txt", kMetStrControllerConfigAdvance},
+    {"psx_loopmode.txt", kMetStrControllerConfigLoop},
+    {"psx_exit.txt", kMetStrControllerConfigExit},
+    {"psx_playback.txt", kMetStrControllerConfigPlayback},
+};
+
+// The labels filled after the instructions. The last two are the stick rows' values.
+const LabelText kPanelLabels[] = {
+    {"psx_actions_pan.txt", kMetStrPsxActionsPan},
+    {"psx_diagram_pan.txt", kMetStrPsxDiagramPan},
+    {"psx_express_val.txt", kMetStrPsxLeftAnalog},
+    {"psx_remixfx_val.txt", kMetStrPsxRightAnalog},
+};
+
+inline void FillLabel(const LabelText &label) {
+    dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(label.pszObject)))
+        ->SetText(GetMetString(label.nId));
+}
+#endif
+
 static const char *const kInstructionText1 = "psx_instruct_01_val.txt";
 static const char *const kInstructionKey1 = "controller_config_instruct1";
 static const char *const kInstructionText2 = "psx_instruct_02_val.txt";
@@ -143,18 +198,33 @@ static const char *const kErrorTitle = "ERROR";
 static const char *const kMissingValuesText = "You must choose a button for every selection.";
 static const char *const kOkButton = "OK";
 
+#ifdef VIDEO_STANDARD_PAL
+// The European release reads the stick labels from its text table.
+inline HxStr LeftStickName() {
+    return GetMetString(kMetStrPsxLeftAnalog);
+}
+
+inline HxStr RightStickName() {
+    return GetMetString(kMetStrPsxRightAnalog);
+}
+#else
 // 0x00891a90
 HxStr g_abLeftStickName("left analog stick");
 // 0x00891a98
 HxStr g_abRightStickName("right analog stick");
+
+inline const HxStr &LeftStickName() {
+    return g_abLeftStickName;
+}
+
+inline const HxStr &RightStickName() {
+    return g_abRightStickName;
+}
+#endif
+
 // 0x00891aa0
 // The value of a row with no button.
 HxStr g_abUnassignedName("o");
-
-inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text = QueryConfigString(nCode, pszKey);
-    return text;
-}
 
 inline const char *TextOrEmpty(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
@@ -166,16 +236,16 @@ inline bool IsStickRow(int nRow) {
 
 // Swaps a stick row between the two sticks.
 inline void ToggleStick(Rnd::Text *pText) {
-    if (pText->mPreWrapText == g_abLeftStickName) {
-        pText->SetText(g_abRightStickName);
+    if (pText->mPreWrapText == LeftStickName()) {
+        pText->SetText(RightStickName());
     } else {
-        pText->SetText(g_abLeftStickName);
+        pText->SetText(LeftStickName());
     }
 }
 
 } // namespace
 
-// 0x001ff1e0
+// NTSC-U/C: 0x001ff1e0, PAL: 0x002066c8
 MetConfigControllerScreen::MetConfigControllerScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreenMultiSoundBank(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
@@ -184,7 +254,7 @@ MetConfigControllerScreen::MetConfigControllerScreen(MetRenderer *pRenderer, int
 
     // The binary expands each loop in this constructor into one call per entry.
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
-        mHelpKeys.push_back(HxStr(kRowKeys[nRow]));
+        mHelpKeys.push_back(MetText(kRowHelpIds[nRow], kRowKeys[nRow]));
     }
 
     mButtonMeshes.resize(kButtonCount);
@@ -205,20 +275,37 @@ MetConfigControllerScreen::~MetConfigControllerScreen() {
     delete mRows;
 }
 
-// 0x001fff40
+// NTSC-U/C: 0x001fff40, PAL: 0x00207618
 void MetConfigControllerScreen::ResolveContainerViews() {
     MetScreenMultiSoundBank::ResolveContainerViews();
 
     // The binary expands this loop into one call per row.
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
-        mRows->Add(HxStr(kRowButtons[nRow]), ConfigText(kPromptConfigCode, kRowKeys[nRow]));
+        mRows->Add(HxStr(kRowButtons[nRow]),
+                   MetConfigText(kRowLabelIds[nRow], kPromptConfigCode, kRowKeys[nRow]));
     }
+
+#ifdef VIDEO_STANDARD_PAL
+    // The binary expands this loop into one call per label.
+    for (const auto &label : kActionLabels) {
+        FillLabel(label);
+    }
+#endif
 
     // Yes, the binary does not test either instruction text for null.
     dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kInstructionText1)))
-        ->SetText(ConfigText(kPromptConfigCode, kInstructionKey1));
+        ->SetText(
+            MetConfigText(kMetStrControllerConfigInstruct1, kPromptConfigCode, kInstructionKey1));
     dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kInstructionText2)))
-        ->SetText(ConfigText(kPromptConfigCode, kInstructionKey2));
+        ->SetText(
+            MetConfigText(kMetStrControllerConfigInstruct2, kPromptConfigCode, kInstructionKey2));
+
+#ifdef VIDEO_STANDARD_PAL
+    // The binary expands this loop into one call per label.
+    for (const auto &label : kPanelLabels) {
+        FillLabel(label);
+    }
+#endif
 
     for (int nButton = 0; nButton < kButtonCount; ++nButton) {
         mButtonMeshes[nButton] =
@@ -232,7 +319,7 @@ void MetConfigControllerScreen::ResolveContainerViews() {
     }
 }
 
-// 0x00200ba8
+// NTSC-U/C: 0x00200ba8, PAL: 0x00208f98
 void MetConfigControllerScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (pCommand->mPadIndex != mControllerIndex + 1) {
         return;
@@ -277,10 +364,10 @@ void MetConfigControllerScreen::HandleCommand(const MetScreenCommand *pCommand) 
         ClearDuplicateAssignment(mRows->mSelected);
         if (!AllRowsAssigned()) {
             std::vector<HxStr> buttons;
-            buttons.push_back(HxStr(kOkButton));
+            buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
             MetMsgScreen::Show(HxStr(kMissingValuesDialogue),
-                               HxStr(kErrorTitle),
-                               HxStr(kMissingValuesText),
+                               MetText(kMetStrMsgERROR, kErrorTitle),
+                               MetText(kMetStrControllerConfigWarn, kMissingValuesText),
                                kOneButton,
                                buttons,
                                this);
@@ -317,25 +404,35 @@ void MetConfigControllerScreen::HandleCommand(const MetScreenCommand *pCommand) 
     UpdateButtonHighlight();
 }
 
-// 0x00201478
+// NTSC-U/C: 0x00201478, PAL: 0x00209bd0
 void MetConfigControllerScreen::EnterAndShow() {
     mRows->SetSelected(0);
 
     HxStr title;
     HxStr options;
     HxStr player;
-    player = ConfigText(kPromptConfigCode, kPlayerKey);
-    options = ConfigText(kTitleConfigCode, kOptionsKey);
+    player = MetConfigText(kMetStrConfigControllerPlayer, kPromptConfigCode, kPlayerKey);
+    options = MetConfigText(kMetStrTConfigControllerOptions, kTitleConfigCode, kOptionsKey);
     title =
         FormatString(kTitleFormat, TextOrEmpty(player), mControllerIndex + 1, TextOrEmpty(options));
     MetScreenTitleScreen::SetTitle(title);
 
     MetHelpScreen::SetText(mHelpKeys[mRows->mSelected], mRenderer->mAnimationFrame);
+#ifdef VIDEO_STANDARD_PAL
+    // The European release offers to save unless the screen was opened from a pause screen.
+    if (MetFrontEndState::shared()->mReturnScreen == kPauseGameScreen ||
+        MetFrontEndState::shared()->mReturnScreen == kPauseRemixScreen) {
+        MetHelpScreen::SelectPreset(GetMetString(kMetStrHStandardTitle));
+    } else {
+        MetHelpScreen::SelectPreset(GetMetString(kMetStrHCcSaveBack));
+    }
+#else
     if (MetFrontEndState::shared()->mUsingMemcard != 0) {
         MetHelpScreen::SelectPreset(HxStr(kSaveBackPreset));
     } else {
         MetHelpScreen::SelectPreset(HxStr(kStandardPreset));
     }
+#endif
 
     ShowConfig(GlobalSettings::shared()->mControllers[mControllerIndex]);
     MetScreenMultiSoundBank::EnterAndShow();
@@ -381,15 +478,15 @@ void MetConfigControllerScreen::OnExitFinished() {
     }
 }
 
-// 0x00201eb8
+// NTSC-U/C: 0x00201eb8, PAL: 0x0020a818
 void MetConfigControllerScreen::ClearDuplicateAssignment(int nRow) {
     if (IsStickRow(nRow)) {
         Rnd::Text *pOther = mRowValueTexts[nRow == kRowExpression ? kRowRemixFX : kRowExpression];
         const HxStr &value = mRowValueTexts[nRow]->mPreWrapText;
-        if (value == g_abLeftStickName) {
-            pOther->SetText(g_abRightStickName);
-        } else if (value == g_abRightStickName) {
-            pOther->SetText(g_abLeftStickName);
+        if (value == LeftStickName()) {
+            pOther->SetText(RightStickName());
+        } else if (value == RightStickName()) {
+            pOther->SetText(LeftStickName());
         }
         return;
     }
@@ -407,12 +504,12 @@ void MetConfigControllerScreen::ClearDuplicateAssignment(int nRow) {
     }
 }
 
-// 0x00202070
+// NTSC-U/C: 0x00202070, PAL: 0x0020ab70
 void MetConfigControllerScreen::UpdateButtonHighlight() {
     const int nRow = mRows->mSelected;
     HxStr value(mRowValueTexts[nRow]->mPreWrapText);
     if (IsStickRow(nRow)) {
-        SetButtonHighlights(value == g_abLeftStickName ? kButtonLeftStick : kButtonRightStick);
+        SetButtonHighlights(value == LeftStickName() ? kButtonLeftStick : kButtonRightStick);
         return;
     }
 
@@ -420,15 +517,15 @@ void MetConfigControllerScreen::UpdateButtonHighlight() {
     SetButtonHighlights(static_cast<unsigned>(nButton) < kButtonCount ? nButton : kButtonNone);
 }
 
-// 0x002022a0
+// NTSC-U/C: 0x002022a0, PAL: 0x0020afa8
 void MetConfigControllerScreen::ShowConfig(ControllerConfig &config) {
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
         const int nButton = config.GetButtonIndex(nRow);
         Rnd::Text *pText = mRowValueTexts[nRow];
         if (nButton == kButtonLeftStick) {
-            pText->SetText(g_abLeftStickName);
+            pText->SetText(LeftStickName());
         } else if (nButton == kButtonRightStick) {
-            pText->SetText(g_abRightStickName);
+            pText->SetText(RightStickName());
         } else {
             pText->SetText(HxStr(1, static_cast<char>(mFirstButtonCode + nButton)));
         }
@@ -503,12 +600,12 @@ int MetConfigControllerScreen::StoreConfig() {
     return 1;
 }
 
-// 0x00206b30
+// NTSC-U/C: 0x00206b30, PAL: 0x0020ae38
 int MetConfigControllerScreen::ButtonIndexForText(const HxStr &text) const {
-    if (text == g_abLeftStickName) {
+    if (text == LeftStickName()) {
         return kButtonLeftStick;
     }
-    if (text == g_abRightStickName) {
+    if (text == RightStickName()) {
         return kButtonRightStick;
     }
     const int nButton = text[0] - mFirstButtonCode;

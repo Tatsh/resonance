@@ -40,11 +40,14 @@ public:
      * Construct the screen.
      *
      * Supplies `fm_canvas` for the screen name, `metagame/persona` for the directory, and
-     * `freq_maker_canvas` for the container, builds an empty avatar, and names it `player1`.
+     * `freq_maker_canvas` for the container, builds an empty avatar, and calls it `player1`. The
+     * European release takes the name from its text table instead, in this routine and in the two
+     * that load an avatar.
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0025e5a8
+     * @ghidraAddress NTSC-U/C: 0x0025e5a8
+     * @ghidraAddress PAL: 0x00274810
      */
     MetFreqMakerCanvasScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -137,9 +140,11 @@ public:
      * Resolve the base views, hang the avatar view from `fm_canvas.view`, and record that it is
      * hung.
      *
-     * Slot 38.
+     * Slot 38. The European release also fills `FREQ CANVAS.txt` with the canvas title from its
+     * text table.
      *
-     * @ghidraAddress 0x0025e798
+     * @ghidraAddress NTSC-U/C: 0x0025e798
+     * @ghidraAddress PAL: 0x00274a60
      */
     virtual void ResolveContainerViews();
 
@@ -231,7 +236,8 @@ public:
      * unmodified. The title is inferred.
      *
      * @param pPersona The persona to edit, or null.
-     * @ghidraAddress 0x002622b8
+     * @ghidraAddress NTSC-U/C: 0x002622b8
+     * @ghidraAddress PAL: 0x00274ee0
      */
     void LoadPersona(MetPersonaData *pPersona);
 
@@ -244,7 +250,8 @@ public:
      *
      * @param pSource The pre-fab persona.
      * @param nRandomize Non-zero to randomise the copy.
-     * @ghidraAddress 0x00262350
+     * @ghidraAddress NTSC-U/C: 0x00262350
+     * @ghidraAddress PAL: 0x00274ff0
      */
     void LoadPrefab(MetPersonaData *pSource, int nRandomize);
 

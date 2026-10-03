@@ -52,7 +52,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0039e308
+     * @ghidraAddress NTSC-U/C: 0x0039e308
+     * @ghidraAddress PAL: 0x003d0890
      */
     MetSoloStagesScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -90,7 +91,11 @@ public:
      * `stage_6buts.view` in a game and `stage_5buts.view` in a remix, and the arrow buttons show
      * only beside stages available at the difficulty.
      *
-     * @ghidraAddress 0x003a5810
+     * The European release reads the title parts from its text table. Its French and Spanish game
+     * titles omit `game`, and its Spanish remix title puts `remix` ahead of `solo` or `multi`.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a5810
+     * @ghidraAddress PAL: 0x003d8f80
      */
     virtual void EnterAndShow();
 
@@ -186,7 +191,11 @@ public:
     /**
      * Resolve the container objects. Slot 38.
      *
-     * @ghidraAddress 0x0039f720
+     * The European release fills the two stage-score headings from its text table and moves each
+     * value text to five units past the end of its heading.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0039f720
+     * @ghidraAddress PAL: 0x003d1df0
      */
     virtual void ResolveContainerViews();
 
@@ -207,7 +216,7 @@ public:
     };
 
 private:
-    // 0x003a09d0
+    // NTSC-U/C: 0x003a09d0, PAL: 0x003d34a8
     // Builds both button lists, the wire meshes, the icon materials, and the stage-button styles.
     void BuildButtons();
 
@@ -243,7 +252,7 @@ private:
     // Shows or hides the level texts and the two status meshes.
     void ShowLevelTexts(int nShowing);
 
-    // 0x003a3310
+    // NTSC-U/C: 0x003a3310, PAL: 0x003d64a8
     // Shows the stage warning in place of the television, or the reverse.
     void ShowWarning(bool bShow);
 
@@ -251,7 +260,7 @@ private:
     // Colours the television and the level texts for a locked, open, or won level.
     void StyleLevel(int bStageLocked, const HxStr &levelName);
 
-    // 0x003a3c68
+    // NTSC-U/C: 0x003a3c68, PAL: 0x003d6f30
     // Fills the level texts for the selected level.
     void ShowLevelDetails();
 

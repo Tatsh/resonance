@@ -11,6 +11,7 @@
 #include "met/metfreqmakerassetmanager.h"
 #include "met/metfreqmakercanvasscreen.h"
 #include "met/metfreqmakerdirectionsscreen.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "rnd/animatable.h"
 #include "rnd/collideable.h"
@@ -372,9 +373,14 @@ void MetFreqMakerInventoryScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ActivateNamedPanel(HxStr(kPanelName));
 }
 
-// 0x0026b518
+// NTSC-U/C: 0x0026b518, PAL: 0x00283008
 void MetFreqMakerInventoryScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
+#ifdef VIDEO_STANDARD_PAL
+    FindObject<Rnd::Text>(kColorTextName)->SetText(GetMetString(kMetStrFmInvColor));
+    FindObject<Rnd::Text>(kLimitTextName)->SetText(GetMetString(kMetStrFmInvLimit));
+    FindObject<Rnd::Text>(kHeadingItemName)->SetText(GetMetString(kMetStrFmInvStamps));
+#endif
     std::map<HxStr, FreqPartTemplate *> parts(
         *MetFreqMakerAssetManager::shared()->GetPartsByName());
     HxStr name;
@@ -825,41 +831,41 @@ void MetFreqMakerInventoryScreen::OnEnterFinished() {
 
 // Expanded into each of the five part page routines.
 inline void
-MetFreqMakerInventoryScreen::ShowPartPage(Rnd::View *pView, int nRowCount, const char *pszHeading) {
+MetFreqMakerInventoryScreen::ShowPartPage(Rnd::View *pView, int nRowCount, const HxStr &heading) {
     HidePages();
     pView->SetShowing(1);
     mCurrentView = pView;
     mCurrentRowCount = nRowCount;
-    FindObject<Rnd::Text>(kHeadingNameName)->SetText(HxStr(pszHeading));
+    FindObject<Rnd::Text>(kHeadingNameName)->SetText(heading);
     ShowInventory(1);
     ShowPalette(0);
     HideGridCursor();
     SetHighlight(kHighlightNone);
 }
 
-// 0x0026d318
+// NTSC-U/C: 0x0026d318, PAL: 0x002853e8
 void MetFreqMakerInventoryScreen::ShowHeadPage() {
-    ShowPartPage(mHeadView, mHeadRowCount, kHeadHeading);
+    ShowPartPage(mHeadView, mHeadRowCount, MetText(kMetStrFmInvHead, kHeadHeading));
 }
 
-// 0x0026d4c8
+// NTSC-U/C: 0x0026d4c8, PAL: 0x002855d8
 void MetFreqMakerInventoryScreen::ShowFacePage() {
-    ShowPartPage(mFaceView, mFaceRowCount, kFaceHeading);
+    ShowPartPage(mFaceView, mFaceRowCount, MetText(kMetStrFmInvFace, kFaceHeading));
 }
 
-// 0x0026d678
+// NTSC-U/C: 0x0026d678, PAL: 0x002857c8
 void MetFreqMakerInventoryScreen::ShowBodyPage() {
-    ShowPartPage(mBodyView, mBodyRowCount, kBodyHeading);
+    ShowPartPage(mBodyView, mBodyRowCount, MetText(kMetStrFmInvBody, kBodyHeading));
 }
 
-// 0x0026d828
+// NTSC-U/C: 0x0026d828, PAL: 0x002859b8
 void MetFreqMakerInventoryScreen::ShowDetailsPage() {
-    ShowPartPage(mDetailsView, mDetailsRowCount, kDetailsHeading);
+    ShowPartPage(mDetailsView, mDetailsRowCount, MetText(kMetStrFmInvDetails, kDetailsHeading));
 }
 
-// 0x0026d9d8
+// NTSC-U/C: 0x0026d9d8, PAL: 0x00285ba8
 void MetFreqMakerInventoryScreen::ShowLogosPage() {
-    ShowPartPage(mLogosView, mLogosRowCount, kLogosHeading);
+    ShowPartPage(mLogosView, mLogosRowCount, MetText(kMetStrFmInvLogos, kLogosHeading));
 }
 
 // 0x0026db88
@@ -878,7 +884,7 @@ void MetFreqMakerInventoryScreen::HidePages() {
     SetHighlight(kHighlightNone);
 }
 
-// 0x0026ddc8
+// NTSC-U/C: 0x0026ddc8, PAL: 0x00286018
 void MetFreqMakerInventoryScreen::ShowEditPage() {
     HidePages();
     int nMeshCount = mEditMeshes.size();
@@ -932,7 +938,7 @@ void MetFreqMakerInventoryScreen::ShowEditPage() {
     ShowPalette(0);
     HideGridCursor();
     SetHighlight(kHighlightNone);
-    FindObject<Rnd::Text>(kHeadingNameName)->SetText(HxStr(kEditHeading));
+    FindObject<Rnd::Text>(kHeadingNameName)->SetText(MetText(kMetStrFmInvFreq, kEditHeading));
 }
 
 // 0x0026e448

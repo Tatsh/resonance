@@ -157,7 +157,8 @@ public:
      *
      * Slot 38.
      *
-     * @ghidraAddress 0x00231908
+     * @ghidraAddress NTSC-U/C: 0x00231908
+     * @ghidraAddress PAL: 0x002452a0
      */
     virtual void ResolveContainerViews();
 

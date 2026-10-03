@@ -47,7 +47,8 @@ public:
      * copied to the option texts before MetPauseBaseScreen::EnterAndShow() copies them again, and
      * mLeavingForConfig is cleared afterwards.
      *
-     * @ghidraAddress 0x00320230
+     * @ghidraAddress NTSC-U/C: 0x00320230
+     * @ghidraAddress PAL: 0x00346cc0
      */
     virtual void EnterAndShow();
 

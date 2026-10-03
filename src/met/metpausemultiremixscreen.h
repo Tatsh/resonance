@@ -44,7 +44,8 @@ public:
      * `pause_multi_remix`. Every label is copied to the option text at the same index before
      * MetPauseBaseScreen::EnterAndShow() copies them again.
      *
-     * @ghidraAddress 0x00328080
+     * @ghidraAddress NTSC-U/C: 0x00328080
+     * @ghidraAddress PAL: 0x0034ff58
      */
     virtual void EnterAndShow();
 

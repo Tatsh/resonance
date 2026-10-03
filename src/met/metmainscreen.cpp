@@ -11,8 +11,8 @@
 #include "met/methelpscreen.h"
 #include "met/metpersonadata.h"
 #include "met/metrenderer.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -80,9 +80,12 @@ constexpr int kSoloHighestPad = 1;
 constexpr int kSaveReturnScreenCount = 1;
 
 // Add one button labelled from configuration. Slot 38 expands it for each button.
-inline void AddButton(MetButtonList *pList, const char *pszObjectName, const char *pszLabelKey) {
+inline void AddButton(MetButtonList *pList,
+                      const char *pszObjectName,
+                      MetStringId nLabelId,
+                      const char *pszLabelKey) {
     HxStr objectName(pszObjectName);
-    HxStr label = QueryConfigString(kLabelConfigCode, pszLabelKey);
+    HxStr label = MetConfigText(nLabelId, kLabelConfigCode, pszLabelKey);
     pList->Add(objectName, label);
 }
 
@@ -125,7 +128,7 @@ void MetMainScreen::EnterAndShow() {
     mActivatePending = 0;
 }
 
-// 0x002c7030
+// NTSC-U/C: 0x002c7030, PAL: 0x002e7b08
 void MetMainScreen::EnterMenu() {
     if (MetFrontEndState::shared()->mPendingTransition != 0) {
         int nTransition = MetFrontEndState::shared()->mPendingTransition;
@@ -137,7 +140,7 @@ void MetMainScreen::EnterMenu() {
         PushNamedScreen(HxStr(kHelpScreen));
         mRenderer->SetActivePanel(this);
     }
-    MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kStandardTitlePreset));
     MetScreen::EnterAndShow();
 }
 
@@ -195,7 +198,7 @@ void MetMainScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// 0x002c72a0
+// NTSC-U/C: 0x002c72a0, PAL: 0x002e7e10
 void MetMainScreen::OnEnterFinished() {
     if (MetFrontEndState::shared()->mReturnScreen == kLogoScreen ||
         mButtonList->mSelected == kNoButton) {
@@ -208,6 +211,9 @@ void MetMainScreen::OnEnterFinished() {
     }
     Application::shared()->GetGameManager()->SetGameMode(kGameModeNone);
     MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
+#ifdef VIDEO_STANDARD_PAL
+    ActivateNamedPanel(HxStr(kMainScreen));
+#endif
 }
 
 // 0x002c73e0
@@ -265,16 +271,17 @@ void MetMainScreen::OpenSelectedButton() {
     }
 }
 
-// 0x002c62a0
+// NTSC-U/C: 0x002c62a0, PAL: 0x002e6ad0
 void MetMainScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    AddButton(mButtonList, kTutorialButton, kTutorialLabel);
-    AddButton(mButtonList, kSoloButton, kSoloLabel);
-    AddButton(mButtonList, kMultiButton, kMultiLabel);
-    AddButton(mButtonList, kOptionsButton, kOptionsLabel);
+    AddButton(mButtonList, kTutorialButton, kMetStrTut, kTutorialLabel);
+    AddButton(mButtonList, kSoloButton, kMetStrSolo, kSoloLabel);
+    AddButton(mButtonList, kMultiButton, kMetStrMulti, kMultiLabel);
+    AddButton(mButtonList, kOptionsButton, kMetStrOpt, kOptionsLabel);
     mHelpKeys.clear();
-    mHelpKeys.push_back(HxStr(kTutorialHelp));
-    mHelpKeys.push_back(HxStr(kSoloHelp));
-    mHelpKeys.push_back(HxStr(kMultiHelp));
-    mHelpKeys.push_back(HxStr(kOptionsHelp));
+    // The European release stores the help texts themselves rather than their keys.
+    mHelpKeys.push_back(MetText(kMetStrHMsTut, kTutorialHelp));
+    mHelpKeys.push_back(MetText(kMetStrHMsSolo, kSoloHelp));
+    mHelpKeys.push_back(MetText(kMetStrHMsMulti, kMultiHelp));
+    mHelpKeys.push_back(MetText(kMetStrHMsOpt, kOptionsHelp));
 }

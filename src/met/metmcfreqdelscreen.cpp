@@ -12,6 +12,7 @@
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "met/scrollinglist.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
@@ -20,7 +21,6 @@
 #include "rnd/mesh.h"
 #include "rnd/text.h"
 #include "rnd/view.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -131,12 +131,6 @@ inline const char *TextOrEmpty(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
 }
 
-// A configuration value read by value.
-inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr value = QueryConfigString(nCode, pszKey);
-    return value;
-}
-
 // Resolve one named object of the renderer as T.
 template <class T>
 inline T *FindObject(const char *pszName) {
@@ -153,12 +147,12 @@ inline void DeletePersonas(std::vector<MetPersonaData *> &personas) {
 
 } // namespace
 
-// 0x002be968
+// NTSC-U/C: 0x002be968, PAL: 0x002de6a8
 MetMCFreqDelScreen::MetMCFreqDelScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mDeleting(0), mList(nullptr), mCopyPersona(nullptr), mLoadPending(0) {
     mShowsLoadedDrawables = 0;
-    mHelpKeys.push_back(HxStr(kHelpKey));
+    mHelpKeys.push_back(MetText(kMetStrHDelFreq, kHelpKey));
 }
 
 // 0x002beca8
@@ -175,16 +169,16 @@ MetMCFreqDelScreen *MetMCFreqDelScreen::New(MetRenderer *pRenderer, int nPriorit
     return new MetMCFreqDelScreen(pRenderer, nPriority);
 }
 
-// 0x002bee90
+// NTSC-U/C: 0x002bee90, PAL: 0x002dec68
 void MetMCFreqDelScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
     Rnd::Text *pListTitle = FindObject<Rnd::Text>(kListTitleText);
-    pListTitle->SetText(ConfigText(kDialogueConfigCode, kListTitleKey));
+    pListTitle->SetText(MetConfigText(kMetStrMcrfFreq, kDialogueConfigCode, kListTitleKey));
     pListTitle->SetShowing(1);
 
     Rnd::Text *pDetailTitle = FindObject<Rnd::Text>(kDetailTitleText);
-    pDetailTitle->SetText(ConfigText(kDialogueConfigCode, kDetailTitleKey));
+    pDetailTitle->SetText(MetConfigText(kMetStrMcrfFreqdata, kDialogueConfigCode, kDetailTitleKey));
     pDetailTitle->SetShowing(1);
 
     mNameText = FindObject<Rnd::Text>(kNameText);
@@ -246,20 +240,25 @@ void MetMCFreqDelScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x002bf750
+// NTSC-U/C: 0x002bf750, PAL: 0x002df6a8
 void MetMCFreqDelScreen::OnPanelActivated() {
     if (!mLoadPending) {
         return;
     }
     std::vector<HxStr> buttons;
-    const HxStr format(ConfigText(kDialogueConfigCode, kLoadKey));
+    const HxStr format(MetConfigText(kMetStrMemLoad, kDialogueConfigCode, kLoadKey));
     const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
-    MetMsgScreen::Show(HxStr(kLoadMessage), HxStr(kWarningTitle), text, kNoButtons, buttons, this);
+    MetMsgScreen::Show(HxStr(kLoadMessage),
+                       MetText(kMetStrMsgWARNING, kWarningTitle),
+                       text,
+                       kNoButtons,
+                       buttons,
+                       this);
     MemcardManager::shared()->mUser = this;
     MemcardManager::shared()->CreateGetConnectStateTask(mCardSlot.mPortSlot);
 }
 
-// 0x002bfa88
+// NTSC-U/C: 0x002bfa88, PAL: 0x002dfa50
 void MetMCFreqDelScreen::ShowList() {
     if (mList == nullptr) {
         Rnd::View *pRow = FindObject<Rnd::View>(kRowView);
@@ -275,19 +274,22 @@ void MetMCFreqDelScreen::ShowList() {
     mList->refresh();
     ShowSelection();
 
-    const HxStr format(ConfigText(kTitleConfigCode, kListTitleFormatKey));
+    const HxStr format(MetConfigText(kMetStrTMemDelType, kTitleConfigCode, kListTitleFormatKey));
     MetScreenTitleScreen::SetTitle(
         HxStr(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName))));
     PushNamedScreen(HxStr(kHelpScreen));
-    MetHelpScreen::SelectPreset(HxStr(kOnlyBackPreset));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHOnlyBackTitle, kOnlyBackPreset));
     MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
     MetScreen::EnterAndShow();
     mLoadPending = 0;
 }
 
-// 0x002bff98
+// NTSC-U/C: 0x002bff98, PAL: 0x002e0030
 void MetMCFreqDelScreen::ShowSelection() {
     Rnd::Text *pInfo = FindObject<Rnd::Text>(kInfoText);
+#ifdef VIDEO_STANDARD_PAL
+    pInfo->SetText(GetMetString(kMetStrMcrfBorn));
+#endif
     if (mPersonas.size() != 0) {
         MetPersonaData *pPersona = mPersonas[mList->getSelected()];
         mNameText->SetShowing(1);
@@ -306,27 +308,31 @@ void MetMCFreqDelScreen::ShowSelection() {
     }
 }
 
-// 0x002c01c0
+// NTSC-U/C: 0x002c01c0, PAL: 0x002e0310
 void MetMCFreqDelScreen::OnExitFinished() {
     if (mExitChoice == kExitToDelete) {
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kNoButton));
-        buttons.push_back(HxStr(kYesButton));
+        buttons.push_back(MetText(kMetStrMsgNO, kNoButton));
+        buttons.push_back(MetText(kMetStrMsgYES, kYesButton));
         MetMsgScreen::Show(HxStr(kDeleteMessage),
-                           HxStr(kConfirmTitle),
-                           ConfigText(kDialogueConfigCode, kDeleteKey),
+                           MetText(kMetStrMsgCONFIRM, kConfirmTitle),
+                           MetConfigText(kMetStrFreqDelOk, kDialogueConfigCode, kDeleteKey),
                            kTwoButtons,
                            buttons,
                            this);
     } else if (mExitChoice == kExitToCopy) {
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kNoButton));
-        buttons.push_back(HxStr(kYesButton));
-        const HxStr format(ConfigText(kDialogueConfigCode, kCopyKey));
+        buttons.push_back(MetText(kMetStrMsgNO, kNoButton));
+        buttons.push_back(MetText(kMetStrMsgYES, kYesButton));
+        const HxStr format(MetConfigText(kMetStrFreqCopyOk, kDialogueConfigCode, kCopyKey));
         const MemcardConnectState next(NextCardSlot(mCardSlot));
         const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(next.mSlotName)));
-        MetMsgScreen::Show(
-            HxStr(kCopyMessage), HxStr(kConfirmTitle), text, kTwoButtons, buttons, this);
+        MetMsgScreen::Show(HxStr(kCopyMessage),
+                           MetText(kMetStrMsgCONFIRM, kConfirmTitle),
+                           text,
+                           kTwoButtons,
+                           buttons,
+                           this);
     } else {
         PushNamedScreen(HxStr(kLeftGizmoScreen));
         PushNamedScreen(HxStr(kMemCardTypeScreen));
@@ -372,16 +378,20 @@ void MetMCFreqDelScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     }
 }
 
-// 0x002c1510
+// NTSC-U/C: 0x002c1510, PAL: 0x002e19f8
 void MetMCFreqDelScreen::OnPersonasLoaded(int, int nStatus) {
     if (nStatus != kLoadStatusLoaded && nStatus != kLoadStatusNoEntry &&
         nStatus != kLoadStatusNoFile) {
-        const HxStr format(ConfigText(kDialogueConfigCode, kLoadFailKey));
+        const HxStr format(MetConfigText(kMetStrMcLoadFail, kDialogueConfigCode, kLoadFailKey));
         const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kOkButton));
-        MetMsgScreen::Show(
-            HxStr(kLoadFailedMessage), HxStr(kErrorTitle), text, kOneButton, buttons, this);
+        buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
+        MetMsgScreen::Show(HxStr(kLoadFailedMessage),
+                           MetText(kMetStrMsgERROR, kErrorTitle),
+                           text,
+                           kOneButton,
+                           buttons,
+                           this);
         return;
     }
 
@@ -395,13 +405,18 @@ void MetMCFreqDelScreen::OnPersonasLoaded(int, int nStatus) {
     }
 
     std::vector<HxStr> buttons;
-    buttons.push_back(HxStr(kOkButton));
-    const HxStr format(ConfigText(kDialogueConfigCode, kNoFreqMessage));
+    buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
+    const HxStr format(MetConfigText(kMetStrNoFreqOnCard, kDialogueConfigCode, kNoFreqMessage));
     const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
-    MetMsgScreen::Show(HxStr(kNoFreqMessage), HxStr(kErrorTitle), text, kOneButton, buttons, this);
+    MetMsgScreen::Show(HxStr(kNoFreqMessage),
+                       MetText(kMetStrMsgERROR, kErrorTitle),
+                       text,
+                       kOneButton,
+                       buttons,
+                       this);
 }
 
-// 0x002c1d10
+// NTSC-U/C: 0x002c1d10, PAL: 0x002e2310
 void MetMCFreqDelScreen::OnConnectState(MemcardConnectState, int nStatus) {
     if (nStatus == kCardPresent) {
         MemcardManager::shared()->mUser = this;
@@ -410,12 +425,16 @@ void MetMCFreqDelScreen::OnConnectState(MemcardConnectState, int nStatus) {
         return;
     }
 
-    const HxStr format(ConfigText(kDialogueConfigCode, kNoCardKey));
+    const HxStr format(MetConfigText(kMetStrMcLoadFailNoCard, kDialogueConfigCode, kNoCardKey));
     const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
     std::vector<HxStr> buttons;
-    buttons.push_back(HxStr(kOkButton));
-    MetMsgScreen::Show(
-        HxStr(kLoadFailedMessage), HxStr(kErrorTitle), text, kOneButton, buttons, this);
+    buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
+    MetMsgScreen::Show(HxStr(kLoadFailedMessage),
+                       MetText(kMetStrMsgERROR, kErrorTitle),
+                       text,
+                       kOneButton,
+                       buttons,
+                       this);
 }
 
 // 0x002c5b40

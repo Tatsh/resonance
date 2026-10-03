@@ -269,9 +269,11 @@ public:
      * Slot 41. A playlist below the limit at `0x0069ad78` selects the
      * `met_jukebox_base_screen_help_tab` layout and posts `met_jukebox_base_screen_ticker_tape`.
      * A full playlist selects `met_jukebox_base_screen_error_tab` and posts
-     * `met_jukebox_base_screen_error_ticker_tape`. The title is inferred.
+     * `met_jukebox_base_screen_error_ticker_tape`. The title is inferred. The European release
+     * looks the layouts and the texts up in the current language.
      *
-     * @ghidraAddress 0x0021fe98
+     * @ghidraAddress NTSC-U/C: 0x0021fe98
+     * @ghidraAddress PAL: 0x00232c90
      */
     virtual void UpdateHelpText();
 

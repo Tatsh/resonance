@@ -57,9 +57,11 @@ public:
      *
      * Slot 38. The catalogue list clones `jbs_remix_factory_01.view` with the highlight and both
      * arrows, and the playlist list clones `jbs_remix_playlist_01.view` five rows deep with none
-     * of the three. The warning text takes the `remix_unavail_disc` prompt.
+     * of the three. The warning text takes the `remix_unavail_disc` prompt. The European release
+     * also sets the playlist caption to the `My Playlist` text of the current language.
      *
-     * @ghidraAddress 0x002250c0
+     * @ghidraAddress NTSC-U/C: 0x002250c0
+     * @ghidraAddress PAL: 0x002380c8
      */
     virtual void ResolveContainerViews();
 

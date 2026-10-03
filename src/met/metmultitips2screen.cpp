@@ -1,9 +1,9 @@
 #include "met/metmultitips2screen.h"
 
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/text.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -15,21 +15,29 @@ constexpr int kPage = 2;
 
 constexpr int kPromptConfigCode = 0x258;
 
-// Each text object and the configuration key it is filled from, in the order slot 38 fills them.
-static const char *const kTexts[][2] = {
-    {"tips_pan.txt", "tp_panel"},
-    {"tp2_score_01.txt", "tp_score1"},
-    {"tp2_score_02.txt", "tp_score2"},
-    {"tp2_title_1.txt", "tp2_title_1"},
-    {"tp2_help_1.txt", "tp2_help_1"},
-    {"tp2_title_2.txt", "tp2_title_2"},
-    {"tp2_help_2.txt", "tp2_help_2"},
+// A text object, the identifier the European release fills it from, and the configuration key the
+// North American release fills it from.
+struct TipText {
+    const char *pszObject;
+    MetStringId nId;
+    const char *pszKey;
+};
+
+// The texts in the order slot 38 fills them.
+static const TipText kTexts[] = {
+    {"tips_pan.txt", kMetStrTpPanel, "tp_panel"},
+    {"tp2_score_01.txt", kMetStrTpScore1, "tp_score1"},
+    {"tp2_score_02.txt", kMetStrTpScore2, "tp_score2"},
+    {"tp2_title_1.txt", kMetStrTp2Title1, "tp2_title_1"},
+    {"tp2_help_1.txt", kMetStrTp2Help1, "tp2_help_1"},
+    {"tp2_title_2.txt", kMetStrTp2Title2, "tp2_title_2"},
+    {"tp2_help_2.txt", kMetStrTp2Help2, "tp2_help_2"},
 };
 
 // Yes, the binary does not test the text for null.
-inline void FillText(const char *pszText, const char *pszKey) {
-    Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(pszText)));
-    HxStr text = QueryConfigString(kPromptConfigCode, pszKey);
+inline void FillText(const TipText &entry) {
+    Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(entry.pszObject)));
+    HxStr text = MetConfigText(entry.nId, kPromptConfigCode, entry.pszKey);
     pText->SetText(text);
 }
 
@@ -46,12 +54,12 @@ MetMultiTips2Screen::MetMultiTips2Screen(MetRenderer *pRenderer, int nPriority)
                              HxStr(kNextScreen)) {
 }
 
-// 0x00307f38
+// NTSC-U/C: 0x00307f38, PAL: 0x0032cf90
 void MetMultiTips2Screen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     // The binary expands this loop into one call per text.
     for (const auto &entry : kTexts) {
-        FillText(entry[0], entry[1]);
+        FillText(entry);
     }
 }
 

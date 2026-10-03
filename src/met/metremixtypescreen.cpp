@@ -14,6 +14,9 @@
 #include "met/metremixmanager.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metsonglists.h"
+#include "met/metstrings.h"
+#include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/manager.h"
@@ -21,6 +24,12 @@
 #include "rnd/view.h"
 #include "script/configquery.h"
 #include "script/scripthost.h"
+
+#ifdef VIDEO_STANDARD_PAL
+#include <libscf.h>
+
+#include "os/hostmode.h"
+#endif
 
 namespace {
 
@@ -121,15 +130,21 @@ constexpr int kExitToButtonAction = 2;
 constexpr float kSelectAlternateInterval = 30.0f;
 constexpr int kSelectAlternateCycles = 2;
 
+#ifdef VIDEO_STANDARD_PAL
+inline const char *TextOrEmpty(const HxStr &text) {
+    return text.mStr != nullptr ? text.mStr : g_szEmptyString;
+}
+#endif
+
 } // namespace
 
-// 0x00361d18
+// NTSC-U/C: 0x00361d18, PAL: 0x0038f220
 MetRemixTypeScreen::MetRemixTypeScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtons(nullptr) {
-    mHelpKeys.push_back(HxStr(kNewObjectName));
-    mHelpKeys.push_back(HxStr(kLoadObjectName));
-    mHelpKeys.push_back(HxStr(kJukeboxObjectName));
+    mHelpKeys.push_back(MetText(kMetStrHSmrtNew, kNewObjectName));
+    mHelpKeys.push_back(MetText(kMetStrHSmrtLoad, kLoadObjectName));
+    mHelpKeys.push_back(MetText(kMetStrHSmrtJukebox, kJukeboxObjectName));
     mButtons = new MetButtonList;
 }
 
@@ -143,14 +158,14 @@ MetRemixTypeScreen *MetRemixTypeScreen::New(MetRenderer *pRenderer, int nPriorit
     return new MetRemixTypeScreen(pRenderer, nPriority);
 }
 
-// 0x00362600
+// NTSC-U/C: 0x00362600, PAL: 0x0038fcb0
 void MetRemixTypeScreen::EnterAndShow() {
     SetShowing(0);
     if (MetFrontEndState::shared()->mPendingTransition != 0) {
         MetFrontEndState *pState = MetFrontEndState::shared();
         pState->mLastTransition = pState->mPendingTransition;
         pState->mPendingTransition = 0;
-        MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
+        MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kStandardTitlePreset));
         PushNamedScreen(HxStr(kLeftGizmoScreen));
         PushNamedScreen(HxStr(kHelpScreen));
         mRenderer->SetActivePanel(this);
@@ -163,7 +178,7 @@ void MetRemixTypeScreen::EnterAndShow() {
     HxStr mode;
     if (Application::shared()->GetGameMode() == kGameModeSolo) {
         {
-            HxStr key = QueryConfigString(kTitleConfigCode, kSoloTitleKey);
+            HxStr key = MetConfigText(kMetStrTSolo, kTitleConfigCode, kSoloTitleKey);
             mode = key;
         }
         mThreeButtonView->SetShowing(1);
@@ -174,22 +189,22 @@ void MetRemixTypeScreen::EnterAndShow() {
         mButtons->Clear();
         {
             HxStr objectName(kNewButton);
-            HxStr label = QueryConfigString(kPromptConfigCode, kNewPrompt);
+            HxStr label = MetConfigText(kMetStrMsNewjam, kPromptConfigCode, kNewPrompt);
             mButtons->Add(objectName, label);
         }
         {
             HxStr objectName(kLoadButton);
-            HxStr label = QueryConfigString(kPromptConfigCode, kLoadPrompt);
+            HxStr label = MetConfigText(kMetStrMsLoadjam, kPromptConfigCode, kLoadPrompt);
             mButtons->Add(objectName, label);
         }
         {
             HxStr objectName(kJukeboxButton);
-            HxStr label = QueryConfigString(kPromptConfigCode, kJukeboxPrompt);
+            HxStr label = MetConfigText(kMetStrMsJukebox, kPromptConfigCode, kJukeboxPrompt);
             mButtons->Add(objectName, label);
         }
     } else {
         {
-            HxStr key = QueryConfigString(kTitleConfigCode, kMultiTitleKey);
+            HxStr key = MetConfigText(kMetStrTMulti, kTitleConfigCode, kMultiTitleKey);
             mode = key;
         }
         mTwoButtonView->SetShowing(1);
@@ -200,12 +215,12 @@ void MetRemixTypeScreen::EnterAndShow() {
         mButtons->Clear();
         {
             HxStr objectName(kNewButton);
-            HxStr label = QueryConfigString(kPromptConfigCode, kNewPrompt);
+            HxStr label = MetConfigText(kMetStrMsNewjam, kPromptConfigCode, kNewPrompt);
             mButtons->Add(objectName, label);
         }
         {
             HxStr objectName(kLoadButton);
-            HxStr label = QueryConfigString(kPromptConfigCode, kLoadPrompt);
+            HxStr label = MetConfigText(kMetStrMsLoadjam, kPromptConfigCode, kLoadPrompt);
             mButtons->Add(objectName, label);
         }
     }
@@ -213,10 +228,10 @@ void MetRemixTypeScreen::EnterAndShow() {
     mView->UpdateWorldXfm(nullptr, 1); // Yes, the binary discards the result.
     mButtons->SetSelected(kFirstButtonIndex);
     {
-        HxStr body = QueryConfigString(kTitleConfigCode, kTitleKey);
+        HxStr body = MetConfigText(kMetStrTRemixType, kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(mode + body);
     }
-    MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kStandardTitlePreset));
     MetHelpScreen::SetText(mHelpKeys[mButtons->mSelected], mRenderer->mAnimationFrame);
     MetScreen::EnterAndShow();
 }
@@ -281,7 +296,7 @@ void MetRemixTypeScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *
     BeginExit();
 }
 
-// 0x00363920
+// NTSC-U/C: 0x00363920, PAL: 0x00391470
 void MetRemixTypeScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kModeScreen));
@@ -294,15 +309,39 @@ void MetRemixTypeScreen::OnExitFinished() {
     case kLoadButtonIndex:
         if (MetFrontEndState::shared()->mUsingMemcard != 0 &&
             Application::shared()->GetGameMode() == kGameModeSolo) {
+#ifdef VIDEO_STANDARD_PAL
+            const bool bLowSpace = !GlobalSettings::shared()->mCardSlots.empty() &&
+                                   (GlobalSettings::shared()->mCardSlots[0].mFree <
+                                    GlobalSettings::shared()->mMinimumFreeClusters);
+#else
             GlobalSettings::shared(); // Yes, the binary discards this call's result.
-            if (GlobalSettings::shared()->mCardSlots[0].mFree <
-                GlobalSettings::shared()->mMinimumFreeClusters) {
+            const bool bLowSpace = GlobalSettings::shared()->mCardSlots[0].mFree <
+                                   GlobalSettings::shared()->mMinimumFreeClusters;
+#endif
+            if (bLowSpace) {
                 std::vector<HxStr> buttons;
-                buttons.push_back(HxStr(kBackButton));
-                buttons.push_back(HxStr(kContinueButton));
+                buttons.push_back(MetText(kMetStrMsgBACK, kBackButton));
+                buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
+#ifdef VIDEO_STANDARD_PAL
+                // The German text also includes the memory card name.
+                const HxStr format = GetMetString(kMetStrWarnRemixNoSpace);
+                HxStr text;
+                if (GetLanguage() == SCE_GERMAN_LANGUAGE) {
+                    const HxStr cardName = FirstCardSlotName();
+                    text = FormatString(TextOrEmpty(format),
+                                        TextOrEmpty(cardName),
+                                        GlobalSettings::shared()->mMinimumFreeClusters);
+                } else {
+                    text = FormatString(TextOrEmpty(format),
+                                        GlobalSettings::shared()->mMinimumFreeClusters);
+                }
+                const HxStr dialogue(kNoSpaceDialogue);
+                const HxStr title = GetMetString(kMetStrMsgWARNING);
+#else
                 const HxStr dialogue(kNoSpaceDialogue);
                 const HxStr title(kWarningTitle);
                 HxStr text = QueryConfigString(kPromptConfigCode, kNoSpaceDialogue);
+#endif
                 MetMsgScreen::Show(dialogue, title, text, kTwoButtons, buttons, this);
                 break;
             }

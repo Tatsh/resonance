@@ -61,7 +61,8 @@ public:
      * prompt layout is `standard_title`. The MetLoadFreqBaseScreen body then runs as a direct
      * call.
      *
-     * @ghidraAddress 0x00297448
+     * @ghidraAddress NTSC-U/C: 0x00297448
+     * @ghidraAddress PAL: 0x002b5530
      */
     virtual void EnterAndShow();
 
@@ -91,9 +92,11 @@ public:
      * Write the selected username into the first button and the edit label into the second.
      *
      * Slot 39. The first button is set exactly as the base sets it. The second takes the `lf_edit`
-     * label with the same username appended.
+     * label with the same username appended. The European release instead formats the username
+     * into the `EDIT %s` text of the current language.
      *
-     * @ghidraAddress 0x002976f8
+     * @ghidraAddress NTSC-U/C: 0x002976f8
+     * @ghidraAddress PAL: 0x002b5878
      */
     virtual void UpdateNameLabel();
 
@@ -150,7 +153,8 @@ public:
      * Slot 45. The first button takes an empty label, the second the `lf_edit` label, and the
      * third the `lf_create` label. The three prompts are the same three the base appends.
      *
-     * @ghidraAddress 0x00296fe8
+     * @ghidraAddress NTSC-U/C: 0x00296fe8
+     * @ghidraAddress PAL: 0x002b4fe0
      */
     virtual void BuildButtonList();
 

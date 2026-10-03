@@ -123,7 +123,8 @@ public:
      * first persona burn texture into the members at `+0x90` through `+0xb4`. Only the panel text
      * is used without a null test.
      *
-     * @ghidraAddress 0x00394728
+     * @ghidraAddress NTSC-U/C: 0x00394728
+     * @ghidraAddress PAL: 0x003c62b8
      */
     virtual void ResolveContainerViews();
 
@@ -166,13 +167,15 @@ private:
     // panel. Slots 2 and 36 are its two callers.
     void ReturnToTitle();
 
-    // 0x00395058
+    // NTSC-U/C: 0x00395058, PAL: 0x003c6d68
     // Loads both texture pairs for the session's level and fills the song, date, and username
     // fields from configuration codes 0x320 through 0x327, falling back to the short title when the
     // full one exceeds the title's wrap width. It then shows the persona's burn texture on the face
     // material's second stage, sets the title-screen caption, pushes `MetHelpScreen`, opens the
     // save screen for the first persona's appearance on the first card slot, and runs
-    // MetScreen::EnterAndShow(). EnterAndShow() is its one caller, and the title is inferred.
+    // MetScreen::EnterAndShow(). EnterAndShow() is its one caller, and the title is inferred. The
+    // European release saves to a copy of the first card slot only when that slot is in port 1,
+    // and otherwise to the stand-in slot `1`.
     void ShowResults();
 
     // ResolveContainerViews() fills +0x90 through +0xb4, and the constructor writes none of them.

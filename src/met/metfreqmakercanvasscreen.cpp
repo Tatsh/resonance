@@ -7,6 +7,7 @@
 #include "game/gamemanagerimpl.h"
 #include "met/metfreqmakerassetmanager.h"
 #include "met/metpersonadata.h"
+#include "met/metstrings.h"
 #include "os/datetime.h"
 #include "os/r250.h"
 #include "rnd/manager.h"
@@ -26,6 +27,11 @@ static const char *const kContainerName = "freq_maker_canvas";
 static const char *const kCanvasView = "fm_canvas.view";
 static const char *const kNameText = "FREQ_NAME.txt";
 
+#ifdef VIDEO_STANDARD_PAL
+// The text that shows the canvas title.
+static const char *const kTitleText = "FREQ CANVAS.txt";
+#endif
+
 // The editing commands HandleCanvasCommand() applies. The binary's jump table covers 13 through 21,
 // and its entries for 15 and 20 do nothing.
 enum CanvasCommand {
@@ -41,9 +47,20 @@ enum CanvasCommand {
 // LoadPrefab() runs randomize() a random number of times below this.
 constexpr float kRandomizePasses = 10.0f;
 
+#ifndef VIDEO_STANDARD_PAL
 // 0x00891af0
-// The name a new avatar starts with.
+// The name a new avatar starts with. The European release reads it from its text table instead.
 HxStr g_defaultFreqName("player1");
+#endif
+
+// The name a new avatar starts with.
+inline HxStr DefaultFreqName() {
+#ifdef VIDEO_STANDARD_PAL
+    return GetMetString(kMetStrFmDefaultName);
+#else
+    return g_defaultFreqName;
+#endif
+}
 
 // Resolve the view the avatar view hangs from.
 inline Rnd::View *FindCanvasView() {
@@ -52,10 +69,10 @@ inline Rnd::View *FindCanvasView() {
 
 } // namespace
 
-// 0x0025e5a8
+// NTSC-U/C: 0x0025e5a8, PAL: 0x00274810
 MetFreqMakerCanvasScreen::MetFreqMakerCanvasScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
-      mPersona(nullptr), mModified(0), mFreqName(g_defaultFreqName), mViewAttached(0) {
+      mPersona(nullptr), mModified(0), mFreqName(DefaultFreqName()), mViewAttached(0) {
 }
 
 // 0x00262030
@@ -106,10 +123,14 @@ void MetFreqMakerCanvasScreen::OnExitFinished() {
     mAppearance.detachFrom(FindCanvasView());
 }
 
-// 0x0025e798
+// NTSC-U/C: 0x0025e798, PAL: 0x00274a60
 void MetFreqMakerCanvasScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     Rnd::View *pView = FindCanvasView();
+#ifdef VIDEO_STANDARD_PAL
+    Rnd::Text *pTitle = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kTitleText)));
+    pTitle->SetText(GetMetString(kMetStrFmCanvas));
+#endif
     mAppearance.detachFrom(pView);
     mAppearance.attachTo(pView);
     mViewAttached = 1;
@@ -209,7 +230,7 @@ FreqPart *MetFreqMakerCanvasScreen::SelectPart(int nIndex) {
     return mAppearance.selectPart(nIndex);
 }
 
-// 0x002622b8
+// NTSC-U/C: 0x002622b8, PAL: 0x00274ee0
 void MetFreqMakerCanvasScreen::LoadPersona(MetPersonaData *pPersona) {
     mPersona = pPersona;
     mAppearance.clear();
@@ -217,7 +238,7 @@ void MetFreqMakerCanvasScreen::LoadPersona(MetPersonaData *pPersona) {
     if (pPersona != nullptr) {
         mAppearance.copyFrom(*pPersona->mAppearance.mDetail);
     }
-    mFreqName = g_defaultFreqName;
+    mFreqName = DefaultFreqName();
     if (mPersona != nullptr) {
         mFreqName = mPersona->mAppearance.mUserName;
     }
@@ -225,13 +246,13 @@ void MetFreqMakerCanvasScreen::LoadPersona(MetPersonaData *pPersona) {
     mModified = 0;
 }
 
-// 0x00262350
+// NTSC-U/C: 0x00262350, PAL: 0x00274ff0
 void MetFreqMakerCanvasScreen::LoadPrefab(MetPersonaData *pSource, int nRandomize) {
     mPersona = nullptr;
     mAppearance.clear();
     mAppearance.resetCursor();
     mAppearance.copyFrom(*pSource->mAppearance.mDetail);
-    mFreqName = g_defaultFreqName;
+    mFreqName = DefaultFreqName();
     if (mPersona != nullptr) { // Yes, mPersona was cleared above, so the source name is never read.
         mFreqName = pSource->mAppearance.mUserName;
     }

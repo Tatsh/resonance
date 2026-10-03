@@ -15,6 +15,7 @@
 #include "met/metpersonadata.h"
 #include "met/metpersonasaverscreen.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/datetime.h"
 #include "os/hxstr.h"
 #include "rnd/text.h"
@@ -95,16 +96,16 @@ MetScreen *MetLoadNewFreqScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadNewFreqScreen(pRenderer, nPriority);
 }
 
-// 0x002a4108
+// NTSC-U/C: 0x002a4108, PAL: 0x002c21e8
 void MetLoadNewFreqScreen::OnNameButton() {
     MetKeyboardRequest request(HxStr(kLoadNewFreqScreen),
-                               HxStr(kKeyboardPrompt),
+                               MetText(kMetStrTMetKbFreq, kKeyboardPrompt),
                                HxStr(kKeyboardInitialText),
                                kAnyPad,
                                this);
     request.mMaxWidth = kKeyboardMaxWidth;
     request.mMaxLength = kKeyboardMaxLength;
-    request.mTicker = kKeyboardTicker;
+    request.mTicker = MetText(kMetStrHNameNewFreqTicker, kKeyboardTicker);
     MetKeyboardScreen::Open(request);
 }
 
@@ -118,13 +119,13 @@ void MetLoadNewFreqScreen::OnMsgScreenDismissed(const HxStr &name, int) {
     ActivateNamedPanel(HxStr(kLoadNewFreqScreen));
 }
 
-// 0x002a3890
+// NTSC-U/C: 0x002a3890, PAL: 0x002c1698
 void MetLoadNewFreqScreen::EnterAndShow() {
-    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
+    HxStr title = MetConfigText(kMetStrTCreateChar, kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
     mNameEntered = 0;
 
-    MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kPromptLayout));
 
     MetLoadFreqBaseScreen::EnterAndShow();
 }
@@ -194,11 +195,11 @@ void MetLoadNewFreqScreen::OnKeyboardTextEntered(const HxStr &text) {
     }
 }
 
-// 0x002a85c0
+// NTSC-U/C: 0x002a85c0, PAL: 0x002c69d8
 void MetLoadNewFreqScreen::UpdateNameLabel() {
     Rnd::Text *pLabel = mButtonList->ButtonAt(kNameButtonIndex)->mText;
 
-    HxStr label = QueryConfigString(kLabelConfigCode, kNameLabelKey);
+    HxStr label = MetConfigText(kMetStrNfEnter, kLabelConfigCode, kNameLabelKey);
     pLabel->SetText(label);
 }
 
@@ -225,25 +226,25 @@ void MetLoadNewFreqScreen::AcquireIdentityList() {
     mIdentityList = MetFreqMakerAssetManager::shared()->GetIdentityList();
 }
 
-// 0x002a3b08
+// NTSC-U/C: 0x002a3b08, PAL: 0x002c1a98
 void MetLoadNewFreqScreen::BuildButtonList() {
     mButtonList->Clear();
 
-    HxStr nameLabel = QueryConfigString(kLabelConfigCode, kNameLabelKey);
+    HxStr nameLabel = MetConfigText(kMetStrNfEnter, kLabelConfigCode, kNameLabelKey);
     mButtonList->Add(HxStr(kNameButtonObject), nameLabel);
 
-    HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
+    HxStr editLabel = MetConfigText(kMetStrNfEdit, kLabelConfigCode, kEditLabelKey);
     mButtonList->Add(HxStr(kEditButtonObject), editLabel);
 
-    HxStr createLabel = QueryConfigString(kLabelConfigCode, kCreateLabelKey);
+    HxStr createLabel = MetConfigText(kMetStrNfCreate, kLabelConfigCode, kCreateLabelKey);
     mButtonList->Add(HxStr(kCreateButtonObject), createLabel);
 
     UpdateNameLabel();
 
     mHelpKeys.erase(mHelpKeys.begin(), mHelpKeys.end());
-    mHelpKeys.push_back(HxStr(kNamePrompt));
-    mHelpKeys.push_back(HxStr(kEditPrompt));
-    mHelpKeys.push_back(HxStr(kCreatePrompt));
+    mHelpKeys.push_back(MetText(kMetStrHIdName, kNamePrompt));
+    mHelpKeys.push_back(MetText(kMetStrHCidEdit, kEditPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHIdCreate, kCreatePrompt));
 
     mButtonList->SetSelected(kNameButtonIndex);
 }

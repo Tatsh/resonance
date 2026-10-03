@@ -9,6 +9,7 @@
 #include "met/metpersonadata.h"
 #include "met/metrenderer.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "script/configquery.h"
@@ -67,8 +68,8 @@ constexpr float kFadeDuration = 360.0f;
 constexpr int kRetainView = 1;
 constexpr int kReleaseView = 0;
 
-inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text = QueryConfigString(nCode, pszKey);
+inline HxStr ConfigText(MetStringId nId, int nCode, const char *pszKey) {
+    HxStr text = MetConfigText(nId, nCode, pszKey);
     return text;
 }
 
@@ -92,7 +93,7 @@ MetExpansionPakScreen::MetExpansionPakScreen(MetRenderer *pRenderer, int nPriori
     mFade = new MetFade(pRenderer);
 }
 
-// 0x00218518
+// NTSC-U/C: 0x00218518, PAL: 0x0022aaa8
 void MetExpansionPakScreen::UpdateIdle(float flTime) {
     mFade->Update(flTime);
     if (mFinished != 0) {
@@ -120,8 +121,8 @@ void MetExpansionPakScreen::UpdateIdle(float flTime) {
         if (mState == DiscSwap::kStepDiscReady) {
             std::vector<HxStr> buttons;
             MetMsgScreen::Show(HxStr(kLoadMessage),
-                               HxStr(kMessageTitle),
-                               ConfigText(kPromptConfigCode, kLoadMessage),
+                               MetText(kMetStrMsgFREQUENCY, kMessageTitle),
+                               ConfigText(kMetStrExpansionLoad, kPromptConfigCode, kLoadMessage),
                                kNoButtons,
                                buttons,
                                this);
@@ -154,8 +155,8 @@ void MetExpansionPakScreen::UpdateIdle(float flTime) {
         mState = kStateIdle;
         std::vector<HxStr> buttons;
         MetMsgScreen::Show(HxStr(kPrepareMessage),
-                           HxStr(kMessageTitle),
-                           ConfigText(kPromptConfigCode, kPrepareMessage),
+                           MetText(kMetStrMsgFREQUENCY, kMessageTitle),
+                           ConfigText(kMetStrExpansionPrepare, kPromptConfigCode, kPrepareMessage),
                            kNoButtons,
                            buttons,
                            this);
@@ -175,36 +176,40 @@ void MetExpansionPakScreen::UpdateIdle(float flTime) {
     personas = *MetPersonaData::loadList();
     MergeLevelLists(personas);
 
-    HxStr before = ConfigText(kPromptConfigCode, kDoneTextBefore);
+    HxStr before = ConfigText(kMetStrExpansionDone1, kPromptConfigCode, kDoneTextBefore);
     HxStr title = QueryConfigString(kExpansionTitleConfigCode);
-    HxStr after = ConfigText(kPromptConfigCode, kDoneTextAfter);
+    HxStr after = ConfigText(kMetStrExpansionDone2, kPromptConfigCode, kDoneTextAfter);
     HxStr text(
         FormatString(kDoneTextFormat, TextOrEmpty(before), TextOrEmpty(title), TextOrEmpty(after)));
     std::vector<HxStr> buttons;
-    buttons.push_back(HxStr(kContinueButton));
-    MetMsgScreen::ShowActive(
-        HxStr(kDoneMessage), HxStr(kMessageTitle), text, kOneButton, buttons, this);
+    buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
+    MetMsgScreen::ShowActive(HxStr(kDoneMessage),
+                             MetText(kMetStrMsgFREQUENCY, kMessageTitle),
+                             text,
+                             kOneButton,
+                             buttons,
+                             this);
 }
 
-// 0x002193e8
+// NTSC-U/C: 0x002193e8, PAL: 0x0022bb70
 void MetExpansionPakScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kPrepareMessage) {
         std::vector<HxStr> buttons;
         if (mRetry == 0) {
-            buttons.push_back(HxStr(kContinueButton));
-            buttons.push_back(HxStr(kCancelButton));
+            buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
+            buttons.push_back(MetText(kMetStrMsgCANCEL, kCancelButton));
             MetMsgScreen::Show(HxStr(kCheckMessage),
-                               HxStr(kMessageTitle),
-                               ConfigText(kPromptConfigCode, kCheckMessage),
+                               MetText(kMetStrMsgFREQUENCY, kMessageTitle),
+                               ConfigText(kMetStrExpansionCheck, kPromptConfigCode, kCheckMessage),
                                kTwoButtons,
                                buttons,
                                this);
         } else {
-            buttons.push_back(HxStr(kRetryButton));
-            buttons.push_back(HxStr(kCancelButton));
+            buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
+            buttons.push_back(MetText(kMetStrMsgCANCEL, kCancelButton));
             MetMsgScreen::Show(HxStr(kCheckMessage),
-                               HxStr(kMessageTitle),
-                               ConfigText(kPromptConfigCode, kRetryText),
+                               MetText(kMetStrMsgFREQUENCY, kMessageTitle),
+                               ConfigText(kMetStrExpansionRetry, kPromptConfigCode, kRetryText),
                                kTwoButtons,
                                buttons,
                                this);
@@ -218,16 +223,16 @@ void MetExpansionPakScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice)
         if (nChoice == kChoiceFirst) {
             std::vector<HxStr> buttons;
             MetMsgScreen::Show(HxStr(kLoadMessage),
-                               HxStr(kMessageTitle),
-                               ConfigText(kPromptConfigCode, kLoadMessage),
+                               MetText(kMetStrMsgFREQUENCY, kMessageTitle),
+                               ConfigText(kMetStrExpansionLoad, kPromptConfigCode, kLoadMessage),
                                kNoButtons,
                                buttons,
                                this);
         } else {
             std::vector<HxStr> buttons;
             MetMsgScreen::Show(HxStr(kLoadMessage),
-                               HxStr(kMessageTitle),
-                               ConfigText(kPromptConfigCode, kLoadMessage),
+                               MetText(kMetStrMsgFREQUENCY, kMessageTitle),
+                               ConfigText(kMetStrExpansionLoad, kPromptConfigCode, kLoadMessage),
                                kNoButtons,
                                buttons,
                                this);
@@ -245,12 +250,12 @@ void MetExpansionPakScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice)
     BeginExit();
 }
 
-// 0x00219e80
+// NTSC-U/C: 0x00219e80, PAL: 0x0022c7b8
 void MetExpansionPakScreen::OnFadeInDone() {
     std::vector<HxStr> buttons;
     MetMsgScreen::Show(HxStr(kPrepareMessage),
-                       HxStr(kMessageTitle),
-                       ConfigText(kPromptConfigCode, kPrepareMessage),
+                       MetText(kMetStrMsgFREQUENCY, kMessageTitle),
+                       ConfigText(kMetStrExpansionPrepare, kPromptConfigCode, kPrepareMessage),
                        kNoButtons,
                        buttons,
                        this);

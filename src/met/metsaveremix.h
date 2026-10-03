@@ -175,7 +175,8 @@ public:
      *
      * @param state The card's state, passed by value and destroyed on return.
      * @param nStatus The enquiry status, kMemcardStatusOk on success.
-     * @ghidraAddress 0x00372c10
+     * @ghidraAddress NTSC-U/C: 0x00372c10
+     * @ghidraAddress PAL: 0x003a1840
      */
     virtual void OnConnectState(MemcardConnectState state, int nStatus);
 
@@ -188,7 +189,8 @@ public:
      *
      * @param nPortSlot The packed port and slot, which is not read.
      * @param nStatus The format status.
-     * @ghidraAddress 0x00373808
+     * @ghidraAddress NTSC-U/C: 0x00373808
+     * @ghidraAddress PAL: 0x003a2b28
      */
     virtual void OnCardFormatted(int nPortSlot, int nStatus);
 
@@ -196,14 +198,16 @@ public:
      * Report a finished remix save. MemcardUser slot 8.
      *
      * Success on port 1 sets mRefreshFirstCardSlot and queues a connect-state enquiry.
-     * OnConnectState() then records the result as the first GlobalSettings::mCardSlots entry.
+     * OnConnectState() then records the result as the first GlobalSettings::mCardSlots entry. The
+     * European release does this only while GlobalSettings::mCardSlots has an entry.
      * Success anywhere else exits MetMsgScreen. A full card raises `save_fail_no_space`, or
      * `copy_fail_no_space` for a copy with the space GlobalSettings::mMinimumFreeClusters requires,
      * and any other status raises `save_fail_no_space` with the `save_fail_general` text.
      *
      * @param nPortSlot The packed port and slot, which is not read.
      * @param nStatus The save status.
-     * @ghidraAddress 0x00374b58
+     * @ghidraAddress NTSC-U/C: 0x00374b58
+     * @ghidraAddress PAL: 0x003a4158
      */
     virtual void OnRemixSaved(int nPortSlot, int nStatus);
 
@@ -216,7 +220,8 @@ public:
      *
      * @param nPortSlot The packed port and slot, which is not read.
      * @param nStatus The listing status, which is not read.
-     * @ghidraAddress 0x00374208
+     * @ghidraAddress NTSC-U/C: 0x00374208
+     * @ghidraAddress PAL: 0x003a36b8
      */
     virtual void OnRemixesListed(int nPortSlot, int nStatus);
 
@@ -228,16 +233,19 @@ public:
      * `mem_format_go`, and NO runs slot 39 with the recorded request. `mem_format_done` and the YES
      * answer to `mem_remix_dupe` save the remix and raise the save dialogue, and NO to
      * `mem_remix_dupe` runs OnDuplicateNameDeclined(). Any other dialogue runs
-     * OnSaveDialogueClosed().
+     * OnSaveDialogueClosed(). In the European release, NO to `mem_format_check` raises the
+     * `save_fail_no_format` error with the `save_aborted` text in place of slot 39, and the answers
+     * to `save_fail_no_format` act like those to `save_fail_no_space`.
      *
      * @param name The dialogue name.
      * @param nChoice The index of the button chosen.
-     * @ghidraAddress 0x00375590
+     * @ghidraAddress NTSC-U/C: 0x00375590
+     * @ghidraAddress PAL: 0x003a4dd8
      */
     virtual void OnMsgScreenDismissed(const HxStr &name, int nChoice);
 
 private:
-    // 0x00372760
+    // NTSC-U/C: 0x00372760, PAL: 0x003a12e8
     // Raises the `save_remix` dialogue, headed `save_title` with the `mem_save` text
     // for a save, or `copy_title` with the `mem_copy12` text naming the next card slot for a copy.
     void BeginSave();

@@ -37,7 +37,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x003c7a88
+     * @ghidraAddress NTSC-U/C: 0x003c7a88
+     * @ghidraAddress PAL: 0x003fed10
      */
     MetTutorialScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -68,7 +69,8 @@ public:
      * button, labels the screen from configuration code 0x269 under `tutorial`, and posts the
      * selected button's prompt.
      *
-     * @ghidraAddress 0x003c82a0
+     * @ghidraAddress NTSC-U/C: 0x003c82a0
+     * @ghidraAddress PAL: 0x003ff6e8
      */
     virtual void EnterAndShow();
 
@@ -135,7 +137,8 @@ public:
      * The buttons are `tut_01.but` and `tut_02.but`, labelled from configuration code 0x258 under
      * `tut_g` and `tut_r`.
      *
-     * @ghidraAddress 0x003c7d78
+     * @ghidraAddress NTSC-U/C: 0x003c7d78
+     * @ghidraAddress PAL: 0x003ff098
      */
     virtual void ResolveContainerViews();
 

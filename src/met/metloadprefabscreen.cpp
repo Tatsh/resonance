@@ -13,12 +13,13 @@
 #include "met/metmsgscreen.h"
 #include "met/metpersonadata.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
+#include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "os/log.h"
 #include "rnd/button.h"
 #include "rnd/text.h"
 #include "rndartt/apalette.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -71,6 +72,12 @@ static const char *const kFreqLimitTextKey = "nomem_freq_limit";
 static const char *const kOkButton = "OK";
 constexpr int kOneButton = 1;
 
+#ifdef VIDEO_STANDARD_PAL
+inline const char *TextOrEmpty(const HxStr &text) {
+    return text.mStr != nullptr ? text.mStr : g_szEmptyString;
+}
+#endif
+
 } // namespace
 
 // 0x002a8a58
@@ -83,43 +90,48 @@ MetLoadPreFabScreen::MetLoadPreFabScreen(MetRenderer *pRenderer, int nPriority)
 MetLoadPreFabScreen::~MetLoadPreFabScreen() {
 }
 
-// 0x002a8aa0
+// NTSC-U/C: 0x002a8aa0, PAL: 0x002c6f18
 void MetLoadPreFabScreen::EnterAndShow() {
-    MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kPromptLayout));
 
-    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
+    HxStr title = MetConfigText(kMetStrTPickChar, kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
 
     MetLoadFreqBaseScreen::EnterAndShow();
 }
 
-// 0x002a8b80
+// NTSC-U/C: 0x002a8b80, PAL: 0x002c7030
 void MetLoadPreFabScreen::BuildButtonList() {
     mButtonList->Clear();
     mButtonList->Add(HxStr(kNameButtonObject), HxStr(kNoLabel));
 
-    HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
+    HxStr editLabel = MetConfigText(kMetStrPfEdit, kLabelConfigCode, kEditLabelKey);
     mButtonList->Add(HxStr(kEditButtonObject), editLabel);
 
-    HxStr createLabel = QueryConfigString(kLabelConfigCode, kCreateLabelKey);
+    HxStr createLabel = MetConfigText(kMetStrPfCreate, kLabelConfigCode, kCreateLabelKey);
     mButtonList->Add(HxStr(kCreateButtonObject), createLabel);
 
     mHelpKeys.erase(mHelpKeys.begin(), mHelpKeys.end());
-    mHelpKeys.push_back(HxStr(kNamePrompt));
-    mHelpKeys.push_back(HxStr(kEditPrompt));
-    mHelpKeys.push_back(HxStr(kCreatePrompt));
+    mHelpKeys.push_back(MetText(kMetStrHIdName, kNamePrompt));
+    mHelpKeys.push_back(MetText(kMetStrHCidEdit, kEditPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHIdCreate, kCreatePrompt));
 
     mButtonList->SetSelected(kNameButtonIndex);
 }
 
-// 0x002a8fe0
+// NTSC-U/C: 0x002a8fe0, PAL: 0x002c7580
 void MetLoadPreFabScreen::UpdateNameLabel() {
     HxStr username((*mIdentityList)[mSelectedIdentity]->mAppearance.mUserName);
     mButtonList->ButtonAt(kNameButtonIndex)->mText->SetText(username);
 
+#ifdef VIDEO_STANDARD_PAL
+    HxStr editLabel = GetMetString(kMetStrPfEdit);
+    HxStr editText(FormatString(TextOrEmpty(editLabel), TextOrEmpty(username)));
+#else
     HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
     HxStr editLabelWithName(editLabel);
     HxStr editText(editLabelWithName += username);
+#endif
     mButtonList->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
 }
 
@@ -168,28 +180,32 @@ void MetLoadPreFabScreen::OnNameButton() {
     ActivateNamedPanel(HxStr(kModeScreen));
 }
 
-// 0x002a9710
+// NTSC-U/C: 0x002a9710, PAL: 0x002c7d88
 void MetLoadPreFabScreen::OnCreateButton() {
     if (MetPersonaData::savedList()->size() >= kMaxSavedPersonas) {
         ExitScreenByName(HxStr(kHelpScreen));
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kOkButton));
-        HxStr text = QueryConfigString(kLabelConfigCode, kFreqLimitTextKey);
-        MetMsgScreen::Show(
-            HxStr(kFreqLimitMessage), HxStr(kFreqLimitTitle), text, kOneButton, buttons, this);
+        buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
+        HxStr text = MetConfigText(kMetStrNomemFreqLimit, kLabelConfigCode, kFreqLimitTextKey);
+        MetMsgScreen::Show(HxStr(kFreqLimitMessage),
+                           MetText(kMetStrMsgERROR, kFreqLimitTitle),
+                           text,
+                           kOneButton,
+                           buttons,
+                           this);
     } else {
         MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadPreFabScreen);
         MetLoadFreqBaseScreen::OnCreateButton();
     }
 }
 
-// 0x002a9b38
+// NTSC-U/C: 0x002a9b38, PAL: 0x002c8270
 void MetLoadPreFabScreen::OnMsgScreenDismissed(const HxStr &name, int) {
     if (!(name == kFreqLimitMessage)) {
         return;
     }
 
-    HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
+    HxStr title = MetConfigText(kMetStrTPickChar, kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
 
     PushNamedScreen(HxStr(kHelpScreen));

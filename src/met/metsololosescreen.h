@@ -65,7 +65,8 @@ public:
      * MetGlobalSettingsSaverScreen::StartSave() runs with this screen as the one to return to, and
      * mActivatePending is cleared. Otherwise ShowButtons() runs.
      *
-     * @ghidraAddress 0x00399f88
+     * @ghidraAddress NTSC-U/C: 0x00399f88
+     * @ghidraAddress PAL: 0x003cc1c0
      */
     virtual void EnterAndShow();
 
@@ -126,7 +127,7 @@ public:
     virtual void OnExitFinished();
 
 private:
-    // 0x0039a4e8
+    // NTSC-U/C: 0x0039a4e8, PAL: 0x003cc7e8
     // Sets the `solo_lose` caption and the `no_back_title` help layout, pushes `MetHelpScreen` and
     // `MetSoloStatsScreen`, makes this screen the active panel, selects the first button, shows its
     // prompt, and runs MetScreen::EnterAndShow(). EnterAndShow() is its one caller, and the title

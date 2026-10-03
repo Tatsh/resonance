@@ -71,7 +71,8 @@ public:
      * for the factory. The list is built on the first entry from `mcrl_line.view`,
      * `mcrl_hilite.mesh`, `mcrl_up.mesh`, and `mcrl_down.mesh`, and shown again on later entries.
      *
-     * @ghidraAddress 0x0034b568
+     * @ghidraAddress NTSC-U/C: 0x0034b568
+     * @ghidraAddress PAL: 0x00377138
      */
     virtual void EnterAndShow();
 
@@ -118,7 +119,8 @@ public:
      * Slot 33. The help layout is `remix_load_opt`, and the help text is the first line of
      * MetScreen::mHelpKeys at the renderer time.
      *
-     * @ghidraAddress 0x00352770
+     * @ghidraAddress NTSC-U/C: 0x00352770
+     * @ghidraAddress PAL: 0x0037e8e0
      */
     virtual void OnEnterFinished();
 
@@ -146,7 +148,8 @@ public:
      * with the configuration code 0x258 labels `rl_saved` and `rl_factory`. `font1_pink_2` and
      * `font1_pinkgrey_2` are resolved into mThisDiscFont and mOtherFont.
      *
-     * @ghidraAddress 0x00349fc8
+     * @ghidraAddress NTSC-U/C: 0x00349fc8
+     * @ghidraAddress PAL: 0x003758e0
      */
     virtual void ResolveContainerViews();
 
@@ -196,7 +199,8 @@ private:
      * same titles as EnterAndShow(), set through MetScreenTitleScreen::ReplaceTitle(). The list is
      * refilled, moved to the first row, and that row is shown.
      *
-     * @ghidraAddress 0x0034a838
+     * @ghidraAddress NTSC-U/C: 0x0034a838
+     * @ghidraAddress PAL: 0x003762e0
      */
     void OnButtonRingMoved();
 

@@ -7,9 +7,9 @@
 #include "met/metfrontendstate.h"
 #include "met/metmsgscreen.h"
 #include "met/metrenderer.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -36,6 +36,11 @@ static const char *const kMemCheckDialogue = "mem_check";
 static const char *const kFormatDoneDialogue = "mem_format_done";
 static const char *const kFormatFailDialogue = "format_fail";
 static const char *const kFormatGoDialogue = "mem_format_go";
+#ifdef VIDEO_STANDARD_PAL
+static const char *const kSaveAbortedDialogue = "save_fail_no_format";
+// The slot name the European release records when the first card slot is not port 1.
+static const char *const kFirstCardSlotName = "1";
+#endif
 
 // Dialogue titles.
 static const char *const kSettingsTitle = "SETTINGS";
@@ -70,12 +75,6 @@ constexpr int kFirstCardPortSlot = 0;
 
 inline const char *TextOrEmpty(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
-}
-
-// A dialogue text read by value from configuration.
-inline HxStr ConfigText(const char *pszKey) {
-    HxStr value = QueryConfigString(kDialogueConfigCode, pszKey);
-    return value;
 }
 
 // The name of the card GlobalSettings records.
@@ -131,12 +130,25 @@ void MetGlobalSettingsSaverScreen::EnterAndShow() {
     RequestConnectState();
 }
 
-// 0x002820a8
+// NTSC-U/C: 0x002820a8, PAL: 0x00295540
 inline void MetGlobalSettingsSaverScreen::RequestConnectState() {
     MemcardManager::shared()->mUser = this;
+#ifdef VIDEO_STANDARD_PAL
+    // The European release enquires about the card in port 1 whatever card GlobalSettings records.
+    MemcardConnectState state;
+    if (GlobalSettings::shared()->mCardSlots.size() != 0 &&
+        GlobalSettings::shared()->mCardSlots[0].mPortSlot == kFirstCardPortSlot) {
+        state = GlobalSettings::shared()->mCardSlots[0];
+    } else {
+        state.mPortSlot = kFirstCardPortSlot;
+        state.mSlotName = kFirstCardSlotName;
+    }
+    MemcardManager::shared()->CreateGetConnectStateTask(state.mPortSlot);
+#else
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
     MemcardManager::shared()->CreateGetConnectStateTask(
         GlobalSettings::shared()->mCardSlots[0].mPortSlot);
+#endif
 }
 
 // 0x002820f8
@@ -154,7 +166,23 @@ void MetGlobalSettingsSaverScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 }
 
-// 0x0027c7a8
+// The binary expands this in place in OnConnectState().
+inline void MetGlobalSettingsSaverScreen::ShowFormatCheck(const MemcardConnectState &state) {
+    std::vector<HxStr> buttons;
+    buttons.push_back(MetText(kMetStrMsgNO, kNoButton));
+    buttons.push_back(MetText(kMetStrMsgYES, kYesButton));
+    const HxStr format(
+        MetConfigText(kMetStrMemFormatCheck, kDialogueConfigCode, kFormatCheckDialogue));
+    const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(state.mSlotName)));
+    MetMsgScreen::Show(HxStr(kFormatCheckDialogue),
+                       MetText(kMetStrMsgSETTINGS, kSettingsTitle),
+                       text,
+                       kTwoButtons,
+                       buttons,
+                       this);
+}
+
+// NTSC-U/C: 0x0027c7a8, PAL: 0x002956b8
 void MetGlobalSettingsSaverScreen::OnConnectState(MemcardConnectState state, int nStatus) {
     if (nStatus == kMemcardStatusOk) {
         if (state.mFormatted != 0) {
@@ -162,75 +190,91 @@ void MetGlobalSettingsSaverScreen::OnConnectState(MemcardConnectState state, int
             MemcardManager::shared()->CreateSaveGlobalSettingsTask(state.mPortSlot,
                                                                    GlobalSettings::shared());
             const std::vector<HxStr> buttons;
-            const HxStr format(ConfigText(kSaveDialogue));
+            const HxStr format(MetConfigText(kMetStrMemSave, kDialogueConfigCode, kSaveDialogue));
             const HxStr text(FormatString(TextOrEmpty(format), RecordedCardName()));
-            MetMsgScreen::Show(
-                HxStr(kSaveDialogue), HxStr(kSettingsTitle), text, kNoButtons, buttons, this);
+            MetMsgScreen::Show(HxStr(kSaveDialogue),
+                               MetText(kMetStrMsgSETTINGS, kSettingsTitle),
+                               text,
+                               kNoButtons,
+                               buttons,
+                               this);
             return;
         }
 
-        std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kNoButton));
-        buttons.push_back(HxStr(kYesButton));
-        const HxStr format(ConfigText(kFormatCheckDialogue));
-        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(state.mSlotName)));
-        MetMsgScreen::Show(
-            HxStr(kFormatCheckDialogue), HxStr(kSettingsTitle), text, kTwoButtons, buttons, this);
+        ShowFormatCheck(state);
         return;
     }
 
+#ifdef VIDEO_STANDARD_PAL
+    if (nStatus == kMemcardStatusNotFormatted) {
+        ShowFormatCheck(state);
+        return;
+    }
+#endif
+
     std::vector<HxStr> buttons;
-    buttons.push_back(HxStr(kRetryButton));
-    buttons.push_back(HxStr(kContinueButton));
+    buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
+    buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
     MetMsgScreen::Show(HxStr(kMemCheckDialogue),
-                       HxStr(kSettingsTitle),
-                       ConfigText(kMemCheckDialogue),
+                       MetText(kMetStrMsgSETTINGS, kSettingsTitle),
+                       MetConfigText(kMetStrMemCheck, kDialogueConfigCode, kMemCheckDialogue),
                        kTwoButtons,
                        buttons,
                        this);
 }
 
-// 0x0027d258
+// NTSC-U/C: 0x0027d258, PAL: 0x00296800
 void MetGlobalSettingsSaverScreen::OnCardFormatted([[maybe_unused]] int nPortSlot, int nStatus) {
     switch (nStatus) {
     case kMemcardStatusOk: {
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kContinueButton));
+        buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
-        const HxStr format(ConfigText(kFormatSuccessText));
+        const HxStr format(
+            MetConfigText(kMetStrFormatSuccess, kDialogueConfigCode, kFormatSuccessText));
         const HxStr text(FormatString(TextOrEmpty(format), RecordedCardName()));
-        MetMsgScreen::ShowActive(
-            HxStr(kFormatDoneDialogue), HxStr(kFormatTitle), text, kOneButton, buttons, this);
+        MetMsgScreen::ShowActive(HxStr(kFormatDoneDialogue),
+                                 MetText(kMetStrMsgFORMAT, kFormatTitle),
+                                 text,
+                                 kOneButton,
+                                 buttons,
+                                 this);
         break;
     }
 
     case kMemcardStatusAlreadyFormatted: {
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kContinueButton));
+        buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
-        const HxStr format(ConfigText(kFormatAlreadyText));
+        const HxStr format(
+            MetConfigText(kMetStrFormatAlready, kDialogueConfigCode, kFormatAlreadyText));
         const HxStr text(FormatString(TextOrEmpty(format), RecordedCardName()));
-        MetMsgScreen::ShowActive(
-            HxStr(kFormatDoneDialogue), HxStr(kFormatTitle), text, kOneButton, buttons, this);
+        MetMsgScreen::ShowActive(HxStr(kFormatDoneDialogue),
+                                 MetText(kMetStrMsgFORMAT, kFormatTitle),
+                                 text,
+                                 kOneButton,
+                                 buttons,
+                                 this);
         break;
     }
 
     default: {
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kRetryButton));
-        buttons.push_back(HxStr(kContinueButton));
-        MetMsgScreen::Show(HxStr(kFormatFailDialogue),
-                           HxStr(kErrorTitle),
-                           ConfigText(kFormatFailDialogue),
-                           kTwoButtons,
-                           buttons,
-                           this);
+        buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
+        buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
+        MetMsgScreen::Show(
+            HxStr(kFormatFailDialogue),
+            MetText(kMetStrMsgERROR, kErrorTitle),
+            MetConfigText(kMetStrFormatFail, kDialogueConfigCode, kFormatFailDialogue),
+            kTwoButtons,
+            buttons,
+            this);
         break;
     }
     }
 }
 
-// 0x0027dc70
+// NTSC-U/C: 0x0027dc70, PAL: 0x002973a8
 void MetGlobalSettingsSaverScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kMemCheckDialogue) {
         if (nChoice == kChoiceSecond) {
@@ -242,12 +286,29 @@ void MetGlobalSettingsSaverScreen::OnMsgScreenDismissed(const HxStr &name, int n
             MemcardManager::shared()->CreateFormatTask(kFirstCardPortSlot);
             const std::vector<HxStr> buttons;
             GlobalSettings::shared(); // Yes, the binary discards this call's result.
-            const HxStr format(ConfigText(kFormatGoDialogue));
+            const HxStr format(
+                MetConfigText(kMetStrMemFormatGo, kDialogueConfigCode, kFormatGoDialogue));
             const HxStr text(FormatString(TextOrEmpty(format), RecordedCardName()));
-            MetMsgScreen::Show(
-                HxStr(kFormatGoDialogue), HxStr(kWarningTitle), text, kNoButtons, buttons, this);
+            MetMsgScreen::Show(HxStr(kFormatGoDialogue),
+                               MetText(kMetStrMsgWARNING, kWarningTitle),
+                               text,
+                               kNoButtons,
+                               buttons,
+                               this);
             return;
         }
+#ifdef VIDEO_STANDARD_PAL
+        std::vector<HxStr> buttons;
+        buttons.push_back(GetMetString(kMetStrMsgRETRY));
+        buttons.push_back(GetMetString(kMetStrMsgCONTINUE));
+        MetMsgScreen::Show(HxStr(kSaveAbortedDialogue),
+                           GetMetString(kMetStrMsgERROR),
+                           GetMetString(kMetStrSaveAborted),
+                           kTwoButtons,
+                           buttons,
+                           this);
+        return;
+#endif
     } else if (name == kFormatDoneDialogue) {
         // Falls through to the connect-state enquiry below.
     } else if (name == kFormatFailDialogue) {
@@ -255,6 +316,13 @@ void MetGlobalSettingsSaverScreen::OnMsgScreenDismissed(const HxStr &name, int n
             BeginExit();
             return;
         }
+#ifdef VIDEO_STANDARD_PAL
+    } else if (name == kSaveAbortedDialogue) {
+        if (nChoice != kChoiceFirst) {
+            BeginExit();
+            return;
+        }
+#endif
     } else {
         BeginExit();
         return;
@@ -263,12 +331,12 @@ void MetGlobalSettingsSaverScreen::OnMsgScreenDismissed(const HxStr &name, int n
     RequestConnectState();
 }
 
-// 0x0027e080
+// NTSC-U/C: 0x0027e080, PAL: 0x00297bc8
 void MetGlobalSettingsSaverScreen::OnGlobalSettingsSaved([[maybe_unused]] int nPortSlot,
                                                          int nStatus) {
     std::vector<HxStr> buttons;
-    buttons.push_back(HxStr(kRetryButton));
-    buttons.push_back(HxStr(kContinueButton));
+    buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
+    buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
     HxStr format;
     HxStr text;
     switch (nStatus) {
@@ -277,25 +345,33 @@ void MetGlobalSettingsSaverScreen::OnGlobalSettingsSaved([[maybe_unused]] int nP
         break;
 
     case kMemcardStatusUnknown:
-        format = ConfigText(kSaveFailNoCardText);
+        format = MetConfigText(kMetStrSaveFailNocard, kDialogueConfigCode, kSaveFailNoCardText);
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
         text = FormatString(TextOrEmpty(format), RecordedCardName());
-        MetMsgScreen::Show(
-            HxStr(kMemCheckDialogue), HxStr(kSettingsTitle), text, kTwoButtons, buttons, this);
+        MetMsgScreen::Show(HxStr(kMemCheckDialogue),
+                           MetText(kMetStrMsgSETTINGS, kSettingsTitle),
+                           text,
+                           kTwoButtons,
+                           buttons,
+                           this);
         break;
 
     case kMemcardStatusCardFull:
-        format = ConfigText(kSaveFailNoSpaceText);
+        format = MetConfigText(kMetStrSaveFailNospace, kDialogueConfigCode, kSaveFailNoSpaceText);
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
         text = FormatString(TextOrEmpty(format), RecordedCardName());
-        MetMsgScreen::Show(
-            HxStr(kMemCheckDialogue), HxStr(kSettingsTitle), text, kTwoButtons, buttons, this);
+        MetMsgScreen::Show(HxStr(kMemCheckDialogue),
+                           MetText(kMetStrMsgSETTINGS, kSettingsTitle),
+                           text,
+                           kTwoButtons,
+                           buttons,
+                           this);
         break;
 
     default:
         MetMsgScreen::Show(HxStr(kMemCheckDialogue),
-                           HxStr(kSettingsTitle),
-                           ConfigText(kSaveFailText),
+                           MetText(kMetStrMsgSETTINGS, kSettingsTitle),
+                           MetConfigText(kMetStrSaveFail, kDialogueConfigCode, kSaveFailText),
                            kTwoButtons,
                            buttons,
                            this);

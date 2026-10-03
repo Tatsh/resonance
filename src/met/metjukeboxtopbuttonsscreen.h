@@ -77,7 +77,8 @@ public:
      * The load wait pumps the asynchronous loaders until every sub-screen reports its container
      * loaded, and MetRemixManager::PrunePlayList() runs before the sub-screens are pushed.
      *
-     * @ghidraAddress 0x00241b08
+     * @ghidraAddress NTSC-U/C: 0x00241b08
+     * @ghidraAddress PAL: 0x00256940
      */
     virtual void EnterAndShow();
 
@@ -131,13 +132,15 @@ public:
      * The buttons are saved remixes, factory remixes, edit playlist, and done, in that order, and
      * the first is selected.
      *
-     * @ghidraAddress 0x00240e28
+     * @ghidraAddress NTSC-U/C: 0x00240e28
+     * @ghidraAddress PAL: 0x00255950
      */
     virtual void ResolveContainerViews();
 
 private:
     // Hide the five sub-screens, show the ones the selected button owns, record the sub-screen
-    // that receives commands in mCommandTargetScreen, and replace the title. 0x00241320
+    // that receives commands in mCommandTargetScreen, and replace the title.
+    // NTSC-U/C: 0x00241320, PAL: 0x00255f98
     void ShowSelectedPanel();
 
     HxStr mCommandTargetScreen; // +0x8c

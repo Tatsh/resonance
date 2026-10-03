@@ -69,9 +69,11 @@ public:
      *
      * Slot 38. The same layout as MetJukeboxCustomRemixesScreen::ResolveContainerViews() over the
      * `jbf_` objects, except that the catalogue row view is also shown, and the playlist caption
-     * is resolved from `dbf_CREATE PLAYLIST.txt`, the name the image records.
+     * is resolved from `dbf_CREATE PLAYLIST.txt`, the name the image records. The European release
+     * also sets the caption to the `My Playlist` text of the current language.
      *
-     * @ghidraAddress 0x0023afd8
+     * @ghidraAddress NTSC-U/C: 0x0023afd8
+     * @ghidraAddress PAL: 0x0024f6c8
      */
     virtual void ResolveContainerViews();
 };

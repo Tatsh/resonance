@@ -8,8 +8,8 @@
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -80,21 +80,21 @@ MetSoloLoseScreen *MetSoloLoseScreen::New(MetRenderer *pRenderer, int nPriority)
     return new MetSoloLoseScreen(pRenderer, nPriority);
 }
 
-// 0x00399f88
+// NTSC-U/C: 0x00399f88, PAL: 0x003cc1c0
 void MetSoloLoseScreen::EnterAndShow() {
     mRenderer->SetActivePanel(this);
     SetShowing(0);
     mButtonList->Clear();
 
-    HxStr retryLabel = QueryConfigString(kPromptConfigCode, kRetryPrompt);
+    HxStr retryLabel = MetConfigText(kMetStrEgslAgain, kPromptConfigCode, kRetryPrompt);
     mButtonList->Add(HxStr(kRetryButtonObject), retryLabel);
 
-    HxStr levelsLabel = QueryConfigString(kPromptConfigCode, kLevelsPrompt);
+    HxStr levelsLabel = MetConfigText(kMetStrEgslLevels, kPromptConfigCode, kLevelsPrompt);
     mButtonList->Add(HxStr(kLevelsButtonObject), levelsLabel);
 
     mHelpKeys.clear();
-    mHelpKeys.push_back(HxStr(kRetryPrompt));
-    mHelpKeys.push_back(HxStr(kLevelsPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHEgslAgain, kRetryPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHEgslLevels, kLevelsPrompt));
 
     if ((MetFrontEndState::shared()->mUsingMemcard == kFrontEndFlagSet) &&
         (MetFrontEndState::shared()->mSettingsDirty == kFrontEndFlagSet)) {
@@ -172,13 +172,13 @@ void MetSoloLoseScreen::OnExitFinished() {
     mButtonList->SetSelected(kNoSelection);
 }
 
-// 0x0039a4e8
+// NTSC-U/C: 0x0039a4e8, PAL: 0x003cc7e8
 void MetSoloLoseScreen::ShowButtons() {
     {
-        HxStr caption = QueryConfigString(kCaptionConfigCode, kCaptionKey);
+        HxStr caption = MetConfigText(kMetStrTSoloLose, kCaptionConfigCode, kCaptionKey);
         MetScreenTitleScreen::SetTitle(caption);
     }
-    MetHelpScreen::SelectPreset(HxStr(kPromptLayout));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHNoBackTitle, kPromptLayout));
     PushNamedScreen(HxStr(kHelpScreen));
     PushNamedScreen(HxStr(kSoloStatsScreen));
     mRenderer->SetActivePanel(this);

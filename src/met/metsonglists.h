@@ -62,11 +62,13 @@ inline bool operator<(const ArenaListEntry &left, const ArenaListEntry &right) {
  * The routine reads configuration code 0x258 with the key `ms_easy`, `ms_normal`, or `ms_expert`
  * for difficulties 0, 1, and 2, and reports an empty string for any other value. The front end's
  * stage and statistics screens call it. Every routine in this unit is a free function over
- * file-scope data, and the unit's name is inferred.
+ * file-scope data, and the unit's name is inferred. The European release looks the three names up
+ * in the current language instead.
  *
  * @param nDifficulty The difficulty.
  * @return The name.
- * @ghidraAddress 0x003cc498
+ * @ghidraAddress NTSC-U/C: 0x003cc498
+ * @ghidraAddress PAL: 0x00403d48
  */
 HxStr DifficultyName(int nDifficulty);
 
@@ -141,9 +143,11 @@ MemcardConnectState NextCardSlot(const MemcardConnectState &slot);
  * Report the name of the first memory-card location found, or `1` when there is none.
  *
  * The body reads GlobalSettings::mCardSlots and copies the slot name of its first entry. The front
- * end's character, remix, and Freq-maker screens call it.
+ * end's character, remix, and Freq-maker screens call it. The European release copies the name
+ * only when the first entry is the first slot of port 1, and reports `1` otherwise.
  *
  * @return The name.
- * @ghidraAddress 0x003d0b98
+ * @ghidraAddress NTSC-U/C: 0x003d0b98
+ * @ghidraAddress PAL: 0x00408990
  */
 HxStr FirstCardSlotName();

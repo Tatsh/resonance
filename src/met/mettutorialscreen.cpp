@@ -13,9 +13,9 @@
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "os/r250.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -80,13 +80,13 @@ constexpr int kSelectAlternateCycles = 2;
 
 } // namespace
 
-// 0x003c7a88
+// NTSC-U/C: 0x003c7a88, PAL: 0x003fed10
 MetTutorialScreen::MetTutorialScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr) {
     mButtonList = new MetButtonList();
-    mHelpKeys.push_back(HxStr(kFirstPrompt));
-    mHelpKeys.push_back(HxStr(kSecondPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHTutG, kFirstPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHTutR, kSecondPrompt));
 }
 
 // 0x003cc1a8
@@ -99,7 +99,7 @@ MetTutorialScreen::~MetTutorialScreen() {
     delete mButtonList;
 }
 
-// 0x003c82a0
+// NTSC-U/C: 0x003c82a0, PAL: 0x003ff6e8
 void MetTutorialScreen::EnterAndShow() {
     if (MetFrontEndState::shared()->mPendingTransition != 0) {
         MetFrontEndState::shared()->mReturnScreen = HxStr(kNoName);
@@ -113,7 +113,7 @@ void MetTutorialScreen::EnterAndShow() {
     mButtonList->SetSelected(kFirstButtonIndex);
 
     {
-        HxStr title = QueryConfigString(kTitleConfigCode, kTitleKey);
+        HxStr title = MetConfigText(kMetStrTTutorial, kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     }
 
@@ -121,18 +121,18 @@ void MetTutorialScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// 0x003c7d78
+// NTSC-U/C: 0x003c7d78, PAL: 0x003ff098
 void MetTutorialScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
     {
         HxStr objectName(kFirstButtonObject);
-        HxStr label = QueryConfigString(kPromptConfigCode, kFirstPrompt);
+        HxStr label = MetConfigText(kMetStrTutG, kPromptConfigCode, kFirstPrompt);
         mButtonList->Add(objectName, label);
     }
     {
         HxStr objectName(kSecondButtonObject);
-        HxStr label = QueryConfigString(kPromptConfigCode, kSecondPrompt);
+        HxStr label = MetConfigText(kMetStrTutR, kPromptConfigCode, kSecondPrompt);
         mButtonList->Add(objectName, label);
     }
 }

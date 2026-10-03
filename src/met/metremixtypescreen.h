@@ -38,7 +38,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x00361d18
+     * @ghidraAddress NTSC-U/C: 0x00361d18
+     * @ghidraAddress PAL: 0x0038f220
      */
     MetRemixTypeScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -67,7 +68,8 @@ public:
      * transition first brings up the gizmo and help screens and clears the loading flag in the
      * game parameters.
      *
-     * @ghidraAddress 0x00362600
+     * @ghidraAddress NTSC-U/C: 0x00362600
+     * @ghidraAddress PAL: 0x0038fcb0
      */
     virtual void EnterAndShow();
 
@@ -115,7 +117,12 @@ public:
      * jukebox button lists the remixes on the card and the disc with MetJukeboxTopButtonsScreen
      * and MetHelpScreen as the screens to return to, and also loads the playlist.
      *
-     * @ghidraAddress 0x00363920
+     * The European release raises the dialogue only when GlobalSettings::mCardSlots is not empty,
+     * and formats GlobalSettings::mMinimumFreeClusters into the dialogue text. The German text
+     * also receives FirstCardSlotName() ahead of it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00363920
+     * @ghidraAddress PAL: 0x00391470
      */
     virtual void OnExitFinished();
 

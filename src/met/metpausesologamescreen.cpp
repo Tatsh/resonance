@@ -4,11 +4,11 @@
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
 #include "met/metfrontendstate.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/text.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -90,19 +90,30 @@ void MetPauseSoloGameScreen::HandleCommand(const MetScreenCommand *pCommand) {
     BeginExit();
 }
 
-// 0x00320230
+// NTSC-U/C: 0x00320230, PAL: 0x00346cc0
 void MetPauseSoloGameScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kPausedText)));
 
-    HxStr heading = QueryConfigString(
-        kPromptConfigCode, params.mPlayMode == kPlayModeJam ? kRemixHeadingKey : kGameHeadingKey);
+    HxStr heading = params.mPlayMode == kPlayModeJam ?
+                        MetConfigText(kMetStrPauseRemix, kPromptConfigCode, kRemixHeadingKey) :
+                        MetConfigText(kMetStrPauseGame, kPromptConfigCode, kGameHeadingKey);
     pPaused->SetText(heading);
 
     mOptionLabels.clear();
+#ifdef VIDEO_STANDARD_PAL
+    mOptionLabels.push_back(GetMetString(kMetStrPauseResume));
+    mOptionLabels.push_back(GetMetString(kMetStrPauseQuit));
+    if (params.mPlayMode == kPlayModeGame) {
+        mOptionLabels.push_back(GetMetString(kMetStrPauseRestart));
+    }
+    mOptionLabels.push_back(GetMetString(kMetStrPauseConfig));
+    mOptionLabels.push_back(GetMetString(kMetStrPauseSettings));
+#else
     QueryConfigStrings(&mOptionLabels,
                        kLabelsConfigCode,
                        params.mPlayMode == kPlayModeGame ? kGameLabelsKey : kRemixLabelsKey);
+#endif
     // Yes, the binary copies the labels here and again in the base slot.
     for (int i = 0; i < kOptionCount; ++i) {
         mOptionTexts[i]->SetText(mOptionLabels[i]);

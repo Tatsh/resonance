@@ -16,6 +16,7 @@
 #include "game/playmap.h"
 #include "game/trackdata.h"
 #include "gfx/gfxdevice.h"
+#include "met/metstrings.h"
 #include "mid/mbt.h"
 #include "msg/advancesectiontogglemsg.h"
 #include "msg/beginphrasecatchmsg.h"
@@ -50,6 +51,12 @@
 #include "rnd/view.h"
 #include "script/configquery.h"
 #include "script/scripthost.h"
+
+#ifdef VIDEO_STANDARD_PAL
+#include <libscf.h>
+
+#include "os/hostmode.h"
+#endif
 
 namespace {
 
@@ -146,7 +153,7 @@ Overlay *g_pOverlay;
 // 0x006dfdf0
 HxStr g_hudLayoutName;
 
-// 0x0041c940
+// NTSC-U/C: 0x0041c940, PAL: 0x004573a0
 Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
     mTutorial = QueryConfigFlag(kTutorialConfigCode);
     mPlaybackOn = 0;
@@ -204,37 +211,38 @@ Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
         HxStr name;
         switch (nInstrument) {
         case kInstrumentDrums:
-            name = "DRUMS";
+            name = MetText(kMetStrIngDRUMS, "DRUMS");
             break;
         case kInstrumentBass:
-            name = "BASS";
+            name = MetText(kMetStrIngBASS, "BASS");
             break;
         case kInstrumentSynth:
-            name = "SYNTH";
+            name = MetText(kMetStrIngSYNTH, "SYNTH");
             break;
         case kInstrumentGuitar:
-            name = "GUITAR";
+            name = MetText(kMetStrIngGUITAR, "GUITAR");
             break;
         case kInstrumentVocal:
-            name = "VOCAL";
+            name = MetText(kMetStrIngVOCAL, "VOCAL");
             break;
         case kInstrumentFx:
-            name = "FX";
+            name = MetText(kMetStrIngFX, "FX");
             break;
         }
         if (nKind == kTrackModeAxe) {
-            name = "AXE";
+            name = MetText(kMetStrIngAXE, "AXE");
         } else if (nKind == kTrackModeScratch) {
-            name = "SCRATCH";
+            name = MetText(kMetStrIngSCRATCH, "SCRATCH");
         } else if (nKind == kTrackModeVocal) {
-            name = "VOCAL";
+            name = MetText(kMetStrIngVOCAL, "VOCAL");
         }
         mInstrumentNames.push_back(name);
         mTrackKinds.push_back(nKind);
     }
 
     if (Application::shared()->IsJukeboxMode()) {
-        mPanel->mMessage.Show(HxStr("Jukebox Mode\nPress the START button to quit"));
+        mPanel->mMessage.Show(
+            MetText(kMetStrIngJukePress, "Jukebox Mode\nPress the START button to quit"));
         mPanel->mAssembly.Jump(0.0f);
         mPanel->mLetterbox.Jump(1.0f);
 
@@ -276,7 +284,7 @@ Overlay::~Overlay() {
     g_gfxDevice.mFeedbackEnabled = 0;
 }
 
-// 0x0041dd20
+// NTSC-U/C: 0x0041dd20, PAL: 0x00458bf0
 void Overlay::SetFrame(float flFrame) {
     const int nBar = static_cast<int>(flFrame / kTicksPerBar);
     bool bBarChanged = false;
@@ -298,7 +306,7 @@ void Overlay::SetFrame(float flFrame) {
     mPanel->SetFrame(flFrame, flTime);
 
     if (Application::shared()->GetGameManager()->IsPlaybackActive() != 0) {
-        mPanel->mMessage.Show(HxStr("DEMO\n\nPress any button to exit"));
+        mPanel->mMessage.Show(MetText(kMetStrIngDemoPress, "DEMO\n\nPress any button to exit"));
     }
 }
 
@@ -396,7 +404,7 @@ void Overlay::OnTrackSelect(Message *pMsg) {
     }
 }
 
-// 0x0041e020
+// NTSC-U/C: 0x0041e020, PAL: 0x00458fb0
 void Overlay::OnWin(Message *pMsg) {
     WinMsg *pWin = static_cast<WinMsg *>(pMsg);
     for (std::vector<HudTrack *>::iterator it = mTracks.begin(); it != mTracks.end(); ++it) {
@@ -409,22 +417,38 @@ void Overlay::OnWin(Message *pMsg) {
     }
 
     HxStr separator(" ");
+#ifdef VIDEO_STANDARD_PAL
+    // The French result messages always take two lines.
+    if ((mTracks.size() >= kTwoLineTrackCount) || (GetLanguage() == SCE_FRENCH_LANGUAGE)) {
+        separator = "\n";
+    }
+#else
     if (mTracks.size() >= kTwoLineTrackCount) {
         separator = "\n";
     }
+#endif
     for (std::vector<HudTrack *>::iterator it = mTracks.begin(); it != mTracks.end(); ++it) {
         HudTrack *pTrack = *it;
         if (std::find(pWin->mWinners.begin(), pWin->mWinners.end(), pTrack->mPlayer) !=
             pWin->mWinners.end()) {
-            pTrack->mTextMessage.Show(HxStr("YOU") + separator + "WIN", kResultScale, kResultHold);
+            pTrack->mTextMessage.Show(MetText(kMetStrIngYOU, "YOU") + separator +
+                                          MetText(kMetStrIngWIN, "WIN"),
+                                      kResultScale,
+                                      kResultHold);
             if (mGameMode == kGameModeSolo) {
-                mPanel->mMessage.Show(HxStr("FREESTYLE\n\nPress the START button to exit"));
+                mPanel->mMessage.Show(
+                    MetText(kMetStrIngFreePress, "FREESTYLE\n\nPress the START button to exit"));
             }
         } else if (mGameMode == kGameModeSolo) {
-            pTrack->mTextMessage.Show(
-                HxStr("GAME") + separator + "OVER", kResultScale, kResultHold);
+            pTrack->mTextMessage.Show(MetText(kMetStrIngGAME, "GAME") + separator +
+                                          MetText(kMetStrIngOVER, "OVER"),
+                                      kResultScale,
+                                      kResultHold);
         } else {
-            pTrack->mTextMessage.Show(HxStr("YOU") + separator + "LOSE", kResultScale, kResultHold);
+            pTrack->mTextMessage.Show(MetText(kMetStrIngYOU, "YOU") + separator +
+                                          MetText(kMetStrIngLOSE, "LOSE"),
+                                      kResultScale,
+                                      kResultHold);
         }
         if (pTrack->mTextMessage.mText->GetShowing() != 0) {
             pTrack->mTextMessage.mActive = 1;
@@ -450,7 +474,7 @@ void Overlay::OnChoosePowerup(Message *pMsg) {
     }
 }
 
-// 0x0041eba0
+// NTSC-U/C: 0x0041eba0, PAL: 0x00459d40
 void Overlay::OnCaughtPowerbar(Message *pMsg) {
     CaughtPowerbarMsg *pCaught = static_cast<CaughtPowerbarMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pCaught->mPlayer);
@@ -458,11 +482,11 @@ void Overlay::OnCaughtPowerbar(Message *pMsg) {
         return;
     }
 
-    const HxStr text = HudPowerupName(pCaught->mKind) + "\nCAPTURED";
+    const HxStr text = HudPowerupName(pCaught->mKind) + MetText(kMetStrIngCaptured, "\nCAPTURED");
     pTrack->mTextMessage.Show(text, kMessageScale, kMessageHold);
 }
 
-// 0x0041eda8
+// NTSC-U/C: 0x0041eda8, PAL: 0x00459ff8
 void Overlay::OnDeployedPowerup(Message *pMsg) {
     if (mPlayMode != kPlayModeGame) {
         return;
@@ -474,13 +498,14 @@ void Overlay::OnDeployedPowerup(Message *pMsg) {
         return;
     }
 
-    const HxStr text = HudPowerupName(pDeployed->mKind) + "\nDEPLOYED";
+    const HxStr text = HudPowerupName(pDeployed->mKind) + MetText(kMetStrIngDeployed, "\nDEPLOYED");
     pTrack->mTextMessage.Show(text, kMessageScale, kMessageHold);
     pTrack->mDeployedPowerup = 1;
     if (pDeployed->mKind == kHudItemBumper) {
         HudTrack *pTarget = FindTrack(pDeployed->mTarget);
         if (pTarget != nullptr) {
-            pTarget->mTextMessage.Show(HxStr("YOU GOT\nBUMPED!"), kMessageScale, kMessageHold);
+            pTarget->mTextMessage.Show(
+                MetText(kMetStrIngBumped, "YOU GOT\nBUMPED!"), kMessageScale, kMessageHold);
         }
     }
 }
@@ -548,7 +573,7 @@ void Overlay::OnText(Message *pMsg) {
         HxStr(static_cast<TextMsg *>(pMsg)->mText), kMessageScale, kMessageHold);
 }
 
-// 0x0041f708
+// NTSC-U/C: 0x0041f708, PAL: 0x0045acd0
 void Overlay::OnLoopToggle(Message *pMsg) {
     if (mPlayMode == kPlayModeGame) {
         return;
@@ -569,13 +594,15 @@ void Overlay::OnLoopToggle(Message *pMsg) {
     }
 
     if (pLoop->mOn != 0) {
-        pTrack->mTextMessage.Show(HxStr("LOOP ON"), kMessageScale, kMessageHold);
+        pTrack->mTextMessage.Show(
+            MetText(kMetStrIngLoopOn, "LOOP ON"), kMessageScale, kMessageHold);
     } else {
-        pTrack->mTextMessage.Show(HxStr("LOOP OFF"), kMessageScale, kMessageHold);
+        pTrack->mTextMessage.Show(
+            MetText(kMetStrIngLoopOff, "LOOP OFF"), kMessageScale, kMessageHold);
     }
 }
 
-// 0x0041f440
+// NTSC-U/C: 0x0041f440, PAL: 0x0045a918
 void Overlay::OnAdvanceSectionToggle(Message *pMsg) {
     if (mTutorial != 0) {
         return;
@@ -588,16 +615,16 @@ void Overlay::OnAdvanceSectionToggle(Message *pMsg) {
 
     HxStr text;
     if (static_cast<AdvanceSectionToggleMsg *>(pMsg)->mAdvance != 0) {
-        text = "ADVANCE TO\nNEXT SECTION";
+        text = MetText(kMetStrIngAdvance, "ADVANCE TO\nNEXT SECTION");
     } else {
-        text = "REPEAT\nSECTION";
+        text = MetText(kMetStrIngRepeat, "REPEAT\nSECTION");
     }
     for (std::vector<HudTrack *>::iterator it = mTracks.begin(); it != mTracks.end(); ++it) {
         (*it)->mTextMessage.Show(text, kMessageScale, kMessageHold);
     }
 }
 
-// 0x0041fba0
+// NTSC-U/C: 0x0041fba0, PAL: 0x0045b1a8
 void Overlay::OnShowEraseEffect(Message *pMsg) {
     ShowEraseEffectMsg *pErase = static_cast<ShowEraseEffectMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pErase->mPlayer);
@@ -606,18 +633,20 @@ void Overlay::OnShowEraseEffect(Message *pMsg) {
     }
 
     if (pErase->mEndBar - pErase->mFirstBar < kTrackEraseBars) {
-        pTrack->mTextMessage.Show(HxStr("BAR ERASED"), kMessageScale, kMessageHold);
+        pTrack->mTextMessage.Show(
+            MetText(kMetStrIngBarErase, "BAR ERASED"), kMessageScale, kMessageHold);
     } else {
-        pTrack->mTextMessage.Show(HxStr("TRACK ERASED"), kMessageScale, kMessageHold);
+        pTrack->mTextMessage.Show(
+            MetText(kMetStrIngTrackErase, "TRACK ERASED"), kMessageScale, kMessageHold);
     }
 }
 
-// 0x0041f9a8
+// NTSC-U/C: 0x0041f9a8, PAL: 0x0045af98
 void Overlay::OnPlaybackToggle(Message *pMsg) {
     PlaybackToggleMsg *pPlayback = static_cast<PlaybackToggleMsg *>(pMsg);
     mPlaybackOn = pPlayback->mOn;
     if (pPlayback->mOn != 0) {
-        mPanel->mMessage.Show(HxStr("Press the SELECT button to edit"));
+        mPanel->mMessage.Show(MetText(kMetStrIngSelPress, "Press the SELECT button to edit"));
         mPanel->mAssembly.SetTarget(0.0f);
         mPanel->mLetterbox.SetTarget(1.0f);
     } else {
@@ -648,7 +677,7 @@ void Overlay::OnToggleGhost(Message *pMsg) {
     }
 }
 
-// 0x0041fed8
+// NTSC-U/C: 0x0041fed8, PAL: 0x0045b508
 void Overlay::OnCatch(Message *pMsg) {
     if (mPlayMode != kPlayModeGame) {
         return;
@@ -684,7 +713,8 @@ void Overlay::OnCatch(Message *pMsg) {
         return;
     }
 
-    pTrack->mTextMessage.Show(HxStr("ROTATE TO\nNEW TRACK"), kMessageScale, kMessageHold);
+    pTrack->mTextMessage.Show(
+        MetText(kMetStrIngRotate, "ROTATE TO\nNEW TRACK"), kMessageScale, kMessageHold);
     pTrack->mBlockedCatches = 0;
 }
 
@@ -731,14 +761,19 @@ void Overlay::OnFadeGame(Message *pMsg) {
     }
 }
 
-// 0x00420588
+// NTSC-U/C: 0x00420588, PAL: 0x0045b808
 void Overlay::OnPlayersTrackNeutralized(Message *pMsg) {
     PlayersTrackNeutralizedMsg *pNeutralized = static_cast<PlayersTrackNeutralizedMsg *>(pMsg);
+#ifdef VIDEO_STANDARD_PAL
+    const HxStr format = GetMetString(kMetStrIngNeutralized);
+    const char *pszFormat = format.mStr != nullptr ? format.mStr : g_szEmptyString;
+#else
+    const char *pszFormat = "NEUTRALIZED!\n%d POINTS";
+#endif
     // Yes, the binary does not test the display for null.
     FindTrack(pNeutralized->mPlayer)
-        ->mTextMessage.Show(HxStr(FormatString("NEUTRALIZED!\n%d POINTS", pNeutralized->mPoints)),
-                            kMessageScale,
-                            kMessageHold);
+        ->mTextMessage.Show(
+            HxStr(FormatString(pszFormat, pNeutralized->mPoints)), kMessageScale, kMessageHold);
 }
 
 // 0x00420408
@@ -760,7 +795,7 @@ void Overlay::OnMultiplierState(Message *pMsg) {
     pTrack->mPoints.mHot = pState->mBonus != 0;
 }
 
-// 0x0041f138
+// NTSC-U/C: 0x0041f138, PAL: 0x0045a470
 void Overlay::OnPowerupFailed(Message *pMsg) {
     PowerupFailedMsg *pFailed = static_cast<PowerupFailedMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pFailed->mPlayer);
@@ -771,19 +806,19 @@ void Overlay::OnPowerupFailed(Message *pMsg) {
     HxStr text;
     switch (pFailed->mKind) {
     case kHudItemNeutralizer:
-        text = "NEUTRALIZER FAILED\nUSE ON\nCAPTURED TRACK";
+        text = MetText(kMetStrIngNeutralizerFail, "NEUTRALIZER FAILED\nUSE ON\nCAPTURED TRACK");
         break;
     case kHudItemCrippler:
-        text = "CRIPPLER FAILED\nUSE ON\nOTHER PLAYER";
+        text = MetText(kMetStrIngCripplerFail, "CRIPPLER FAILED\nUSE ON\nOTHER PLAYER");
         break;
     case kHudItemFreestyler:
-        text = "FREESTYLER FAILED\nUSE ON\nFREESTYLE TRACK";
+        text = MetText(kMetStrIngFreestylerFail, "FREESTYLER FAILED\nUSE ON\nFREESTYLE TRACK");
         break;
     case kHudItemAutocatcher:
-        text = "AUTOCATCHER FAILED\nUSE ON\nFREE TRACK";
+        text = MetText(kMetStrIngAutocatcherFail, "AUTOCATCHER FAILED\nUSE ON\nFREE TRACK");
         break;
     case kHudItemBumper:
-        text = "BUMPER FAILED\nUSE ON\nOTHER PLAYER";
+        text = MetText(kMetStrIngBumperFail, "BUMPER FAILED\nUSE ON\nOTHER PLAYER");
         break;
     default:
         break;

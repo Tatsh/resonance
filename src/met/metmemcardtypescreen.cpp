@@ -9,6 +9,7 @@
 #include "met/metremixmanager.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "script/configquery.h"
@@ -65,20 +66,23 @@ inline const char *TextOrEmpty(const HxStr &text) {
 }
 
 // Add one button labelled from configuration. Slot 38 expands it for each button.
-inline void AddButton(MetButtonList *pList, const char *pszObjectName, const char *pszLabelKey) {
+inline void AddButton(MetButtonList *pList,
+                      const char *pszObjectName,
+                      MetStringId nLabelId,
+                      const char *pszLabelKey) {
     HxStr objectName(pszObjectName);
-    HxStr label = QueryConfigString(kLabelConfigCode, pszLabelKey);
+    HxStr label = MetConfigText(nLabelId, kLabelConfigCode, pszLabelKey);
     pList->Add(objectName, label);
 }
 
 } // namespace
 
-// 0x002d23b8
+// NTSC-U/C: 0x002d23b8, PAL: 0x002f4680
 MetMemCardTypeScreen::MetMemCardTypeScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr) {
-    mHelpKeys.push_back(HxStr(kRemixKey));
-    mHelpKeys.push_back(HxStr(kFreqKey));
+    mHelpKeys.push_back(MetText(kMetStrHMcrfRemix, kRemixKey));
+    mHelpKeys.push_back(MetText(kMetStrHMcrfFreq, kFreqKey));
 }
 
 // 0x002d84d0
@@ -96,15 +100,15 @@ void MetMemCardTypeScreen::SetCardSlot(MemcardConnectState slot) {
     mCardSlot = slot;
 }
 
-// 0x002d2b50
+// NTSC-U/C: 0x002d2b50, PAL: 0x002f4fa8
 void MetMemCardTypeScreen::EnterAndShow() {
     if (mButtonList->mSelected == kNoSelection) {
         mButtonList->SetSelected(kRemixButtonIndex);
     }
-    HxStr format = QueryConfigString(kTitleConfigCode, kTitleFormatKey);
+    HxStr format = MetConfigText(kMetStrTMemDelType, kTitleConfigCode, kTitleFormatKey);
     const HxStr title(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
     MetScreenTitleScreen::SetTitle(title);
-    MetHelpScreen::SelectPreset(HxStr(kStandardTitlePreset));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kStandardTitlePreset));
     MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
     MetScreen::EnterAndShow();
 }
@@ -177,11 +181,11 @@ void MetMemCardTypeScreen::OnExitFinished() {
     }
 }
 
-// 0x002d26b0
+// NTSC-U/C: 0x002d26b0, PAL: 0x002f4a18
 void MetMemCardTypeScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mButtonList = new MetButtonList;
-    AddButton(mButtonList, kRemixButton, kRemixKey);
-    AddButton(mButtonList, kFreqButton, kFreqKey);
+    AddButton(mButtonList, kRemixButton, kMetStrMcrfRemix, kRemixKey);
+    AddButton(mButtonList, kFreqButton, kMetStrMcrfFreq, kFreqKey);
     mButtonList->SetSelected(kNoSelection);
 }

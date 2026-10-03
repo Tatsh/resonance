@@ -56,7 +56,8 @@ public:
      * Slot 38. The panel takes the `tp3_panel` text, as the image records. The texts are not
      * tested for null.
      *
-     * @ghidraAddress 0x003091e8
+     * @ghidraAddress NTSC-U/C: 0x003091e8
+     * @ghidraAddress PAL: 0x0032e5e0
      */
     virtual void ResolveContainerViews();
 };

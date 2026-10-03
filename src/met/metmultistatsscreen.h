@@ -88,7 +88,8 @@ public:
      * `ems_freq_0N.mesh` for N from 1, emptying both texts. The four player colours are green,
      * violet, yellow, and red. No object is tested for null.
      *
-     * @ghidraAddress 0x002ff3f8
+     * @ghidraAddress NTSC-U/C: 0x002ff3f8
+     * @ghidraAddress PAL: 0x003239e8
      */
     virtual void ResolveContainerViews();
 

@@ -13,6 +13,7 @@
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "met/scrollinglist.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
@@ -99,17 +100,18 @@ inline std::vector<MetRemixRecord> *Catalogue(int nKey) {
 }
 
 inline HxStr FactoryTitle(const GameParams &params) {
-    HxStr title = QueryConfigString(kTitleConfigCode,
-                                    params.mPlayMode == kPlayModeJam ? kFactoryRemixTitleKey :
-                                                                       kFactoryCustomTitleKey);
+    HxStr title =
+        params.mPlayMode == kPlayModeJam ?
+            MetConfigText(kMetStrTFactLoadRemix, kTitleConfigCode, kFactoryRemixTitleKey) :
+            MetConfigText(kMetStrTFactLoadCustom, kTitleConfigCode, kFactoryCustomTitleKey);
     return title;
 }
 
 inline HxStr CardTitle(const GameParams &params) {
     HxStr slotName = FirstCardSlotName();
-    HxStr format = QueryConfigString(kTitleConfigCode,
-                                     params.mPlayMode == kPlayModeJam ? kCardRemixTitleKey :
-                                                                        kCardCustomTitleKey);
+    HxStr format = params.mPlayMode == kPlayModeJam ?
+                       MetConfigText(kMetStrTMemLoadRemix, kTitleConfigCode, kCardRemixTitleKey) :
+                       MetConfigText(kMetStrTMemLoadCustom, kTitleConfigCode, kCardCustomTitleKey);
     return HxStr(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
 }
 
@@ -123,16 +125,16 @@ MetRemixLoadScreen::MetRemixLoadScreen(MetRenderer *pRenderer, int nPriority)
     mButtons = new MetButtonList;
 }
 
-// 0x00349fc8
+// NTSC-U/C: 0x00349fc8, PAL: 0x003758e0
 void MetRemixLoadScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mButtons->Clear();
     {
-        HxStr label = QueryConfigString(kPromptConfigCode, kSavedLabelKey);
+        HxStr label = MetConfigText(kMetStrRlSaved, kPromptConfigCode, kSavedLabelKey);
         mButtons->Add(HxStr(kSavedButton), label);
     }
     {
-        HxStr label = QueryConfigString(kPromptConfigCode, kFactoryLabelKey);
+        HxStr label = MetConfigText(kMetStrRlFactory, kPromptConfigCode, kFactoryLabelKey);
         mButtons->Add(HxStr(kFactoryButton), label);
     }
     mThisDiscFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kMatchingFont)));
@@ -206,7 +208,7 @@ void MetRemixLoadScreen::ShowRowOnDataScreen(unsigned nIndex) {
     }
 }
 
-// 0x0034a838
+// NTSC-U/C: 0x0034a838, PAL: 0x003762e0
 void MetRemixLoadScreen::OnButtonRingMoved() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     if (mButtons->mSelected == kSavedButtonIndex) {
@@ -222,12 +224,13 @@ void MetRemixLoadScreen::OnButtonRingMoved() {
     ShowRowOnDataScreen(kFirstRow);
 }
 
-// 0x0034b568
+// NTSC-U/C: 0x0034b568, PAL: 0x00377138
 void MetRemixLoadScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     mHelpKeys.clear();
-    mHelpKeys.push_back(
-        HxStr(params.mPlayMode == kPlayModeJam ? kCardRemixTitleKey : kCardCustomTitleKey));
+    mHelpKeys.push_back(params.mPlayMode == kPlayModeJam ?
+                            MetText(kMetStrHMemLoadRemix, kCardRemixTitleKey) :
+                            MetText(kMetStrHMemLoadCustom, kCardCustomTitleKey));
     mButtons->ButtonAt(kSavedButtonIndex)->SetShowing(1);
     mButtons->ButtonAt(kFactoryButtonIndex)->SetShowing(1);
 
@@ -361,9 +364,9 @@ void MetRemixLoadScreen::PlayHighSound(int nSelector) {
     }
 }
 
-// 0x00352770
+// NTSC-U/C: 0x00352770, PAL: 0x0037e8e0
 void MetRemixLoadScreen::OnEnterFinished() {
     ShowRowOnDataScreen(kFirstRow);
-    MetHelpScreen::SelectPreset(HxStr(kHelpLayout));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHRemixLoadOpt, kHelpLayout));
     MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
 }

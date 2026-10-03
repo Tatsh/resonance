@@ -1,6 +1,9 @@
 #include "met/metjukeboxeditplaylistscreenlowerleft.h"
 
+#include "met/metstrings.h"
 #include "os/hxstr.h"
+#include "rnd/manager.h"
+#include "rnd/text.h"
 
 namespace {
 
@@ -8,6 +11,21 @@ namespace {
 static const char *const kScreenName = "jbed";
 static const char *const kContainerDirectory = "metagame/Shared";
 static const char *const kContainerFile = "juke_edit_data";
+
+#ifdef VIDEO_STANDARD_PAL
+// Each instruction text and the identifier it is filled from, in the order slot 38 fills them.
+struct InstructionText {
+    const char *pszObject;
+    MetStringId nId;
+};
+
+static const InstructionText kInstructionTexts[] = {
+    {"jbed_CREATE PLAYLIST.txt", kMetStrJbedInstruct},
+    {"jbed_l1l2_val.txt", kMetStrJbedSort},
+    {"jbed_x_val.txt", kMetStrJbedDel},
+    {"jbed_square_val.txt", kMetStrJbedClear},
+};
+#endif
 
 } // namespace
 
@@ -47,9 +65,16 @@ MetJukeboxEditPlaylistScreenLowerLeft::New(MetRenderer *pRenderer, int nPriority
     return new MetJukeboxEditPlaylistScreenLowerLeft(pRenderer, nPriority);
 }
 
-// 0x0023aaf0
+// NTSC-U/C: 0x0023aaf0, PAL: 0x0024b988
 void MetJukeboxEditPlaylistScreenLowerLeft::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
+#ifdef VIDEO_STANDARD_PAL
+    // The binary expands this loop into one call per text, and it does not test a text for null.
+    for (const auto &entry : kInstructionTexts) {
+        Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(entry.pszObject)));
+        pText->SetText(GetMetString(entry.nId));
+    }
+#endif
 }
 
 // 0x0023ab10

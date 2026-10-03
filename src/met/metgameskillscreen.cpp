@@ -7,6 +7,8 @@
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
+#include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "script/configquery.h"
 
@@ -74,7 +76,7 @@ MetGameSkillScreen *MetGameSkillScreen::New(MetRenderer *pRenderer, int nPriorit
     return new MetGameSkillScreen(pRenderer, nPriority);
 }
 
-// 0x00273800
+// NTSC-U/C: 0x00273800, PAL: 0x0028be60
 void MetGameSkillScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     mButtonList->SetSelected(params.mDifficulty);
@@ -82,24 +84,32 @@ void MetGameSkillScreen::EnterAndShow() {
     mHelpKeys.clear();
     if (Application::shared()->GetGameManager()->GetGameMode() == kGameModeSolo) {
         {
-            HxStr key = QueryConfigString(kTitleConfigCode, kSoloTitleKey);
+            HxStr key = MetConfigText(kMetStrTSolo, kTitleConfigCode, kSoloTitleKey);
             mode = key;
         }
-        mHelpKeys.push_back(HxStr(kSoloEasyHelp));
-        mHelpKeys.push_back(HxStr(kSoloNormalHelp));
-        mHelpKeys.push_back(HxStr(kSoloExpertHelp));
+        mHelpKeys.push_back(MetText(kMetStrHSmgsEasy, kSoloEasyHelp));
+        mHelpKeys.push_back(MetText(kMetStrHSmgsNormal, kSoloNormalHelp));
+        mHelpKeys.push_back(MetText(kMetStrHSmgsExpert, kSoloExpertHelp));
     } else {
         {
-            HxStr key = QueryConfigString(kTitleConfigCode, kMultiTitleKey);
+            HxStr key = MetConfigText(kMetStrTMulti, kTitleConfigCode, kMultiTitleKey);
             mode = key;
         }
-        mHelpKeys.push_back(HxStr(kMultiEasyHelp));
-        mHelpKeys.push_back(HxStr(kMultiNormalHelp));
-        mHelpKeys.push_back(HxStr(kMultiExpertHelp));
+        mHelpKeys.push_back(MetText(kMetStrHMgsEasy, kMultiEasyHelp));
+        mHelpKeys.push_back(MetText(kMetStrHMgsNormal, kMultiNormalHelp));
+        mHelpKeys.push_back(MetText(kMetStrHMgsExpert, kMultiExpertHelp));
     }
     {
+#ifdef VIDEO_STANDARD_PAL
+        // The text is a format with the mode in place of `%s`.
+        HxStr body = GetMetString(kMetStrTSkill);
+        MetScreenTitleScreen::SetTitle(
+            HxStr(FormatString(body.mStr != nullptr ? body.mStr : g_szEmptyString,
+                               mode.mStr != nullptr ? mode.mStr : g_szEmptyString)));
+#else
         HxStr body = QueryConfigString(kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(mode + body);
+#endif
     }
     MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
     MetScreen::EnterAndShow();
@@ -169,22 +179,22 @@ void MetGameSkillScreen::OnExitFinished() {
     ActivateNamedPanel(HxStr(kSoloStagesScreen));
 }
 
-// 0x00273310
+// NTSC-U/C: 0x00273310, PAL: 0x0028b858
 void MetGameSkillScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     {
         HxStr objectName(kEasyButton);
-        HxStr label = QueryConfigString(kPromptConfigCode, kEasyPrompt);
+        HxStr label = MetConfigText(kMetStrMsEasy, kPromptConfigCode, kEasyPrompt);
         mButtonList->Add(objectName, label);
     }
     {
         HxStr objectName(kNormalButton);
-        HxStr label = QueryConfigString(kPromptConfigCode, kNormalPrompt);
+        HxStr label = MetConfigText(kMetStrMsNormal, kPromptConfigCode, kNormalPrompt);
         mButtonList->Add(objectName, label);
     }
     {
         HxStr objectName(kExpertButton);
-        HxStr label = QueryConfigString(kPromptConfigCode, kExpertPrompt);
+        HxStr label = MetConfigText(kMetStrMsExpert, kPromptConfigCode, kExpertPrompt);
         mButtonList->Add(objectName, label);
     }
 }

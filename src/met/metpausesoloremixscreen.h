@@ -48,7 +48,8 @@ public:
      * option text at the same index before MetPauseBaseScreen::EnterAndShow() copies them again,
      * and mOpensConfigScreen is cleared afterwards.
      *
-     * @ghidraAddress 0x00324260
+     * @ghidraAddress NTSC-U/C: 0x00324260
+     * @ghidraAddress PAL: 0x0034b8a8
      */
     virtual void EnterAndShow();
 

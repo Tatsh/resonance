@@ -11,13 +11,13 @@
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/button.h"
 #include "rnd/manager.h"
 #include "rnd/text.h"
 #include "rnd/view.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -43,7 +43,9 @@ static const char *const kInstructionsText = "mcl_instructions.txt";
 static const char *const kPanelTitleKey = "mem_card_select";
 static const char *const kNoCardKey = "mc_sel_none";
 static const char *const kCardSelectedKey = "mc_sel_card";
+#ifndef VIDEO_STANDARD_PAL
 static const char *const kAvailableFormat = "%i kb available";
+#endif
 static const char *const kOnlyBackPreset = "only_back_title";
 static const char *const kOptionsPreset = "mc_opt";
 
@@ -54,6 +56,14 @@ static const char *const kNoCardMessage = "mem_check12";
 static const char *const kOtherCardKey = "mem_detect_special";
 static const char *const kWarningTitle = "WARNING";
 static const char *const kOkButton = "OK";
+#ifdef VIDEO_STANDARD_PAL
+static const char *const kNewCardMessage = "new_card_warning";
+static const char *const kMsgScreen = "MetMsgScreen";
+
+// The two texts the European release empties.
+static const char *const kLabelText1 = "mcl_label_01.txt";
+static const char *const kLabelText2 = "mcl_label_02.txt";
+#endif
 
 // The slot name the card in port 1 reports when no multitap is attached.
 static const char *const kPlainPortOneName = "1";
@@ -74,6 +84,15 @@ constexpr int kTitleConfigCode = 0x269;
 // Button counts MetMsgScreen receives with each dialogue.
 constexpr int kNoButtons = 0;
 constexpr int kOneButton = 1;
+#ifdef VIDEO_STANDARD_PAL
+constexpr int kTwoButtons = 2;
+
+// The `new_card_warning` button that proceeds, counted from zero.
+constexpr int kChoiceOk = 1;
+
+// The MetFrontEndState::mUsingMemcard value OnDetectFinished() restores.
+constexpr int kUsingMemcard = 1;
+#endif
 
 // Packed port and slot values of GlobalSettings::mCardSlots entries.
 constexpr int kPortSlotOneA = 0;
@@ -102,12 +121,6 @@ inline const char *TextOrEmpty(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
 }
 
-// A configuration value read by value.
-inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr value = QueryConfigString(nCode, pszKey);
-    return value;
-}
-
 // Resolve one named object of the renderer as T.
 template <class T>
 inline T *FindObject(const char *pszName) {
@@ -126,12 +139,12 @@ inline void AppendCardAt(std::vector<MemcardConnectState> &cards, int nPortSlot)
 
 } // namespace
 
-// 0x002cb8c8
+// NTSC-U/C: 0x002cb8c8, PAL: 0x002ec7c8
 MetMemCardLoadScreen::MetMemCardLoadScreen(MetRenderer *pRenderer, int nPriority)
     : MetMemDetectScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mLeftArrow(nullptr), mRightArrow(nullptr), mSelected(0), mUnused(0), mPickerUser(nullptr) {
-    mHelpKeys.push_back(HxStr(kCardKey));
+    mHelpKeys.push_back(MetText(kMetStrHMclCard, kCardKey));
 }
 
 // 0x002cbcc8
@@ -143,12 +156,17 @@ MetMemCardLoadScreen *MetMemCardLoadScreen::New(MetRenderer *pRenderer, int nPri
     return new MetMemCardLoadScreen(pRenderer, nPriority);
 }
 
-// 0x002cbeb8
+// NTSC-U/C: 0x002cbeb8, PAL: 0x002ece58
 void MetMemCardLoadScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mInfoView = FindObject<Rnd::View>(kInfoView);
     FindObject<Rnd::Text>(kPanelTitleText)
-        ->SetText(ConfigText(kDialogueConfigCode, kPanelTitleKey));
+        ->SetText(MetConfigText(kMetStrMemCardSelect, kDialogueConfigCode, kPanelTitleKey));
+#ifdef VIDEO_STANDARD_PAL
+    // Yes, the binary does not test either text for null.
+    FindObject<Rnd::Text>(kLabelText1)->SetText(HxStr(kNoName));
+    FindObject<Rnd::Text>(kLabelText2)->SetText(HxStr(kNoName));
+#endif
     mLeftArrow = FindObject<Rnd::Button>(kLeftArrow);
     mRightArrow = FindObject<Rnd::Button>(kRightArrow);
     mSlotNumberText = FindObject<Rnd::Text>(kSlotNumberText);
@@ -213,21 +231,40 @@ void MetMemCardLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// 0x002cc9c0
+// NTSC-U/C: 0x002cc9c0, PAL: 0x002ede18
 void MetMemCardLoadScreen::EnterAndShow() {
+#ifdef VIDEO_STANDARD_PAL
+    mUsingMemcardOnEnter = MetFrontEndState::shared()->mUsingMemcard;
+#endif
     SetShowing(0);
     if (MetFrontEndState::shared()->mReturnScreen == kConfigOptionsScreen) {
         MetFrontEndState::shared()->mReturnScreen = HxStr(kNoName);
+#ifdef VIDEO_STANDARD_PAL
+        // OnMsgScreenDismissed() probes once the warning is accepted.
+        std::vector<HxStr> buttons;
+        buttons.push_back(GetMetString(kMetStrMsgCANCEL));
+        buttons.push_back(GetMetString(kMetStrMsgOK));
+        const HxStr format(GetMetString(kMetStrMemCardLoadWarning));
+        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(FirstCardSlotName())));
+        MetMsgScreen::Show(HxStr(kNewCardMessage),
+                           GetMetString(kMetStrMsgWARNING),
+                           text,
+                           kTwoButtons,
+                           buttons,
+                           this);
+        mRenderer->AddScreen(this);
+#else
         mPickerUser = this; // Yes, the binary stores this before Present() stores it again.
         Present(this, false);
+#endif
     } else {
         ShowCards();
     }
 }
 
-// 0x002ccab8
+// NTSC-U/C: 0x002ccab8, PAL: 0x002ee410
 void MetMemCardLoadScreen::ShowCards() {
-    MetScreenTitleScreen::SetTitle(ConfigText(kTitleConfigCode, kCardKey));
+    MetScreenTitleScreen::SetTitle(MetConfigText(kMetStrTMclCard, kTitleConfigCode, kCardKey));
     RefreshCards();
     UpdateArrows();
     ShowSelection();
@@ -236,19 +273,25 @@ void MetMemCardLoadScreen::ShowCards() {
     MetScreen::EnterAndShow();
 }
 
-// 0x002ccc48
+// NTSC-U/C: 0x002ccc48, PAL: 0x002ee5f8
 void MetMemCardLoadScreen::ShowSelection() {
     Rnd::Text *pInstructions = FindObject<Rnd::Text>(kInstructionsText);
     if (mCards.size() == 0) {
         mInfoView->SetShowing(0);
-        pInstructions->SetText(ConfigText(kDialogueConfigCode, kNoCardKey));
-        MetHelpScreen::SelectPreset(HxStr(kOnlyBackPreset));
+        pInstructions->SetText(MetConfigText(kMetStrMcSelNone, kDialogueConfigCode, kNoCardKey));
+        MetHelpScreen::SelectPreset(MetText(kMetStrHOnlyBackTitle, kOnlyBackPreset));
     } else {
         mInfoView->SetShowing(1);
         mSlotNumberText->SetText(mCards[mSelected].mSlotName);
+#ifdef VIDEO_STANDARD_PAL
+        const HxStr format(GetMetString(kMetStrMcSpaceAvail));
+        mAvailableText->SetText(HxStr(FormatString(TextOrEmpty(format), mCards[mSelected].mFree)));
+#else
         mAvailableText->SetText(HxStr(FormatString(kAvailableFormat, mCards[mSelected].mFree)));
-        pInstructions->SetText(ConfigText(kDialogueConfigCode, kCardSelectedKey));
-        MetHelpScreen::SelectPreset(HxStr(kOptionsPreset));
+#endif
+        pInstructions->SetText(
+            MetConfigText(kMetStrMcSelCard, kDialogueConfigCode, kCardSelectedKey));
+        MetHelpScreen::SelectPreset(MetText(kMetStrHMcOpt, kOptionsPreset));
     }
 }
 
@@ -283,7 +326,7 @@ void MetMemCardLoadScreen::OnExitFinished() {
     }
 }
 
-// 0x002cd4e0
+// NTSC-U/C: 0x002cd4e0, PAL: 0x002ef098
 void MetMemCardLoadScreen::OnNoCard() {
     MemcardConnectState slot;
     bool bOtherCard = false;
@@ -296,28 +339,38 @@ void MetMemCardLoadScreen::OnNoCard() {
 
     if (!bOtherCard) {
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kOkButton));
-        MetMsgScreen::ShowActive(HxStr(kNoCardMessage),
-                                 HxStr(kWarningTitle),
-                                 ConfigText(kDialogueConfigCode, kNoCardMessage),
-                                 kOneButton,
-                                 buttons,
-                                 this);
+        buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
+        MetMsgScreen::ShowActive(
+            HxStr(kNoCardMessage),
+            MetText(kMetStrMsgWARNING, kWarningTitle),
+            MetConfigText(kMetStrMemCheck12, kDialogueConfigCode, kNoCardMessage),
+            kOneButton,
+            buttons,
+            this);
         return;
     }
 
     const MemcardConnectState next(NextCardSlot(slot));
-    const HxStr format(ConfigText(kDialogueConfigCode, kOtherCardKey));
+    const HxStr format(MetConfigText(kMetStrMemDetectSpecial, kDialogueConfigCode, kOtherCardKey));
     const HxStr text(FormatString(
         TextOrEmpty(format), TextOrEmpty(next.mSlotName), TextOrEmpty(slot.mSlotName)));
     std::vector<HxStr> buttons;
-    buttons.push_back(HxStr(kOkButton));
-    MetMsgScreen::ShowActive(
-        HxStr(kNoCardMessage), HxStr(kWarningTitle), text, kOneButton, buttons, this);
+    buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
+    MetMsgScreen::ShowActive(HxStr(kNoCardMessage),
+                             MetText(kMetStrMsgWARNING, kWarningTitle),
+                             text,
+                             kOneButton,
+                             buttons,
+                             this);
 }
 
-// 0x002cdce0
+// NTSC-U/C: 0x002cdce0, PAL: 0x002ef9b0
 void MetMemCardLoadScreen::OnDetectFinished() {
+#ifdef VIDEO_STANDARD_PAL
+    if (mUsingMemcardOnEnter == kUsingMemcard) {
+        MetFrontEndState::shared()->mUsingMemcard = mUsingMemcardOnEnter;
+    }
+#endif
     RefreshCards();
     PushNamedScreen(HxStr(kOwnScreenName));
     ActivateNamedPanel(HxStr(kOwnScreenName));
@@ -358,18 +411,42 @@ void MetMemCardLoadScreen::Present(MetMemCardPickerUser *pUser, bool bShowNow) {
     }
 }
 
-// 0x002ce2c0
+// NTSC-U/C: 0x002ce2c0, PAL: 0x002f0048
 void MetMemCardLoadScreen::StartDetect() {
     std::vector<HxStr> buttons;
     MetMsgScreen::Show(HxStr(kDetectMessage),
-                       HxStr(kWarningTitle),
-                       ConfigText(kDialogueConfigCode, kDetectKey),
+                       MetText(kMetStrMsgWARNING, kWarningTitle),
+                       MetConfigText(kMetStrMemDetect12, kDialogueConfigCode, kDetectKey),
                        kNoButtons,
                        buttons,
                        this);
     mRenderer->AddScreen(this);
     MetMemDetectScreen::StartDetect();
 }
+
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x002f0368
+void MetMemCardLoadScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
+    if (name == kNewCardMessage) {
+        if (nChoice == kChoiceOk) {
+            mPickerUser = this; // Yes, the binary stores this before Present() stores it again.
+            Present(this, false);
+        } else {
+            PushNamedScreen(HxStr(kRightGizmoScreen));
+            PushNamedScreen(HxStr(kHelpScreen));
+            PushNamedScreen(HxStr(kConfigOptionsScreen));
+            ActivateNamedPanel(HxStr(kConfigOptionsScreen));
+        }
+    } else {
+        MetMemDetectScreen::OnMsgScreenDismissed(name, nChoice);
+    }
+}
+
+// PAL: 0x002f4290
+void MetMemCardLoadScreen::ShowFormatCheck(const MemcardConnectState &) {
+    ExitScreenByName(HxStr(kMsgScreen));
+}
+#endif
 
 // 0x002d1eb0
 void MetMemCardLoadScreen::PlayCycleLeftSound(int nSelector) {
@@ -405,8 +482,8 @@ void MetMemCardLoadScreen::UpdateArrows() {
     }
 }
 
-// 0x002d2018
+// NTSC-U/C: 0x002d2018, PAL: 0x002f41f0
 void MetMemCardLoadScreen::OnEnterFinished() {
     MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
-    MetHelpScreen::SelectPreset(HxStr(kOptionsPreset));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHMcOpt, kOptionsPreset));
 }

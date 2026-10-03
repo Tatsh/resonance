@@ -15,6 +15,7 @@
 #include "met/metrenderer.h"
 #include "met/metsolowinscreen.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/button.h"
@@ -152,19 +153,19 @@ MetStageFinishScreen::~MetStageFinishScreen() {
     delete mContinueButtons;
 }
 
-// 0x003be068
+// NTSC-U/C: 0x003be068, PAL: 0x003f2e40
 void MetStageFinishScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
     {
         HxStr objectName(kContinueButtonObject);
-        HxStr label = QueryConfigString(kPromptConfigCode, kContinuePrompt);
+        HxStr label = MetConfigText(kMetStrEgswContinue, kPromptConfigCode, kContinuePrompt);
         mContinueButtons->Add(objectName, label);
     }
 
     for (int i = kFirstCongratulationText; i <= kLastCongratulationText; ++i) {
         Rnd::Text *pText = FindText(HxStr(FormatString(kCongratulationTextFormat, i)));
-        HxStr text = QueryConfigString(kPromptConfigCode, kContainerName);
+        HxStr text = MetConfigText(kMetStrEndGameCongrats, kPromptConfigCode, kContainerName);
         pText->SetText(text); // The binary does not test the lookup for null.
     }
 }
@@ -311,28 +312,28 @@ void MetStageFinishScreen::OnEnterFinished() {
     ActivateNamedPanel(HxStr(kNoName));
 }
 
-// 0x003bf8e8
+// NTSC-U/C: 0x003bf8e8, PAL: 0x003f49e0
 void MetStageFinishScreen::AddHighScoreMessage(int nPreviousScore, int nScore) {
     if (nPreviousScore == 0 || nPreviousScore >= nScore) {
         return;
     }
-    HxStr message = QueryConfigString(kPromptConfigCode, kHighScoreKey);
+    HxStr message = MetConfigText(kMetStrEndGameHighScore, kPromptConfigCode, kHighScoreKey);
     mMessages.push_back(message);
 }
 
-// 0x003bf9b8
+// NTSC-U/C: 0x003bf9b8, PAL: 0x003f4ac8
 void MetStageFinishScreen::AddArenaCompleteMessage(int nPreviousCompleted, int nCompleted) {
     if (nPreviousCompleted >= nCompleted) {
         return;
     }
-    HxStr format = QueryConfigString(kPromptConfigCode, kArenaCompleteKey);
+    HxStr format = MetConfigText(kMetStrEndGameArenaComplete, kPromptConfigCode, kArenaCompleteKey);
     const ArenaListEntry &arena = (*GetArenaList())[nCompleted - 1];
     HxStr arenaName = QueryConfigString(kArenaNameConfigCode, TextOf(arena.mName));
     HxStr message(FormatString(TextOf(format), TextOf(arenaName)));
     mMessages.push_back(message);
 }
 
-// 0x003bfc48
+// NTSC-U/C: 0x003bfc48, PAL: 0x003f4db8
 void MetStageFinishScreen::AddStageCompleteMessage(int nWasComplete, int nIsComplete) {
     if (nIsComplete == 0 || nWasComplete != 0) {
         return;
@@ -345,17 +346,17 @@ void MetStageFinishScreen::AddStageCompleteMessage(int nWasComplete, int nIsComp
         (nStage == kNormalLastStage && nDifficulty == kDifficultyNormal) ||
         (nStage == kExpertLastStage && nDifficulty == kDifficultyExpert)) {
         HxStr difficultyName = DifficultyName(nDifficulty);
-        HxStr format = QueryConfigString(kPromptConfigCode, kLastStageKey);
+        HxStr format = MetConfigText(kMetStrEndGameLastStage, kPromptConfigCode, kLastStageKey);
         HxStr message(FormatString(TextOf(format), TextOf(difficultyName)));
         mMessages.push_back(message);
     } else {
-        HxStr format = QueryConfigString(kPromptConfigCode, kStageKey);
+        HxStr format = MetConfigText(kMetStrEndGameStage, kPromptConfigCode, kStageKey);
         HxStr message(FormatString(TextOf(format), nStage + 1));
         mMessages.push_back(message);
     }
 }
 
-// 0x003c0008
+// NTSC-U/C: 0x003c0008, PAL: 0x003f5220
 void MetStageFinishScreen::AddDifficultyUnlockMessage(int nWasUnlocked, int nIsUnlocked) {
     mDifficultyUnlocked = 0;
     if (nIsUnlocked == 0 || nWasUnlocked != 0) {
@@ -366,7 +367,8 @@ void MetStageFinishScreen::AddDifficultyUnlockMessage(int nWasUnlocked, int nIsU
     QueryConfigValue(kStageConfigCode, TextOf(params.mLevelName)); // The stage is discarded.
     HxStr message;
     if (params.mDifficulty != kDifficultyExpert) {
-        HxStr format = QueryConfigString(kPromptConfigCode, kDifficultyUnlockKey);
+        HxStr format =
+            MetConfigText(kMetStrEndGameEasyNormal, kPromptConfigCode, kDifficultyUnlockKey);
         HxStr difficultyName = DifficultyName(params.mDifficulty + 1);
         message = FormatString(TextOf(format), TextOf(difficultyName));
         mMessages.push_back(message);
@@ -425,38 +427,39 @@ void MetStageFinishScreen::OnExitFinished() {
     }
 }
 
-// 0x003bfb78
+// NTSC-U/C: 0x003bfb78, PAL: 0x003f4cd0
 void MetStageFinishScreen::AddStageScoreBeatMessage(int nWasBeaten, int nIsBeaten) {
     if (nIsBeaten == 0 || nWasBeaten != 0) {
         return;
     }
-    HxStr message = QueryConfigString(kPromptConfigCode, kStageScoreBeatKey);
+    HxStr message = MetConfigText(kMetStrStageScoreBeat, kPromptConfigCode, kStageScoreBeatKey);
     mMessages.push_back(message);
 }
 
-// 0x003c02c0
+// NTSC-U/C: 0x003c02c0, PAL: 0x003f5568
 void MetStageFinishScreen::AddSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked) {
     if (nIsUnlocked == 0 || nWasUnlocked != 0) {
         return;
     }
-    HxStr message = QueryConfigString(kPromptConfigCode, kSecretKey);
+    HxStr message = MetConfigText(kMetStrEndGameSecret, kPromptConfigCode, kSecretKey);
     mMessages.push_back(message);
 }
 
-// 0x003c0390
+// NTSC-U/C: 0x003c0390, PAL: 0x003f5650
 void MetStageFinishScreen::AddSuperSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked) {
     if (nIsUnlocked == 0 || nWasUnlocked != 0) {
         return;
     }
-    HxStr message = QueryConfigString(kPromptConfigCode, kSuperSecretKey);
+    HxStr message = MetConfigText(kMetStrEndGameSuperSecret, kPromptConfigCode, kSuperSecretKey);
     mMessages.push_back(message);
 }
 
-// 0x003c0460
+// NTSC-U/C: 0x003c0460, PAL: 0x003f5738
 void MetStageFinishScreen::AddEndSuperSecretUnlockMessage(int nWasUnlocked, int nIsUnlocked) {
     if (nIsUnlocked == 0 || nWasUnlocked != 0) {
         return;
     }
-    HxStr message = QueryConfigString(kPromptConfigCode, kEndSuperSecretKey);
+    HxStr message =
+        MetConfigText(kMetStrEndGameEndSuperSecret, kPromptConfigCode, kEndSuperSecretKey);
     mMessages.push_back(message);
 }

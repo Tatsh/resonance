@@ -113,7 +113,8 @@ public:
      *
      * @param nIndex The zero-based macro index.
      * @return The macro text.
-     * @ghidraAddress 0x0028cbb8
+     * @ghidraAddress NTSC-U/C: 0x0028cbb8
+     * @ghidraAddress PAL: 0x002a88d8
      */
     static HxStr DefaultMacro(int nIndex);
 
@@ -162,7 +163,8 @@ public:
      * Slot 9. Sets the ticker text to the literal `keyboard_clear_ticker` and then runs
      * MetScreen::BeginExit().
      *
-     * @ghidraAddress 0x0028c550
+     * @ghidraAddress NTSC-U/C: 0x0028c550
+     * @ghidraAddress PAL: 0x002a8238
      */
     virtual void BeginExit();
 
@@ -288,9 +290,11 @@ public:
      *
      * Slot 38. Runs MetScreen::ResolveContainerViews() first and then resolves each of the seven
      * container objects by name, casting three to Rnd::View and four to Rnd::Text. It records the
-     * two caption offsets, selects the regular layout and panel, and runs ResetKeyStates().
+     * two caption offsets, selects the regular layout and panel, and runs ResetKeyStates(). The
+     * European release then runs LocalizeKeyLabels().
      *
-     * @ghidraAddress 0x00282948
+     * @ghidraAddress NTSC-U/C: 0x00282948
+     * @ghidraAddress PAL: 0x0029d620
      */
     virtual void ResolveContainerViews();
 
@@ -299,6 +303,14 @@ private:
     // Apply one key by name. The named keys go to their handlers, the twelve function keys insert
     // their macro, and every other name is typed as its first character.
     void DispatchKeyName(const HxStr &name);
+
+#ifdef VIDEO_STANDARD_PAL
+    // PAL: 0x0029c770
+    // Fill the named key labels from the European text table. The caption beside each of the
+    // three wide keys moves right by the growth of its label's end. ResolveContainerViews() runs
+    // it last. The name is inferred.
+    void LocalizeKeyLabels();
+#endif
 
     // 0x00283f38
     // Highlight the selected key's button and show its macro when it is a function key. Nothing
@@ -322,11 +334,11 @@ private:
     // Step the selection up, as MoveDown() steps it down.
     void MoveUp();
 
-    // 0x00284ec0
+    // NTSC-U/C: 0x00284ec0, PAL: 0x002a01c0
     // Show the macro of a function key beside the caret, or report that it does not fit.
     void ShowMacro(const HxStr &key);
 
-    // 0x002850b8
+    // NTSC-U/C: 0x002850b8, PAL: 0x002a0428
     // Append the default macro of one function key to the text when it fits.
     void InsertMacro(int nIndex);
 
@@ -355,11 +367,11 @@ private:
     // Toggle caps lock, which also releases shift.
     void OnCaps();
 
-    // 0x002865a0
+    // NTSC-U/C: 0x002865a0, PAL: 0x002a1b60
     // Insert three spaces when they fit.
     void OnTab();
 
-    // 0x00286850
+    // NTSC-U/C: 0x00286850, PAL: 0x002a1ef8
     // Insert one space when it fits.
     void OnSpace();
 
@@ -367,7 +379,7 @@ private:
     // Delete the character at the caret.
     void OnDelete();
 
-    // 0x00286c10
+    // NTSC-U/C: 0x00286c10, PAL: 0x002a2320
     // Insert the first character of a key name when it fits.
     void OnCharacter(const HxStr &key);
 

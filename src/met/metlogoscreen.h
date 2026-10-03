@@ -182,9 +182,12 @@ public:
      * Resolve the animation views, the container view, the start text, the wave view, the version
      * text, and the four legal texts, and hide the screen.
      *
-     * Slot 38. The base slot does not run, and the screen resolves MetScreen::mView itself.
+     * Slot 38. The base slot does not run, and the screen resolves MetScreen::mView itself. The
+     * European release sets the start text and the four legal texts to their texts in the current
+     * language.
      *
-     * @ghidraAddress 0x002ba6d0
+     * @ghidraAddress NTSC-U/C: 0x002ba6d0
+     * @ghidraAddress PAL: 0x002d9f00
      */
     virtual void ResolveContainerViews();
 

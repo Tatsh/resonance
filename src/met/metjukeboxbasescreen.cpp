@@ -4,6 +4,7 @@
 #include "met/methelpscreen.h"
 #include "met/metremixmanager.h"
 #include "met/metrenderer.h"
+#include "met/metstrings.h"
 #include "met/scrollinglist.h"
 #include "met/texturepairrecord.h"
 #include "os/hxstr.h"
@@ -307,14 +308,16 @@ void MetJukeboxBaseScreen::UpdateIdle([[maybe_unused]] float flTime) {
     }
 }
 
-// 0x0021fe98
+// NTSC-U/C: 0x0021fe98, PAL: 0x00232c90
 void MetJukeboxBaseScreen::UpdateHelpText() {
     if (mPlayList->entries.size() < static_cast<unsigned>(g_nMaxPlayListEntries)) {
-        MetHelpScreen::SelectPreset(HxStr(kHelpLayout));
-        MetHelpScreen::SetText(HxStr(kHelpText), mRenderer->mAnimationFrame);
+        MetHelpScreen::SelectPreset(MetText(kMetStrHMetJukeboxBaseScreenHelpTab, kHelpLayout));
+        MetHelpScreen::SetText(MetText(kMetStrHMetJukeboxBaseScreenTickerTape, kHelpText),
+                               mRenderer->mAnimationFrame);
     } else {
-        MetHelpScreen::SelectPreset(HxStr(kFullLayout));
-        MetHelpScreen::SetText(HxStr(kFullText), mRenderer->mAnimationFrame);
+        MetHelpScreen::SelectPreset(MetText(kMetStrHMetJukeboxBaseScreenErrorTab, kFullLayout));
+        MetHelpScreen::SetText(MetText(kMetStrHMetJukeboxBaseScreenErrorTickerTape, kFullText),
+                               mRenderer->mAnimationFrame);
     }
 }
 

@@ -52,7 +52,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x001f65a0
+     * @ghidraAddress NTSC-U/C: 0x001f65a0
+     * @ghidraAddress PAL: 0x001fcfc8
      */
     MetArenasScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -80,9 +81,11 @@ public:
      * The title is the configuration string 0x269 for `solo` or `multi`, a space, the one for
      * `game` or `remix`, and the one for `arenas`. The screenshot pair is invalidated, the buttons
      * are set up through SetupArenaButtons(), the prompt layout `standard_title` is selected, and
-     * MetScreen::EnterAndShow() runs.
+     * MetScreen::EnterAndShow() runs. The European release looks each part up in the current
+     * language and, in Spanish, places the `game` or `remix` part before the mode.
      *
-     * @ghidraAddress 0x001f7750
+     * @ghidraAddress NTSC-U/C: 0x001f7750
+     * @ghidraAddress PAL: 0x001fe3b8
      */
     virtual void EnterAndShow();
 
@@ -206,7 +209,8 @@ private:
      *
      * @param bUnlockAll Non-zero to unlock every arena. EnterAndShow() passes
      * MetFrontEndState::mUnlockAll.
-     * @ghidraAddress 0x001f7d40
+     * @ghidraAddress NTSC-U/C: 0x001f7d40
+     * @ghidraAddress PAL: 0x001fee58
      */
     void SetupArenaButtons(int bUnlockAll);
 

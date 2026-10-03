@@ -74,7 +74,8 @@ public:
      * 0x258 without storing them, and resolves the ten members. No lookup is tested for null
      * before use.
      *
-     * @ghidraAddress 0x003af450
+     * @ghidraAddress NTSC-U/C: 0x003af450
+     * @ghidraAddress PAL: 0x003e3498
      */
     virtual void ResolveContainerViews();
 

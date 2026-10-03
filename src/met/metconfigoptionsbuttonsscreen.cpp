@@ -7,11 +7,11 @@
 #include "met/methelpscreen.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "rnd/button.h"
 #include "rnd/manager.h"
 #include "rnd/view.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -63,11 +63,6 @@ static const char *const kGameOptionsScreen = "MetConfigGameOptionsScreen";
 static const char *const kCreditsScreen = "MetCreditsScreen";
 static const char *const kExpansionPakScreen = "MetExpansionPakScreen";
 
-inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr text = QueryConfigString(nCode, pszKey);
-    return text;
-}
-
 } // namespace
 
 // 0x002071f0
@@ -113,7 +108,7 @@ void MetConfigOptionsButtonsScreen::HandleCommand(const MetScreenCommand *pComma
     }
 }
 
-// 0x00207660
+// NTSC-U/C: 0x00207660, PAL: 0x00210540
 void MetConfigOptionsButtonsScreen::EnterAndShow() {
     const int bDiscButton = GlobalSettings::shared()->mGameOptions.mExpansionPack;
 
@@ -126,26 +121,34 @@ void MetConfigOptionsButtonsScreen::EnterAndShow() {
     mOptionButtons->Clear();
     mHelpKeys.clear();
 
-    mOptionButtons->Add(HxStr(kGameButton), ConfigText(kPromptConfigCode, kGamePrompt));
-    mOptionButtons->Add(HxStr(kControllerButton), ConfigText(kPromptConfigCode, kControllerPrompt));
-    mOptionButtons->Add(HxStr(kMemoryButton), ConfigText(kPromptConfigCode, kMemoryPrompt));
-    mOptionButtons->Add(HxStr(kCreditsButton), ConfigText(kPromptConfigCode, kCreditsPrompt));
+    mOptionButtons->Add(HxStr(kGameButton),
+                        MetConfigText(kMetStrNobGameSetup, kPromptConfigCode, kGamePrompt));
+    mOptionButtons->Add(
+        HxStr(kControllerButton),
+        MetConfigText(kMetStrNobControllerSetup, kPromptConfigCode, kControllerPrompt));
+    mOptionButtons->Add(HxStr(kMemoryButton),
+                        MetConfigText(kMetStrNobMemCardSetup, kPromptConfigCode, kMemoryPrompt));
+    mOptionButtons->Add(HxStr(kCreditsButton),
+                        MetConfigText(kMetStrNobCredits, kPromptConfigCode, kCreditsPrompt));
     if (bDiscButton) {
-        mOptionButtons->Add(HxStr(kDiscButton), ConfigText(kPromptConfigCode, kDiscPrompt));
+        mOptionButtons->Add(HxStr(kDiscButton),
+                            MetConfigText(kMetStrNobDiskChange, kPromptConfigCode, kDiscPrompt));
     }
 
-    mHelpKeys.push_back(HxStr(kGamePrompt));
-    mHelpKeys.push_back(HxStr(kControllerPrompt));
-    mHelpKeys.push_back(HxStr(kMemoryPrompt));
-    mHelpKeys.push_back(HxStr(kCreditsPrompt));
+    // The European release stores the help texts themselves rather than their keys.
+    mHelpKeys.push_back(MetText(kMetStrHNobGameSetup, kGamePrompt));
+    mHelpKeys.push_back(MetText(kMetStrHNobControllerSetup, kControllerPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHNobMemCardSetup, kMemoryPrompt));
+    mHelpKeys.push_back(MetText(kMetStrHNobCredits, kCreditsPrompt));
     if (bDiscButton) {
-        mHelpKeys.push_back(HxStr(kDiscPrompt));
+        mHelpKeys.push_back(MetText(kMetStrHNobDiskChange, kDiscPrompt));
     }
 
     mOptionButtons->SetSelected(kFirstButton);
     mControllerIndex = kFirstController;
-    MetScreenTitleScreen::SetTitle(ConfigText(kTitleConfigCode, kTitleKey));
-    MetHelpScreen::SelectPreset(HxStr(kStandardPreset));
+    MetScreenTitleScreen::SetTitle(
+        MetConfigText(kMetStrTConfigOptionButtons, kTitleConfigCode, kTitleKey));
+    MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kStandardPreset));
     MetHelpScreen::SetText(mHelpKeys[mOptionButtons->mSelected], mRenderer->mAnimationFrame);
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
     MetScreen::EnterAndShow();

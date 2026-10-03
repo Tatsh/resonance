@@ -65,7 +65,8 @@ public:
      *
      * Slot 5.
      *
-     * @ghidraAddress 0x002e79b8
+     * @ghidraAddress NTSC-U/C: 0x002e79b8
+     * @ghidraAddress PAL: 0x0030ab70
      */
     virtual void EnterAndShow();
 
@@ -132,7 +133,8 @@ public:
      *
      * Slot 38.
      *
-     * @ghidraAddress 0x002e7490
+     * @ghidraAddress NTSC-U/C: 0x002e7490
+     * @ghidraAddress PAL: 0x0030a520
      */
     virtual void ResolveContainerViews();
 

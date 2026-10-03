@@ -20,6 +20,9 @@
 #include "met/metpersonasaverscreen.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metsonglists.h"
+#include "met/metstrings.h"
+#include "os/formatstring.h"
 #include "os/r250.h"
 #include "rnd/button.h"
 #include "rnd/manager.h"
@@ -158,9 +161,10 @@ inline const char *TextOrEmpty(const HxStr &text) {
 }
 
 // Add one button labelled from configuration. Slot 38 expands it for each button.
-inline void AddButton(MetButtonList *pList, const char *pszObjectName, const char *pszPrompt) {
+inline void
+AddButton(MetButtonList *pList, const char *pszObjectName, MetStringId nId, const char *pszPrompt) {
     HxStr objectName(pszObjectName);
-    HxStr label = QueryConfigString(kPromptConfigCode, pszPrompt);
+    HxStr label = MetConfigText(nId, kPromptConfigCode, pszPrompt);
     pList->Add(objectName, label);
 }
 
@@ -184,21 +188,22 @@ MetFreqMakerButtonsScreen *MetFreqMakerButtonsScreen::New(MetRenderer *pRenderer
     return new MetFreqMakerButtonsScreen(pRenderer, nPriority);
 }
 
-// 0x00258c80
+// NTSC-U/C: 0x00258c80, PAL: 0x0026e8b8
 void MetFreqMakerButtonsScreen::EnterAndShow() {
     mButtonList->SetSelected(kFirstButtonIndex);
     if (mEditing == kCreating) {
-        HxStr title = QueryConfigString(kTitleConfigCode, kCreateTitleKey);
+        HxStr title =
+            MetConfigText(kMetStrTFreqMakerCreateButtons, kTitleConfigCode, kCreateTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     } else if (mEditing == kEditing) {
-        HxStr title = QueryConfigString(kTitleConfigCode, kEditTitleKey);
+        HxStr title = MetConfigText(kMetStrTFreqMakerEditButtons, kTitleConfigCode, kEditTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     }
     Rnd::Button *pSave = dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(kSaveButton)));
     if (MetFrontEndState::shared()->mUsingMemcard != 0) {
-        pSave->mText->SetText(HxStr(kSaveLabel));
+        pSave->mText->SetText(MetText(kMetStrFmButSave, kSaveLabel));
     } else {
-        pSave->mText->SetText(HxStr(kDoneLabel));
+        pSave->mText->SetText(MetText(kMetStrFmButDone, kDoneLabel));
     }
     UpdateRandomizeLabel();
     MetScreen::EnterAndShow();
@@ -244,7 +249,7 @@ inline void MetFreqMakerButtonsScreen::StartPersonaSave(const std::vector<HxStr>
     }
 }
 
-// 0x00259ad0
+// NTSC-U/C: 0x00259ad0, PAL: 0x0026fa58
 void MetFreqMakerButtonsScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (!(name == kCheckChangedDialogue)) {
         return;
@@ -254,8 +259,15 @@ void MetFreqMakerButtonsScreen::OnMsgScreenDismissed(const HxStr &name, int nCho
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kCanvasScreen)))
             ->CommitPersona();
         std::vector<HxStr> screens;
+#ifdef VIDEO_STANDARD_PAL
+        screens.resize(kSaveReturnScreenCount);
+        screens[0] = kModeScreen;
+        screens[1] = kLeftGizmoScreen;
+        screens[2] = kHelpScreen;
+#else
         screens.push_back(MetFrontEndState::shared()->mReturnScreen);
         screens.push_back(HxStr(kHelpScreen));
+#endif
         StartPersonaSave(screens);
         break;
     }
@@ -271,7 +283,7 @@ void MetFreqMakerButtonsScreen::OnMsgScreenDismissed(const HxStr &name, int nCho
     }
 }
 
-// 0x002581c8
+// NTSC-U/C: 0x002581c8, PAL: 0x0026db18
 void MetFreqMakerButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -294,11 +306,14 @@ void MetFreqMakerButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) 
                     ->GetFreqName();
             static_cast<MetKeyboardScreen *>(FindScreenByName(HxStr(kKeyboardScreen)))
                 ->ResetKeyStates();
-            MetKeyboardRequest request(
-                HxStr(kButtonsScreen), HxStr(kNamePromptText), *pName, kAnyPad, this);
+            MetKeyboardRequest request(HxStr(kButtonsScreen),
+                                       MetText(kMetStrTMetKbFreq, kNamePromptText),
+                                       *pName,
+                                       kAnyPad,
+                                       this);
             request.mMaxLength = kNameMaxLength;
             request.mMaxWidth = kNameMaxWidth;
-            request.mTicker = kNameTicker;
+            request.mTicker = MetText(kMetStrHMetFmNameFreq, kNameTicker);
             MetKeyboardScreen::Open(request);
         } else if (selected == kSaveButton) {
             static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kCanvasScreen)))
@@ -358,7 +373,7 @@ void MetFreqMakerButtonsScreen::OnEnterFinished() {
     ShowDirectionsForButton(mButtonList->mSelectedButton);
 }
 
-// 0x00259040
+// NTSC-U/C: 0x00259040, PAL: 0x0026ed18
 void MetFreqMakerButtonsScreen::OnExitFinished() {
     static_cast<MetFreqMakerInventoryScreen *>(FindScreenByName(HxStr(kInventoryScreen)))
         ->HidePages();
@@ -374,7 +389,23 @@ void MetFreqMakerButtonsScreen::OnExitFinished() {
         }
         screens[1] = kLeftGizmoScreen;
         screens[2] = kHelpScreen;
+#ifdef VIDEO_STANDARD_PAL
+        // Unlike slot 15, a save with a card identifies the slot through FirstCardSlotName().
+        MetFreqMakerCanvasScreen *pCanvas =
+            static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kCanvasScreen)));
+        int nNewPersona = mNewPersona == 1;
+        MemcardConnectState slot;
+        if (MetFrontEndState::shared()->mUsingMemcard != 0) {
+            slot.mPortSlot = kStandInPortSlot;
+            slot.mSlotName = FirstCardSlotName();
+        } else {
+            slot.mSlotName = kStandInSlotName;
+            slot.mPortSlot = kStandInPortSlot;
+        }
+        MetPersonaSaverScreen::StartSave(screens, pCanvas->mPersona, slot, nNewPersona, 0);
+#else
         StartPersonaSave(screens);
+#endif
         break;
     }
 
@@ -383,9 +414,19 @@ void MetFreqMakerButtonsScreen::OnExitFinished() {
             static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kCanvasScreen)));
         if (MetFrontEndState::shared()->mUsingMemcard != 0 && pCanvas->mModified != 0) {
             std::vector<HxStr> buttons;
-            buttons.push_back(HxStr(kYesButton));
-            buttons.push_back(HxStr(kNoButton));
+            buttons.push_back(MetText(kMetStrMsgYES, kYesButton));
+            buttons.push_back(MetText(kMetStrMsgNO, kNoButton));
             const HxStr freqName(*pCanvas->GetFreqName());
+#ifdef VIDEO_STANDARD_PAL
+            const HxStr format = GetMetString(kMetStrFmConfirmSave);
+            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(freqName)));
+            MetMsgScreen::Show(HxStr(kCheckChangedDialogue),
+                               GetMetString(kMetStrMsgWARNING),
+                               text,
+                               kTwoButtons,
+                               buttons,
+                               this);
+#else
             char szText[kCheckChangedBufferSize];
             sprintf(szText, kCheckChangedFormat, TextOrEmpty(freqName));
             MetMsgScreen::Show(HxStr(kCheckChangedDialogue),
@@ -394,6 +435,7 @@ void MetFreqMakerButtonsScreen::OnExitFinished() {
                                kTwoButtons,
                                buttons,
                                this);
+#endif
             MetHelpScreen::SetText(HxStr(kNoName), mRenderer->mAnimationFrame);
         } else {
             PushNamedScreen(MetFrontEndState::shared()->mReturnScreen);
@@ -487,18 +529,18 @@ void MetFreqMakerButtonsScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     mButtonList->mSelectedButton->SetState(kButtonStatePressed);
 }
 
-// 0x00257b70
+// NTSC-U/C: 0x00257b70, PAL: 0x0026d320
 void MetFreqMakerButtonsScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    AddButton(mButtonList, kRandomizeButton, kRandomizePrompt);
-    AddButton(mButtonList, kBodyButton, kBodyPrompt);
-    AddButton(mButtonList, kHeadButton, kHeadPrompt);
-    AddButton(mButtonList, kFaceButton, kFacePrompt);
-    AddButton(mButtonList, kDetailsButton, kDetailsPrompt);
-    AddButton(mButtonList, kLogosButton, kLogosPrompt);
-    AddButton(mButtonList, kEditButton, kEditPrompt);
-    AddButton(mButtonList, kNameButton, kNamePrompt);
-    AddButton(mButtonList, kSaveButton, kSavePrompt);
+    AddButton(mButtonList, kRandomizeButton, kMetStrFqmakRandomize, kRandomizePrompt);
+    AddButton(mButtonList, kBodyButton, kMetStrFqmakBody, kBodyPrompt);
+    AddButton(mButtonList, kHeadButton, kMetStrFqmakHead, kHeadPrompt);
+    AddButton(mButtonList, kFaceButton, kMetStrFqmakFace, kFacePrompt);
+    AddButton(mButtonList, kDetailsButton, kMetStrFqmakDetails, kDetailsPrompt);
+    AddButton(mButtonList, kLogosButton, kMetStrFqmakLogos, kLogosPrompt);
+    AddButton(mButtonList, kEditButton, kMetStrFqmakEdit, kEditPrompt);
+    AddButton(mButtonList, kNameButton, kMetStrFqmakName, kNamePrompt);
+    AddButton(mButtonList, kSaveButton, kMetStrFqmakSave, kSavePrompt);
 }
 
 // 0x0025a108
@@ -519,15 +561,15 @@ void MetFreqMakerButtonsScreen::SetEditing(int nEditing) {
     }
 }
 
-// 0x0025a228
+// NTSC-U/C: 0x0025a228, PAL: 0x002702c8
 void MetFreqMakerButtonsScreen::UpdateRandomizeLabel() {
     Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kRandomizeText)));
     switch (mEditing) {
     case kEditing:
-        pText->SetText(HxStr(kMutateLabel));
+        pText->SetText(MetText(kMetStrFmButMutate, kMutateLabel));
         break;
     case kCreating:
-        pText->SetText(HxStr(kRandomizeLabel));
+        pText->SetText(MetText(kMetStrFmButRandom, kRandomizeLabel));
         break;
     default:
         break;

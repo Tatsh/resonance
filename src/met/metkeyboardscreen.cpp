@@ -11,11 +11,11 @@
 #include "met/metkbuser.h"
 #include "met/metkeyboardrequest.h"
 #include "met/metrenderer.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/button.h"
 #include "rnd/manager.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -127,9 +127,48 @@ constexpr float kVectorPadding = 1.0f;
 // Row of Rnd::Transformable::mLocalXfm that holds the translation.
 constexpr int kTranslationRow = 3;
 
+#ifdef VIDEO_STANDARD_PAL
+// The ticker texts for text and for a macro that do not fit.
+inline HxStr TextTooWideTicker() {
+    return GetMetString(kMetStrHMetKeyboardTextTooWide);
+}
+
+inline HxStr MacroTooLargeTicker() {
+    return GetMetString(kMetStrHMetKeyboardMacroTooLarge);
+}
+
+// A key label the language replaces, and the caption beside it that moves with the label's end,
+// or null.
+struct KeyLabel {
+    const char *pszLabel;
+    MetStringId nId;
+    const char *pszCaption;
+};
+
+// The labels in the order LocalizeKeyLabels() fills them.
+static const KeyLabel kKeyLabels[] = {
+    {"key_TAB.txt", kMetStrKbTab, nullptr},
+    {"key_CAPS.txt", kMetStrKbCaps, nullptr},
+    {"key_SHIFT.txt", kMetStrKbShift, nullptr},
+    {"key_BACKSPACE.txt", kMetStrKbBack, "key_BACKSPACE_quik.txt"},
+    {"key_ENTER.txt", kMetStrKbEnter, "key_ENTER_quik.txt"},
+    {"key_SHIFT2.txt", kMetStrKbShift, nullptr},
+    {"key_DELETE.txt", kMetStrKbDel, nullptr},
+    {"key_SPACE.txt", kMetStrKbSpace, "key_SPACE_quik.txt"},
+};
+#else
 // 0x00891b20
 HxStr g_textTooWide("met_keyboard_text_too_wide");
 HxStr g_macroTooLarge("met_keyboard_macro_too_large.");
+
+inline const HxStr &TextTooWideTicker() {
+    return g_textTooWide;
+}
+
+inline const HxStr &MacroTooLargeTicker() {
+    return g_macroTooLarge;
+}
+#endif
 
 // 0x00891b30
 // The names of the keys that are not typed as a character.
@@ -476,7 +515,7 @@ MetKeyboardScreen::MetKeyboardScreen(MetRenderer *pRenderer, int nPriority)
 MetKeyboardScreen::~MetKeyboardScreen() {
 }
 
-// 0x00282948
+// NTSC-U/C: 0x00282948, PAL: 0x0029d620
 void MetKeyboardScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mpCursor = FindText(kCursorObject);
@@ -495,7 +534,39 @@ void MetKeyboardScreen::ResolveContainerViews() {
     mRow = kResolvedRow;
     mColumn = kResolvedColumn;
     ResetKeyStates();
+#ifdef VIDEO_STANDARD_PAL
+    LocalizeKeyLabels();
+#endif
 }
+
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x0029c770
+void MetKeyboardScreen::LocalizeKeyLabels() {
+    // The binary expands this loop into one block per label.
+    for (const auto &entry : kKeyLabels) {
+        Rnd::Text *pLabel = FindText(entry.pszLabel);
+        if (entry.pszCaption == nullptr) {
+            pLabel->SetText(GetMetString(entry.nId));
+            continue;
+        }
+
+        pLabel->SetShowing(1);
+        const Vector3 before = pLabel->CharPosition(pLabel->mPreWrapText.mLen);
+        pLabel->SetText(GetMetString(entry.nId));
+        const Vector3 after = pLabel->CharPosition(pLabel->mPreWrapText.mLen);
+        pLabel->SetShowing(0);
+        Vector3 shift;
+        Vec3Sub(&after.x, &before.x, &shift.x);
+
+        Rnd::Text *pCaption = FindText(entry.pszCaption);
+        Vector3 position;
+        memcpy(&position, pCaption->mLocalXfm[kTranslationRow], sizeof(position));
+        position.x += shift.x;
+        memcpy(pCaption->mLocalXfm[kTranslationRow], &position, sizeof(position));
+        pCaption->mDirty = 1;
+    }
+}
+#endif
 
 // 0x00282ef0
 void MetKeyboardScreen::DispatchKeyName(const HxStr &name) {
@@ -880,7 +951,7 @@ std::vector<HxStr> *MetKeyboardScreen::GetDefaultMacros() {
     return &g_defaultMacros;
 }
 
-// 0x00284ec0
+// NTSC-U/C: 0x00284ec0, PAL: 0x002a01c0
 void MetKeyboardScreen::ShowMacro(const HxStr &key) {
     if (mMacrosDisabled != 0) {
         return;
@@ -897,7 +968,7 @@ void MetKeyboardScreen::ShowMacro(const HxStr &key) {
         if (static_cast<float>(g_nKeyboardMaxWidth) <= static_cast<float>(nEnd) + flWidth &&
             mText.mLen + macro.mLen < static_cast<unsigned>(g_nKeyboardMaxLength)) {
             PlayErrorSound(mSelector);
-            SetTickerText(g_macroTooLarge);
+            SetTickerText(MacroTooLargeTicker());
             return;
         }
 
@@ -914,7 +985,7 @@ void MetKeyboardScreen::ShowMacro(const HxStr &key) {
     }
 }
 
-// 0x002850b8
+// NTSC-U/C: 0x002850b8, PAL: 0x002a0428
 void MetKeyboardScreen::InsertMacro(int nIndex) {
     if (mMacrosDisabled != 0) {
         return;
@@ -927,7 +998,7 @@ void MetKeyboardScreen::InsertMacro(int nIndex) {
     if (static_cast<float>(g_nKeyboardMaxWidth) <= static_cast<float>(nEnd) + flWidth &&
         mText.mLen + macro.mLen < static_cast<unsigned>(g_nKeyboardMaxLength)) {
         mLastAction = kActionRejected;
-        SetTickerText(HxStr(kNoMacroRoomTicker));
+        SetTickerText(MetText(kMetStrHMetKbMacroError, kNoMacroRoomTicker));
         return;
     }
 
@@ -1045,7 +1116,7 @@ void MetKeyboardScreen::OnCaps() {
     HighlightCurrentKey();
 }
 
-// 0x002865a0
+// NTSC-U/C: 0x002865a0, PAL: 0x002a1b60
 void MetKeyboardScreen::OnTab() {
     HxStr spaces;
     for (int i = 0; i < kTabWidth; ++i) {
@@ -1062,13 +1133,13 @@ void MetKeyboardScreen::OnTab() {
         SetTickerText(mTicker);
     } else {
         mLastAction = kActionRejected;
-        SetTickerText(g_textTooWide);
+        SetTickerText(TextTooWideTicker());
     }
     mpTextEntryWindow->SetText(mText);
     UpdateCursor();
 }
 
-// 0x00286850
+// NTSC-U/C: 0x00286850, PAL: 0x002a1ef8
 void MetKeyboardScreen::OnSpace() {
     const int nEnd = TextEndX();
     if (static_cast<float>(nEnd) + mpTextEntryWindow->MeasureText(" ", 1) <
@@ -1080,7 +1151,7 @@ void MetKeyboardScreen::OnSpace() {
         SetTickerText(mTicker);
     } else {
         mLastAction = kActionRejected;
-        SetTickerText(g_textTooWide);
+        SetTickerText(TextTooWideTicker());
     }
     mpTextEntryWindow->SetText(mText);
     UpdateCursor();
@@ -1099,7 +1170,7 @@ void MetKeyboardScreen::OnDelete() {
     UpdateCursor();
 }
 
-// 0x00286c10
+// NTSC-U/C: 0x00286c10, PAL: 0x002a2320
 void MetKeyboardScreen::OnCharacter(const HxStr &key) {
     char ch = key[0];
     const int nEnd = TextEndX();
@@ -1112,7 +1183,7 @@ void MetKeyboardScreen::OnCharacter(const HxStr &key) {
         SetTickerText(mTicker);
     } else {
         mLastAction = kActionRejected;
-        SetTickerText(g_textTooWide);
+        SetTickerText(TextTooWideTicker());
     }
     mpTextEntryWindow->SetText(mText);
     UpdateCursor();
@@ -1131,9 +1202,9 @@ MetScreen *MetKeyboardScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetKeyboardScreen(pRenderer, nPriority);
 }
 
-// 0x0028c550
+// NTSC-U/C: 0x0028c550, PAL: 0x002a8238
 void MetKeyboardScreen::BeginExit() {
-    SetTickerText(HxStr(kClearTickerTemplate));
+    SetTickerText(MetText(kMetStrHKeyboardClearTicker, kClearTickerTemplate));
     MetScreen::BeginExit();
 }
 
@@ -1231,9 +1302,13 @@ void MetKeyboardScreen::OnEnterFinished() {
 void MetKeyboardScreen::OnDeparted() {
 }
 
-// 0x0028cbb8
+// NTSC-U/C: 0x0028cbb8, PAL: 0x002a88d8
 HxStr MetKeyboardScreen::DefaultMacro(int nIndex) {
+#ifdef VIDEO_STANDARD_PAL
+    HxStr text = GetMetString(kMetStrKbMacroF1 + nIndex);
+#else
     HxStr text = QueryConfigString(kMacroConfigCode, FormatString(kMacroKeyFormat, nIndex + 1));
+#endif
     return text;
 }
 

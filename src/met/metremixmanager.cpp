@@ -12,6 +12,7 @@
 #include "met/metmsgscreen.h"
 #include "met/metrenderer.h"
 #include "met/metsonglists.h"
+#include "met/metstrings.h"
 #include "msg/metfreqendedmsg.h"
 #include "os/async.h"
 #include "os/formatstring.h"
@@ -90,6 +91,14 @@ constexpr char kFormatAlreadyText[] = "format_already";
 constexpr char kFormatTitle[] = "FORMAT";
 constexpr char kSettingsTitle[] = "SETTINGS";
 constexpr char kErrorTitle[] = "ERROR";
+#ifdef VIDEO_STANDARD_PAL
+constexpr char kSaveAbortedDialogue[] = "save_fail_no_format";
+
+// The packed port and slot of port 1, and the slot name the European release gives it when
+// GlobalSettings records another card.
+constexpr int kPortOne = 0;
+constexpr char kPortOneSlotName[] = "1";
+#endif
 
 // Button labels, and the button counts MetMsgScreen::Show() receives with them.
 constexpr char kOkButton[] = "OK";
@@ -133,11 +142,21 @@ inline const char *PathOrEmpty(const HxStr &path) {
     return path.mStr != nullptr ? path.mStr : g_szEmptyString;
 }
 
-// A dialogue text read by value from configuration.
-inline HxStr ConfigText(const char *pszKey) {
-    HxStr value = QueryConfigString(kDialogueConfigCode, pszKey);
-    return value;
+#ifdef VIDEO_STANDARD_PAL
+// The card GlobalSettings records when it is in port 1, or otherwise port 1 under the slot name
+// `1`. The European release expands it in place.
+inline MemcardConnectState PortOneCardSlot() {
+    MemcardConnectState slot;
+    if (GlobalSettings::shared()->mCardSlots.size() != 0 &&
+        GlobalSettings::shared()->mCardSlots[0].mPortSlot == kPortOne) {
+        slot = GlobalSettings::shared()->mCardSlots[0];
+    } else {
+        slot.mPortSlot = kPortOne;
+        slot.mSlotName = kPortOneSlotName;
+    }
+    return slot;
 }
+#endif
 
 // The display name of the first memory-card slot, or the empty string.
 inline const char *FirstCardSlotText() {
@@ -313,7 +332,7 @@ inline void MetRemixManager::NextTrack() {
     mCurrentPlaylistTrack = std::min(nLast, mCurrentPlaylistTrack + 1);
 }
 
-// 0x00353350
+// NTSC-U/C: 0x00353350, PAL: 0x0037f5a8
 void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
                                   std::vector<MemcardConnectState> slots,
                                   int bLoadPlayList) {
@@ -337,7 +356,7 @@ void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
     HxStr slotNames;
     int nParts = 0;
     if (bHasFactory != 0) {
-        factoryText = ConfigText(kFactoryListLoadText);
+        factoryText = MetConfigText(kMetStrFactListLoad, kDialogueConfigCode, kFactoryListLoadText);
         nParts = 1;
     }
     if (cardSlots.size() != 0) {
@@ -347,7 +366,9 @@ void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
             slotNames.Insert(slotNames.mLen, HxStr(kSlotNameSeparator));
             slotNames.Insert(slotNames.mLen, slots[cardSlots[i]].mSlotName);
         }
-        cardText = FormatString(PathOrEmpty(ConfigText(kMemLoadDialogue)), PathOrEmpty(slotNames));
+        cardText = FormatString(
+            PathOrEmpty(MetConfigText(kMetStrMemLoad, kDialogueConfigCode, kMemLoadDialogue)),
+            PathOrEmpty(slotNames));
     }
     if (nParts == kBothSources) {
         text = FormatString(kBothSourcesFormat, PathOrEmpty(factoryText), PathOrEmpty(cardText));
@@ -356,7 +377,8 @@ void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
     } else {
         text = cardText;
     }
-    MetMsgScreen::Show(HxStr(kMemLoadDialogue), HxStr(kWarningTitle), text, 0, buttons, this);
+    MetMsgScreen::Show(
+        HxStr(kMemLoadDialogue), MetText(kMetStrMsgWARNING, kWarningTitle), text, 0, buttons, this);
 
     MemcardManager::shared()->mUser = this;
     mRemixes.clear();
@@ -387,7 +409,7 @@ void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
     }
 }
 
-// 0x003548e8
+// NTSC-U/C: 0x003548e8, PAL: 0x00380cd8
 void MetRemixManager::BeginRemixLoad(const std::vector<HxStr> &returnScreens,
                                      const std::vector<HxStr> &restoreScreens,
                                      const MetRemixRecord &record,
@@ -396,28 +418,34 @@ void MetRemixManager::BeginRemixLoad(const std::vector<HxStr> &returnScreens,
     HxStr text;
     if (nFactory != 0) {
         if (Application::shared()->GetPlayMode() == kPlayModeGame) {
-            text = ConfigText(kFactoryCustomLoadText);
+            text =
+                MetConfigText(kMetStrFactCustomLoad, kDialogueConfigCode, kFactoryCustomLoadText);
         } else {
-            text = ConfigText(kFactoryRemixLoadText);
+            text = MetConfigText(kMetStrFactRemixLoad, kDialogueConfigCode, kFactoryRemixLoadText);
         }
     } else {
         const HxStr slotName = FirstCardSlotName();
         HxStr format;
         if (Application::shared()->GetPlayMode() == kPlayModeGame) {
-            format = ConfigText(kCustomLoadText);
+            format = MetConfigText(kMetStrCustomLoad, kDialogueConfigCode, kCustomLoadText);
         } else {
-            format = ConfigText(kRemixLoadText);
+            format = MetConfigText(kMetStrRemixLoad, kDialogueConfigCode, kRemixLoadText);
         }
         text = FormatString(PathOrEmpty(format), PathOrEmpty(slotName));
     }
-    MetMsgScreen::Show(HxStr(kLoadRemixDataDialogue), HxStr(kWarningTitle), text, 0, buttons, this);
+    MetMsgScreen::Show(HxStr(kLoadRemixDataDialogue),
+                       MetText(kMetStrMsgWARNING, kWarningTitle),
+                       text,
+                       0,
+                       buttons,
+                       this);
     mAfterLoadAction = kAfterLoadExit;
     ReplaceScreens(mReturnScreens, returnScreens);
     ReplaceScreens(mRestoreScreens, restoreScreens);
     LoadRemix(record, nFactory);
 }
 
-// 0x00355ff0
+// NTSC-U/C: 0x00355ff0, PAL: 0x00382920
 void MetRemixManager::OnRemixLoaded(int nPortSlot, int nStatus) {
     LogPrintf(" in MetRemixManager::%s(). Return code = %i.\n", __func__, nStatus);
     if (nStatus == 0) {
@@ -431,10 +459,21 @@ void MetRemixManager::OnRemixLoaded(int nPortSlot, int nStatus) {
 
     LogPrintf("Failed to load remix from memory card slot %i.", nPortSlot);
     std::vector<HxStr> buttons;
-    buttons.push_back(HxStr(kOkButton));
+    buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
+#ifdef VIDEO_STANDARD_PAL
+    HxStr text;
+    if (mAfterLoadAction == kAfterLoadStart) {
+        text = GetMetString(kMetStrLoadFailJukebox);
+    } else {
+        text = GetMetString(kMetStrLoadFail);
+    }
+    const HxStr name(kRemixLoadFailedDialogue);
+    const HxStr title(GetMetString(kMetStrMsgWARNING));
+#else
     const HxStr name(kRemixLoadFailedDialogue);
     const HxStr title(kWarningTitle);
     HxStr text = QueryConfigString(kDialogueConfigCode, kLoadFailText);
+#endif
     MetMsgScreen::Show(name, title, text, 1, buttons, this);
 }
 
@@ -444,7 +483,7 @@ inline void MetRemixManager::RetrySavePlayList() {
     SavePlayList(screens);
 }
 
-// 0x003555c0
+// NTSC-U/C: 0x003555c0, PAL: 0x00381b20
 void MetRemixManager::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kLoadRemixDataDialogue) {
         PushReturnScreens();
@@ -479,16 +518,37 @@ void MetRemixManager::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
             MemcardManager::shared()->CreateFormatTask(0);
             const std::vector<HxStr> buttons;
             GlobalSettings::shared(); // Yes, the binary discards this call's result.
-            const HxStr format(ConfigText(kFormatGoDialogue));
+            const HxStr format(
+                MetConfigText(kMetStrMemFormatGo, kDialogueConfigCode, kFormatGoDialogue));
             const HxStr text(FormatString(PathOrEmpty(format), FirstCardSlotText()));
-            MetMsgScreen::Show(
-                HxStr(kFormatGoDialogue), HxStr(kWarningTitle), text, 0, buttons, this);
+            MetMsgScreen::Show(HxStr(kFormatGoDialogue),
+                               MetText(kMetStrMsgWARNING, kWarningTitle),
+                               text,
+                               0,
+                               buttons,
+                               this);
         } else {
+#ifdef VIDEO_STANDARD_PAL
+            std::vector<HxStr> buttons;
+            buttons.push_back(GetMetString(kMetStrMsgRETRY));
+            buttons.push_back(GetMetString(kMetStrMsgCONTINUE));
+            MetMsgScreen::Show(HxStr(kSaveAbortedDialogue),
+                               GetMetString(kMetStrMsgERROR),
+                               GetMetString(kMetStrSaveAborted),
+                               kTwoButtons,
+                               buttons,
+                               this);
+#else
             RetrySavePlayList();
+#endif
         }
     } else if (name == kFormatDoneDialogue) {
         RetrySavePlayList();
+#ifdef VIDEO_STANDARD_PAL
+    } else if (name == kFormatFailDialogue || name == kSaveAbortedDialogue) {
+#else
     } else if (name == kFormatFailDialogue) {
+#endif
         if (nChoice != kChoiceFirst) {
             PushReturnScreens();
         } else {
@@ -497,38 +557,49 @@ void MetRemixManager::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     }
 }
 
-// 0x003569d0
+// NTSC-U/C: 0x003569d0, PAL: 0x00383638
 void MetRemixManager::OnCardFormatted([[maybe_unused]] int nPortSlot, int nStatus) {
     if (nStatus == 0) {
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kContinueButton));
+        buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
-        const HxStr format(ConfigText(kFormatSuccessText));
+        const HxStr format(
+            MetConfigText(kMetStrFormatSuccess, kDialogueConfigCode, kFormatSuccessText));
         const HxStr text(FormatString(PathOrEmpty(format), FirstCardSlotText()));
-        MetMsgScreen::ShowActive(
-            HxStr(kFormatDoneDialogue), HxStr(kFormatTitle), text, kOneButton, buttons, this);
+        MetMsgScreen::ShowActive(HxStr(kFormatDoneDialogue),
+                                 MetText(kMetStrMsgFORMAT, kFormatTitle),
+                                 text,
+                                 kOneButton,
+                                 buttons,
+                                 this);
     } else if (nStatus == kCardStatusAlreadyFormatted) {
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kContinueButton));
+        buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
-        const HxStr format(ConfigText(kFormatAlreadyText));
+        const HxStr format(
+            MetConfigText(kMetStrFormatAlready, kDialogueConfigCode, kFormatAlreadyText));
         const HxStr text(FormatString(PathOrEmpty(format), FirstCardSlotText()));
-        MetMsgScreen::ShowActive(
-            HxStr(kFormatDoneDialogue), HxStr(kFormatTitle), text, kOneButton, buttons, this);
+        MetMsgScreen::ShowActive(HxStr(kFormatDoneDialogue),
+                                 MetText(kMetStrMsgFORMAT, kFormatTitle),
+                                 text,
+                                 kOneButton,
+                                 buttons,
+                                 this);
     } else {
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kRetryButton));
-        buttons.push_back(HxStr(kContinueButton));
-        MetMsgScreen::Show(HxStr(kFormatFailDialogue),
-                           HxStr(kErrorTitle),
-                           ConfigText(kFormatFailDialogue),
-                           kTwoButtons,
-                           buttons,
-                           this);
+        buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
+        buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
+        MetMsgScreen::Show(
+            HxStr(kFormatFailDialogue),
+            MetText(kMetStrMsgERROR, kErrorTitle),
+            MetConfigText(kMetStrFormatFail, kDialogueConfigCode, kFormatFailDialogue),
+            kTwoButtons,
+            buttons,
+            this);
     }
 }
 
-// 0x003573e8
+// NTSC-U/C: 0x003573e8, PAL: 0x003841e0
 void MetRemixManager::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot, int nStatus) {
     std::vector<HxStr> buttons;
     HxStr format;
@@ -539,23 +610,31 @@ void MetRemixManager::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot, int
         break;
 
     case kCardStatusUnformatted:
-        buttons.push_back(HxStr(kNoButton));
-        buttons.push_back(HxStr(kYesButton));
-        format = ConfigText(kFormatCheckDialogue);
+        buttons.push_back(MetText(kMetStrMsgNO, kNoButton));
+        buttons.push_back(MetText(kMetStrMsgYES, kYesButton));
+        format = MetConfigText(kMetStrMemFormatCheck, kDialogueConfigCode, kFormatCheckDialogue);
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
         text = FormatString(PathOrEmpty(format), FirstCardSlotText());
-        MetMsgScreen::Show(
-            HxStr(kFormatCheckDialogue), HxStr(kSettingsTitle), text, kTwoButtons, buttons, this);
+        MetMsgScreen::Show(HxStr(kFormatCheckDialogue),
+                           MetText(kMetStrMsgSETTINGS, kSettingsTitle),
+                           text,
+                           kTwoButtons,
+                           buttons,
+                           this);
         break;
 
     case kCardStatusNoCard:
-        buttons.push_back(HxStr(kRetryButton));
-        buttons.push_back(HxStr(kContinueButton));
-        format = ConfigText(kSaveFailNoCardText);
+        buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
+        buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
+        format = MetConfigText(kMetStrSaveFailNocard, kDialogueConfigCode, kSaveFailNoCardText);
+#ifdef VIDEO_STANDARD_PAL
+        text = FormatString(PathOrEmpty(format), kPortOneSlotName);
+#else
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
         text = FormatString(PathOrEmpty(format), FirstCardSlotText());
+#endif
         MetMsgScreen::Show(HxStr(kPlayListSaveRetryDialogue),
-                           HxStr(kErrorTitle),
+                           MetText(kMetStrMsgERROR, kErrorTitle),
                            text,
                            kTwoButtons,
                            buttons,
@@ -563,13 +642,13 @@ void MetRemixManager::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot, int
         break;
 
     case kCardStatusNoSpace:
-        buttons.push_back(HxStr(kRetryButton));
-        buttons.push_back(HxStr(kContinueButton));
-        format = ConfigText(kSaveFailNoSpaceText);
+        buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
+        buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
+        format = MetConfigText(kMetStrSaveFailNospace, kDialogueConfigCode, kSaveFailNoSpaceText);
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
         text = FormatString(PathOrEmpty(format), FirstCardSlotText());
         MetMsgScreen::Show(HxStr(kPlayListSaveRetryDialogue),
-                           HxStr(kErrorTitle),
+                           MetText(kMetStrMsgERROR, kErrorTitle),
                            text,
                            kTwoButtons,
                            buttons,
@@ -577,10 +656,10 @@ void MetRemixManager::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot, int
         break;
 
     default:
-        buttons.push_back(HxStr(kOkButton));
+        buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
         MetMsgScreen::Show(HxStr(kPlayListSaveFailedDialogue),
-                           HxStr(kErrorTitle),
-                           ConfigText(kSaveFailText),
+                           MetText(kMetStrMsgERROR, kErrorTitle),
+                           MetConfigText(kMetStrSaveFail, kDialogueConfigCode, kSaveFailText),
                            kOneButton,
                            buttons,
                            this);
@@ -588,14 +667,21 @@ void MetRemixManager::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot, int
     }
 }
 
-// 0x00356508
+// NTSC-U/C: 0x00356508, PAL: 0x00382fc8
 void MetRemixManager::SavePlayList(const std::vector<HxStr> &returnScreens) {
     ReplaceScreens(mReturnScreens, returnScreens);
     const std::vector<HxStr> buttons;
+#ifdef VIDEO_STANDARD_PAL
+    HxStr format = GetMetString(kMetStrMemSave);
+    const MemcardConnectState slot(PortOneCardSlot());
+    const HxStr text(FormatString(PathOrEmpty(format), PathOrEmpty(slot.mSlotName)));
+#else
     HxStr format = QueryConfigString(kDialogueConfigCode, kMemSaveDialogue);
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
     const HxStr text(FormatString(PathOrEmpty(format), FirstCardSlotText()));
-    MetMsgScreen::Show(HxStr(kMemSaveDialogue), HxStr(kWarningTitle), text, 0, buttons, this);
+#endif
+    MetMsgScreen::Show(
+        HxStr(kMemSaveDialogue), MetText(kMetStrMsgWARNING, kWarningTitle), text, 0, buttons, this);
     MemcardManager::shared()->mUser = this;
     MemcardManager::shared()->CreateSaveJukeboxPlayListTask(
         0, &mPlayList, QueryConfigValue(kPlayListIndexCode));

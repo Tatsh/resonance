@@ -136,7 +136,6 @@ clippedlines
 clippedsprites
 clippedtris
 clipw
-clocki
 closeit
 closeop
 clut
@@ -233,6 +232,7 @@ durgemmsg
 durgemrowstring
 durgemstrip
 durgemtrails
+dvideo
 dynload
 easywarn
 ecossin
@@ -242,7 +242,10 @@ eeregs
 eetypes
 effectpowerup
 egmg
+egmr
+egng
 egsl
+egsr
 egsw
 egwb
 elif
@@ -360,6 +363,7 @@ gamercmd
 gamerecorder
 gameskill
 gamestats
+gamestrings
 gedf
 gemmsg
 gempacket
@@ -403,6 +407,7 @@ harmonix
 hblkhd
 hblks
 hdbd
+hdemo
 heapdump
 heff
 hhiiiiihhhhhh
@@ -579,6 +584,7 @@ lobbyconnectionlostmsg
 localjamenablemgr
 localplayer
 localplayercmd
+logoback
 longobject
 longop
 looptogglemsg
@@ -730,6 +736,7 @@ metsonyscreen
 metstagefinishscreen
 metstartnetlaunchmsg
 metstartpausemsg
+metstrings
 mettoplogoscreen
 mettutorialscreen
 metunlockstagesmsg
@@ -831,6 +838,7 @@ nobits
 nocard
 nodefaultlibs
 nodisc
+nodoubt
 nolattice
 nomacro
 nomemcard
@@ -853,6 +861,7 @@ ntpath
 nullplayer
 nullptr
 numpydoc
+oakenf
 obfilestream
 objc
 objcopy
@@ -988,6 +997,7 @@ qfsrv
 quadword
 quadwords
 quat
+quik
 qwords
 randomizable
 randu
@@ -1003,7 +1013,6 @@ readbuf
 readop
 recinfo
 recolor
-recomputation
 refe
 reflow
 refree
@@ -1015,6 +1024,7 @@ regi
 reginfo
 releaseable
 relocs
+remixdata
 remixfx
 remixfxmsg
 remixindex
@@ -1063,6 +1073,7 @@ sbss
 scallclientsstatuspacket
 scallplayersinfopacket
 sceneanim
+sces
 scgameoverpacket
 schemafile
 scloadlevelpacket
@@ -1192,6 +1203,7 @@ sysmodule
 tadr
 tagfile
 tatsh
+tdemo
 teamfreq
 tempomap
 testa
@@ -1252,6 +1264,7 @@ togglemode
 toolstream
 tostring
 totbytes
+toupper
 tpcpyud
 trackdata
 trackselectmsg

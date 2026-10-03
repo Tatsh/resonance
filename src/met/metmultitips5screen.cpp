@@ -1,5 +1,6 @@
 #include "met/metmultitips5screen.h"
 
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/text.h"
@@ -15,17 +16,29 @@ constexpr int kPage = 5;
 
 constexpr int kPromptConfigCode = 0x258;
 
-// Each text object and the configuration key it is filled from, in the order slot 38 fills them.
-static const char *const kTexts[][2] = {
-    {"tp5_tips_pan.txt", "tp5_panel"},
-    {"tp5_title.txt", "tp5_title"},
-    {"tp5_help.txt", "tp5_help"},
+// A text object, the identifier the European release fills it from, and the configuration key the
+// North American release fills it from.
+struct TipText {
+    const char *pszObject;
+    MetStringId nId;
+    const char *pszKey;
+};
+
+// The texts in the order slot 38 fills them.
+static const TipText kTexts[] = {
+    {"tp5_tips_pan.txt", kMetStrTp5Panel, "tp5_panel"},
+    {"tp5_title.txt", kMetStrTp5Title, "tp5_title"},
+    {"tp5_help.txt", kMetStrTp5Help, "tp5_help"},
+#ifdef VIDEO_STANDARD_PAL
+    {"tp5_track_01.txt", kMetStrIngSYNTH, nullptr},
+    {"tp5_track_02.txt", kMetStrIngBASS, nullptr},
+#endif
 };
 
 // Yes, the binary does not test the text for null.
-inline void FillText(const char *pszText, const char *pszKey) {
-    Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(pszText)));
-    HxStr text = QueryConfigString(kPromptConfigCode, pszKey);
+inline void FillText(const TipText &entry) {
+    Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(entry.pszObject)));
+    HxStr text = MetConfigText(entry.nId, kPromptConfigCode, entry.pszKey);
     pText->SetText(text);
 }
 
@@ -42,12 +55,12 @@ MetMultiTips5Screen::MetMultiTips5Screen(MetRenderer *pRenderer, int nPriority)
                              HxStr(kNextScreen)) {
 }
 
-// 0x0030a170
+// NTSC-U/C: 0x0030a170, PAL: 0x0032f858
 void MetMultiTips5Screen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     // The binary expands this loop into one call per text.
     for (const auto &entry : kTexts) {
-        FillText(entry[0], entry[1]);
+        FillText(entry);
     }
 }
 

@@ -71,7 +71,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x0037ace0
+     * @ghidraAddress NTSC-U/C: 0x0037ace0
+     * @ghidraAddress PAL: 0x003aa960
      */
     MetSaveRemixScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -163,7 +164,8 @@ public:
      * MetRenderer::OnReturnFromGame(), and selects the first button. It then labels the player
      * panel `remix_player` with the controller number, falls back to the first persona when none
      * was given, labels mFreqNameText with the persona's name, and fills mInstructionsText from
-     * `save_remix_command` and the card slot's name.
+     * `save_remix_command` and the card slot's name. The European release formats the card slot's
+     * name into the `save_remix_command` text of the current language in place of appending it.
      *
      * The remix name comes from the name typed last when there is one, from the MetRemixManager
      * record when a saved game is loaded, and otherwise from the level's default name (code 0x325,
@@ -171,7 +173,8 @@ public:
      * appended. A name that still does not fit is a Fatal() error. It ends by setting the help text
      * and the `remix_save_options` preset and running MetScreen::EnterAndShow().
      *
-     * @ghidraAddress 0x0037b8e8
+     * @ghidraAddress NTSC-U/C: 0x0037b8e8
+     * @ghidraAddress PAL: 0x003ab9c8
      */
     virtual void EnterAndShow();
 
@@ -213,7 +216,8 @@ public:
      * Every other code is ignored.
      *
      * @param pCommand The command the renderer translated from an input message.
-     * @ghidraAddress 0x0037b258
+     * @ghidraAddress NTSC-U/C: 0x0037b258
+     * @ghidraAddress PAL: 0x003ab150
      */
     virtual void HandleCommand(const MetScreenCommand *pCommand);
 
@@ -285,7 +289,8 @@ public:
      * through RecordPendingSave() with the typed name, the level name, the appearances, and the
      * album number configuration code 0x514 reads.
      *
-     * @ghidraAddress 0x0037c260
+     * @ghidraAddress NTSC-U/C: 0x0037c260
+     * @ghidraAddress PAL: 0x003ac4c0
      */
     virtual void OnExitFinished();
 
@@ -294,9 +299,11 @@ public:
      *
      * It runs the MetScreen body, resolves `ers_freqname_player.txt`, `ers_instructions.txt`, and
      * `ers_remix_title_val.txt` into the three text members, and adds `save_copy.but` with an
-     * empty label to the MetButtonList at mButtonList.
+     * empty label to the MetButtonList at mButtonList. The European release also sets
+     * `ers_remix_title.txt` to the `save_remix_title` text of the current language.
      *
-     * @ghidraAddress 0x0037af98
+     * @ghidraAddress NTSC-U/C: 0x0037af98
+     * @ghidraAddress PAL: 0x003aaca8
      */
     virtual void ResolveContainerViews();
 
@@ -327,7 +334,8 @@ public:
      * MetKBUser subobject as the receiver, with a width of 228, a length of 32, and the save-remix
      * ticker text, and passes it to MetKeyboardScreen::Open().
      *
-     * @ghidraAddress 0x0037ccc8
+     * @ghidraAddress NTSC-U/C: 0x0037ccc8
+     * @ghidraAddress PAL: 0x003ad0c8
      */
     virtual void OnDuplicateNameDeclined();
 

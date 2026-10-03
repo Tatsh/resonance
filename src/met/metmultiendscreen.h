@@ -68,7 +68,8 @@ public:
      *
      * Slot 5.
      *
-     * @ghidraAddress 0x002f6158
+     * @ghidraAddress NTSC-U/C: 0x002f6158
+     * @ghidraAddress PAL: 0x00319fd8
      */
     virtual void EnterAndShow();
 

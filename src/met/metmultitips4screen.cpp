@@ -1,5 +1,6 @@
 #include "met/metmultitips4screen.h"
 
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/text.h"
@@ -15,28 +16,35 @@ constexpr int kPage = 4;
 
 constexpr int kPromptConfigCode = 0x258;
 
-// Each text object and the configuration key it is filled from, in the order slot 38 fills them.
-// Yes, the panel takes the `tp3_panel` key.
-static const char *const kTexts[][2] = {
-    {"tp4_tips_pan.txt", "tp3_panel"},
-    {"tp4_hud_head.txt", "tp4_hud_label"},
-    {"tp4_desc_head.txt", "tp4_desc_label"},
-    {"tp4_autocatcher_head.txt", "tp4_title_1"},
-    {"tp4_autocatcher_val.txt", "tp4_help_1"},
-    {"tp4_freestyler_head.txt", "tp4_title_2"},
-    {"tp4_freestyler_val.txt", "tp4_help_2"},
-    {"tp4_crippler_head.txt", "tp4_title_3"},
-    {"tp4_crippler_val.txt", "tp4_help_3"},
-    {"tp4_neutralizer_head.txt", "tp4_title_4"},
-    {"tp4_neutralizer_val.txt", "tp4_help_4"},
-    {"tp4_bumper_head.txt", "tp4_title_5"},
-    {"tp4_bumper_val.txt", "tp4_help_5"},
+// A text object, the identifier the European release fills it from, and the configuration key the
+// North American release fills it from.
+struct TipText {
+    const char *pszObject;
+    MetStringId nId;
+    const char *pszKey;
+};
+
+// The texts in the order slot 38 fills them. Yes, the panel takes the `tp3_panel` text.
+static const TipText kTexts[] = {
+    {"tp4_tips_pan.txt", kMetStrTp3Panel, "tp3_panel"},
+    {"tp4_hud_head.txt", kMetStrTp4HudLabel, "tp4_hud_label"},
+    {"tp4_desc_head.txt", kMetStrTp4DescLabel, "tp4_desc_label"},
+    {"tp4_autocatcher_head.txt", kMetStrTp4Title1, "tp4_title_1"},
+    {"tp4_autocatcher_val.txt", kMetStrTp4Help1, "tp4_help_1"},
+    {"tp4_freestyler_head.txt", kMetStrTp4Title2, "tp4_title_2"},
+    {"tp4_freestyler_val.txt", kMetStrTp4Help2, "tp4_help_2"},
+    {"tp4_crippler_head.txt", kMetStrTp4Title3, "tp4_title_3"},
+    {"tp4_crippler_val.txt", kMetStrTp4Help3, "tp4_help_3"},
+    {"tp4_neutralizer_head.txt", kMetStrTp4Title4, "tp4_title_4"},
+    {"tp4_neutralizer_val.txt", kMetStrTp4Help4, "tp4_help_4"},
+    {"tp4_bumper_head.txt", kMetStrTp4Title5, "tp4_title_5"},
+    {"tp4_bumper_val.txt", kMetStrTp4Help5, "tp4_help_5"},
 };
 
 // Yes, the binary does not test the text for null.
-inline void FillText(const char *pszText, const char *pszKey) {
-    Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(pszText)));
-    HxStr text = QueryConfigString(kPromptConfigCode, pszKey);
+inline void FillText(const TipText &entry) {
+    Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(entry.pszObject)));
+    HxStr text = MetConfigText(entry.nId, kPromptConfigCode, entry.pszKey);
     pText->SetText(text);
 }
 
@@ -53,12 +61,12 @@ MetMultiTips4Screen::MetMultiTips4Screen(MetRenderer *pRenderer, int nPriority)
                              HxStr(kNextScreen)) {
 }
 
-// 0x003091e8
+// NTSC-U/C: 0x003091e8, PAL: 0x0032e5e0
 void MetMultiTips4Screen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     // The binary expands this loop into one call per text.
     for (const auto &entry : kTexts) {
-        FillText(entry[0], entry[1]);
+        FillText(entry);
     }
 }
 

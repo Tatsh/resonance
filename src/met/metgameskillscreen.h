@@ -61,9 +61,11 @@ public:
      * show the screen.
      *
      * Slot 5. The solo mode reads the `solo` title prefix and the `smgs_` help texts, and every
-     * other mode reads the `multi` prefix and the `mgs_` help texts.
+     * other mode reads the `multi` prefix and the `mgs_` help texts. The European release formats
+     * the prefix into the `skill` text of the current language in place of appending the two.
      *
-     * @ghidraAddress 0x00273800
+     * @ghidraAddress NTSC-U/C: 0x00273800
+     * @ghidraAddress PAL: 0x0028be60
      */
     virtual void EnterAndShow();
 
@@ -124,7 +126,8 @@ public:
      *
      * Slot 38.
      *
-     * @ghidraAddress 0x00273310
+     * @ghidraAddress NTSC-U/C: 0x00273310
+     * @ghidraAddress PAL: 0x0028b858
      */
     virtual void ResolveContainerViews();
 

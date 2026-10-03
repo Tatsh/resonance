@@ -61,9 +61,12 @@ public:
      *
      * The disc button, its prompt, and the `nob_5group.view` frame appear only when
      * GameOptions::mExpansionPack is set, and `nob_4group.view` appears otherwise. The title is the
-     * `config_option_buttons` title and the help layout is `standard_title`.
+     * `config_option_buttons` title and the help layout is `standard_title`. The European release
+     * looks the prompts, the help texts, the title, and the layout up in the current language, and
+     * the help list stores the help texts rather than their keys.
      *
-     * @ghidraAddress 0x00207660
+     * @ghidraAddress NTSC-U/C: 0x00207660
+     * @ghidraAddress PAL: 0x00210540
      */
     virtual void EnterAndShow();
 
