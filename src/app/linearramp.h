@@ -15,7 +15,8 @@ public:
     /**
      * Start at 0 with no time recorded, mapping 0 through 1 onto 0 through 100 over 240 units.
      *
-     * @ghidraAddress 0x00411878
+     * @ghidraAddress NTSC-U/C: 0x00411878
+     * @ghidraAddress PAL: 0x0044b340
      */
     LinearRamp();
 
@@ -28,7 +29,8 @@ public:
      * @param flFrom The mapped value at raw 0.
      * @param flTo The mapped value at raw 1.
      * @param flDuration The time the raw value takes to cover 0 through 1.
-     * @ghidraAddress 0x004118d0
+     * @ghidraAddress NTSC-U/C: 0x004118d0
+     * @ghidraAddress PAL: 0x0044b398
      */
     void SetRange(float flFrom, float flTo, float flDuration);
 
@@ -36,7 +38,8 @@ public:
      * Set the raw value to move toward.
      *
      * @param flTarget The raw target.
-     * @ghidraAddress 0x00411900
+     * @ghidraAddress NTSC-U/C: 0x00411900
+     * @ghidraAddress PAL: 0x0044b3c8
      */
     void SetTarget(float flTarget);
 
@@ -47,7 +50,8 @@ public:
      * Update() then finishes the move and reports a change. The title is inferred.
      *
      * @param flTarget The raw target.
-     * @ghidraAddress 0x00411908
+     * @ghidraAddress NTSC-U/C: 0x00411908
+     * @ghidraAddress PAL: 0x0044b3d0
      */
     void Jump(float flTarget);
 
@@ -55,7 +59,8 @@ public:
      * Report the mapped value.
      *
      * @return `mCurrent * mScale + mOffset`.
-     * @ghidraAddress 0x00411958
+     * @ghidraAddress NTSC-U/C: 0x00411958
+     * @ghidraAddress PAL: 0x0044b420
      */
     float Value();
 
@@ -68,7 +73,8 @@ public:
      * @param flTime The current time.
      * @return 1 when the raw value was away from the target on entry, and 0 when it was already
      *         there.
-     * @ghidraAddress 0x00411970
+     * @ghidraAddress NTSC-U/C: 0x00411970
+     * @ghidraAddress PAL: 0x0044b438
      */
     int Update(float flTime);
 

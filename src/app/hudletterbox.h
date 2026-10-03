@@ -21,7 +21,8 @@ public:
     /**
      * Resolve the view, hide it, and set the ramp's range.
      *
-     * @ghidraAddress 0x0041b3b0
+     * @ghidraAddress NTSC-U/C: 0x0041b3b0
+     * @ghidraAddress PAL: 0x00455d08
      */
     HudLetterbox();
 
@@ -31,7 +32,8 @@ public:
      * The head-up display panel inlines the body, and this copy has no caller.
      *
      * @param flTime The time the ramp runs against.
-     * @ghidraAddress 0x0042a608
+     * @ghidraAddress NTSC-U/C: 0x0042a608
+     * @ghidraAddress PAL: 0x00465958
      */
     void SetFrame(float flTime);
 
@@ -41,7 +43,8 @@ public:
      * The out-of-line copy has no caller. The title is inferred.
      *
      * @param flTarget The raw target, 0 for no bars and 1 for full bars.
-     * @ghidraAddress 0x0042a698
+     * @ghidraAddress NTSC-U/C: 0x0042a698
+     * @ghidraAddress PAL: 0x004659e8
      */
     void SetTarget(float flTarget);
 
@@ -51,7 +54,8 @@ public:
      * The out-of-line copy has no caller. The title is inferred.
      *
      * @param flTarget The raw target.
-     * @ghidraAddress 0x0042a6b8
+     * @ghidraAddress NTSC-U/C: 0x0042a6b8
+     * @ghidraAddress PAL: 0x00465a08
      */
     void Jump(float flTarget);
 

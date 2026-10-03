@@ -26,7 +26,8 @@ public:
      *
      * @param nIndex The crippler.
      * @param flRate The view rate. AppTunnel passes its `+0x144`.
-     * @ghidraAddress 0x0043e1f0
+     * @ghidraAddress NTSC-U/C: 0x0043e1f0
+     * @ghidraAddress PAL: 0x0047aa80
      */
     TnlCrippleFX(int nIndex, float flRate);
 
@@ -39,7 +40,8 @@ public:
      *
      * @param targets The players to hit.
      * @param flFrame The launch frame.
-     * @ghidraAddress 0x004568b8
+     * @ghidraAddress NTSC-U/C: 0x004568b8
+     * @ghidraAddress PAL: 0x00493de8
      */
     void Start(const std::vector<TnlPlayer *> &targets, float flFrame);
 
@@ -54,7 +56,8 @@ public:
      * view and releases the particles. AppTunnel::SetFrame() calls it for every crippler.
      *
      * @param flFrame The current frame.
-     * @ghidraAddress 0x0043e500
+     * @ghidraAddress NTSC-U/C: 0x0043e500
+     * @ghidraAddress PAL: 0x0047adf0
      */
     void SetFrame(float flFrame);
 

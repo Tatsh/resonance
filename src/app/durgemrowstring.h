@@ -31,7 +31,8 @@ public:
      * @param pMat The material the ribbon draws with.
      * @param pView The view that draws the ribbon.
      * @param flWidth The width of the ribbon.
-     * @ghidraAddress 0x00432830
+     * @ghidraAddress NTSC-U/C: 0x00432830
+     * @ghidraAddress PAL: 0x0046e520
      */
     DurGemRowString(int nLane, Rnd::Mat *pMat, Rnd::View *pView, float flWidth);
 
@@ -43,7 +44,8 @@ public:
      * head of this unit, ahead of AddLine(), is what assigns it to this class rather than to
      * DurGemStrip, whose destructor has the same body.
      *
-     * @ghidraAddress 0x00436ee0
+     * @ghidraAddress NTSC-U/C: 0x00436ee0
+     * @ghidraAddress PAL: 0x00472c78
      */
     ~DurGemRowString();
 
@@ -58,7 +60,8 @@ public:
      * @param flStartBlend The position across the lane at the start.
      * @param flEndFrame The tunnel frame of the end.
      * @param flEndBlend The position across the lane at the end.
-     * @ghidraAddress 0x00436f48
+     * @ghidraAddress NTSC-U/C: 0x00436f48
+     * @ghidraAddress PAL: 0x00472ce0
      */
     void AddLine(const Color &color,
                  float flStartFrame,
@@ -71,7 +74,8 @@ public:
      *
      * mRow becomes -1000. DurGemTrails::EndTrail() inlines the body.
      *
-     * @ghidraAddress 0x004370b8
+     * @ghidraAddress NTSC-U/C: 0x004370b8
+     * @ghidraAddress PAL: 0x00472e50
      */
     void Clear();
 
@@ -82,7 +86,8 @@ public:
      *
      * @param nRow The slice row being drawn.
      * @return The point count of the ribbon when shown, otherwise 0.
-     * @ghidraAddress 0x004370f8
+     * @ghidraAddress NTSC-U/C: 0x004370f8
+     * @ghidraAddress PAL: 0x00472e90
      */
     int Show(int nRow);
 
@@ -93,7 +98,8 @@ public:
      * head-up display unit, is recorded as a copy of this one, because nothing there identifies
      * another class it could belong to. The title is inferred.
      *
-     * @ghidraAddress 0x00437180
+     * @ghidraAddress NTSC-U/C: 0x00437180
+     * @ghidraAddress PAL: 0x00472f18
      */
     void Hide();
 
@@ -106,7 +112,8 @@ public:
      * @param plane The plane to test against.
      * @param pOut Receives the crossing point.
      * @return True when a segment crosses plane.
-     * @ghidraAddress 0x004371b0
+     * @ghidraAddress NTSC-U/C: 0x004371b0
+     * @ghidraAddress PAL: 0x00472f48
      */
     bool FindCrossing(const Plane &plane, Vector3 *pOut);
 

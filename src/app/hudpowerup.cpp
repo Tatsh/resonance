@@ -10,7 +10,7 @@
 #include "rnd/mesh.h"
 #include "rnd/view.h"
 
-// 0x004167d0
+// NTSC-U/C: 0x004167d0, PAL: 0x004503d0
 HudPowerup::HudPowerup(int nIndex) : mContainer(nullptr) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
@@ -37,7 +37,7 @@ HudPowerup::HudPowerup(int nIndex) : mContainer(nullptr) {
     Show(kHudItemNone);
 }
 
-// 0x004299a0
+// NTSC-U/C: 0x004299a0, PAL: 0x00464fe0
 void HudPowerup::Show(int nKind) {
     Rnd::View *pView = nullptr;
 

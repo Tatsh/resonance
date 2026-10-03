@@ -66,7 +66,8 @@ public:
     }
 
     /**
-     * @ghidraAddress 0x00105120
+     * @ghidraAddress NTSC-U/C: 0x00105120
+     * @ghidraAddress PAL: 0x00105120
      */
     virtual ~MsgSink();
 
@@ -79,7 +80,8 @@ public:
      * MsgSink subobject table in the image places this body at slot 2.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x00105158
+     * @ghidraAddress NTSC-U/C: 0x00105158
+     * @ghidraAddress PAL: 0x00105158
      */
     virtual void Handle(Message *pMsg);
 

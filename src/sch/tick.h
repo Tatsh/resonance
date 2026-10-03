@@ -47,7 +47,8 @@ struct Tick {
      *
      * @param stream The stream to write to.
      * @return The stream, allowing calls to be chained.
-     * @ghidraAddress 0x006100a8
+     * @ghidraAddress NTSC-U/C: 0x006100a8
+     * @ghidraAddress PAL: 0x00650d18
      */
     OBStream &Save(OBStream &stream);
 
@@ -59,7 +60,8 @@ struct Tick {
      *
      * @param stream The stream to read from.
      * @return The stream, allowing calls to be chained.
-     * @ghidraAddress 0x00610118
+     * @ghidraAddress NTSC-U/C: 0x00610118
+     * @ghidraAddress PAL: 0x00650d88
      */
     IBStream &Load(IBStream &stream);
 
@@ -67,7 +69,8 @@ struct Tick {
      * Write the count to a diagnostic stream as a number of seconds.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00610050
+     * @ghidraAddress NTSC-U/C: 0x00610050
+     * @ghidraAddress PAL: 0x00650cc0
      */
     void Print(std::ostream &stream);
 

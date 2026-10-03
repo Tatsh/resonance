@@ -35,7 +35,8 @@ public:
      * start at 100000000.
      *
      * @param colorName The player's colour name, whose first letter selects every object.
-     * @ghidraAddress 0x00439958
+     * @ghidraAddress NTSC-U/C: 0x00439958
+     * @ghidraAddress PAL: 0x004757f8
      */
     explicit TnlCatcher(const HxStr &colorName);
 
@@ -43,14 +44,16 @@ public:
      * Switch the material between the plain and the multiplier texture.
      *
      * @param nMultiplied Non-zero for "act_mult_<c>.tex", zero for "act_<c>.bmp".
-     * @ghidraAddress 0x00455268
+     * @ghidraAddress NTSC-U/C: 0x00455268
+     * @ghidraAddress PAL: 0x00492798
      */
     void SetMultiplied(int nMultiplied);
 
     /**
      * Put every target on the "tar up" material.
      *
-     * @ghidraAddress 0x004553c0
+     * @ghidraAddress NTSC-U/C: 0x004553c0
+     * @ghidraAddress PAL: 0x004928f0
      */
     void ResetTargets();
 
@@ -60,7 +63,8 @@ public:
      * Does nothing while the view is hidden. The image has no caller.
      *
      * @param nTarget The target, 0 through 2.
-     * @ghidraAddress 0x00455330
+     * @ghidraAddress NTSC-U/C: 0x00455330
+     * @ghidraAddress PAL: 0x00492860
      */
     void Hit(int nTarget);
 
@@ -68,7 +72,8 @@ public:
      * Set the alpha of the "act_<c>.mat" material.
      *
      * @param flAlpha The alpha.
-     * @ghidraAddress 0x00455238
+     * @ghidraAddress NTSC-U/C: 0x00455238
+     * @ghidraAddress PAL: 0x00492768
      */
     void SetAlpha(float flAlpha);
 
@@ -78,7 +83,8 @@ public:
      * The image has no caller.
      *
      * @param pParent The parent view.
-     * @ghidraAddress 0x004552d8
+     * @ghidraAddress NTSC-U/C: 0x004552d8
+     * @ghidraAddress PAL: 0x00492808
      */
     void AttachTo(Rnd::View *pParent);
 
@@ -88,7 +94,8 @@ public:
      * The view frame is written only when flFrame is not negative. The image has no caller.
      *
      * @param flFrame The scaled song position TnlActivator::Update() receives.
-     * @ghidraAddress 0x00455418
+     * @ghidraAddress NTSC-U/C: 0x00455418
+     * @ghidraAddress PAL: 0x00492948
      */
     void Update(float flFrame);
 

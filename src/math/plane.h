@@ -27,7 +27,8 @@ struct Plane {
  * @param plane The plane, in the space the transform maps from.
  * @param pXfm The transform, four rows of four floats.
  * @return The plane in the space the transform maps to.
- * @ghidraAddress 0x00550fa8
+ * @ghidraAddress NTSC-U/C: 0x00550fa8
+ * @ghidraAddress PAL: 0x005915e8
  */
 Plane TransformPlaneToWorld(const Plane &plane, const float *pXfm);
 
@@ -41,7 +42,8 @@ Plane TransformPlaneToWorld(const Plane &plane, const float *pXfm);
  * @param pTo The four values at flT of 1.
  * @param pOut Receives the four blended values.
  * @param flT The blend weight.
- * @ghidraAddress 0x00551078
+ * @ghidraAddress NTSC-U/C: 0x00551078
+ * @ghidraAddress PAL: 0x005916b8
  */
 void InterpolateFourFloats(const float *pFrom, const float *pTo, float *pOut, float flT);
 
@@ -55,7 +57,8 @@ void InterpolateFourFloats(const float *pFrom, const float *pTo, float *pOut, fl
  * @param plane The plane.
  * @param pT Receives the crossing as a fraction of the way from the start to the end.
  * @return Whether the fraction lies in `[0, 1]`.
- * @ghidraAddress 0x00551218
+ * @ghidraAddress NTSC-U/C: 0x00551218
+ * @ghidraAddress PAL: 0x00591858
  */
 bool IntersectSegmentWithPlane(const Vector3 segment[2], const Plane &plane, float *pT);
 
@@ -82,7 +85,8 @@ struct Segment {
  * @param first The first plane.
  * @param second The second plane.
  * @return The point, then the point plus the direction.
- * @ghidraAddress 0x0054fcf8
+ * @ghidraAddress NTSC-U/C: 0x0054fcf8
+ * @ghidraAddress PAL: 0x00590338
  */
 Segment IntersectPlanes(const Plane &first, const Plane &second);
 
@@ -97,6 +101,7 @@ Segment IntersectPlanes(const Plane &first, const Plane &second);
  * @param second The second plane.
  * @param third The third plane.
  * @return The point.
- * @ghidraAddress 0x005510e0
+ * @ghidraAddress NTSC-U/C: 0x005510e0
+ * @ghidraAddress PAL: 0x00591720
  */
 Vector3 IntersectPlanes(const Plane &first, const Plane &second, const Plane &third);

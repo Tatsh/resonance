@@ -45,7 +45,8 @@ public:
     };
 
     /**
-     * @ghidraAddress 0x004b6270
+     * @ghidraAddress NTSC-U/C: 0x004b6270
+     * @ghidraAddress PAL: 0x004f4580
      */
     Task();
 
@@ -55,7 +56,8 @@ public:
      * The source task supplies nothing. The body is identical to the default constructor.
      *
      * @param other The task to copy. The binary reads nothing from it.
-     * @ghidraAddress 0x004b6708
+     * @ghidraAddress NTSC-U/C: 0x004b6708
+     * @ghidraAddress PAL: 0x004f4a18
      */
     Task(const Task &other);
 
@@ -65,7 +67,8 @@ public:
      * Destroying a task that is still running reports `hx: destroying active task` and then
      * unlinks it.
      *
-     * @ghidraAddress 0x004b6808
+     * @ghidraAddress NTSC-U/C: 0x004b6808
+     * @ghidraAddress PAL: 0x004f4b18
      */
     virtual ~Task();
 
@@ -74,7 +77,8 @@ public:
      *
      * @param other The task to copy, which is compared against this one and otherwise unused.
      * @return This task.
-     * @ghidraAddress 0x004b6928
+     * @ghidraAddress NTSC-U/C: 0x004b6928
+     * @ghidraAddress PAL: 0x004f4c38
      */
     Task &operator=(const Task &other);
 
@@ -86,7 +90,8 @@ public:
      *
      * @param bBlocking Non-zero to run the task to completion in this call.
      * @return Zero when the task has already finished or when CheckStateChange() refused.
-     * @ghidraAddress 0x004b6370
+     * @ghidraAddress NTSC-U/C: 0x004b6370
+     * @ghidraAddress PAL: 0x004f4680
      */
     int Start(int bBlocking);
 
@@ -94,7 +99,8 @@ public:
      * Unlink the task and retain its position.
      *
      * @return Zero when the task is not running and when CheckStateChange() refused.
-     * @ghidraAddress 0x004b6968
+     * @ghidraAddress NTSC-U/C: 0x004b6968
+     * @ghidraAddress PAL: 0x004f4c78
      */
     int Suspend();
 
@@ -102,7 +108,8 @@ public:
      * Return the task to kTaskStateIdle so that it can be started again.
      *
      * @return Zero when CheckStateChange() refused.
-     * @ghidraAddress 0x004b6a28
+     * @ghidraAddress NTSC-U/C: 0x004b6a28
+     * @ghidraAddress PAL: 0x004f4d38
      */
     int Reset();
 
@@ -110,7 +117,8 @@ public:
      * Retire the task.
      *
      * @return Zero when CheckStateChange() refused.
-     * @ghidraAddress 0x004b6ae8
+     * @ghidraAddress NTSC-U/C: 0x004b6ae8
+     * @ghidraAddress PAL: 0x004f4df8
      */
     int Finish();
 
@@ -118,7 +126,8 @@ public:
      * Read the task's lifecycle position.
      *
      * @return A TaskState.
-     * @ghidraAddress 0x004b6958
+     * @ghidraAddress NTSC-U/C: 0x004b6958
+     * @ghidraAddress PAL: 0x004f4c68
      */
     int State();
 
@@ -126,7 +135,8 @@ public:
      * Test whether the task has been started and has not yet finished.
      *
      * @return Non-zero while the state is kTaskStateRunning or kTaskStateSuspended.
-     * @ghidraAddress 0x004b65e8
+     * @ghidraAddress NTSC-U/C: 0x004b65e8
+     * @ghidraAddress PAL: 0x004f48f8
      */
     int IsActive();
 
@@ -134,7 +144,8 @@ public:
      * Read how far the task has progressed.
      *
      * @return The value the task reports.
-     * @ghidraAddress 0x004b6610
+     * @ghidraAddress NTSC-U/C: 0x004b6610
+     * @ghidraAddress PAL: 0x004f4920
      */
     float GetProgress();
 
@@ -142,7 +153,8 @@ public:
      * Read the task's display title.
      *
      * @return The title the task reports.
-     * @ghidraAddress 0x004b6638
+     * @ghidraAddress NTSC-U/C: 0x004b6638
+     * @ghidraAddress PAL: 0x004f4948
      */
     HxStr GetName();
 
@@ -150,7 +162,8 @@ public:
      * Test whether the task suppresses its progress report.
      *
      * @return Non-zero to suppress the report.
-     * @ghidraAddress 0x004b6670
+     * @ghidraAddress NTSC-U/C: 0x004b6670
+     * @ghidraAddress PAL: 0x004f4980
      */
     int GetQuiet();
 
@@ -162,7 +175,8 @@ public:
      * more work to do has its progress reported unless it is quiet.
      *
      * @return Non-zero while the ring still includes a task.
-     * @ghidraAddress 0x004b6490
+     * @ghidraAddress NTSC-U/C: 0x004b6490
+     * @ghidraAddress PAL: 0x004f47a0
      */
     static int PollTasks();
 
@@ -187,7 +201,8 @@ protected:
      * Report whether the task suppresses its progress report.
      *
      * @return Non-zero to suppress the report. The default is zero.
-     * @ghidraAddress 0x004b6bb0
+     * @ghidraAddress NTSC-U/C: 0x004b6bb0
+     * @ghidraAddress PAL: 0x004f4ec0
      */
     virtual int Quiet();
 
@@ -199,7 +214,8 @@ protected:
      * @param nFrom The current TaskState.
      * @param nTo The requested TaskState.
      * @return Zero to refuse the change. The default approves every change.
-     * @ghidraAddress 0x004b6bb8
+     * @ghidraAddress NTSC-U/C: 0x004b6bb8
+     * @ghidraAddress PAL: 0x004f4ec8
      */
     virtual int CheckStateChange(int nFrom, int nTo);
 
@@ -224,6 +240,7 @@ private:
 /**
  * Head of the circular run ring, or null when no task is running.
  *
- * @ghidraAddress 0x006fba4c
+ * @ghidraAddress NTSC-U/C: 0x006fba4c
+ * @ghidraAddress PAL: 0x0073f4c4
  */
 extern Task::Node *g_pRunningTasks;

@@ -46,7 +46,7 @@ inline Vector3 Scaled(const Vector3 &vector, float flScale) {
 
 } // namespace
 
-// 0x0043c688
+// NTSC-U/C: 0x0043c688, PAL: 0x00478cc8
 TnlPanelFX::TnlPanelFX(int nIndex) : mStateFrame(kNoFrame), mState(kStateIdle), mIndex(nIndex) {
     mOffset.w = 1.0f;
 
@@ -67,7 +67,7 @@ TnlPanelFX::TnlPanelFX(int nIndex) : mStateFrame(kNoFrame), mState(kStateIdle), 
     }
 }
 
-// 0x0043cb78
+// NTSC-U/C: 0x0043cb78, PAL: 0x00479278
 void TnlPanelFX::Start(int nRing, int nSlice, int nForward) {
     mDirection = nForward != 0 ? 1.0f : -1.0f;
     mMat->mStages.front().mBlend = Rnd::Mat::kBlendModeSrcAlpha;
@@ -91,7 +91,7 @@ void TnlPanelFX::Start(int nRing, int nSlice, int nForward) {
     mState = kStateRise;
 }
 
-// 0x0043cd38
+// NTSC-U/C: 0x0043cd38, PAL: 0x00479438
 void TnlPanelFX::Update(float flFrame) {
     switch (mState) {
     case kStateIdle:

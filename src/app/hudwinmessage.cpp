@@ -34,7 +34,7 @@ constexpr float kPromptDelay = 8000.0f;
 
 } // namespace
 
-// 0x0041b4c8
+// NTSC-U/C: 0x0041b4c8, PAL: 0x00455e40
 HudWinMessage::HudWinMessage()
     : mStart(kNoStart), mState(kStateIdle), mMessage(HxStr("HUD winmsg")),
       mPrompt(HxStr("HUD genmsg.txt")) {
@@ -119,12 +119,12 @@ void HudWinMessage::SetFrame(float flTime) {
     }
 }
 
-// 0x0042a800
+// NTSC-U/C: 0x0042a800, PAL: 0x00465b50
 void HudWinMessage::HidePrompt() {
     mPrompt.Hide();
 }
 
-// 0x0042a830
+// NTSC-U/C: 0x0042a830, PAL: 0x00465b80
 void HudWinMessage::Draw() {
     if (mState == kStateIdle) {
         return;

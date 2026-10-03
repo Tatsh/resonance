@@ -50,7 +50,7 @@ inline void SetSystemBasis(Rnd::ParticleSys *pSys, const Vector3 *pBasis, std::s
 
 } // namespace
 
-// 0x0043d368
+// NTSC-U/C: 0x0043d368, PAL: 0x00479ac8
 TnlFireFX::TnlFireFX(const HxStr &name, int nIndex)
     : mPathStartFrame(0.0f), mPathEndFrame(kUnset), mReferenceFrame(kNoFrame), mActive(0),
       mIndex(nIndex) {
@@ -71,7 +71,7 @@ TnlFireFX::TnlFireFX(const HxStr &name, int nIndex)
     }
 }
 
-// 0x0043d8c0
+// NTSC-U/C: 0x0043d8c0, PAL: 0x0047a0f0
 int TnlFireFX::Start(float flPathStart,
                      int nIndex,
                      int nSlot,
@@ -118,7 +118,7 @@ int TnlFireFX::Start(float flPathStart,
     return 1;
 }
 
-// 0x004565a8
+// NTSC-U/C: 0x004565a8, PAL: 0x00493ad8
 void TnlFireFX::SetFrame(float flFrame, float flViewFrame) {
     mView->SetFrame(flViewFrame);
     if (mReferenceFrame == kUnset) {

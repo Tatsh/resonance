@@ -27,7 +27,8 @@ public:
      * The message only shows in game mode.
      *
      * @param pPlayMap The play map whose steps the marker walks.
-     * @ghidraAddress 0x0043fa18
+     * @ghidraAddress NTSC-U/C: 0x0043fa18
+     * @ghidraAddress PAL: 0x0047c3f8
      */
     explicit TnlBoundary(PlayMap *pPlayMap);
 
@@ -39,7 +40,8 @@ public:
      * the path at the new bar, and the message is rewritten.
      *
      * @param flFrame The current frame.
-     * @ghidraAddress 0x0043fcc0
+     * @ghidraAddress NTSC-U/C: 0x0043fcc0
+     * @ghidraAddress PAL: 0x0047c6d8
      */
     void SetFrame(float flFrame);
 

@@ -15,30 +15,30 @@ inline void DeleteStoredMessages(std::vector<Message *> &messages) {
 
 } // namespace
 
-// 0x0054a738
+// NTSC-U/C: 0x0054a738, PAL: 0x0058ac68
 MsgQueue::MsgQueue() {
     mTarget = &mFirst;
     mInPoll = 0;
 }
 
-// 0x0054a7a0
+// NTSC-U/C: 0x0054a7a0, PAL: 0x0058acd0
 MsgQueue::~MsgQueue() {
     DeleteStoredMessages(mFirst);
     DeleteStoredMessages(mSecond);
 }
 
-// 0x0054b220
+// NTSC-U/C: 0x0054b220, PAL: 0x0058b750
 void MsgQueue::Store(Message *pMsg) {
     mTarget->push_back(pMsg->Clone());
 }
 
-// 0x0054b290
+// NTSC-U/C: 0x0054b290, PAL: 0x0058b7c0
 void MsgQueue::HandleMessage(Message *pMsg) {
     pMsg->Type(); // Yes, the binary discards this call's result.
     mTarget->push_back(pMsg->Clone());
 }
 
-// 0x0054aa58
+// NTSC-U/C: 0x0054aa58, PAL: 0x0058af88
 void MsgQueue::Poll() {
     mInPoll = 1;
     mDraining = mTarget;

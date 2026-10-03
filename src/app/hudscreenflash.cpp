@@ -19,7 +19,7 @@ constexpr float kScaleNumerator = 1000.0f;
 
 } // namespace
 
-// 0x0041b150
+// NTSC-U/C: 0x0041b150, PAL: 0x00455a88
 HudScreenFlash::HudScreenFlash() : mStart(kNoFade), mRate(1.0f) {
     mMesh = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD screen rect")));
     mMesh->SetShowing(1);
@@ -28,7 +28,7 @@ HudScreenFlash::HudScreenFlash() : mStart(kNoFade), mRate(1.0f) {
         kScaleNumerator / static_cast<float>(static_cast<long long>(GetMillisecondsPerSecond()));
 }
 
-// 0x0042a548
+// NTSC-U/C: 0x0042a548, PAL: 0x00465898
 void HudScreenFlash::Start(float flDuration, int nFadeIn) {
     // The binary converts through the 64-bit integer to float routine.
     mStart = static_cast<float>(static_cast<long long>(GetElapsedMilliseconds())) * mScale;
@@ -39,7 +39,7 @@ void HudScreenFlash::Start(float flDuration, int nFadeIn) {
     mRate = 1.0f / flDuration;
 }
 
-// 0x0041b2a0
+// NTSC-U/C: 0x0041b2a0, PAL: 0x00455bf8
 void HudScreenFlash::SetFrame() {
     const float flNow =
         static_cast<float>(static_cast<long long>(GetElapsedMilliseconds())) * mScale;

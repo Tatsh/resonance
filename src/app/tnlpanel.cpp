@@ -41,7 +41,7 @@ inline Rnd::MeshAnim *FindMeshAnim(const char *pszName) {
 
 } // namespace
 
-// 0x00457228
+// NTSC-U/C: 0x00457228, PAL: 0x00494758
 TnlPanel::TnlPanel(
     int nRing, int nSlice, Player *pPlayer, int nPowerbar, Kind kind, int nShowing, int nColorIndex)
     : mRing(nRing), mSlice(nSlice), mPlayer(pPlayer), mPowerbar(nPowerbar), mKind(kind),
@@ -51,7 +51,7 @@ TnlPanel::TnlPanel(
     Refresh();
 }
 
-// 0x004417f8
+// NTSC-U/C: 0x004417f8, PAL: 0x0047e510
 void TnlPanel::Refresh() {
     const int nIndex = mColorIndex % kLaneMatCount;
     if (mPowerbar == kNoPowerbar) {
@@ -79,7 +79,7 @@ void TnlPanel::Refresh() {
     }
 }
 
-// 0x00441c68
+// NTSC-U/C: 0x00441c68, PAL: 0x0047ea20
 void TnlPanel::Apply() {
     int nShowing = mShowing;
     if (Application::shared()->GetPlayMode() == kPlayModeGame && mKind == kKindLane &&
@@ -95,7 +95,7 @@ void TnlPanel::Apply() {
         mRing, mSlice, TnlLaneColorFromName(mPlayer->mColorName));
 }
 
-// 0x00441d98
+// NTSC-U/C: 0x00441d98, PAL: 0x0047eb70
 int TnlPanel::Update(float flFrame, AppTunnel *pTunnel) {
     if (mStartFrame <= flFrame && mDuration == 0.0f) {
         if (mKind != kKindLane) {

@@ -34,17 +34,17 @@ public:
     explicit Cmd(ActiveFilter *pOwner) : mOwner(pOwner) {
     }
 
-    // 0x001002f8
+    // NTSC-U/C: 0x001002f8, PAL: 0x001002f8
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x00100308
+    // NTSC-U/C: 0x00100308, PAL: 0x00100308
     virtual void Execute() {
         mOwner->Update();
     }
 
-    // 0x00100328
+    // NTSC-U/C: 0x00100328, PAL: 0x00100328
     virtual void Print(std::ostream &stream) {
         stream << "{ActiveFilter}";
     }
@@ -62,7 +62,7 @@ int Cmd::sCmdID;
 
 } // namespace
 
-// 0x00100080
+// NTSC-U/C: 0x00100080, PAL: 0x00100080
 ActiveFilter::ActiveFilter(Sch::TickClock *pClock, FilterLover *pLover)
     : mTarget(0.0f), mRetention(kDefaultRetention), mValue(0.0f), mLover(pLover), mClock(pClock),
       mStepCommand(nullptr) {
@@ -70,7 +70,7 @@ ActiveFilter::ActiveFilter(Sch::TickClock *pClock, FilterLover *pLover)
     mInterval.mValue = 0;
 }
 
-// 0x00100100
+// NTSC-U/C: 0x00100100, PAL: 0x00100100
 ActiveFilter::~ActiveFilter() {
     const CmdID command = mCommand;
     mClock->Withdraw(command);
@@ -80,7 +80,7 @@ ActiveFilter::~ActiveFilter() {
     mStepCommand = nullptr;
 }
 
-// 0x00100150
+// NTSC-U/C: 0x00100150, PAL: 0x00100150
 void ActiveFilter::SetTarget(float flTarget) {
     mTarget = flTarget;
     if (mStepCommand != nullptr) {
@@ -92,7 +92,7 @@ void ActiveFilter::SetTarget(float flTarget) {
     Update();
 }
 
-// 0x001001c8
+// NTSC-U/C: 0x001001c8, PAL: 0x001001c8
 void ActiveFilter::Update() {
     mValue = (1.0 - mRetention) * mTarget + mRetention * mValue;
     mLover->OnFilterValue(mValue);

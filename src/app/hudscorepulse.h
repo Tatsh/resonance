@@ -16,7 +16,8 @@ public:
     /**
      * Resolve `<layout> score pulse.mesh` and hide it.
      *
-     * @ghidraAddress 0x0041bdb8
+     * @ghidraAddress NTSC-U/C: 0x0041bdb8
+     * @ghidraAddress PAL: 0x004568c0
      */
     HudScorePulse();
 
@@ -29,7 +30,8 @@ public:
      * title is inferred.
      *
      * @param pBadge The leader's badge.
-     * @ghidraAddress 0x0041c2b0
+     * @ghidraAddress NTSC-U/C: 0x0041c2b0
+     * @ghidraAddress PAL: 0x00456c48
      */
     void MoveTo(HudBadge *pBadge);
 

@@ -16,7 +16,7 @@ constexpr int kFullInset = 75;
 
 } // namespace
 
-// 0x0041bc50
+// NTSC-U/C: 0x0041bc50, PAL: 0x00456758
 void HudFeedback::SetFrame(float flFrame) {
     if (0.0f < flFrame) {
         return;

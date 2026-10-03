@@ -15,7 +15,8 @@ struct TnlPendingTrigger {
      *
      * @param flFrame The current frame.
      * @return Zero once the trigger has fired and been deleted, non-zero while it still waits.
-     * @ghidraAddress 0x004572c8
+     * @ghidraAddress NTSC-U/C: 0x004572c8
+     * @ghidraAddress PAL: 0x004947f8
      */
     int Update(float flFrame);
 

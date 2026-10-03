@@ -67,9 +67,9 @@ constexpr int kNoPowerup = -1;
 
 } // namespace
 
-// 0x006e253c
+// NTSC-U/C: 0x006e253c, PAL: 0x00725e44
 Renderer *g_pRenderer;
-// 0x006e2538
+// NTSC-U/C: 0x006e2538, PAL: 0x00725e40
 int g_nLsdMode;
 // NTSC-U/C: 0x006e2510, PAL: 0x00725e18
 RndAsyncLoader *g_pTunnelLoader;
@@ -81,16 +81,16 @@ RndAsyncLoader *g_pHudLoader;
 // PAL: 0x00725e24
 RndAsyncLoader *g_pGameFontsLoader;
 #endif
-// 0x006e251c
+// NTSC-U/C: 0x006e251c, PAL: 0x00725e28
 RndAsyncLoader *g_pArenaLoader;
-// 0x006e2520
+// NTSC-U/C: 0x006e2520, PAL: 0x00725e2c
 RndAsyncLoader *g_pLevelLoader;
-// 0x006e2528
+// NTSC-U/C: 0x006e2528, PAL: 0x00725e30
 HxStr g_arenaName("");
-// 0x006e2530
+// NTSC-U/C: 0x006e2530, PAL: 0x00725e38
 HxStr g_levelName("");
 
-// 0x0042c2e0
+// NTSC-U/C: 0x0042c2e0, PAL: 0x00467da0
 Renderer::Renderer()
     : mSongClock(Application::shared()->GetSongClock()), mSongTick(0.0f), mDrawTimingGraph(0),
       mDrawRenderStats(0), mCellsPerRow(0), mRowCount(0), mTunnel(nullptr), mOverlay(nullptr),
@@ -159,7 +159,7 @@ Renderer::Renderer()
     g_pRenderer = this;
 }
 
-// 0x0042ce08
+// NTSC-U/C: 0x0042ce08, PAL: 0x004689c0
 Renderer::~Renderer() {
     g_pRenderer = nullptr;
     delete mArena;
@@ -167,7 +167,7 @@ Renderer::~Renderer() {
     delete mTunnel;
 }
 
-// 0x0042d3b8
+// NTSC-U/C: 0x0042d3b8, PAL: 0x00468f70
 void Renderer::HandleMessage(Message *pMsg) {
     int nType = pMsg->Type();
     if (nType == g_nGameBeginMsgType) {
@@ -181,13 +181,13 @@ void Renderer::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x00432460
+// NTSC-U/C: 0x00432460, PAL: 0x0046e138
 void Renderer::PollMessages() {
     mSongTick = static_cast<float>(mSongClock->SongTick());
     RendererBase::PollMessages();
 }
 
-// 0x004324a0
+// NTSC-U/C: 0x004324a0, PAL: 0x0046e178
 void Renderer::Update() {
     mTunnel->SetFrame(mSongTick);
     mOverlay->SetFrame(mSongTick);
@@ -200,7 +200,7 @@ void Renderer::Update() {
     mHudView->UpdateWorldXfm(nullptr, 0);    // Yes, the binary discards the result.
 }
 
-// 0x0042d258
+// NTSC-U/C: 0x0042d258, PAL: 0x00468e10
 void Renderer::Draw() {
     mOuterView->Draw();
 
@@ -230,7 +230,7 @@ void Renderer::Draw() {
     }
 }
 
-// 0x004322b8
+// NTSC-U/C: 0x004322b8, PAL: 0x0046df90
 Renderer::Cell *Renderer::GetCell(int nTrack, int nBar) {
     int nSlice = nBar % mCellsPerRow;
     if (nSlice < 0) {
@@ -290,7 +290,7 @@ void Renderer::UnloadCommon() {
     }
 }
 
-// 0x0042bbe8
+// NTSC-U/C: 0x0042bbe8, PAL: 0x004674c8
 void Renderer::LoadLevel(const GameParams &params) {
     HxStr level(params.mLevelName);
     HxStr arena(params.mArenaName);
@@ -324,7 +324,7 @@ void Renderer::LoadLevel(const GameParams &params) {
     }
 }
 
-// 0x00432128
+// NTSC-U/C: 0x00432128, PAL: 0x0046de00
 void Renderer::UnloadLevel() {
     delete g_pLevelLoader;
     g_pLevelLoader = nullptr;
@@ -358,7 +358,7 @@ int Renderer::PollCommon(float *pflProgress) {
 #endif
 }
 
-// 0x004321a8
+// NTSC-U/C: 0x004321a8, PAL: 0x0046de80
 int Renderer::PollLevel(float *pflProgress) {
     if (g_pArenaLoader == nullptr) {
         return 0;
@@ -371,7 +371,7 @@ int Renderer::PollLevel(float *pflProgress) {
     return nArenaDone != 0 && nLevelDone != 0;
 }
 
-// 0x00432228
+// NTSC-U/C: 0x00432228, PAL: 0x0046df00
 int Renderer::IsLevelLoaded(const HxStr &arena, const HxStr &level) {
     if (!(g_arenaName == arena) || !(g_levelName == level)) {
         return 0;
@@ -386,7 +386,7 @@ int Renderer::IsLevelLoaded(const HxStr &arena, const HxStr &level) {
     return nArenaDone != 0 && nLevelDone != 0;
 }
 
-// 0x0042d068
+// NTSC-U/C: 0x0042d068, PAL: 0x00468c20
 void Renderer::OnBarStatus(BarStatusMsg *pMsg) {
     bool bOverlayChanged = false;
     bool bTunnelChanged = false;
@@ -432,7 +432,7 @@ void Renderer::OnBarStatus(BarStatusMsg *pMsg) {
     }
 }
 
-// 0x00432318
+// NTSC-U/C: 0x00432318, PAL: 0x0046dff0
 void Renderer::OnPointAmount(Message *pMsg) {
     Send(pMsg);
 
@@ -463,7 +463,7 @@ void Renderer::OnPointAmount(Message *pMsg) {
     mLeader = pLeader;
 }
 
-// 0x004322f8
+// NTSC-U/C: 0x004322f8, PAL: 0x0046dfd0
 void Renderer::OnGameBegin() {
     CallScriptTemplate(kGameBeginScriptTemplate);
 }

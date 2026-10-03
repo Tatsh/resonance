@@ -29,7 +29,8 @@ struct Quat {
  * @param pAxis The rotation axis, three floats.
  * @param flAngle The rotation angle in radians.
  * @return The quaternion.
- * @ghidraAddress 0x004efd80
+ * @ghidraAddress NTSC-U/C: 0x004efd80
+ * @ghidraAddress PAL: 0x0052e970
  */
 Quat AxisAngleToQuat(const float *pAxis, float flAngle);
 
@@ -42,7 +43,8 @@ Quat AxisAngleToQuat(const float *pAxis, float flAngle);
  * @param quat The quaternion, treated as unit length.
  * @param pAxis Receives the axis, three floats.
  * @param pflAngle Receives the angle in radians.
- * @ghidraAddress 0x004f0350
+ * @ghidraAddress NTSC-U/C: 0x004f0350
+ * @ghidraAddress PAL: 0x0052ef40
  */
 void QuatDecomposeAxisAngle(const Quat &quat, float *pAxis, float *pflAngle);
 
@@ -54,7 +56,8 @@ void QuatDecomposeAxisAngle(const Quat &quat, float *pAxis, float *pflAngle);
  *
  * @param pAngles The three angles in radians, ordered X, Y, and Z.
  * @return The quaternion.
- * @ghidraAddress 0x004f0230
+ * @ghidraAddress NTSC-U/C: 0x004f0230
+ * @ghidraAddress PAL: 0x0052ee20
  */
 Quat EulerAnglesToQuat(const float *pAngles);
 
@@ -68,7 +71,8 @@ Quat EulerAnglesToQuat(const float *pAngles);
  *
  * @param pMat3Rows The rotation, three rows of four floats, treated as orthonormal.
  * @return The quaternion.
- * @ghidraAddress 0x004ee9c0
+ * @ghidraAddress NTSC-U/C: 0x004ee9c0
+ * @ghidraAddress PAL: 0x0052d568
  */
 Quat Mat33ToQuat(const float *pMat3Rows);
 
@@ -81,7 +85,8 @@ Quat Mat33ToQuat(const float *pMat3Rows);
  * @param b The right factor.
  * @param out Receives the product. Every component of both factors is loaded before the first
  *            store, which permits the destination to alias either factor.
- * @ghidraAddress 0x004f06a0
+ * @ghidraAddress NTSC-U/C: 0x004f06a0
+ * @ghidraAddress PAL: 0x0052f290
  */
 void QuatMultiply(const Quat &a, const Quat &b, Quat &out);
 
@@ -95,7 +100,8 @@ void QuatMultiply(const Quat &a, const Quat &b, Quat &out);
  * @param quat The rotation to start from.
  * @param pRotVec The rotation vector, three floats.
  * @return The composed rotation.
- * @ghidraAddress 0x004f0178
+ * @ghidraAddress NTSC-U/C: 0x004f0178
+ * @ghidraAddress PAL: 0x0052ed68
  */
 Quat QuatRotateByVector(const Quat &quat, const float *pRotVec);
 
@@ -116,7 +122,8 @@ Quat QuatRotateByVector(const Quat &quat, const float *pRotVec);
  * @param to The rotation at a parameter of one.
  * @param out Receives the interpolation.
  * @param flT The interpolation parameter.
- * @ghidraAddress 0x004eec20
+ * @ghidraAddress NTSC-U/C: 0x004eec20
+ * @ghidraAddress PAL: 0x0052d7c8
  */
 void QuatSlerp(const Quat &from, const Quat &to, Quat &out, float flT);
 
@@ -129,7 +136,8 @@ void QuatSlerp(const Quat &from, const Quat &to, Quat &out, float flT);
  *
  * @param quat The rotation, treated as unit length.
  * @param pMat3Rows Receives the rotation, three rows of four floats.
- * @ghidraAddress 0x004f0600
+ * @ghidraAddress NTSC-U/C: 0x004f0600
+ * @ghidraAddress PAL: 0x0052f1f0
  */
 void QuatToMat33(const Quat &quat, float *pMat3Rows);
 
@@ -144,7 +152,8 @@ void QuatToMat33(const Quat &quat, float *pMat3Rows);
  *
  * @param pMat3Rows The rotation, three rows of four floats.
  * @param pAngles Receives the three angles in radians, ordered X, Y, and Z.
- * @ghidraAddress 0x004efe08
+ * @ghidraAddress NTSC-U/C: 0x004efe08
+ * @ghidraAddress PAL: 0x0052e9f8
  */
 void Mat33ToEulerAngles(const float *pMat3Rows, float *pAngles);
 
@@ -157,7 +166,8 @@ void Mat33ToEulerAngles(const float *pMat3Rows, float *pAngles);
  *
  * @param pMat3Rows The basis, three rows of four floats.
  * @param pScale Receives the three scales.
- * @ghidraAddress 0x004efed8
+ * @ghidraAddress NTSC-U/C: 0x004efed8
+ * @ghidraAddress PAL: 0x0052eac8
  */
 void Mat33ExtractScale(const float *pMat3Rows, float *pScale);
 
@@ -172,6 +182,7 @@ void Mat33ExtractScale(const float *pMat3Rows, float *pScale);
  * @param pTo The angles at a parameter of one, three floats.
  * @param pOut Receives the interpolated angles, three floats.
  * @param flT The interpolation parameter.
- * @ghidraAddress 0x004effe0
+ * @ghidraAddress NTSC-U/C: 0x004effe0
+ * @ghidraAddress PAL: 0x0052ebd0
  */
 void LerpEulerAngles(const float *pFrom, const float *pTo, float *pOut, float flT);

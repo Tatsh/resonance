@@ -23,7 +23,8 @@ struct Vector2 {
  * @param pA The first vector.
  * @param pB The second vector.
  * @param pOut Receives pA plus pB, and may alias either input.
- * @ghidraAddress 0x00169818
+ * @ghidraAddress NTSC-U/C: 0x00169818
+ * @ghidraAddress PAL: 0x0016ba00
  */
 void AddVec2(const float *pA, const float *pB, float *pOut);
 
@@ -37,7 +38,8 @@ void AddVec2(const float *pA, const float *pB, float *pOut);
  * @param pA The vector subtracted from.
  * @param pB The vector subtracted.
  * @param pOut Receives pA minus pB, and may alias either input.
- * @ghidraAddress 0x004bec40
+ * @ghidraAddress NTSC-U/C: 0x004bec40
+ * @ghidraAddress PAL: 0x004fccc8
  */
 void SubVec2(const float *pA, const float *pB, float *pOut);
 
@@ -50,7 +52,8 @@ void SubVec2(const float *pA, const float *pB, float *pOut);
  * @param pSrc The vector.
  * @param flScale The scale.
  * @param pOut Receives pSrc times flScale.
- * @ghidraAddress 0x00169840
+ * @ghidraAddress NTSC-U/C: 0x00169840
+ * @ghidraAddress PAL: 0x0016ba28
  */
 void ScaleVec2(const float *pSrc, float flScale, float *pOut);
 
@@ -61,7 +64,8 @@ void ScaleVec2(const float *pSrc, float flScale, float *pOut);
  *
  * @param pSrc The vector.
  * @param pOut Receives the negated vector.
- * @ghidraAddress 0x004bec88
+ * @ghidraAddress NTSC-U/C: 0x004bec88
+ * @ghidraAddress PAL: 0x004fcd10
  */
 void NegateVec2(const float *pSrc, float *pOut);
 
@@ -72,7 +76,8 @@ void NegateVec2(const float *pSrc, float *pOut);
  *
  * @param pSrc The vector.
  * @param pOut Receives the unit vector.
- * @ghidraAddress 0x004beca8
+ * @ghidraAddress NTSC-U/C: 0x004beca8
+ * @ghidraAddress PAL: 0x004fcd30
  */
 void NormalizeVec2(const float *pSrc, float *pOut);
 
@@ -81,7 +86,8 @@ void NormalizeVec2(const float *pSrc, float *pOut);
  *
  * @param pSrc The vector.
  * @return The length.
- * @ghidraAddress 0x004bfcc0
+ * @ghidraAddress NTSC-U/C: 0x004bfcc0
+ * @ghidraAddress PAL: 0x004fdd60
  */
 float Vec2Length(const float *pSrc);
 
@@ -94,6 +100,7 @@ float Vec2Length(const float *pSrc);
  * @param first The point and the direction of the first line.
  * @param second The point and the direction of the second line.
  * @return The crossing point.
- * @ghidraAddress 0x00551190
+ * @ghidraAddress NTSC-U/C: 0x00551190
+ * @ghidraAddress PAL: 0x005917d0
  */
 Vector2 IntersectLines(const Vector2 first[2], const Vector2 second[2]);

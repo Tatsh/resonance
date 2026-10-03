@@ -22,7 +22,8 @@ public:
     /**
      * Resolve the prompt's mesh and both materials, and hide the prompt.
      *
-     * @ghidraAddress 0x00417840
+     * @ghidraAddress NTSC-U/C: 0x00417840
+     * @ghidraAddress PAL: 0x00451628
      */
     HudAnalogStick();
 
@@ -34,7 +35,8 @@ public:
      * inferred.
      *
      * @param motion The motion.
-     * @ghidraAddress 0x00429d60
+     * @ghidraAddress NTSC-U/C: 0x00429d60
+     * @ghidraAddress PAL: 0x004653a0
      */
     void SetMotion(const HxStr &motion);
 
@@ -44,7 +46,8 @@ public:
      * The constructor is the one caller. The title is inferred.
      *
      * @param nShowing Non-zero to show.
-     * @ghidraAddress 0x00429dd8
+     * @ghidraAddress NTSC-U/C: 0x00429dd8
+     * @ghidraAddress PAL: 0x00465418
      */
     void SetShowing(int nShowing);
 

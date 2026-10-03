@@ -32,15 +32,15 @@ constexpr int kCommandErrorDuration = 50;
 
 } // namespace
 
-// 0x006f8a80
+// NTSC-U/C: 0x006f8a80, PAL: 0x0073c4d0
 long long g_llWatchdogSecondNs;
 
-// 0x004a9858
+// NTSC-U/C: 0x004a9858, PAL: 0x004e7968
 Watchdog::Watchdog()
     : mStreamMode(0), mRecorder(nullptr), mPlayback(nullptr), mNowNs(0), mBlocked(0) {
 }
 
-// 0x004a9980
+// NTSC-U/C: 0x004a9980, PAL: 0x004e7a90
 Watchdog::~Watchdog() {
     mBlocked = 1;
     std::for_each(mQueue.begin(), mQueue.end(), Attachment::ReleaseIfSet);
@@ -53,7 +53,7 @@ Watchdog::~Watchdog() {
     mPlayback = nullptr;
 }
 
-// 0x004ac8c0
+// NTSC-U/C: 0x004ac8c0, PAL: 0x004eaa60
 void Watchdog::BeginRecording(OBStream &stream) {
     mRecorder = new WatchdogRecorder(&stream);
     mStreamMode = kStreamModeRecording;
@@ -61,7 +61,7 @@ void Watchdog::BeginRecording(OBStream &stream) {
     mNowNs = 0;
 }
 
-// 0x004ac9e8
+// NTSC-U/C: 0x004ac9e8, PAL: 0x004eab88
 void Watchdog::Close() {
     delete mRecorder;
     mRecorder = nullptr;
@@ -84,7 +84,7 @@ inline void Watchdog::Enqueue(Sch::TimedCommand *pCommand, CmdID &id) {
     mQueue.insert(pCommand);
 }
 
-// 0x004ac608
+// NTSC-U/C: 0x004ac608, PAL: 0x004ea7a8
 void Watchdog::QueueAbsolute(Sch::TimedCommand *pCommand,
                              long long nTick,
                              CmdID &id,
@@ -98,7 +98,7 @@ void Watchdog::QueueAbsolute(Sch::TimedCommand *pCommand,
     Enqueue(pCommand, id);
 }
 
-// 0x004ac698
+// NTSC-U/C: 0x004ac698, PAL: 0x004ea838
 void Watchdog::QueueDelta(
     Sch::TimedCommand *pCommand, long long nDelta, CmdID &id, int bRecordable, int nOrder) {
     if (mStreamMode == kStreamModePlayback && bRecordable != 0) {
@@ -118,7 +118,7 @@ void Watchdog::QueueDelta(
     }
 }
 
-// 0x004ac808
+// NTSC-U/C: 0x004ac808, PAL: 0x004ea9a8
 void Watchdog::PostUnreferenced(Sch::Command *pCommand) {
     if (mStreamMode != kStreamModeRecording) {
         return;
@@ -133,14 +133,14 @@ void Watchdog::PostUnreferenced(Sch::Command *pCommand) {
     // Yes, the binary destroys the wrapper without queueing or recording it.
 }
 
-// 0x004a9a78
+// NTSC-U/C: 0x004a9a78, PAL: 0x004e7b88
 void Watchdog::Snapshot() {
     const std::multiset<Sch::TimedCommand *, QueueOrder> queue(mQueue);
     mQueue.clear();
     std::for_each(queue.begin(), queue.end(), Attachment::ReleaseIfSet);
 }
 
-// 0x004ac7b0
+// NTSC-U/C: 0x004ac7b0, PAL: 0x004ea950
 void Watchdog::QueueReplayed(Sch::TimedCommand *pCommand) {
     pCommand->mCommand->mQueued = 1;
     if (mBlocked != 0) {
@@ -152,7 +152,7 @@ void Watchdog::QueueReplayed(Sch::TimedCommand *pCommand) {
     mQueue.insert(pCommand);
 }
 
-// 0x004aa260
+// NTSC-U/C: 0x004aa260, PAL: 0x004e8370
 void Watchdog::WithdrawByCmdID(const CmdID &id) {
     if (id.mValue <= 0) {
         return;
@@ -169,7 +169,7 @@ void Watchdog::WithdrawByCmdID(const CmdID &id) {
     }
 }
 
-// 0x004a9d00
+// NTSC-U/C: 0x004a9d00, PAL: 0x004e7e10
 void Watchdog::Withdraw(Sch::TimedCommand *pCommand) {
     const auto it = mQueue.find(pCommand);
     if (it == mQueue.end()) {
@@ -181,7 +181,7 @@ void Watchdog::Withdraw(Sch::TimedCommand *pCommand) {
     }
 }
 
-// 0x004aa848
+// NTSC-U/C: 0x004aa848, PAL: 0x004e8958
 void Watchdog::Service() {
     long long nNow = mClock.Now();
     if (g_llWatchdogSecondNs + kWatchdogSecondNs < nNow) {
@@ -216,19 +216,19 @@ void Watchdog::Service() {
     }
 }
 
-// 0x004aca30
+// NTSC-U/C: 0x004aca30, PAL: 0x004eabd0
 void Watchdog::RestartClock() {
     mClock.Mark(0);
     mNowNs = 0;
 }
 
-// 0x004aca60
+// NTSC-U/C: 0x004aca60, PAL: 0x004eac00
 void Watchdog::Flush() {
     mClock.Mark(mNowNs);
     g_llWatchdogSecondNs = mClock.Now();
 }
 
-// 0x004ac950
+// NTSC-U/C: 0x004ac950, PAL: 0x004eaaf0
 void Watchdog::StartPlayback(IBStream &stream) {
     mPlayback = new WatchdogPlayback(this);
     mPlayback->Load(stream);

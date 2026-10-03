@@ -56,14 +56,16 @@ public:
      *
      * @param pWatchdog The scheduler this clock posts to.
      * @param pTempoMap The tempo map to share, or null for a private one.
-     * @ghidraAddress 0x004a79f8
+     * @ghidraAddress NTSC-U/C: 0x004a79f8
+     * @ghidraAddress PAL: 0x004e5b08
      */
     TickClock(Watchdog *pWatchdog, TempoMap *pTempoMap);
 
     /**
      * Give back the reference to the tempo map.
      *
-     * @ghidraAddress 0x004a7aa8
+     * @ghidraAddress NTSC-U/C: 0x004a7aa8
+     * @ghidraAddress PAL: 0x004e5bb8
      */
     ~TickClock();
 
@@ -75,7 +77,8 @@ public:
      * the tempo map a converted level reports.
      *
      * @param pTempoMap The tempo map to share, or null.
-     * @ghidraAddress 0x004a7be0
+     * @ghidraAddress NTSC-U/C: 0x004a7be0
+     * @ghidraAddress PAL: 0x004e5cf0
      */
     void SetTempoMap(TempoMap *pTempoMap);
 
@@ -88,7 +91,8 @@ public:
      * `0x00100ab8`.
      *
      * @return The song position, in MIDI ticks at 480 per quarter note.
-     * @ghidraAddress 0x004a7af8
+     * @ghidraAddress NTSC-U/C: 0x004a7af8
+     * @ghidraAddress PAL: 0x004e5c08
      */
     int SongTick();
 
@@ -104,7 +108,8 @@ public:
      * Mid::MBT(int) immediately before the call.
      *
      * @param tick The song position.
-     * @ghidraAddress 0x004a7b60
+     * @ghidraAddress NTSC-U/C: 0x004a7b60
+     * @ghidraAddress PAL: 0x004e5c70
      */
     void SetSongTick(Mid::MBT tick);
 
@@ -113,7 +118,8 @@ public:
      *
      * @param pCommand The command to run.
      * @param tick The scheduler time to run it at, in this clock's frame.
-     * @ghidraAddress 0x004a5fd0
+     * @ghidraAddress NTSC-U/C: 0x004a5fd0
+     * @ghidraAddress PAL: 0x004e4070
      */
     void PostAt(Command *pCommand, Tick tick);
 
@@ -127,7 +133,8 @@ public:
      * @param id The handle to queue under.
      * @param nUnused All 17 call sites pass 0 as the fifth argument, and the body never reads
      *                it. The type and the meaning are not recoverable.
-     * @ghidraAddress 0x004a6248
+     * @ghidraAddress NTSC-U/C: 0x004a6248
+     * @ghidraAddress PAL: 0x004e42e8
      */
     void PostAtSongTick(Command *pCommand, long long nTick, CmdID &id, int nUnused = 0);
 
@@ -136,7 +143,8 @@ public:
      *
      * @param pCommand The command to run.
      * @param nTick The song position, in MIDI ticks at 480 per quarter note.
-     * @ghidraAddress 0x004a6330
+     * @ghidraAddress NTSC-U/C: 0x004a6330
+     * @ghidraAddress PAL: 0x004e43d0
      */
     void PostAtSongTick(Command *pCommand, long long nTick);
 

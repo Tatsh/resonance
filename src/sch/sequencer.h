@@ -42,7 +42,8 @@ public:
     /**
      * Withdraw the queued command, release it, and free the sequencer.
      *
-     * @ghidraAddress 0x00100df8
+     * @ghidraAddress NTSC-U/C: 0x00100df8
+     * @ghidraAddress PAL: 0x00100df8
      */
     virtual ~Sequencer() {
         Withdraw();
@@ -75,7 +76,8 @@ public:
      *
      * The copy is deleted once the sink has handled it.
      *
-     * @ghidraAddress 0x00100e70
+     * @ghidraAddress NTSC-U/C: 0x00100e70
+     * @ghidraAddress PAL: 0x00100e70
      */
     virtual void Dispatch() {
         MuseMsg *pMsg = mCursor->mValue->CloneAt(mNextTick.mTick);
@@ -92,7 +94,8 @@ public:
      *
      * @param pClock The clock to post against.
      * @param pSink The sink every message goes to.
-     * @ghidraAddress 0x00100ef8
+     * @ghidraAddress NTSC-U/C: 0x00100ef8
+     * @ghidraAddress PAL: 0x00100ef8
      */
     void Post(Sch::TickClock *pClock, MsgSink *pSink) {
         mSink = pSink;
@@ -110,7 +113,8 @@ public:
      * tick is dispatched at once, and any other is posted, creating SequencerCmd on the first
      * post. The title is inferred.
      *
-     * @ghidraAddress 0x00100970
+     * @ghidraAddress NTSC-U/C: 0x00100970
+     * @ghidraAddress PAL: 0x00100970
      */
     void ScheduleNext() {
         if (mCursor == mFinish) {

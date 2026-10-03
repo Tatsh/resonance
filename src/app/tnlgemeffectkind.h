@@ -20,7 +20,8 @@ public:
      * The lookup result is used without a null check.
      *
      * @param pszName The base name of the particle system.
-     * @ghidraAddress 0x004121d0
+     * @ghidraAddress NTSC-U/C: 0x004121d0
+     * @ghidraAddress PAL: 0x0044bcb0
      */
     explicit TnlGemEffectKind(const char *pszName);
 

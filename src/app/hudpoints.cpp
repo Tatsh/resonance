@@ -37,7 +37,7 @@ constexpr float kBankTo = 300.0f;
 
 } // namespace
 
-// 0x00418818
+// NTSC-U/C: 0x00418818, PAL: 0x00452918
 HudPoints::HudPoints(int nIndex)
     : mFlash(0.0f), mPulse(0.0f), mPulseRest(0.0f), mMultiplier(kInitialMultiplier), mPoints(0),
       mShowing(0), mHot(0), mUnusedWord(0) {
@@ -72,7 +72,7 @@ HudPoints::HudPoints(int nIndex)
     mMultiplierText->SetShowing(0);
 }
 
-// 0x00418de8
+// NTSC-U/C: 0x00418de8, PAL: 0x00452fa8
 void HudPoints::SetFrame(float flTime) {
     mExitView->SetShowing(mExit.Update(flTime));
 
@@ -102,7 +102,7 @@ void HudPoints::SetFrame(float flTime) {
     }
 }
 
-// 0x00418f90
+// NTSC-U/C: 0x00418f90, PAL: 0x004533d8
 void HudPoints::ShowExit(int nPoints) {
     mPointsText->SetShowing(0);
     mShowing = 0;
@@ -115,7 +115,7 @@ void HudPoints::ShowExit(int nPoints) {
     }
 }
 
-// 0x004190a8
+// NTSC-U/C: 0x004190a8, PAL: 0x00453510
 void HudPoints::Bank() {
     if (mShowing != 0) {
         mExitText->SetText(HxStr(FormatString("%d", mPoints)));
@@ -129,7 +129,7 @@ void HudPoints::Bank() {
     mPulseRest = 0.0f;
 }
 
-// 0x00429fe0
+// NTSC-U/C: 0x00429fe0, PAL: 0x00453150
 void HudPoints::SetPoints(int nPoints) {
     mPoints = nPoints;
     mPointsText->SetText(HxStr(FormatString("%d", nPoints)));

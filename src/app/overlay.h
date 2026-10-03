@@ -56,7 +56,8 @@ public:
      * Each track display goes through its deleting destructor at `0x0042aa18`, and the panel's
      * implicit destructor is inlined.
      *
-     * @ghidraAddress 0x0041da00
+     * @ghidraAddress NTSC-U/C: 0x0041da00
+     * @ghidraAddress PAL: 0x004588b0
      */
     virtual ~Overlay();
 
@@ -67,7 +68,8 @@ public:
      * and runs one handler for each. A PowerupCountMsg is recognised and ignored.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x004206e0
+     * @ghidraAddress NTSC-U/C: 0x004206e0
+     * @ghidraAddress PAL: 0x0045ba00
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -92,7 +94,8 @@ public:
      * Draws the win message over the frame feedback while its sequence runs, and does nothing
      * otherwise. The title is inferred.
      *
-     * @ghidraAddress 0x0042acb8
+     * @ghidraAddress NTSC-U/C: 0x0042acb8
+     * @ghidraAddress PAL: 0x004660d0
      */
     void Draw();
 
@@ -105,7 +108,8 @@ public:
      * @param nTrack The track.
      * @param nBar The bar.
      * @param effects The cell's effect mask.
-     * @ghidraAddress 0x0042ad10
+     * @ghidraAddress NTSC-U/C: 0x0042ad10
+     * @ghidraAddress PAL: 0x00466128
      */
     void OnBarChanged(int nTrack, int nBar, BarStatusMsg::Effects effects);
 
@@ -117,7 +121,8 @@ public:
      *
      * @param pOldLeader The previous leader, or null.
      * @param pNewLeader The new leader, or null.
-     * @ghidraAddress 0x0042ad98
+     * @ghidraAddress NTSC-U/C: 0x0042ad98
+     * @ghidraAddress PAL: 0x004661b0
      */
     void OnLeaderChanged(Player *pOldLeader, Player *pNewLeader);
 
@@ -127,13 +132,13 @@ private:
     // act on the track display of the message's player, which FindTrack() looks up, and show text
     // through HudTextMessage::Show() at scale 1 for 1500 unless noted.
 
-    // 0x0041fdd8
+    // NTSC-U/C: 0x0041fdd8, PAL: 0x0045b408
     // TrackSelectMsg. Shows the track's instrument name on the selecting player's
     // label, records the track, lights the effect lamps from the renderer's cell for the current
     // bar, and banks the player's points unless mTutorial is set.
     void OnTrackSelect(Message *pMsg);
 
-    // 0x0042aec8
+    // NTSC-U/C: 0x0042aec8, PAL: 0x004662e0
     // inlined. GameOverMsg. Runs script template 1001 when mTutorial is set.
     void OnGameOver();
 
@@ -145,7 +150,7 @@ private:
     // uses two lines in French.
     void OnWin(Message *pMsg);
 
-    // 0x0041e9b8
+    // NTSC-U/C: 0x0041e9b8, PAL: 0x00459b58
     // ChoosePowerupMsg. Shows the chosen kind on the player's powerup indicator in
     // kPlayModeGame, and selects its effect lamp name otherwise. Runs script template 1016 when
     // mTutorial is set.
@@ -162,23 +167,23 @@ private:
     // bumper.
     void OnDeployedPowerup(Message *pMsg);
 
-    // 0x0042aff0
+    // NTSC-U/C: 0x0042aff0, PAL: 0x00466408
     // inlined. PointAmountMsg. Records the new score in the player's badge, pending an
     // untimed redraw.
     void OnPointAmount(Message *pMsg);
 
-    // 0x0041f310
+    // NTSC-U/C: 0x0041f310, PAL: 0x0045a7e8
     // JuiceAmountMsg. In kGameModeSolo and kPlayModeGame, sets the player's energy
     // level to the juice amount and pulses the player's icon while the juice is above 0.85.
     void OnJuiceAmount(Message *pMsg);
 
-    // 0x0042b068
+    // NTSC-U/C: 0x0042b068, PAL: 0x00466480
     // inlined. PhraseCapturedMsg. Runs script template 1005 when mTutorial is set.
     // Otherwise, in kPlayModeGame before the bar in mLastBar, shows the capturing player's
     // points leaving.
     void OnPhraseCaptured(Message *pMsg);
 
-    // 0x0041f5e8
+    // NTSC-U/C: 0x0041f5e8, PAL: 0x0045ab90
     // TextMsg. Shows the message's text in the first track display's text message.
     void OnText(Message *pMsg);
 
@@ -204,12 +209,12 @@ private:
     // during playback, and hides every text message.
     void OnPlaybackToggle(Message *pMsg);
 
-    // 0x0042aef8
+    // NTSC-U/C: 0x0042aef8, PAL: 0x00466310
     // inlined. ToggleGhostMsg. Outside kPlayModeGame, lights or darkens the player's
     // kHudItemGuides lamp. Runs script template 1021 when mTutorial is set.
     void OnToggleGhost(Message *pMsg);
 
-    // 0x0042b130
+    // NTSC-U/C: 0x0042b130, PAL: 0x00466548
     // inlined. JamEffectMsg. Runs script template 1017 in kPlayModeJam when mTutorial
     // is set. The message is not read.
     void OnJamEffect();
@@ -220,17 +225,17 @@ private:
     // bars that cannot be captured and shows `ROTATE TO\nNEW TRACK` at the third.
     void OnCatch(Message *pMsg);
 
-    // 0x0042b178
+    // NTSC-U/C: 0x0042b178, PAL: 0x00466590
     // inlined. PhraseMuffedMsg. In kPlayModeGame without mTutorial, banks the
     // player's points.
     void OnPhraseMuffed(Message *pMsg);
 
-    // 0x004201c0
+    // NTSC-U/C: 0x004201c0, PAL: 0x00466610
     // BeginPhraseCatchMsg. In kPlayModeGame before the last bar and without
     // mTutorial, shows the phrase's points and multiplier on the player's readout.
     void OnBeginPhraseCatch(Message *pMsg);
 
-    // 0x0042b1f8
+    // NTSC-U/C: 0x0042b1f8, PAL: 0x004667a0
     // inlined. FadeGameMsg. Starts the screen flash over the message's duration, and
     // hides the win message's prompt when the game fades out.
     void OnFadeGame(Message *pMsg);
@@ -239,7 +244,7 @@ private:
     // PlayersTrackNeutralizedMsg. Shows `NEUTRALIZED!\n<points> POINTS`.
     void OnPlayersTrackNeutralized(Message *pMsg);
 
-    // 0x00420408
+    // NTSC-U/C: 0x00420408, PAL: 0x004666e0
     // MultiplierStateMsg. Without mTutorial and before the last bar, shows the base
     // plus the bonus multiplier and selects the hot material while a bonus applies.
     void OnMultiplierState(Message *pMsg);
@@ -248,7 +253,7 @@ private:
     // PowerupFailedMsg. Shows the failure text for the powerup kind at scale 0.8.
     void OnPowerupFailed(Message *pMsg);
 
-    // 0x0042ae88
+    // NTSC-U/C: 0x0042ae88, PAL: 0x004662a0
     // The badge whose mPlayer is pPlayer, or null.
     HudBadge *FindBadge(Player *pPlayer);
 
@@ -299,7 +304,8 @@ private:
  *
  * The constructor stores the object and the destructor clears the word.
  *
- * @ghidraAddress 0x006dfdf8
+ * @ghidraAddress NTSC-U/C: 0x006dfdf8
+ * @ghidraAddress PAL: 0x00723628
  */
 extern Overlay *g_pOverlay;
 
@@ -310,6 +316,7 @@ extern Overlay *g_pOverlay;
  * formats it into the names it resolves. The translation unit's static initialiser at `0x00429348`
  * constructs it. Its string pointer is at `0x006dfdf4`.
  *
- * @ghidraAddress 0x006dfdf0
+ * @ghidraAddress NTSC-U/C: 0x006dfdf0
+ * @ghidraAddress PAL: 0x00723620
  */
 extern HxStr g_hudLayoutName;

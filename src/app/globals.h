@@ -52,12 +52,14 @@ public:
      * The synth and the script sink are not cleared, so Shutdown() tests uninitialised memory
      * when it runs before Init().
      *
-     * @ghidraAddress 0x00118c40
+     * @ghidraAddress NTSC-U/C: 0x00118c40
+     * @ghidraAddress PAL: 0x00119190
      */
     Globals();
 
     /**
-     * @ghidraAddress 0x00118c68
+     * @ghidraAddress NTSC-U/C: 0x00118c68
+     * @ghidraAddress PAL: 0x001191b8
      */
     virtual ~Globals();
 
@@ -78,7 +80,8 @@ public:
     /**
      * Create every process-wide service.
      *
-     * @ghidraAddress 0x001170d0
+     * @ghidraAddress NTSC-U/C: 0x001170d0
+     * @ghidraAddress PAL: 0x001175a0
      */
     void Init();
 
@@ -86,59 +89,80 @@ public:
      * Destroy every process-wide service.
      *
      * The watchdog is flushed first, then each service is destroyed in the reverse of the order
-     * Init() created them. The routine is unreferenced in the image.
+     * Init() created them. The routine is unreferenced in the NTSC-U/C image. The PAL build calls
+     * it from Application::ExitInstance() and does not destroy the synth.
      *
-     * @ghidraAddress 0x00117270
+     * @ghidraAddress NTSC-U/C: 0x00117270
+     * @ghidraAddress PAL: 0x00117740
      */
     void Shutdown();
 
     /**
      * Create the hardware synth.
      *
-     * @ghidraAddress 0x00118c98
+     * @ghidraAddress NTSC-U/C: 0x00118c98
+     * @ghidraAddress PAL: 0x001191e8
      */
     void CreateSynth();
 
     /**
      * Drive the main loop until it stops.
      *
-     * @ghidraAddress 0x00118cc8
+     * @ghidraAddress NTSC-U/C: 0x00118cc8
+     * @ghidraAddress PAL: 0x00119218
      */
     void RunMainLoop();
 
+#ifdef VIDEO_STANDARD_PAL
+    /**
+     * Stop the main loop after its current pass.
+     *
+     * No code calls it. The title is inferred.
+     *
+     * @ghidraAddress PAL: 0x00119238
+     */
+    void StopMainLoop();
+#endif
+
     /**
      * @return The game manager.
-     * @ghidraAddress 0x00118eb8
+     * @ghidraAddress NTSC-U/C: 0x00118eb8
+     * @ghidraAddress PAL: 0x00119418
      */
     GameManagerImpl *GetGameManager();
 
     /**
      * @return The hardware synth.
-     * @ghidraAddress 0x00118ec0
+     * @ghidraAddress NTSC-U/C: 0x00118ec0
+     * @ghidraAddress PAL: 0x00119420
      */
     Ps2HardSynth *GetSynth();
 
     /**
      * @return The long-operation watchdog.
-     * @ghidraAddress 0x00118eb0
+     * @ghidraAddress NTSC-U/C: 0x00118eb0
+     * @ghidraAddress PAL: 0x00119410
      */
     Watchdog *GetWatchdog();
 
     /**
      * @return The watchdog's time base.
-     * @ghidraAddress 0x00118e70
+     * @ghidraAddress NTSC-U/C: 0x00118e70
+     * @ghidraAddress PAL: 0x001193d0
      */
     WatchdogTimer *GetWatchdogTimer();
 
     /**
      * @return The sink that runs posted script text.
-     * @ghidraAddress 0x00118ef8
+     * @ghidraAddress NTSC-U/C: 0x00118ef8
+     * @ghidraAddress PAL: 0x00119458
      */
     ScriptSink *GetScriptSink();
 
     /**
      * @return The shared log stream, which the remix tasks also use as the remix payload buffer.
-     * @ghidraAddress 0x00118f00
+     * @ghidraAddress NTSC-U/C: 0x00118f00
+     * @ghidraAddress PAL: 0x00119460
      */
     IOBPreallocMemStream *GetLog();
 
@@ -149,7 +173,8 @@ public:
      * as the destination of a remix payload. The title is inferred.
      *
      * @return The log stream, rewound through Reset().
-     * @ghidraAddress 0x00118f08
+     * @ghidraAddress NTSC-U/C: 0x00118f08
+     * @ghidraAddress PAL: 0x00119468
      */
     IOBPreallocMemStream *GetResetLog();
 
@@ -159,7 +184,8 @@ public:
      * Reads mGameManager directly rather than through GetGameManager().
      *
      * @return GameManagerImpl::GetWorld().
-     * @ghidraAddress 0x00118d40
+     * @ghidraAddress NTSC-U/C: 0x00118d40
+     * @ghidraAddress PAL: 0x001192a0
      */
     GrooveWorld *GetWorld();
 
@@ -170,7 +196,8 @@ public:
      * it.
      *
      * @return GameManagerImpl::GetMetaWorld().
-     * @ghidraAddress 0x00118d70
+     * @ghidraAddress NTSC-U/C: 0x00118d70
+     * @ghidraAddress PAL: 0x001192d0
      */
     MetaGameWorld *GetMetaWorld();
 
@@ -180,7 +207,8 @@ public:
      * Reads mGameManager directly. The image records no caller.
      *
      * @return GameManagerImpl::GetUnwrittenValue().
-     * @ghidraAddress 0x00118ec8
+     * @ghidraAddress NTSC-U/C: 0x00118ec8
+     * @ghidraAddress PAL: 0x00119428
      */
     int GetUnwrittenValue();
 
@@ -188,7 +216,8 @@ public:
      * Report the game manager's play mode.
      *
      * @return GameManagerImpl::GetPlayMode().
-     * @ghidraAddress 0x00118dd8
+     * @ghidraAddress NTSC-U/C: 0x00118dd8
+     * @ghidraAddress PAL: 0x00119338
      */
     int GetPlayMode();
 
@@ -196,7 +225,8 @@ public:
      * Report the game manager's game mode.
      *
      * @return GameManagerImpl::GetGameMode().
-     * @ghidraAddress 0x00118e08
+     * @ghidraAddress NTSC-U/C: 0x00118e08
+     * @ghidraAddress PAL: 0x00119368
      */
     int GetGameMode();
 
@@ -206,7 +236,8 @@ public:
      * The body composes GetWorld() with GrooveWorld::GetSongClock().
      *
      * @return The world's song clock.
-     * @ghidraAddress 0x00118e78
+     * @ghidraAddress NTSC-U/C: 0x00118e78
+     * @ghidraAddress PAL: 0x001193d8
      */
     Sch::TickClock *GetSongClock();
 
@@ -216,7 +247,8 @@ public:
      * The body composes GetWorld() with GrooveWorld::GetPlayMap().
      *
      * @return The play map.
-     * @ghidraAddress 0x00118da0
+     * @ghidraAddress NTSC-U/C: 0x00118da0
+     * @ghidraAddress PAL: 0x00119300
      */
     PlayMap *GetPlayMap();
 
@@ -224,7 +256,8 @@ public:
      * Report whether the session is a jukebox session.
      *
      * @return GameParams::mJukeboxMode of GameManagerImpl::GetParams().
-     * @ghidraAddress 0x00118e38
+     * @ghidraAddress NTSC-U/C: 0x00118e38
+     * @ghidraAddress PAL: 0x00119398
      */
     int IsJukeboxMode();
 
@@ -234,7 +267,8 @@ public:
      * The body composes GetWorld() with GrooveWorld::GetLevel().
      *
      * @return The level.
-     * @ghidraAddress 0x00118d18
+     * @ghidraAddress NTSC-U/C: 0x00118d18
+     * @ghidraAddress PAL: 0x00119278
      */
     LevelData *GetLevel();
 
@@ -245,7 +279,8 @@ public:
      * a finiteness test of song position 0 whose result is discarded. The title is inferred.
      *
      * @return The tempo, in microseconds per quarter note.
-     * @ghidraAddress 0x00118ce8
+     * @ghidraAddress NTSC-U/C: 0x00118ce8
+     * @ghidraAddress PAL: 0x00119248
      */
     int GetTempo();
 
@@ -262,6 +297,7 @@ private:
 /**
  * Buffer that Globals opens its log stream over.
  *
- * @ghidraAddress 0x0086f7d0
+ * @ghidraAddress NTSC-U/C: 0x0086f7d0
+ * @ghidraAddress PAL: 0x008b3ed0
  */
 extern char g_abLogBuffer[kLogBufferSize];

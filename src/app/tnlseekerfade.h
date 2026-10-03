@@ -26,7 +26,8 @@ public:
      *
      * @param nIndex The seeker, and the player index.
      * @param color The seeker colour.
-     * @ghidraAddress 0x00438308
+     * @ghidraAddress NTSC-U/C: 0x00438308
+     * @ghidraAddress PAL: 0x004740b8
      */
     TnlSeekerFade(int nIndex, const Color &color);
 
@@ -35,7 +36,8 @@ public:
      *
      * @param nActive Non-zero to apply mFirstSlice, mSliceCount, and mRing, zero to apply
      *                `(0, 0, 0)`.
-     * @ghidraAddress 0x00454a68
+     * @ghidraAddress NTSC-U/C: 0x00454a68
+     * @ghidraAddress PAL: 0x00491f98
      */
     void SetActive(int nActive);
 
@@ -46,7 +48,8 @@ public:
      * for a non-empty range and to 0 otherwise. The seeker colour is rewritten only when the alpha
      * changed.
      *
-     * @ghidraAddress 0x00454b58
+     * @ghidraAddress NTSC-U/C: 0x00454b58
+     * @ghidraAddress PAL: 0x00492088
      */
     void Update();
 

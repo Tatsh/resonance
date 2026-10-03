@@ -39,7 +39,8 @@ public:
      * @param pPlayer The player.
      * @param nIndex The player's index in the world and its seeker index.
      * @param pTunnel The tunnel that allocated this object.
-     * @ghidraAddress 0x00440020
+     * @ghidraAddress NTSC-U/C: 0x00440020
+     * @ghidraAddress PAL: 0x0047cb70
      */
     TnlPlayer(Player *pPlayer, int nIndex, AppTunnel *pTunnel);
 
@@ -51,7 +52,8 @@ public:
      *
      * @param flFrame The song position.
      * @param flScaledFrame The song position scaled by the AppTunnel factor at `+0x144`.
-     * @ghidraAddress 0x00440b48
+     * @ghidraAddress NTSC-U/C: 0x00440b48
+     * @ghidraAddress PAL: 0x0047d7c0
      */
     void Update(float flFrame, float flScaledFrame);
 
@@ -62,7 +64,8 @@ public:
      * emitted in AppTunnel's translation unit.
      *
      * @param flFrame The frame the paths start from.
-     * @ghidraAddress 0x00457008
+     * @ghidraAddress NTSC-U/C: 0x00457008
+     * @ghidraAddress PAL: 0x00494538
      */
     void SetCrippleFrame(float flFrame) {
         mCrippleFrame = flFrame;

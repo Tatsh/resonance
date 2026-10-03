@@ -24,7 +24,7 @@ constexpr float kPi = 3.1415925f;
 
 } // namespace
 
-// 0x0043c118
+// NTSC-U/C: 0x0043c118, PAL: 0x004786e0
 TnlNowRing::TnlNowRing(int nMeshCount, int nPlayerCount) : mResetPending(1) {
     mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("nowring.view")));
     mRotView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("nowring rot.view")));
@@ -38,7 +38,7 @@ TnlNowRing::TnlNowRing(int nMeshCount, int nPlayerCount) : mResetPending(1) {
     mPlayerMeshes.resize(nPlayerCount, 0);
 }
 
-// 0x00456268
+// NTSC-U/C: 0x00456268, PAL: 0x00493798
 void TnlNowRing::SetPlayerMesh(int nPlayer, int nMesh) {
     mPlayerMeshes[nPlayer] = nMesh;
     if (mResetPending == 0) {
@@ -46,7 +46,7 @@ void TnlNowRing::SetPlayerMesh(int nPlayer, int nMesh) {
     }
 }
 
-// 0x00456148
+// NTSC-U/C: 0x00456148, PAL: 0x00493678
 void TnlNowRing::SetFrame(float flFrame) {
     if (mResetPending == 0 || !(kResetFrame < flFrame)) {
         return;
@@ -56,7 +56,7 @@ void TnlNowRing::SetFrame(float flFrame) {
     mResetPending = 0;
 }
 
-// 0x00456028
+// NTSC-U/C: 0x00456028, PAL: 0x00493558
 void TnlNowRing::SetRotation(int nStep) {
     if (mResetPending == 0) {
         return;
@@ -73,7 +73,7 @@ void TnlNowRing::SetRotation(int nStep) {
     mRotView->mDirty = 1;
 }
 
-// 0x004562a0
+// NTSC-U/C: 0x004562a0, PAL: 0x004937d0
 void TnlNowRing::RefreshMeshes() {
     for (std::vector<Rnd::Mesh *>::iterator it = mMeshes.begin(); it != mMeshes.end(); ++it) {
         (*it)->SetShowing(1);
@@ -83,7 +83,7 @@ void TnlNowRing::RefreshMeshes() {
     }
 }
 
-// 0x00455ff8
+// NTSC-U/C: 0x00455ff8, PAL: 0x00493528
 void TnlNowRing::SetShowing(int nShowing) {
     mView->SetShowing(nShowing);
 }

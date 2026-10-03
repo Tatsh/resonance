@@ -18,7 +18,8 @@ public:
      * The wires, `<layout> loopwires<n>.mesh`, show only in kPlayModeJam.
      *
      * @param nIndex The track display number that fills `<n>`.
-     * @ghidraAddress 0x00417b40
+     * @ghidraAddress NTSC-U/C: 0x00417b40
+     * @ghidraAddress PAL: 0x00451b00
      */
     HudLoop(int nIndex);
 
@@ -28,7 +29,8 @@ public:
      * The constructor is its one caller. The name is inferred.
      *
      * @param nShowing Non-zero to show.
-     * @ghidraAddress 0x00429e38
+     * @ghidraAddress NTSC-U/C: 0x00429e38
+     * @ghidraAddress PAL: 0x00465478
      */
     void SetShowing(int nShowing);
 

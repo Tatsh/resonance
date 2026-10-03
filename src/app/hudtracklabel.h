@@ -19,7 +19,8 @@ public:
      * Resolve the label's mesh and text, and show the mesh.
      *
      * @param nIndex The track display number that fills `<layout> track<n>.mesh` and `.txt`.
-     * @ghidraAddress 0x00417d58
+     * @ghidraAddress NTSC-U/C: 0x00417d58
+     * @ghidraAddress PAL: 0x00451d58
      */
     HudTrackLabel(int nIndex);
 
@@ -29,7 +30,8 @@ public:
      * The out-of-line copy has no caller. The title is inferred.
      *
      * @param text The text to show.
-     * @ghidraAddress 0x00429e68
+     * @ghidraAddress NTSC-U/C: 0x00429e68
+     * @ghidraAddress PAL: 0x004654a8
      */
     void SetText(const HxStr &text);
 

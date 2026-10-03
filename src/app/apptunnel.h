@@ -98,7 +98,8 @@ public:
      * camera pose with every activator suppressed and the now ring hidden.
      *
      * @param pRenderer The renderer that constructs this object.
-     * @ghidraAddress 0x00442020
+     * @ghidraAddress NTSC-U/C: 0x00442020
+     * @ghidraAddress PAL: 0x0047ee28
      */
     AppTunnel(Renderer *pRenderer);
 
@@ -107,7 +108,8 @@ public:
      *
      * Clears g_pAppTunnel first. The pending triggers are not deleted.
      *
-     * @ghidraAddress 0x00445740
+     * @ghidraAddress NTSC-U/C: 0x00445740
+     * @ghidraAddress PAL: 0x00482950
      */
     virtual ~AppTunnel();
 
@@ -118,7 +120,8 @@ public:
      * every other type are ignored, and nothing is passed on to MsgSink.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x00449688
+     * @ghidraAddress NTSC-U/C: 0x00449688
+     * @ghidraAddress PAL: 0x00486938
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -132,7 +135,8 @@ public:
      * Rnd::Animatable::SetFrame() on its three views.
      *
      * @param flFrame The song position, in MIDI ticks.
-     * @ghidraAddress 0x00446960
+     * @ghidraAddress NTSC-U/C: 0x00446960
+     * @ghidraAddress PAL: 0x00483b90
      */
     void SetFrame(float flFrame);
 
@@ -144,7 +148,8 @@ public:
      *
      * @param pOldLeader The previous leader, or null.
      * @param pNewLeader The new leader, or null.
-     * @ghidraAddress 0x00446838
+     * @ghidraAddress NTSC-U/C: 0x00446838
+     * @ghidraAddress PAL: 0x00483a68
      */
     void OnLeaderChanged(Player *pOldLeader, Player *pNewLeader);
 
@@ -163,7 +168,8 @@ public:
      * @param pPlayer The cell's player.
      * @param nPowerup The cell's `mPowerup`.
      * @param nEnabled The cell's `mEnabled`.
-     * @ghidraAddress 0x004465a0
+     * @ghidraAddress NTSC-U/C: 0x004465a0
+     * @ghidraAddress PAL: 0x004837d0
      */
     void OnBarChanged(
         int nTrack, int nBar, int nRefreshing, Player *pPlayer, int nPowerup, int nEnabled);
@@ -176,7 +182,8 @@ public:
      *
      * @param nView The index of the local view.
      * @param flFrame The song position, in MIDI ticks. The body does not read it.
-     * @ghidraAddress 0x00457bd0
+     * @ghidraAddress NTSC-U/C: 0x00457bd0
+     * @ghidraAddress PAL: 0x00495100
      */
     void PrepareLocalView(int nView, float flFrame);
 
@@ -188,7 +195,8 @@ public:
      * changed. The title is inferred from the particle system and its DurGemTrails callers.
      *
      * @param pos The point, in the space of the tunnel strings.
-     * @ghidraAddress 0x00457a98
+     * @ghidraAddress NTSC-U/C: 0x00457a98
+     * @ghidraAddress PAL: 0x00494fc8
      */
     void PlaceStringFlare(const Vector3 &pos);
 
@@ -202,7 +210,8 @@ public:
      * @param nTrack The track.
      * @param nBar The bar.
      * @return 1 when the bar is locked, 0 otherwise.
-     * @ghidraAddress 0x00457338
+     * @ghidraAddress NTSC-U/C: 0x00457338
+     * @ghidraAddress PAL: 0x00494868
      */
     int IsTrackBarLocked(int nTrack, int nBar);
 
@@ -215,7 +224,8 @@ public:
      *
      * @param nTrack The track.
      * @param pGhost The drawable, the Rnd::Drawable subobject of the activator's ghost view.
-     * @ghidraAddress 0x00457418
+     * @ghidraAddress NTSC-U/C: 0x00457418
+     * @ghidraAddress PAL: 0x00494948
      */
     void ShowTrackGhost(int nTrack, Rnd::Drawable *pGhost);
 
@@ -225,7 +235,8 @@ public:
      * TnlActivator is the caller. The title is inferred.
      *
      * @param nTrack The track.
-     * @ghidraAddress 0x004574c8
+     * @ghidraAddress NTSC-U/C: 0x004574c8
+     * @ghidraAddress PAL: 0x004949f8
      */
     void HideTrackGhost(int nTrack);
 
@@ -234,7 +245,8 @@ public:
      *
      * @param nTrack The track.
      * @return The material.
-     * @ghidraAddress 0x00457570
+     * @ghidraAddress NTSC-U/C: 0x00457570
+     * @ghidraAddress PAL: 0x00494aa0
      */
     Rnd::Mat *GetGhostMat(int nTrack);
 
@@ -246,7 +258,8 @@ public:
      * TnlGem::Flash() and TnlGemManager::Update() are the callers. The title is inferred.
      *
      * @param pos The point.
-     * @ghidraAddress 0x00457588
+     * @ghidraAddress NTSC-U/C: 0x00457588
+     * @ghidraAddress PAL: 0x00494ab8
      */
     void StartGemFlash(const Vector3 &pos);
 
@@ -259,7 +272,8 @@ public:
      * @param nSlice The slice of the cell.
      * @param nForward Non-zero to run the effect forward.
      * @return 1 when an effect started, 0 when every effect was busy.
-     * @ghidraAddress 0x00457648
+     * @ghidraAddress NTSC-U/C: 0x00457648
+     * @ghidraAddress PAL: 0x00494b78
      */
     int StartPanelFX(int nRing, int nSlice, int nForward);
 
@@ -286,7 +300,7 @@ private:
     };
 
     // Offer a fire to each TnlFireFX in turn until one starts it. HandleMessage() inlines this.
-    // 0x004576a0
+    // NTSC-U/C: 0x004576a0, PAL: 0x00494bd0
     void StartFireFX(float flPathStart,
                      int nIndex,
                      int nSlot,
@@ -299,7 +313,7 @@ private:
     int StartCrippleFX(const std::vector<TnlPlayer *> &targets, float flFrame);
 
     // Start the first idle TnlBumpFX. Returns 1 when one started. HandleMessage() inlines this.
-    // 0x00457828
+    // NTSC-U/C: 0x00457828, PAL: 0x00494d58
     int StartBumpFX(int nStep, const HxStr &colorName, int nForward, float flPathOffset);
 
     // Start the first idle TnlSnake, through TnlSnake::Start() inlined. Returns 1 when one
@@ -314,7 +328,7 @@ private:
     void PlaceStringFlareOnRing(int nRing, float flBlend);
 
     // Append a panel to mPanels and set the frame it starts from. OnBarChanged() is the caller.
-    // 0x00447268
+    // NTSC-U/C: 0x00447268, PAL: 0x00484498
     void AddPanel(TnlPanel *pPanel, float flStartFrame);
 
     // GemMsg: queue a gem of the kind the track, the powerup, the ghost flag, and the jukebox
@@ -322,7 +336,7 @@ private:
     void OnGem(GemMsg *pMsg);
 
     // CatchMsg: mark the catcher target, and flash and pulse on a hit or queue a miss gem.
-    // 0x00447938
+    // NTSC-U/C: 0x00447938, PAL: 0x00484b88
     void OnCatch(CatchMsg *pMsg);
 
     // PhraseMuffedMsg: redraw the bar's panel when the player tried the phrase. 0x00447ba8.
@@ -347,18 +361,18 @@ private:
     void OnFreestyleFX(FreestyleFXMsg *pMsg);
 
     // DeployedPowerupMsg: the effect of a neutralizer, autocatcher, bumper, or multiplier.
-    // 0x00448d58
+    // NTSC-U/C: 0x00448d58, PAL: 0x00485fc8
     void OnDeployedPowerup(DeployedPowerupMsg *pMsg);
 
     // NowBarMsg: ease the player's pointer toward a lane. HandleMessage() inlines this.
-    // 0x00457cf0
+    // NTSC-U/C: 0x00457cf0, PAL: 0x00495220
     void OnNowBar(NowBarMsg *pMsg);
 
     // ClearGemMsg: remove one gem. HandleMessage() inlines this. 0x00457d88.
     void OnClearGem(ClearGemMsg *pMsg);
 
     // ClearGemsMsg: remove one bar's gems and end its trail. HandleMessage() inlines this.
-    // 0x00457dd8
+    // NTSC-U/C: 0x00457dd8, PAL: 0x00495308
     void OnClearGems(ClearGemsMsg *pMsg);
 
     // SusGemMsg: start or stop a sustain strip. HandleMessage() inlines this. 0x00457e48.
@@ -396,11 +410,11 @@ private:
     void OnAxeButton(AxeButtonMsg *pMsg);
 
     // PlayersTrackNeutralizedMsg: rumble the player's controller. HandleMessage() inlines this.
-    // 0x004580e8
+    // NTSC-U/C: 0x004580e8, PAL: 0x00495658
     void OnPlayersTrackNeutralized(PlayersTrackNeutralizedMsg *pMsg);
 
     // ToggleGhostMsg: show or hide the player's track ghost. HandleMessage() inlines this.
-    // 0x00458120
+    // NTSC-U/C: 0x00458120, PAL: 0x00495690
     void OnToggleGhost(ToggleGhostMsg *pMsg);
 
     // JuiceAmountMsg: in a solo game, blink the player's activator while the juice is low.
@@ -413,7 +427,7 @@ private:
 
     // Move each ghost material's alpha by its fade rate. A ghost that fades out completely hides
     // its gem kind, and either end of the range stops the fade. SetFrame() is the caller.
-    // 0x00446460
+    // NTSC-U/C: 0x00446460, PAL: 0x00483690
     void UpdateGhostFades();
 
     Renderer *mRenderer; // +0x04
@@ -499,6 +513,7 @@ private:
  *
  * The constructor stores the object and the destructor clears the word.
  *
- * @ghidraAddress 0x006e42a0
+ * @ghidraAddress NTSC-U/C: 0x006e42a0
+ * @ghidraAddress PAL: 0x00727bc0
  */
 extern AppTunnel *g_pAppTunnel;

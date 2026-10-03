@@ -41,7 +41,7 @@ inline void ResetLocalXfm(Rnd::Transformable *pTrans, const Transform &identity)
 
 } // namespace
 
-// 0x00440020
+// NTSC-U/C: 0x00440020, PAL: 0x0047cb70
 TnlPlayer::TnlPlayer(Player *pPlayer, int nIndex, AppTunnel *pTunnel)
     : mPlayerNum(pPlayer->GetInputSlot() + 1), mCrippleFrame(kUnsetFrame),
       mCrippleActPath(FindObject<Rnd::TransAnim>("crip act path")), mActivatorFx(nullptr),
@@ -81,7 +81,7 @@ TnlPlayer::TnlPlayer(Player *pPlayer, int nIndex, AppTunnel *pTunnel)
     }
 }
 
-// 0x00440b48
+// NTSC-U/C: 0x00440b48, PAL: 0x0047d7c0
 void TnlPlayer::Update(float flFrame, float flScaledFrame) {
     mActivator.Update(flFrame, flScaledFrame);
     mGridMarkers.Update(flFrame);

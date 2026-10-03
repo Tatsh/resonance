@@ -31,7 +31,7 @@ constexpr unsigned kLargestCount = 9;
 
 } // namespace
 
-// 0x004191b8
+// NTSC-U/C: 0x004191b8, PAL: 0x00453640
 HudCountdown::HudCountdown(int nIndex, int nTargetBar)
     : mTargetBar(nTargetBar), mShownCount(kNoCount), mChangeFrame(kNoFrame) {
     const char *pszLayout =
@@ -57,7 +57,7 @@ HudCountdown::HudCountdown(int nIndex, int nTargetBar)
     }
 }
 
-// 0x004194c0
+// NTSC-U/C: 0x004194c0, PAL: 0x00453998
 void HudCountdown::SetFrame(float flFrame) {
     if (mDisabled != 0) {
         return;

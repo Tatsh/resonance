@@ -39,14 +39,16 @@ public:
      *
      * @param nPlayerCount The number of players, each with an outer camera and a local view.
      * @param nSkipIntro Non-zero to start in the playing pose. AppTunnel passes its `+0xc8`.
-     * @ghidraAddress 0x00440d30
+     * @ghidraAddress NTSC-U/C: 0x00440d30
+     * @ghidraAddress PAL: 0x0047d9a8
      */
     TnlCameraRig(int nPlayerCount, int nSkipIntro);
 
     /**
      * Run the ramp towards the playing pose and hide the outer cameras and views of players 2 to 4.
      *
-     * @ghidraAddress 0x004414a0
+     * @ghidraAddress NTSC-U/C: 0x004414a0
+     * @ghidraAddress PAL: 0x0047e1b8
      */
     void ZoomIn();
 
@@ -56,7 +58,8 @@ public:
      * The views of players 2 to 4 show again once the ramp settles. AppTunnel inlines this, and
      * the out-of-line copy has no caller.
      *
-     * @ghidraAddress 0x00457118
+     * @ghidraAddress NTSC-U/C: 0x00457118
+     * @ghidraAddress PAL: 0x00494648
      */
     void ZoomOut();
 
@@ -68,7 +71,8 @@ public:
      * the ramp settles after ZoomOut(), the outer cameras and views of players 2 to 4 show.
      *
      * @param flTime The current time.
-     * @ghidraAddress 0x00441558
+     * @ghidraAddress NTSC-U/C: 0x00441558
+     * @ghidraAddress PAL: 0x0047e270
      */
     void SetFrame(float flTime);
 

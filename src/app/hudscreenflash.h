@@ -19,7 +19,8 @@ public:
     /**
      * Resolve the rectangle and show it fully opaque.
      *
-     * @ghidraAddress 0x0041b150
+     * @ghidraAddress NTSC-U/C: 0x0041b150
+     * @ghidraAddress PAL: 0x00455a88
      */
     HudScreenFlash();
 
@@ -31,7 +32,8 @@ public:
      *
      * @param flDuration The time the fade takes, in milliseconds.
      * @param nFadeIn Non-zero to fade from opaque to clear, and zero to fade from clear to opaque.
-     * @ghidraAddress 0x0042a548
+     * @ghidraAddress NTSC-U/C: 0x0042a548
+     * @ghidraAddress PAL: 0x00465898
      */
     void Start(float flDuration, int nFadeIn);
 
@@ -41,7 +43,8 @@ public:
      * Does nothing before the fade starts. Once the fade has run its duration, the alpha stays at
      * its end value and the fade is marked finished.
      *
-     * @ghidraAddress 0x0041b2a0
+     * @ghidraAddress NTSC-U/C: 0x0041b2a0
+     * @ghidraAddress PAL: 0x00455bf8
      */
     void SetFrame();
 

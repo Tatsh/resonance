@@ -31,7 +31,8 @@ public:
      * when one exists.
      *
      * @param name The object name the three suffixes are appended to.
-     * @ghidraAddress 0x00416dd8
+     * @ghidraAddress NTSC-U/C: 0x00416dd8
+     * @ghidraAddress PAL: 0x00450ac0
      */
     HudTextMessage(const HxStr &name);
 
@@ -41,7 +42,8 @@ public:
      * HudTrack's destructor and Overlay's destructor inline the body, and the out-of-line copy has
      * no caller.
      *
-     * @ghidraAddress 0x00429aa8
+     * @ghidraAddress NTSC-U/C: 0x00429aa8
+     * @ghidraAddress PAL: 0x004650e8
      */
     ~HudTextMessage() {
         mFont->SetSize(mFontSize);
@@ -56,7 +58,8 @@ public:
      * @param text The text to show.
      * @param flScale The font scale relative to the original size.
      * @param flHold How long the message stays between its fades.
-     * @ghidraAddress 0x00429b58
+     * @ghidraAddress NTSC-U/C: 0x00429b58
+     * @ghidraAddress PAL: 0x00465198
      */
     void Show(const HxStr &text, float flScale, float flHold);
 
@@ -65,7 +68,8 @@ public:
      *
      * The title is inferred.
      *
-     * @ghidraAddress 0x00429af8
+     * @ghidraAddress NTSC-U/C: 0x00429af8
+     * @ghidraAddress PAL: 0x00465138
      */
     void Hide();
 
@@ -73,7 +77,8 @@ public:
      * Advance the fade animation, hiding the text once it has faded out.
      *
      * @param flTime The current time. The first call after Show() records it as the start.
-     * @ghidraAddress 0x00429c20
+     * @ghidraAddress NTSC-U/C: 0x00429c20
+     * @ghidraAddress PAL: 0x00465260
      */
     void SetFrame(float flTime);
 

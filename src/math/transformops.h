@@ -11,7 +11,8 @@ extern "C" {
  *
  * @param pDst Receives the inverse, four rows of four floats.
  * @param pSrc The transform to invert, four rows of four floats.
- * @ghidraAddress 0x005e7b08
+ * @ghidraAddress NTSC-U/C: 0x005e7b08
+ * @ghidraAddress PAL: 0x00629cf0
  */
 void sceVu0InversMatrix(float *pDst, const float *pSrc);
 
@@ -25,7 +26,8 @@ void sceVu0InversMatrix(float *pDst, const float *pSrc);
  * @param pDst Receives the product, four rows of four floats. It may alias either factor.
  * @param pA The left factor, four rows of four floats.
  * @param pB The right factor, four rows of four floats.
- * @ghidraAddress 0x005e7a58
+ * @ghidraAddress NTSC-U/C: 0x005e7a58
+ * @ghidraAddress PAL: 0x00629c40
  */
 void sceVu0MulAffineMatrix(float *pDst, const float *pA, const float *pB);
 
@@ -39,7 +41,8 @@ void sceVu0MulAffineMatrix(float *pDst, const float *pA, const float *pB);
  * @param pDst Receives the product, four rows of four floats. It may alias either factor.
  * @param pA The left factor, four rows of four floats.
  * @param pB The right factor, four rows of four floats.
- * @ghidraAddress 0x005e7ab0
+ * @ghidraAddress NTSC-U/C: 0x005e7ab0
+ * @ghidraAddress PAL: 0x00629c98
  */
 void sceVu0MulAffineMatrixXyz(float *pDst, const float *pA, const float *pB);
 
@@ -54,7 +57,8 @@ void sceVu0MulAffineMatrixXyz(float *pDst, const float *pA, const float *pB);
  * @param pA The transform applied first, four rows of four floats.
  * @param pB The transform applied second, four rows of four floats.
  * @param pOut Receives the composition and may alias either input.
- * @ghidraAddress 0x0045dae8
+ * @ghidraAddress NTSC-U/C: 0x0045dae8
+ * @ghidraAddress PAL: 0x0049b190
  */
 void XfmConcat(const float *pA, const float *pB, float *pOut);
 
@@ -68,7 +72,8 @@ void XfmConcat(const float *pA, const float *pB, float *pOut);
  *
  * @param pAngles The three angles in radians, ordered X, Y, and Z.
  * @param pMat3Rows Receives the rotation, three rows of four floats.
- * @ghidraAddress 0x004f0430
+ * @ghidraAddress NTSC-U/C: 0x004f0430
+ * @ghidraAddress PAL: 0x0052f020
  */
 void EulerAnglesToMatrix3x3(const float *pAngles, float *pMat3Rows);
 
@@ -87,7 +92,8 @@ void EulerAnglesToMatrix3x3(const float *pAngles, float *pMat3Rows);
  * @param pAxisY The direction the Y row takes, four floats.
  * @param pReference The reference direction, three floats.
  * @param pMat3Rows Receives the basis, three rows of four floats.
- * @ghidraAddress 0x004f0538
+ * @ghidraAddress NTSC-U/C: 0x004f0538
+ * @ghidraAddress PAL: 0x0052f128
  */
 void Mat33BuildOrthonormal(const float *pAxisY, const float *pReference, float *pMat3Rows);
 
@@ -103,7 +109,8 @@ void Mat33BuildOrthonormal(const float *pAxisY, const float *pReference, float *
  *
  * @param pSrc The basis to rebuild, three rows of four floats.
  * @param pDst Receives the orthonormal basis, three rows of four floats.
- * @ghidraAddress 0x002556c8
+ * @ghidraAddress NTSC-U/C: 0x002556c8
+ * @ghidraAddress PAL: 0x0026adc0
  */
 void Mat33OrthonormalizeAroundY(const float *pSrc, float *pDst);
 
@@ -119,7 +126,8 @@ void Mat33OrthonormalizeAroundY(const float *pSrc, float *pDst);
  * @param pMat3Rows The basis, three rows of four floats.
  * @param pAngles Receives the three angles in radians, ordered X, Y, and Z.
  * @param pScale Receives the three scales.
- * @ghidraAddress 0x004ee750
+ * @ghidraAddress NTSC-U/C: 0x004ee750
+ * @ghidraAddress PAL: 0x0052d2f8
  */
 void Mat34DecomposeEulerScale(const float *pMat3Rows, float *pAngles, float *pScale);
 
@@ -135,7 +143,8 @@ void Mat34DecomposeEulerScale(const float *pMat3Rows, float *pAngles, float *pSc
  * @param pMatA The left factor, three rows of four floats.
  * @param pMatB The right factor, three rows of four floats.
  * @param pOut Receives the product, and may alias either factor.
- * @ghidraAddress 0x00453ec8
+ * @ghidraAddress NTSC-U/C: 0x00453ec8
+ * @ghidraAddress PAL: 0x004913e8
  */
 void MultiplyMat3VU0(const float *pMatA, const float *pMatB, float *pOut);
 
@@ -149,7 +158,8 @@ void MultiplyMat3VU0(const float *pMatA, const float *pMatB, float *pOut);
  * @param pScale The three scales.
  * @param pMat3Rows The basis to scale, three rows of four floats.
  * @param pOut Receives the scaled basis, and may alias pMat3Rows.
- * @ghidraAddress 0x0045da58
+ * @ghidraAddress NTSC-U/C: 0x0045da58
+ * @ghidraAddress PAL: 0x0049b100
  */
 void ScaleRows3x3(const float *pScale, const float *pMat3Rows, float *pOut);
 
@@ -163,6 +173,7 @@ void ScaleRows3x3(const float *pScale, const float *pMat3Rows, float *pOut);
  * @param pVec The vector to transform, four floats.
  * @param pMat3Rows The rotation, three rows of four floats.
  * @param pOut Receives the transformed vector, and may alias pVec.
- * @ghidraAddress 0x00453ea0
+ * @ghidraAddress NTSC-U/C: 0x00453ea0
+ * @ghidraAddress PAL: 0x004913c0
  */
 void TransformVec3ByMat3VU0(const float *pVec, const float *pMat3Rows, float *pOut);

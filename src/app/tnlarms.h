@@ -29,7 +29,8 @@ public:
     /**
      * Resolve the view and the three systems.
      *
-     * @ghidraAddress 0x0043f3f8
+     * @ghidraAddress NTSC-U/C: 0x0043f3f8
+     * @ghidraAddress PAL: 0x0047bd80
      */
     TnlArms();
 
@@ -39,7 +40,8 @@ public:
      * AppTunnel inlines this, and the out-of-line copy has no caller.
      *
      * @param flFrame The trigger frame.
-     * @ghidraAddress 0x00456ad0
+     * @ghidraAddress NTSC-U/C: 0x00456ad0
+     * @ghidraAddress PAL: 0x00494000
      */
     void Start(float flFrame);
 
@@ -50,7 +52,8 @@ public:
      * out-of-line copy has no caller.
      *
      * @param flFrame The current frame.
-     * @ghidraAddress 0x00456ba0
+     * @ghidraAddress NTSC-U/C: 0x00456ba0
+     * @ghidraAddress PAL: 0x004940d0
      */
     void SetFrame(float flFrame);
 
@@ -61,7 +64,8 @@ public:
      * copy has no caller.
      *
      * @param pParent The drawable to add the arms view to.
-     * @ghidraAddress 0x00456a88
+     * @ghidraAddress NTSC-U/C: 0x00456a88
+     * @ghidraAddress PAL: 0x00493fb8
      */
     void AttachTo(Rnd::Drawable *pParent);
 

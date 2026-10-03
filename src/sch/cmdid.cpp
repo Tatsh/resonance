@@ -9,20 +9,20 @@
 namespace {
 
 // The next handle value to hand out, which starts at one so that no handle is zero.
-// 0x0077d2e8
+// NTSC-U/C: 0x0077d2e8, PAL: 0x007c10c0
 int g_nNextCmdIdValue = 1;
 
 // Handle values a replayed recording has reserved.
-// 0x008e4f08
+// NTSC-U/C: 0x008e4f08, PAL: 0x00929f08
 std::set<int> g_reservedCmdIdValues;
 
-// 0x008e4f18
+// NTSC-U/C: 0x008e4f18, PAL: 0x00929f18
 // The first reserved value the counter has not yet passed.
 std::set<int>::iterator g_itNextReservedCmdIdValue = g_reservedCmdIdValues.end();
 
 } // namespace
 
-// 0x005e4dc8
+// NTSC-U/C: 0x005e4dc8, PAL: 0x00626f88
 int CmdID::AllocateValue() {
     while (g_itNextReservedCmdIdValue != g_reservedCmdIdValues.end()) {
         if (*g_itNextReservedCmdIdValue != g_nNextCmdIdValue) {
@@ -34,24 +34,24 @@ int CmdID::AllocateValue() {
     return g_nNextCmdIdValue++;
 }
 
-// 0x005e5908
+// NTSC-U/C: 0x005e5908, PAL: 0x00627ac8
 void CmdID::Reserve(CmdID id) {
     g_reservedCmdIdValues.insert(id.mValue);
     g_itNextReservedCmdIdValue = g_reservedCmdIdValues.begin();
 }
 
-// 0x005e59a0
+// NTSC-U/C: 0x005e59a0, PAL: 0x00627b60
 OBStream &CmdID::Save(OBStream &stream) {
     int nValue = mValue;
     return stream.Write(&nValue, sizeof(nValue));
 }
 
-// 0x005e59e0
+// NTSC-U/C: 0x005e59e0, PAL: 0x00627ba0
 IBStream &CmdID::Load(IBStream &stream) {
     return stream.Read(&mValue, sizeof(mValue));
 }
 
-// 0x005e5958
+// NTSC-U/C: 0x005e5958, PAL: 0x00627b18
 void CmdID::Print(std::ostream &stream) {
     stream << "{cmdID " << mValue << '}';
 }

@@ -26,7 +26,8 @@ public:
      *
      * @param nIndex The track display number that fills `<layout> pts<n>`, `ptsmult<n>`, and
      *        `pts_exit<n>`.
-     * @ghidraAddress 0x00418818
+     * @ghidraAddress NTSC-U/C: 0x00418818
+     * @ghidraAddress PAL: 0x00452918
      */
     HudPoints(int nIndex);
 
@@ -38,7 +39,8 @@ public:
      * and the pulse then fall by 0.2 and 0.05.
      *
      * @param flTime The time AnimRange::Update() compares against.
-     * @ghidraAddress 0x00418de8
+     * @ghidraAddress NTSC-U/C: 0x00418de8
+     * @ghidraAddress PAL: 0x00452fa8
      */
     void SetFrame(float flTime);
 
@@ -49,7 +51,8 @@ public:
      * frame 100 at full flash. The title is inferred.
      *
      * @param nPoints The points to show exiting.
-     * @ghidraAddress 0x00418f90
+     * @ghidraAddress NTSC-U/C: 0x00418f90
+     * @ghidraAddress PAL: 0x004533d8
      */
     void ShowExit(int nPoints);
 
@@ -58,7 +61,8 @@ public:
      *
      * The exit animation plays from frame 200 to frame 300. The title is inferred.
      *
-     * @ghidraAddress 0x004190a8
+     * @ghidraAddress NTSC-U/C: 0x004190a8
+     * @ghidraAddress PAL: 0x00453510
      */
     void Bank();
 
@@ -82,7 +86,8 @@ public:
      * The out-of-line copy has no caller. The title is inferred.
      *
      * @param nPoints The points to show.
-     * @ghidraAddress 0x00429fe0
+     * @ghidraAddress NTSC-U/C: 0x00429fe0
+     * @ghidraAddress PAL: 0x00453150
      */
     void SetPoints(int nPoints);
 

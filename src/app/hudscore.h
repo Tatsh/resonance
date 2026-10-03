@@ -30,7 +30,8 @@ public:
      *
      * @param pPlayer The player whose colour the font takes.
      * @param nIndex The badge number that fills `<n>`.
-     * @ghidraAddress 0x00419618
+     * @ghidraAddress NTSC-U/C: 0x00419618
+     * @ghidraAddress PAL: 0x00453b10
      */
     HudScore(Player *pPlayer, int nIndex);
 
@@ -40,7 +41,8 @@ public:
      * HudBadge::SetFrame() inlines the body, and this copy has no caller.
      *
      * @param flTime The time HudBadge::SetFrame() receives as its second argument.
-     * @ghidraAddress 0x0042a220
+     * @ghidraAddress NTSC-U/C: 0x0042a220
+     * @ghidraAddress PAL: 0x00454120
      */
     void Update(float flTime);
 

@@ -37,7 +37,7 @@ constexpr float kMaxAlpha = 0.8f;
 
 constexpr float kCentreLane = 0.5f;
 
-// 0x004546a0
+// NTSC-U/C: 0x004546a0, PAL: 0x00491bd0
 // Deletes a marker's mesh. ~Marker() expands it inline, and this out-of-line copy has no caller.
 inline void DeleteMesh(Rnd::Mesh *pMesh) {
     delete pMesh;
@@ -49,7 +49,7 @@ TnlGridMarkers::Marker::~Marker() {
     DeleteMesh(mMesh);
 }
 
-// 0x00438fe0
+// NTSC-U/C: 0x00438fe0, PAL: 0x00474e10
 void TnlGridMarkers::Marker::Init(Rnd::Mesh *pSource, Rnd::Drawable *pParent) {
     if (!pSource) {
         mMesh = nullptr;
@@ -60,7 +60,7 @@ void TnlGridMarkers::Marker::Init(Rnd::Mesh *pSource, Rnd::Drawable *pParent) {
     pParent->AddDraw(mMesh, nullptr);
 }
 
-// 0x00454fb0
+// NTSC-U/C: 0x00454fb0, PAL: 0x004924e0
 void TnlGridMarkers::Marker::Place(int nTrack, int nFrame) {
     if (!mMesh) {
         return;
@@ -70,7 +70,7 @@ void TnlGridMarkers::Marker::Place(int nTrack, int nFrame) {
     mFrame = flFrame;
 }
 
-// 0x00439150
+// NTSC-U/C: 0x00439150, PAL: 0x00474fa0
 TnlGridMarkers::TnlGridMarkers(AppTunnel *pTunnel, int nPlayerNum) : mTrack(0), mTunnel(pTunnel) {
     Rnd::View *pView = dynamic_cast<Rnd::View *>(
         Rnd::g_manager.Find(HxStr(FormatString("grid%d.view", nPlayerNum))));
@@ -92,7 +92,7 @@ TnlGridMarkers::TnlGridMarkers(AppTunnel *pTunnel, int nPlayerNum) : mTrack(0), 
     }
 }
 
-// 0x004550c8
+// NTSC-U/C: 0x004550c8, PAL: 0x004925f8
 void TnlGridMarkers::SetTrack(int nTrack) {
     for (auto it = mMarkers.begin(); it != mMarkers.end(); ++it) {
         it->Place(nTrack, static_cast<int>(it->mFrame));
@@ -100,7 +100,7 @@ void TnlGridMarkers::SetTrack(int nTrack) {
     mTrack = nTrack;
 }
 
-// 0x00439718
+// NTSC-U/C: 0x00439718, PAL: 0x004755b8
 void TnlGridMarkers::Update(float flFrame) {
     for (auto it = mMarkers.begin(); it != mMarkers.end(); ++it) {
         if (kRecycleDistance < flFrame - it->mFrame) {

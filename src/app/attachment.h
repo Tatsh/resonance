@@ -27,7 +27,8 @@ public:
     }
 
     /**
-     * @ghidraAddress 0x004bfe30
+     * @ghidraAddress NTSC-U/C: 0x004bfe30
+     * @ghidraAddress PAL: 0x004fded0
      */
     virtual ~Attachment();
 
@@ -35,7 +36,8 @@ public:
      * Give back one reference and destroy the object once the last one is gone.
      *
      * @return The remaining reference count, or zero once the object has been destroyed.
-     * @ghidraAddress 0x004bfe60
+     * @ghidraAddress NTSC-U/C: 0x004bfe60
+     * @ghidraAddress PAL: 0x004fdf00
      */
     int Release();
 
@@ -44,7 +46,8 @@ public:
      *
      * The default implementation deletes the object through the virtual destructor.
      *
-     * @ghidraAddress 0x004bfea8
+     * @ghidraAddress NTSC-U/C: 0x004bfea8
+     * @ghidraAddress PAL: 0x004fdf48
      */
     virtual void Destroy();
 
@@ -56,7 +59,8 @@ public:
      * `0x004ac5e8`. The title is inferred.
      *
      * @param pAttachment The object, or null.
-     * @ghidraAddress 0x001b8d40
+     * @ghidraAddress NTSC-U/C: 0x001b8d40
+     * @ghidraAddress PAL: 0x001beb18
      */
     static void ReleaseIfSet(Attachment *pAttachment) {
         if (pAttachment != nullptr) {

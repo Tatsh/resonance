@@ -9,7 +9,7 @@
 
 namespace Sch {
 
-// 0x005d32f8
+// NTSC-U/C: 0x005d32f8, PAL: 0x00615360
 TimedCommand::TimedCommand(Command *pCommand, Tick tick, int bDelta)
     : mCommand(pCommand), mOrder(-1), mDueTick{-1}, mLocalTick(tick), mDelta(bDelta), mCmdID{-1} {
     // The store of pCommand sits in the branch delay slot of the null test and therefore runs
@@ -19,19 +19,19 @@ TimedCommand::TimedCommand(Command *pCommand, Tick tick, int bDelta)
     }
 }
 
-// 0x005d33e8
+// NTSC-U/C: 0x005d33e8, PAL: 0x00615450
 TimedCommand::~TimedCommand() {
     if (mCommand != nullptr) {
         mCommand->Release();
     }
 }
 
-// 0x005d33b8
+// NTSC-U/C: 0x005d33b8, PAL: 0x00615420
 void TimedCommand::Run() {
     mCommand->Execute();
 }
 
-// 0x005d30b0
+// NTSC-U/C: 0x005d30b0, PAL: 0x006150f8
 void TimedCommand::Print(std::ostream &stream) {
     HxStr sMode(" abs");
     if (mDelta != 0) {
@@ -48,7 +48,7 @@ void TimedCommand::Print(std::ostream &stream) {
     stream << ']';
 }
 
-// 0x005d3440
+// NTSC-U/C: 0x005d3440, PAL: 0x006154a8
 void TimedCommand::Save(OBStream &stream) {
     mDueTick.Save(stream); // Yes, the binary discards this call's result.
     stream.Write(&mOrder, sizeof(mOrder));
@@ -58,7 +58,7 @@ void TimedCommand::Save(OBStream &stream) {
     stream << mCommand;
 }
 
-// 0x005d34d0
+// NTSC-U/C: 0x005d34d0, PAL: 0x00615538
 void TimedCommand::Load(IBStream &stream) {
     mDueTick.Load(stream); // Yes, the binary discards this call's result.
     stream.Read(&mOrder, sizeof(mOrder));

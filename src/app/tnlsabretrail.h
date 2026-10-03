@@ -43,14 +43,16 @@ public:
      *
      * @param nIndex The player index, selecting "gem_glow<n>.ps".
      * @param colorName The player's colour name, whose first letter selects the string.
-     * @ghidraAddress 0x00438518
+     * @ghidraAddress NTSC-U/C: 0x00438518
+     * @ghidraAddress PAL: 0x00474308
      */
     TnlSabreTrail(int nIndex, HxStr colorName);
 
     /**
      * Empty the line.
      *
-     * @ghidraAddress 0x00454c50
+     * @ghidraAddress NTSC-U/C: 0x00454c50
+     * @ghidraAddress PAL: 0x00492180
      */
     ~TnlSabreTrail();
 
@@ -58,14 +60,16 @@ public:
      * Show or hide the string.
      *
      * @param nShowing Non-zero to show.
-     * @ghidraAddress 0x00454d30
+     * @ghidraAddress NTSC-U/C: 0x00454d30
+     * @ghidraAddress PAL: 0x00492260
      */
     void SetShowing(int nShowing);
 
     /**
      * Release every glow particle, drop every point, and zero the track and the bar range.
      *
-     * @ghidraAddress 0x00454dc8
+     * @ghidraAddress NTSC-U/C: 0x00454dc8
+     * @ghidraAddress PAL: 0x004922f8
      */
     void Clear();
 
@@ -74,7 +78,8 @@ public:
      *
      * Does nothing while mBarCount is zero.
      *
-     * @ghidraAddress 0x00454d60
+     * @ghidraAddress NTSC-U/C: 0x00454d60
+     * @ghidraAddress PAL: 0x00492290
      */
     void Rebuild();
 
@@ -88,7 +93,8 @@ public:
      * @param nTrack The tunnel track and the level track.
      * @param nFirstBar The first bar.
      * @param nBarCount The number of bars.
-     * @ghidraAddress 0x004387b0
+     * @ghidraAddress NTSC-U/C: 0x004387b0
+     * @ghidraAddress PAL: 0x004745e0
      */
     void Build(int nTrack, int nFirstBar, int nBarCount);
 
@@ -103,7 +109,8 @@ public:
      * @param nStrength The strength, the gems caught so far in the phrase.
      * @param nTotal The gems the phrase requires. AppTunnel's CatchMsg handler loads it into $a2
      *               at `0x00447af4`, and the body does not read it.
-     * @ghidraAddress 0x00438ad0
+     * @ghidraAddress NTSC-U/C: 0x00438ad0
+     * @ghidraAddress PAL: 0x00474900
      */
     void Pulse(float flFrame, int nStrength, int nTotal);
 
@@ -113,7 +120,8 @@ public:
      * Does nothing with fewer than two points.
      *
      * @param flFrame The song position.
-     * @ghidraAddress 0x00438c20
+     * @ghidraAddress NTSC-U/C: 0x00438c20
+     * @ghidraAddress PAL: 0x00474a50
      */
     void Update(float flFrame);
 

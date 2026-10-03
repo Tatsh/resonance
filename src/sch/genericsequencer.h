@@ -55,7 +55,8 @@ public:
      * Inline. The out-of-line copy at `0x001aa418` sits in the MultiMusePlayer unit, and the
      * instantiation's destructor expands the body. The title is inferred.
      *
-     * @ghidraAddress 0x001aa418
+     * @ghidraAddress NTSC-U/C: 0x001aa418
+     * @ghidraAddress PAL: 0x001b0180
      */
     void Withdraw() {
         const CmdID id = mCmdId;

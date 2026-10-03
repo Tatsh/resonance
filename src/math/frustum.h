@@ -38,7 +38,8 @@ struct Frustum {
  * @param flFov Field of view in radians.
  * @param flAspect Vertical extent divided by the horizontal extent.
  * @return frustum.
- * @ghidraAddress 0x00550b78
+ * @ghidraAddress NTSC-U/C: 0x00550b78
+ * @ghidraAddress PAL: 0x005911b8
  */
 Frustum &BuildFrustum(Frustum &frustum, float flNear, float flFar, float flFov, float flAspect);
 
@@ -51,7 +52,8 @@ Frustum &BuildFrustum(Frustum &frustum, float flNear, float flFar, float flFov, 
  * @param sink The sink to write to.
  * @param frustum The view volume.
  * @return The sink.
- * @ghidraAddress 0x0054f798
+ * @ghidraAddress NTSC-U/C: 0x0054f798
+ * @ghidraAddress PAL: 0x0058fdd8
  */
 FailSink &operator<<(FailSink &sink, const Frustum &frustum);
 
@@ -69,6 +71,7 @@ constexpr int kVu0StatusStickySign = 0x80;
  * @param sphere The sphere, in the space the planes are expressed in.
  * @param frustum The view volume.
  * @return kVu0StatusStickySign when the whole sphere is behind some plane, and zero otherwise.
- * @ghidraAddress 0x005513a8
+ * @ghidraAddress NTSC-U/C: 0x005513a8
+ * @ghidraAddress PAL: 0x005919e8
  */
 int IsSphereOutsideFrustum(const Sphere &sphere, const Frustum &frustum);

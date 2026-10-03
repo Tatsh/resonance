@@ -36,14 +36,16 @@ public:
      * @param pSink The sink every message goes to.
      * @param nUnmapped Non-zero to index the track's bars directly rather than through the play
      *        map.
-     * @ghidraAddress 0x00100c70
+     * @ghidraAddress NTSC-U/C: 0x00100c70
+     * @ghidraAddress PAL: 0x00100c70
      */
     BarSequencer(Sch::TickClock *pClock, TrackData *pTrack, MsgSink *pSink, int nUnmapped);
 
     /**
      * Delete the sequencer and release the task.
      *
-     * @ghidraAddress 0x00100d78
+     * @ghidraAddress NTSC-U/C: 0x00100d78
+     * @ghidraAddress PAL: 0x00100d78
      */
     virtual ~BarSequencer();
 
@@ -52,7 +54,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x00100c08
+     * @ghidraAddress NTSC-U/C: 0x00100c08
+     * @ghidraAddress PAL: 0x00100c08
      */
     static void *operator new(size_t nSize);
 
@@ -60,7 +63,8 @@ public:
      * Release a task under the tag `BarSequencer`.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x00100c28
+     * @ghidraAddress NTSC-U/C: 0x00100c28
+     * @ghidraAddress PAL: 0x00100c28
      */
     static void operator delete(void *pBlock);
 
@@ -68,7 +72,8 @@ public:
      * Write `{BarSequencer}`.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00100c48
+     * @ghidraAddress NTSC-U/C: 0x00100c48
+     * @ghidraAddress PAL: 0x00100c48
      */
     virtual void Print(std::ostream &stream);
 
@@ -79,7 +84,8 @@ public:
      *
      * @param nTick The song position of the run, in MIDI ticks.
      * @return 1, which keeps the task running.
-     * @ghidraAddress 0x00100370
+     * @ghidraAddress NTSC-U/C: 0x00100370
+     * @ghidraAddress PAL: 0x00100370
      */
     virtual int Tick(int nTick);
 

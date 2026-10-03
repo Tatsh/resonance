@@ -52,7 +52,8 @@ public:
          * HandleMessage() runs directly, so a chain of routers cannot form.
          *
          * @param pMsg The message to forward.
-         * @ghidraAddress 0x00139f50
+         * @ghidraAddress NTSC-U/C: 0x00139f50
+         * @ghidraAddress PAL: 0x0013a898
          */
         virtual void Handle(Message *pMsg);
 
@@ -64,7 +65,8 @@ public:
          * exist for the class to be concrete.
          *
          * @param pMsg The message, which the body does not read.
-         * @ghidraAddress 0x00139f48
+         * @ghidraAddress NTSC-U/C: 0x00139f48
+         * @ghidraAddress PAL: 0x0013a890
          */
         virtual void HandleMessage(Message *pMsg);
 
@@ -83,7 +85,8 @@ public:
      * The router's target is this object, so every message the queue delivers arrives at this
      * object's HandleMessage().
      *
-     * @ghidraAddress 0x00139c10
+     * @ghidraAddress NTSC-U/C: 0x00139c10
+     * @ghidraAddress PAL: 0x0013a558
      */
     RendererBase();
 
@@ -95,7 +98,8 @@ public:
      * second table write is the router member rather than a second base, because the RTTI records
      * MsgSink as the one base of this class and Router as a nested class with its own descriptor.
      *
-     * @ghidraAddress 0x00139e20
+     * @ghidraAddress NTSC-U/C: 0x00139e20
+     * @ghidraAddress PAL: 0x0013a768
      */
     virtual ~RendererBase();
 
@@ -106,7 +110,8 @@ public:
      * PollMessages() drains the queue. MetRenderer and Renderer both inherit this body.
      *
      * @param pMsg The message to store.
-     * @ghidraAddress 0x00139f80
+     * @ghidraAddress NTSC-U/C: 0x00139f80
+     * @ghidraAddress PAL: 0x0013a8c8
      */
     virtual void Handle(Message *pMsg);
 
@@ -115,7 +120,8 @@ public:
      *
      * MetaGameWorld's forwarder at `0x003d4860` is the caller.
      *
-     * @ghidraAddress 0x00139f28
+     * @ghidraAddress NTSC-U/C: 0x00139f28
+     * @ghidraAddress PAL: 0x0013a870
      */
     virtual void Start();
 
@@ -124,7 +130,8 @@ public:
      *
      * MetaGameWorld's forwarder at `0x003d4890` is a caller.
      *
-     * @ghidraAddress 0x00139f30
+     * @ghidraAddress NTSC-U/C: 0x00139f30
+     * @ghidraAddress PAL: 0x0013a878
      */
     virtual void Stop();
 
@@ -134,7 +141,8 @@ public:
      * The body drains the queue through MsgQueue::Poll(). MetRenderer inherits it, and Renderer's
      * override calls it explicitly.
      *
-     * @ghidraAddress 0x00139fb0
+     * @ghidraAddress NTSC-U/C: 0x00139fb0
+     * @ghidraAddress PAL: 0x0013a8f8
      */
     virtual void PollMessages();
 
@@ -150,7 +158,8 @@ public:
      *
      * GameManagerImpl::DrawFrameSimple() is the caller.
      *
-     * @ghidraAddress 0x00139f38
+     * @ghidraAddress NTSC-U/C: 0x00139f38
+     * @ghidraAddress PAL: 0x0013a880
      */
     virtual void UpdateSimple();
 
@@ -159,7 +168,8 @@ public:
      *
      * GameManagerImpl::DrawFrameSimple() is the caller.
      *
-     * @ghidraAddress 0x00139f40
+     * @ghidraAddress NTSC-U/C: 0x00139f40
+     * @ghidraAddress PAL: 0x0013a888
      */
     virtual void DrawSimple();
 

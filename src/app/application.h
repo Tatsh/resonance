@@ -23,7 +23,8 @@
 class Application : public Globals {
 public:
     /**
-     * @ghidraAddress 0x00198cb0
+     * @ghidraAddress NTSC-U/C: 0x00198cb0
+     * @ghidraAddress PAL: 0x0019e9e0
      */
     virtual ~Application();
 
@@ -35,23 +36,27 @@ public:
      * the game manager, and then hands control to the frame loop.
      *
      * @return Always 1.
-     * @ghidraAddress 0x00198d20
+     * @ghidraAddress NTSC-U/C: 0x00198d20
+     * @ghidraAddress PAL: 0x0019ea50
      */
     virtual int Run();
 
     /**
      * Tear the game down as it exits.
      *
-     * The override has no effect. Nothing in the image invokes it.
+     * The NTSC-U/C override has no effect. The PAL override calls Shutdown() and then destroys
+     * the script host.
      *
      * @return Always zero.
-     * @ghidraAddress 0x00198da0
+     * @ghidraAddress NTSC-U/C: 0x00198da0
+     * @ghidraAddress PAL: 0x0019ead0
      */
     virtual int ExitInstance();
 
     /**
      * @return The single application instance.
-     * @ghidraAddress 0x00198da8
+     * @ghidraAddress NTSC-U/C: 0x00198da8
+     * @ghidraAddress PAL: 0x0019eaf8
      */
     static Application *shared();
 };

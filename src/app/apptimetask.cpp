@@ -28,30 +28,30 @@ public:
         }
     }
 
-    // 0x0013b048
+    // NTSC-U/C: 0x0013b048, PAL: 0x0013b990
     virtual ~Cmd() {
         if (mTask != nullptr) {
             mTask->Release();
         }
     }
 
-    // 0x0013b038
+    // NTSC-U/C: 0x0013b038, PAL: 0x0013b980
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x0013b0a8
+    // NTSC-U/C: 0x0013b0a8, PAL: 0x0013b9f0
     virtual void Execute() {
         mTask->Run();
     }
 
-    // 0x0013b0c8
+    // NTSC-U/C: 0x0013b0c8, PAL: 0x0013ba10
     virtual void Print(std::ostream &stream) {
         mTask->Print(stream);
     }
 
     // The image initialises it to zero.
-    // 0x00671b60
+    // NTSC-U/C: 0x00671b60, PAL: 0x006b2768
     static int sCmdID;
 
 private:
@@ -62,23 +62,23 @@ int Cmd::sCmdID;
 
 } // namespace
 
-// 0x0013b100
+// NTSC-U/C: 0x0013b100, PAL: 0x0013ba48
 TimeTask::TimeTask(WatchdogTimer *pClock, long long nPeriodNs)
     : mClock(pClock), mPeriodNs(nPeriodNs), mNextNs(0), mEpochNs(0) {
     mCommand.mValue = kUnallocatedCommand;
 }
 
-// 0x0013b138
+// NTSC-U/C: 0x0013b138, PAL: 0x0013ba80
 TimeTask::~TimeTask() {
     Stop();
 }
 
-// 0x0013afc0
+// NTSC-U/C: 0x0013afc0, PAL: 0x0013b908
 void TimeTask::Print(std::ostream &stream) {
     stream << kDescription;
 }
 
-// 0x0013b180
+// NTSC-U/C: 0x0013b180, PAL: 0x0013bac8
 void TimeTask::Start(long long nEpochOffsetNs) {
     mNextNs = mClock->Now();
     if (nEpochOffsetNs == kNoEpochOffset) {
@@ -89,7 +89,7 @@ void TimeTask::Start(long long nEpochOffsetNs) {
     Run();
 }
 
-// 0x0013ae70
+// NTSC-U/C: 0x0013ae70, PAL: 0x0013b7b8
 void TimeTask::Run() {
     if (Tick(mNextNs - mEpochNs) != 1) {
         return;
@@ -104,7 +104,7 @@ void TimeTask::Run() {
     }
 }
 
-// 0x0013b1f0
+// NTSC-U/C: 0x0013b1f0, PAL: 0x0013bb38
 void TimeTask::Stop() {
     const CmdID command = mCommand;
     mClock->Withdraw(command);

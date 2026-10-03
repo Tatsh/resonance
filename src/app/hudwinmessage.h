@@ -29,7 +29,8 @@ public:
     /**
      * Resolve the two messages and start idle.
      *
-     * @ghidraAddress 0x0041b4c8
+     * @ghidraAddress NTSC-U/C: 0x0041b4c8
+     * @ghidraAddress PAL: 0x00455e40
      */
     HudWinMessage();
 
@@ -54,7 +55,8 @@ public:
      *
      * The out-of-line copy has no caller. The title is inferred.
      *
-     * @ghidraAddress 0x0042a800
+     * @ghidraAddress NTSC-U/C: 0x0042a800
+     * @ghidraAddress PAL: 0x00465b50
      */
     void HidePrompt();
 
@@ -63,7 +65,8 @@ public:
      *
      * Overlay::Draw() inlines the body, and this copy has no caller. The title is inferred.
      *
-     * @ghidraAddress 0x0042a830
+     * @ghidraAddress NTSC-U/C: 0x0042a830
+     * @ghidraAddress PAL: 0x00465b80
      */
     void Draw();
 

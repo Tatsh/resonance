@@ -13,7 +13,7 @@ constexpr double kNanosecondsPerSecond = 1000000000.0;
 
 } // namespace
 
-// 0x00512498
+// NTSC-U/C: 0x00512498, PAL: 0x00552780
 WatchdogClock::WatchdogClock() {
     mPausedRunMs = 0;
     mRunning = 1;
@@ -23,7 +23,7 @@ WatchdogClock::WatchdogClock() {
     mStartMs = nNowMs;
 }
 
-// 0x00512538
+// NTSC-U/C: 0x00512538, PAL: 0x00552820
 void WatchdogClock::Mark(long long nNanoseconds) {
     const long long nMarkMs = static_cast<long long>(nNanoseconds / mNsPerUnit);
     if (mRunning != 0) {
@@ -33,7 +33,7 @@ void WatchdogClock::Mark(long long nNanoseconds) {
     }
 }
 
-// 0x005125e0
+// NTSC-U/C: 0x005125e0, PAL: 0x005528c8
 long long WatchdogClock::Now() {
     long long nRunMs;
     if (mRunning != 0) {
@@ -44,7 +44,7 @@ long long WatchdogClock::Now() {
     return static_cast<long long>(nRunMs * mNsPerUnit);
 }
 
-// 0x00512680
+// NTSC-U/C: 0x00512680, PAL: 0x00552968
 void WatchdogClock::Pause() {
     if (mRunning == 0) {
         return;
@@ -55,7 +55,7 @@ void WatchdogClock::Pause() {
     mPausedRunMs = nNowMs - mStartMs;
 }
 
-// 0x00512700
+// NTSC-U/C: 0x00512700, PAL: 0x005529e8
 void WatchdogClock::Resume() {
     if (mRunning != 0) {
         return;
@@ -66,7 +66,7 @@ void WatchdogClock::Resume() {
     mStartMs = nNowMs - mPausedRunMs;
 }
 
-// 0x00512788
+// NTSC-U/C: 0x00512788, PAL: 0x00552a70
 void WatchdogClock::Advance(int nAmount) {
     Pause();
     mPausedRunMs += static_cast<long long>(nAmount * kAdvanceScale / mNsPerUnit);

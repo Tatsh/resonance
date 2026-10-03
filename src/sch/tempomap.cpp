@@ -18,18 +18,18 @@ long long NanosecondsPerTickFor(int nMicrosecondsPerQuarter) {
 
 } // namespace
 
-// 0x0052d118
+// NTSC-U/C: 0x0052d118, PAL: 0x0056d7a8
 TempoMap::TempoMap(int nMicrosecondsPerQuarter)
     : mNanosecondsPerTick(NanosecondsPerTickFor(nMicrosecondsPerQuarter)), mOriginNanoseconds(0),
       mCeilingBias(NanosecondsPerTickFor(nMicrosecondsPerQuarter) - 1),
       mMicrosecondsPerQuarter(nMicrosecondsPerQuarter) {
 }
 
-// 0x0052d240
+// NTSC-U/C: 0x0052d240, PAL: 0x0056d8d0
 TempoMap::~TempoMap() {
 }
 
-// 0x0052d198
+// NTSC-U/C: 0x0052d198, PAL: 0x0056d828
 void TempoMap::SetTempo(int nMicrosecondsPerQuarter, long long nTick) {
     long long nWhen = (mNanosecondsPerTick * nTick) + mOriginNanoseconds;
     // The binary stores the tempo before it computes the new scale, at 0x0052d1d4.

@@ -20,7 +20,8 @@ extern "C" {
  *
  * @param name The stream to play, with its device prefix.
  * @param with_audio Non-zero to decode and play the PCM stream alongside the video.
- * @ghidraAddress 0x00511010
+ * @ghidraAddress NTSC-U/C: 0x00511010
+ * @ghidraAddress PAL: 0x00551288
  */
 void play_cutscene(const char *name, int with_audio);
 

@@ -17,7 +17,8 @@ class WatchdogRecorder {
 public:
     /**
      * @param pStream The stream the recording is written to.
-     * @ghidraAddress 0x00596290
+     * @ghidraAddress NTSC-U/C: 0x00596290
+     * @ghidraAddress PAL: 0x005d9698
      */
     explicit WatchdogRecorder(OBStream *pStream);
 
@@ -29,7 +30,8 @@ public:
      * inferred.
      *
      * @param pCommand The wrapper.
-     * @ghidraAddress 0x005962a0
+     * @ghidraAddress NTSC-U/C: 0x005962a0
+     * @ghidraAddress PAL: 0x005d96a8
      */
     void Record(Sch::TimedCommand *pCommand);
 

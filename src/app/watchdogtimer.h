@@ -33,7 +33,8 @@ class WatchdogTimer {
 public:
     /**
      * @param pWatchdog The monitor these readings belong to.
-     * @ghidraAddress 0x004a7780
+     * @ghidraAddress NTSC-U/C: 0x004a7780
+     * @ghidraAddress PAL: 0x004e5890
      */
     WatchdogTimer(Watchdog *pWatchdog);
 
@@ -43,7 +44,8 @@ public:
      * The first call wins. Every later call is ignored.
      *
      * @param nNanoseconds The reading to treat as zero.
-     * @ghidraAddress 0x004a7828
+     * @ghidraAddress NTSC-U/C: 0x004a7828
+     * @ghidraAddress PAL: 0x004e5938
      */
     void SetOrigin(long long nNanoseconds);
 
@@ -54,7 +56,8 @@ public:
      * most recent due tick relative to the origin.
      *
      * @return The time in nanoseconds.
-     * @ghidraAddress 0x004a77c0
+     * @ghidraAddress NTSC-U/C: 0x004a77c0
+     * @ghidraAddress PAL: 0x004e58d0
      */
     long long Now();
 
@@ -65,7 +68,8 @@ public:
      * reports mPausedNs from then on. Does nothing while mHasOrigin is already clear.
      * GrooveWorld::StopLevel() at `0x0018ec90` calls it on the song clock. The title is inferred.
      *
-     * @ghidraAddress 0x004a7878
+     * @ghidraAddress NTSC-U/C: 0x004a7878
+     * @ghidraAddress PAL: 0x004e5988
      */
     void Pause();
 
@@ -76,7 +80,8 @@ public:
      * nothing while mHasOrigin is already set. GrooveWorld::StartPlay() calls it on the song clock.
      * The title is inferred.
      *
-     * @ghidraAddress 0x004a7848
+     * @ghidraAddress NTSC-U/C: 0x004a7848
+     * @ghidraAddress PAL: 0x004e5958
      */
     void Resume();
 
@@ -97,7 +102,8 @@ public:
      *                    such a post out and playback suppresses it, because the stream supplies
      *                    it instead.
      * @param bDelta Non-zero to treat tick as a distance from now.
-     * @ghidraAddress 0x004a78b8
+     * @ghidraAddress NTSC-U/C: 0x004a78b8
+     * @ghidraAddress PAL: 0x004e59c8
      */
     void Post(Sch::Command *pCommand, Sch::Tick tick, CmdID &id, int bRecordable, int bDelta);
 
@@ -108,7 +114,8 @@ public:
      * mWatchdog.
      *
      * @param id The handle to withdraw.
-     * @ghidraAddress 0x004a79d0
+     * @ghidraAddress NTSC-U/C: 0x004a79d0
+     * @ghidraAddress PAL: 0x004e5ae0
      */
     void Withdraw(const CmdID &id);
 
@@ -123,7 +130,8 @@ public:
      * @param tick The distance from now.
      * @param id The handle to queue under.
      * @param bRecordable Non-zero for a post the recorded stream is to include.
-     * @ghidraAddress 0x004a60a0
+     * @ghidraAddress NTSC-U/C: 0x004a60a0
+     * @ghidraAddress PAL: 0x004e4140
      */
     void PostIn(Sch::Command *pCommand, Sch::Tick tick, CmdID &id, int bRecordable);
 
@@ -134,7 +142,8 @@ public:
      *
      * @param pCommand The command to run.
      * @param tick The distance from now.
-     * @ghidraAddress 0x004a6178
+     * @ghidraAddress NTSC-U/C: 0x004a6178
+     * @ghidraAddress PAL: 0x004e4218
      */
     void PostIn(Sch::Command *pCommand, Sch::Tick tick);
 

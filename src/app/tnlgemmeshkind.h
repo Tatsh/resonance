@@ -26,7 +26,8 @@ public:
      * @param pMesh The multi-mesh.
      * @param flLodOffset The frames added to the instanced mesh's level of detail threshold.
      * @param flCostScale The cost of one triangle.
-     * @ghidraAddress 0x004158c0
+     * @ghidraAddress NTSC-U/C: 0x004158c0
+     * @ghidraAddress PAL: 0x0044f410
      */
     TnlGemMeshKind(Rnd::MultiMesh *pMesh, float flLodOffset, float flCostScale);
 
@@ -36,7 +37,8 @@ public:
      * Does nothing when pParent is null. Each multi-mesh is added at the end of the draw list.
      *
      * @param pParent The drawable to add to, or null.
-     * @ghidraAddress 0x00415980
+     * @ghidraAddress NTSC-U/C: 0x00415980
+     * @ghidraAddress PAL: 0x0044f4d0
      */
     void AddDrawTo(Rnd::Drawable *pParent);
 
@@ -44,7 +46,8 @@ public:
      * Show or hide the multi-mesh of this level and of every coarser level.
      *
      * @param nShowing Non-zero to show.
-     * @ghidraAddress 0x004159d8
+     * @ghidraAddress NTSC-U/C: 0x004159d8
+     * @ghidraAddress PAL: 0x0044f528
      */
     void SetShowing(int nShowing);
 
@@ -52,7 +55,8 @@ public:
      * Report the drawing cost one gem at this level adds.
      *
      * @return mCost while the multi-mesh is showing, zero otherwise.
-     * @ghidraAddress 0x00415a30
+     * @ghidraAddress NTSC-U/C: 0x00415a30
+     * @ghidraAddress PAL: 0x0044f580
      */
     float GetCost();
 

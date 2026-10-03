@@ -31,7 +31,7 @@ inline Vector3 PointAlongSegment(const Segment &segment, float flT) {
 
 } // namespace
 
-// 0x00550fa8
+// NTSC-U/C: 0x00550fa8, PAL: 0x005915e8
 Plane TransformPlaneToWorld(const Plane &plane, const float *pXfm) {
     Plane result;
     result.a = (pXfm[0] * plane.a) + (pXfm[4] * plane.b) + (pXfm[8] * plane.c);
@@ -41,7 +41,7 @@ Plane TransformPlaneToWorld(const Plane &plane, const float *pXfm) {
     return result;
 }
 
-// 0x00551078
+// NTSC-U/C: 0x00551078, PAL: 0x005916b8
 void InterpolateFourFloats(const float *pFrom, const float *pTo, float *pOut, float flT) {
     constexpr int kValueCount = 4;
     for (int i = 0; i < kValueCount; ++i) {
@@ -49,7 +49,7 @@ void InterpolateFourFloats(const float *pFrom, const float *pTo, float *pOut, fl
     }
 }
 
-// 0x00551218
+// NTSC-U/C: 0x00551218, PAL: 0x00591858
 bool IntersectSegmentWithPlane(const Vector3 segment[2], const Plane &plane, float *pT) {
     const auto &start = segment[0];
     const auto &end = segment[1];
@@ -59,7 +59,7 @@ bool IntersectSegmentWithPlane(const Vector3 segment[2], const Plane &plane, flo
     return (0.0f <= *pT) && (*pT <= 1.0f);
 }
 
-// 0x0054fcf8
+// NTSC-U/C: 0x0054fcf8, PAL: 0x00590338
 Segment IntersectPlanes(const Plane &first, const Plane &second) {
     Vector3 direction = ConstructVector3();
     Vec3Cross(&first.a, &second.a, &direction.x);
@@ -82,7 +82,7 @@ Segment IntersectPlanes(const Plane &first, const Plane &second) {
     return line;
 }
 
-// 0x005510e0
+// NTSC-U/C: 0x005510e0, PAL: 0x00591720
 Vector3 IntersectPlanes(const Plane &first, const Plane &second, const Plane &third) {
     const Segment line = IntersectPlanes(first, second);
     float flT;

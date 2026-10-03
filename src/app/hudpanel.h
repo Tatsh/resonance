@@ -34,7 +34,8 @@ public:
      * animation `<layout> assembly.view` ramps from frame 0 to frame 100 over 480 units, and the
      * label swap animation `HUD1 label swap.tnm` ramps from frame 100 to frame 200 over 480 units.
      *
-     * @ghidraAddress 0x0041c3a0
+     * @ghidraAddress NTSC-U/C: 0x0041c3a0
+     * @ghidraAddress PAL: 0x00456d58
      */
     HudPanel();
 
@@ -47,7 +48,8 @@ public:
      *
      * @param flFrame The song position, in MIDI ticks.
      * @param flTime The time.
-     * @ghidraAddress 0x0041c7d8
+     * @ghidraAddress NTSC-U/C: 0x0041c7d8
+     * @ghidraAddress PAL: 0x00457238
      */
     void SetFrame(float flFrame, float flTime);
 

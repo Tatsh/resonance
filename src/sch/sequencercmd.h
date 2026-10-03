@@ -28,14 +28,16 @@ public:
      * Report sCmdID.
      *
      * @return The class's command identifier.
-     * @ghidraAddress 0x00100b50
+     * @ghidraAddress NTSC-U/C: 0x00100b50
+     * @ghidraAddress PAL: 0x00100b50
      */
     virtual int CmdID();
 
     /**
      * Run GenericSequencer::Dispatch() on the owner.
      *
-     * @ghidraAddress 0x00100b60
+     * @ghidraAddress NTSC-U/C: 0x00100b60
+     * @ghidraAddress PAL: 0x00100b60
      */
     virtual void Execute();
 
@@ -43,14 +45,16 @@ public:
      * Write `{Sequencer}`.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00100b90
+     * @ghidraAddress NTSC-U/C: 0x00100b90
+     * @ghidraAddress PAL: 0x00100b90
      */
     virtual void Print(std::ostream &stream);
 
     /**
      * The class's command identifier, which the image initialises to zero.
      *
-     * @ghidraAddress 0x00675e50
+     * @ghidraAddress NTSC-U/C: 0x00675e50
+     * @ghidraAddress PAL: 0x006b6a78
      */
     static int sCmdID;
 

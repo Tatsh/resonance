@@ -39,7 +39,8 @@ public:
      * @param nIndex The player index and the seeker index.
      * @param colorName The player's colour name, taken by value.
      * @param pOwner The player object that embeds this one.
-     * @ghidraAddress 0x0043b3d8
+     * @ghidraAddress NTSC-U/C: 0x0043b3d8
+     * @ghidraAddress PAL: 0x004778f8
      */
     TnlActivator(int nIndex, HxStr colorName, TnlPlayer *pOwner);
 
@@ -49,7 +50,8 @@ public:
      * @param flFrame The song position.
      * @param flScaledFrame The song position scaled by the AppTunnel factor at `+0x144`. The
      *                      catcher and the pointer run on it.
-     * @ghidraAddress 0x0043baf8
+     * @ghidraAddress NTSC-U/C: 0x0043baf8
+     * @ghidraAddress PAL: 0x004780c0
      */
     void Update(float flFrame, float flScaledFrame);
 
@@ -57,7 +59,8 @@ public:
      * Show or hide the rotation view.
      *
      * @param nShowing Non-zero to show.
-     * @ghidraAddress 0x00455ac8
+     * @ghidraAddress NTSC-U/C: 0x00455ac8
+     * @ghidraAddress PAL: 0x00492ff8
      */
     void SetRotShowing(int nShowing);
 
@@ -65,7 +68,8 @@ public:
      * Attach "leader.ps" to the effect view and show it, or detach and hide it.
      *
      * @param nLeader Non-zero to attach and show.
-     * @ghidraAddress 0x00455a40
+     * @ghidraAddress NTSC-U/C: 0x00455a40
+     * @ghidraAddress PAL: 0x00492f70
      */
     void SetLeader(int nLeader);
 
@@ -75,7 +79,8 @@ public:
      * The ghost is mGhostView placed on track mTrack through AppTunnel.
      *
      * @param nGhost Non-zero to show.
-     * @ghidraAddress 0x00455c98
+     * @ghidraAddress NTSC-U/C: 0x00455c98
+     * @ghidraAddress PAL: 0x004931c8
      */
     void SetGhost(int nGhost);
 
@@ -85,7 +90,8 @@ public:
      * mGhost is restored after the inner SetGhost() call. The image has no caller.
      *
      * @param nSuppressed Non-zero to hide both.
-     * @ghidraAddress 0x00455af8
+     * @ghidraAddress NTSC-U/C: 0x00455af8
+     * @ghidraAddress PAL: 0x00493028
      */
     void SetSuppressed(int nSuppressed);
 
@@ -99,7 +105,8 @@ public:
      * @param nLevel The level. A non-zero level hides the ghost.
      * @param nKind The instrument kind.
      * @param flTrack The track.
-     * @ghidraAddress 0x00455b70
+     * @ghidraAddress NTSC-U/C: 0x00455b70
+     * @ghidraAddress PAL: 0x004930a0
      */
     void MoveToTrack(int nLevel, int nKind, float flTrack);
 

@@ -43,7 +43,7 @@ inline void BlendVector(const Vector3 &a, float flA, const Vector3 &b, float flB
 
 } // namespace
 
-// 0x00432830
+// NTSC-U/C: 0x00432830, PAL: 0x0046e520
 DurGemRowString::DurGemRowString(int nLane, Rnd::Mat *pMat, Rnd::View *pView, float flWidth)
     : mString(nullptr), mLane(nLane), mRow(kUnplacedRow), mCount(0) {
     mString = Rnd::String::NewString(DurGemTrails::NewStringName());
@@ -53,12 +53,12 @@ DurGemRowString::DurGemRowString(int nLane, Rnd::Mat *pMat, Rnd::View *pView, fl
     pView->AddDraw(mString);
 }
 
-// 0x00436ee0
+// NTSC-U/C: 0x00436ee0, PAL: 0x00472c78
 DurGemRowString::~DurGemRowString() {
     delete mString;
 }
 
-// 0x00436f48
+// NTSC-U/C: 0x00436f48, PAL: 0x00472ce0
 void DurGemRowString::AddLine(const Color &color,
                               float flStartFrame,
                               float flStartBlend,
@@ -85,14 +85,14 @@ void DurGemRowString::AddLine(const Color &color,
     mString->SetPointPos(nFirst + 1, xfm.mTranslation);
 }
 
-// 0x004370b8
+// NTSC-U/C: 0x004370b8, PAL: 0x00472e50
 void DurGemRowString::Clear() {
     mRow = kClearedRow;
     mCount = 0;
     mString->SetShowing(0);
 }
 
-// 0x004370f8
+// NTSC-U/C: 0x004370f8, PAL: 0x00472e90
 int DurGemRowString::Show(int nRow) {
     if (nRow == mRow) {
         mString->SetShowing(1);
@@ -102,12 +102,12 @@ int DurGemRowString::Show(int nRow) {
     return 0;
 }
 
-// 0x00437180
+// NTSC-U/C: 0x00437180, PAL: 0x00472f18
 void DurGemRowString::Hide() {
     mString->SetShowing(0);
 }
 
-// 0x004371b0
+// NTSC-U/C: 0x004371b0, PAL: 0x00472f48
 bool DurGemRowString::FindCrossing(const Plane &plane, Vector3 *pOut) {
     for (int i = 0; i < mCount; ++i) {
         const Vector3 segment[] = {

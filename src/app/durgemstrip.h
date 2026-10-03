@@ -26,7 +26,8 @@ public:
      * The ribbon takes the next DurGemTrails::NewStringName() name.
      *
      * @param pView The view that draws the ribbon.
-     * @ghidraAddress 0x004329e8
+     * @ghidraAddress NTSC-U/C: 0x004329e8
+     * @ghidraAddress PAL: 0x0046e6f8
      */
     explicit DurGemStrip(Rnd::View *pView);
 
@@ -38,7 +39,8 @@ public:
      * head of this unit, ahead of Start(), is what assigns it to this class rather than to
      * DurGemRowString, whose destructor has the same body.
      *
-     * @ghidraAddress 0x004372d8
+     * @ghidraAddress NTSC-U/C: 0x004372d8
+     * @ghidraAddress PAL: 0x00473070
      */
     ~DurGemStrip();
 
@@ -55,7 +57,8 @@ public:
      * @param flWidth The width of the ribbon.
      * @param pMat The material the ribbon draws with.
      * @return True when the strip was free and now draws the trail.
-     * @ghidraAddress 0x00437340
+     * @ghidraAddress NTSC-U/C: 0x00437340
+     * @ghidraAddress PAL: 0x004730d8
      */
     bool Start(int nLane,
                const Color &color,
@@ -72,7 +75,8 @@ public:
      * head. The strip is hidden and freed once flFrame passes mEnd by more than 480 frames.
      *
      * @param flFrame The current tunnel frame.
-     * @ghidraAddress 0x00432b90
+     * @ghidraAddress NTSC-U/C: 0x00432b90
+     * @ghidraAddress PAL: 0x0046e8c0
      */
     void Update(float flFrame);
 
@@ -84,7 +88,8 @@ public:
      * @param nId The identifier of the trail to stop.
      * @param flFrame The tunnel frame the trail ends at.
      * @return True when the strip drew trail nId.
-     * @ghidraAddress 0x00437480
+     * @ghidraAddress NTSC-U/C: 0x00437480
+     * @ghidraAddress PAL: 0x00473218
      */
     bool Stop(int nId, float flFrame);
 
@@ -96,7 +101,8 @@ public:
      * @param flFrame The tunnel frame to test.
      * @param pOut Receives the position.
      * @return True when the strip is in use and flFrame lies between mStart and mEnd.
-     * @ghidraAddress 0x004374c0
+     * @ghidraAddress NTSC-U/C: 0x004374c0
+     * @ghidraAddress PAL: 0x00473258
      */
     bool GetHeadPos(float flFrame, Vector3 *pOut);
 

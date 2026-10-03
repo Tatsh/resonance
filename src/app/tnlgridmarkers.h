@@ -48,7 +48,8 @@ public:
          *
          * @param pSource The mesh to copy, or null.
          * @param pParent The drawable the copy is added to.
-         * @ghidraAddress 0x00438fe0
+         * @ghidraAddress NTSC-U/C: 0x00438fe0
+         * @ghidraAddress PAL: 0x00474e10
          */
         void Init(Rnd::Mesh *pSource, Rnd::Drawable *pParent);
 
@@ -59,7 +60,8 @@ public:
          *
          * @param nTrack The tunnel track.
          * @param nFrame The song position, in frames.
-         * @ghidraAddress 0x00454fb0
+         * @ghidraAddress NTSC-U/C: 0x00454fb0
+         * @ghidraAddress PAL: 0x004924e0
          */
         void Place(int nTrack, int nFrame);
 
@@ -74,7 +76,8 @@ public:
      *
      * @param pTunnel The tunnel, queried by Update().
      * @param nPlayerNum The player number, selecting the view.
-     * @ghidraAddress 0x00439150
+     * @ghidraAddress NTSC-U/C: 0x00439150
+     * @ghidraAddress PAL: 0x00474fa0
      */
     TnlGridMarkers(AppTunnel *pTunnel, int nPlayerNum);
 
@@ -84,7 +87,8 @@ public:
      * The image has no caller.
      *
      * @param nTrack The tunnel track.
-     * @ghidraAddress 0x004550c8
+     * @ghidraAddress NTSC-U/C: 0x004550c8
+     * @ghidraAddress PAL: 0x004925f8
      */
     void SetTrack(int nTrack);
 
@@ -94,7 +98,8 @@ public:
      * A marker's alpha is `(3840 - mFrame + flFrame) / 1920`, capped at 0.8.
      *
      * @param flFrame The song position.
-     * @ghidraAddress 0x00439718
+     * @ghidraAddress NTSC-U/C: 0x00439718
+     * @ghidraAddress PAL: 0x004755b8
      */
     void Update(float flFrame);
 

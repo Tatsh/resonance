@@ -31,7 +31,8 @@ public:
      *
      * @param name The name prefix.
      * @param nIndex The index Start() must be given, -1 when the object has a second system.
-     * @ghidraAddress 0x0043d368
+     * @ghidraAddress NTSC-U/C: 0x0043d368
+     * @ghidraAddress PAL: 0x00479ac8
      */
     TnlFireFX(const HxStr &name, int nIndex);
 
@@ -50,7 +51,8 @@ public:
      * @param altColor The colour of the second system.
      * @param flPathEnd The path frame that ends the fire.
      * @return 1 when the fire started, 0 when it was busy or nIndex did not match.
-     * @ghidraAddress 0x0043d8c0
+     * @ghidraAddress NTSC-U/C: 0x0043d8c0
+     * @ghidraAddress PAL: 0x0047a0f0
      */
     int Start(float flPathStart,
               int nIndex,
@@ -67,7 +69,8 @@ public:
      *
      * @param flFrame The current frame.
      * @param flViewFrame The frame the view is driven to.
-     * @ghidraAddress 0x004565a8
+     * @ghidraAddress NTSC-U/C: 0x004565a8
+     * @ghidraAddress PAL: 0x00493ad8
      */
     void SetFrame(float flFrame, float flViewFrame);
 

@@ -21,7 +21,8 @@ public:
      * Shows the indicator's mesh, `<layout> pup<n>.mesh`, only in kPlayModeGame.
      *
      * @param nIndex The track display number that fills `<n>` and the views' `%d`.
-     * @ghidraAddress 0x004167d0
+     * @ghidraAddress NTSC-U/C: 0x004167d0
+     * @ghidraAddress PAL: 0x004503d0
      */
     HudPowerup(int nIndex);
 
@@ -33,7 +34,8 @@ public:
      * inferred.
      *
      * @param nKind The HudItemKind to show, or kHudItemNone.
-     * @ghidraAddress 0x004299a0
+     * @ghidraAddress NTSC-U/C: 0x004299a0
+     * @ghidraAddress PAL: 0x00464fe0
      */
     void Show(int nKind);
 

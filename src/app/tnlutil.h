@@ -21,7 +21,8 @@
  *
  * @param name The colour name.
  * @return The colour.
- * @ghidraAddress 0x00437e60
+ * @ghidraAddress NTSC-U/C: 0x00437e60
+ * @ghidraAddress PAL: 0x00473c10
  */
 Color TnlColorFromName(const HxStr &name);
 
@@ -33,7 +34,8 @@ Color TnlColorFromName(const HxStr &name);
  *
  * @param name The colour name, taken by value.
  * @return The colour.
- * @ghidraAddress 0x00437fa8
+ * @ghidraAddress NTSC-U/C: 0x00437fa8
+ * @ghidraAddress PAL: 0x00473d58
  */
 Color TnlDimColorFromName(HxStr name);
 
@@ -45,7 +47,8 @@ Color TnlDimColorFromName(HxStr name);
  *
  * @param name The colour name, taken by value.
  * @return The colour.
- * @ghidraAddress 0x00438138
+ * @ghidraAddress NTSC-U/C: 0x00438138
+ * @ghidraAddress PAL: 0x00473ee8
  */
 Color TnlLaneColorFromName(HxStr name);
 
@@ -57,7 +60,8 @@ Color TnlLaneColorFromName(HxStr name);
  *
  * @param name The colour name, taken by value.
  * @return The index.
- * @ghidraAddress 0x00454770
+ * @ghidraAddress NTSC-U/C: 0x00454770
+ * @ghidraAddress PAL: 0x00491ca0
  */
 int TnlColorIndexFromName(HxStr name);
 
@@ -85,7 +89,8 @@ inline void PadTransformRows(Transform &xfm) {
  *
  * @param trans The object to move.
  * @param flFrame The path frame.
- * @ghidraAddress 0x004548d0
+ * @ghidraAddress NTSC-U/C: 0x004548d0
+ * @ghidraAddress PAL: 0x00491e00
  */
 inline void PlaceOnPath(Rnd::Transformable &trans, float flFrame) {
     Transform xfm;
@@ -106,7 +111,8 @@ inline void PlaceOnPath(Rnd::Transformable &trans, float flFrame) {
  * @param nRing The ring.
  * @param flFrame The path frame.
  * @param flBlend The weight of the next ring's translation.
- * @ghidraAddress 0x00454808
+ * @ghidraAddress NTSC-U/C: 0x00454808
+ * @ghidraAddress PAL: 0x00491d38
  */
 inline void PlaceOnRing(Rnd::Transformable &trans, int nRing, float flFrame, float flBlend) {
     constexpr float kRingTangentScale = 0.97f;
@@ -125,7 +131,8 @@ inline void PlaceOnRing(Rnd::Transformable &trans, int nRing, float flFrame, flo
  * AppTunnel's constructor writes it at `0x00442344`. A non-zero value stops TnlActivator::Update()
  * from blinking the activator and catcher materials.
  *
- * @ghidraAddress 0x006e42a4
+ * @ghidraAddress NTSC-U/C: 0x006e42a4
+ * @ghidraAddress PAL: 0x00727bc4
  */
 extern int g_nAppTunnelTutorial;
 
@@ -135,6 +142,7 @@ extern int g_nAppTunnelTutorial;
  * AppTunnel's constructor sets it to 2 for a game of two to four players, which use the
  * split-screen tunnel, and to 1 otherwise, when it also adds "lat light1" to "tunnel.env".
  *
- * @ghidraAddress 0x006e42b0
+ * @ghidraAddress NTSC-U/C: 0x006e42b0
+ * @ghidraAddress PAL: 0x00727bd0
  */
 extern float g_flTunnelBrightness;

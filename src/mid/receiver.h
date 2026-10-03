@@ -27,7 +27,8 @@ namespace Mid {
 class Receiver {
 public:
     /**
-     * @ghidraAddress 0x001ea248
+     * @ghidraAddress NTSC-U/C: 0x001ea248
+     * @ghidraAddress PAL: 0x001f04b8
      */
     virtual ~Receiver();
 
@@ -37,7 +38,8 @@ public:
      * Slot 2.
      *
      * @param nTrack The track index.
-     * @ghidraAddress 0x001ea278
+     * @ghidraAddress NTSC-U/C: 0x001ea278
+     * @ghidraAddress PAL: 0x001f04e8
      */
     virtual void NewTrack(unsigned char nTrack);
 
@@ -50,7 +52,8 @@ public:
      * @param nNote The note number.
      * @param nVelocity The velocity.
      * @param nChannel The channel.
-     * @ghidraAddress 0x001ea280
+     * @ghidraAddress NTSC-U/C: 0x001ea280
+     * @ghidraAddress PAL: 0x001f04f0
      */
     virtual void
     NoteOn(int nTick, unsigned char nNote, unsigned char nVelocity, unsigned char nChannel);
@@ -64,7 +67,8 @@ public:
      * @param nTick The event position, in MIDI ticks.
      * @param nNote The note number.
      * @param nChannel The channel.
-     * @ghidraAddress 0x001ea288
+     * @ghidraAddress NTSC-U/C: 0x001ea288
+     * @ghidraAddress PAL: 0x001f04f8
      */
     virtual void NoteOff(int nTick, unsigned char nNote, unsigned char nChannel);
 
@@ -77,7 +81,8 @@ public:
      * @param nController The controller number.
      * @param nValue The value.
      * @param nChannel The channel.
-     * @ghidraAddress 0x001ea290
+     * @ghidraAddress NTSC-U/C: 0x001ea290
+     * @ghidraAddress PAL: 0x001f0500
      */
     virtual void
     Controller(int nTick, unsigned char nController, unsigned char nValue, unsigned char nChannel);
@@ -90,7 +95,8 @@ public:
      * @param nTick The event position, in MIDI ticks.
      * @param nProgram The program number.
      * @param nChannel The channel.
-     * @ghidraAddress 0x001ea298
+     * @ghidraAddress NTSC-U/C: 0x001ea298
+     * @ghidraAddress PAL: 0x001f0508
      */
     virtual void ProgramChange(int nTick, unsigned char nProgram, unsigned char nChannel);
 
@@ -103,7 +109,8 @@ public:
      * @param nLow The low seven bits of the bend.
      * @param nHigh The high seven bits of the bend.
      * @param nChannel The channel.
-     * @ghidraAddress 0x001ea2a0
+     * @ghidraAddress NTSC-U/C: 0x001ea2a0
+     * @ghidraAddress PAL: 0x001f0510
      */
     virtual void
     PitchBend(int nTick, unsigned char nLow, unsigned char nHigh, unsigned char nChannel);
@@ -118,7 +125,8 @@ public:
      *
      * @param nTick The event position, in MIDI ticks.
      * @param nMicrosecondsPerQuarter The tempo.
-     * @ghidraAddress 0x001ea2a8
+     * @ghidraAddress NTSC-U/C: 0x001ea2a8
+     * @ghidraAddress PAL: 0x001f0518
      */
     virtual void Tempo(int nTick, int nMicrosecondsPerQuarter);
 
@@ -131,7 +139,8 @@ public:
      * @param nTick The event position, in MIDI ticks.
      * @param pText The text, which is NUL-terminated by the reader.
      * @param nType The meta type.
-     * @ghidraAddress 0x001ea2b0
+     * @ghidraAddress NTSC-U/C: 0x001ea2b0
+     * @ghidraAddress PAL: 0x001f0520
      */
     virtual void TextEvent(int nTick, const char *pText, unsigned char nType);
 
@@ -140,7 +149,8 @@ public:
      *
      * Slot 10.
      *
-     * @ghidraAddress 0x001ea2b8
+     * @ghidraAddress NTSC-U/C: 0x001ea2b8
+     * @ghidraAddress PAL: 0x001f0528
      */
     virtual void EndTrack();
 
@@ -151,7 +161,8 @@ public:
      * no chunk left. LevelConverter's table points at a two-instruction body of its own at
      * `0x001ea360`. That body is this default re-emitted rather than an override.
      *
-     * @ghidraAddress 0x001ea2c0
+     * @ghidraAddress NTSC-U/C: 0x001ea2c0
+     * @ghidraAddress PAL: 0x001f0530
      */
     virtual void AllDone();
 
@@ -160,7 +171,8 @@ public:
      *
      * Slot 12, an empty default with no override anywhere. Mid::FileReader never calls it.
      *
-     * @ghidraAddress 0x001ea2c8
+     * @ghidraAddress NTSC-U/C: 0x001ea2c8
+     * @ghidraAddress PAL: 0x001f0538
      */
     virtual void UnusedFirstHook();
 
@@ -169,7 +181,8 @@ public:
      *
      * Slot 13, an empty default with no override anywhere. Mid::FileReader never calls it.
      *
-     * @ghidraAddress 0x001ea2d0
+     * @ghidraAddress NTSC-U/C: 0x001ea2d0
+     * @ghidraAddress PAL: 0x001f0540
      */
     virtual void UnusedSecondHook();
 
@@ -178,7 +191,8 @@ public:
      *
      * Slot 14, an empty default with no override anywhere. Mid::FileReader never calls it.
      *
-     * @ghidraAddress 0x001ea2d8
+     * @ghidraAddress NTSC-U/C: 0x001ea2d8
+     * @ghidraAddress PAL: 0x001f0548
      */
     virtual void UnusedThirdHook();
 
@@ -187,7 +201,8 @@ public:
      *
      * Slot 15, an empty default with no override anywhere. Mid::FileReader never calls it.
      *
-     * @ghidraAddress 0x001ea2e0
+     * @ghidraAddress NTSC-U/C: 0x001ea2e0
+     * @ghidraAddress PAL: 0x001f0550
      */
     virtual void UnusedFourthHook();
 };

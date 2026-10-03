@@ -30,7 +30,8 @@ public:
     /**
      * Write the recorded rates and force back to the system.
      *
-     * @ghidraAddress 0x00455d08
+     * @ghidraAddress NTSC-U/C: 0x00455d08
+     * @ghidraAddress PAL: 0x00493238
      */
     ~TnlEmitter();
 
@@ -40,7 +41,8 @@ public:
      * pSys must not be null.
      *
      * @param pSys The particle system.
-     * @ghidraAddress 0x00455d58
+     * @ghidraAddress NTSC-U/C: 0x00455d58
+     * @ghidraAddress PAL: 0x00493288
      */
     void Attach(Rnd::ParticleSys *pSys);
 
@@ -48,21 +50,24 @@ public:
      * Give the system the recorded force turned by a rotation.
      *
      * @param pMat3Rows The rotation, three rows of four floats.
-     * @ghidraAddress 0x00455e30
+     * @ghidraAddress NTSC-U/C: 0x00455e30
+     * @ghidraAddress PAL: 0x00493360
      */
     void RotateForce(const float *pMat3Rows);
 
     /**
      * Release the live particles and give back the recorded rates.
      *
-     * @ghidraAddress 0x00455e88
+     * @ghidraAddress NTSC-U/C: 0x00455e88
+     * @ghidraAddress PAL: 0x004933b8
      */
     void Restart();
 
     /**
      * Zero both emission rates.
      *
-     * @ghidraAddress 0x00455ed0
+     * @ghidraAddress NTSC-U/C: 0x00455ed0
+     * @ghidraAddress PAL: 0x00493400
      */
     void Stop();
 

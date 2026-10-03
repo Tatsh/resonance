@@ -11,12 +11,12 @@ ScriptSink::ScriptSink(Globals *pOwner) : mGlobals(pOwner) {
 // at `0x00118a08`, which installs the base table at `0x007ccc40`; this class declares no
 // destructor of its own.
 
-// 0x00118c00
+// NTSC-U/C: 0x00118c00, PAL: 0x00119150
 ScriptSink *ScriptSink::CreateInstance(Globals *pOwner) {
     return new ScriptSink(pOwner);
 }
 
-// 0x00118ad0
+// NTSC-U/C: 0x00118ad0, PAL: 0x00118fe8
 // The receiver is unused, which is why the body reads only the message.
 void ScriptSink::RunMessageScript(Message *pMsg) {
     const char *pszScript = static_cast<ScriptMsg *>(pMsg)->mScript.mStr;
@@ -26,7 +26,7 @@ void ScriptSink::RunMessageScript(Message *pMsg) {
     RunScript(HxStr(pszScript));
 }
 
-// 0x00118b50
+// NTSC-U/C: 0x00118b50, PAL: 0x00119088
 void ScriptSink::HandleMessage(Message *pMsg) {
     if (pMsg->Type() != g_nScriptMsgType) {
         return;

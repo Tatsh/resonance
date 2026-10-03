@@ -21,14 +21,16 @@ public:
     /**
      * Resolve "lattice.mnm" and rest it at frame 0.
      *
-     * @ghidraAddress 0x0043c598
+     * @ghidraAddress NTSC-U/C: 0x0043c598
+     * @ghidraAddress PAL: 0x00478bb8
      */
     TnlLattice();
 
     /**
      * Return the animation to frame 0.
      *
-     * @ghidraAddress 0x00456368
+     * @ghidraAddress NTSC-U/C: 0x00456368
+     * @ghidraAddress PAL: 0x00493898
      */
     ~TnlLattice();
 
@@ -50,7 +52,8 @@ public:
      * Returns at once before the start frame. AppTunnel inlines this at `0x0044715c`.
      *
      * @param flFrame The current frame.
-     * @ghidraAddress 0x004563c0
+     * @ghidraAddress NTSC-U/C: 0x004563c0
+     * @ghidraAddress PAL: 0x004938f0
      */
     void SetFrame(float flFrame);
 

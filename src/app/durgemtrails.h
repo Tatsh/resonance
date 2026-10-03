@@ -41,7 +41,8 @@ public:
      *
      * @param pTunnel The owner and receiver of the crossing points Update() finds.
      * @param nMaxPoints The most ribbon points Update() shows at once.
-     * @ghidraAddress 0x00432f60
+     * @ghidraAddress NTSC-U/C: 0x00432f60
+     * @ghidraAddress PAL: 0x0046ecb0
      */
     DurGemTrails(AppTunnel *pTunnel, int nMaxPoints);
 
@@ -50,7 +51,8 @@ public:
      *
      * The curve list and the two vectors are torn down by their compiler-generated destructors.
      *
-     * @ghidraAddress 0x00433320
+     * @ghidraAddress NTSC-U/C: 0x00433320
+     * @ghidraAddress PAL: 0x0046f090
      */
     ~DurGemTrails();
 
@@ -60,7 +62,8 @@ public:
      * @param flWidth The width of each ribbon.
      * @param pMat The material each ribbon draws with.
      * @param nLane The lane to fill.
-     * @ghidraAddress 0x004377f0
+     * @ghidraAddress NTSC-U/C: 0x004377f0
+     * @ghidraAddress PAL: 0x00473588
      */
     void CreateLane(float flWidth, int nLane, Rnd::Mat *pMat);
 
@@ -78,7 +81,8 @@ public:
      * @param flStartBlend The position across the lane at the start.
      * @param flEndFrame The tunnel frame of the end.
      * @param flEndBlend The position across the lane at the end.
-     * @ghidraAddress 0x004337d8
+     * @ghidraAddress NTSC-U/C: 0x004337d8
+     * @ghidraAddress PAL: 0x0046f548
      */
     void AddSegment(int nLane,
                     const Color &color,
@@ -93,7 +97,8 @@ public:
      *
      * @param nLane The lane to clear.
      * @param nRow The slice row to clear.
-     * @ghidraAddress 0x00433c40
+     * @ghidraAddress NTSC-U/C: 0x00433c40
+     * @ghidraAddress PAL: 0x0046f9b0
      */
     void EndTrail(int nLane, int nRow);
 
@@ -108,7 +113,8 @@ public:
      * @param nId The identifier of the trail.
      * @param flFrame The tunnel frame the trail starts at.
      * @param flBlend The position across the lane.
-     * @ghidraAddress 0x00433db0
+     * @ghidraAddress NTSC-U/C: 0x00433db0
+     * @ghidraAddress PAL: 0x0046fb20
      */
     void StartStrip(int nLane, const Color &color, int nId, float flFrame, float flBlend);
 
@@ -117,7 +123,8 @@ public:
      *
      * @param nId The identifier of the trail.
      * @param flFrame The tunnel frame the trail ends at.
-     * @ghidraAddress 0x00437a60
+     * @ghidraAddress NTSC-U/C: 0x00437a60
+     * @ghidraAddress PAL: 0x004737f8
      */
     void StopStrip(int nId, float flFrame);
 
@@ -130,7 +137,8 @@ public:
      * of each live strip, goes to mTunnel.
      *
      * @param flFrame The current tunnel frame.
-     * @ghidraAddress 0x00433f80
+     * @ghidraAddress NTSC-U/C: 0x00433f80
+     * @ghidraAddress PAL: 0x0046fcf0
      */
     void Update(float flFrame);
 
@@ -141,16 +149,17 @@ public:
      *
      * @return The new count formatted with the literal at `0x0081a768`, four digits in angle
      * brackets after a fixed prefix.
-     * @ghidraAddress 0x00436e38
+     * @ghidraAddress NTSC-U/C: 0x00436e38
+     * @ghidraAddress PAL: 0x00472bd0
      */
     static HxStr NewStringName();
 
 private:
-    // 0x00437af8
+    // NTSC-U/C: 0x00437af8, PAL: 0x00473890
     // The row string of lane nLane in slice row nRow, the row taken modulo mRowCount.
     DurGemRowString *GetRowString(int nLane, int nRow);
 
-    // 0x00433530
+    // NTSC-U/C: 0x00433530, PAL: 0x0046f2a0
     // Place the midpoint of pPoints[nFirst] and pPoints[nLast] and recurse into both
     // halves while it lies off the chord.
     static void SubdivideSegment(int nLane,
@@ -162,7 +171,7 @@ private:
                                  float flEndFrame,
                                  float flEndBlend);
 
-    // 0x004378e0
+    // NTSC-U/C: 0x004378e0, PAL: 0x00473678
     // Report the midpoint frame, blend, and position of a segment, and whether the
     // position lies off the chord of first and last. SubdivideSegment() inlines the body.
     static bool NeedsSubdivision(int nLane,
@@ -176,7 +185,7 @@ private:
                                  float flEndFrame,
                                  float flEndBlend);
 
-    // 0x00436e88
+    // NTSC-U/C: 0x00436e88, PAL: 0x00472c20
     // The first curve of row nRow or later. AddSegment() and EndTrail() inline the
     // body.
     static std::list<DurGemCurve>::iterator FindFirstCurve(std::list<DurGemCurve> &curves,
@@ -201,6 +210,7 @@ private:
 /**
  * Number of ribbon names DurGemTrails::NewStringName() and its inlined copies have issued.
  *
- * @ghidraAddress 0x006e3440
+ * @ghidraAddress NTSC-U/C: 0x006e3440
+ * @ghidraAddress PAL: 0x00726d58
  */
 extern int g_nDurGemStringCount;

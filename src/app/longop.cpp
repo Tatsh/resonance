@@ -1,28 +1,28 @@
 #include "app/longop.h"
 
-// 0x00719858
+// NTSC-U/C: 0x00719858, PAL: 0x0075d758
 LongOperationProc g_pfnLongOperationPollProc;
-// 0x0071985c
+// NTSC-U/C: 0x0071985c, PAL: 0x0075d75c
 LongOperationProc g_pfnLongOperationDrawProc;
 
-// 0x00520428
+// NTSC-U/C: 0x00520428, PAL: 0x00560980
 void SetLongOperationPollProc(LongOperationProc pfnPoll) {
     g_pfnLongOperationPollProc = pfnPoll;
 }
 
-// 0x00520438
+// NTSC-U/C: 0x00520438, PAL: 0x00560990
 void RunLongOperationPollProc() {
     if (g_pfnLongOperationPollProc != nullptr) {
         g_pfnLongOperationPollProc();
     }
 }
 
-// 0x00520460
+// NTSC-U/C: 0x00520460, PAL: 0x005609b8
 void SetLongOperationDrawProc(LongOperationProc pfnDraw) {
     g_pfnLongOperationDrawProc = pfnDraw;
 }
 
-// 0x00520470
+// NTSC-U/C: 0x00520470, PAL: 0x005609c8
 void RunLongOperationDrawProc() {
     if (g_pfnLongOperationDrawProc != nullptr) {
         g_pfnLongOperationDrawProc();

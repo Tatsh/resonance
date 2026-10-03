@@ -24,7 +24,8 @@ public:
      * The panel and HudWinMessage both inline the body, and this copy has no caller.
      *
      * @param name The object name of the text.
-     * @ghidraAddress 0x0042a6d8
+     * @ghidraAddress NTSC-U/C: 0x0042a6d8
+     * @ghidraAddress PAL: 0x00465a28
      */
     HudGenMessage(const HxStr &name);
 
@@ -34,7 +35,8 @@ public:
      * The out-of-line copy has no caller. The title is inferred.
      *
      * @param text The text.
-     * @ghidraAddress 0x0042a768
+     * @ghidraAddress NTSC-U/C: 0x0042a768
+     * @ghidraAddress PAL: 0x00465ab8
      */
     void Show(const HxStr &text);
 
@@ -43,7 +45,8 @@ public:
      *
      * The out-of-line copy has no caller. The title is inferred.
      *
-     * @ghidraAddress 0x0042a7c0
+     * @ghidraAddress NTSC-U/C: 0x0042a7c0
+     * @ghidraAddress PAL: 0x00465b10
      */
     void Hide();
 

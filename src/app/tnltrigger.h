@@ -18,7 +18,8 @@ public:
      *
      * The compiler emits the deleting form out of line.
      *
-     * @ghidraAddress 0x004585b8
+     * @ghidraAddress NTSC-U/C: 0x004585b8
+     * @ghidraAddress PAL: 0x00495b40
      */
     virtual ~TnlTrigger() {
     }

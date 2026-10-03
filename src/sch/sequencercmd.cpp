@@ -4,17 +4,17 @@
 
 int SequencerCmd::sCmdID;
 
-// 0x00100b50
+// NTSC-U/C: 0x00100b50, PAL: 0x00100b50
 int SequencerCmd::CmdID() {
     return sCmdID;
 }
 
-// 0x00100b60
+// NTSC-U/C: 0x00100b60, PAL: 0x00100b60
 void SequencerCmd::Execute() {
     mOwner->Dispatch();
 }
 
-// 0x00100b90
+// NTSC-U/C: 0x00100b90, PAL: 0x00100b90
 void SequencerCmd::Print(std::ostream &stream) {
     stream << "{Sequencer}";
 }

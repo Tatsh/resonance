@@ -54,14 +54,16 @@ public:
      *
      * @param pReader The chunk reader positioned at the start of the file.
      * @param pReceiver The sink for every event.
-     * @ghidraAddress 0x003d4a68
+     * @ghidraAddress NTSC-U/C: 0x003d4a68
+     * @ghidraAddress PAL: 0x0040c958
      */
     FileReader(HxDataChunkReader *pReader, Receiver *pReceiver);
 
     /**
      * Read every chunk of the file.
      *
-     * @ghidraAddress 0x003d6528
+     * @ghidraAddress NTSC-U/C: 0x003d6528
+     * @ghidraAddress PAL: 0x0040e418
      */
     void Read();
 
@@ -72,14 +74,16 @@ public:
      * any other name is skipped. At the end of the file EndOfFile() is called.
      *
      * @return Whether a chunk was read.
-     * @ghidraAddress 0x003d4ac8
+     * @ghidraAddress NTSC-U/C: 0x003d4ac8
+     * @ghidraAddress PAL: 0x0040c9b8
      */
     bool ReadChunk();
 
     /**
      * Report the end of the file to the receiver's AllDone().
      *
-     * @ghidraAddress 0x003d65a8
+     * @ghidraAddress NTSC-U/C: 0x003d65a8
+     * @ghidraAddress PAL: 0x0040e498
      */
     void EndOfFile();
 
@@ -87,7 +91,8 @@ public:
      * Read the format, track count, and division of an `MThd` chunk.
      *
      * @param stream The chunk payload.
-     * @ghidraAddress 0x003d6558
+     * @ghidraAddress NTSC-U/C: 0x003d6558
+     * @ghidraAddress PAL: 0x0040e448
      */
     void ReadHeader(HxStream &stream);
 
@@ -95,7 +100,8 @@ public:
      * Read one `MTrk` chunk when the file format has one track per chunk.
      *
      * @param stream The chunk payload.
-     * @ghidraAddress 0x003d65d8
+     * @ghidraAddress NTSC-U/C: 0x003d65d8
+     * @ghidraAddress PAL: 0x0040e4c8
      */
     void ReadTrackChunk(HxStream &stream);
 
@@ -103,7 +109,8 @@ public:
      * Begin a track at the receiver and read its events until the end-of-track meta event.
      *
      * @param stream The chunk payload.
-     * @ghidraAddress 0x003d6610
+     * @ghidraAddress NTSC-U/C: 0x003d6610
+     * @ghidraAddress PAL: 0x0040e500
      */
     void ReadTrack(HxStream &stream);
 
@@ -114,7 +121,8 @@ public:
      * 0 becomes a note off.
      *
      * @param stream The chunk payload.
-     * @ghidraAddress 0x003d4c10
+     * @ghidraAddress NTSC-U/C: 0x003d4c10
+     * @ghidraAddress PAL: 0x0040cb00
      */
     void ReadEvent(HxStream &stream);
 
@@ -122,7 +130,8 @@ public:
      * Skip a system-exclusive event or read a meta event, depending on mRunningStatus.
      *
      * @param stream The chunk payload, positioned after the status byte.
-     * @ghidraAddress 0x003d4df0
+     * @ghidraAddress NTSC-U/C: 0x003d4df0
+     * @ghidraAddress PAL: 0x0040cce0
      */
     void ReadSystemEvent(HxStream &stream);
 
@@ -133,7 +142,8 @@ public:
      *
      * @param nType The meta type.
      * @param stream The chunk payload, positioned at the length.
-     * @ghidraAddress 0x003d4f00
+     * @ghidraAddress NTSC-U/C: 0x003d4f00
+     * @ghidraAddress PAL: 0x0040cdf0
      */
     void ReadMeta(unsigned char nType, HxStream &stream);
 
@@ -146,7 +156,8 @@ public:
      * @param nStatus The status byte.
      * @param nData1 The first data byte.
      * @param nData2 The second data byte.
-     * @ghidraAddress 0x003d5260
+     * @ghidraAddress NTSC-U/C: 0x003d5260
+     * @ghidraAddress PAL: 0x0040d150
      */
     void Dispatch(MBT tick, unsigned char nStatus, unsigned char nData1, unsigned char nData2);
 
@@ -159,14 +170,16 @@ public:
      * @param nStatus The status byte.
      * @param nData1 The first data byte.
      * @param nData2 The second data byte.
-     * @ghidraAddress 0x003d66a8
+     * @ghidraAddress NTSC-U/C: 0x003d66a8
+     * @ghidraAddress PAL: 0x0040e598
      */
     void QueueEvent(MBT tick, unsigned char nStatus, unsigned char nData1, unsigned char nData2);
 
     /**
      * Sort mPending with mCompare, deliver every event at mPendingTick, and empty it.
      *
-     * @ghidraAddress 0x003d5140
+     * @ghidraAddress NTSC-U/C: 0x003d5140
+     * @ghidraAddress PAL: 0x0040d030
      */
     void Flush();
 

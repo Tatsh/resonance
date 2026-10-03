@@ -31,7 +31,8 @@ public:
      * translation unit. The title is inferred.
      *
      * @param nShowing Non-zero to show.
-     * @ghidraAddress 0x00429e08
+     * @ghidraAddress NTSC-U/C: 0x00429e08
+     * @ghidraAddress PAL: 0x00465448
      */
     void SetShowing(int nShowing);
 

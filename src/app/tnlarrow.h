@@ -26,14 +26,16 @@ public:
      * Resolve "arrow<nIndex>.mesh" with every slot hidden.
      *
      * @param nIndex The arrow.
-     * @ghidraAddress 0x0043ff10
+     * @ghidraAddress NTSC-U/C: 0x0043ff10
+     * @ghidraAddress PAL: 0x0047ca40
      */
     explicit TnlArrow(int nIndex);
 
     /**
      * Hide the arrow from every slot.
      *
-     * @ghidraAddress 0x00456e20
+     * @ghidraAddress NTSC-U/C: 0x00456e20
+     * @ghidraAddress PAL: 0x00494350
      */
     ~TnlArrow();
 
@@ -46,7 +48,8 @@ public:
      *
      * @param pPlayer The player.
      * @param flExpireFrame The frame after which the slot hides.
-     * @ghidraAddress 0x00456e90
+     * @ghidraAddress NTSC-U/C: 0x00456e90
+     * @ghidraAddress PAL: 0x004943c0
      */
     void Show(TnlPlayer *pPlayer, float flExpireFrame);
 
@@ -56,7 +59,8 @@ public:
      * A slot the arrow is not shown to is unchanged. The expiry frame of the slot is not reset.
      *
      * @param nSlot The player slot, from 0.
-     * @ghidraAddress 0x00456f20
+     * @ghidraAddress NTSC-U/C: 0x00456f20
+     * @ghidraAddress PAL: 0x00494450
      */
     void Hide(int nSlot);
 
@@ -66,7 +70,8 @@ public:
      * The expiry frame of such a slot returns to 1e9.
      *
      * @param flFrame The current frame.
-     * @ghidraAddress 0x00456f68
+     * @ghidraAddress NTSC-U/C: 0x00456f68
+     * @ghidraAddress PAL: 0x00494498
      */
     void SetFrame(float flFrame);
 

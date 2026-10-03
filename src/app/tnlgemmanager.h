@@ -34,7 +34,8 @@ public:
      *
      * @param pTunnel The tunnel that owns the manager.
      * @param flCostBudget The drawing cost Update() places gems up to in one frame.
-     * @ghidraAddress 0x004122c0
+     * @ghidraAddress NTSC-U/C: 0x004122c0
+     * @ghidraAddress PAL: 0x0044bdc0
      */
     TnlGemManager(AppTunnel *pTunnel, float flCostBudget);
 
@@ -43,7 +44,8 @@ public:
      *
      * The gems are dropped without Release().
      *
-     * @ghidraAddress 0x00412490
+     * @ghidraAddress NTSC-U/C: 0x00412490
+     * @ghidraAddress PAL: 0x0044bf90
      */
     ~TnlGemManager();
 
@@ -58,7 +60,8 @@ public:
      * @param flLodOffset The frames added to every level's threshold.
      * @param flCostScale The cost of one triangle.
      * @return The kind of the first level, the number of levels registered before the call.
-     * @ghidraAddress 0x00412628
+     * @ghidraAddress NTSC-U/C: 0x00412628
+     * @ghidraAddress PAL: 0x0044c128
      */
     char AddMeshKind(const char *pszName, float flLodOffset, float flCostScale);
 
@@ -67,7 +70,8 @@ public:
      *
      * @param pszName The base name, such as "gem_drum".
      * @return The kind, kEffectKindBase plus the number of effect kinds registered before the call.
-     * @ghidraAddress 0x00412878
+     * @ghidraAddress NTSC-U/C: 0x00412878
+     * @ghidraAddress PAL: 0x0044c3a0
      */
     char AddEffectKind(const char *pszName);
 
@@ -78,7 +82,8 @@ public:
      * mAppearFrame.
      *
      * @param gem The gem.
-     * @ghidraAddress 0x00412968
+     * @ghidraAddress NTSC-U/C: 0x00412968
+     * @ghidraAddress PAL: 0x0044c490
      */
     void Add(const TnlGem &gem);
 
@@ -88,7 +93,8 @@ public:
      * @param nTrack The ring.
      * @param flStart The first frame removed.
      * @param flEnd The frame the removal stops before.
-     * @ghidraAddress 0x00412b18
+     * @ghidraAddress NTSC-U/C: 0x00412b18
+     * @ghidraAddress PAL: 0x0044c640
      */
     void RemoveRange(char nTrack, float flStart, float flEnd);
 
@@ -98,7 +104,8 @@ public:
      * @param nTrack The ring.
      * @param flFrame The frame.
      * @param flBlend The position across the ring.
-     * @ghidraAddress 0x00412c50
+     * @ghidraAddress NTSC-U/C: 0x00412c50
+     * @ghidraAddress PAL: 0x0044c778
      */
     void Remove(char nTrack, float flFrame, float flBlend);
 
@@ -112,7 +119,8 @@ public:
      * reached. AppTunnel::SetFrame() calls it at `0x00446a08`.
      *
      * @param flFrame The tunnel frame of the playhead.
-     * @ghidraAddress 0x00412db0
+     * @ghidraAddress NTSC-U/C: 0x00412db0
+     * @ghidraAddress PAL: 0x0044c8d8
      */
     void Update(float flFrame);
 
@@ -121,7 +129,8 @@ public:
      *
      * @param nKind The kind.
      * @return The level.
-     * @ghidraAddress 0x00415a50
+     * @ghidraAddress NTSC-U/C: 0x00415a50
+     * @ghidraAddress PAL: 0x0044f5a0
      */
     TnlGemMeshKind *GetMeshKind(char nKind);
 
@@ -130,7 +139,8 @@ public:
      *
      * @param nKind The kind, kEffectKindBase or above.
      * @return The kind record.
-     * @ghidraAddress 0x00415a68
+     * @ghidraAddress NTSC-U/C: 0x00415a68
+     * @ghidraAddress PAL: 0x0044f5b8
      */
     TnlGemEffectKind *GetEffectKind(char nKind);
 
@@ -141,7 +151,8 @@ public:
      *
      * @param nKind The kind.
      * @param pParent The drawable to add to, or null.
-     * @ghidraAddress 0x00415a88
+     * @ghidraAddress NTSC-U/C: 0x00415a88
+     * @ghidraAddress PAL: 0x0044f5d8
      */
     void AddKindDraws(char nKind, Rnd::Drawable *pParent);
 
@@ -153,7 +164,8 @@ public:
      *
      * @param nKind The kind.
      * @param nShowing Non-zero to show.
-     * @ghidraAddress 0x00415af8
+     * @ghidraAddress NTSC-U/C: 0x00415af8
+     * @ghidraAddress PAL: 0x0044f648
      */
     void SetKindShowing(char nKind, int nShowing);
 
@@ -180,14 +192,16 @@ private:
  * inlined copy is known. The routine takes no object and belongs to no identified class.
  *
  * @return The name.
- * @ghidraAddress 0x00415668
+ * @ghidraAddress NTSC-U/C: 0x00415668
+ * @ghidraAddress PAL: 0x0044f1b8
  */
 HxStr NextTnlMeshName();
 
 /**
  * The number of the last NextTnlMeshName() name.
  *
- * @ghidraAddress 0x006df360
+ * @ghidraAddress NTSC-U/C: 0x006df360
+ * @ghidraAddress PAL: 0x00722b88
  */
 extern int g_nTnlMeshNameCounter;
 
@@ -196,6 +210,7 @@ extern int g_nTnlMeshNameCounter;
  *
  * Update() writes it and nothing reads it.
  *
- * @ghidraAddress 0x006df364
+ * @ghidraAddress NTSC-U/C: 0x006df364
+ * @ghidraAddress PAL: 0x00722b8c
  */
 extern float g_flTnlGemLastFrame;

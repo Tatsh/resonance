@@ -29,7 +29,8 @@ class HxStr;
  * @param pNote2 Receives the second note, or is left at -1.
  * @param pVelocity Receives the velocity, or is left at 127.
  * @param pAutoStop Receives 1 for a sound that releases itself, or is left at 0.
- * @ghidraAddress 0x0012e570
+ * @ghidraAddress NTSC-U/C: 0x0012e570
+ * @ghidraAddress PAL: 0x0012ece8
  */
 void LookupSound(const HxStr &name, int *pNote, int *pNote2, int *pVelocity, int *pAutoStop);
 
@@ -41,7 +42,8 @@ void LookupSound(const HxStr &name, int *pNote, int *pNote2, int *pVelocity, int
  * the synthesiser through this one entry point.
  *
  * @param pszName The registered name, such as `SND_MET_SLIDE`.
- * @ghidraAddress 0x0012f470
+ * @ghidraAddress NTSC-U/C: 0x0012f470
+ * @ghidraAddress PAL: 0x0012fc08
  */
 void PlaySoundByName(const char *pszName);
 
@@ -54,7 +56,8 @@ void PlaySoundByName(const char *pszName);
  * is the one caller, and it stops `SND_MET_MUSIC1`. The title is inferred from the note-off.
  *
  * @param pszName The registered name.
- * @ghidraAddress 0x0012eba0
+ * @ghidraAddress NTSC-U/C: 0x0012eba0
+ * @ghidraAddress PAL: 0x0012f318
  */
 void StopSoundByName(const char *pszName);
 
@@ -71,7 +74,8 @@ void StopSoundByName(const char *pszName);
  * @param nNote2 The second note, or -1 for none.
  * @param nVelocity The velocity, from 0 to 127.
  * @param bAutoStop Non-zero to release the first note after 480 ticks.
- * @ghidraAddress 0x0012ea50
+ * @ghidraAddress NTSC-U/C: 0x0012ea50
+ * @ghidraAddress PAL: 0x0012f1c8
  */
 void PlaySynthSound(int nNote, int nNote2, int nVelocity, int bAutoStop);
 
@@ -82,7 +86,8 @@ void PlaySynthSound(int nNote, int nNote2, int nVelocity, int bAutoStop);
  * note-off for each queued note whose release tick has arrived. It is stored in a file-scope
  * pointer. GrooveWorld::StartPlay() is the caller. The title is inferred.
  *
- * @ghidraAddress 0x0012e460
+ * @ghidraAddress NTSC-U/C: 0x0012e460
+ * @ghidraAddress PAL: 0x0012ebd8
  */
 void CreateNoteDestroyer();
 
@@ -91,7 +96,8 @@ void CreateNoteDestroyer();
  *
  * GrooveWorld::StartPlay() is the caller. The title is inferred.
  *
- * @ghidraAddress 0x0012f3d8
+ * @ghidraAddress NTSC-U/C: 0x0012f3d8
+ * @ghidraAddress PAL: 0x0012fb70
  */
 void StartNoteDestroyer();
 
@@ -100,7 +106,8 @@ void StartNoteDestroyer();
  *
  * GrooveWorld::Shutdown() is the caller. The title is inferred.
  *
- * @ghidraAddress 0x0012f400
+ * @ghidraAddress NTSC-U/C: 0x0012f400
+ * @ghidraAddress PAL: 0x0012fb98
  */
 void StopNoteDestroyer();
 
@@ -109,7 +116,8 @@ void StopNoteDestroyer();
  *
  * GrooveWorld::Shutdown() is the caller, after StopNoteDestroyer(). The title is inferred.
  *
- * @ghidraAddress 0x0012f428
+ * @ghidraAddress NTSC-U/C: 0x0012f428
+ * @ghidraAddress PAL: 0x0012fbc0
  */
 void DestroyNoteDestroyer();
 
@@ -119,7 +127,8 @@ void DestroyNoteDestroyer();
  * The script commands that activate listen mode, practice mode, and team freqs are among the
  * callers. The title is inferred from them.
  *
- * @ghidraAddress 0x0012f598
+ * @ghidraAddress NTSC-U/C: 0x0012f598
+ * @ghidraAddress PAL: 0x0012fd50
  */
 void PlayActivateSound();
 
@@ -131,6 +140,7 @@ void PlayActivateSound();
  * `0x00122ab8` are the callers. The title is inferred.
  *
  * @param kind The captured powerup.
- * @ghidraAddress 0x0012f520
+ * @ghidraAddress NTSC-U/C: 0x0012f520
+ * @ghidraAddress PAL: 0x0012fcd8
  */
 void PlayPowerupSound(HudItemKind kind);

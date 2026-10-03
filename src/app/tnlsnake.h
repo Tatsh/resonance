@@ -31,14 +31,16 @@ public:
      * The ribbon and the head are named with NextAppTunnelName(). The ribbon draws with
      * "snake.mat" at width 0.2 and starts hidden.
      *
-     * @ghidraAddress 0x0043e6a0
+     * @ghidraAddress NTSC-U/C: 0x0043e6a0
+     * @ghidraAddress PAL: 0x0047af90
      */
     TnlSnake();
 
     /**
      * Take the ribbon out of "tnl transparent" and delete the ribbon and the head.
      *
-     * @ghidraAddress 0x0043ed50
+     * @ghidraAddress NTSC-U/C: 0x0043ed50
+     * @ghidraAddress PAL: 0x0047b6d8
      */
     ~TnlSnake();
 
@@ -52,7 +54,8 @@ public:
      * @param color The ribbon colour.
      * @param flPhase The phase of the swing, in radians.
      * @param flAmplitude The amplitude of the swing.
-     * @ghidraAddress 0x00456960
+     * @ghidraAddress NTSC-U/C: 0x00456960
+     * @ghidraAddress PAL: 0x00493e90
      */
     void Start(float flFrame, int nRing, const Color &color, float flPhase, float flAmplitude);
 
@@ -66,7 +69,8 @@ public:
      * on four neighbouring points.
      *
      * @param flFrame The song frame.
-     * @ghidraAddress 0x0043eec0
+     * @ghidraAddress NTSC-U/C: 0x0043eec0
+     * @ghidraAddress PAL: 0x0047b848
      */
     void Update(float flFrame);
 

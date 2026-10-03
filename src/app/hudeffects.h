@@ -40,7 +40,8 @@ public:
      * The wires, `<layout> fxwires<n>.mesh`, show only in kPlayModeJam.
      *
      * @param nIndex The track display number that fills `<n>`.
-     * @ghidraAddress 0x00417f50
+     * @ghidraAddress NTSC-U/C: 0x00417f50
+     * @ghidraAddress PAL: 0x00451f90
      */
     HudEffects(int nIndex);
 
@@ -51,7 +52,8 @@ public:
      * BarStatusMsg reports. The title is inferred.
      *
      * @param effects One bit per item kind, bit n for kind n.
-     * @ghidraAddress 0x00418760
+     * @ghidraAddress NTSC-U/C: 0x00418760
+     * @ghidraAddress PAL: 0x00452860
      */
     void SetMask(BarStatusMsg::Effects effects);
 
@@ -61,7 +63,8 @@ public:
      * The out-of-line copy has no caller. The title is inferred.
      *
      * @param nKind The HudItemKind to select.
-     * @ghidraAddress 0x00429e98
+     * @ghidraAddress NTSC-U/C: 0x00429e98
+     * @ghidraAddress PAL: 0x004654d8
      */
     void Select(int nKind);
 
@@ -72,7 +75,8 @@ public:
      *
      * @param nKind The HudItemKind.
      * @param nLit Non-zero to light.
-     * @ghidraAddress 0x00429f28
+     * @ghidraAddress NTSC-U/C: 0x00429f28
+     * @ghidraAddress PAL: 0x00465568
      */
     void SetLit(int nKind, int nLit);
 

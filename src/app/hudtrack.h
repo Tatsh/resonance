@@ -34,7 +34,8 @@ public:
      *
      * @param pPlayer The player the display shows.
      * @param nIndex The display number, counted over the players with a slot from 0.
-     * @ghidraAddress 0x0041bec8
+     * @ghidraAddress NTSC-U/C: 0x0041bec8
+     * @ghidraAddress PAL: 0x004569f0
      */
     HudTrack(Player *pPlayer, int nIndex);
 
@@ -46,7 +47,8 @@ public:
      *
      * @param flFrame The song position, in MIDI ticks.
      * @param flTime The time the text message and the points readout run against.
-     * @ghidraAddress 0x0042ab08
+     * @ghidraAddress NTSC-U/C: 0x0042ab08
+     * @ghidraAddress PAL: 0x00465e58
      */
     void SetFrame(float flFrame, float flTime);
 

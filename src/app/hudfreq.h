@@ -30,7 +30,8 @@ public:
      *
      * @param pPlayer The player the icon shows.
      * @param nIndex The badge number that fills `<n>` and selects the persona burn texture.
-     * @ghidraAddress 0x00419b40
+     * @ghidraAddress NTSC-U/C: 0x00419b40
+     * @ghidraAddress PAL: 0x00454268
      */
     HudFreq(Player *pPlayer, int nIndex);
 
@@ -42,7 +43,8 @@ public:
      * inlined copy of this routine. The title is inferred.
      *
      * @param nPulsing Non-zero to pulse.
-     * @ghidraAddress 0x0042a348
+     * @ghidraAddress NTSC-U/C: 0x0042a348
+     * @ghidraAddress PAL: 0x00465698
      */
     void SetPulsing(int nPulsing);
 
@@ -54,7 +56,8 @@ public:
      * at `+0x10`. The title is inferred.
      *
      * @param nShowing Non-zero to show the icon.
-     * @ghidraAddress 0x0042a3f0
+     * @ghidraAddress NTSC-U/C: 0x0042a3f0
+     * @ghidraAddress PAL: 0x00465740
      */
     void SetShowing(int nShowing) {
         mMesh->SetShowing(nShowing);
@@ -68,7 +71,8 @@ public:
      * HudBadge::SetFrame() inlines the body, and this copy has no caller.
      *
      * @param flFrame The song position, in MIDI ticks.
-     * @ghidraAddress 0x0042a350
+     * @ghidraAddress NTSC-U/C: 0x0042a350
+     * @ghidraAddress PAL: 0x004656a0
      */
     void SetFrame(float flFrame);
 

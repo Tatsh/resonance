@@ -28,7 +28,8 @@ public:
      *
      * @param nMeshCount The number of meshes, "nowmesh0" through "nowmesh<nMeshCount - 1>".
      * @param nPlayerCount The number of player slots, each starting at mesh 0.
-     * @ghidraAddress 0x0043c118
+     * @ghidraAddress NTSC-U/C: 0x0043c118
+     * @ghidraAddress PAL: 0x004786e0
      */
     TnlNowRing(int nMeshCount, int nPlayerCount);
 
@@ -39,7 +40,8 @@ public:
      *
      * @param nPlayer The player slot.
      * @param nMesh The index of the mesh to hide.
-     * @ghidraAddress 0x00456268
+     * @ghidraAddress NTSC-U/C: 0x00456268
+     * @ghidraAddress PAL: 0x00493798
      */
     void SetPlayerMesh(int nPlayer, int nMesh);
 
@@ -49,7 +51,8 @@ public:
      * AppTunnel inlines this at `0x00446f1c`, and the out-of-line copy has no caller.
      *
      * @param flFrame The current frame.
-     * @ghidraAddress 0x00456148
+     * @ghidraAddress NTSC-U/C: 0x00456148
+     * @ghidraAddress PAL: 0x00493678
      */
     void SetFrame(float flFrame);
 
@@ -63,14 +66,16 @@ public:
      * inlines it with the view index. The out-of-line copy has no caller.
      *
      * @param nStep The number of eighths of a turn.
-     * @ghidraAddress 0x00456028
+     * @ghidraAddress NTSC-U/C: 0x00456028
+     * @ghidraAddress PAL: 0x00493558
      */
     void SetRotation(int nStep);
 
     /**
      * Show every mesh, then hide the mesh of each player slot.
      *
-     * @ghidraAddress 0x004562a0
+     * @ghidraAddress NTSC-U/C: 0x004562a0
+     * @ghidraAddress PAL: 0x004937d0
      */
     void RefreshMeshes();
 
@@ -81,7 +86,8 @@ public:
      * out-of-line copy has no caller.
      *
      * @param nShowing Non-zero to show.
-     * @ghidraAddress 0x00455ff8
+     * @ghidraAddress NTSC-U/C: 0x00455ff8
+     * @ghidraAddress PAL: 0x00493528
      */
     void SetShowing(int nShowing);
 

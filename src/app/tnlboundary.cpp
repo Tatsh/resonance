@@ -22,7 +22,7 @@ constexpr float kPassedFrames = 480.0f;
 
 } // namespace
 
-// 0x0043fa18
+// NTSC-U/C: 0x0043fa18, PAL: 0x0047c3f8
 TnlBoundary::TnlBoundary(PlayMap *pPlayMap)
     : mPlayMap(pPlayMap), mView(nullptr), mStep(0), mStepCount(pPlayMap->GetSectionCount()) {
     mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("boundary.view")));
@@ -32,7 +32,7 @@ TnlBoundary::TnlBoundary(PlayMap *pPlayMap)
     UpdateText();
 }
 
-// 0x0043fcc0
+// NTSC-U/C: 0x0043fcc0, PAL: 0x0047c6d8
 void TnlBoundary::SetFrame(float flFrame) {
     const float flPast = flFrame - static_cast<float>(mStep * kFramesPerBar);
     mView->SetFrame(flPast + kAnimLead);

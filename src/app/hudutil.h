@@ -52,7 +52,8 @@ HxStr HudPowerupName(int nKind);
  *
  * @param name The colour name, as a player records it.
  * @return The colour.
- * @ghidraAddress 0x00416068
+ * @ghidraAddress NTSC-U/C: 0x00416068
+ * @ghidraAddress PAL: 0x0044fba0
  */
 Color HudColorFromName(HxStr name);
 
@@ -63,13 +64,15 @@ Color HudColorFromName(HxStr name);
  * inlines the body twice, and this copy has no caller. The title is inferred.
  *
  * @return The name.
- * @ghidraAddress 0x004298e8
+ * @ghidraAddress NTSC-U/C: 0x004298e8
+ * @ghidraAddress PAL: 0x00464f28
  */
 HxStr NextHudName();
 
 /**
  * Count of names NextHudName() has produced.
  *
- * @ghidraAddress 0x006dfde8
+ * @ghidraAddress NTSC-U/C: 0x006dfde8
+ * @ghidraAddress PAL: 0x00723618
  */
 extern int g_nHudNameCounter;

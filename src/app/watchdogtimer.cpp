@@ -23,12 +23,12 @@ constexpr int kUnallocatedCommand = -2;
 
 } // namespace
 
-// 0x004a7780
+// NTSC-U/C: 0x004a7780, PAL: 0x004e5890
 WatchdogTimer::WatchdogTimer(Watchdog *pWatchdog)
     : mNegatedOrigin(0), mPausedNs(0), mHasOrigin(0), mWatchdog(pWatchdog) {
 }
 
-// 0x004a7828
+// NTSC-U/C: 0x004a7828, PAL: 0x004e5938
 void WatchdogTimer::SetOrigin(long long nNanoseconds) {
     if (mHasOrigin == 0) {
         mHasOrigin = 1;
@@ -36,7 +36,7 @@ void WatchdogTimer::SetOrigin(long long nNanoseconds) {
     }
 }
 
-// 0x004a77c0
+// NTSC-U/C: 0x004a77c0, PAL: 0x004e58d0
 long long WatchdogTimer::Now() {
     if (mHasOrigin == 0) {
         return mPausedNs;
@@ -44,7 +44,7 @@ long long WatchdogTimer::Now() {
     return mWatchdog->mNowNs + mNegatedOrigin;
 }
 
-// 0x004a7878
+// NTSC-U/C: 0x004a7878, PAL: 0x004e5988
 void WatchdogTimer::Pause() {
     if (mHasOrigin != 0) {
         mHasOrigin = 0;
@@ -52,7 +52,7 @@ void WatchdogTimer::Pause() {
     }
 }
 
-// 0x004a7848
+// NTSC-U/C: 0x004a7848, PAL: 0x004e5958
 void WatchdogTimer::Resume() {
     if (mHasOrigin == 0) {
         mHasOrigin = 1;
@@ -60,7 +60,7 @@ void WatchdogTimer::Resume() {
     }
 }
 
-// 0x004a78b8
+// NTSC-U/C: 0x004a78b8, PAL: 0x004e59c8
 void WatchdogTimer::Post(
     Sch::Command *pCommand, Sch::Tick tick, CmdID &id, int bRecordable, int bDelta) {
     Sch::TimedCommand *pTimed = new Sch::TimedCommand(pCommand, tick, bDelta);
@@ -73,14 +73,14 @@ void WatchdogTimer::Post(
     Attachment::ReleaseIfSet(pTimed);
 }
 
-// 0x004a60a0
+// NTSC-U/C: 0x004a60a0, PAL: 0x004e4140
 void WatchdogTimer::PostIn(Sch::Command *pCommand, Sch::Tick tick, CmdID &id, int bRecordable) {
     Sch::TimedCommand *pTimed = new Sch::TimedCommand(pCommand, tick, kDeltaPost);
     mWatchdog->QueueDelta(pTimed, tick.mValue, id, bRecordable, kDefaultOrder);
     Attachment::ReleaseIfSet(pTimed);
 }
 
-// 0x004a6178
+// NTSC-U/C: 0x004a6178, PAL: 0x004e4218
 void WatchdogTimer::PostIn(Sch::Command *pCommand, Sch::Tick tick) {
     CmdID id;
     id.mValue = kUnallocatedCommand;
@@ -89,7 +89,7 @@ void WatchdogTimer::PostIn(Sch::Command *pCommand, Sch::Tick tick) {
     Attachment::ReleaseIfSet(pTimed);
 }
 
-// 0x004a79d0
+// NTSC-U/C: 0x004a79d0, PAL: 0x004e5ae0
 void WatchdogTimer::Withdraw(const CmdID &id) {
     const CmdID copy = id; // Yes, the binary copies the handle to the stack first.
     mWatchdog->WithdrawByCmdID(copy);

@@ -20,7 +20,8 @@ public:
     /**
      * Start idle with no animation.
      *
-     * @ghidraAddress 0x00411a18
+     * @ghidraAddress NTSC-U/C: 0x00411a18
+     * @ghidraAddress PAL: 0x0044b4e0
      */
     AnimRange();
 
@@ -28,7 +29,8 @@ public:
      * Attach the animation and rewind it to frame 0.
      *
      * @param pAnim The animation to play.
-     * @ghidraAddress 0x00411a30
+     * @ghidraAddress NTSC-U/C: 0x00411a30
+     * @ghidraAddress PAL: 0x0044b4f8
      */
     void SetAnim(Rnd::Animatable *pAnim);
 
@@ -40,7 +42,8 @@ public:
      *
      * @param flFrom The first frame.
      * @param flTo The last frame.
-     * @ghidraAddress 0x00411a58
+     * @ghidraAddress NTSC-U/C: 0x00411a58
+     * @ghidraAddress PAL: 0x0044b520
      */
     void Play(float flFrom, float flTo);
 
@@ -49,7 +52,8 @@ public:
      *
      * @param flTime The current time. The first call after Play() records it as the start.
      * @return 1 while the run continues, and 0 when idle or once the run has finished.
-     * @ghidraAddress 0x00411ab8
+     * @ghidraAddress NTSC-U/C: 0x00411ab8
+     * @ghidraAddress PAL: 0x0044b580
      */
     int Update(float flTime);
 

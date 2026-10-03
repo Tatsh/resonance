@@ -32,7 +32,8 @@ public:
     /**
      * Delete the ribbon.
      *
-     * @ghidraAddress 0x004375a8
+     * @ghidraAddress NTSC-U/C: 0x004375a8
+     * @ghidraAddress PAL: 0x00473340
      */
     ~DurGemCurve();
 
@@ -48,7 +49,8 @@ public:
      * @param color The colour of every point.
      * @param pMat The material the ribbon draws with.
      * @param flWidth The width of the ribbon.
-     * @ghidraAddress 0x00432cf0
+     * @ghidraAddress NTSC-U/C: 0x00432cf0
+     * @ghidraAddress PAL: 0x0046ea20
      */
     void Init(Rnd::View *pView,
               int nLane,
@@ -64,7 +66,8 @@ public:
      * DurGemTrails::Update() inlines the body.
      *
      * @return The point count of the ribbon.
-     * @ghidraAddress 0x00437610
+     * @ghidraAddress NTSC-U/C: 0x00437610
+     * @ghidraAddress PAL: 0x004733a8
      */
     int Show();
 
@@ -73,7 +76,8 @@ public:
      *
      * DurGemTrails::Update() inlines the body.
      *
-     * @ghidraAddress 0x00437670
+     * @ghidraAddress NTSC-U/C: 0x00437670
+     * @ghidraAddress PAL: 0x00473408
      */
     void Hide();
 
@@ -86,7 +90,8 @@ public:
      * @param plane The plane to test against.
      * @param pOut Receives the crossing point.
      * @return True when a segment crosses plane.
-     * @ghidraAddress 0x004376a0
+     * @ghidraAddress NTSC-U/C: 0x004376a0
+     * @ghidraAddress PAL: 0x00473438
      */
     bool FindCrossing(const Plane &plane, Vector3 *pOut);
 

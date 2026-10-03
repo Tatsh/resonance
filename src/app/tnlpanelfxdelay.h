@@ -32,7 +32,8 @@ public:
      * effect. The frame is not read.
      *
      * @param flFrame The frame the trigger fires on.
-     * @ghidraAddress 0x004571f8
+     * @ghidraAddress NTSC-U/C: 0x004571f8
+     * @ghidraAddress PAL: 0x00494728
      */
     virtual void Fire(float flFrame);
 

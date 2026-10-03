@@ -49,7 +49,8 @@ public:
      * @param kind The kind of panel.
      * @param nShowing Non-zero when the section should show.
      * @param nColorIndex The material number, taken modulo 4.
-     * @ghidraAddress 0x00457228
+     * @ghidraAddress NTSC-U/C: 0x00457228
+     * @ghidraAddress PAL: 0x00494758
      */
     TnlPanel(int nRing,
              int nSlice,
@@ -76,7 +77,8 @@ public:
      * A lane uses "tunnel mat<n>" or "powerbar mat<n>" in white. The other kinds use their panel
      * material in white at half alpha.
      *
-     * @ghidraAddress 0x004417f8
+     * @ghidraAddress NTSC-U/C: 0x004417f8
+     * @ghidraAddress PAL: 0x0047e510
      */
     void Refresh();
 
@@ -86,7 +88,8 @@ public:
      * In game mode a lane panel whose owner is a real player hides. A shown section takes the
      * material and colour.
      *
-     * @ghidraAddress 0x00441c68
+     * @ghidraAddress NTSC-U/C: 0x00441c68
+     * @ghidraAddress PAL: 0x0047ea20
      */
     void Apply();
 
@@ -101,7 +104,8 @@ public:
      * @param flFrame The current frame.
      * @param pTunnel The tunnel whose panel effects a lane with no owner starts.
      * @return 1 while the panel runs, and 0 once it has been applied.
-     * @ghidraAddress 0x00441d98
+     * @ghidraAddress NTSC-U/C: 0x00441d98
+     * @ghidraAddress PAL: 0x0047eb70
      */
     int Update(float flFrame, AppTunnel *pTunnel);
 

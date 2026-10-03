@@ -12,24 +12,24 @@ constexpr float kNotStarted = 0.0f;
 
 } // namespace
 
-// 0x00411a18
+// NTSC-U/C: 0x00411a18, PAL: 0x0044b4e0
 AnimRange::AnimRange() : mStart(kIdle), mAnim(nullptr) {
 }
 
-// 0x00411a30
+// NTSC-U/C: 0x00411a30, PAL: 0x0044b4f8
 void AnimRange::SetAnim(Rnd::Animatable *pAnim) {
     mAnim = pAnim;
     mAnim->SetFrame(0.0f);
 }
 
-// 0x00411a58
+// NTSC-U/C: 0x00411a58, PAL: 0x0044b520
 void AnimRange::Play(float flFrom, float flTo) {
     mFrom = mAnim->InverseFilters(flFrom);
     mTo = mAnim->InverseFilters(flTo);
     mStart = kNotStarted;
 }
 
-// 0x00411ab8
+// NTSC-U/C: 0x00411ab8, PAL: 0x0044b580
 int AnimRange::Update(float flTime) {
     if (mStart == kIdle) {
         return 0;

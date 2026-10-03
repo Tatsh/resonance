@@ -34,7 +34,8 @@ public:
      * Build one block and one label per section of a play map.
      *
      * @param pPlayMap The play map of the level, from Globals::GetPlayMap().
-     * @ghidraAddress 0x00419f88
+     * @ghidraAddress NTSC-U/C: 0x00419f88
+     * @ghidraAddress PAL: 0x00454740
      */
     HudPosition(PlayMap *pPlayMap);
 
@@ -44,7 +45,8 @@ public:
      * The head-up display panel's implicit destructor calls this one, and Overlay's destructor
      * inlines the panel's.
      *
-     * @ghidraAddress 0x0041ac18
+     * @ghidraAddress NTSC-U/C: 0x0041ac18
+     * @ghidraAddress PAL: 0x00455550
      */
     ~HudPosition();
 
@@ -87,7 +89,8 @@ public:
      * as repeating. Public because Overlay's AdvanceSectionToggleMsg handler at `0x0041f440`
      * calls it. The title is inferred.
      *
-     * @ghidraAddress 0x0041ad88
+     * @ghidraAddress NTSC-U/C: 0x0041ad88
+     * @ghidraAddress PAL: 0x004556c0
      */
     void Update();
 

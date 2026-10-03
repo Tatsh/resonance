@@ -111,9 +111,10 @@ class NoteDestroyer : public TickTask {
 public:
     /**
      * @param pGlobals The globals whose song clock and synthesiser the task uses.
-     * @ghidraAddress 0x0012f1e0
+     * @ghidraAddress NTSC-U/C: 0x0012f1e0
+     * @ghidraAddress PAL: 0x0012f978
      */
-    // 0x0012f1e0
+    // NTSC-U/C: 0x0012f1e0, PAL: 0x0012f978
     explicit NoteDestroyer(Globals *pGlobals)
         : TickTask(
               pGlobals->GetSongClock(), Mid::MBT(kDestroyerPeriodTicks).mTick, kDestroyerUnaligned),
@@ -124,8 +125,11 @@ public:
         mCount = 0;
     }
 
-    /** @ghidraAddress 0x0012f2b8 */
-    // 0x0012f2b8
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0012f2b8
+     * @ghidraAddress PAL: 0x0012fa50
+     */
+    // NTSC-U/C: 0x0012f2b8, PAL: 0x0012fa50
     virtual ~NoteDestroyer() {
     }
 
@@ -136,9 +140,10 @@ public:
      *
      * @param nTick The song position.
      * @return Always 1, to run again.
-     * @ghidraAddress 0x0012f308
+     * @ghidraAddress NTSC-U/C: 0x0012f308
+     * @ghidraAddress PAL: 0x0012faa0
      */
-    // 0x0012f308
+    // NTSC-U/C: 0x0012f308, PAL: 0x0012faa0
     virtual int Tick(int nTick) {
         for (int nIndex = 0; nIndex < mCount;) {
             if (!(nTick < mEntries[nIndex].mTick)) {
@@ -178,17 +183,17 @@ private:
 };
 
 // The note destroyer, from CreateNoteDestroyer() to DestroyNoteDestroyer().
-// 0x0066f538
+// NTSC-U/C: 0x0066f538, PAL: 0x006b0128
 NoteDestroyer *g_pNoteDestroyer;
 
 } // namespace
 
-// 0x0012e460
+// NTSC-U/C: 0x0012e460, PAL: 0x0012ebd8
 void CreateNoteDestroyer() {
     g_pNoteDestroyer = new NoteDestroyer(Application::shared());
 }
 
-// 0x0012ea50
+// NTSC-U/C: 0x0012ea50, PAL: 0x0012f1c8
 void PlaySynthSound(int nNote, int nNote2, int nVelocity, int bAutoStop) {
     Ps2HardSynth *pSynth = Application::shared()->GetSynth();
     // Yes, the binary tests the first note against 1 rather than -1.
@@ -207,23 +212,23 @@ void PlaySynthSound(int nNote, int nNote2, int nVelocity, int bAutoStop) {
     }
 }
 
-// 0x0012f3d8
+// NTSC-U/C: 0x0012f3d8, PAL: 0x0012fb70
 void StartNoteDestroyer() {
     g_pNoteDestroyer->Start(kMBTInfinity);
 }
 
-// 0x0012f400
+// NTSC-U/C: 0x0012f400, PAL: 0x0012fb98
 void StopNoteDestroyer() {
     g_pNoteDestroyer->Stop();
 }
 
-// 0x0012f428
+// NTSC-U/C: 0x0012f428, PAL: 0x0012fbc0
 void DestroyNoteDestroyer() {
     delete g_pNoteDestroyer;
     g_pNoteDestroyer = nullptr;
 }
 
-// 0x0012f470
+// NTSC-U/C: 0x0012f470, PAL: 0x0012fc08
 void PlaySoundByName(const char *pszName) {
     const HxStr name(pszName);
     int nNote = kNoNote;
@@ -234,12 +239,12 @@ void PlaySoundByName(const char *pszName) {
     PlaySynthSound(nNote, nNote2, nVelocity, bAutoStop);
 }
 
-// 0x0012f598
+// NTSC-U/C: 0x0012f598, PAL: 0x0012fd50
 void PlayActivateSound() {
     PlaySynthSound(kNoteActivate, kNoNote, kDefaultVelocity, 0);
 }
 
-// 0x0012e570
+// NTSC-U/C: 0x0012e570, PAL: 0x0012ece8
 void LookupSound(const HxStr &name, int *pNote, int *pNote2, int *pVelocity, int *pAutoStop) {
     *pNote = kNoNote;
     *pNote2 = kNoNote;
@@ -353,7 +358,7 @@ void LookupSound(const HxStr &name, int *pNote, int *pNote2, int *pVelocity, int
     }
 }
 
-// 0x0012eba0
+// NTSC-U/C: 0x0012eba0, PAL: 0x0012f318
 void StopSoundByName(const char *pszName) {
     const HxStr name(pszName);
     int nNote = kNoNote;
@@ -371,7 +376,7 @@ void StopSoundByName(const char *pszName) {
     }
 }
 
-// 0x0012f520
+// NTSC-U/C: 0x0012f520, PAL: 0x0012fcd8
 // The jump table at `0x007d1bd0` maps kinds 0 through 4 to sounds 0x3f, 0x3d, 0x3e, 0x3c, and
 // 0x40, kinds 5 through 11 to no sound, and kind 12 to 0x41, which is what the cases below
 // encode. Kinds past 12 return without playing.

@@ -16,17 +16,17 @@ constexpr int kEndRecordingCmdId = 6;
 
 } // namespace
 
-// 0x00594968
+// NTSC-U/C: 0x00594968, PAL: 0x005d7d00
 WatchdogPlayback::WatchdogPlayback(Watchdog *pWatchdog) : mWatchdog(pWatchdog) {
 }
 
-// 0x00594988
+// NTSC-U/C: 0x00594988, PAL: 0x005d7d20
 WatchdogPlayback::~WatchdogPlayback() {
     std::for_each(mCommands.begin(), mCommands.end(), Attachment::ReleaseIfSet);
     mCommands.erase(mCommands.begin(), mCommands.end());
 }
 
-// 0x00594a78
+// NTSC-U/C: 0x00594a78, PAL: 0x005d7e10
 void WatchdogPlayback::Load(IBStream &stream) {
     mCommands.erase(mCommands.begin(), mCommands.end());
     for (;;) {
@@ -42,7 +42,7 @@ void WatchdogPlayback::Load(IBStream &stream) {
     mCursor = mCommands.begin();
 }
 
-// 0x005962e8
+// NTSC-U/C: 0x005962e8, PAL: 0x005d96f0
 void WatchdogPlayback::Start() {
     mWatchdog->mClock.Pause();
     mWatchdog->RestartClock();
@@ -50,7 +50,7 @@ void WatchdogPlayback::Start() {
     mWatchdog->mClock.Resume();
 }
 
-// 0x00596330
+// NTSC-U/C: 0x00596330, PAL: 0x005d9738
 void WatchdogPlayback::QueueRemaining() {
     while (mCursor != mCommands.end()) {
         mWatchdog->QueueReplayed(*mCursor);

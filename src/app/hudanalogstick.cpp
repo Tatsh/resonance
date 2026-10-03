@@ -5,7 +5,7 @@
 #include "rnd/mat.h"
 #include "rnd/mesh.h"
 
-// 0x00417840
+// NTSC-U/C: 0x00417840, PAL: 0x00451628
 HudAnalogStick::HudAnalogStick() {
     mMesh = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD1 analog_stick.mesh")));
     mInOutMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD in_out_stick.mat")));
@@ -13,7 +13,7 @@ HudAnalogStick::HudAnalogStick() {
     SetShowing(0);
 }
 
-// 0x00429d60
+// NTSC-U/C: 0x00429d60, PAL: 0x004653a0
 void HudAnalogStick::SetMotion(const HxStr &motion) {
     if (motion == "in_out") {
         mMesh->SetMaterial(mInOutMat);
@@ -22,7 +22,7 @@ void HudAnalogStick::SetMotion(const HxStr &motion) {
     }
 }
 
-// 0x00429dd8
+// NTSC-U/C: 0x00429dd8, PAL: 0x00465418
 void HudAnalogStick::SetShowing(int nShowing) {
     mMesh->SetShowing(nShowing);
 }

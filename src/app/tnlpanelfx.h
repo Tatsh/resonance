@@ -33,7 +33,8 @@ public:
      * as a copy of "tunnel erase0".
      *
      * @param nIndex The panel slot, also the material number.
-     * @ghidraAddress 0x0043c688
+     * @ghidraAddress NTSC-U/C: 0x0043c688
+     * @ghidraAddress PAL: 0x00478cc8
      */
     explicit TnlPanelFX(int nIndex);
 
@@ -42,7 +43,8 @@ public:
      *
      * AppTunnel's destructor inlines the body. The deleting copy at `0x00456418` has no caller.
      *
-     * @ghidraAddress 0x00456418
+     * @ghidraAddress NTSC-U/C: 0x00456418
+     * @ghidraAddress PAL: 0x00493948
      */
     ~TnlPanelFX() {
         mView->RemoveDraw(mMesh);
@@ -59,7 +61,8 @@ public:
      * @param nRing The ring of the section.
      * @param nSlice The slice of the section, also the bar.
      * @param nForward Non-zero to rise along mOffset, zero to rise against it.
-     * @ghidraAddress 0x0043cb78
+     * @ghidraAddress NTSC-U/C: 0x0043cb78
+     * @ghidraAddress PAL: 0x00479278
      */
     void Start(int nRing, int nSlice, int nForward);
 
@@ -73,7 +76,8 @@ public:
      * faces again.
      *
      * @param flFrame The current frame.
-     * @ghidraAddress 0x0043cd38
+     * @ghidraAddress NTSC-U/C: 0x0043cd38
+     * @ghidraAddress PAL: 0x00479438
      */
     void Update(float flFrame);
 

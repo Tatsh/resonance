@@ -25,7 +25,7 @@ constexpr float kShowFrames = 9600.0f;
 
 } // namespace
 
-// 0x0043f3f8
+// NTSC-U/C: 0x0043f3f8, PAL: 0x0047bd80
 TnlArms::TnlArms() : mStartFrame(kNoFrame) {
     mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("arms.view")));
     mView->SetShowing(0);
@@ -42,7 +42,7 @@ TnlArms::TnlArms() : mStartFrame(kNoFrame) {
     }
 }
 
-// 0x00456ad0
+// NTSC-U/C: 0x00456ad0, PAL: 0x00494000
 void TnlArms::Start(float flFrame) {
     mStartFrame = flFrame;
     for (unsigned i = 0; i < mEmitters.size(); ++i) {
@@ -51,7 +51,7 @@ void TnlArms::Start(float flFrame) {
     mView->SetShowing(1);
 }
 
-// 0x00456ba0
+// NTSC-U/C: 0x00456ba0, PAL: 0x004940d0
 void TnlArms::SetFrame(float flFrame) {
     const float flElapsed = flFrame - mStartFrame;
     if (flElapsed < 0.0f) {
@@ -70,7 +70,7 @@ void TnlArms::SetFrame(float flFrame) {
     }
 }
 
-// 0x00456a88
+// NTSC-U/C: 0x00456a88, PAL: 0x00493fb8
 void TnlArms::AttachTo(Rnd::Drawable *pParent) {
     pParent->AddDraw(mView, GetCachedTunnelObject());
 }

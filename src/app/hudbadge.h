@@ -27,7 +27,8 @@ public:
      *
      * @param pPlayer The player the badge shows.
      * @param nIndex The badge number, counted over the world's players from 0.
-     * @ghidraAddress 0x0042ac58
+     * @ghidraAddress NTSC-U/C: 0x0042ac58
+     * @ghidraAddress PAL: 0x00465fa8
      */
     HudBadge(Player *pPlayer, int nIndex);
 
@@ -36,7 +37,8 @@ public:
      *
      * @param flFrame The song position, in MIDI ticks.
      * @param flTime The time HudScore::Update() compares against.
-     * @ghidraAddress 0x0041c0f8
+     * @ghidraAddress NTSC-U/C: 0x0041c0f8
+     * @ghidraAddress PAL: 0x00466008
      */
     void SetFrame(float flFrame, float flTime);
 

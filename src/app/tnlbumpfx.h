@@ -31,14 +31,16 @@ public:
      * generator is hidden.
      *
      * @param nIndex The burst slot.
-     * @ghidraAddress 0x0043dc20
+     * @ghidraAddress NTSC-U/C: 0x0043dc20
+     * @ghidraAddress PAL: 0x0047a450
      */
     explicit TnlBumpFX(int nIndex);
 
     /**
      * Give the generator back both rate bounds at the recorded low rate.
      *
-     * @ghidraAddress 0x00456690
+     * @ghidraAddress NTSC-U/C: 0x00456690
+     * @ghidraAddress PAL: 0x00493bc0
      */
     ~TnlBumpFX();
 
@@ -55,7 +57,8 @@ public:
      *                  TnlColorFromName() with no further copy.
      * @param nForward Non-zero runs the path window forward.
      * @param flPathOffset The distance from the song frame to the path window.
-     * @ghidraAddress 0x0043dea8
+     * @ghidraAddress NTSC-U/C: 0x0043dea8
+     * @ghidraAddress PAL: 0x0047a738
      */
     void Start(int nStep, const HxStr &colorName, int nForward, float flPathOffset);
 
@@ -79,7 +82,8 @@ public:
      * `flFrame + mPathOffset` and to end 800 frames later, or earlier when mForward is clear.
      *
      * @param flFrame The current frame.
-     * @ghidraAddress 0x004566c8
+     * @ghidraAddress NTSC-U/C: 0x004566c8
+     * @ghidraAddress PAL: 0x00493bf8
      */
     void SetFrame(float flFrame);
 

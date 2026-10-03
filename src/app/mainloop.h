@@ -35,7 +35,8 @@ public:
      * compiler emits. The body does not use the flag.
      * @param pWatchdog The long-operation watchdog to service.
      * @param pGameManager The game manager to draw through.
-     * @ghidraAddress 0x001ec998
+     * @ghidraAddress NTSC-U/C: 0x001ec998
+     * @ghidraAddress PAL: 0x001f2c20
      */
     MainLoop(int nInCharge, Watchdog *pWatchdog, GameManagerImpl *pGameManager);
 
@@ -44,7 +45,8 @@ public:
      *
      * The redraw callback the constructor installed is not removed.
      *
-     * @ghidraAddress 0x001ef158
+     * @ghidraAddress NTSC-U/C: 0x001ef158
+     * @ghidraAddress PAL: 0x001f54f8
      */
     virtual ~MainLoop();
 
@@ -53,22 +55,36 @@ public:
      *
      * Nothing in the image clears mRunning, so the routine does not return.
      *
-     * @ghidraAddress 0x001ef290
+     * @ghidraAddress NTSC-U/C: 0x001ef290
+     * @ghidraAddress PAL: 0x001f5630
      */
     void Run();
+
+#ifdef VIDEO_STANDARD_PAL
+    /**
+     * Clear mRunning so that Run() returns after the current pass.
+     *
+     * Only Globals::StopMainLoop() uses it, and no code calls that routine.
+     */
+    void Stop() {
+        mRunning = 0;
+    }
+#endif
 
     /**
      * Fire every timer whose deadline has passed, then recompute the next deadline.
      *
      * @param nNowNs The current reading of the frame clock in nanoseconds.
-     * @ghidraAddress 0x001ef308
+     * @ghidraAddress NTSC-U/C: 0x001ef308
+     * @ghidraAddress PAL: 0x001f56a8
      */
     void FireDueTimers(long long nNowNs);
 
     /**
      * Recompute the earliest of the two timer deadlines.
      *
-     * @ghidraAddress 0x001ef2e0
+     * @ghidraAddress NTSC-U/C: 0x001ef2e0
+     * @ghidraAddress PAL: 0x001f5680
      */
     void UpdateNextDeadline();
 
@@ -77,7 +93,8 @@ public:
      *
      * The routine is unreferenced in the image.
      *
-     * @ghidraAddress 0x001ef230
+     * @ghidraAddress NTSC-U/C: 0x001ef230
+     * @ghidraAddress PAL: 0x001f55d0
      */
     void FlushWatchdogNow();
 
@@ -87,7 +104,8 @@ public:
      * The routine is unreferenced in the image.
      *
      * @param nFrames The number of frames to wait.
-     * @ghidraAddress 0x001ef260
+     * @ghidraAddress NTSC-U/C: 0x001ef260
+     * @ghidraAddress PAL: 0x001f5600
      */
     void FlushWatchdogAfter(int nFrames);
 
@@ -96,7 +114,8 @@ protected:
      * Report no progress, because the frame loop never finishes.
      *
      * @return Always zero.
-     * @ghidraAddress 0x001ef118
+     * @ghidraAddress NTSC-U/C: 0x001ef118
+     * @ghidraAddress PAL: 0x001f54b8
      */
     virtual float Progress();
 
@@ -104,7 +123,8 @@ protected:
      * Report an empty title.
      *
      * @return An empty string.
-     * @ghidraAddress 0x001ef128
+     * @ghidraAddress NTSC-U/C: 0x001ef128
+     * @ghidraAddress PAL: 0x001f54c8
      */
     virtual HxStr Name();
 
@@ -112,7 +132,8 @@ protected:
      * Run one frame.
      *
      * @return Always 1, so the frame loop is never retired by the run ring.
-     * @ghidraAddress 0x001ecc90
+     * @ghidraAddress NTSC-U/C: 0x001ecc90
+     * @ghidraAddress PAL: 0x001f2f98
      */
     virtual int Poll();
 
@@ -123,17 +144,20 @@ public:
      * The long-operation poll callback. Renderer's constructor also calls it directly, at
      * `0x0042c3bc`, before it waits for the common loads.
      *
-     * @ghidraAddress 0x001ec7d0
+     * @ghidraAddress NTSC-U/C: 0x001ec7d0
+     * @ghidraAddress PAL: 0x001f2a58
      */
     static void PumpTimers();
 
     /**
      * Redraw the display during a long operation.
      *
-     * Refreshes the display at most once every eighteen milliseconds of the profiler clock. Public
-     * because GrooveWorld::EndLevel() at `0x0018eb70` installs it as the bank-load progress hook.
+     * Refreshes the display at most once every 18 milliseconds of the profiler clock, or
+     * every 21 milliseconds in the PAL build. Public because GrooveWorld::EndLevel() at
+     * `0x0018eb70` installs it as the bank-load progress hook.
      *
-     * @ghidraAddress 0x001ec8c0
+     * @ghidraAddress NTSC-U/C: 0x001ec8c0
+     * @ghidraAddress PAL: 0x001f2b48
      */
     static void KeepAliveDraw();
 
@@ -142,13 +166,15 @@ private:
     // poller, accumulates a profile timer, and advances the game world when the world and the
     // playback object are both present; nothing in it concerns a sound bank, and no literal
     // attests the word, so the earlier spelling of both this member and its callee is dropped.
-    // 0x001ef3d0
+    // NTSC-U/C: 0x001ef3d0, PAL: 0x001f5770
     void FirePollTimer(long long nNowNs);
 
-    // Rearm the watchdog timer and service the watchdog. 0x001ef398
+    // Rearm the watchdog timer and service the watchdog.
+    // NTSC-U/C: 0x001ef398, PAL: 0x001f5738
     void FireWatchdogPoll(long long nNowNs);
 
-    // Runs after the frame is drawn, with an empty body. 0x001ef410
+    // Runs after the frame is drawn, with an empty body.
+    // NTSC-U/C: 0x001ef410, PAL: 0x001f57b0
     void PostDraw();
 
     int mRunning;                  // +0x0c
@@ -167,6 +193,7 @@ private:
 /**
  * The single frame loop, or null before Globals::Init() and after the loop is destroyed.
  *
- * @ghidraAddress 0x00694740
+ * @ghidraAddress NTSC-U/C: 0x00694740
+ * @ghidraAddress PAL: 0x006d5a48
  */
 extern MainLoop *g_pMainLoop;

@@ -22,22 +22,22 @@ const char *NameText(const Rnd::Object *pObject) {
 
 } // namespace
 
-// 0x006de808
+// NTSC-U/C: 0x006de808, PAL: 0x00722020
 Rnd::Tunnel *g_pTunnel;
 
-// 0x0040d1e8
+// NTSC-U/C: 0x0040d1e8, PAL: 0x00446c28
 void CacheTunnelObjectByName() {
     g_pTunnel = dynamic_cast<Rnd::Tunnel *>(Rnd::g_manager.Find(HxStr(kTunnelObjectName)));
 }
 
-// 0x0040f6c0
+// NTSC-U/C: 0x0040f6c0, PAL: 0x00449148
 Rnd::Tunnel *GetCachedTunnelObject() {
     return g_pTunnel;
 }
 
 namespace Rnd {
 
-// 0x0040d2b0
+// NTSC-U/C: 0x0040d2b0, PAL: 0x00446d10
 void Animatable::SetRate(float flRate) {
     ScaleOffset *pStage = nullptr;
     if (mFilters.size() != 0) {
@@ -52,7 +52,7 @@ void Animatable::SetRate(float flRate) {
     pStage->mOffset = flOutput - mFrame * flRate;
 }
 
-// 0x0040d3d0
+// NTSC-U/C: 0x0040d3d0, PAL: 0x00446e30
 void Animatable::SetOffset(float flOffset) {
     ScaleOffset *pStage = nullptr;
     if (mFilters.size() != 0) {
@@ -65,7 +65,7 @@ void Animatable::SetOffset(float flOffset) {
     pStage->mOffset = flOffset;
 }
 
-// 0x0040d4a8
+// NTSC-U/C: 0x0040d4a8, PAL: 0x00446f08
 void Animatable::SetLoopRange(float flMin, float flMax) {
     MinMaxLoop *pStage = nullptr;
     if (mFilters.size() != 0) {
@@ -79,14 +79,14 @@ void Animatable::SetLoopRange(float flMin, float flMax) {
     pStage->mMin = flMin;
 }
 
-// 0x0040f660
+// NTSC-U/C: 0x0040f660, PAL: 0x004490e8
 void View::AddView(View *pChild) {
     AddDraw(pChild, nullptr);
     AddAnim(pChild);
     AddTrans(pChild);
 }
 
-// 0x0040f5f8
+// NTSC-U/C: 0x0040f5f8, PAL: 0x00449080
 void View::RemoveView(View *pChild) {
     RemoveDraw(pChild);
     RemoveAnim(pChild);

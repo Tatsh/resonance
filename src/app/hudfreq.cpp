@@ -30,7 +30,7 @@ constexpr int kBurnStage = 1;
 
 } // namespace
 
-// 0x00419b40
+// NTSC-U/C: 0x00419b40, PAL: 0x00454268
 HudFreq::HudFreq(Player *pPlayer, int nIndex) : mPulsing(0), mPulseLoop(kNoPulseLoop) {
     Rnd::Tex *pBurn = FreqAppearance::FindPersonaBurnTexture(nIndex);
 
@@ -58,12 +58,12 @@ HudFreq::HudFreq(Player *pPlayer, int nIndex) : mPulsing(0), mPulseLoop(kNoPulse
     SetPulsing(0);
 }
 
-// 0x0042a348
+// NTSC-U/C: 0x0042a348, PAL: 0x00465698
 void HudFreq::SetPulsing(int nPulsing) {
     mPulsing = nPulsing;
 }
 
-// 0x0042a350
+// NTSC-U/C: 0x0042a350, PAL: 0x004656a0
 void HudFreq::SetFrame(float flFrame) {
     if (flFrame < kIconAnimLength) {
         mAnim->SetFrame(flFrame);

@@ -18,7 +18,8 @@ struct Box {
      * Rnd::Mesh::BoundingBox() call it. The name is inferred.
      *
      * @param point The point to enclose.
-     * @ghidraAddress 0x00551020
+     * @ghidraAddress NTSC-U/C: 0x00551020
+     * @ghidraAddress PAL: 0x00591660
      */
     void GrowToContain(const Vector3 &point);
 

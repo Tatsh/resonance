@@ -19,7 +19,7 @@ constexpr int kMBTPrintNegativeInfinity = -715827881;
 
 } // namespace
 
-// 0x00100ab8
+// NTSC-U/C: 0x00100ab8, PAL: 0x00100ab8
 int IsFiniteMBT(int nTick) {
     // The sum wraps as an unsigned value, which folds both bounds into one comparison.
     return static_cast<unsigned int>(nTick) + static_cast<unsigned int>(-kMBTMinimum) <=
@@ -28,7 +28,7 @@ int IsFiniteMBT(int nTick) {
 
 namespace Mid {
 
-// 0x004ace18
+// NTSC-U/C: 0x004ace18, PAL: 0x004eafb8
 void MBT::Print(std::ostream &stream) {
     if (mTick > kMBTPrintMaximum) {
         stream << "[inf]tk";
@@ -44,13 +44,13 @@ void MBT::Print(std::ostream &stream) {
            << ':' << nInMeasure % kTicksPerBeat << "tk";
 }
 
-// 0x004acf28
+// NTSC-U/C: 0x004acf28, PAL: 0x004eb0c8
 OBStream &MBT::Save(OBStream &stream) {
     const int nTick = mTick;
     return stream.Write(&nTick, sizeof(nTick));
 }
 
-// 0x004acf68
+// NTSC-U/C: 0x004acf68, PAL: 0x004eb108
 IBStream &MBT::Load(IBStream &stream) {
     return stream.Read(&mTick, sizeof(mTick));
 }

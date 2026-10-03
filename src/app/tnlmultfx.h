@@ -21,7 +21,8 @@ public:
     /**
      * Resolve the path and both systems and silence the systems.
      *
-     * @ghidraAddress 0x0043d008
+     * @ghidraAddress NTSC-U/C: 0x0043d008
+     * @ghidraAddress PAL: 0x00479708
      */
     TnlMultFX();
 
@@ -32,7 +33,8 @@ public:
      *
      * @param flFrom The first path frame.
      * @param flTo The last path frame.
-     * @ghidraAddress 0x004564a0
+     * @ghidraAddress NTSC-U/C: 0x004564a0
+     * @ghidraAddress PAL: 0x004939d0
      */
     void Start(float flFrom, float flTo);
 
@@ -43,7 +45,8 @@ public:
      * inlines this at `0x00447100`, and the out-of-line copy has no caller.
      *
      * @param flFrame The current frame.
-     * @ghidraAddress 0x00456528
+     * @ghidraAddress NTSC-U/C: 0x00456528
+     * @ghidraAddress PAL: 0x00493a58
      */
     void SetFrame(float flFrame);
 

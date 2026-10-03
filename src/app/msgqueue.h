@@ -36,14 +36,16 @@ public:
     /**
      * Start with both vectors empty and mFirst accepting.
      *
-     * @ghidraAddress 0x0054a738
+     * @ghidraAddress NTSC-U/C: 0x0054a738
+     * @ghidraAddress PAL: 0x0058ac68
      */
     MsgQueue();
 
     /**
      * Delete every stored message and release both vectors.
      *
-     * @ghidraAddress 0x0054a7a0
+     * @ghidraAddress NTSC-U/C: 0x0054a7a0
+     * @ghidraAddress PAL: 0x0058acd0
      */
     virtual ~MsgQueue();
 
@@ -53,7 +55,8 @@ public:
      * The body is HandleMessage() with the Message::Type() call omitted.
      *
      * @param pMsg The message to copy and store.
-     * @ghidraAddress 0x0054b220
+     * @ghidraAddress NTSC-U/C: 0x0054b220
+     * @ghidraAddress PAL: 0x0058b750
      */
     void Store(Message *pMsg);
 
@@ -68,7 +71,8 @@ public:
      * The title is inferred from the behaviour. The member is not virtual and both call sites are
      * direct calls. No recovered metadata records a title for it.
      *
-     * @ghidraAddress 0x0054aa58
+     * @ghidraAddress NTSC-U/C: 0x0054aa58
+     * @ghidraAddress PAL: 0x0058af88
      */
     void Poll();
 
@@ -77,7 +81,8 @@ protected:
      * Store a copy of a message.
      *
      * @param pMsg The message to copy and store.
-     * @ghidraAddress 0x0054b290
+     * @ghidraAddress NTSC-U/C: 0x0054b290
+     * @ghidraAddress PAL: 0x0058b7c0
      */
     virtual void HandleMessage(Message *pMsg);
 

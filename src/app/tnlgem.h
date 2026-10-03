@@ -48,7 +48,8 @@ public:
      * @param flFrame The tunnel frame of the gem.
      * @param flBlend The position across the ring.
      * @param flAppearFrame The tunnel frame from which the gem is drawn.
-     * @ghidraAddress 0x00415790
+     * @ghidraAddress NTSC-U/C: 0x00415790
+     * @ghidraAddress PAL: 0x0044f2e0
      */
     TnlGem(char nKind,
            char nTrack,
@@ -70,7 +71,8 @@ public:
      * @param pManager The manager that owns the gem kinds.
      * @param flFrame The tunnel frame of the playhead.
      * @return The drawing cost of the gem.
-     * @ghidraAddress 0x00411e38
+     * @ghidraAddress NTSC-U/C: 0x00411e38
+     * @ghidraAddress PAL: 0x0044b918
      */
     float Place(TnlGemManager *pManager, float flFrame);
 
@@ -79,7 +81,8 @@ public:
      *
      * AppTunnel calls it at `0x004483bc`, and TnlGemManager inlines it.
      *
-     * @ghidraAddress 0x004157e8
+     * @ghidraAddress NTSC-U/C: 0x004157e8
+     * @ghidraAddress PAL: 0x0044f338
      */
     void Release();
 
@@ -90,7 +93,8 @@ public:
      * TnlGemManager::Update() inlines it.
      *
      * @param pTunnel The tunnel that owns the flash particles.
-     * @ghidraAddress 0x00415868
+     * @ghidraAddress NTSC-U/C: 0x00415868
+     * @ghidraAddress PAL: 0x0044f3b8
      */
     void Flash(AppTunnel *pTunnel);
 
@@ -119,6 +123,7 @@ public:
  * @param stream The stream to print to.
  * @param gem The gem.
  * @return stream.
- * @ghidraAddress 0x00411d30
+ * @ghidraAddress NTSC-U/C: 0x00411d30
+ * @ghidraAddress PAL: 0x0044b810
  */
 std::ostream &operator<<(std::ostream &stream, const TnlGem &gem);

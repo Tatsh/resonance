@@ -19,13 +19,20 @@
 // the block reserves 64 bytes of slack for aligning the first.
 enum {
     kBufferAlign = 64,
-    kMpegWorkSize = 0x17c300,
     kAudioBufferSize = 0xc000,
     kAudioIopBufferSize = 0x6000,
     kVideoDataSize = 0x80000,
+#ifdef VIDEO_STANDARD_PAL
+    kMpegWorkSize = 0x1c8200,
+    kFrameImagesSize = 0x32a000,
+    kFrameTagsSize = 0x99c80,
+    kCutsceneMemorySize = 0x667f00,
+#else
+    kMpegWorkSize = 0x17c300,
     kFrameImagesSize = 0x2a3000,
     kFrameTagsSize = 0x80880,
     kCutsceneMemorySize = 0x57bc00,
+#endif
 };
 
 // Decoded frames the queue holds, tags and time stamps the decoder records, and the two thread
@@ -42,10 +49,15 @@ enum {
 // The display the movie is shown on, and its double buffer, which is half height.
 enum {
     kDisplayWidth = 640,
+#ifdef VIDEO_STANDARD_PAL
+    kDisplayHeight = 512,
+    kGsVideoMode = 3,
+#else
     kDisplayHeight = 480,
+    kGsVideoMode = 2,
+#endif
     kGsPsmCt32 = 0,
     kGsInterlace = 1,
-    kGsNtsc = 2,
     kGsFrameMode = 1,
     kGsResetAll = 0,
     kClearEnabled = 1,
@@ -79,88 +91,88 @@ enum {
 #define ALIGN_UP(pointer)                                                                          \
     ((void *)(((uintptr_t)(pointer) + kBufferAlign - 1) & ~(uintptr_t)(kBufferAlign - 1)))
 
-// 0x0070cae0
+// NTSC-U/C: 0x0070cae0, PAL: 0x007509d0
 static int g_is_with_audio = 1;
 
-// 0x0070cae8
+// NTSC-U/C: 0x0070cae8, PAL: 0x007509d8
 VoBuf voBuf;
 
-// 0x0070cb00
+// NTSC-U/C: 0x0070cb00, PAL: 0x007509f0
 sceGsDBuff db;
 
-// 0x0070cd30
+// NTSC-U/C: 0x0070cd30, PAL: 0x00750c20
 static ReadBuf *g_read_buf;
 
-// 0x0070cd34
+// NTSC-U/C: 0x0070cd34, PAL: 0x00750c24
 static int g_decode_thread;
 
-// 0x0070cd38
+// NTSC-U/C: 0x0070cd38, PAL: 0x00750c28
 static int g_default_thread;
 
-// 0x0070cd40
+// NTSC-U/C: 0x0070cd40, PAL: 0x00750c30
 static StrFile g_in_file;
 
-// 0x0070cd78
+// NTSC-U/C: 0x0070cd78, PAL: 0x00750c68
 VideoDec videoDec;
 
-// 0x0070ce30
+// NTSC-U/C: 0x0070ce30, PAL: 0x00750d20
 AudioDec audioDec;
 
-// 0x0070ce90
+// NTSC-U/C: 0x0070ce90, PAL: 0x00750d80
 // The pad buttons read during the last pass of the playback loop, active high.
 static int g_pad_buttons;
 
-// 0x00895400
+// NTSC-U/C: 0x00895400, PAL: 0x008da440
 static int g_default_priority;
 
-// 0x00895404
+// NTSC-U/C: 0x00895404, PAL: 0x008da444
 static void *g_frame_images;
 
-// 0x00895408
+// NTSC-U/C: 0x00895408, PAL: 0x008da448
 static void *g_frame_tags;
 
-// 0x00895440
+// NTSC-U/C: 0x00895440, PAL: 0x008da480
 // The ring the input buffer builds ends in one more tag that points back to the first.
 static unsigned long long g_video_tags[kVideoTagCount + 1][2];
 
-// 0x00896450
+// NTSC-U/C: 0x00896450, PAL: 0x008db490
 static unsigned char *g_mpeg_work;
 
-// 0x00896454
+// NTSC-U/C: 0x00896454, PAL: 0x008db494
 static unsigned char *g_audio_buffer;
 
-// 0x00896458
+// NTSC-U/C: 0x00896458, PAL: 0x008db498
 static void *g_video_data;
 
-// 0x00896480
+// NTSC-U/C: 0x00896480, PAL: 0x008db4c0
 static unsigned char g_default_stack[kDefaultStackSize] __attribute__((aligned(16)));
 
-// 0x00896c80
+// NTSC-U/C: 0x00896c80, PAL: 0x008dbcc0
 static unsigned char g_decode_stack[kDecodeStackSize] __attribute__((aligned(16)));
 
-// 0x0089ac80
+// NTSC-U/C: 0x0089ac80, PAL: 0x008dfcc0
 // The next global starts 0x100 bytes beyond the time stamps. That bounds each at 0x18 bytes.
 static unsigned char g_time_stamps[kTimeStampCount][kTimeStampSize];
 
-// 0x0089dd80
+// NTSC-U/C: 0x0089dd80, PAL: 0x008e2dc0
 static void *g_cutscene_memory;
 
-// 0x00510f20
+// NTSC-U/C: 0x00510f20, PAL: 0x00551198
 void ErrMessage(char *message) {
     LogPrintf("[ Error ] %s\n", message);
 }
 
-// 0x00510f48
+// NTSC-U/C: 0x00510f48, PAL: 0x005511c0
 void switchThread(void) {
     RotateThreadReadyQueue(g_default_priority);
 }
 
-// 0x00510f70
+// NTSC-U/C: 0x00510f70, PAL: 0x005511e8
 static void proceed_audio(void) {
     audioDecSendToIOP(&audioDec);
 }
 
-// 0x00511100
+// NTSC-U/C: 0x00511100, PAL: 0x00551378
 static int is_audio_ok(void) {
     if (g_is_with_audio == 0) {
         return 1;
@@ -168,7 +180,7 @@ static int is_audio_ok(void) {
     return audioDecIsPreset(&audioDec);
 }
 
-// 0x005110e0
+// NTSC-U/C: 0x005110e0, PAL: 0x00551358
 static void default_main(void *argument) {
     (void)argument;
     for (;;) {
@@ -176,14 +188,14 @@ static void default_main(void *argument) {
     }
 }
 
-// 0x00511088
+// NTSC-U/C: 0x00511088, PAL: 0x00551300
 static void reset_display(void) {
     clearGsMem(0, 0, 0, kDisplayWidth, kDisplayHeight);
     sceGsSetDefDBuff(&db, kGsPsmCt32, kDisplayWidth, kDisplayHeight / 2, 0, 0, kClearEnabled);
     FlushCache(kFlushCacheWriteBackData);
 }
 
-// 0x005107a8
+// NTSC-U/C: 0x005107a8, PAL: 0x00550a20
 static void init_all(void) {
     g_cutscene_memory = MemAllocTagged(kCutsceneMemorySize, __FILE__, __LINE__);
     g_mpeg_work = ALIGN_UP(g_cutscene_memory);
@@ -197,11 +209,11 @@ static void init_all(void) {
     sceDmaReset(kDmaResetEnable);
     sceGsSyncPath(0, 0);
     sceGsSyncV(0);
-    sceGsResetGraph(kGsResetAll, kGsInterlace, kGsNtsc, kGsFrameMode);
+    sceGsResetGraph(kGsResetAll, kGsInterlace, kGsVideoMode, kGsFrameMode);
     reset_display();
 }
 
-// 0x00510b98
+// NTSC-U/C: 0x00510b98, PAL: 0x00550e10
 static void prepare_playback(const char *name) {
     *D_CTRL |= kDmaCtrlEnable;
     *D_STAT = kDmaStatClearVif1;
@@ -286,7 +298,7 @@ static inline int poll_skip(int *released, int *pressed) {
     return skip;
 }
 
-// 0x005108b0
+// NTSC-U/C: 0x005108b0, PAL: 0x00550b28
 static int play_mpeg(VideoDec *video_dec, ReadBuf *buffer, StrFile *file) {
     int released = 0;
     int pressed = 0;
@@ -348,7 +360,7 @@ static int play_mpeg(VideoDec *video_dec, ReadBuf *buffer, StrFile *file) {
     return 1;
 }
 
-// 0x00510e28
+// NTSC-U/C: 0x00510e28, PAL: 0x005510a0
 static void term_all(void) {
     reset_display(); // Inlined in the binary.
     readBufDelete(g_read_buf);
@@ -366,7 +378,7 @@ static void term_all(void) {
     strFileClose(&g_in_file);
 }
 
-// 0x00510fc0
+// NTSC-U/C: 0x00510fc0, PAL: 0x00551238
 static int play(const char *name, int with_audio) {
     g_is_with_audio = with_audio;
     prepare_playback(name);
@@ -375,12 +387,12 @@ static int play(const char *name, int with_audio) {
     return g_pad_buttons;
 }
 
-// 0x00510f90
+// NTSC-U/C: 0x00510f90, PAL: 0x00551208
 static void free_all(void) {
     MemFreeTagged(g_cutscene_memory, __FILE__, __LINE__);
 }
 
-// 0x00511010
+// NTSC-U/C: 0x00511010, PAL: 0x00551288
 void play_cutscene(const char *name, int with_audio) {
     const char *path = strchr(name, ':');
     if (path != NULL) {

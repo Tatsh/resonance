@@ -19,7 +19,8 @@ public:
      * Does nothing at a positive position.
      *
      * @param flFrame The song position, in MIDI ticks.
-     * @ghidraAddress 0x0041bc50
+     * @ghidraAddress NTSC-U/C: 0x0041bc50
+     * @ghidraAddress PAL: 0x00456758
      */
     void SetFrame(float flFrame);
 

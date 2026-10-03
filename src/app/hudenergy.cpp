@@ -32,7 +32,7 @@ constexpr int kBlinkShown = 120;
 
 } // namespace
 
-// 0x00416428
+// NTSC-U/C: 0x00416428, PAL: 0x0044ffd0
 HudEnergy::HudEnergy([[maybe_unused]] int nIndex) {
     Rnd::Mesh *pFrame = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD1 energy.mesh")));
     mBar = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD1 energy bar.mesh")));
@@ -50,7 +50,7 @@ HudEnergy::HudEnergy([[maybe_unused]] int nIndex) {
     }
 }
 
-// 0x004166b8
+// NTSC-U/C: 0x004166b8, PAL: 0x004502b8
 void HudEnergy::SetFrame(float flFrame) {
     mAnim->SetFrame(mLevel * kFramesPerLevel);
 

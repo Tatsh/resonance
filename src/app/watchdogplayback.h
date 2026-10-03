@@ -21,14 +21,16 @@ class WatchdogPlayback {
 public:
     /**
      * @param pWatchdog The monitor the commands are replayed on.
-     * @ghidraAddress 0x00594968
+     * @ghidraAddress NTSC-U/C: 0x00594968
+     * @ghidraAddress PAL: 0x005d7d00
      */
     explicit WatchdogPlayback(Watchdog *pWatchdog);
 
     /**
      * Release every loaded wrapper through Attachment::ReleaseIfSet() and empty mCommands.
      *
-     * @ghidraAddress 0x00594988
+     * @ghidraAddress NTSC-U/C: 0x00594988
+     * @ghidraAddress PAL: 0x005d7d20
      */
     ~WatchdogPlayback();
 
@@ -41,7 +43,8 @@ public:
      * through Sch::CmdID::Reserve(). mCursor is left at the first wrapper. The title is inferred.
      *
      * @param stream The recording.
-     * @ghidraAddress 0x00594a78
+     * @ghidraAddress NTSC-U/C: 0x00594a78
+     * @ghidraAddress PAL: 0x005d7e10
      */
     void Load(IBStream &stream);
 
@@ -51,13 +54,14 @@ public:
      * Pauses the clock, restarts it at zero, queues each wrapper from mCursor on, and resumes the
      * clock. The title is inferred.
      *
-     * @ghidraAddress 0x005962e8
+     * @ghidraAddress NTSC-U/C: 0x005962e8
+     * @ghidraAddress PAL: 0x005d96f0
      */
     void Start();
 
 private:
     // Hands every wrapper from mCursor to the end to Watchdog::QueueReplayed().
-    // 0x00596330
+    // NTSC-U/C: 0x00596330, PAL: 0x005d9738
     void QueueRemaining();
 
     std::vector<Sch::TimedCommand *> mCommands;         // +0x00

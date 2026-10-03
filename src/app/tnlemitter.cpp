@@ -3,7 +3,7 @@
 #include "math/transformops.h"
 #include "rnd/particlesys.h"
 
-// 0x00455d08
+// NTSC-U/C: 0x00455d08, PAL: 0x00493238
 TnlEmitter::~TnlEmitter() {
     if (mParticleSys != nullptr) {
         mParticleSys->mEmitRateLow = mEmitRateLow;
@@ -12,7 +12,7 @@ TnlEmitter::~TnlEmitter() {
     }
 }
 
-// 0x00455d58
+// NTSC-U/C: 0x00455d58, PAL: 0x00493288
 void TnlEmitter::Attach(Rnd::ParticleSys *pSys) {
     mParticleSys = pSys;
     mEmitRateLow = pSys->mEmitRateLow;
@@ -23,7 +23,7 @@ void TnlEmitter::Attach(Rnd::ParticleSys *pSys) {
     pSys->FreeAllParticles();
 }
 
-// 0x00455e30
+// NTSC-U/C: 0x00455e30, PAL: 0x00493360
 void TnlEmitter::RotateForce(const float *pMat3Rows) {
     if (mParticleSys != nullptr) {
         Vector3 force;
@@ -33,7 +33,7 @@ void TnlEmitter::RotateForce(const float *pMat3Rows) {
     }
 }
 
-// 0x00455e88
+// NTSC-U/C: 0x00455e88, PAL: 0x004933b8
 void TnlEmitter::Restart() {
     if (mParticleSys != nullptr) {
         mParticleSys->FreeAllParticles();
@@ -42,7 +42,7 @@ void TnlEmitter::Restart() {
     }
 }
 
-// 0x00455ed0
+// NTSC-U/C: 0x00455ed0, PAL: 0x00493400
 void TnlEmitter::Stop() {
     if (mParticleSys != nullptr) {
         mParticleSys->mEmitRateHigh = 0.0f;

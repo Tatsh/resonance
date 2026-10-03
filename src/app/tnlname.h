@@ -10,13 +10,15 @@
  * from NextHudName(), a routine of the same shape.
  *
  * @return The name.
- * @ghidraAddress 0x00454650
+ * @ghidraAddress NTSC-U/C: 0x00454650
+ * @ghidraAddress PAL: 0x00491b80
  */
 HxStr NextAppTunnelName();
 
 /**
  * Count of names NextAppTunnelName() has produced.
  *
- * @ghidraAddress 0x006e42ac
+ * @ghidraAddress NTSC-U/C: 0x006e42ac
+ * @ghidraAddress PAL: 0x00727bcc
  */
 extern int g_nAppTunnelNameCounter;

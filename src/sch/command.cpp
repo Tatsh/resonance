@@ -27,7 +27,7 @@ bool operator<(const CommandFactoryEntry &left, const CommandFactoryEntry &right
 
 typedef std::vector<CommandFactoryEntry> CommandFactoryTable;
 
-// 0x005381b0
+// NTSC-U/C: 0x005381b0, PAL: 0x00577a70
 CommandFactoryTable &CommandFactoryList() {
     static CommandFactoryTable table;
     return table;
@@ -35,7 +35,7 @@ CommandFactoryTable &CommandFactoryList() {
 
 } // namespace
 
-// 0x00538208
+// NTSC-U/C: 0x00538208, PAL: 0x00577ac8
 CommandFactory::CommandFactory(int nCmdID, CommandFactoryProc pfnCreate) {
     CommandFactoryEntry wanted;
     wanted.mCmdID = nCmdID; // Yes, the binary never writes the other field of the search key.
@@ -51,7 +51,7 @@ CommandFactory::CommandFactory(int nCmdID, CommandFactoryProc pfnCreate) {
     CommandFactoryList().insert(position, entry);
 }
 
-// 0x005382e8
+// NTSC-U/C: 0x005382e8, PAL: 0x00577ba8
 OBStream &operator<<(OBStream &stream, Command &command) {
     if (command.CmdID() == 0) {
         char cAbsent = '0';
@@ -66,7 +66,7 @@ OBStream &operator<<(OBStream &stream, Command &command) {
     return stream;
 }
 
-// 0x005383d8
+// NTSC-U/C: 0x005383d8, PAL: 0x00577c98
 IBStream &operator>>(IBStream &stream, Command &command) {
     char cPresent;
     int nCmdID;
@@ -81,24 +81,24 @@ IBStream &operator>>(IBStream &stream, Command &command) {
     return stream;
 }
 
-// 0x00539ef8
+// NTSC-U/C: 0x00539ef8, PAL: 0x00579828
 Command::~Command() {
 }
 
-// 0x0053a088
+// NTSC-U/C: 0x0053a088, PAL: 0x005799b8
 void Command::Print(std::ostream &stream) {
     stream << "{Command}";
 }
 
-// 0x00539f20
+// NTSC-U/C: 0x00539f20, PAL: 0x00579850
 void Command::Save([[maybe_unused]] OBStream &stream) {
 }
 
-// 0x00539f28
+// NTSC-U/C: 0x00539f28, PAL: 0x00579858
 void Command::Load([[maybe_unused]] IBStream &stream) {
 }
 
-// 0x00539fe8
+// NTSC-U/C: 0x00539fe8, PAL: 0x00579918
 Command *Command::NewCommand(int nCmdID) {
     if (nCmdID == 0) {
         std::cerr << " Attempted to call NewCommand(0); returning NULL" << std::endl;
@@ -114,7 +114,7 @@ Command *Command::NewCommand(int nCmdID) {
     return (*entry->mpfnCreate)();
 }
 
-// 0x005384d0
+// NTSC-U/C: 0x005384d0, PAL: 0x00577d90
 OBStream &operator<<(OBStream &stream, Command *pCommand) {
     if (pCommand != nullptr) {
         if (pCommand->CmdID() != 0) {
@@ -133,7 +133,7 @@ OBStream &operator<<(OBStream &stream, Command *pCommand) {
     return stream;
 }
 
-// 0x005385f0
+// NTSC-U/C: 0x005385f0, PAL: 0x00577eb0
 IBStream &operator>>(IBStream &stream, Command *&pCommand) {
     char cPresent;
     stream.ReadBytes(&cPresent, sizeof(cPresent));

@@ -38,7 +38,8 @@ public:
      *
      * @param stream The stream to write to.
      * @return The stream, allowing calls to be chained.
-     * @ghidraAddress 0x005e59a0
+     * @ghidraAddress NTSC-U/C: 0x005e59a0
+     * @ghidraAddress PAL: 0x00627b60
      */
     OBStream &Save(OBStream &stream);
 
@@ -47,7 +48,8 @@ public:
      *
      * @param stream The stream to read from.
      * @return The stream, allowing calls to be chained.
-     * @ghidraAddress 0x005e59e0
+     * @ghidraAddress NTSC-U/C: 0x005e59e0
+     * @ghidraAddress PAL: 0x00627ba0
      */
     IBStream &Load(IBStream &stream);
 
@@ -55,7 +57,8 @@ public:
      * Write a description of the handle to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x005e5958
+     * @ghidraAddress NTSC-U/C: 0x005e5958
+     * @ghidraAddress PAL: 0x00627b18
      */
     void Print(std::ostream &stream);
 
@@ -67,7 +70,8 @@ public:
      * `0x008e4f18` walks forward alongside the counter. The name is inferred.
      *
      * @return The value.
-     * @ghidraAddress 0x005e4dc8
+     * @ghidraAddress NTSC-U/C: 0x005e4dc8
+     * @ghidraAddress PAL: 0x00626f88
      */
     static int AllocateValue();
 
@@ -80,7 +84,8 @@ public:
      * The title is inferred.
      *
      * @param id The handle to reserve.
-     * @ghidraAddress 0x005e5908
+     * @ghidraAddress NTSC-U/C: 0x005e5908
+     * @ghidraAddress PAL: 0x00627ac8
      */
     static void Reserve(CmdID id);
 

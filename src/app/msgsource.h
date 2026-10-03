@@ -26,7 +26,8 @@ class MsgSink;
 class MsgSource {
 public:
     /**
-     * @ghidraAddress 0x0054a168
+     * @ghidraAddress NTSC-U/C: 0x0054a168
+     * @ghidraAddress PAL: 0x0058a698
      */
     virtual ~MsgSource();
 
@@ -34,7 +35,8 @@ public:
      * Register a sink, ignoring a sink that is already registered.
      *
      * @param pSink The sink to register.
-     * @ghidraAddress 0x0054a270
+     * @ghidraAddress NTSC-U/C: 0x0054a270
+     * @ghidraAddress PAL: 0x0058a7a0
      */
     virtual void AddSink(MsgSink *pSink);
 
@@ -44,7 +46,8 @@ public:
      * A sink that is not registered is ignored.
      *
      * @param pSink The sink to unregister.
-     * @ghidraAddress 0x0054a2f0
+     * @ghidraAddress NTSC-U/C: 0x0054a2f0
+     * @ghidraAddress PAL: 0x0058a820
      */
     virtual void RemoveSink(MsgSink *pSink);
 
@@ -62,7 +65,8 @@ public:
      * goes through MsgSink::Handle(), table slot 2.
      *
      * @param pMsg The message to deliver.
-     * @ghidraAddress 0x0054a370
+     * @ghidraAddress NTSC-U/C: 0x0054a370
+     * @ghidraAddress PAL: 0x0058a8a0
      */
     void Send(Message *pMsg);
 
@@ -72,7 +76,8 @@ public:
      * GrooveWorld::DestroyGraphs() at `0x0018da60` calls it. An identical copy sits at
      * `0x001fedb0`.
      *
-     * @ghidraAddress 0x0054a218
+     * @ghidraAddress NTSC-U/C: 0x0054a218
+     * @ghidraAddress PAL: 0x0058a748
      */
     void ClearSinks();
 

@@ -15,7 +15,7 @@ constexpr float kRampDuration = 480.0f;
 
 } // namespace
 
-// 0x0041c3a0
+// NTSC-U/C: 0x0041c3a0, PAL: 0x00456d58
 HudPanel::HudPanel()
     : mPosition(Application::shared()->GetPlayMap()), mMessage(HxStr("HUD genmsg.txt")),
       mAssembly(HxStr(g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString) +
@@ -26,7 +26,7 @@ HudPanel::HudPanel()
       mLabelSwap(HxStr("HUD1 label swap.tnm"), kLabelSwapFrom, kLabelSwapTo, kRampDuration) {
 }
 
-// 0x0041c7d8
+// NTSC-U/C: 0x0041c7d8, PAL: 0x00457238
 void HudPanel::SetFrame(float flFrame, float flTime) {
     mPosition.SetFrame(flFrame);
     mScreenFlash.SetFrame();

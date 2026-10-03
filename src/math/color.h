@@ -26,7 +26,8 @@ struct Color {
  *
  * @param source The colour to clamp.
  * @param result Receives the clamped colour. It may alias the source.
- * @ghidraAddress 0x00607268
+ * @ghidraAddress NTSC-U/C: 0x00607268
+ * @ghidraAddress PAL: 0x00647ed8
  */
 void ClampColorToUnitRange(const Color &source, Color &result);
 
@@ -49,7 +50,8 @@ void ClampColorToUnitRange(const Color &source, Color &result);
  * @param right The second colour.
  * @param result Receives the sum. It may alias either operand, and the mesh weld path passes the
  *               same address as both the first operand and the result.
- * @ghidraAddress 0x004924a8
+ * @ghidraAddress NTSC-U/C: 0x004924a8
+ * @ghidraAddress PAL: 0x004d0358
  */
 void AddColor(const Color &left, const Color &right, Color &result);
 
@@ -62,7 +64,8 @@ void AddColor(const Color &left, const Color &right, Color &result);
  * @param left The colour subtracted from.
  * @param right The colour to subtract.
  * @param result Receives the difference. It may alias either operand.
- * @ghidraAddress 0x0052b258
+ * @ghidraAddress NTSC-U/C: 0x0052b258
+ * @ghidraAddress PAL: 0x0056b8d0
  */
 void SubColor(const Color &left, const Color &right, Color &result);
 
@@ -78,6 +81,7 @@ void SubColor(const Color &left, const Color &right, Color &result);
  * @param source The colour to scale.
  * @param flScale The factor applied to every component, alpha included.
  * @param result Receives the scaled colour. It may alias the source.
- * @ghidraAddress 0x00453e08
+ * @ghidraAddress NTSC-U/C: 0x00453e08
+ * @ghidraAddress PAL: 0x00491328
  */
 void ScaleColor(const Color &source, float flScale, Color &result);

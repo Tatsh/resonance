@@ -25,7 +25,8 @@ public:
      * @param nIndex The track display number that fills `<layout> countdown<n>`.
      * @param nTargetBar The bar the countdown runs to. HudTrack's constructor reads it from
      *        PlayMap::GetEndBar() of Globals::GetPlayMap(), the last bar of the level.
-     * @ghidraAddress 0x004191b8
+     * @ghidraAddress NTSC-U/C: 0x004191b8
+     * @ghidraAddress PAL: 0x00453640
      */
     HudCountdown(int nIndex, int nTargetBar);
 
@@ -35,7 +36,8 @@ public:
      * A change of count sets the text and restarts the animation from the current frame.
      *
      * @param flFrame The song position, in MIDI ticks.
-     * @ghidraAddress 0x004194c0
+     * @ghidraAddress NTSC-U/C: 0x004194c0
+     * @ghidraAddress PAL: 0x00453998
      */
     void SetFrame(float flFrame);
 

@@ -29,8 +29,12 @@ constexpr long long kTimerPeriodNs = 4000000;
 // Frame number that disarms the scheduled watchdog flush, because the loop never runs that long.
 constexpr int kFlushFrameNever = 100000000;
 
-// Shortest interval between two long-operation redraws.
+// Shortest interval between two long-operation redraws, a little over one field.
+#ifdef VIDEO_STANDARD_PAL
+constexpr long long kKeepAliveIntervalMs = 21;
+#else
 constexpr long long kKeepAliveIntervalMs = 18;
+#endif
 
 // The length is not recovered. The label it receives is eleven characters.
 constexpr int kFrameLabelSize = 32;
@@ -62,10 +66,10 @@ inline long long FrameClockNs(Watchdog *pWatchdog) {
 
 } // namespace
 
-// 0x00694740
+// NTSC-U/C: 0x00694740, PAL: 0x006d5a48
 MainLoop *g_pMainLoop;
 
-// 0x001ec998
+// NTSC-U/C: 0x001ec998, PAL: 0x001f2c20
 MainLoop::MainLoop(int nInCharge, Watchdog *pWatchdog, GameManagerImpl *pGameManager) {
     // The call passes 1. The value selects virtual-base setup the compiler emits. The body
     // does not use the flag.
@@ -88,14 +92,14 @@ MainLoop::MainLoop(int nInCharge, Watchdog *pWatchdog, GameManagerImpl *pGameMan
     UpdateNextDeadline();
 }
 
-// 0x001ef158
+// NTSC-U/C: 0x001ef158, PAL: 0x001f54f8
 MainLoop::~MainLoop() {
     g_pMainLoop = nullptr;
     SetLongOperationPollProc(nullptr);
     // Yes, the binary retains the redraw callback.
 }
 
-// 0x001ef290
+// NTSC-U/C: 0x001ef290, PAL: 0x001f5630
 void MainLoop::Run() {
     mRunning = 1;
     do {
@@ -103,25 +107,25 @@ void MainLoop::Run() {
     } while (mRunning != 0);
 }
 
-// 0x001ef2e0
+// NTSC-U/C: 0x001ef2e0, PAL: 0x001f5680
 void MainLoop::UpdateNextDeadline() {
     mNextDeadlineNs = mNextWatchdogPollNs < mNextBankPollNs ? mNextWatchdogPollNs : mNextBankPollNs;
 }
 
-// 0x001ef3d0
+// NTSC-U/C: 0x001ef3d0, PAL: 0x001f5770
 void MainLoop::FirePollTimer(long long nNowNs) {
     mNextBankPollNs = nNowNs + kTimerPeriodNs;
     mGameManager->PollPlayback();
 }
 
-// 0x001ef398
+// NTSC-U/C: 0x001ef398, PAL: 0x001f5738
 void MainLoop::FireWatchdogPoll(long long nNowNs) {
     mNextWatchdogPollNs = nNowNs + kTimerPeriodNs;
     mWatchdog->Service();
     PollSynthEvents();
 }
 
-// 0x001ef308
+// NTSC-U/C: 0x001ef308, PAL: 0x001f56a8
 void MainLoop::FireDueTimers(long long nNowNs) {
     if (nNowNs >= mNextBankPollNs) {
         FirePollTimer(nNowNs);
@@ -132,29 +136,29 @@ void MainLoop::FireDueTimers(long long nNowNs) {
     UpdateNextDeadline();
 }
 
-// 0x001ef230
+// NTSC-U/C: 0x001ef230, PAL: 0x001f55d0
 void MainLoop::FlushWatchdogNow() {
     mFlushFrame = kFlushFrameNever;
     mWatchdog->Flush();
 }
 
-// 0x001ef260
+// NTSC-U/C: 0x001ef260, PAL: 0x001f5600
 void MainLoop::FlushWatchdogAfter(int nFrames) {
     mFlushFrame = mFrameCount + nFrames;
     mWatchdog->Flush();
 }
 
-// 0x001ef118
+// NTSC-U/C: 0x001ef118, PAL: 0x001f54b8
 float MainLoop::Progress() {
     return 0.0f;
 }
 
-// 0x001ef128
+// NTSC-U/C: 0x001ef128, PAL: 0x001f54c8
 HxStr MainLoop::Name() {
     return HxStr("");
 }
 
-// 0x001ecc90
+// NTSC-U/C: 0x001ecc90, PAL: 0x001f2f98
 int MainLoop::Poll() {
     s_qwElapsedMs = GetElapsedMilliseconds();
 
@@ -189,11 +193,11 @@ int MainLoop::Poll() {
     return 1;
 }
 
-// 0x001ef410
+// NTSC-U/C: 0x001ef410, PAL: 0x001f57b0
 void MainLoop::PostDraw() {
 }
 
-// 0x001ec7d0
+// NTSC-U/C: 0x001ec7d0, PAL: 0x001f2a58
 void MainLoop::PumpTimers() {
     ++s_nPollTicks;
     if (s_pPumpedLoop == nullptr) {
@@ -206,7 +210,7 @@ void MainLoop::PumpTimers() {
     }
 }
 
-// 0x001ec8c0
+// NTSC-U/C: 0x001ec8c0, PAL: 0x001f2b48
 void MainLoop::KeepAliveDraw() {
     long long nNowMs = GetElapsedMilliseconds();
     if (nNowMs - s_qwLastKeepAliveMs < kKeepAliveIntervalMs) {

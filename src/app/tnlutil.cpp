@@ -29,13 +29,13 @@ inline Color MakeColor(float flR, float flG, float flB) {
 
 } // namespace
 
-// 0x006e42a4
+// NTSC-U/C: 0x006e42a4, PAL: 0x00727bc4
 int g_nAppTunnelTutorial;
 
-// 0x006e42b0
+// NTSC-U/C: 0x006e42b0, PAL: 0x00727bd0
 float g_flTunnelBrightness = 1.0f;
 
-// 0x00437e60
+// NTSC-U/C: 0x00437e60, PAL: 0x00473c10
 Color TnlColorFromName(const HxStr &name) {
     if (name == "green") {
         return MakeColor(0.0f, 1.0f, 0.0f);
@@ -55,7 +55,7 @@ Color TnlColorFromName(const HxStr &name) {
     return MakeColor(0.0f, 1.0f, 1.0f);
 }
 
-// 0x00437fa8
+// NTSC-U/C: 0x00437fa8, PAL: 0x00473d58
 Color TnlDimColorFromName(HxStr name) {
     if (name == "green") {
         return MakeColor(0.0f, kDimComponent, 0.0f);
@@ -75,7 +75,7 @@ Color TnlDimColorFromName(HxStr name) {
     return MakeColor(0.0f, 1.0f, 1.0f);
 }
 
-// 0x00438138
+// NTSC-U/C: 0x00438138, PAL: 0x00473ee8
 Color TnlLaneColorFromName(HxStr name) {
     Color base;
     if (name == "green") {
@@ -96,7 +96,7 @@ Color TnlLaneColorFromName(HxStr name) {
     return result;
 }
 
-// 0x00454770
+// NTSC-U/C: 0x00454770, PAL: 0x00491ca0
 int TnlColorIndexFromName(HxStr name) {
     if (name == "null") {
         return kColorIndexNull;

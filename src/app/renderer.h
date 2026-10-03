@@ -81,7 +81,8 @@ public:
      * 0x3a2 into the two debug-overlay switches, builds the three sinks, sizes the cell grid from
      * the `tunnel` object, and records itself in g_pRenderer.
      *
-     * @ghidraAddress 0x0042c2e0
+     * @ghidraAddress NTSC-U/C: 0x0042c2e0
+     * @ghidraAddress PAL: 0x00467da0
      */
     Renderer();
 
@@ -90,7 +91,8 @@ public:
      *
      * Slot 1 of both tables. The sinks are deleted in reverse order of construction.
      *
-     * @ghidraAddress 0x0042ce08
+     * @ghidraAddress NTSC-U/C: 0x0042ce08
+     * @ghidraAddress PAL: 0x004689c0
      */
     virtual ~Renderer();
 
@@ -102,7 +104,8 @@ public:
      * the sinks.
      *
      * @param pMsg The message to dispatch.
-     * @ghidraAddress 0x0042d3b8
+     * @ghidraAddress NTSC-U/C: 0x0042d3b8
+     * @ghidraAddress PAL: 0x00468f70
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -112,7 +115,8 @@ public:
      * RendererBase slot 6. The tick is stored as a float in mSongTick before
      * RendererBase::PollMessages() drains the queue.
      *
-     * @ghidraAddress 0x00432460
+     * @ghidraAddress NTSC-U/C: 0x00432460
+     * @ghidraAddress PAL: 0x0046e138
      */
     virtual void PollMessages();
 
@@ -122,7 +126,8 @@ public:
      * RendererBase slot 7, pure in the base. The tick goes to the three sinks and the three views,
      * and each view then recomposes its world transform.
      *
-     * @ghidraAddress 0x004324a0
+     * @ghidraAddress NTSC-U/C: 0x004324a0
+     * @ghidraAddress PAL: 0x0046e178
      */
     virtual void Update();
 
@@ -134,7 +139,8 @@ public:
      * AppTunnel::PrepareLocalView() has placed it, draws `hud.view` and the overlay, and finally
      * the two debug overlays under mDrawTimingGraph and mDrawRenderStats.
      *
-     * @ghidraAddress 0x0042d258
+     * @ghidraAddress NTSC-U/C: 0x0042d258
+     * @ghidraAddress PAL: 0x00468e10
      */
     virtual void Draw();
 
@@ -147,7 +153,8 @@ public:
      * @param nTrack The track. It selects the row.
      * @param nBar The bar. It selects the column.
      * @return The cell.
-     * @ghidraAddress 0x004322b8
+     * @ghidraAddress NTSC-U/C: 0x004322b8
+     * @ghidraAddress PAL: 0x0046df90
      */
     Cell *GetCell(int nTrack, int nBar);
 
@@ -184,14 +191,16 @@ public:
      * recorded.
      *
      * @param params The settings whose level and arena names are loaded.
-     * @ghidraAddress 0x0042bbe8
+     * @ghidraAddress NTSC-U/C: 0x0042bbe8
+     * @ghidraAddress PAL: 0x004674c8
      */
     static void LoadLevel(const GameParams &params);
 
     /**
      * Delete the level and arena loaders and forget both names.
      *
-     * @ghidraAddress 0x00432128
+     * @ghidraAddress NTSC-U/C: 0x00432128
+     * @ghidraAddress PAL: 0x0046de00
      */
     static void UnloadLevel();
 
@@ -212,7 +221,8 @@ public:
      * @param pflProgress Receives the mean progress of the two loads. Not written when the arena
      *        load has not started.
      * @return 1 when both are done, and 0 otherwise.
-     * @ghidraAddress 0x004321a8
+     * @ghidraAddress NTSC-U/C: 0x004321a8
+     * @ghidraAddress PAL: 0x0046de80
      */
     static int PollLevel(float *pflProgress);
 
@@ -224,23 +234,24 @@ public:
      * @param arena The arena name to compare.
      * @param level The level name to compare.
      * @return 1 when both names match the recorded ones and both loads are done, and 0 otherwise.
-     * @ghidraAddress 0x00432228
+     * @ghidraAddress NTSC-U/C: 0x00432228
+     * @ghidraAddress PAL: 0x0046df00
      */
     static int IsLevelLoaded(const HxStr &arena, const HxStr &level);
 
 private:
-    // 0x004322f8
+    // NTSC-U/C: 0x004322f8, PAL: 0x0046dfd0
     // Runs script template 1000. HandleMessage() inlines the body, and this copy has
     // no caller.
     void OnGameBegin();
 
-    // 0x0042d068
+    // NTSC-U/C: 0x0042d068, PAL: 0x00468c20
     // Merges the payload into the cell for its track and bar, then tells the overlay
     // when the bar or the effect mask changed and the tunnel when the bar or any of the other
     // three fields changed.
     void OnBarStatus(BarStatusMsg *pMsg);
 
-    // 0x00432318
+    // NTSC-U/C: 0x00432318, PAL: 0x0046dff0
     // Sends the message on, then outside game mode 1 and play mode 2 finds the one
     // world player with the highest score and reports a change of leader to the tunnel and the
     // overlay. A tie for the top score produces no leader. HandleMessage() inlines the body, and
@@ -292,7 +303,8 @@ private:
  * The constructor stores the object and the destructor clears the word. The body of the script
  * function `lsdmode` at `0x0042d558` reads it before toggling g_nLsdMode.
  *
- * @ghidraAddress 0x006e253c
+ * @ghidraAddress NTSC-U/C: 0x006e253c
+ * @ghidraAddress PAL: 0x00725e44
  */
 extern Renderer *g_pRenderer;
 
@@ -303,7 +315,8 @@ extern Renderer *g_pRenderer;
  * unit's static initialiser at `0x00431ab8` registers that function. The global's name follows the
  * script name.
  *
- * @ghidraAddress 0x006e2538
+ * @ghidraAddress NTSC-U/C: 0x006e2538
+ * @ghidraAddress PAL: 0x00725e40
  */
 extern int g_nLsdMode;
 
@@ -345,27 +358,31 @@ extern RndAsyncLoader *g_pGameFontsLoader;
 /**
  * Loader for the arena Renderer::LoadLevel() last started.
  *
- * @ghidraAddress 0x006e251c
+ * @ghidraAddress NTSC-U/C: 0x006e251c
+ * @ghidraAddress PAL: 0x00725e28
  */
 extern RndAsyncLoader *g_pArenaLoader;
 
 /**
  * Loader for the level Renderer::LoadLevel() last started.
  *
- * @ghidraAddress 0x006e2520
+ * @ghidraAddress NTSC-U/C: 0x006e2520
+ * @ghidraAddress PAL: 0x00725e2c
  */
 extern RndAsyncLoader *g_pLevelLoader;
 
 /**
  * Arena name g_pArenaLoader was started for, empty when none.
  *
- * @ghidraAddress 0x006e2528
+ * @ghidraAddress NTSC-U/C: 0x006e2528
+ * @ghidraAddress PAL: 0x00725e30
  */
 extern HxStr g_arenaName;
 
 /**
  * Level name g_pLevelLoader was started for, empty when none.
  *
- * @ghidraAddress 0x006e2530
+ * @ghidraAddress NTSC-U/C: 0x006e2530
+ * @ghidraAddress PAL: 0x00725e38
  */
 extern HxStr g_levelName;

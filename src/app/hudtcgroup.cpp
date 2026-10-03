@@ -16,7 +16,7 @@ HudTcGroup::HudTcGroup() {
     SetShowing(0);
 }
 
-// 0x00429e08
+// NTSC-U/C: 0x00429e08, PAL: 0x00465448
 void HudTcGroup::SetShowing(int nShowing) {
     mView->SetShowing(nShowing);
 }

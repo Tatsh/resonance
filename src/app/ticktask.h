@@ -33,14 +33,16 @@ public:
      * @param nPeriod Ticks between one run and the next.
      * @param bAligned Non-zero to delay the first run to the next multiple of nPeriod. Every
      *                 recovered caller passes zero.
-     * @ghidraAddress 0x0013ad88
+     * @ghidraAddress NTSC-U/C: 0x0013ad88
+     * @ghidraAddress PAL: 0x0013b6d0
      */
     TickTask(Sch::TickClock *pClock, int nPeriod, int bAligned);
 
     /**
      * Withdraw the queued command.
      *
-     * @ghidraAddress 0x0013adc8
+     * @ghidraAddress NTSC-U/C: 0x0013adc8
+     * @ghidraAddress PAL: 0x0013b710
      */
     virtual ~TickTask();
 
@@ -51,7 +53,8 @@ public:
      * shared with every subclass that does not override it.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x0013ac48
+     * @ghidraAddress NTSC-U/C: 0x0013ac48
+     * @ghidraAddress PAL: 0x0013b590
      */
     virtual void Print(std::ostream &stream);
 
@@ -75,7 +78,8 @@ public:
      *
      * @param nEpochOffset Ticks the epoch lies before the current position, or Mid::MBT's
      *                     infinity sentinel for an epoch at zero.
-     * @ghidraAddress 0x0013a860
+     * @ghidraAddress NTSC-U/C: 0x0013a860
+     * @ghidraAddress PAL: 0x0013b1a8
      */
     void Start(int nEpochOffset);
 
@@ -84,7 +88,8 @@ public:
      *
      * The file-local Cmd's Execute() is the caller. The title is inferred.
      *
-     * @ghidraAddress 0x0013aa38
+     * @ghidraAddress NTSC-U/C: 0x0013aa38
+     * @ghidraAddress PAL: 0x0013b380
      */
     void Run();
 
@@ -94,7 +99,8 @@ public:
      * The destructor, GamePowerupPlacer, StutterEffector, PitchingSTG, and VoxingSTG call it. The
      * title is inferred.
      *
-     * @ghidraAddress 0x0013ae10
+     * @ghidraAddress NTSC-U/C: 0x0013ae10
+     * @ghidraAddress PAL: 0x0013b758
      */
     void Stop();
 

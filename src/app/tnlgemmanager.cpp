@@ -20,19 +20,19 @@ constexpr float kFlashLeadFrames = -20.0f;
 
 } // namespace
 
-// 0x006df360
+// NTSC-U/C: 0x006df360, PAL: 0x00722b88
 int g_nTnlMeshNameCounter = 1;
 
-// 0x006df364
+// NTSC-U/C: 0x006df364, PAL: 0x00722b8c
 float g_flTnlGemLastFrame;
 
-// 0x004122c0
+// NTSC-U/C: 0x004122c0, PAL: 0x0044bdc0
 TnlGemManager::TnlGemManager(AppTunnel *pTunnel, float flCostBudget)
     : mTunnel(pTunnel), mCostBudget(flCostBudget), mLateWindow(kLateWindowFrames),
       mMaxPlaced(kInitialMaxPlaced) {
 }
 
-// 0x00412490
+// NTSC-U/C: 0x00412490, PAL: 0x0044bf90
 TnlGemManager::~TnlGemManager() {
     for (auto *pKind : mMeshKinds) {
         delete pKind;
@@ -42,7 +42,7 @@ TnlGemManager::~TnlGemManager() {
     }
 }
 
-// 0x00412628
+// NTSC-U/C: 0x00412628, PAL: 0x0044c128
 char TnlGemManager::AddMeshKind(const char *pszName, float flLodOffset, float flCostScale) {
     char nKind = mMeshKinds.size();
     TnlGemMeshKind *pPrevious = nullptr;
@@ -62,14 +62,14 @@ char TnlGemManager::AddMeshKind(const char *pszName, float flLodOffset, float fl
     return nKind;
 }
 
-// 0x00412878
+// NTSC-U/C: 0x00412878, PAL: 0x0044c3a0
 char TnlGemManager::AddEffectKind(const char *pszName) {
     int nCount = mEffectKinds.size();
     mEffectKinds.push_back(new TnlGemEffectKind(pszName));
     return nCount + kEffectKindBase;
 }
 
-// 0x00412968
+// NTSC-U/C: 0x00412968, PAL: 0x0044c490
 void TnlGemManager::Add(const TnlGem &gem) {
     auto it = FindFirstAt(mGems, gem.mFrame);
     while ((it != mGems.end()) && (it->mFrame <= gem.mFrame)) {
@@ -82,7 +82,7 @@ void TnlGemManager::Add(const TnlGem &gem) {
     mGems.insert(it, gem);
 }
 
-// 0x00412b18
+// NTSC-U/C: 0x00412b18, PAL: 0x0044c640
 void TnlGemManager::RemoveRange(char nTrack, float flStart, float flEnd) {
     auto it = FindFirstAt(mGems, flStart);
     while ((it != mGems.end()) && (it->mFrame < flEnd)) {
@@ -95,7 +95,7 @@ void TnlGemManager::RemoveRange(char nTrack, float flStart, float flEnd) {
     }
 }
 
-// 0x00412c50
+// NTSC-U/C: 0x00412c50, PAL: 0x0044c778
 void TnlGemManager::Remove(char nTrack, float flFrame, float flBlend) {
     auto it = FindFirstAt(mGems, flFrame);
     while ((it != mGems.end()) && (it->mFrame == flFrame)) {
@@ -108,7 +108,7 @@ void TnlGemManager::Remove(char nTrack, float flFrame, float flBlend) {
     }
 }
 
-// 0x00412db0
+// NTSC-U/C: 0x00412db0, PAL: 0x0044c8d8
 void TnlGemManager::Update(float flFrame) {
     (void)mGems.size(); // Yes, the binary walks the whole list and discards the count.
     auto it = mGems.begin();
@@ -149,32 +149,32 @@ void TnlGemManager::Update(float flFrame) {
     }
 }
 
-// 0x00415a50
+// NTSC-U/C: 0x00415a50, PAL: 0x0044f5a0
 TnlGemMeshKind *TnlGemManager::GetMeshKind(char nKind) {
     return mMeshKinds[nKind];
 }
 
-// 0x00415a68
+// NTSC-U/C: 0x00415a68, PAL: 0x0044f5b8
 TnlGemEffectKind *TnlGemManager::GetEffectKind(char nKind) {
     // The binary narrows the difference back to a signed char before indexing.
     return mEffectKinds[static_cast<signed char>(nKind - kEffectKindBase)];
 }
 
-// 0x00415a88
+// NTSC-U/C: 0x00415a88, PAL: 0x0044f5d8
 void TnlGemManager::AddKindDraws(char nKind, Rnd::Drawable *pParent) {
     if (!(nKind & kEffectKindBase)) {
         mMeshKinds[nKind]->AddDrawTo(pParent);
     }
 }
 
-// 0x00415af8
+// NTSC-U/C: 0x00415af8, PAL: 0x0044f648
 void TnlGemManager::SetKindShowing(char nKind, int nShowing) {
     if (!(nKind & kEffectKindBase)) {
         mMeshKinds[nKind]->SetShowing(nShowing);
     }
 }
 
-// 0x00415e78
+// NTSC-U/C: 0x00415e78, PAL: 0x0044f9e0
 std::list<TnlGem>::iterator TnlGemManager::FindFirstAt(std::list<TnlGem> &gems, float flFrame) {
     for (auto it = gems.begin(); it != gems.end(); ++it) {
         if (flFrame <= it->mFrame) {
@@ -184,7 +184,7 @@ std::list<TnlGem>::iterator TnlGemManager::FindFirstAt(std::list<TnlGem> &gems, 
     return gems.end();
 }
 
-// 0x00415668
+// NTSC-U/C: 0x00415668, PAL: 0x0044f1b8
 HxStr NextTnlMeshName() {
     return HxStr(FormatString("<tnlmesh%04d>", ++g_nTnlMeshNameCounter));
 }

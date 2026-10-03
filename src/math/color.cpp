@@ -1,6 +1,6 @@
 #include "math/color.h"
 
-// 0x004924a8
+// NTSC-U/C: 0x004924a8, PAL: 0x004d0358
 void AddColor(const Color &left, const Color &right, Color &result) {
     const float flAlpha = left.a + right.a;
     const float flRed = left.r + right.r;
@@ -12,7 +12,7 @@ void AddColor(const Color &left, const Color &right, Color &result) {
     result.b = flBlue;
 }
 
-// 0x0052b258
+// NTSC-U/C: 0x0052b258, PAL: 0x0056b8d0
 void SubColor(const Color &left, const Color &right, Color &result) {
     const float flAlpha = left.a - right.a;
     const float flRed = left.r - right.r;
@@ -24,7 +24,7 @@ void SubColor(const Color &left, const Color &right, Color &result) {
     result.b = flBlue;
 }
 
-// 0x00453e08
+// NTSC-U/C: 0x00453e08, PAL: 0x00491328
 void ScaleColor(const Color &source, float flScale, Color &result) {
     const float flAlpha = source.a * flScale;
     const float flRed = source.r * flScale;
@@ -56,7 +56,7 @@ inline float ClampComponent(float flValue) {
 
 } // namespace
 
-// 0x00607268
+// NTSC-U/C: 0x00607268, PAL: 0x00647ed8
 void ClampColorToUnitRange(const Color &source, Color &result) {
     result.r = ClampComponent(source.r);
     result.g = ClampComponent(source.g);

@@ -39,7 +39,8 @@ public:
      *
      * @param pOwner The globals the sink belongs to.
      * @return The new sink.
-     * @ghidraAddress 0x00118c00
+     * @ghidraAddress NTSC-U/C: 0x00118c00
+     * @ghidraAddress PAL: 0x00119150
      */
     static ScriptSink *CreateInstance(Globals *pOwner);
 
@@ -52,7 +53,8 @@ protected:
      * and passes it to RunScript().
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x00118b50
+     * @ghidraAddress NTSC-U/C: 0x00118b50
+     * @ghidraAddress PAL: 0x00119088
      */
     virtual void HandleMessage(Message *pMsg);
 

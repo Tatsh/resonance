@@ -22,7 +22,8 @@ public:
     /**
      * Resolve the box and its material and hide the box.
      *
-     * @ghidraAddress 0x00417170
+     * @ghidraAddress NTSC-U/C: 0x00417170
+     * @ghidraAddress PAL: 0x00450f10
      */
     HudHighlight();
 
@@ -36,7 +37,8 @@ public:
      * @param flRight The target right edge.
      * @param flBottom The target bottom edge.
      * @param flDuration The time the move takes, in the units SetFrame() receives.
-     * @ghidraAddress 0x00417388
+     * @ghidraAddress NTSC-U/C: 0x00417388
+     * @ghidraAddress PAL: 0x00451170
      */
     void MoveTo(float flLeft, float flTop, float flRight, float flBottom, float flDuration);
 
@@ -49,7 +51,8 @@ public:
      * @param flTop The top edge.
      * @param flRight The right edge.
      * @param flBottom The bottom edge.
-     * @ghidraAddress 0x00417570
+     * @ghidraAddress NTSC-U/C: 0x00417570
+     * @ghidraAddress PAL: 0x00451358
      */
     void JumpTo(float flLeft, float flTop, float flRight, float flBottom);
 
@@ -61,7 +64,8 @@ public:
      * time, and raises the alpha by the same share of the move, up to 1.
      *
      * @param flTime The current time.
-     * @ghidraAddress 0x00417690
+     * @ghidraAddress NTSC-U/C: 0x00417690
+     * @ghidraAddress PAL: 0x00451478
      */
     void SetFrame(float flTime);
 
@@ -71,7 +75,8 @@ public:
      * The constructor is the one caller. The title is inferred.
      *
      * @param nShowing Non-zero to show.
-     * @ghidraAddress 0x00429d30
+     * @ghidraAddress NTSC-U/C: 0x00429d30
+     * @ghidraAddress PAL: 0x00465370
      */
     void SetShowing(int nShowing);
 

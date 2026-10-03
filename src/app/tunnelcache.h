@@ -15,7 +15,8 @@ class Tunnel;
  * An object of that name that is not an Rnd::Tunnel records null. AppTunnel's constructor is the
  * caller.
  *
- * @ghidraAddress 0x0040d1e8
+ * @ghidraAddress NTSC-U/C: 0x0040d1e8
+ * @ghidraAddress PAL: 0x00446c28
  */
 void CacheTunnelObjectByName();
 
@@ -23,13 +24,15 @@ void CacheTunnelObjectByName();
  * Report the tunnel CacheTunnelObjectByName() last recorded.
  *
  * @return g_pTunnel.
- * @ghidraAddress 0x0040f6c0
+ * @ghidraAddress NTSC-U/C: 0x0040f6c0
+ * @ghidraAddress PAL: 0x00449148
  */
 Rnd::Tunnel *GetCachedTunnelObject();
 
 /**
  * Tunnel CacheTunnelObjectByName() last recorded, or null.
  *
- * @ghidraAddress 0x006de808
+ * @ghidraAddress NTSC-U/C: 0x006de808
+ * @ghidraAddress PAL: 0x00722020
  */
 extern Rnd::Tunnel *g_pTunnel;

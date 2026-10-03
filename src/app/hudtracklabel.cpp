@@ -7,7 +7,7 @@
 #include "rnd/mesh.h"
 #include "rnd/text.h"
 
-// 0x00417d58
+// NTSC-U/C: 0x00417d58, PAL: 0x00451d58
 HudTrackLabel::HudTrackLabel(int nIndex) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
@@ -21,7 +21,7 @@ HudTrackLabel::HudTrackLabel(int nIndex) {
     mMesh->SetShowing(1);
 }
 
-// 0x00429e68
+// NTSC-U/C: 0x00429e68, PAL: 0x004654a8
 void HudTrackLabel::SetText(const HxStr &text) {
     mText->SetText(text);
 }

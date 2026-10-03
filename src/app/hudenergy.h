@@ -22,7 +22,8 @@ public:
      * starts at 0, and the constructor then runs SetFrame() 100 times with a frame of -1.
      *
      * @param nIndex The track display number. The body does not read it.
-     * @ghidraAddress 0x00416428
+     * @ghidraAddress NTSC-U/C: 0x00416428
+     * @ghidraAddress PAL: 0x0044ffd0
      */
     HudEnergy(int nIndex);
 
@@ -33,7 +34,8 @@ public:
      * level below 0.2 shows it for the first 120 of every 240 ticks, and any other level shows it.
      *
      * @param flFrame The song position, in MIDI ticks, that times the blink.
-     * @ghidraAddress 0x004166b8
+     * @ghidraAddress NTSC-U/C: 0x004166b8
+     * @ghidraAddress PAL: 0x004502b8
      */
     void SetFrame(float flFrame);
 

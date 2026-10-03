@@ -58,7 +58,7 @@ constexpr int kXfmRowTranslation = 3;
 
 } // namespace
 
-// 0x0043e6a0
+// NTSC-U/C: 0x0043e6a0, PAL: 0x0047af90
 TnlSnake::TnlSnake()
     : mStartFrame(kNoFrame), mString(Rnd::String::NewString(NextAppTunnelName())),
       mHead(Rnd::NewMeshThroughHook(NextAppTunnelName())),
@@ -79,7 +79,7 @@ TnlSnake::TnlSnake()
     mString->AddDraw(mHead, nullptr);
 }
 
-// 0x0043ed50
+// NTSC-U/C: 0x0043ed50, PAL: 0x0047b6d8
 TnlSnake::~TnlSnake() {
     mView->RemoveDraw(mString);
     mString->RemoveDraw(mHead);
@@ -87,7 +87,7 @@ TnlSnake::~TnlSnake() {
     delete mHead;
 }
 
-// 0x00456960
+// NTSC-U/C: 0x00456960, PAL: 0x00493e90
 void TnlSnake::Start(
     float flFrame, int nRing, const Color &color, float flPhase, float flAmplitude) {
     mString->SetShowing(1);
@@ -103,7 +103,7 @@ void TnlSnake::Start(
     }
 }
 
-// 0x0043eec0
+// NTSC-U/C: 0x0043eec0, PAL: 0x0047b848
 void TnlSnake::Update(float flFrame) {
     if (mStartFrame == kNoFrame || mLastFrame == flFrame) {
         return;
@@ -150,7 +150,7 @@ void TnlSnake::Update(float flFrame) {
     }
 }
 
-// 0x0043f218
+// NTSC-U/C: 0x0043f218, PAL: 0x0047bba0
 void TnlSnake::SetPointFrame(int nFrame, int nIndex) {
     if (mPointFrames[nIndex] == nFrame) {
         return;

@@ -38,7 +38,8 @@ public:
          *
          * @param iconName The icon mesh.
          * @param baseName The base mesh.
-         * @ghidraAddress 0x00455508
+         * @ghidraAddress NTSC-U/C: 0x00455508
+         * @ghidraAddress PAL: 0x00492a38
          */
         void Init(const HxStr &iconName, const HxStr &baseName);
 
@@ -48,7 +49,8 @@ public:
          * The image has no caller. SetKind() inlines the body.
          *
          * @param nShowing Non-zero to show.
-         * @ghidraAddress 0x004555e0
+         * @ghidraAddress NTSC-U/C: 0x004555e0
+         * @ghidraAddress PAL: 0x00492b10
          */
         void SetShowing(int nShowing);
 
@@ -58,7 +60,8 @@ public:
          * The image has no caller. SetAlpha() inlines the body.
          *
          * @param flAlpha The alpha.
-         * @ghidraAddress 0x00455640
+         * @ghidraAddress NTSC-U/C: 0x00455640
+         * @ghidraAddress PAL: 0x00492b70
          */
         void SetAlpha(float flAlpha);
 
@@ -70,7 +73,8 @@ public:
      * Resolve the views and the three mesh pairs, and stop the spin.
      *
      * @param colorName The player's colour name, whose first letter selects every object.
-     * @ghidraAddress 0x0043a810
+     * @ghidraAddress NTSC-U/C: 0x0043a810
+     * @ghidraAddress PAL: 0x00476b10
      */
     explicit TnlPointer(const HxStr &colorName);
 
@@ -81,14 +85,16 @@ public:
      * no pair.
      *
      * @param nKind The instrument kind.
-     * @ghidraAddress 0x0043b248
+     * @ghidraAddress NTSC-U/C: 0x0043b248
+     * @ghidraAddress PAL: 0x00477768
      */
     void SetKind(int nKind);
 
     /**
      * Stop the spin and send the dip ramp back to rest.
      *
-     * @ghidraAddress 0x004557d0
+     * @ghidraAddress NTSC-U/C: 0x004557d0
+     * @ghidraAddress PAL: 0x00492d00
      */
     void Reset();
 
@@ -98,7 +104,8 @@ public:
      * Does nothing while the pointer view is hidden. The image has no caller.
      *
      * @param nRestart Non-zero to restart the 300-unit spin period at the next Update().
-     * @ghidraAddress 0x00455768
+     * @ghidraAddress NTSC-U/C: 0x00455768
+     * @ghidraAddress PAL: 0x00492c98
      */
     void Spin(int nRestart);
 
@@ -109,7 +116,8 @@ public:
      * caller.
      *
      * @param flLane The lane position, 0 through 1.
-     * @ghidraAddress 0x00455810
+     * @ghidraAddress NTSC-U/C: 0x00455810
+     * @ghidraAddress PAL: 0x00492d40
      */
     void SetLane(float flLane);
 
@@ -119,7 +127,8 @@ public:
      * The image has no caller. TnlActivator::Update() inlines the body.
      *
      * @param flAlpha The alpha.
-     * @ghidraAddress 0x004556c8
+     * @ghidraAddress NTSC-U/C: 0x004556c8
+     * @ghidraAddress PAL: 0x00492bf8
      */
     void SetAlpha(float flAlpha);
 
@@ -129,7 +138,8 @@ public:
      * The image has no caller. TnlActivator's constructor inlines the body.
      *
      * @param pParent The parent view.
-     * @ghidraAddress 0x00455670
+     * @ghidraAddress NTSC-U/C: 0x00455670
+     * @ghidraAddress PAL: 0x00492ba0
      */
     void AttachTo(Rnd::View *pParent);
 
@@ -139,7 +149,8 @@ public:
      * The image has no caller. TnlActivator::Update() inlines the body.
      *
      * @param flTime The scaled song position TnlActivator::Update() receives.
-     * @ghidraAddress 0x00455860
+     * @ghidraAddress NTSC-U/C: 0x00455860
+     * @ghidraAddress PAL: 0x00492d90
      */
     void Update(float flTime);
 
