@@ -80,19 +80,19 @@ constexpr unsigned char kRleDelta = 2;
 constexpr int kRow4Mask = 0xfff8;
 constexpr int kRowWordMask = 0xfffc;
 
-// 0x008e68e0
+// NTSC-U/C: 0x008e68e0, PAL: 0x0092b8e0
 BmpFileHeader s_readFileHeader;
 
-// 0x008e68f0
+// NTSC-U/C: 0x008e68f0, PAL: 0x0092b8f0
 BmpInfoHeader s_readInfoHeader;
 
-// 0x008e6918
+// NTSC-U/C: 0x008e6918, PAL: 0x0092b918
 BmpFileHeader s_writeFileHeader;
 
-// 0x008e6928
+// NTSC-U/C: 0x008e6928, PAL: 0x0092b928
 BmpInfoHeader s_writeInfoHeader;
 
-// 0x007a5768
+// NTSC-U/C: 0x007a5768, PAL: 0x007e9468
 // the zero bytes each written row is padded with.
 const unsigned char kRowPadding[kRowAlignment] = {0, 0, 0, 0};
 
@@ -102,7 +102,7 @@ inline unsigned char SwapNibbles(unsigned char nByte) {
 
 } // namespace
 
-// 0x0061c688
+// NTSC-U/C: 0x0061c688, PAL: 0x0065d218
 int ABmpFile::ReadHeader() {
     fread(&s_readFileHeader, 1, kFileHeaderSize, mFile);
     fread(&s_readInfoHeader, 1, kInfoHeaderSize, mFile);
@@ -144,7 +144,7 @@ int ABmpFile::ReadHeader() {
     return kAGfxFileOk;
 }
 
-// 0x0061c860
+// NTSC-U/C: 0x0061c860, PAL: 0x0065d3f0
 int ABmpFile::ReadImage(ABitmap *pImage, int *pbEnd) {
     if (mImageRead != 0) {
         *pbEnd = 1;
@@ -209,7 +209,7 @@ int ABmpFile::ReadImage(ABitmap *pImage, int *pbEnd) {
     return kAGfxFileOk;
 }
 
-// 0x0061ca78
+// NTSC-U/C: 0x0061ca78, PAL: 0x0065d608
 int ABmpFile::Write(const ABitmap &bitmap) {
     BmpHeader header;
     header.mType = kBmpType;
@@ -281,7 +281,7 @@ int ABmpFile::Write(const ABitmap &bitmap) {
     return kAGfxFileOk;
 }
 
-// 0x0061cde0
+// NTSC-U/C: 0x0061cde0, PAL: 0x0065d970
 APalette *ABmpFile::ReadPalette() {
     unsigned int aEntries[kPaletteEntryCount];
     memset(aEntries, 0, sizeof(aEntries));
@@ -295,7 +295,7 @@ APalette *ABmpFile::ReadPalette() {
     return new APalette(aEntries, mColorCount);
 }
 
-// 0x0061d5c0
+// NTSC-U/C: 0x0061d5c0, PAL: 0x0065e150
 int ABmpFile::ReadPixels(ABitmap *pImage) {
     fseek(mFile, mPixelOffset, SEEK_SET);
     if (mCompression == kCompressionNone) {
@@ -304,7 +304,7 @@ int ABmpFile::ReadPixels(ABitmap *pImage) {
     return ReadRlePixels(pImage);
 }
 
-// 0x0061cef8
+// NTSC-U/C: 0x0061cef8, PAL: 0x0065da88
 int ABmpFile::ReadUncompressedPixels(ABitmap *pImage) {
     unsigned char *pRow = static_cast<unsigned char *>(pImage->mPixels);
     int nStride = pImage->mBytesPerRow;
@@ -342,7 +342,7 @@ int ABmpFile::ReadUncompressedPixels(ABitmap *pImage) {
     return kAGfxFileOk;
 }
 
-// 0x0061d0e8
+// NTSC-U/C: 0x0061d0e8, PAL: 0x0065dc78
 int ABmpFile::ReadRlePixels(ABitmap *pImage) {
     unsigned char *pRow = static_cast<unsigned char *>(pImage->mPixels);
     int nStride = pImage->mBytesPerRow;
@@ -440,7 +440,7 @@ int ABmpFile::ReadRlePixels(ABitmap *pImage) {
     return kAGfxFileOk;
 }
 
-// 0x0061d620
+// NTSC-U/C: 0x0061d620, PAL: 0x0065e1b0
 void ABmpFile::ExpandRow24To32(unsigned char *pPixels, int nCount) {
     const unsigned char *pSource = pPixels + (nCount - 1) * kRGBByteCount;
     unsigned char *pDest = pPixels + (nCount - 1) * kRGBAByteCount;

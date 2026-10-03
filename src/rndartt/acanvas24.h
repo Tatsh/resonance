@@ -37,47 +37,113 @@ public:
      * Construct over a bitmap.
      *
      * @param bitmap The bitmap the canvas addresses.
-     * @ghidraAddress 0x006302f8
+     * @ghidraAddress NTSC-U/C: 0x006302f8
+     * @ghidraAddress PAL: 0x00670e88
      */
     explicit ACanvas24(const ABitmap &bitmap);
 
-    /** Slot 1. @ghidraAddress 0x00630278 */
+    /**
+     * Slot 1.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00630278
+     * @ghidraAddress PAL: 0x00670e08
+     */
     virtual ~ACanvas24();
 
-    /** Slot 2. Expands a palette entry into the three channel bytes. @ghidraAddress 0x00630448 */
+    /**
+     * Slot 2. Expands a palette entry into the three channel bytes.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00630448
+     * @ghidraAddress PAL: 0x00670fd8
+     */
     virtual void SetColorIndex(int nIndex);
 
-    /** Slot 3. @ghidraAddress 0x00630330 */
+    /**
+     * Slot 3.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00630330
+     * @ghidraAddress PAL: 0x00670ec0
+     */
     virtual void SetColor15(unsigned short nColor);
 
-    /** Slot 4. @ghidraAddress 0x00630360 */
+    /**
+     * Slot 4.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00630360
+     * @ghidraAddress PAL: 0x00670ef0
+     */
     virtual void SetColorRGB(const unsigned char *pRGB);
 
-    /** Slot 5. @ghidraAddress 0x00630380 */
+    /**
+     * Slot 5.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00630380
+     * @ghidraAddress PAL: 0x00670f10
+     */
     virtual void SetColor32(unsigned int nColor);
 
-    /** Slot 6. Stores the whole word. @ghidraAddress 0x00630388 */
+    /**
+     * Slot 6. Stores the whole word.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00630388
+     * @ghidraAddress PAL: 0x00670f18
+     */
     virtual void SetColorNative(unsigned int nColor);
 
-    /** Slot 7. @ghidraAddress 0x00630108 */
+    /**
+     * Slot 7.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00630108
+     * @ghidraAddress PAL: 0x00670c98
+     */
     virtual int GetColorIndex();
 
-    /** Slot 8. @ghidraAddress 0x00630390 */
+    /**
+     * Slot 8.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00630390
+     * @ghidraAddress PAL: 0x00670f20
+     */
     virtual unsigned short GetColor15();
 
-    /** Slot 9. @ghidraAddress 0x006303c8 */
+    /**
+     * Slot 9.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006303c8
+     * @ghidraAddress PAL: 0x00670f58
+     */
     virtual void GetColorRGB(unsigned char *pRGB);
 
-    /** Slot 10. @ghidraAddress 0x006303e8 */
+    /**
+     * Slot 10.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006303e8
+     * @ghidraAddress PAL: 0x00670f78
+     */
     virtual unsigned int GetColor32();
 
-    /** Slot 11. Reads the whole word. @ghidraAddress 0x006303f0 */
+    /**
+     * Slot 11. Reads the whole word.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006303f0
+     * @ghidraAddress PAL: 0x00670f80
+     */
     virtual unsigned int GetColorNative();
 
-    /** Slot 15. @ghidraAddress 0x00630498 */
+    /**
+     * Slot 15.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00630498
+     * @ghidraAddress PAL: 0x00671028
+     */
     virtual void PutPixelIndexedNoClip(int nX, int nY, int nIndex);
 
-    /** Slot 17. @ghidraAddress 0x00630508 */
+    /**
+     * Slot 17.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00630508
+     * @ghidraAddress PAL: 0x00671098
+     */
     virtual void PutPixel15NoClip(int nX, int nY, unsigned short nColor);
 
     // The base declares a PutPixelNoClip of its own at a different slot, and declaring this
@@ -91,24 +157,47 @@ public:
      * The base's slot 21 is the colourless store rather than a format-specific one. Slot 31 is the
      * same case on the read side, and both traps appear in ACanvas8 as well.
      *
-     * @ghidraAddress 0x00630558
+     * @ghidraAddress NTSC-U/C: 0x00630558
+     * @ghidraAddress PAL: 0x006710e8
      */
     virtual void PutPixelNoClip(int nX, int nY, unsigned int nColor);
 
-    /** Slot 23. @ghidraAddress 0x006303f8 */
+    /**
+     * Slot 23.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006303f8
+     * @ghidraAddress PAL: 0x00670f88
+     */
     virtual void PutPixelNativeNoClip(int nX, int nY, unsigned int nColor);
 
-    /** Slot 25. @ghidraAddress 0x006301b0 */
+    /**
+     * Slot 25.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006301b0
+     * @ghidraAddress PAL: 0x00670d40
+     */
     virtual int GetPixelIndexedNoClip(int nX, int nY);
 
-    /** Slot 27. @ghidraAddress 0x00630598 */
+    /**
+     * Slot 27.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00630598
+     * @ghidraAddress PAL: 0x00671128
+     */
     virtual unsigned short GetPixel15NoClip(int nX, int nY);
 
     /** Slot 31. The slot is the colourless read.
-     *  @ghidraAddress 0x006305f0 */
+     *  @ghidraAddress NTSC-U/C: 0x006305f0
+     *  @ghidraAddress PAL: 0x00671180
+     */
     virtual unsigned int GetPixelNoClip(int nX, int nY);
 
-    /** Slot 33. @ghidraAddress 0x00630420 */
+    /**
+     * Slot 33.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00630420
+     * @ghidraAddress PAL: 0x00670fb0
+     */
     virtual unsigned int GetPixelNativeNoClip(int nX, int nY);
 
 protected:

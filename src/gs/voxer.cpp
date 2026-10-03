@@ -54,7 +54,7 @@ inline Mid::MBT MakePosition(int nTick) {
 
 } // namespace
 
-// 0x001d81b8
+// NTSC-U/C: 0x001d81b8, PAL: 0x001de098
 Voxer::Voxer(PhraseMgr *pPhraseMgr,
              Quantizer *pQuantizer,
              Sch::TickClock *pClock,
@@ -65,7 +65,7 @@ Voxer::Voxer(PhraseMgr *pPhraseMgr,
       mUnreadSentinel(kNoValue) {
 }
 
-// 0x001d8370
+// NTSC-U/C: 0x001d8370, PAL: 0x001de250
 void Voxer::OnPitchRiff(PitchRiffMsg *pMsg) {
     if (pMsg->mTrack != mTrack || pMsg->mPlayer != mPlayer) {
         return;
@@ -76,7 +76,7 @@ void Voxer::OnPitchRiff(PitchRiffMsg *pMsg) {
     Send(&press);
 }
 
-// 0x001d8430
+// NTSC-U/C: 0x001d8430, PAL: 0x001de310
 void Voxer::OnStopRiff(StopRiffMsg *pMsg) {
     if (pMsg->mTrack != mTrack || pMsg->mPlayer != mPlayer) {
         return;
@@ -89,7 +89,7 @@ void Voxer::OnStopRiff(StopRiffMsg *pMsg) {
     }
 }
 
-// 0x001d8508
+// NTSC-U/C: 0x001d8508, PAL: 0x001de3e8
 void Voxer::UpdateSustain(int nTick) {
     const int bHeld = mHeldLevels.any();
     if (mSustaining == bHeld) {
@@ -110,7 +110,7 @@ void Voxer::UpdateSustain(int nTick) {
     Send(&sustain);
 }
 
-// 0x001d8638
+// NTSC-U/C: 0x001d8638, PAL: 0x001de518
 void Voxer::OnErase(int nBar, int bWholeStep, int bAnnounce) {
     int bErased = 0;
     int nFirstBar;
@@ -147,7 +147,7 @@ void Voxer::OnErase(int nBar, int bWholeStep, int bAnnounce) {
     OnInvalidateSeeker(nBar);
 }
 
-// 0x001d8840
+// NTSC-U/C: 0x001d8840, PAL: 0x001de720
 void Voxer::OnTrackSelect(TrackSelectMsg *pMsg) {
     if (pMsg->mTrack != mTrack || pMsg->mPlace != 0) {
         return;
@@ -156,6 +156,12 @@ void Voxer::OnTrackSelect(TrackSelectMsg *pMsg) {
     if (mHeldLevels.any() && mPlayer->IsNull() == 0) {
         mHeldLevels.reset();
         UpdateSustain(pMsg->mPosition.mTick);
+#ifdef VIDEO_STANDARD_PAL
+        mSustaining = 0;
+        StdMidiMsg sustainRelease(
+            pMsg->mPosition.mTick, kControlChange | mChannel, kSustainController, kSustainReleased);
+        Send(&sustainRelease);
+#endif
         AxeButtonMsg release(kButtonReleased, 0, mPlayer);
         Send(&release);
     }
@@ -172,7 +178,7 @@ void Voxer::OnTrackSelect(TrackSelectMsg *pMsg) {
     OnInvalidateSeeker(pMsg->mPosition.mTick / mBarTicks);
 }
 
-// 0x001d89d0
+// NTSC-U/C: 0x001d89d0, PAL: 0x001de920
 void Voxer::StartPhrase(int nTick) {
     const int nBar = nTick / mBarTicks;
     if (nBar == mPhraseBar) {
@@ -188,7 +194,7 @@ void Voxer::StartPhrase(int nTick) {
     OnErase(nBar, 0, 0);
 }
 
-// 0x001d8b00
+// NTSC-U/C: 0x001d8b00, PAL: 0x001dea50
 void Voxer::FinishPhrase(int nBar) {
     if (nBar != mPhraseBar || mPhrase == nullptr) {
         return;
@@ -217,7 +223,7 @@ void Voxer::FinishPhrase(int nBar) {
     }
 }
 
-// 0x001d8dc8
+// NTSC-U/C: 0x001d8dc8, PAL: 0x001ded18
 int Voxer::Tick(int nElapsedTicks) {
     const int nBar = nElapsedTicks / mBarTicks;
     if (nBar == 0) {
@@ -236,13 +242,20 @@ int Voxer::Tick(int nElapsedTicks) {
         StartPhrase(nElapsedTicks);
         mPhrase->AddMuseMsg(Mid::MBT(nElapsedTicks % mBarTicks).mTick, &release);
         Send(&release);
+#ifdef VIDEO_STANDARD_PAL
+        if (mPlayer->IsNull() == 0) {
+            AxeButtonMsg button(kButtonReleased, 0, mPlayer);
+            Send(&button);
+        }
+#else
         AxeButtonMsg button(kButtonReleased, 0, mPlayer);
         Send(&button);
+#endif
     }
     return 1;
 }
 
-// 0x001d8fb0
+// NTSC-U/C: 0x001d8fb0, PAL: 0x001def20
 void Voxer::OnInvalidateSeeker(int) {
     if (mPlayer->IsNull() != 0) {
         return;
@@ -251,7 +264,7 @@ void Voxer::OnInvalidateSeeker(int) {
     Send(&off);
 }
 
-// 0x001d9050
+// NTSC-U/C: 0x001d9050, PAL: 0x001defc0
 void Voxer::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_nPitchRiffMsgType)) {
@@ -285,11 +298,11 @@ void Voxer::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x001d9dd0
+// NTSC-U/C: 0x001d9dd0, PAL: 0x001dfd40
 Voxer::~Voxer() {
 }
 
-// 0x001d9e40
+// NTSC-U/C: 0x001d9e40, PAL: 0x001dfdb0
 void Voxer::OnEraseMsg(EraseMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -300,14 +313,14 @@ void Voxer::OnEraseMsg(EraseMsg *pMsg) {
     OnErase(pMsg->mPosition.mTick / mBarTicks, pMsg->mDoubleTap, 1);
 }
 
-// 0x001d9e98
+// NTSC-U/C: 0x001d9e98, PAL: 0x001dfe08
 void Voxer::OnInvalidateSeekerMsg(InvalidateSeekerMsg *pMsg) {
     if (pMsg->mTrack == mTrack) {
         OnInvalidateSeeker(pMsg->mBar);
     }
 }
 
-// 0x001d9ec8
+// NTSC-U/C: 0x001d9ec8, PAL: 0x001dfe38
 int Voxer::QueryBar(int nBar) {
     return mTrackData->QueryBar(nBar);
 }

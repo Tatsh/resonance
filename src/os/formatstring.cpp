@@ -9,19 +9,19 @@ namespace {
 // GetDirectoryFromPath() buffer ends where the FormatString() buffer begins.
 constexpr int kDirectoryBufferSize = 0x100;
 
-// 0x008de290
+// NTSC-U/C: 0x008de290, PAL: 0x00923250
 char g_szDirectoryBuffer[kDirectoryBufferSize] = {};
 
 // The size is not recovered: nothing else in the image references the region, and the format runs
 // unbounded. The value below is a placeholder rather than a recovered size.
 constexpr int kFormatStringBufferSize = 1024;
 
-// 0x008de390
+// NTSC-U/C: 0x008de390, PAL: 0x00923350
 char g_szFormatStringBuffer[kFormatStringBufferSize] = {};
 
 } // namespace
 
-// 0x0054f688
+// NTSC-U/C: 0x0054f688, PAL: 0x0058fcc8
 const char *FormatString(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -30,7 +30,7 @@ const char *FormatString(const char *pszFormat, ...) {
     return g_szFormatStringBuffer;
 }
 
-// 0x0054f6f0
+// NTSC-U/C: 0x0054f6f0, PAL: 0x0058fd30
 const char *GetDirectoryFromPath(const char *pszPath) {
     strcpy(g_szDirectoryBuffer, pszPath);
     char *pszSeparator = strrchr(g_szDirectoryBuffer, '/');

@@ -35,22 +35,26 @@ public:
      * @param pMuse The sequence to play, retained for the lifetime of the player.
      * @param pParent The owner this player reports back to.
      * @param pClock The clock the schedule is posted against.
-     * @ghidraAddress 0x001a9fb8
+     * @ghidraAddress NTSC-U/C: 0x001a9fb8
+     * @ghidraAddress PAL: 0x001afd20
      */
     MultiMusePlayer(MultiMuse *pMuse, MuseParent *pParent, Sch::TickClock *pClock);
 
     /**
-     * @ghidraAddress 0x001aa100
+     * @ghidraAddress NTSC-U/C: 0x001aa100
+     * @ghidraAddress PAL: 0x001afe68
      */
     virtual ~MultiMusePlayer();
 
     /**
-     * @ghidraAddress 0x001a9b48
+     * @ghidraAddress NTSC-U/C: 0x001a9b48
+     * @ghidraAddress PAL: 0x001af8b0
      */
     virtual void Start(MsgSink *pSink);
 
     /**
-     * @ghidraAddress 0x001aa1b8
+     * @ghidraAddress NTSC-U/C: 0x001aa1b8
+     * @ghidraAddress PAL: 0x001aff20
      */
     virtual void Stop();
 
@@ -58,17 +62,20 @@ public:
      * MusePlayer table slot 4. The body is one instruction and returns 1.
      *
      * @return 1.
-     * @ghidraAddress 0x001a9ed0
+     * @ghidraAddress NTSC-U/C: 0x001a9ed0
+     * @ghidraAddress PAL: 0x001afc38
      */
     virtual int DisplacesSiblings();
 
     /**
-     * @ghidraAddress 0x001aa1f8
+     * @ghidraAddress NTSC-U/C: 0x001aa1f8
+     * @ghidraAddress PAL: 0x001aff60
      */
     virtual void RetainOnly(MusePlayer *pPlayer);
 
     /**
-     * @ghidraAddress 0x001a9c30
+     * @ghidraAddress NTSC-U/C: 0x001a9c30
+     * @ghidraAddress PAL: 0x001af998
      */
     virtual void PlayerFinished(MusePlayer *pPlayer);
 

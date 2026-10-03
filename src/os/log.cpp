@@ -31,12 +31,12 @@ constexpr int kFormatMessageUnused = 0;
 // How long an assertion report asks to stay on screen.
 constexpr int kAssertionMessageDuration = 600;
 
-// 0x0071d368
+// NTSC-U/C: 0x0071d368, PAL: 0x00760dd8
 char g_szFatalMessage[kFatalMessageSize];
 
 } // namespace
 
-// 0x0053dde0
+// NTSC-U/C: 0x0053dde0, PAL: 0x0057da10
 void LogPrintf(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -44,7 +44,7 @@ void LogPrintf(const char *pszFormat, ...) {
     va_end(args);
 }
 
-// 0x0052e3e8
+// NTSC-U/C: 0x0052e3e8, PAL: 0x0056da60
 void Warn(const char *pszFormat, ...) {
     if (WarningsEnabled() != 1) {
         return;
@@ -57,7 +57,7 @@ void Warn(const char *pszFormat, ...) {
     va_end(args);
 }
 
-// 0x0052e510
+// NTSC-U/C: 0x0052e510, PAL: 0x0056dbc0
 void ReportAssertion(const char *pszMessage, const char *pszFile, int nLine) {
     // The image builds the text in a pre-standard strstream, terminates it with ends, and never
     // releases the frozen buffer. A string stream produces the same text without the leak.
@@ -67,7 +67,7 @@ void ReportAssertion(const char *pszMessage, const char *pszFile, int nLine) {
     exit(0);
 }
 
-// 0x0052ea68
+// NTSC-U/C: 0x0052ea68, PAL: 0x0056e160
 void AlertScriptTemplate(int nTemplate, ...) {
     const HxStr format = GetScriptTemplate(nTemplate);
     va_list args;
@@ -76,7 +76,7 @@ void AlertScriptTemplate(int nTemplate, ...) {
     va_end(args);
 }
 
-// 0x0052e868
+// NTSC-U/C: 0x0052e868, PAL: 0x0056df18
 void Fatal(const char *pszFormat, ...) {
     MemCloseLogAndReport();
 
@@ -89,7 +89,7 @@ void Fatal(const char *pszFormat, ...) {
     }
 }
 
-// 0x0052e960
+// NTSC-U/C: 0x0052e960, PAL: 0x0056e018
 void Error(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -97,7 +97,7 @@ void Error(const char *pszFormat, ...) {
     va_end(args);
 }
 
-// 0x00466368
+// NTSC-U/C: 0x00466368, PAL: 0x004a3d98
 void ShowReportedMessage(const HxStr &text, int nDuration) {
     if (ScreenMessagesEnabled() == 1) {
         ShowScreenMessage(text.mStr != nullptr ? text.mStr : g_szEmptyString, nDuration);
@@ -105,7 +105,7 @@ void ShowReportedMessage(const HxStr &text, int nDuration) {
     std::cout << text << std::endl;
 }
 
-// 0x004663d8
+// NTSC-U/C: 0x004663d8, PAL: 0x004a3e08
 void ShowAlertMessage(const HxStr &text) {
     ShowScreenMessage(text.mStr != nullptr ? text.mStr : g_szEmptyString, kAlertMessageDuration);
     std::cout << "Alert! " << text << std::endl;

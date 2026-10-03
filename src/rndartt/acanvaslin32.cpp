@@ -38,11 +38,11 @@ inline APalette *ResolvePalette(const ABitmap &source, const ABitmap &canvas) {
 
 } // namespace
 
-// 0x00614240
+// NTSC-U/C: 0x00614240, PAL: 0x00654dd0
 ACanvasLin32::ACanvasLin32(const ABitmap &bitmap) : ACanvas32(bitmap) {
 }
 
-// 0x00614278
+// NTSC-U/C: 0x00614278, PAL: 0x00654e08
 void ACanvasLin32::BuildAlphaFromColorKey(unsigned int nColorKey) {
     unsigned char *pRow = static_cast<unsigned char *>(mBitmap.mPixels);
     nColorKey &= kACanvas32ChannelsMask;
@@ -61,22 +61,22 @@ void ACanvasLin32::BuildAlphaFromColorKey(unsigned int nColorKey) {
     }
 }
 
-// 0x00614308
+// NTSC-U/C: 0x00614308, PAL: 0x00654e98
 void ACanvasLin32::PutPixelNoClip(int nX, int nY) {
     *PixelAt(mBitmap, nX, nY) = mColor;
 }
 
-// 0x00614330
+// NTSC-U/C: 0x00614330, PAL: 0x00654ec0
 void ACanvasLin32::PutPixelNoClip(int nX, int nY, unsigned int nColor) {
     *PixelAt(mBitmap, nX, nY) = nColor;
 }
 
-// 0x00614350
+// NTSC-U/C: 0x00614350, PAL: 0x00654ee0
 unsigned int ACanvasLin32::GetPixelNoClip(int nX, int nY) {
     return *PixelAt(mBitmap, nX, nY);
 }
 
-// 0x00614370
+// NTSC-U/C: 0x00614370, PAL: 0x00654f00
 void ACanvasLin32::FillRowNoClip(int nY, int nLeft, int nRight) {
     unsigned int *pPixel = PixelAt(mBitmap, nLeft, nY);
     // Yes, the binary counts down to zero exactly. A reversed span runs on.
@@ -85,7 +85,7 @@ void ACanvasLin32::FillRowNoClip(int nY, int nLeft, int nRight) {
     }
 }
 
-// 0x006143b8
+// NTSC-U/C: 0x006143b8, PAL: 0x00654f48
 void ACanvasLin32::FillColumnNoClip(int nX, int nTop, int nBottom) {
     unsigned char *pPixel = ByteAt(mBitmap, nX, nTop);
     // Yes, the binary counts down to zero exactly. A reversed span runs on.
@@ -95,7 +95,7 @@ void ACanvasLin32::FillColumnNoClip(int nX, int nTop, int nBottom) {
     }
 }
 
-// 0x00614408
+// NTSC-U/C: 0x00614408, PAL: 0x00654f98
 void ACanvasLin32::FillRectNoClip(ARect rect) {
     const short nWidth = static_cast<short>(rect.mRight - rect.mLeft);
     unsigned char *pRow = ByteAt(mBitmap, rect.mLeft, rect.mTop);
@@ -111,7 +111,7 @@ void ACanvasLin32::FillRectNoClip(ARect rect) {
     }
 }
 
-// 0x006148e0
+// NTSC-U/C: 0x006148e0, PAL: 0x00655470
 void ACanvasLin32::TextureRowIndexed(int nY,
                                      int nLeft,
                                      int nRight,
@@ -134,7 +134,7 @@ void ACanvasLin32::TextureRowIndexed(int nY,
     }
 }
 
-// 0x006144b0
+// NTSC-U/C: 0x006144b0, PAL: 0x00655040
 void ACanvasLin32::Blit4NoClip(const ABitmap &source, int nX, int nY) {
     const APalette *pPalette = ResolvePalette(source, mBitmap);
     if (pPalette == nullptr) {
@@ -159,7 +159,7 @@ void ACanvasLin32::Blit4NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00614608
+// NTSC-U/C: 0x00614608, PAL: 0x00655198
 void ACanvasLin32::Blit8NoClip(const ABitmap &source, int nX, int nY) {
     const APalette *pPalette = ResolvePalette(source, mBitmap);
     if (pPalette == nullptr) {
@@ -183,7 +183,7 @@ void ACanvasLin32::Blit8NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00614070
+// NTSC-U/C: 0x00614070, PAL: 0x00654c00
 void ACanvasLin32::Blit32NoClip(const ABitmap &source, int nX, int nY) {
     const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
     unsigned char *pDestRow = ByteAt(mBitmap, nX, nY);
@@ -210,7 +210,7 @@ void ACanvasLin32::Blit32NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x006146f0
+// NTSC-U/C: 0x006146f0, PAL: 0x00655280
 void ACanvasLin32::RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap) {
     if (span.mPalette == nullptr) {
         return;
@@ -227,7 +227,7 @@ void ACanvasLin32::RemapRowIndexed(const ARowSpan &span, const unsigned char *pR
     }
 }
 
-// 0x00614790
+// NTSC-U/C: 0x00614790, PAL: 0x00655320
 void ACanvasLin32::StretchRowIndexed(const AStretchSpan &span) {
     if (span.mPalette == nullptr) {
         return;
@@ -245,7 +245,7 @@ void ACanvasLin32::StretchRowIndexed(const AStretchSpan &span) {
     }
 }
 
-// 0x00614830
+// NTSC-U/C: 0x00614830, PAL: 0x006553c0
 void ACanvasLin32::StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap) {
     if (span.mPalette == nullptr) {
         return;

@@ -13,15 +13,15 @@ namespace {
 // being recovered.
 constexpr int kFailMessageSize = 0x100;
 
-// 0x00894e30
+// NTSC-U/C: 0x00894e30, PAL: 0x008d9e40
 char g_szFailMessage[kFailMessageSize] = {};
 
-// 0x00894f30
+// NTSC-U/C: 0x00894f30, PAL: 0x008d9f40
 char g_szFailFormatted[kFailMessageSize] = {};
 
 // The handler SetReportHandler() installs when it is given none. It hands the message to Print(),
 // and Print() discards it. A sink with this handler reports nothing at all.
-// 0x004ddf68
+// NTSC-U/C: 0x004ddf68, PAL: 0x0051c520
 void DefaultFailReport(const char *pszMessage) {
     g_failSink.Print(pszMessage);
 }
@@ -41,7 +41,7 @@ inline FailSink::~FailSink() {
 
 FailSink g_failSink;
 
-// 0x004de0a0
+// NTSC-U/C: 0x004de0a0, PAL: 0x0051c658
 void FailSink::CloseLog() {
     if (mLogStream != nullptr) {
         mLogStream->Flush();
@@ -50,7 +50,7 @@ void FailSink::CloseLog() {
     mLogStream = nullptr;
 }
 
-// 0x004ddfb8
+// NTSC-U/C: 0x004ddfb8, PAL: 0x0051c570
 void FailSink::OpenLog(const HxStr &path) {
     CloseLog();
     mLogStream = new Rnd::FileStream(path, kOpenForWriting);
@@ -62,12 +62,12 @@ void FailSink::OpenLog(const HxStr &path) {
     }
 }
 
-// 0x004ddf90
+// NTSC-U/C: 0x004ddf90, PAL: 0x0051c548
 void FailSink::SetReportHandler(FailReportProc pfnReport) {
     mReportProc = (pfnReport != nullptr) ? pfnReport : DefaultFailReport;
 }
 
-// 0x004dde28
+// NTSC-U/C: 0x004dde28, PAL: 0x0051c3e0
 void FailSink::Report(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -77,7 +77,7 @@ void FailSink::Report(const char *pszFormat, ...) {
     mReportProc(g_szFailMessage);
 }
 
-// 0x004dde98
+// NTSC-U/C: 0x004dde98, PAL: 0x0051c450
 FailSink *FailSink::Format(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -87,7 +87,7 @@ FailSink *FailSink::Format(const char *pszFormat, ...) {
     return this;
 }
 
-// 0x004ddfb0
+// NTSC-U/C: 0x004ddfb0, PAL: 0x0051c568
 FailSink *FailSink::Print([[maybe_unused]] const char *pszText) {
     return this;
 }

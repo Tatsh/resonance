@@ -14,14 +14,16 @@ public:
     /**
      * @param nChannel The MIDI channel the controller change goes to.
      * @param nAppliedLevel The controller value while the effect is applied.
-     * @ghidraAddress 0x001a1a10
+     * @ghidraAddress NTSC-U/C: 0x001a1a10
+     * @ghidraAddress PAL: 0x001a7778
      */
     VolumeEffector(unsigned char nChannel, int nAppliedLevel);
 
     /**
      * Switch the effect off, then tear down the base.
      *
-     * @ghidraAddress 0x001a1a68
+     * @ghidraAddress NTSC-U/C: 0x001a1a68
+     * @ghidraAddress PAL: 0x001a77d0
      */
     virtual ~VolumeEffector();
 
@@ -29,7 +31,8 @@ public:
      * Report which effect this object applies.
      *
      * @return kEffectorTypeVolume.
-     * @ghidraAddress 0x001a1b30
+     * @ghidraAddress NTSC-U/C: 0x001a1b30
+     * @ghidraAddress PAL: 0x001a7898
      */
     virtual int Type();
 
@@ -39,7 +42,8 @@ public:
      * A request that repeats the current position sends nothing.
      *
      * @param bEnabled Non-zero to apply the effect.
-     * @ghidraAddress 0x001a07c0
+     * @ghidraAddress NTSC-U/C: 0x001a07c0
+     * @ghidraAddress PAL: 0x001a6528
      */
     virtual void Enable(int bEnabled);
 

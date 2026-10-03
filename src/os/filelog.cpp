@@ -105,16 +105,16 @@ inline void BuildHostPath(char *pszDest, const char *pszPath) {
 
 } // namespace
 
-// 0x006ee280
+// NTSC-U/C: 0x006ee280, PAL: 0x00731ca0
 std::fstream g_fileLog;
 
-// 0x006ee320
+// NTSC-U/C: 0x006ee320, PAL: 0x00731d40
 int g_bFileLogOpen = 0;
 
-// 0x006ee378
+// NTSC-U/C: 0x006ee378, PAL: 0x00731d98
 char g_szFileLogPath[kFileLogPathSize] = {};
 
-// 0x0047c9c0
+// NTSC-U/C: 0x0047c9c0, PAL: 0x004ba650
 int FileOpen(const char *pszPath, int nFlags, ...) {
     const int nSceFlags = TranslateOpenFlags(nFlags);
 
@@ -189,7 +189,7 @@ int FileOpen(const char *pszPath, int nFlags, ...) {
     return nFile;
 }
 
-// 0x0047ddf0
+// NTSC-U/C: 0x0047ddf0, PAL: 0x004bbac8
 void FileLogStart(const char *pszPath) {
     strcpy(g_szFileLogPath, pszPath);
     // The image passes the default protection 0664 alongside the mode.
@@ -197,7 +197,7 @@ void FileLogStart(const char *pszPath) {
     g_bFileLogOpen = 1;
 }
 
-// 0x0047de48
+// NTSC-U/C: 0x0047de48, PAL: 0x004bbb20
 void FileLogStop() {
     if (g_bFileLogOpen != 0) {
         g_fileLog.close();
@@ -205,14 +205,14 @@ void FileLogStop() {
     }
 }
 
-// 0x0047de88
+// NTSC-U/C: 0x0047de88, PAL: 0x004bbb60
 void FileLogAppend(const char *pszText) {
     if (g_bFileLogOpen != 0) {
         g_fileLog << pszText << std::endl;
     }
 }
 
-// 0x0047dec0
+// NTSC-U/C: 0x0047dec0, PAL: 0x004bbb98
 void AppendPathComponent(const char *pszComponent, char *pszPath) {
     if (*pszComponent != '\0') {
         strcat(pszPath, kDiscPathSeparator);
@@ -230,7 +230,7 @@ void AppendPathComponent(const char *pszComponent, char *pszPath) {
     strcat(pszPath, kDiscVersionSuffix);
 }
 
-// 0x0047dfb0
+// NTSC-U/C: 0x0047dfb0, PAL: 0x004bbc88
 int FileClose(int nFile) {
     char szTrace[kFileTraceSize];
     sprintf(szTrace, "close($%x) at t:%f", nFile, kUntimedSeconds);
@@ -245,7 +245,7 @@ int FileClose(int nFile) {
     return sceClose(nFile & ~kFileHandleSceFile);
 }
 
-// 0x0047e060
+// NTSC-U/C: 0x0047e060, PAL: 0x004bbd38
 int FileRead(int nFile, void *pBuffer, int nLength) {
     int nRead;
     if ((nFile & kFileHandleArkStream) != 0) {
@@ -269,7 +269,7 @@ int FileRead(int nFile, void *pBuffer, int nLength) {
     return nRead;
 }
 
-// 0x0047e178
+// NTSC-U/C: 0x0047e178, PAL: 0x004bbe50
 int FileWrite(int nFile, const void *pBuffer, int nLength) {
     if ((nFile & kFileHandleArkStream) != 0) {
         return -1;
@@ -280,7 +280,7 @@ int FileWrite(int nFile, const void *pBuffer, int nLength) {
     return sceWrite(nFile & ~kFileHandleSceFile, pBuffer, nLength);
 }
 
-// 0x0047e1c8
+// NTSC-U/C: 0x0047e1c8, PAL: 0x004bbea0
 int FileSeek(int nFile, int nOffset, int nOrigin) {
     int nPosition;
     if ((nFile & kFileHandleArkStream) != 0) {
@@ -305,7 +305,7 @@ int FileSeek(int nFile, int nOffset, int nOrigin) {
     return nPosition;
 }
 
-// 0x0047e2f0
+// NTSC-U/C: 0x0047e2f0, PAL: 0x004bbfc8
 int FileIsatty(int nFile) {
     if ((nFile & kFileHandleArkStream) != 0 || (nFile & kFileHandleSceFile) != 0) {
         return 0;
@@ -316,7 +316,7 @@ int FileIsatty(int nFile) {
 // The C library's system calls. The original C library called the file layer through them, for
 // the standard descriptors as for every file the game opens with the C library.
 
-// 0x005da840
+// NTSC-U/C: 0x005da840, PAL: 0x0061c8a8
 extern "C" int _open(const char *pszPath, int nFlags, ...) {
     va_list args;
     va_start(args, nFlags);
@@ -329,7 +329,7 @@ extern "C" int _close(int nFile) {
     return FileClose(nFile);
 }
 
-// 0x0062db94
+// NTSC-U/C: 0x0062db94, PAL: 0x0066e724
 extern "C" int _read(int nFile, void *pBuffer, size_t nLength) {
     return FileRead(nFile, pBuffer, static_cast<int>(nLength));
 }
@@ -348,14 +348,14 @@ extern "C" int _isatty(int nFile) {
 
 // Every descriptor reports a character device. The C library then queries isatty() before it
 // buffers a stream by line, and Python's modification time lookup succeeds for an archive stream.
-// 0x00596670
+// NTSC-U/C: 0x00596670, PAL: 0x005d9a78
 extern "C" int _fstat(int /* nFile */, struct stat *pStat) {
     memset(pStat, 0, sizeof(*pStat));
     pStat->st_mode = S_IFCHR;
     return 0;
 }
 
-// 0x005966b8
+// NTSC-U/C: 0x005966b8, PAL: 0x005d9ac0
 extern "C" int _stat(const char * /* pszPath */, struct stat * /* pStat */) {
     errno = EIO;
     return -1;

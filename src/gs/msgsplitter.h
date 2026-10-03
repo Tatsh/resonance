@@ -19,12 +19,14 @@
 class MsgSplitter : public MsgSink, public MsgSource {
 public:
     /**
-     * @ghidraAddress 0x001aae68
+     * @ghidraAddress NTSC-U/C: 0x001aae68
+     * @ghidraAddress PAL: 0x001b0bd0
      */
     MsgSplitter();
 
     /**
-     * @ghidraAddress 0x001aad98
+     * @ghidraAddress NTSC-U/C: 0x001aad98
+     * @ghidraAddress PAL: 0x001b0b00
      */
     virtual ~MsgSplitter();
 
@@ -34,7 +36,8 @@ public:
      * Primary table slot 3. Forwards to MsgSource::Send().
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001ab4a8
+     * @ghidraAddress NTSC-U/C: 0x001ab4a8
+     * @ghidraAddress PAL: 0x001b1210
      */
     virtual void HandleMessage(Message *pMsg);
 };

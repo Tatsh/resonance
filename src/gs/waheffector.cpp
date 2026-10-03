@@ -12,7 +12,7 @@ constexpr unsigned char kSwitchOff = 0;
 
 } // namespace
 
-// 0x001a08f8
+// NTSC-U/C: 0x001a08f8, PAL: 0x001a6660
 void WahEffector::Enable(int bEnabled) {
     if (bEnabled == mEnabled && mPending != 0) {
         return;
@@ -27,7 +27,7 @@ void WahEffector::Enable(int bEnabled) {
     Send(&msg);
 }
 
-// 0x001a0a10
+// NTSC-U/C: 0x001a0a10, PAL: 0x001a6778
 int WahEffector::Tick(int nElapsedTicks) {
     float flValue;
     mOscillator->Sample(static_cast<float>(nElapsedTicks), &flValue);
@@ -40,13 +40,13 @@ int WahEffector::Tick(int nElapsedTicks) {
     return 1;
 }
 
-// 0x001a2040
+// NTSC-U/C: 0x001a2040, PAL: 0x001a7da8
 WahEffector::~WahEffector() {
     WahEffector::Enable(0); // The binary calls this class's own body rather than dispatching.
     delete mOscillator;
 }
 
-// 0x001a2128
+// NTSC-U/C: 0x001a2128, PAL: 0x001a7e90
 int WahEffector::Type() {
     return kEffectorTypeWah;
 }

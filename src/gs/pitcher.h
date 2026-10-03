@@ -48,7 +48,8 @@ public:
      * Inline. Identical copies sit at `0x001b3348`, `0x001d10b8`, and `0x001d9798`, one in each
      * deriving translation unit, and the deriving destructors all call the first.
      *
-     * @ghidraAddress 0x001b3348
+     * @ghidraAddress NTSC-U/C: 0x001b3348
+     * @ghidraAddress PAL: 0x001b9120
      */
     virtual ~Pitcher() {
     }

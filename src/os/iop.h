@@ -27,7 +27,8 @@ struct IopModule {
  * the debug console and the boot configuration are initialised last. The image is
  * `cdrom0:\IOP\IOPRP23.IMG;1` in kHostModeCdOnly and `host0:iop/ioprp23.img` otherwise.
  *
- * @ghidraAddress 0x004dfe28
+ * @ghidraAddress NTSC-U/C: 0x004dfe28
+ * @ghidraAddress PAL: 0x0051e5c0
  */
 void InitIop();
 
@@ -47,7 +48,8 @@ void InitIop();
  *
  * @param pModule The module to load.
  * @param nSources A mask of IopModuleSource values.
- * @ghidraAddress 0x004de170
+ * @ghidraAddress NTSC-U/C: 0x004de170
+ * @ghidraAddress PAL: 0x0051c728
  */
 void LoadIopModule(const IopModule *pModule, unsigned nSources);
 
@@ -59,7 +61,8 @@ void LoadIopModule(const IopModule *pModule, unsigned nSources);
  * started. The host mode also selects the media mask. kHostModeCdHost permits both media,
  * kHostModeCdOnly permits the disc, and kHostModeHostOnly permits the host link.
  *
- * @ghidraAddress 0x004de600
+ * @ghidraAddress NTSC-U/C: 0x004de600
+ * @ghidraAddress PAL: 0x0051ccd0
  */
 void LoadIopModules();
 
@@ -71,7 +74,8 @@ void LoadIopModules();
  * setting the host mode to kHostModeCdOnly and UsingArkFiles() to 1. ScreenMessagesEnabled() is
  * the word it omits.
  *
- * @ghidraAddress 0x0050f030
+ * @ghidraAddress NTSC-U/C: 0x0050f030
+ * @ghidraAddress PAL: 0x0054e5c8
  */
 void ConfigureRetailBoot();
 
@@ -86,9 +90,32 @@ void ConfigureRetailBoot();
  * The name is inferred from the console geometry and the cell fill. Nothing in the image attests
  * it, and InitIop() is the only caller.
  *
- * @ghidraAddress 0x005e5f18
+ * @ghidraAddress NTSC-U/C: 0x005e5f18
+ * @ghidraAddress PAL: 0x006280d8
  */
 void InitDebugConsole();
+
+#ifdef VIDEO_STANDARD_PAL
+/**
+ * Close the debug console InitDebugConsole() opened and release its cells.
+ *
+ * The routine belongs to devconsole.cpp and is declared here so that iop.cpp can call it.
+ * ShutdownIop() is the only caller. The name is inferred.
+ *
+ * @ghidraAddress PAL: 0x00628120
+ */
+void CloseDebugConsole();
+
+/**
+ * Undo the IOP services the game started for the session.
+ *
+ * Closes multitap ports 0 to 3 and then the debug console. main() calls it after the application
+ * exits. The name is inferred.
+ *
+ * @ghidraAddress PAL: 0x0051e678
+ */
+void ShutdownIop();
+#endif
 
 /**
  * Apply the boot configuration and build the zone list.
@@ -137,6 +164,7 @@ enum HardEffectTemplate {
  * The name is inferred from those expressions. Nothing in the image attests it, and
  * LoadIopModules() is the only caller.
  *
- * @ghidraAddress 0x005e1210
+ * @ghidraAddress NTSC-U/C: 0x005e1210
+ * @ghidraAddress PAL: 0x00623150
  */
 void RegisterHardEffectCommands();

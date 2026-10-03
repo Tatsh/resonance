@@ -45,7 +45,8 @@ public:
      *
      * Increments g_nMusePlayerSerial and records the new value in mId.
      *
-     * @ghidraAddress 0x001aa440
+     * @ghidraAddress NTSC-U/C: 0x001aa440
+     * @ghidraAddress PAL: 0x001b01a8
      */
     MusePlayer();
 
@@ -53,7 +54,8 @@ public:
      * Inline. Identical copies sit at `0x001aa3e8` and `0x001aa4a8`, one in each translation unit
      * that emits the table at `0x007dfe68`.
      *
-     * @ghidraAddress 0x001aa3e8
+     * @ghidraAddress NTSC-U/C: 0x001aa3e8
+     * @ghidraAddress PAL: 0x001b0150
      */
     virtual ~MusePlayer() {
     }
@@ -98,6 +100,7 @@ private:
  *
  * Starts at 0. MusePlayer's constructor is the one reader and writer.
  *
- * @ghidraAddress 0x00686290
+ * @ghidraAddress NTSC-U/C: 0x00686290
+ * @ghidraAddress PAL: 0x006c74f8
  */
 extern int g_nMusePlayerSerial;

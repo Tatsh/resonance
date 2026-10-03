@@ -55,7 +55,7 @@ constexpr int kLoadFailureStatus = 1;
 // records.
 constexpr int kIopModuleCount = 10;
 
-// 0x00702660
+// NTSC-U/C: 0x00702660, PAL: 0x007460b0
 // The table sits in .data rather than in .rodata. The original therefore declared it without
 // const.
 IopModule g_iopModules[kIopModuleCount] = {{"sio2man", 0, nullptr},
@@ -69,7 +69,7 @@ IopModule g_iopModules[kIopModuleCount] = {{"sio2man", 0, nullptr},
                                            {"sdrdrv", 0, nullptr},
                                            {"ezmidi", 0, nullptr}};
 
-// 0x004dfc40
+// NTSC-U/C: 0x004dfc40, PAL: 0x0051e3a0
 // An unreferenced out-of-line copy sits at that address while the only call site is
 // inlined, which is what establishes an inline function rather than a block the caller open-codes.
 // The same applies to every helper below.
@@ -80,7 +80,7 @@ inline void LoadModuleFromHost(const char *pszPath, int nArgLength, const char *
     }
 }
 
-// 0x004dfc80
+// NTSC-U/C: 0x004dfc80, PAL: 0x0051e3e0
 inline void LoadModuleFromCd(const char *pszPath, int nArgLength, const char *pArgs) {
     if (sceSifLoadModule(pszPath, nArgLength, pArgs) < 0) {
         Error(kLoadFailedFormat, pszPath);
@@ -90,7 +90,7 @@ inline void LoadModuleFromCd(const char *pszPath, int nArgLength, const char *pA
     sceCdSync(SCECdBlock);
 }
 
-// 0x004dfd80
+// NTSC-U/C: 0x004dfd80, PAL: 0x0051e518
 // The host mode is read again here rather than passed in, so InitIop() and this helper
 // each call GetHostMode() once.
 inline void RebootIopWithImage() {
@@ -115,7 +115,7 @@ inline void RebootIopWithImage() {
     sceCdMmode(SCECdCD);
 }
 
-// 0x004dfcc8
+// NTSC-U/C: 0x004dfcc8, PAL: 0x0051e428
 inline void LoadAllIopModules(unsigned nSources) {
     AsyncCheck(1);
 
@@ -125,7 +125,7 @@ inline void LoadAllIopModules(unsigned nSources) {
     }
 }
 
-// 0x004dfd28
+// NTSC-U/C: 0x004dfd28, PAL: 0x0051e488
 // The console exposes two controller ports, and a third is opened regardless.
 inline void InitMultitapPorts() {
     sceMtapInit();
@@ -134,14 +134,27 @@ inline void InitMultitapPorts() {
     sceMtapPortOpen(2);
 }
 
-// 0x004dfd60
+#ifdef VIDEO_STANDARD_PAL
+// The ports InitMultitapPorts() opens and one more.
+constexpr int kMultitapPortCount = 4;
+
+// PAL: 0x0051e4c0
+// ShutdownIop() expands it inline, and the out-of-line copy has no caller.
+inline void CloseMultitapPorts() {
+    for (int nPort = 0; nPort < kMultitapPortCount; ++nPort) {
+        sceMtapPortClose(nPort);
+    }
+}
+#endif
+
+// NTSC-U/C: 0x004dfd60, PAL: 0x0051e4f8
 inline void InitMemoryCardLibrary() {
     sceMcInitLibrary(); // Yes, the binary discards this call's result.
 }
 
 } // namespace
 
-// 0x004dfe28
+// NTSC-U/C: 0x004dfe28, PAL: 0x0051e5c0
 void InitIop() {
     ConfigureRetailBoot();
     RebootIopWithImage();
@@ -149,7 +162,15 @@ void InitIop() {
     InitBootConfig();
 }
 
-// 0x004de170
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x0051e678
+void ShutdownIop() {
+    CloseMultitapPorts();
+    CloseDebugConsole();
+}
+#endif
+
+// NTSC-U/C: 0x004de170, PAL: 0x0051c728
 void LoadIopModule(const IopModule *pModule, unsigned nSources) {
     if ((nSources & kIopModuleSourceDisc) != 0) {
         HxStr name(pModule->mName);
@@ -170,7 +191,7 @@ void LoadIopModule(const IopModule *pModule, unsigned nSources) {
     }
 }
 
-// 0x004de600
+// NTSC-U/C: 0x004de600, PAL: 0x0051ccd0
 void LoadIopModules() {
     const HostMode mode = GetHostMode();
     WaitVsync();
@@ -205,7 +226,7 @@ void LoadIopModules() {
     InitMemoryCardLibrary();
 }
 
-// 0x005e1210
+// NTSC-U/C: 0x005e1210, PAL: 0x00623150
 void RegisterHardEffectCommands() {
     RegisterScriptTemplate(kTemplateUseHardEffect, HxStr(kUseHardEffectExpression));
     RegisterScriptTemplate(kTemplateHardEffectId, HxStr(kHardEffectIdExpression));

@@ -46,7 +46,8 @@ public:
      * @param pClock The clock the TickTask base is posted against.
      * @param pTrackData The track description, which arrives in `t0`. Its `+0x04` is copied into
      *                   mTrack and its `+0x08` byte into mChannel.
-     * @ghidraAddress 0x001d81b8
+     * @ghidraAddress NTSC-U/C: 0x001d81b8
+     * @ghidraAddress PAL: 0x001de098
      */
     Voxer(PhraseMgr *pPhraseMgr,
           Quantizer *pQuantizer,
@@ -56,7 +57,8 @@ public:
     /**
      * Destroy the voxer. The body only chains to Pitcher's destructor.
      *
-     * @ghidraAddress 0x001d9dd0
+     * @ghidraAddress NTSC-U/C: 0x001d9dd0
+     * @ghidraAddress PAL: 0x001dfd40
      */
     virtual ~Voxer();
 
@@ -66,11 +68,13 @@ public:
      * At bar zero the sustain controller is released at position kMBTInfinity. The routine
      * finishes the phrase of the previous bar and turns the seeker off. At a bar
      * TrackData::QueryBar() rejects while sustaining, it clears the held levels, records and
-     * sends the sustain release in a new phrase, and releases the button with an AxeButtonMsg.
+     * sends the sustain release in a new phrase, and releases the button with an AxeButtonMsg. In
+     * the PAL build the button is released only when mPlayer is not the stand-in.
      *
      * @param nElapsedTicks Ticks since the epoch.
      * @return 1 always.
-     * @ghidraAddress 0x001d8dc8
+     * @ghidraAddress NTSC-U/C: 0x001d8dc8
+     * @ghidraAddress PAL: 0x001ded18
      */
     virtual int Tick(int nElapsedTicks);
 
@@ -82,7 +86,8 @@ protected:
      * AxeButtonMsg presses the button.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001d8370
+     * @ghidraAddress NTSC-U/C: 0x001d8370
+     * @ghidraAddress PAL: 0x001de250
      */
     void OnPitchRiff(PitchRiffMsg *pMsg);
 
@@ -93,7 +98,8 @@ protected:
      * no level left held, an AxeButtonMsg releases the button.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001d8430
+     * @ghidraAddress NTSC-U/C: 0x001d8430
+     * @ghidraAddress PAL: 0x001de310
      */
     void OnStopRiff(StopRiffMsg *pMsg);
 
@@ -101,10 +107,13 @@ protected:
      * Install the player a TrackSelectMsg for this track selects.
      *
      * A player still holding levels has them cleared, the sustain updated, and the button
-     * released. A real new player gets a NowBarMsg at lane 0.5 and its seeker turned off.
+     * released. The PAL build also clears mSustaining and sends the sustain release at the
+     * message's position before releasing the button. A real new player gets a NowBarMsg at
+     * lane 0.5 and its seeker turned off.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001d8840
+     * @ghidraAddress NTSC-U/C: 0x001d8840
+     * @ghidraAddress PAL: 0x001de720
      */
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
@@ -119,7 +128,8 @@ protected:
      * @param nBar The bar.
      * @param bWholeStep Non-zero to erase the whole step, an EraseMsg's `+0x10`.
      * @param bAnnounce Non-zero for an EraseMsg, and zero from StartPhrase().
-     * @ghidraAddress 0x001d8638
+     * @ghidraAddress NTSC-U/C: 0x001d8638
+     * @ghidraAddress PAL: 0x001de518
      */
     void OnErase(int nBar, int bWholeStep, int bAnnounce);
 
@@ -127,7 +137,8 @@ protected:
      * Turn mPlayer's seeker off, unless mPlayer is the stand-in.
      *
      * @param nBar Not read.
-     * @ghidraAddress 0x001d8fb0
+     * @ghidraAddress NTSC-U/C: 0x001d8fb0
+     * @ghidraAddress PAL: 0x001def20
      */
     void OnInvalidateSeeker(int nBar);
 
@@ -137,38 +148,39 @@ protected:
      * Primary table slot 3.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001d9050
+     * @ghidraAddress NTSC-U/C: 0x001d9050
+     * @ghidraAddress PAL: 0x001defc0
      */
     virtual void HandleMessage(Message *pMsg);
 
 private:
     // The out-of-line copy of the EraseMsg branch HandleMessage() expands inline.
-    // 0x001d9e40
+    // NTSC-U/C: 0x001d9e40, PAL: 0x001dfdb0
     void OnEraseMsg(EraseMsg *pMsg);
 
     // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
-    // 0x001d9e98
+    // NTSC-U/C: 0x001d9e98, PAL: 0x001dfe08
     void OnInvalidateSeekerMsg(InvalidateSeekerMsg *pMsg);
 
     // Returns TrackData::QueryBar() for the bar on mTrackData. UpdateSustain() calls it.
-    // 0x001d9ec8
+    // NTSC-U/C: 0x001d9ec8, PAL: 0x001dfe38
     int QueryBar(int nBar);
 
     // When the held levels no longer match mSustaining, sends the sustain controller (0 while
     // held, 127 once released) at nTick, recorded into the phrase at its offset in the bar. A
     // bar QueryBar() rejects plays SND_INACTIVE instead. The title is inferred.
-    // 0x001d8508
+    // NTSC-U/C: 0x001d8508, PAL: 0x001de3e8
     void UpdateSustain(int nTick);
 
     // Unless the bar of nTick is mPhraseBar, finishes the phrase, sends a BarStatusMsg, starts a
     // new Phrase for mPlayer there, and silently erases the bar. The title is inferred.
-    // 0x001d89d0
+    // NTSC-U/C: 0x001d89d0, PAL: 0x001de920
     void StartPhrase(int nTick);
 
     // For nBar equal to mPhraseBar with a phrase in progress, closes a held sustain one tick
     // before the bar ends, installs the phrase in the phrase manager, and releases it. A held
     // sustain then reopens at the start of the next bar in a new phrase. The title is inferred.
-    // 0x001d8b00
+    // NTSC-U/C: 0x001d8b00, PAL: 0x001dea50
     void FinishPhrase(int nBar);
 
     static constexpr int kLevelBits = 64;

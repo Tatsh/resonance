@@ -46,7 +46,8 @@ public:
      * @param pQuantizer The quantiser for the track.
      * @param pClock The clock the producer schedules against.
      * @param pTrackData The track description.
-     * @ghidraAddress 0x001cf988
+     * @ghidraAddress NTSC-U/C: 0x001cf988
+     * @ghidraAddress PAL: 0x001d5840
      */
     Scratcher(PhraseMgr *pPhraseMgr,
               Quantizer *pQuantizer,
@@ -54,7 +55,8 @@ public:
               const TrackData *pTrackData);
 
     /**
-     * @ghidraAddress 0x001d1bf0
+     * @ghidraAddress NTSC-U/C: 0x001d1bf0
+     * @ghidraAddress PAL: 0x001d7aa8
      */
     virtual ~Scratcher();
 
@@ -67,7 +69,8 @@ public:
      *
      * @param nElapsedTicks Ticks since the epoch.
      * @return 1 always.
-     * @ghidraAddress 0x001d1d68
+     * @ghidraAddress NTSC-U/C: 0x001d1d68
+     * @ghidraAddress PAL: 0x001d7c20
      */
     virtual int Tick(int nElapsedTicks);
 
@@ -80,7 +83,8 @@ protected:
      * OnPitchRiff() at a step of up to 3 in either direction.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001cfd20
+     * @ghidraAddress NTSC-U/C: 0x001cfd20
+     * @ghidraAddress PAL: 0x001d5bd8
      */
     void PostNowBarMsg(AxisRegisterMsg *pMsg);
 
@@ -93,7 +97,8 @@ protected:
      * identifying mPlayer goes out, and SendSeekerMsg() runs for the bar.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001d0038
+     * @ghidraAddress NTSC-U/C: 0x001d0038
+     * @ghidraAddress PAL: 0x001d5ef0
      */
     void EraseGemRange(EraseMsg *pMsg);
 
@@ -104,7 +109,8 @@ protected:
      * installs the player, and a real player then has SendSeekerMsg() run for the message's bar.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001d0248
+     * @ghidraAddress NTSC-U/C: 0x001d0248
+     * @ghidraAddress PAL: 0x001d6100
      */
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
@@ -117,7 +123,8 @@ protected:
      * @param nGem The gem, a PitchRiffMsg's first word.
      * @param nStep The pitch step, zero from a PitchRiffMsg and -3 to 3 from PostNowBarMsg().
      * @param nTick The song position.
-     * @ghidraAddress 0x001d0358
+     * @ghidraAddress NTSC-U/C: 0x001d0358
+     * @ghidraAddress PAL: 0x001d6210
      */
     void OnPitchRiff(int nGem, int nStep, int nTick);
 
@@ -125,7 +132,8 @@ protected:
      * Turn mPlayer's seeker off, unless mPlayer is the stand-in.
      *
      * @param nBar Not read.
-     * @ghidraAddress 0x001d08e0
+     * @ghidraAddress NTSC-U/C: 0x001d08e0
+     * @ghidraAddress PAL: 0x001d6798
      */
     void SendSeekerMsg(int nBar);
 
@@ -135,22 +143,23 @@ protected:
      * Primary table slot 3.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001d0980
+     * @ghidraAddress NTSC-U/C: 0x001d0980
+     * @ghidraAddress PAL: 0x001d6838
      */
     virtual void HandleMessage(Message *pMsg);
 
 private:
     // The out-of-line copy of the PitchRiffMsg branch HandleMessage() expands inline.
-    // 0x001d1cc8
+    // NTSC-U/C: 0x001d1cc8, PAL: 0x001d7b80
     void OnPitchRiffMsg(PitchRiffMsg *pMsg);
 
     // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
-    // 0x001d1d18
+    // NTSC-U/C: 0x001d1d18, PAL: 0x001d7bd0
     void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
 
     // Returns TrackData::QueryBar() for the bar on mTrackData. OnPitchRiff() calls it (at
     // `0x001d03dc`).
-    // 0x001d1d48
+    // NTSC-U/C: 0x001d1d48, PAL: 0x001d7c00
     int QueryBar(int nBar);
 
     PhraseMgr *mPhraseMgr;       // +0x38

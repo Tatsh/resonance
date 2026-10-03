@@ -24,14 +24,16 @@ unsigned ReadCycleCount();
  * Accumulating differences rather than counter readings is what makes the total survive a wrap of
  * the 32-bit counter.
  *
- * @ghidraAddress 0x007082c0
+ * @ghidraAddress NTSC-U/C: 0x007082c0
+ * @ghidraAddress PAL: 0x0074bdf0
  */
 extern long long g_llTotalCycles;
 
 /**
  * The counter reading the last call took.
  *
- * @ghidraAddress 0x007082c8
+ * @ghidraAddress NTSC-U/C: 0x007082c8
+ * @ghidraAddress PAL: 0x0074bdf8
  */
 extern unsigned g_nLastCycleCount;
 
@@ -41,7 +43,8 @@ extern unsigned g_nLastCycleCount;
  * Every caller writes this word and none reads it, so it exists for a debugger rather than for the
  * game.
  *
- * @ghidraAddress 0x007082cc
+ * @ghidraAddress NTSC-U/C: 0x007082cc
+ * @ghidraAddress PAL: 0x0074bdfc
  */
 extern unsigned g_nLastCycleDelta;
 
@@ -50,7 +53,8 @@ extern unsigned g_nLastCycleDelta;
  *
  * ResetCycleCounter() writes it and no routine in the image reads it.
  *
- * @ghidraAddress 0x007082b4
+ * @ghidraAddress NTSC-U/C: 0x007082b4
+ * @ghidraAddress PAL: 0x0074bde4
  */
 extern float g_flMillisecondsPerCycle;
 
@@ -58,7 +62,8 @@ extern float g_flMillisecondsPerCycle;
  * Word ResetCycleCounter() clears beside the cycle state. No routine in the image reads it, and its
  * purpose is undetermined.
  *
- * @ghidraAddress 0x007082b8
+ * @ghidraAddress NTSC-U/C: 0x007082b8
+ * @ghidraAddress PAL: 0x0074bde8
  */
 extern int g_nUnusedCycleCounter;
 
@@ -70,7 +75,8 @@ extern int g_nUnusedCycleCounter;
  * in the unit that defines the out-of-line GetElapsedMilliseconds(), is the one caller. The name is
  * inferred.
  *
- * @ghidraAddress 0x004fefb0
+ * @ghidraAddress NTSC-U/C: 0x004fefb0
+ * @ghidraAddress PAL: 0x0053dd60
  */
 void ResetCycleCounter();
 
@@ -88,7 +94,8 @@ void ResetCycleCounter();
  * The name is inferred from the arithmetic. Nothing in the image attests it.
  *
  * @return The elapsed milliseconds.
- * @ghidraAddress 0x00466300
+ * @ghidraAddress NTSC-U/C: 0x00466300
+ * @ghidraAddress PAL: 0x004a3d30
  */
 inline int GetElapsedMilliseconds() {
     const unsigned nCount = ReadCycleCount();
@@ -109,7 +116,8 @@ inline int GetElapsedMilliseconds() {
  * The name is inferred from the value. Nothing in the image attests it.
  *
  * @return 1000.
- * @ghidraAddress 0x00466360
+ * @ghidraAddress NTSC-U/C: 0x00466360
+ * @ghidraAddress PAL: 0x004a3d90
  */
 inline int GetMillisecondsPerSecond() {
     return kMillisecondsPerSecond;

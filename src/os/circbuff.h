@@ -19,7 +19,8 @@ public:
      *
      * @param pBuff The buffer.
      * @param nSize The buffer size in bytes.
-     * @ghidraAddress 0x0060e8b0
+     * @ghidraAddress NTSC-U/C: 0x0060e8b0
+     * @ghidraAddress PAL: 0x0064f520
      */
     CircBuff(char *pBuff, int nSize);
 
@@ -29,7 +30,8 @@ public:
      * One byte is always held back. A write pointer equal to the read pointer reports zero.
      *
      * @return The free space in bytes.
-     * @ghidraAddress 0x0060e930
+     * @ghidraAddress NTSC-U/C: 0x0060e930
+     * @ghidraAddress PAL: 0x0064f5a0
      */
     int FreeSpace();
 
@@ -38,7 +40,8 @@ public:
      *
      * @param nBytes The size to test.
      * @return Non-zero when the bytes fit.
-     * @ghidraAddress 0x0060e998
+     * @ghidraAddress NTSC-U/C: 0x0060e998
+     * @ghidraAddress PAL: 0x0064f608
      */
     int HasSpace(int nBytes);
 
@@ -46,7 +49,8 @@ public:
      * Move the write pointer back to mBuff once it has reached mWrap, unless the read pointer is
      * still at mBuff.
      *
-     * @ghidraAddress 0x0060ea20
+     * @ghidraAddress NTSC-U/C: 0x0060ea20
+     * @ghidraAddress PAL: 0x0064f690
      */
     void WrapWrite();
 
@@ -55,7 +59,8 @@ public:
      *
      * @param nBytes The number of bytes consumed.
      * @return The new read pointer.
-     * @ghidraAddress 0x0060ea50
+     * @ghidraAddress NTSC-U/C: 0x0060ea50
+     * @ghidraAddress PAL: 0x0064f6c0
      */
     char *AdvanceRead(int nBytes);
 
@@ -67,7 +72,8 @@ public:
      * @param pStart The start of the range.
      * @param nBytes The length of the range.
      * @return Non-zero when the write pointer is outside the range.
-     * @ghidraAddress 0x0060ea80
+     * @ghidraAddress NTSC-U/C: 0x0060ea80
+     * @ghidraAddress PAL: 0x0064f6f0
      */
     int IsClearOfWrite(const char *pStart, int nBytes) const;
 
@@ -76,7 +82,8 @@ public:
      *
      * @param nBytes The size requested.
      * @return The size that can be written without wrapping.
-     * @ghidraAddress 0x0060eaf0
+     * @ghidraAddress NTSC-U/C: 0x0060eaf0
+     * @ghidraAddress PAL: 0x0064f760
      */
     int ContiguousWriteSize(int nBytes) const;
 
@@ -88,7 +95,8 @@ public:
      *
      * @param nBytes The number of bytes written.
      * @return The new write pointer.
-     * @ghidraAddress 0x0060eb18
+     * @ghidraAddress NTSC-U/C: 0x0060eb18
+     * @ghidraAddress PAL: 0x0064f788
      */
     char *AdvanceWrite(int nBytes);
 
@@ -101,7 +109,8 @@ public:
      * @param pSrc The bytes to copy.
      * @param nBytes The number of bytes.
      * @return nBytes, or 0 when nothing was copied.
-     * @ghidraAddress 0x0060eb48
+     * @ghidraAddress NTSC-U/C: 0x0060eb48
+     * @ghidraAddress PAL: 0x0064f7b8
      */
     int Write(const void *pSrc, int nBytes);
 
@@ -114,7 +123,8 @@ public:
      * @param nFile The file to read.
      * @param nBytes The number of bytes.
      * @return nBytes, or 0 when nothing was read.
-     * @ghidraAddress 0x0060ec08
+     * @ghidraAddress NTSC-U/C: 0x0060ec08
+     * @ghidraAddress PAL: 0x0064f878
      */
     int ReadFromFile(int nFile, int nBytes);
 
@@ -122,7 +132,8 @@ public:
      * Log the pointers and the size under a label.
      *
      * @param pszLabel The label printed first.
-     * @ghidraAddress 0x0060ecd0
+     * @ghidraAddress NTSC-U/C: 0x0060ecd0
+     * @ghidraAddress PAL: 0x0064f940
      */
     void Dump(const char *pszLabel) const;
 

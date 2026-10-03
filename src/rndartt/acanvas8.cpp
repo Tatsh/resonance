@@ -63,37 +63,37 @@ inline APalette *ResolvePalette(APalette *pOwn) {
 
 } // namespace
 
-// 0x00635bc0
+// NTSC-U/C: 0x00635bc0, PAL: 0x00676750
 ACanvas8::ACanvas8(const ABitmap &bitmap) : ACanvas(bitmap), mColor(0) {
 }
 
-// 0x00635b40
+// NTSC-U/C: 0x00635b40, PAL: 0x006766d0
 ACanvas8::~ACanvas8() {
 }
 
-// 0x00635bf8
+// NTSC-U/C: 0x00635bf8, PAL: 0x00676788
 void ACanvas8::SetColorIndex(int nIndex) {
     mColor = static_cast<unsigned char>(nIndex);
 }
 
-// 0x00635c00
+// NTSC-U/C: 0x00635c00, PAL: 0x00676790
 // Byte for byte the same store as SetColorIndex(), in a separate slot.
 void ACanvas8::SetColorNative(unsigned int nColor) {
     mColor = static_cast<unsigned char>(nColor);
 }
 
-// 0x00635c08
+// NTSC-U/C: 0x00635c08, PAL: 0x00676798
 int ACanvas8::GetColorIndex() {
     return mColor;
 }
 
-// 0x00635c10
+// NTSC-U/C: 0x00635c10, PAL: 0x006767a0
 // Byte for byte the same load as GetColorIndex(), in a separate slot.
 unsigned int ACanvas8::GetColorNative() {
     return mColor;
 }
 
-// 0x00635c70
+// NTSC-U/C: 0x00635c70, PAL: 0x00676800
 void ACanvas8::SetColor15(unsigned short nColor) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -107,7 +107,7 @@ void ACanvas8::SetColor15(unsigned short nColor) {
         pPalette->FindNearestEntry(Rgb8888From1555(nColor), kPaletteFirstIndex, kPaletteLastIndex));
 }
 
-// 0x00635d08
+// NTSC-U/C: 0x00635d08, PAL: 0x00676898
 void ACanvas8::SetColorRGB(const unsigned char *pRGB) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -121,7 +121,7 @@ void ACanvas8::SetColorRGB(const unsigned char *pRGB) {
         Rgb8888FromChannels(pRGB), kPaletteFirstIndex, kPaletteLastIndex));
 }
 
-// 0x00635db0
+// NTSC-U/C: 0x00635db0, PAL: 0x00676940
 void ACanvas8::SetColor32(unsigned int nColor) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -135,7 +135,7 @@ void ACanvas8::SetColor32(unsigned int nColor) {
         pPalette->FindNearestEntry(nColor, kPaletteFirstIndex, kPaletteLastIndex));
 }
 
-// 0x00635e30
+// NTSC-U/C: 0x00635e30, PAL: 0x006769c0
 unsigned short ACanvas8::GetColor15() {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -144,7 +144,7 @@ unsigned short ACanvas8::GetColor15() {
     return APackRgb1555From8888(pPalette->mEntries[mColor]);
 }
 
-// 0x00635e78
+// NTSC-U/C: 0x00635e78, PAL: 0x00676a08
 void ACanvas8::GetColorRGB(unsigned char *pRGB) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -156,7 +156,7 @@ void ACanvas8::GetColorRGB(unsigned char *pRGB) {
     pRGB[0] = static_cast<unsigned char>(nColor);
 }
 
-// 0x00635ec0
+// NTSC-U/C: 0x00635ec0, PAL: 0x00676a50
 unsigned int ACanvas8::GetColor32() {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -165,7 +165,7 @@ unsigned int ACanvas8::GetColor32() {
     return pPalette->mEntries[mColor];
 }
 
-// 0x006362d0
+// NTSC-U/C: 0x006362d0, PAL: 0x00676e60
 // The only slot with no fallback to the default palette: a canvas with no palette of
 // its own does nothing here. It also re-reads the palette pointer and the entry count on every
 // iteration rather than caching either.
@@ -181,13 +181,13 @@ void ACanvas8::BuildAlphaFromColorKey(unsigned int nColorKey) {
     }
 }
 
-// 0x00635c18
+// NTSC-U/C: 0x00635c18, PAL: 0x006767a8
 // Native is the palette index for this format, so the store narrows and forwards.
 void ACanvas8::PutPixelNativeNoClip(int nX, int nY, unsigned int nColor) {
     PutPixelIndexedNoClip(nX, nY, static_cast<int>(nColor & kChannelMask));
 }
 
-// 0x00635ef8
+// NTSC-U/C: 0x00635ef8, PAL: 0x00676a88
 void ACanvas8::PutPixel15NoClip(int nX, int nY, unsigned short nColor) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -203,7 +203,7 @@ void ACanvas8::PutPixel15NoClip(int nX, int nY, unsigned short nColor) {
     PutPixelIndexedNoClip(nX, nY, nIndex & static_cast<int>(kChannelMask));
 }
 
-// 0x00635fd8
+// NTSC-U/C: 0x00635fd8, PAL: 0x00676b68
 void ACanvas8::PutPixelRGBNoClip(int nX, int nY, const unsigned char *pRGB) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -219,7 +219,7 @@ void ACanvas8::PutPixelRGBNoClip(int nX, int nY, const unsigned char *pRGB) {
     PutPixelIndexedNoClip(nX, nY, nIndex & static_cast<int>(kChannelMask));
 }
 
-// 0x006360c8
+// NTSC-U/C: 0x006360c8, PAL: 0x00676c58
 void ACanvas8::PutPixelNoClip(int nX, int nY, unsigned int nColor) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -234,13 +234,13 @@ void ACanvas8::PutPixelNoClip(int nX, int nY, unsigned int nColor) {
     PutPixelIndexedNoClip(nX, nY, nIndex & static_cast<int>(kChannelMask));
 }
 
-// 0x00635c48
+// NTSC-U/C: 0x00635c48, PAL: 0x006767d8
 // Native is the palette index for this format, so the read forwards unchanged.
 unsigned int ACanvas8::GetPixelNativeNoClip(int nX, int nY) {
     return static_cast<unsigned int>(GetPixelIndexedNoClip(nX, nY));
 }
 
-// 0x00636190
+// NTSC-U/C: 0x00636190, PAL: 0x00676d20
 unsigned short ACanvas8::GetPixel15NoClip(int nX, int nY) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -249,7 +249,7 @@ unsigned short ACanvas8::GetPixel15NoClip(int nX, int nY) {
     return APackRgb1555From8888(pPalette->mEntries[GetPixelIndexedNoClip(nX, nY)]);
 }
 
-// 0x006361f8
+// NTSC-U/C: 0x006361f8, PAL: 0x00676d88
 void ACanvas8::GetPixelRGBNoClip(int nX, int nY, unsigned char *pRGB) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -261,7 +261,7 @@ void ACanvas8::GetPixelRGBNoClip(int nX, int nY, unsigned char *pRGB) {
     pRGB[0] = static_cast<unsigned char>(nColor);
 }
 
-// 0x00636270
+// NTSC-U/C: 0x00636270, PAL: 0x00676e00
 unsigned int ACanvas8::GetPixelNoClip(int nX, int nY) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {

@@ -29,7 +29,7 @@ constexpr unsigned char kThirdSwitchController = 81;
 
 } // namespace
 
-// 0x001a0df0
+// NTSC-U/C: 0x001a0df0, PAL: 0x001a6b58
 Effector *Effector::CreateForType(int nType, unsigned char nChannel, int nTrack) {
     Effector *pEffector = nullptr;
     Sch::TickClock *pClock = Application::shared()->GetSongClock();
@@ -74,14 +74,14 @@ Effector *Effector::CreateForType(int nType, unsigned char nChannel, int nTrack)
     return pEffector;
 }
 
-// 0x001a18c8
+// NTSC-U/C: 0x001a18c8, PAL: 0x001a7630
 Effector::Effector() {
 }
 
-// 0x001a24a8
+// NTSC-U/C: 0x001a24a8, PAL: 0x001a8210
 Effector::~Effector() {
 }
 
-// 0x001a2558
+// NTSC-U/C: 0x001a2558, PAL: 0x001a82c0
 void Effector::Enable([[maybe_unused]] int bEnabled) {
 }

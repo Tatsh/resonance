@@ -16,14 +16,16 @@ public:
      * @param nChannel The MIDI channel the controller change goes to.
      * @param nType The EffectorType Type() reports.
      * @param nController The controller number.
-     * @ghidraAddress 0x001a1bc0
+     * @ghidraAddress NTSC-U/C: 0x001a1bc0
+     * @ghidraAddress PAL: 0x001a7928
      */
     MidiOnOffEffector(unsigned char nChannel, int nType, unsigned char nController);
 
     /**
      * Switch the effect off, then tear down the base.
      *
-     * @ghidraAddress 0x001a1c28
+     * @ghidraAddress NTSC-U/C: 0x001a1c28
+     * @ghidraAddress PAL: 0x001a7990
      */
     virtual ~MidiOnOffEffector();
 
@@ -31,7 +33,8 @@ public:
      * Report which effect this object applies.
      *
      * @return The type the constructor received.
-     * @ghidraAddress 0x001a1cf0
+     * @ghidraAddress NTSC-U/C: 0x001a1cf0
+     * @ghidraAddress PAL: 0x001a7a58
      */
     virtual int Type();
 
@@ -41,7 +44,8 @@ public:
      * A request that repeats the current position sends nothing.
      *
      * @param bEnabled Non-zero to apply the effect.
-     * @ghidraAddress 0x001a0860
+     * @ghidraAddress NTSC-U/C: 0x001a0860
+     * @ghidraAddress PAL: 0x001a65c8
      */
     virtual void Enable(int bEnabled);
 

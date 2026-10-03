@@ -31,7 +31,8 @@ public:
      * Construct over a bitmap.
      *
      * @param bitmap The bitmap the canvas addresses.
-     * @ghidraAddress 0x006280d0
+     * @ghidraAddress NTSC-U/C: 0x006280d0
+     * @ghidraAddress PAL: 0x00668c60
      */
     explicit ACanvasLin4(const ABitmap &bitmap);
 
@@ -41,20 +42,36 @@ public:
      * The body restores ACanvas's table rather than ACanvas8's, because the inlined destructor
      * chain runs to the root and the intermediate store is dead.
      *
-     * @ghidraAddress 0x00628018
+     * @ghidraAddress NTSC-U/C: 0x00628018
+     * @ghidraAddress PAL: 0x00668ba8
      */
     virtual ~ACanvasLin4();
 
     // Lookup only, as in the base: this overload would otherwise hide the base's other one.
     using ACanvas8::PutPixelNoClip;
 
-    /** Slot 13. Writes the stored colour into the addressed nibble. @ghidraAddress 0x00628108 */
+    /**
+     * Slot 13. Writes the stored colour into the addressed nibble.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628108
+     * @ghidraAddress PAL: 0x00668c98
+     */
     virtual void PutPixelNoClip(int nX, int nY);
 
-    /** Slot 15. @ghidraAddress 0x00628180 */
+    /**
+     * Slot 15.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628180
+     * @ghidraAddress PAL: 0x00668d10
+     */
     virtual void PutPixelIndexedNoClip(int nX, int nY, int nIndex);
 
-    /** Slot 25. @ghidraAddress 0x006281f0 */
+    /**
+     * Slot 25.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006281f0
+     * @ghidraAddress PAL: 0x00668d80
+     */
     virtual int GetPixelIndexedNoClip(int nX, int nY);
 
     /**
@@ -63,7 +80,8 @@ public:
      * @param source The source bitmap.
      * @param nX The destination column.
      * @param nY The destination row.
-     * @ghidraAddress 0x00627e88
+     * @ghidraAddress NTSC-U/C: 0x00627e88
+     * @ghidraAddress PAL: 0x00668a18
      */
     virtual void Blit4NoClip(const ABitmap &source, int nX, int nY);
 
@@ -73,7 +91,8 @@ public:
      * @param source The source bitmap.
      * @param nX The destination column.
      * @param nY The destination row.
-     * @ghidraAddress 0x00628248
+     * @ghidraAddress NTSC-U/C: 0x00628248
+     * @ghidraAddress PAL: 0x00668dd8
      */
     virtual void Blit8NoClip(const ABitmap &source, int nX, int nY);
 
@@ -83,7 +102,8 @@ public:
      * @param source The source bitmap.
      * @param nX The destination column.
      * @param nY The destination row.
-     * @ghidraAddress 0x006282e0
+     * @ghidraAddress NTSC-U/C: 0x006282e0
+     * @ghidraAddress PAL: 0x00668e70
      */
     virtual void BlitRle8NoClip(const ABitmap &source, int nX, int nY);
 
@@ -115,7 +135,8 @@ private:
      * @param pRow One byte per pixel, already expanded by the caller.
      * @param nX The destination column.
      * @param nY The destination row.
-     * @ghidraAddress 0x00627cf8
+     * @ghidraAddress NTSC-U/C: 0x00627cf8
+     * @ghidraAddress PAL: 0x00668888
      */
     void WriteIndexedRow(const ABitmap *pSource, const unsigned char *pRow, int nX, int nY);
 };

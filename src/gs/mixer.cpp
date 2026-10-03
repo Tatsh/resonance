@@ -42,7 +42,7 @@ constexpr unsigned char kCompletedGain = 115;
 
 } // namespace
 
-// 0x001a7110
+// NTSC-U/C: 0x001a7110, PAL: 0x001ace78
 Mixer::Mixer(int nTrack, unsigned char nChannel)
     : mChannel(nChannel), mTrack(nTrack), mLastSection(0), mSelection(&g_nullPlayer),
       mZeroedBytes(), mLevelIndex(0), mTracksOnBar(kNoValue) {
@@ -57,11 +57,11 @@ Mixer::Mixer(int nTrack, unsigned char nChannel)
     QueryConfigVector(&mTrackLevels, kTrackLevelsConfigCode);
 }
 
-// 0x001a8130
+// NTSC-U/C: 0x001a8130, PAL: 0x001ade98
 Mixer::~Mixer() {
 }
 
-// 0x001a72b8
+// NTSC-U/C: 0x001a72b8, PAL: 0x001ad020
 void Mixer::SendPan() {
     const unsigned nIndex = static_cast<unsigned>(mTrack - mLastSection) & 7;
     unsigned char nPan = 0;
@@ -76,7 +76,7 @@ void Mixer::SendPan() {
     mOutput->Handle(&msg);
 }
 
-// 0x001a73a8
+// NTSC-U/C: 0x001a73a8, PAL: 0x001ad110
 void Mixer::SetGainFactor(int nIndex, unsigned char nFactor) {
     mGainFactors[nIndex] = nFactor;
 
@@ -98,7 +98,7 @@ void Mixer::SetGainFactor(int nIndex, unsigned char nFactor) {
     mOutput->Handle(&msg);
 }
 
-// 0x001a7490
+// NTSC-U/C: 0x001a7490, PAL: 0x001ad1f8
 void Mixer::SetMuted(int bMuted) {
     const int bWasMuted = mMuted;
     mMuted = bMuted;
@@ -125,7 +125,7 @@ void Mixer::SetMuted(int bMuted) {
     mOutput->Handle(&msg);
 }
 
-// 0x001a75d8
+// NTSC-U/C: 0x001a75d8, PAL: 0x001ad340
 void Mixer::OnTrackSelect(TrackSelectMsg *pMsg) {
     if (pMsg->mTrack == mTrack) {
         mSelection = pMsg->mPlayer;
@@ -140,14 +140,14 @@ void Mixer::OnTrackSelect(TrackSelectMsg *pMsg) {
     }
 }
 
-// 0x001a76d0
+// NTSC-U/C: 0x001a76d0, PAL: 0x001ad438
 void Mixer::OnTracksOn(TracksOnMsg *pMsg) {
     mTracksOnBar = pMsg->mBar;
     mLevelIndex = pMsg->mTracks;
     RecomputeGain();
 }
 
-// 0x001a82f0
+// NTSC-U/C: 0x001a82f0, PAL: 0x001ae058
 void Mixer::RecomputeGain() {
     unsigned char nGain;
     if (Application::shared()->GetGameManager()->GetStats()->mCompleted != 0) {
@@ -160,7 +160,7 @@ void Mixer::RecomputeGain() {
     SetGainFactor(kStateGainFactor, nGain);
 }
 
-// 0x001a8390
+// NTSC-U/C: 0x001a8390, PAL: 0x001ae0f8
 void Mixer::ApplyControlChange(StdMidiMsg *pMsg) {
     const unsigned char nController = pMsg->mData1;
     if (nController >= kControllerFirstGain && nController <= kControllerLastGain) {
@@ -180,7 +180,7 @@ void Mixer::ApplyControlChange(StdMidiMsg *pMsg) {
     mOutput->Handle(pMsg);
 }
 
-// 0x001a7780
+// NTSC-U/C: 0x001a7780, PAL: 0x001ad4e8
 void Mixer::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwStdMidiMsgType)) {

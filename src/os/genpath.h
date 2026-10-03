@@ -5,7 +5,8 @@
  *
  * BuildBitmapCacheFileName() inserts it in front of a file name. The name is inferred.
  *
- * @ghidraAddress 0x00725840
+ * @ghidraAddress NTSC-U/C: 0x00725840
+ * @ghidraAddress PAL: 0x007694e0
  */
 extern const char *g_szGenDirectory;
 
@@ -21,7 +22,8 @@ extern const char *g_szGenDirectory;
  * @param pszPath The path, rewritten in place. The buffer must take the longer result.
  * @param pszExtension The extension to append.
  * @return pszPath.
- * @ghidraAddress 0x005585a8
+ * @ghidraAddress NTSC-U/C: 0x005585a8
+ * @ghidraAddress PAL: 0x00599700
  */
 char *BuildBitmapCacheFileName(char *pszPath, const char *pszExtension);
 
@@ -33,7 +35,8 @@ char *BuildBitmapCacheFileName(char *pszPath, const char *pszExtension);
  *
  * @param pszPath The original bitmap path.
  * @return Non-zero when the ".abm.gz" file opens.
- * @ghidraAddress 0x00558538
+ * @ghidraAddress NTSC-U/C: 0x00558538
+ * @ghidraAddress PAL: 0x00599690
  */
 int LoadBitmapFileFromPath(const char *pszPath);
 
@@ -44,6 +47,7 @@ int LoadBitmapFileFromPath(const char *pszPath);
  *
  * @param pszPath The path, rewritten in place. The buffer must take the longer result.
  * @param pszExtension The extension to insert.
- * @ghidraAddress 0x005586b0
+ * @ghidraAddress NTSC-U/C: 0x005586b0
+ * @ghidraAddress PAL: 0x00599808
  */
 void ReplaceFileNameExtension(char *pszPath, const char *pszExtension);

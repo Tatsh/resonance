@@ -105,7 +105,8 @@ public:
      * @param nSize The whole block size in bytes, header included.
      * @param nFlags Any combination of the kHeapFlag values.
      * @return The heap, which is the block itself.
-     * @ghidraAddress 0x00552040
+     * @ghidraAddress NTSC-U/C: 0x00552040
+     * @ghidraAddress PAL: 0x00592680
      */
     static Heap *Create(void *pBlock, unsigned nSize, unsigned nFlags);
 
@@ -115,7 +116,8 @@ public:
      * Performs no work unless the heap allocated the block itself, because a caller-supplied block
      * belongs to the caller. Nothing is cleared first, so the heap must not be used afterwards.
      *
-     * @ghidraAddress 0x00552108
+     * @ghidraAddress NTSC-U/C: 0x00552108
+     * @ghidraAddress PAL: 0x00592748
      */
     void Destroy();
 
@@ -130,7 +132,8 @@ public:
      * @param pszFile The requesting file, which only the report uses.
      * @param nLine The requesting line, which only the report uses.
      * @return The payload, or null when no node fits.
-     * @ghidraAddress 0x00551780
+     * @ghidraAddress NTSC-U/C: 0x00551780
+     * @ghidraAddress PAL: 0x00591dc0
      */
     void *Alloc(unsigned nSize, const char *pszFile, int nLine);
 
@@ -143,7 +146,8 @@ public:
      * @param pBlock The payload to release.
      * @param pszFile The releasing file, which the shipped body ignores.
      * @param nLine The releasing line, which the shipped body ignores.
-     * @ghidraAddress 0x00551d28
+     * @ghidraAddress NTSC-U/C: 0x00551d28
+     * @ghidraAddress PAL: 0x00592368
      */
     void Free(void *pBlock, const char *pszFile, int nLine);
 
@@ -160,7 +164,8 @@ public:
      * @param nLine The requesting line, which the shipped body ignores.
      * @return The payload, which differs from pBlock only when the block moved, or null when the
      *         move could not allocate.
-     * @ghidraAddress 0x005519d0
+     * @ghidraAddress NTSC-U/C: 0x005519d0
+     * @ghidraAddress PAL: 0x00592010
      */
     void *Realloc(void *pBlock, unsigned nSize, const char *pszFile, int nLine);
 
@@ -173,7 +178,8 @@ public:
      *
      * @param nSize The new usable length in bytes.
      * @return Non-zero when the heap was shortened.
-     * @ghidraAddress 0x00552138
+     * @ghidraAddress NTSC-U/C: 0x00552138
+     * @ghidraAddress PAL: 0x00592778
      */
     int Shrink(unsigned nSize);
 
@@ -184,14 +190,16 @@ public:
      * log.
      *
      * @param pszPath The file to write.
-     * @ghidraAddress 0x00551ec8
+     * @ghidraAddress NTSC-U/C: 0x00551ec8
+     * @ghidraAddress PAL: 0x00592508
      */
     void DumpToFile(const char *pszPath);
 
     /**
      * Write the counters to the log and to the memory report.
      *
-     * @ghidraAddress 0x00552218
+     * @ghidraAddress NTSC-U/C: 0x00552218
+     * @ghidraAddress PAL: 0x00592858
      */
     void DumpStats();
 
@@ -219,6 +227,7 @@ private:
  * The one interpreter heap, built by Py_Initialize() over the whole of the zone called
  * `python`.
  *
- * @ghidraAddress 0x00723998
+ * @ghidraAddress NTSC-U/C: 0x00723998
+ * @ghidraAddress PAL: 0x00767588
  */
 extern Heap *g_pPythonHeap;

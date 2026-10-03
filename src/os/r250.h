@@ -11,21 +11,24 @@ constexpr int kR250TableSize = 256;
  * SeedR250() fills every word, and NextR250() replaces one word per draw with the exclusive or of
  * two others.
  *
- * @ghidraAddress 0x0071c8e8
+ * @ghidraAddress NTSC-U/C: 0x0071c8e8
+ * @ghidraAddress PAL: 0x00760828
  */
 extern int g_aR250Table[kR250TableSize];
 
 /**
  * Index of the word NextR250() replaces next. Zero at startup and after SeedR250().
  *
- * @ghidraAddress 0x0071c8e0
+ * @ghidraAddress NTSC-U/C: 0x0071c8e0
+ * @ghidraAddress PAL: 0x00760820
  */
 extern int g_nR250Index;
 
 /**
  * Index of the word NextR250() combines with the replaced one. 103 at startup and after SeedR250().
  *
- * @ghidraAddress 0x0071c8e4
+ * @ghidraAddress NTSC-U/C: 0x0071c8e4
+ * @ghidraAddress PAL: 0x00760824
  */
 extern int g_nR250LagIndex;
 
@@ -38,7 +41,8 @@ extern int g_nR250LagIndex;
  * MetRenderer's constructor and the routine at `0x0030e2c8` are the recovered callers.
  *
  * @param nSeed The starting value of the sequence.
- * @ghidraAddress 0x0052d038
+ * @ghidraAddress NTSC-U/C: 0x0052d038
+ * @ghidraAddress PAL: 0x0056d6c8
  */
 void SeedR250(int nSeed);
 
@@ -49,7 +53,8 @@ void SeedR250(int nSeed);
  * table.
  *
  * @return The replaced word.
- * @ghidraAddress 0x0052cfd0
+ * @ghidraAddress NTSC-U/C: 0x0052cfd0
+ * @ghidraAddress PAL: 0x0056d660
  */
 int NextR250();
 
@@ -59,7 +64,8 @@ int NextR250();
  * @param nLow The smallest value.
  * @param nHigh The value the range stops below.
  * @return nLow plus the remainder of a draw divided by the width of the range.
- * @ghidraAddress 0x0052d098
+ * @ghidraAddress NTSC-U/C: 0x0052d098
+ * @ghidraAddress PAL: 0x0056d728
  */
 int RandomInt(int nLow, int nHigh);
 
@@ -67,6 +73,7 @@ int RandomInt(int nLow, int nHigh);
  * Draw a float in [0, 1).
  *
  * @return The low sixteen bits of a draw divided by 65536.
- * @ghidraAddress 0x0052d0e0
+ * @ghidraAddress NTSC-U/C: 0x0052d0e0
+ * @ghidraAddress PAL: 0x0056d770
  */
 float RandomFloat();

@@ -10,7 +10,8 @@
  *
  * @param pszFormat A printf-style format string.
  * @return The shared buffer.
- * @ghidraAddress 0x0054f688
+ * @ghidraAddress NTSC-U/C: 0x0054f688
+ * @ghidraAddress PAL: 0x0058fcc8
  */
 const char *FormatString(const char *pszFormat, ...);
 
@@ -23,6 +24,7 @@ const char *FormatString(const char *pszFormat, ...);
  *
  * @param pszPath The path.
  * @return The shared buffer, holding the directory.
- * @ghidraAddress 0x0054f6f0
+ * @ghidraAddress NTSC-U/C: 0x0054f6f0
+ * @ghidraAddress PAL: 0x0058fd30
  */
 const char *GetDirectoryFromPath(const char *pszPath);

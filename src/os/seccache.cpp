@@ -11,12 +11,12 @@ constexpr char kSectorCacheZoneName[] = "seccache";
 
 // The access clock, not a flag. Stamps start at 1 so that a row that has never been used, whose
 // stamp is zero, always sorts as the oldest.
-// 0x008de798
+// NTSC-U/C: 0x008de798, PAL: 0x00923758
 unsigned g_nSectorCacheClock;
 
 // The image initialises this word to kNoZone and nothing writes it. The read below is its only
 // reference, so the ZoneFree() branch it selects is dead code.
-// 0x00724bf0
+// NTSC-U/C: 0x00724bf0, PAL: 0x007687e0
 int g_nSectorCacheZone = kNoZone;
 
 } // namespace
@@ -24,7 +24,7 @@ int g_nSectorCacheZone = kNoZone;
 int g_nSectorCacheRows;
 SectorCacheRow *g_pSectorCacheRows;
 
-// 0x00554fb8
+// NTSC-U/C: 0x00554fb8, PAL: 0x00595640
 void InitSectorCache(int nRows) {
     int nSaved = ZoneGetCurrent();
     int nZone = FindZoneByName(kSectorCacheZoneName);
@@ -53,7 +53,7 @@ void InitSectorCache(int nRows) {
     ZoneSetCurrent(nSaved);
 }
 
-// 0x005550c8
+// NTSC-U/C: 0x005550c8, PAL: 0x00595750
 void ShutdownSectorCache() {
     SectorCacheRow *pRow = g_pSectorCacheRows;
     for (int i = 0; i < g_nSectorCacheRows; ++i) {
@@ -73,7 +73,7 @@ void ShutdownSectorCache() {
     g_nSectorCacheRows = 0;
 }
 
-// 0x00555298
+// NTSC-U/C: 0x00555298, PAL: 0x00595920
 void InvalidateCachedSectors(int nFile) {
     for (int i = 0; i < g_nSectorCacheRows; ++i) {
         SectorCacheRow *pRow = &g_pSectorCacheRows[i];
@@ -85,7 +85,7 @@ void InvalidateCachedSectors(int nFile) {
     }
 }
 
-// 0x00555190
+// NTSC-U/C: 0x00555190, PAL: 0x00595818
 SectorCacheRow *SectorCacheFind(int nFile, int nSector) {
     for (int i = 0; i < g_nSectorCacheRows; ++i) {
         SectorCacheRow *pRow = &g_pSectorCacheRows[i];
@@ -101,7 +101,7 @@ SectorCacheRow *SectorCacheFind(int nFile, int nSector) {
     return nullptr;
 }
 
-// 0x005552f0
+// NTSC-U/C: 0x005552f0, PAL: 0x00595978
 void LockCachedSector(int nFile, int nSector) {
     // The inlined search advances the clock over the row it finds, and the sentinel below then
     // replaces the value it wrote. One clock tick is therefore spent for nothing.
@@ -113,12 +113,12 @@ void LockCachedSector(int nFile, int nSector) {
     pRow->mStamp = kSectorCacheLocked;
 }
 
-// 0x00555398
+// NTSC-U/C: 0x00555398, PAL: 0x00595a20
 void SetSectorRowLocked(SectorCacheRow *pRow) {
     pRow->mStamp = kSectorCacheLocked;
 }
 
-// 0x005553a8
+// NTSC-U/C: 0x005553a8, PAL: 0x00595a30
 void UnlockCachedSector(int nFile, int nSector) {
     SectorCacheRow *pRow = SectorCacheFind(nFile, nSector);
     if (pRow == nullptr) {
@@ -129,7 +129,7 @@ void UnlockCachedSector(int nFile, int nSector) {
     ++g_nSectorCacheClock;
 }
 
-// 0x005554a0
+// NTSC-U/C: 0x005554a0, PAL: 0x00595b28
 void DumpSectorCache() {
     LogPrintf("SECTOR CACHE:\n");
     for (int i = 0; i < g_nSectorCacheRows; ++i) {
@@ -143,7 +143,7 @@ void DumpSectorCache() {
     }
 }
 
-// 0x00554e50
+// NTSC-U/C: 0x00554e50, PAL: 0x005954d8
 SectorCacheRow *SectorCacheGetLru(int nFile, int nSector) {
     unsigned nOldest = kSectorCacheStampCeiling;
     SectorCacheRow *pChosen = nullptr;

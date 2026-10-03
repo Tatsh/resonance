@@ -23,7 +23,8 @@ public:
      * Occupies vtable slot 1. The body is empty, and neither subclass declares a destructor of its
      * own.
      *
-     * @ghidraAddress 0x002a3860
+     * @ghidraAddress NTSC-U/C: 0x002a3860
+     * @ghidraAddress PAL: 0x002c1668
      */
     virtual ~AsyncCallback();
 

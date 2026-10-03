@@ -78,15 +78,15 @@ inline int IndexForChannels(APalette *pPalette, const unsigned char *pRGB) {
 
 } // namespace
 
-// 0x006302f8
+// NTSC-U/C: 0x006302f8, PAL: 0x00670e88
 ACanvas24::ACanvas24(const ABitmap &bitmap) : ACanvas(bitmap), mColorNative(0) {
 }
 
-// 0x00630278
+// NTSC-U/C: 0x00630278, PAL: 0x00670e08
 ACanvas24::~ACanvas24() {
 }
 
-// 0x00630448
+// NTSC-U/C: 0x00630448, PAL: 0x00670fd8
 void ACanvas24::SetColorIndex(int nIndex) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -95,31 +95,31 @@ void ACanvas24::SetColorIndex(int nIndex) {
     ChannelsFrom8888(pPalette->mEntries[nIndex & static_cast<int>(kChannelMask)], mColorChannels);
 }
 
-// 0x00630330
+// NTSC-U/C: 0x00630330, PAL: 0x00670ec0
 void ACanvas24::SetColor15(unsigned short nColor) {
     ChannelsFromColor15(nColor & kColor15Mask, mColorChannels);
 }
 
-// 0x00630360
+// NTSC-U/C: 0x00630360, PAL: 0x00670ef0
 void ACanvas24::SetColorRGB(const unsigned char *pRGB) {
     mColorChannels[kRedChannel] = pRGB[kRedChannel];
     mColorChannels[kGreenChannel] = pRGB[kGreenChannel];
     mColorChannels[kBlueChannel] = pRGB[kBlueChannel];
 }
 
-// 0x00630380
+// NTSC-U/C: 0x00630380, PAL: 0x00670f10
 // Byte for byte the same store as SetColorNative(), in a separate slot: for this
 // format an 8888 colour and the native word are the same thing.
 void ACanvas24::SetColor32(unsigned int nColor) {
     mColorNative = nColor;
 }
 
-// 0x00630388
+// NTSC-U/C: 0x00630388, PAL: 0x00670f18
 void ACanvas24::SetColorNative(unsigned int nColor) {
     mColorNative = nColor;
 }
 
-// 0x00630108
+// NTSC-U/C: 0x00630108, PAL: 0x00670c98
 int ACanvas24::GetColorIndex() {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -128,30 +128,30 @@ int ACanvas24::GetColorIndex() {
     return IndexForChannels(pPalette, mColorChannels);
 }
 
-// 0x00630390
+// NTSC-U/C: 0x00630390, PAL: 0x00670f20
 unsigned short ACanvas24::GetColor15() {
     return Color15FromChannels(mColorChannels);
 }
 
-// 0x006303c8
+// NTSC-U/C: 0x006303c8, PAL: 0x00670f58
 void ACanvas24::GetColorRGB(unsigned char *pRGB) {
     pRGB[kRedChannel] = mColorChannels[kRedChannel];
     pRGB[kGreenChannel] = mColorChannels[kGreenChannel];
     pRGB[kBlueChannel] = mColorChannels[kBlueChannel];
 }
 
-// 0x006303e8
+// NTSC-U/C: 0x006303e8, PAL: 0x00670f78
 // Byte for byte the same load as GetColorNative(), in a separate slot.
 unsigned int ACanvas24::GetColor32() {
     return mColorNative;
 }
 
-// 0x006303f0
+// NTSC-U/C: 0x006303f0, PAL: 0x00670f80
 unsigned int ACanvas24::GetColorNative() {
     return mColorNative;
 }
 
-// 0x00630498
+// NTSC-U/C: 0x00630498, PAL: 0x00671028
 void ACanvas24::PutPixelIndexedNoClip(int nX, int nY, int nIndex) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -162,28 +162,28 @@ void ACanvas24::PutPixelIndexedNoClip(int nX, int nY, int nIndex) {
     PutPixelRGBNoClip(nX, nY, rgb);
 }
 
-// 0x00630508
+// NTSC-U/C: 0x00630508, PAL: 0x00671098
 void ACanvas24::PutPixel15NoClip(int nX, int nY, unsigned short nColor) {
     unsigned char rgb[kChannelCount];
     ChannelsFromColor15(nColor & kColor15Mask, rgb);
     PutPixelRGBNoClip(nX, nY, rgb);
 }
 
-// 0x00630558
+// NTSC-U/C: 0x00630558, PAL: 0x006710e8
 void ACanvas24::PutPixelNoClip(int nX, int nY, unsigned int nColor) {
     unsigned char rgb[kChannelCount];
     ChannelsFrom8888(nColor, rgb);
     PutPixelRGBNoClip(nX, nY, rgb);
 }
 
-// 0x006303f8
+// NTSC-U/C: 0x006303f8, PAL: 0x00670f88
 // For this format the native word is an 8888 colour, so the store forwards to the
 // colourless slot through the table rather than converting.
 void ACanvas24::PutPixelNativeNoClip(int nX, int nY, unsigned int nColor) {
     PutPixelNoClip(nX, nY, nColor);
 }
 
-// 0x006301b0
+// NTSC-U/C: 0x006301b0, PAL: 0x00670d40
 int ACanvas24::GetPixelIndexedNoClip(int nX, int nY) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -194,21 +194,21 @@ int ACanvas24::GetPixelIndexedNoClip(int nX, int nY) {
     return IndexForChannels(pPalette, rgb);
 }
 
-// 0x00630598
+// NTSC-U/C: 0x00630598, PAL: 0x00671128
 unsigned short ACanvas24::GetPixel15NoClip(int nX, int nY) {
     unsigned char rgb[kChannelCount];
     GetPixelRGBNoClip(nX, nY, rgb);
     return Color15FromChannels(rgb);
 }
 
-// 0x006305f0
+// NTSC-U/C: 0x006305f0, PAL: 0x00671180
 unsigned int ACanvas24::GetPixelNoClip(int nX, int nY) {
     unsigned char rgb[kChannelCount];
     GetPixelRGBNoClip(nX, nY, rgb);
     return Rgb8888FromChannels(rgb);
 }
 
-// 0x00630420
+// NTSC-U/C: 0x00630420, PAL: 0x00670fb0
 // The read counterpart of PutPixelNativeNoClip().
 unsigned int ACanvas24::GetPixelNativeNoClip(int nX, int nY) {
     return GetPixelNoClip(nX, nY);

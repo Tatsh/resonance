@@ -5,12 +5,12 @@
 #include "os/async.h"
 #include "os/log.h"
 
-// 0x0060e8b0
+// NTSC-U/C: 0x0060e8b0, PAL: 0x0064f520
 CircBuff::CircBuff(char *pBuff, int nSize)
     : mBuff(pBuff), mBuffSize(nSize), mWrite(pBuff), mRead(pBuff), mWrap(pBuff + nSize) {
 }
 
-// 0x0060e930
+// NTSC-U/C: 0x0060e930, PAL: 0x0064f5a0
 int CircBuff::FreeSpace() {
     if (mWrite == mRead) {
         return 0;
@@ -22,7 +22,7 @@ int CircBuff::FreeSpace() {
     return (mWrap - mWrite) + (mRead - mBuff) - 1;
 }
 
-// 0x0060e998
+// NTSC-U/C: 0x0060e998, PAL: 0x0064f608
 int CircBuff::HasSpace(int nBytes) {
     if (mWrite == mRead) {
         return 0;
@@ -38,14 +38,14 @@ int CircBuff::HasSpace(int nBytes) {
     return 1;
 }
 
-// 0x0060ea20
+// NTSC-U/C: 0x0060ea20, PAL: 0x0064f690
 void CircBuff::WrapWrite() {
     if (mWrite >= mWrap && mBuff < mRead) {
         mWrite = mBuff;
     }
 }
 
-// 0x0060ea50
+// NTSC-U/C: 0x0060ea50, PAL: 0x0064f6c0
 char *CircBuff::AdvanceRead(int nBytes) {
     mRead += nBytes;
     if (mRead >= mWrap) {
@@ -54,7 +54,7 @@ char *CircBuff::AdvanceRead(int nBytes) {
     return mRead;
 }
 
-// 0x0060ea80
+// NTSC-U/C: 0x0060ea80, PAL: 0x0064f6f0
 int CircBuff::IsClearOfWrite(const char *pStart, int nBytes) const {
     const char *pEnd = pStart + nBytes;
     if (mWrap < pEnd) {
@@ -69,7 +69,7 @@ int CircBuff::IsClearOfWrite(const char *pStart, int nBytes) const {
     return 0;
 }
 
-// 0x0060eaf0
+// NTSC-U/C: 0x0060eaf0, PAL: 0x0064f760
 int CircBuff::ContiguousWriteSize(int nBytes) const {
     if (mWrite + nBytes > mWrap) {
         return mWrap - mWrite;
@@ -77,7 +77,7 @@ int CircBuff::ContiguousWriteSize(int nBytes) const {
     return nBytes;
 }
 
-// 0x0060eb18
+// NTSC-U/C: 0x0060eb18, PAL: 0x0064f788
 char *CircBuff::AdvanceWrite(int nBytes) {
     mWrite += nBytes;
     if (mWrite >= mWrap && mRead != mBuff) {
@@ -86,7 +86,7 @@ char *CircBuff::AdvanceWrite(int nBytes) {
     return mWrite;
 }
 
-// 0x0060eb48
+// NTSC-U/C: 0x0060eb48, PAL: 0x0064f7b8
 int CircBuff::Write(const void *pSrc, int nBytes) {
     WrapWrite();
     if (mWrite < mRead) {
@@ -110,7 +110,7 @@ int CircBuff::Write(const void *pSrc, int nBytes) {
     return nBytes;
 }
 
-// 0x0060ec08
+// NTSC-U/C: 0x0060ec08, PAL: 0x0064f878
 int CircBuff::ReadFromFile(int nFile, int nBytes) {
     WrapWrite();
     if (mWrite < mRead) {
@@ -135,7 +135,7 @@ int CircBuff::ReadFromFile(int nFile, int nBytes) {
     return nBytes;
 }
 
-// 0x0060ecd0
+// NTSC-U/C: 0x0060ecd0, PAL: 0x0064f940
 void CircBuff::Dump(const char *pszLabel) const {
     LogPrintf("%s: circbuff: pRead: %p, pWrite: %p, pWrap: %p, pBuff: %p, buffsz: %d\n",
               pszLabel,

@@ -11,20 +11,20 @@
 #include "rndartt/abitmap.h"
 #include "rndartt/agfxfile.h"
 
-// 0x0070d3d0
+// NTSC-U/C: 0x0070d3d0, PAL: 0x007512c0
 const int g_anGsPixelStorageModes[kABitmapFormatCount] = {
     kGsPsmT4, kGsPsmT8, kGsPsmCt16, kGsPsmCt24, kGsPsmCt32, kGsPsmT8};
 
-// 0x0070d3e8
+// NTSC-U/C: 0x0070d3e8, PAL: 0x007512d8
 const int g_anBitsPerPixelTable[kABitmapFormatCount] = {4, 8, 16, 24, 32, 8};
 
-// 0x0089dd90
+// NTSC-U/C: 0x0089dd90, PAL: 0x008e2dd0
 sceGsStoreImage g_vramReadBackStoreImage;
 
-// 0x0089de00
+// NTSC-U/C: 0x0089de00, PAL: 0x008e2e40
 sceGsLoadImage g_vramWipeLoadImage;
 
-// 0x00718468
+// NTSC-U/C: 0x00718468, PAL: 0x0075c358
 int g_nScreendumpIndex = 1;
 
 namespace {
@@ -48,11 +48,11 @@ constexpr int kFlushCacheWriteBackData = 0;
 
 } // namespace
 
-// 0x005149f0
+// NTSC-U/C: 0x005149f0, PAL: 0x00554d20
 VramTable::~VramTable() {
 }
 
-// 0x00512850
+// NTSC-U/C: 0x00512850, PAL: 0x00552b38
 void VramTable::Init() {
     mFlushCount = 0;
     mPaletteBase = g_gfxDevice.GetReservedVramWords() / (kVramBlockBytes / 4);
@@ -82,7 +82,7 @@ void VramTable::Init() {
     Clear(0);
 }
 
-// 0x00512970
+// NTSC-U/C: 0x00512970, PAL: 0x00552c58
 void VramTable::Clear(int bClearPalettes) {
     VramTableEntry *pEntry = mpListHead[kVramListFree];
     while (pEntry != nullptr) {
@@ -140,11 +140,11 @@ void VramTable::Clear(int bClearPalettes) {
     }
 }
 
-// 0x00514cd8
+// NTSC-U/C: 0x00514cd8, PAL: 0x00555008
 void VramTable::BeginFrame() {
 }
 
-// 0x00513190
+// NTSC-U/C: 0x00513190, PAL: 0x00553478
 void VramTable::EndFrame() {
     for (VramTableEntry *pEntry = mpListHead[kVramListUsed]; pEntry != nullptr;
          pEntry = pEntry->mpNext) {
@@ -171,7 +171,7 @@ void VramTable::EndFrame() {
     memset(&mSwaps, 0, kVramFrameCounterBytes);
 }
 
-// 0x00513298
+// NTSC-U/C: 0x00513298, PAL: 0x00553580
 void VramTable::AdvanceLockCycle() {
     // The counter is advanced through the file scope instance rather than through this.
     ++g_vramTable.mFlushCount;
@@ -210,7 +210,7 @@ void VramTable::AdvanceLockCycle() {
     g_anVramPalLockCount[nGeneration] = 0;
 }
 
-// 0x00513438
+// NTSC-U/C: 0x00513438, PAL: 0x00553720
 void VramTable::PrintStats(const char *pszPrefix) {
     LogPrintf("%sVRAM in use: %d blocks (%d bytes)\n",
               pszPrefix,
@@ -242,13 +242,13 @@ void VramTable::PrintStats(const char *pszPrefix) {
               mAccumFreeMerges);
 }
 
-// 0x00514ce0
+// NTSC-U/C: 0x00514ce0, PAL: 0x00555010
 void VramTable::GetLastFrameLoads(int *pnLoads, int *pnBlocks) const {
     *pnLoads = g_nVramLoadsLastFrame;
     *pnBlocks = g_nVramLoadBlocksLastFrame;
 }
 
-// 0x005149f8
+// NTSC-U/C: 0x005149f8, PAL: 0x00554d28
 VramTableEntry *VramTable::AllocEntry() {
     VramTableEntry *pEntry = mpListHead[kVramListPool];
     if (pEntry == nullptr) {
@@ -267,7 +267,7 @@ VramTableEntry *VramTable::AllocEntry() {
     return pEntry;
 }
 
-// 0x00515360
+// NTSC-U/C: 0x00515360, PAL: 0x00555690
 VramPalEntry *VramTable::AllocPalEntry() {
     VramPalEntry *pPal = g_pVramPalFree;
     if (pPal == nullptr) {
@@ -277,7 +277,7 @@ VramPalEntry *VramTable::AllocPalEntry() {
     return pPal;
 }
 
-// 0x00514a48
+// NTSC-U/C: 0x00514a48, PAL: 0x00554d78
 void VramTable::UnlinkEntry(VramTableEntry *pEntry, int nList) {
     if (pEntry->mpPrev == nullptr) {
         mpListHead[nList] = pEntry->mpNext;
@@ -291,7 +291,7 @@ void VramTable::UnlinkEntry(VramTableEntry *pEntry, int nList) {
     }
 }
 
-// 0x00514b60
+// NTSC-U/C: 0x00514b60, PAL: 0x00554e90
 void VramTable::ReleaseEntry(VramTableEntry *pEntry) {
     if (mpListHead[kVramListPool] == nullptr) {
         mpListHead[kVramListPool] = pEntry;
@@ -307,7 +307,7 @@ void VramTable::ReleaseEntry(VramTableEntry *pEntry) {
     pEntry->Reset();
 }
 
-// 0x00514bb8
+// NTSC-U/C: 0x00514bb8, PAL: 0x00554ee8
 void VramTable::MergeBlocks(VramTableEntry *pKeep, VramTableEntry *pAbsorb) {
     pKeep->mSize = static_cast<unsigned short>(pKeep->mSize + pAbsorb->mSize);
     UnlinkEntry(pAbsorb, kVramListFree);
@@ -321,7 +321,7 @@ void VramTable::MergeBlocks(VramTableEntry *pKeep, VramTableEntry *pAbsorb) {
     ++mFreeMerges;
 }
 
-// 0x00512b50
+// NTSC-U/C: 0x00512b50, PAL: 0x00552e38
 void VramTable::FreeBlock(VramTableEntry *pEntry) {
     if (mpListHead[kVramListFree] == nullptr) {
         mpListTail[kVramListFree] = pEntry;
@@ -346,7 +346,7 @@ void VramTable::FreeBlock(VramTableEntry *pEntry) {
     }
 }
 
-// 0x00512cf0
+// NTSC-U/C: 0x00512cf0, PAL: 0x00552fd8
 void VramTable::RemoveFromChain(VramTableEntry *pEntry) {
     if (pEntry->mpUpper != nullptr) {
         pEntry->mpUpper->mpLower = pEntry->mpLower;
@@ -367,7 +367,7 @@ void VramTable::RemoveFromChain(VramTableEntry *pEntry) {
     }
 }
 
-// 0x00512e08
+// NTSC-U/C: 0x00512e08, PAL: 0x005530f0
 void VramTable::AllocBlock(VramTableEntry *pEntry, unsigned short nBlocks) {
     VramTableEntry *pTaken = nullptr;
 
@@ -498,7 +498,7 @@ void VramTable::AllocBlock(VramTableEntry *pEntry, unsigned short nBlocks) {
     }
 }
 
-// 0x00514d00
+// NTSC-U/C: 0x00514d00, PAL: 0x00555030
 void VramTable::ReadBackBitmap(ABitmap *pBitmap, unsigned short nMemAddr) {
     const int nBufferWidth = (pBitmap->mWidth + kGsTexelsPerTbwUnit - 1) / kGsTexelsPerTbwUnit;
     sceGsSetDefStoreImage(&g_vramReadBackStoreImage,
@@ -515,7 +515,7 @@ void VramTable::ReadBackBitmap(ABitmap *pBitmap, unsigned short nMemAddr) {
     sceGsSyncPath(kGsSyncPathWait, kGsSyncPathNoTimeout);
 }
 
-// 0x00513528
+// NTSC-U/C: 0x00513528, PAL: 0x00553810
 void VramTable::Screendump(const char *pszName) {
     const int nPreviousZone = ZoneGetCurrent();
     ZoneSetCurrent(FindZoneByName(kScreendumpZoneName));
@@ -537,7 +537,7 @@ void VramTable::Screendump(const char *pszName) {
     AGfxFile::WriteBitmap(szPath, bitmap);
 }
 
-// 0x00514db8
+// NTSC-U/C: 0x00514db8, PAL: 0x005550e8
 void VramTable::WipeVram() {
     unsigned char abZero[kVramWipeTileBytes];
     memset(abZero, 0, sizeof(abZero));
@@ -563,20 +563,20 @@ void VramTable::WipeVram() {
     }
 }
 
-// 0x00515148
+// NTSC-U/C: 0x00515148, PAL: 0x00555478
 void VramTableEntry::MakeFree(unsigned short nMemAddr, unsigned short nBlocks) {
     mKind = kVramBlockKindFree;
     mMemAddr = nMemAddr;
     mSize = nBlocks;
 }
 
-// 0x00514ee8
+// NTSC-U/C: 0x00514ee8, PAL: 0x00555218
 void VramTableEntry::Reset() {
     mKind = kVramBlockKindNone;
     mMemAddr = 0;
 }
 
-// 0x00514ef8
+// NTSC-U/C: 0x00514ef8, PAL: 0x00555228
 void VramTableEntry::SetPinned(int bPinned) {
     if (bPinned != 0) {
         mLockMask = static_cast<unsigned char>(mLockMask | kVramLockPinned);
@@ -585,7 +585,7 @@ void VramTableEntry::SetPinned(int bPinned) {
     }
 }
 
-// 0x00515058
+// NTSC-U/C: 0x00515058, PAL: 0x00555388
 int VramTableEntry::BlocksForImage(int nWidth,
                                    int nHeight,
                                    [[maybe_unused]] int nBitsPerPixel,
@@ -614,7 +614,7 @@ int VramTableEntry::BlocksForImage(int nWidth,
            kVramPageBlocks;
 }
 
-// 0x00514f18
+// NTSC-U/C: 0x00514f18, PAL: 0x00555248
 void VramTableEntry::SetupSurface(int nWidth, int nHeight, int nBitsPerPixel, int nPsm, int nKind) {
     const int nBlocks = BlocksForImage(nWidth, nHeight, nBitsPerPixel, nPsm);
     mSize = static_cast<unsigned short>(nBlocks);
@@ -640,7 +640,7 @@ void VramTableEntry::SetupSurface(int nWidth, int nHeight, int nBitsPerPixel, in
     }
 }
 
-// 0x00513690
+// NTSC-U/C: 0x00513690, PAL: 0x00553978
 int VramTableEntry::GetBlockAddr() {
     if (mLastUsed != g_vramTable.mFlushCount) {
         const int nGeneration = g_vramTable.mLockGeneration - 1;
@@ -664,7 +664,7 @@ int VramTableEntry::GetBlockAddr() {
     return mMemAddr;
 }
 
-// 0x00515160
+// NTSC-U/C: 0x00515160, PAL: 0x00555490
 int VramTableEntry::UploadImage(
     const void *pSource, int nWidth, int nHeight, [[maybe_unused]] int nBitsPerPixel, int nPsm) {
     if (mMemAddr == 0) {
@@ -698,7 +698,7 @@ int VramTableEntry::UploadImage(
     return mMemAddr;
 }
 
-// 0x005152a8
+// NTSC-U/C: 0x005152a8, PAL: 0x005555d8
 void VramTableEntry::UploadSubImage(const void *pSource,
                                     int nWidth,
                                     int nHeight,
@@ -721,7 +721,7 @@ void VramTableEntry::UploadSubImage(const void *pSource,
     sceGsExecLoadImage(&g_vramUploadSubLoadImage, pSource);
 }
 
-// 0x00514fa8
+// NTSC-U/C: 0x00514fa8, PAL: 0x005552d8
 void VramTableEntry::FreeSelf() {
     mLockMask = 0;
     g_vramTable.UnlinkEntry(this, kVramListUsed);
@@ -733,7 +733,7 @@ void VramTableEntry::FreeSelf() {
     }
 }
 
-// 0x00513900
+// NTSC-U/C: 0x00513900, PAL: 0x00553be8
 int VramPalEntry::AllocBlock() {
     int nSlot = 0;
     if (g_adVramPalSlots[0] == 0xffffffffu) {
@@ -759,7 +759,7 @@ int VramPalEntry::AllocBlock() {
     return g_vramTable.mPaletteBase + nSlot * kVramPalBlocks;
 }
 
-// 0x00513780
+// NTSC-U/C: 0x00513780, PAL: 0x00553a68
 int VramPalEntry::SwapOutOldest() {
     // The head of the resident chain is dereferenced without a null test.
     VramPalEntry *pPal = g_pVramPalUsed;
@@ -805,17 +805,17 @@ int VramPalEntry::SwapOutOldest() {
     return nSlot;
 }
 
-// 0x005153f0
+// NTSC-U/C: 0x005153f0, PAL: 0x00555720
 int VramPalEntry::GetSlotIndex() const {
     return (mMemAddr - g_vramTable.mPaletteBase) / kVramPalBlocks;
 }
 
-// 0x005154c8
+// NTSC-U/C: 0x005154c8, PAL: 0x005557f8
 void VramPalEntry::ClearLockMask() {
     mLockMask = 0;
 }
 
-// 0x00513a40
+// NTSC-U/C: 0x00513a40, PAL: 0x00553d28
 int VramPalEntry::GetBlockAddr() {
     const int bStale = (mLastUsed != g_vramTable.mFlushCount) ? 1 : 0;
     const int nGeneration = g_vramTable.mLockGeneration - 1;
@@ -851,7 +851,7 @@ int VramPalEntry::GetBlockAddr() {
     return mMemAddr;
 }
 
-// 0x00515590
+// NTSC-U/C: 0x00515590, PAL: 0x005558c0
 int VramPalEntry::UploadClut(
     const void *pSource, int nWidth, int nHeight, [[maybe_unused]] int nBitsPerPixel, int nPsm) {
     if (mMemAddr == 0) {
@@ -877,7 +877,7 @@ int VramPalEntry::UploadClut(
     return mMemAddr;
 }
 
-// 0x005154d0
+// NTSC-U/C: 0x005154d0, PAL: 0x00555800
 void VramPalEntry::FreeSelf() {
     if (mMemAddr != 0) {
         if (mpPrev != nullptr) {

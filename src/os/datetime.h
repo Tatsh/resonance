@@ -12,6 +12,7 @@ class HxStr;
  *
  * @param text Receives the date and time.
  * @return Whether text was written.
- * @ghidraAddress 0x0053a108
+ * @ghidraAddress NTSC-U/C: 0x0053a108
+ * @ghidraAddress PAL: 0x00579a38
  */
 bool FormatCurrentDateTime(HxStr &text);

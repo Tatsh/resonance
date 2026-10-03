@@ -87,70 +87,70 @@ struct AsyncOp {
 };
 
 // The element is the 48-byte request inline, not a pointer to one.
-// 0x006e9128
+// NTSC-U/C: 0x006e9128, PAL: 0x0072cac0
 std::list<AsyncRequest> g_asyncPendingJobs;
 
-// 0x006e9130
+// NTSC-U/C: 0x006e9130, PAL: 0x0072cac8
 std::list<AsyncRequest> g_asyncCompletedJobs;
 
-// 0x006e9134
+// NTSC-U/C: 0x006e9134, PAL: 0x0072cacc
 int g_nAsyncNextJobId = 1;
 
-// 0x006e9138
+// NTSC-U/C: 0x006e9138, PAL: 0x0072cad0
 int g_bAsyncInitialised = 0;
 
-// 0x006e913c
+// NTSC-U/C: 0x006e913c, PAL: 0x0072cad4
 int g_nAsyncHostMedia = 0;
 
-// 0x006e9140
+// NTSC-U/C: 0x006e9140, PAL: 0x0072cad8
 AsyncOp g_asyncCurrentOp{-1, -1, -1, nullptr, 0, 0, 0};
 
-// 0x006e915c
+// NTSC-U/C: 0x006e915c, PAL: 0x0072caf4
 int g_bAsyncThreaded = 0;
 
 // Raised by the drive callback and consumed by AsyncCheck.
-// 0x006e9160
+// NTSC-U/C: 0x006e9160, PAL: 0x0072caf8
 int g_nAsyncOpFinished = 0;
 
 // The image never writes the read mode. Reads retry three times, with no spindle override and
 // 2048-byte sectors.
-// 0x006e9168
+// NTSC-U/C: 0x006e9168, PAL: 0x0072cb00
 sceCdRMode g_asyncOpReadMode = {3, 0, SCECdSecS2048, 0};
 
 // Cleared once the read finishes, which is what makes a zero here mean "no command in flight" to
 // AsyncCheck.
-// 0x006e9170
+// NTSC-U/C: 0x006e9170, PAL: 0x0072cb08
 long long g_llAsyncOpDeadline;
 
-// 0x006e9178
+// NTSC-U/C: 0x006e9178, PAL: 0x0072cb10
 long long g_llAsyncOpStartTime;
 
-// 0x006e91d0
+// NTSC-U/C: 0x006e91d0, PAL: 0x0072cb68
 AsyncJob *g_pAsyncFreeJobs = nullptr;
 
-// 0x006e91d4
+// NTSC-U/C: 0x006e91d4, PAL: 0x0072cb6c
 int g_nAsyncCallbackThread = 0;
 
 // Nothing restores it.
-// 0x006e91d8
+// NTSC-U/C: 0x006e91d8, PAL: 0x0072cb70
 sceCdCBFunc g_pfnAsyncPrevCdCallback;
 
 // The drive error code the last callback report latched.
-// 0x006e91dc
+// NTSC-U/C: 0x006e91dc, PAL: 0x0072cb74
 int g_nAsyncOpError = 0;
 
 // The absolute disc sector the seek moves to and the read then starts at.
-// 0x00892590
+// NTSC-U/C: 0x00892590, PAL: 0x008d6c90
 int g_nAsyncOpLsn = 0;
 
 // The kernel saves the callback thread's 128-bit registers on this stack, so it starts on a
 // quadword boundary at least. The image places it on a 32-byte boundary.
-// 0x008925a0
+// NTSC-U/C: 0x008925a0, PAL: 0x008d6ca0
 alignas(64) char g_abAsyncCallbackStack[kAsyncCallbackStackSize] = {};
 
 } // namespace
 
-// 0x0045f000
+// NTSC-U/C: 0x0045f000, PAL: 0x0049c6c0
 void InitAsync() {
     g_nAsyncHostMedia = (UsingCdMedia() == 0);
     g_asyncPendingJobs.clear();
@@ -187,7 +187,7 @@ void InitAsync() {
     g_bAsyncInitialised = 1;
 }
 
-// 0x0045fc90
+// NTSC-U/C: 0x0045fc90, PAL: 0x0049d350
 void AsyncQueueRequest(AsyncRequest request) {
     if (g_nAsyncHostMedia != 0) {
         const int nRead = FileRead(request.mFile, request.mReadBuffer, request.mReadLength);
@@ -270,12 +270,12 @@ void AsyncQueueRequest(AsyncRequest request) {
     g_asyncPendingJobs.push_back(request);
 }
 
-// 0x00460b20
+// NTSC-U/C: 0x00460b20, PAL: 0x0049e1e0
 int IsMediaReady() {
     return 1;
 }
 
-// 0x00460b28
+// NTSC-U/C: 0x00460b28, PAL: 0x0049e1e8
 void AsyncMediaEventCallback(int nFunction) {
     g_nAsyncOpError = sceCdGetError();
 
@@ -287,14 +287,14 @@ void AsyncMediaEventCallback(int nFunction) {
     }
 }
 
-// 0x00460b98
+// NTSC-U/C: 0x00460b98, PAL: 0x0049e258
 void ShutdownAsync() {
     if (g_bAsyncInitialised != 0) {
         MemFreeTagged(g_pAsyncFreeJobs, __FILE__, __LINE__);
     }
 }
 
-// 0x00460bd0
+// NTSC-U/C: 0x00460bd0, PAL: 0x0049e290
 int AsyncSubmitRequest(int nFile,
                        void *pBuffer,
                        int nLength,
@@ -332,7 +332,7 @@ int AsyncSubmitRequest(int nFile,
     return request.mId;
 }
 
-// 0x00460d90
+// NTSC-U/C: 0x00460d90, PAL: 0x0049e450
 AsyncJob *AsyncGetFreeJobChain() {
     AsyncJob *pJob = g_pAsyncFreeJobs;
     AsyncJob *pNext = pJob->mNext;
@@ -345,7 +345,7 @@ AsyncJob *AsyncGetFreeJobChain() {
     return pJob;
 }
 
-// 0x00460dd8
+// NTSC-U/C: 0x00460dd8, PAL: 0x0049e498
 void AsyncReleaseJobChain(AsyncJob *pChain) {
     if (pChain == nullptr) {
         return;
@@ -361,7 +361,7 @@ void AsyncReleaseJobChain(AsyncJob *pChain) {
 
 namespace {
 
-// 0x004604c8
+// NTSC-U/C: 0x004604c8, PAL: 0x0049db88
 // Issue the command the current transfer's state calls for.
 //
 // The name is attested by the routine's own report. A state the routine does not recognise is
@@ -392,7 +392,7 @@ void AsyncIssueOp() {
 
 } // namespace
 
-// 0x00460590
+// NTSC-U/C: 0x00460590, PAL: 0x0049dc50
 void AsyncCheck(int nBlocking) {
     if ((g_asyncCurrentOp.mStatus != kAsyncOpSeeking) &&
         (g_asyncCurrentOp.mStatus != kAsyncOpReading)) {
@@ -468,7 +468,7 @@ void AsyncCheck(int nBlocking) {
 
 namespace {
 
-// 0x004603d8
+// NTSC-U/C: 0x004603d8, PAL: 0x0049da98
 // Advance the current transfer and take its results once it has finished.
 //
 // Reports non-zero only on the pass that finds the data in place, and the record is idle again
@@ -529,7 +529,7 @@ inline void UnlinkAsyncJob(AsyncRequest *pRequest, AsyncJob *pJob) {
     }
 }
 
-// 0x00460e10
+// NTSC-U/C: 0x00460e10, PAL: 0x0049e4d0
 // Perform one job at once rather than through the sector cache.
 //
 // This is the path a request on a loose file takes. The cache is keyed by 64 KiB chunks of an
@@ -545,7 +545,7 @@ void DeliverAsyncJobData(AsyncRequest *pRequest, AsyncJob *pJob) {
     UnlinkAsyncJob(pRequest, pJob);
 }
 
-// 0x00460120
+// NTSC-U/C: 0x00460120, PAL: 0x0049d7e0
 // Report the work the drive should do next.
 //
 // A pending request on a loose file is serviced in place and ends the scan. The first pending
@@ -567,7 +567,7 @@ int PickNextAsyncFetch(AsyncRequest *pRequest) {
     return (nSector != kAsyncNoSectorPending) ? nSector : -1;
 }
 
-// 0x00460238
+// NTSC-U/C: 0x00460238, PAL: 0x0049d8f8
 // Hand a freshly read chunk to every pending request that wants it.
 //
 // A request whose last job is satisfied here completes immediately. The data a caller asked for is
@@ -601,7 +601,7 @@ void DistributeAsyncSectorData(int nFile, int nSector, const void *pSectorData) 
     }
 }
 
-// 0x00460ee0
+// NTSC-U/C: 0x00460ee0, PAL: 0x0049e5a0
 // Start the transfer of one chunk into the cache.
 //
 // The name is attested by the routine's own report. The row the transfer will fill is locked for
@@ -627,7 +627,7 @@ int AsyncQueueCachedSector(int nFile, int nSector, int nBaseSector) {
 
 } // namespace
 
-// 0x0045f8d8
+// NTSC-U/C: 0x0045f8d8, PAL: 0x0049cf98
 void AsyncPumpCompletedRequests() {
     if (g_nAsyncHostMedia == 0) {
         int nFile;
@@ -662,7 +662,7 @@ void AsyncPumpCompletedRequests() {
     }
 }
 
-// 0x00460d58
+// NTSC-U/C: 0x00460d58, PAL: 0x0049e418
 int ResolveAsyncStreamFile(int nFile) {
     if ((nFile & kFileHandleArkStream) == 0) {
         return nFile;
@@ -671,7 +671,7 @@ int ResolveAsyncStreamFile(int nFile) {
     return GetArkStreamArkId(nFile & ~kFileHandleArkStream);
 }
 
-// 0x00460f78
+// NTSC-U/C: 0x00460f78, PAL: 0x0049e638
 int MatchesCurrentAsyncOp(int nFile, int nSector) {
     if (g_asyncCurrentOp.mId != nFile) {
         return 0;
@@ -680,7 +680,7 @@ int MatchesCurrentAsyncOp(int nFile, int nSector) {
     return (g_asyncCurrentOp.mSector == nSector) ? 1 : 0;
 }
 
-// 0x0045ffa8
+// NTSC-U/C: 0x0045ffa8, PAL: 0x0049d668
 void AsyncJobComplete(AsyncRequest *pRequest, int nStatus) {
     if (nStatus > 0) {
         LogPrintf("AsyncJobComplete: job %d has error: %d\n", pRequest->mId, nStatus);
@@ -697,7 +697,7 @@ void AsyncJobComplete(AsyncRequest *pRequest, int nStatus) {
     g_asyncCompletedJobs.push_back(*pRequest);
 }
 
-// 0x0045f658
+// NTSC-U/C: 0x0045f658, PAL: 0x0049cd18
 int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength) {
     for (auto it = g_asyncCompletedJobs.begin(); it != g_asyncCompletedJobs.end(); ++it) {
         if (it->mId != nHandle) {
@@ -721,7 +721,7 @@ int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength) {
     return -1;
 }
 
-// 0x0045f738
+// NTSC-U/C: 0x0045f738, PAL: 0x0049cdf8
 void AsyncCancelRequest(int nHandle) {
     for (auto it = g_asyncPendingJobs.begin(); it != g_asyncPendingJobs.end(); ++it) {
         if (it->mId != nHandle) {
@@ -759,7 +759,7 @@ void AsyncCancelRequest(int nHandle) {
     }
 }
 
-// 0x0045faf0
+// NTSC-U/C: 0x0045faf0, PAL: 0x0049d1b0
 void AsyncDump() {
     LogPrintf("\nASYNC DUMP\n\n");
     LogPrintf("current op:  id: %d, sector: %d, buffer: %p, status: %d, retry: %d (%d)\n",
@@ -787,7 +787,7 @@ void AsyncDump() {
     LogPrintf("num Free Job Chains: %d\n", nFreeJobs);
 }
 
-// 0x0045f148
+// NTSC-U/C: 0x0045f148, PAL: 0x0049c808
 int AsyncLoadFileByPath(const char *pszPath,
                         void *pBuffer,
                         unsigned nLength,
@@ -908,7 +908,7 @@ int AsyncLoadFileByPath(const char *pszPath,
     return request.mId;
 }
 
-// 0x0045fa38
+// NTSC-U/C: 0x0045fa38, PAL: 0x0049d0f8
 void CountAsyncQueues(int *pnPending, int *pnCompleted, int *pnFreeJobs) {
     *pnPending = static_cast<int>(g_asyncPendingJobs.size());
     *pnCompleted = static_cast<int>(g_asyncCompletedJobs.size());

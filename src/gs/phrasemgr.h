@@ -77,7 +77,8 @@ public:
      * @param nConfig The configuration value ScoreTrackGraph reads from the query at
      *                `0x00509110` with the identifier 0x2be.
      * @param pTrackData The track description.
-     * @ghidraAddress 0x001ba0d0
+     * @ghidraAddress NTSC-U/C: 0x001ba0d0
+     * @ghidraAddress PAL: 0x001bfea8
      */
     PhraseMgr(Sch::TickClock *pClock,
               int nBarTicks,
@@ -88,7 +89,8 @@ public:
     /**
      * Withdraw both commands through WithdrawCommands(), then delete both owned objects.
      *
-     * @ghidraAddress 0x001ba2b8
+     * @ghidraAddress NTSC-U/C: 0x001ba2b8
+     * @ghidraAddress PAL: 0x001c0090
      */
     virtual ~PhraseMgr();
 
@@ -100,14 +102,16 @@ public:
      * combination gets a JamPowerbarMgr. The constructor and CatchingSTG::CreatePowerbarMgr() call
      * it.
      *
-     * @ghidraAddress 0x001ba3d8
+     * @ghidraAddress NTSC-U/C: 0x001ba3d8
+     * @ghidraAddress PAL: 0x001c01b0
      */
     void CreatePowerbarMgr();
 
     /**
      * @param nBar The bar, mapped through slot 5 of mMap.
      * @return PowerbarMgr::GetPowerbar() on mPowerbarMgr for the mapped bar.
-     * @ghidraAddress 0x001c01e8
+     * @ghidraAddress NTSC-U/C: 0x001c01e8
+     * @ghidraAddress PAL: 0x001c6018
      */
     int GetPowerbar(int nBar);
 
@@ -117,7 +121,8 @@ public:
      * Performs no work when the lookup at `0x001b8e50` reports nothing.
      *
      * @param nPhrase The value the message's `+0x04` receives.
-     * @ghidraAddress 0x001bc468
+     * @ghidraAddress NTSC-U/C: 0x001bc468
+     * @ghidraAddress PAL: 0x001c2240
      */
     void PostPhraseMsg(int nPhrase);
 
@@ -130,7 +135,8 @@ public:
      * one recovered caller.
      *
      * @param pMsg The packet the gem is read out of.
-     * @ghidraAddress 0x001ba6d0
+     * @ghidraAddress NTSC-U/C: 0x001ba6d0
+     * @ghidraAddress PAL: 0x001c04a8
      */
     void PostGemMsg(Message *pMsg);
 
@@ -140,7 +146,8 @@ public:
      * RefreshBar() calls it for a riff track.
      *
      * @param nBar The bar.
-     * @ghidraAddress 0x001bc0f0
+     * @ghidraAddress NTSC-U/C: 0x001bc0f0
+     * @ghidraAddress PAL: 0x001c1ec8
      */
     void PostGemMsgSecond(int nBar);
 
@@ -153,7 +160,8 @@ public:
      *
      * @param nBar The bar.
      * @param bGhost Non-zero to post ghost gems.
-     * @ghidraAddress 0x001bc290
+     * @ghidraAddress NTSC-U/C: 0x001bc290
+     * @ghidraAddress PAL: 0x001c2068
      */
     void PostGemMsgThird(int nBar, int bGhost);
 
@@ -166,7 +174,8 @@ public:
      * for a scratch track.
      *
      * @param nBar The bar.
-     * @ghidraAddress 0x001bbcf0
+     * @ghidraAddress NTSC-U/C: 0x001bbcf0
+     * @ghidraAddress PAL: 0x001c1ac8
      */
     void PostDurGemMsg(int nBar);
 
@@ -181,7 +190,8 @@ public:
      *
      * @param nBar The bar.
      * @param bClear Non-zero to clear the bar's gems first.
-     * @ghidraAddress 0x001bbb90
+     * @ghidraAddress NTSC-U/C: 0x001bbb90
+     * @ghidraAddress PAL: 0x001c1968
      */
     void RefreshBar(int nBar, int bClear);
 
@@ -192,7 +202,8 @@ public:
      * mRefreshing goes out in the message's `+0x14`. RefreshBar() is the recovered caller.
      *
      * @param nBar The bar.
-     * @ghidraAddress 0x001bb9f8
+     * @ghidraAddress NTSC-U/C: 0x001bb9f8
+     * @ghidraAddress PAL: 0x001c17d0
      */
     void PostBarStatusMsg(int nBar);
 
@@ -202,7 +213,8 @@ public:
      * The file-local Cmd runs it.
      *
      * @param nBar The bar to play.
-     * @ghidraAddress 0x001bb6b8
+     * @ghidraAddress NTSC-U/C: 0x001bb6b8
+     * @ghidraAddress PAL: 0x001c1490
      */
     void OnCommand(int nBar);
 
@@ -213,28 +225,32 @@ public:
      * The file-local ExportCmd runs it.
      *
      * @param nBar The bar.
-     * @ghidraAddress 0x001bb8a0
+     * @ghidraAddress NTSC-U/C: 0x001bb8a0
+     * @ghidraAddress PAL: 0x001c1678
      */
     void OnExportCommand(int nBar);
 
     /**
      * @param nBar The bar. PhrasePlayer passes the bar it plays.
      * @return PhraseDatabase::GetPhraseAt() on mDatabase.
-     * @ghidraAddress 0x001c01c8
+     * @ghidraAddress NTSC-U/C: 0x001c01c8
+     * @ghidraAddress PAL: 0x001c5ff8
      */
     Phrase *GetPhraseAt(int nBar);
 
     /**
      * @param nBar The bar. PhrasePlayer passes the bar it plays.
      * @return PhraseDatabase::GetStepValue() on mDatabase.
-     * @ghidraAddress 0x001c0248
+     * @ghidraAddress NTSC-U/C: 0x001c0248
+     * @ghidraAddress PAL: 0x001c6078
      */
     long long *GetStepValue(int nBar);
 
     /**
      * @param nBar The bar, mapped through slot 5 of mMap.
      * @return The byte at `+0x28` of the phrase at the mapped bar.
-     * @ghidraAddress 0x001c0338
+     * @ghidraAddress NTSC-U/C: 0x001c0338
+     * @ghidraAddress PAL: 0x001c6168
      */
     unsigned char GetPhraseByte(int nBar);
 
@@ -244,7 +260,8 @@ public:
      *
      * @param nBar The bar, mapped through slot 5 of mMap.
      * @param cValue The byte.
-     * @ghidraAddress 0x001c0298
+     * @ghidraAddress NTSC-U/C: 0x001c0298
+     * @ghidraAddress PAL: 0x001c60c8
      */
     void SetPhraseByte(int nBar, char cValue);
 
@@ -252,7 +269,8 @@ public:
      * Return every phrase to one owner and clear and post every bar of the window again.
      *
      * @param pPlayer The owner.
-     * @ghidraAddress 0x001c0380
+     * @ghidraAddress NTSC-U/C: 0x001c0380
+     * @ghidraAddress PAL: 0x001c61b0
      */
     void ResetOwners(Player *pPlayer);
 
@@ -261,21 +279,24 @@ public:
      *
      * mRefreshing is set while the bars are posted.
      *
-     * @ghidraAddress 0x001c03e0
+     * @ghidraAddress NTSC-U/C: 0x001c03e0
+     * @ghidraAddress PAL: 0x001c6210
      */
     void RefreshAllBars();
 
     /**
      * @param nTick The song position, in MIDI ticks.
      * @return The bar the position falls in. The start of that bar is computed and discarded.
-     * @ghidraAddress 0x001bf6c0
+     * @ghidraAddress NTSC-U/C: 0x001bf6c0
+     * @ghidraAddress PAL: 0x001c54e0
      */
     int TickToBar(int nTick);
 
     /**
      * @param nBar The bar.
      * @return The song position the bar starts at.
-     * @ghidraAddress 0x001bf738
+     * @ghidraAddress NTSC-U/C: 0x001bf738
+     * @ghidraAddress PAL: 0x001c5558
      */
     int BarToTick(int nBar);
 
@@ -290,7 +311,8 @@ public:
      * @param nFirstBar The first bar.
      * @param nSecondBar The second bar.
      * @return Non-zero when the phrases match.
-     * @ghidraAddress 0x001bb558
+     * @ghidraAddress NTSC-U/C: 0x001bb558
+     * @ghidraAddress PAL: 0x001c1330
      */
     int PhrasesMatch(int nFirstBar, int nSecondBar);
 
@@ -301,7 +323,8 @@ public:
      *
      * @param nBar The bar.
      * @param nOffset The offset within the bar, in MIDI ticks.
-     * @ghidraAddress 0x001bb798
+     * @ghidraAddress NTSC-U/C: 0x001bb798
+     * @ghidraAddress PAL: 0x001c1570
      */
     void ReplayBar(int nBar, int nOffset);
 
@@ -315,7 +338,8 @@ public:
      * @param pPhrase The phrase.
      * @param nBar The bar, mapped through slot 5 of mMap.
      * @param bRefresh Non-zero to post the bar through RefreshBar() afterwards.
-     * @ghidraAddress 0x001bb1a0
+     * @ghidraAddress NTSC-U/C: 0x001bb1a0
+     * @ghidraAddress PAL: 0x001c0f78
      */
     void InstallPhrase(Phrase *pPhrase, int nBar, int bRefresh);
 
@@ -330,7 +354,8 @@ public:
      *
      * @param nBar The bar, mapped through slot 5 of mMap.
      * @param bAll Non-zero to clear every chained bar as well.
-     * @ghidraAddress 0x001bb328
+     * @ghidraAddress NTSC-U/C: 0x001bb328
+     * @ghidraAddress PAL: 0x001c1100
      */
     void ClearPhrase(int nBar, int bAll);
 
@@ -343,7 +368,8 @@ public:
      * caller.
      *
      * @param pMsg The packet.
-     * @ghidraAddress 0x001ba540
+     * @ghidraAddress NTSC-U/C: 0x001ba540
+     * @ghidraAddress PAL: 0x001c0318
      */
     void OnCaughtPhrasePacket(Message *pMsg);
 
@@ -353,7 +379,8 @@ public:
      *
      * ScoreTrackGraph's slot 2 is the recovered caller.
      *
-     * @ghidraAddress 0x001bc588
+     * @ghidraAddress NTSC-U/C: 0x001bc588
+     * @ghidraAddress PAL: 0x001c2360
      */
     void StartCommands();
 
@@ -376,14 +403,16 @@ public:
      * @param pOwner The player a new phrase is given to.
      * @param bPost Non-zero to post the gem to the window bars. Both NotePitcher calls pass a
      *              member.
-     * @ghidraAddress 0x001baa98
+     * @ghidraAddress NTSC-U/C: 0x001baa98
+     * @ghidraAddress PAL: 0x001c0870
      */
     void AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner, int bPost);
 
     /**
      * Withdraw both scheduled commands. The destructor calls it first.
      *
-     * @ghidraAddress 0x001c0450
+     * @ghidraAddress NTSC-U/C: 0x001c0450
+     * @ghidraAddress PAL: 0x001c6280
      */
     void WithdrawCommands();
 
@@ -396,7 +425,8 @@ public:
      * body inline, and the out-of-line copy has no caller.
      *
      * @param pPacket The packet.
-     * @ghidraAddress 0x001c0010
+     * @ghidraAddress NTSC-U/C: 0x001c0010
+     * @ghidraAddress PAL: 0x001c5e40
      */
     void OnPhrasePacket(PhrasePacket *pPacket);
 
@@ -407,7 +437,8 @@ public:
      * HandleMessage() expands the body inline, and the out-of-line copy has no caller.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001c0110
+     * @ghidraAddress NTSC-U/C: 0x001c0110
+     * @ghidraAddress PAL: 0x001c5f40
      */
     void OnInvalidateTrack(InvalidateTrackMsg *pMsg);
 
@@ -420,7 +451,8 @@ public:
      * caller.
      *
      * @param pMsg The RefreshNetMsg.
-     * @ghidraAddress 0x001ba928
+     * @ghidraAddress NTSC-U/C: 0x001ba928
+     * @ghidraAddress PAL: 0x001c0700
      */
     void OnRefreshNet(Message *pMsg);
 
@@ -429,7 +461,8 @@ public:
      *
      * @param nBar The bar, passed to PhraseDatabase::GetPhraseAt().
      * @return The owner of the phrase the database reports, or g_nullPlayer when there is none.
-     * @ghidraAddress 0x001c0268
+     * @ghidraAddress NTSC-U/C: 0x001c0268
+     * @ghidraAddress PAL: 0x001c6098
      */
     Player *GetPhraseOwner(int nBar);
 
@@ -445,7 +478,8 @@ public:
      *
      * @param pPlayer The new owner.
      * @param nBar The bar.
-     * @ghidraAddress 0x001bafa8
+     * @ghidraAddress NTSC-U/C: 0x001bafa8
+     * @ghidraAddress PAL: 0x001c0d80
      */
     void SetPhraseOwner(Player *pPlayer, int nBar);
 
@@ -459,7 +493,8 @@ protected:
      * RefreshAllBars(). The two On routines and RefreshAllBars() are expanded inline.
      *
      * @param pMsg The message or packet.
-     * @ghidraAddress 0x001bc718
+     * @ghidraAddress NTSC-U/C: 0x001bc718
+     * @ghidraAddress PAL: 0x001c24f0
      */
     virtual void HandleMessage(Message *pMsg);
 

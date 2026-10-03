@@ -18,14 +18,16 @@ constexpr int kFileLogPathSize = 0x40;
  * for every file it opens while the log is open. The title is inferred from that role, and it is
  * distinct from the allocation log behind `g_szMemLogPath`.
  *
- * @ghidraAddress 0x006ee280
+ * @ghidraAddress NTSC-U/C: 0x006ee280
+ * @ghidraAddress PAL: 0x00731ca0
  */
 extern std::fstream g_fileLog;
 
 /**
  * Non-zero while g_fileLog is open.
  *
- * @ghidraAddress 0x006ee320
+ * @ghidraAddress NTSC-U/C: 0x006ee320
+ * @ghidraAddress PAL: 0x00731d40
  */
 extern int g_bFileLogOpen;
 
@@ -34,7 +36,8 @@ extern int g_bFileLogOpen;
  *
  * FileOpen() compares every path it opens against this one and does not log the log file itself.
  *
- * @ghidraAddress 0x006ee378
+ * @ghidraAddress NTSC-U/C: 0x006ee378
+ * @ghidraAddress PAL: 0x00731d98
  */
 extern char g_szFileLogPath[kFileLogPathSize];
 
@@ -45,7 +48,8 @@ extern char g_szFileLogPath[kFileLogPathSize];
  * The title is inferred.
  *
  * @param pszPath The path of the log file.
- * @ghidraAddress 0x0047ddf0
+ * @ghidraAddress NTSC-U/C: 0x0047ddf0
+ * @ghidraAddress PAL: 0x004bbac8
  */
 void FileLogStart(const char *pszPath);
 
@@ -54,7 +58,8 @@ void FileLogStart(const char *pszPath);
  *
  * HxScript's `memlog_term` binding calls it at `0x00155e0c`. The title is inferred.
  *
- * @ghidraAddress 0x0047de48
+ * @ghidraAddress NTSC-U/C: 0x0047de48
+ * @ghidraAddress PAL: 0x004bbb20
  */
 void FileLogStop();
 
@@ -64,6 +69,7 @@ void FileLogStop();
  * No call site exists. FileOpen() expands the same body inline. The title is inferred.
  *
  * @param pszText The line, without its line break.
- * @ghidraAddress 0x0047de88
+ * @ghidraAddress NTSC-U/C: 0x0047de88
+ * @ghidraAddress PAL: 0x004bbb60
  */
 void FileLogAppend(const char *pszText);

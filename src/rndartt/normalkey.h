@@ -25,7 +25,8 @@ struct NormalKey {
      * @param flRed The red channel.
      * @param flGreen The green channel.
      * @param flBlue The blue channel.
-     * @ghidraAddress 0x00558740
+     * @ghidraAddress NTSC-U/C: 0x00558740
+     * @ghidraAddress PAL: 0x00599898
      */
     NormalKey(float flRed, float flGreen, float flBlue);
 
@@ -38,7 +39,8 @@ struct NormalKey {
      *
      * @param keys The set of keys.
      * @param color The colour. Its alpha is not read.
-     * @ghidraAddress 0x00557858
+     * @ghidraAddress NTSC-U/C: 0x00557858
+     * @ghidraAddress PAL: 0x005989b0
      */
     static void InsertUniqueNormalKey(std::vector<NormalKey> &keys, const Color &color);
 
@@ -65,6 +67,7 @@ struct NormalKey {
  *
  * The image does not read it. The name is inferred.
  *
- * @ghidraAddress 0x00725848
+ * @ghidraAddress NTSC-U/C: 0x00725848
+ * @ghidraAddress PAL: 0x007694e8
  */
 extern NormalKey g_normalKeyUnused;

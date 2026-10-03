@@ -190,7 +190,7 @@ constexpr int kDebugGlyphFloats = kDebugGlyphSegments * kFloatsPerSegment;
 constexpr int kBlankAdvanceCells = 2;
 constexpr double kGlyphAdvanceCells = 1.5;
 
-// 0x006f2f28
+// NTSC-U/C: 0x006f2f28, PAL: 0x00736978
 const float g_aafDebugGlyphStrokes[kDebugGlyphCount][kDebugGlyphFloats] = {
     {0.0f, 1.0f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.5f, 0.0f, 0.5f, 0.0f, 0.5f},
     {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f},
@@ -306,6 +306,23 @@ constexpr short kGsInterlace = 1;
 constexpr short kGsNtsc = 2;
 constexpr short kGsFieldMode = 0;
 
+#ifdef VIDEO_STANDARD_PAL
+constexpr short kGsPal = 3;
+
+// The display widths and heights Init() rounds a requested size down to. A height of 448 or 224
+// selects NTSC output, and 512 or 256 PAL output.
+constexpr int kDisplayWidth640 = 640;
+constexpr int kDisplayWidth512 = 512;
+constexpr int kDisplayWidth384 = 384;
+constexpr int kDisplayWidth256 = 256;
+constexpr int kPalFrameHeight = 512;
+constexpr int kNtscFrameHeight = 448;
+constexpr int kPalFieldHeight = 256;
+constexpr int kNtscFieldHeight = 224;
+// Any depth under 32 bits becomes a 16-bit framebuffer.
+constexpr int kPixelBytes16 = 2;
+#endif
+
 // Pixel depths the display supports, and the frame and depth buffer formats each selects.
 constexpr int kDepth16 = 16;
 constexpr int kDepth24 = 24;
@@ -342,18 +359,18 @@ inline void *ToDmaAddress(const void *pAddress) {
                                     ((nAddress & kScratchpadAddressBit) << 1));
 }
 
-// 0x006f36c0
+// NTSC-U/C: 0x006f36c0, PAL: 0x00737100
 GsDoubleBuffer g_displayBuffers;
 
 } // namespace
 
-// 0x006f2a80
+// NTSC-U/C: 0x006f2a80, PAL: 0x007364c0
 GfxDevice g_gfxDevice;
 
-// 0x006f2f20
+// NTSC-U/C: 0x006f2f20, PAL: 0x00736970
 volatile int g_nVblankCounter;
 
-// 0x0049ac50
+// NTSC-U/C: 0x0049ac50, PAL: 0x004d8bd0
 GfxDevice::GfxDevice()
     : mpSavedWrite(nullptr), mpReservedRegion(nullptr),
       mSavedPacket(kSavedPacketQuadwords, GifQuadword()), mpOpenTag(nullptr), mnSwapVblank(0),
@@ -366,7 +383,7 @@ GfxDevice::GfxDevice()
     mAdTag.mHi = kGifRegAd;
 }
 
-// 0x0049afe0
+// NTSC-U/C: 0x0049afe0, PAL: 0x004d8ff8
 void GfxDevice::Terminate() {
     Rnd::RegisterMeshClass();
     Rnd::PsCam::Terminate();
@@ -378,54 +395,81 @@ void GfxDevice::Terminate() {
     g_vramTable.~VramTable(); // Yes, the binary calls the destructor on the global directly.
 }
 
-// 0x0049fea0
+// NTSC-U/C: 0x0049fea0, PAL: 0x004ddf28
 int GfxDevice::VblankHandler([[maybe_unused]] int nCause) {
     ++g_nVblankCounter;
     ExitHandler();
     return 0;
 }
 
-// 0x0049fef0
+// NTSC-U/C: 0x0049fef0, PAL: 0x004ddf78
 void GfxDevice::ResetVramAndSavePacket() {
     g_vramTable.Clear(1);
     SavePacket();
 }
 
-// 0x0049ff28
+// NTSC-U/C: 0x0049ff28, PAL: 0x004ddfb0
 void GfxDevice::SavePacket() {
     sceDmaSync(sceDmaGetChan(SCE_DMA_GIF), 0, 0);
     sceDmaSync(sceDmaGetChan(SCE_DMA_VIF1), 0, 0);
     std::memcpy(&mSavedPacket[0], mpBuffer, (mpWrite - mpBuffer) * sizeof(GifQuadword));
 }
 
-// 0x0049ff98
+// NTSC-U/C: 0x0049ff98, PAL: 0x004de020
 void GfxDevice::RestorePacket() {
     std::memcpy(mpBuffer, &mSavedPacket[0], (mpWrite - mpBuffer) * sizeof(GifQuadword));
 }
 
-// 0x004a00e8
+// NTSC-U/C: 0x004a00e8, PAL: 0x004de170
 inline void GfxDevice::SendPacket() {
     sceDmaChan *pChannel = sceDmaGetChan(mnUseVu1 != 0 ? SCE_DMA_VIF1 : SCE_DMA_GIF);
     sceDmaSendN(pChannel, ToDmaAddress(mpBuffer), static_cast<int>(mpWrite - mpBuffer));
 }
 
-// 0x004a0388
+// NTSC-U/C: 0x004a0388, PAL: 0x004de410
 void GfxDevice::FlipFrameBuffer() {
     mpDisplayBuffers->PutDrawEnv(mnDrawBuffer, 1);
     SwapBuffers();
 }
 
-// 0x0049ae20
+// NTSC-U/C: 0x0049ae20, PAL: 0x004d8da0
 void GfxDevice::Init(int nWidth, int nHeight, int nBitDepth) {
     int nTimer = kFirstDeviceTimer;
     for (const char *pszName : kapszDeviceTimerNames) {
         g_profileTimers[nTimer].mName = HxStr(pszName);
         ++nTimer;
     }
+#ifdef VIDEO_STANDARD_PAL
+    if (nWidth >= kDisplayWidth640) {
+        mnDisplayWidth = kDisplayWidth640;
+    } else if (nWidth >= kDisplayWidth512) {
+        mnDisplayWidth = kDisplayWidth512;
+    } else if (nWidth >= kDisplayWidth384) {
+        mnDisplayWidth = kDisplayWidth384;
+    } else {
+        mnDisplayWidth = kDisplayWidth256;
+    }
+    if (nHeight >= kPalFrameHeight) {
+        mnNtscOutput = 0;
+        mnDisplayHeight = kPalFrameHeight;
+    } else if (nHeight >= kNtscFrameHeight) {
+        mnDisplayHeight = kNtscFrameHeight;
+        mnNtscOutput = 1;
+    } else if (nHeight >= kPalFieldHeight) {
+        mnNtscOutput = 0;
+        mnDisplayHeight = kPalFieldHeight;
+    } else {
+        mnDisplayHeight = kNtscFieldHeight;
+        mnNtscOutput = 1;
+    }
+    mnPixelBytes = nBitDepth < kDepth32 ? kPixelBytes16 : kFallbackPixelBytes;
+    mnUseVu1 = 0;
+#else
     mnDisplayWidth = nWidth;
     mnDisplayHeight = nHeight;
     mnUseVu1 = 0;
     mnPixelBytes = nBitDepth / kBitsPerPixelByte;
+#endif
     mpWrite = reinterpret_cast<GifQuadword *>(kGifBufferHalf0);
     mpBuffer = mpWrite;
     InitDisplayMode();
@@ -440,7 +484,7 @@ void GfxDevice::Init(int nWidth, int nHeight, int nBitDepth) {
     g_vramTable.Init();
 }
 
-// 0x0049b138
+// NTSC-U/C: 0x0049b138, PAL: 0x004d9150
 void GfxDevice::InitDisplayMode() {
     std::memset(mGsRegs, kRegShadowFillByte, sizeof(mGsRegs));
     mGsRegs[kGsRegFogCol] = kFogColInitial;
@@ -448,7 +492,11 @@ void GfxDevice::InitDisplayMode() {
     sceDmaReset(kDmaResetEnable);
     sceGsSyncPath(0, 0);
     sceGsSyncV(0);
+#ifdef VIDEO_STANDARD_PAL
+    sceGsResetGraph(kGsResetFull, kGsInterlace, mnNtscOutput != 0 ? kGsNtsc : kGsPal, kGsFieldMode);
+#else
     sceGsResetGraph(kGsResetFull, kGsInterlace, kGsNtsc, kGsFieldMode);
+#endif
 
     short nPsm = kPsmCt32;
     short nZPsm = kPsmZ24;
@@ -500,7 +548,7 @@ void GfxDevice::InitDisplayMode() {
     LeaveVu1Path();
 }
 
-// 0x0049b930
+// NTSC-U/C: 0x0049b930, PAL: 0x004d9950
 void GfxDevice::BeginFrame() {
     SwapBuffers();
     std::memset(&g_renderStats, 0, sizeof(g_renderStats));
@@ -514,7 +562,7 @@ void GfxDevice::BeginFrame() {
     }
 }
 
-// 0x004a0238
+// NTSC-U/C: 0x004a0238, PAL: 0x004de2c0
 inline void GfxDevice::SwapBuffers() {
     sceGsSyncPath(0, 0);
     while (g_nVblankCounter < mnSwapVblank) {
@@ -540,7 +588,7 @@ inline void GfxDevice::SwapBuffers() {
     mGsRegs[kGsRegPrim] = kAllBits;
 }
 
-// 0x0049bac8
+// NTSC-U/C: 0x0049bac8, PAL: 0x004d9ae8
 void GfxDevice::PresentFrame(int nSwapBuffers) {
     if (mFeedbackEnabled != 0) {
         SetupGsDrawContext();
@@ -553,7 +601,7 @@ void GfxDevice::PresentFrame(int nSwapBuffers) {
     }
 }
 
-// 0x0049b478
+// NTSC-U/C: 0x0049b478, PAL: 0x004d9498
 int GfxDevice::FlushGifPacket(int bRetainOpenTag, int bOnlyWhenFull) {
     if (bOnlyWhenFull != 0 && mpWrite < mpBuffer + kGifBufferQuadwords) {
         return 0;
@@ -586,7 +634,7 @@ int GfxDevice::FlushGifPacket(int bRetainOpenTag, int bOnlyWhenFull) {
     return 1;
 }
 
-// 0x0049b5a8
+// NTSC-U/C: 0x0049b5a8, PAL: 0x004d95c8
 void GfxDevice::WriteGifTag(const GifQuadword *pTag) {
     ++g_renderStats.mnGifTags;
     CloseGifTag(0); // Inlined in the binary.
@@ -606,7 +654,7 @@ void GfxDevice::WriteGifTag(const GifQuadword *pTag) {
     mpWrite = pWrite + 1;
 }
 
-// 0x0049ffd0
+// NTSC-U/C: 0x0049ffd0, PAL: 0x004de058
 void GfxDevice::SetGsReg(int nReg, unsigned long long qwValue, unsigned long long qwMask) {
     if ((mGsRegs[nReg] & qwMask) == (qwValue & qwMask)) {
         return;
@@ -633,7 +681,7 @@ void GfxDevice::SetGsReg(int nReg, unsigned long long qwValue, unsigned long lon
     }
 }
 
-// 0x004a0348
+// NTSC-U/C: 0x004a0348, PAL: 0x004de3d0
 void GfxDevice::EnterVu1Path() {
     if (mnUseVu1 != 0) {
         return;
@@ -642,7 +690,7 @@ void GfxDevice::EnterVu1Path() {
     mnUseVu1 = 1;
 }
 
-// 0x0049b838
+// NTSC-U/C: 0x0049b838, PAL: 0x004d9858
 void GfxDevice::LeaveVu1Path() {
     if (mnUseVu1 == 0) {
         return;
@@ -653,7 +701,7 @@ void GfxDevice::LeaveVu1Path() {
     mnUseVu1 = 0;
 }
 
-// 0x0049fd98
+// NTSC-U/C: 0x0049fd98, PAL: 0x004dde20
 void GfxDevice::ReserveGifSpace(int nQuadwords) {
     if (mnUseVu1 == 0) {
         return;
@@ -668,7 +716,7 @@ void GfxDevice::ReserveGifSpace(int nQuadwords) {
     mpWrite = pRegion;
 }
 
-// 0x0049fe08
+// NTSC-U/C: 0x0049fe08, PAL: 0x004dde90
 void GfxDevice::SwapGifWrite() {
     if (mnUseVu1 == 0) {
         return;
@@ -681,7 +729,7 @@ void GfxDevice::SwapGifWrite() {
     mpSavedWrite = pWrite;
 }
 
-// 0x0049fe38
+// NTSC-U/C: 0x0049fe38, PAL: 0x004ddec0
 void GfxDevice::FlushReservedGif() {
     if (mnUseVu1 == 0) {
         return;
@@ -702,7 +750,7 @@ void GfxDevice::FlushReservedGif() {
     mpReservedRegion = nullptr;
 }
 
-// 0x004a0158
+// NTSC-U/C: 0x004a0158, PAL: 0x004de1e0
 void GfxDevice::CloseGifTag(int bEndOfPacket) {
     GifQuadword *pTag = mpOpenTag;
     if (pTag == nullptr) {
@@ -736,7 +784,7 @@ void GfxDevice::CloseGifTag(int bEndOfPacket) {
     mpOpenVifDirect = nullptr;
 }
 
-// 0x0049b6b8
+// NTSC-U/C: 0x0049b6b8, PAL: 0x004d96d8
 void GfxDevice::RestoreFrameBufferTarget() {
     const sceGsDrawEnv1 &draw =
         mnDrawBuffer != 0 ? mpDisplayBuffers->mHalves[1].mDraw : mpDisplayBuffers->mHalves[0].mDraw;
@@ -744,7 +792,7 @@ void GfxDevice::RestoreFrameBufferTarget() {
     SetGsReg(kGsRegXyOffset1, draw.xyoffset1, kGsXyOffsetMask);
 }
 
-// 0x0049b368
+// NTSC-U/C: 0x0049b368, PAL: 0x004d9388
 void GfxDevice::SetClearColor(const Color &color) {
     mClearColor = color;
     mpDisplayBuffers->mHalves[0].mClear.rgbaqWord = PackRgbaq(color);
@@ -752,7 +800,7 @@ void GfxDevice::SetClearColor(const Color &color) {
     FlushCache(kFlushCacheWriteBackData);
 }
 
-// 0x0049ccb8
+// NTSC-U/C: 0x0049ccb8, PAL: 0x004dacd8
 void GfxDevice::SetupGsDrawContext() {
     SetGsReg(kGsRegTest1, kTestZTestAlways, kTestZTestMask);
     SetGsReg(kGsRegZbuf1, kZbufZmsk, kZbufZmsk);
@@ -814,7 +862,7 @@ void GfxDevice::SetupGsDrawContext() {
     FlushGifPacket(0, 1);
 }
 
-// 0x0049bc20
+// NTSC-U/C: 0x0049bc20, PAL: 0x004d9c40
 void GfxDevice::DrawDebugText(const char *pszText, const Rect &rect, const Color &color) {
     GifQuadword primAndColor;
     primAndColor.mLo = kGsPrimLineStrip;
@@ -853,7 +901,7 @@ void GfxDevice::DrawDebugText(const char *pszText, const Rect &rect, const Color
     }
 }
 
-// 0x0049c630
+// NTSC-U/C: 0x0049c630, PAL: 0x004da650
 void GfxDevice::DrawTimingBar(const Rect &rect, const Color &color) {
     GifQuadword *pHeader = g_gfxDevice.mpWrite;
     g_gfxDevice.mpWrite = pHeader + 1;
@@ -871,7 +919,7 @@ void GfxDevice::DrawTimingBar(const Rect &rect, const Color &color) {
     g_gfxDevice.FlushGifPacket(1, 1);
 }
 
-// 0x0049bec8
+// NTSC-U/C: 0x0049bec8, PAL: 0x004d9ee8
 void GfxDevice::DrawRenderStatsOverlay() {
     SetGsReg(kGsRegTest1, kTestZTestAlways, kTestZTestMask);
     GifQuadword tag;
@@ -926,7 +974,7 @@ void GfxDevice::DrawRenderStatsOverlay() {
     DrawDebugText(FormatString("vramk %d", nBlocks >> 2), rect, white);
 }
 
-// 0x0049c388
+// NTSC-U/C: 0x0049c388, PAL: 0x004da3a8
 void GfxDevice::DrawFpsReadout() {
     mflFrameMsSum += TimerMilliseconds(g_lastFrameProfileTimers[kProfileTimerFrame]);
     mflSyncMsSum += TimerMilliseconds(g_lastFrameProfileTimers[kProfileTimerSync]);
@@ -957,7 +1005,7 @@ void GfxDevice::DrawFpsReadout() {
     DrawDebugText(FormatString("fps %d sync %d", mnFps, mnSyncMsAverage), rect, white);
 }
 
-// 0x0049c778
+// NTSC-U/C: 0x0049c778, PAL: 0x004da798
 void GfxDevice::DrawSubsystemTimingGraph(int nFullScaleMs) {
     SetGsReg(kGsRegTest1, kTestZTestAlways, kTestZTestMask);
     GifQuadword barTag;
@@ -1015,7 +1063,7 @@ void GfxDevice::DrawSubsystemTimingGraph(int nFullScaleMs) {
     }
 }
 
-// 0x0049fec0
+// NTSC-U/C: 0x0049fec0, PAL: 0x004ddf48
 int GfxDevice::GetReservedVramWords() const {
     return (mpDisplayBuffers->mZbp << kGsPageWordShift) +
            ((mnDisplayWidth * mnDisplayHeight * mnDepthBytes) >> kBytesPerWordShift);

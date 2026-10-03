@@ -19,7 +19,8 @@
 class GhostNotesEffector : public Effector {
 public:
     /**
-     * @ghidraAddress 0x001a1cf8
+     * @ghidraAddress NTSC-U/C: 0x001a1cf8
+     * @ghidraAddress PAL: 0x001a7a60
      */
     virtual ~GhostNotesEffector();
 
@@ -27,7 +28,8 @@ public:
      * Report which effect this object applies.
      *
      * @return kEffectorTypeGhostNotes.
-     * @ghidraAddress 0x001a1e30
+     * @ghidraAddress NTSC-U/C: 0x001a1e30
+     * @ghidraAddress PAL: 0x001a7b98
      */
     virtual int Type();
 
@@ -35,7 +37,8 @@ public:
      * Do nothing.
      *
      * @param bEnabled Ignored.
-     * @ghidraAddress 0x001a1e38
+     * @ghidraAddress NTSC-U/C: 0x001a1e38
+     * @ghidraAddress PAL: 0x001a7ba0
      */
     virtual void Enable(int bEnabled);
 };

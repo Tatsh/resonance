@@ -17,36 +17,40 @@ namespace {
 // The value of the file-service open flag that opens for reading only.
 constexpr int kOpenReadOnly = 1;
 
-// 0x0070bf10
+// NTSC-U/C: 0x0070bf10, PAL: 0x0074faa0
 int g_nHostMode = 0;
 
-// 0x0070bf14
+// NTSC-U/C: 0x0070bf14, PAL: 0x0074faa4
 int g_nUsingArkFiles = 0;
 
-// 0x0070bf18
+// NTSC-U/C: 0x0070bf18, PAL: 0x0074faa8
 int g_nWarningsEnabled = 1;
 
 // No routine writes this word. ConfigureRetailBoot() omits it from the block.
-// 0x0070bf1c
+// NTSC-U/C: 0x0070bf1c, PAL: 0x0074faac
 int g_nScreenMessagesEnabled = 1;
 
-// 0x0070bf20
+// NTSC-U/C: 0x0070bf20, PAL: 0x0074fab0
 int g_nUsingCdMedia = 0;
 
-// 0x0070bf24
+// NTSC-U/C: 0x0070bf24, PAL: 0x0074fab4
 int g_nDebugKeysEnabled = 0;
 
-// 0x0070bf28
+// NTSC-U/C: 0x0070bf28, PAL: 0x0074fab8
 int g_nMidiErrorLogEnabled = 0;
 
-// 0x0070bf2c
+// NTSC-U/C: 0x0070bf2c, PAL: 0x0074fabc
 int g_nMemAccountingEnabled = 0;
 
-// 0x0070bf30
+// NTSC-U/C: 0x0070bf30, PAL: 0x0074fac0
 int g_nIntroMovieEnabled = 1;
 
-// 0x0070bf38
+// NTSC-U/C: 0x0070bf38, PAL: 0x0074fac8
+#ifdef VIDEO_STANDARD_PAL
+HxStr g_versionString("197");
+#else
 HxStr g_versionString("198");
+#endif
 
 #ifdef VIDEO_STANDARD_PAL
 // The language code GetLanguage() reports. The name is inferred.
@@ -56,7 +60,7 @@ int g_nLanguage = SCE_FRENCH_LANGUAGE;
 
 // Report that no configuration file was found, force the disc configuration, and open the memory
 // report. InitBootConfig() is the one caller.
-// 0x0050dad8
+// NTSC-U/C: 0x0050dad8, PAL: 0x0054cfd0
 void ForceCdOnlyBoot() {
     LogPrintf(" Running from CD only, since we couldn't find the config file\n");
     g_nHostMode = kHostModeCdOnly;
@@ -68,59 +72,59 @@ void ForceCdOnlyBoot() {
 
 } // namespace
 
-// 0x0050ef90
+// NTSC-U/C: 0x0050ef90, PAL: 0x0054e508
 HostMode GetHostMode() {
     return static_cast<HostMode>(g_nHostMode);
 }
 
-// 0x0050efa0
+// NTSC-U/C: 0x0050efa0, PAL: 0x0054e518
 int UsingArkFiles() {
     return g_nUsingArkFiles;
 }
 
-// 0x0050efb0
+// NTSC-U/C: 0x0050efb0, PAL: 0x0054e528
 int WarningsEnabled() {
     return g_nWarningsEnabled;
 }
 
-// 0x0050efc0
+// NTSC-U/C: 0x0050efc0, PAL: 0x0054e538
 int ScreenMessagesEnabled() {
     return g_nScreenMessagesEnabled;
 }
 
-// 0x0050efd0
+// NTSC-U/C: 0x0050efd0, PAL: 0x0054e548
 int UsingCdMedia() {
     return g_nUsingCdMedia;
 }
 
-// 0x0050ef30
+// NTSC-U/C: 0x0050ef30, PAL: 0x0054e4a8
 HxStr GetFreqRoot() {
     return HxStr("");
 }
 
-// 0x0050d9f0
+// NTSC-U/C: 0x0050d9f0, PAL: 0x0054cea8
 HxStr MakeFreqPath(const HxStr &name) {
     HxStr path(GetFreqRoot());
     path += name;
     return path;
 }
 
-// 0x0050efe0
+// NTSC-U/C: 0x0050efe0, PAL: 0x0054e558
 int DebugKeysEnabled() {
     return g_nDebugKeysEnabled;
 }
 
-// 0x0050eff0
+// NTSC-U/C: 0x0050eff0, PAL: 0x0054e568
 int MidiErrorLogEnabled() {
     return g_nMidiErrorLogEnabled;
 }
 
-// 0x0050f000
+// NTSC-U/C: 0x0050f000, PAL: 0x0054e578
 int MemAccountingEnabled() {
     return g_nMemAccountingEnabled;
 }
 
-// 0x0050f010
+// NTSC-U/C: 0x0050f010, PAL: 0x0054e588
 int IntroMovieEnabled() {
     return g_nIntroMovieEnabled;
 }
@@ -137,12 +141,12 @@ void SetLanguage(int nLanguage) {
 }
 #endif
 
-// 0x0050ef60
+// NTSC-U/C: 0x0050ef60, PAL: 0x0054e4d8
 HxStr GetVersionString() {
     return g_versionString;
 }
 
-// 0x0050f030
+// NTSC-U/C: 0x0050f030, PAL: 0x0054e5c8
 void ConfigureRetailBoot() {
     g_nHostMode = kHostModeCdOnly;
     g_nIntroMovieEnabled = 1;
@@ -163,12 +167,12 @@ void InitBootConfig() {
 #endif
 }
 
-// 0x0050f0a8
+// NTSC-U/C: 0x0050f0a8, PAL: 0x0054e650
 void TerminateBootConfig() {
     ReleaseAllZoneSlots();
 }
 
-// 0x0050f0c8
+// NTSC-U/C: 0x0050f0c8, PAL: 0x0054e670
 bool FileExists(const char *pszPath) {
     const int nDescriptor = sceOpen(pszPath, kOpenReadOnly);
     if (nDescriptor < 0) {

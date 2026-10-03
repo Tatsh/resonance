@@ -177,11 +177,13 @@ char HxStr::operator[](unsigned i) const {
 void HxStr::Alloc(unsigned nLen) {
 #ifdef VIDEO_STANDARD_PAL
     if (mStr != g_szEmptyString && mStr != nullptr) {
+        delete[] mStr;
+    }
 #else
     if (mStr != nullptr) {
-#endif
         delete mStr; // Yes, the binary releases the array through the single-object delete.
     }
+#endif
     mLen = nLen;
     mStr = new char[nLen + 1];
     memset(mStr, 0, mLen + 1);

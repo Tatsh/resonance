@@ -33,7 +33,8 @@ public:
      * @param nChannel The MIDI channel. Only the low four bits are kept.
      * @param pParent The owner the player reports to.
      * @param pClock The clock the note-off is scheduled against.
-     * @ghidraAddress 0x001b4328
+     * @ghidraAddress NTSC-U/C: 0x001b4328
+     * @ghidraAddress PAL: 0x001ba100
      */
     NotePlayer(unsigned char nNote,
                unsigned char nVelocity,
@@ -45,7 +46,8 @@ public:
     /**
      * Stop the note through this class's Stop().
      *
-     * @ghidraAddress 0x001b4460
+     * @ghidraAddress NTSC-U/C: 0x001b4460
+     * @ghidraAddress PAL: 0x001ba238
      */
     virtual ~NotePlayer();
 
@@ -55,7 +57,8 @@ public:
      * mParent is told to retain this player alone before the note-on is sent.
      *
      * @param pSink The sink both messages go to.
-     * @ghidraAddress 0x001b3d58
+     * @ghidraAddress NTSC-U/C: 0x001b3d58
+     * @ghidraAddress PAL: 0x001b9b30
      */
     virtual void Start(MsgSink *pSink);
 
@@ -65,13 +68,15 @@ public:
      * The note-off is a StdMidiMsg with status 0x80 ORed with mChannel, mNote, and velocity 0 at
      * the current song position. mSink is cleared whether or not the note was sounding.
      *
-     * @ghidraAddress 0x001b3ee0
+     * @ghidraAddress NTSC-U/C: 0x001b3ee0
+     * @ghidraAddress PAL: 0x001b9cb8
      */
     virtual void Stop();
 
     /**
      * @return Zero. A note never displaces its sibling players.
-     * @ghidraAddress 0x001b41c0
+     * @ghidraAddress NTSC-U/C: 0x001b41c0
+     * @ghidraAddress PAL: 0x001b9f98
      */
     virtual int DisplacesSiblings();
 
@@ -81,14 +86,15 @@ public:
      * The file-local Cmd runs it. mSink is cleared between the two steps.
      *
      * @param nTick The song position the command was scheduled for.
-     * @ghidraAddress 0x001b4040
+     * @ghidraAddress NTSC-U/C: 0x001b4040
+     * @ghidraAddress PAL: 0x001b9e18
      */
     void OnCommand(int nTick);
 
 private:
     // Sends the note-on (status 0x90 ORed with mChannel, mNote, mVelocity) at a song position to
     // mSink.
-    // 0x001b3fb8
+    // NTSC-U/C: 0x001b3fb8, PAL: 0x001b9d90
     void PostStdMidiMsg(int nTick);
 
     unsigned char mNote;     // +0x08

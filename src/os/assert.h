@@ -21,7 +21,8 @@
  * @param pszFile The reporting file, from `__FILE__`.
  * @param nLine The reporting line, from `__LINE__`.
  * @param pszExpression The source text of the failed expression.
- * @ghidraAddress 0x0055c548
+ * @ghidraAddress NTSC-U/C: 0x0055c548
+ * @ghidraAddress PAL: 0x0059d768
  */
 #ifdef __cplusplus
 extern "C" {

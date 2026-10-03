@@ -16,7 +16,8 @@ public:
      *
      * @param ppStream The file's stream pointer.
      * @param pszFile The source file name.
-     * @ghidraAddress 0x004b44c8
+     * @ghidraAddress NTSC-U/C: 0x004b44c8
+     * @ghidraAddress PAL: 0x004f27d8
      */
     SpewRegistrar(std::ostream **ppStream, const char *pszFile);
 };

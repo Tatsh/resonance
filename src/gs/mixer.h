@@ -41,12 +41,14 @@ public:
      *
      * @param nTrack The track this mixer serves. BGTrackGraph passes -1, which matches no track.
      * @param nChannel The MIDI channel every message it emits is sent on.
-     * @ghidraAddress 0x001a7110
+     * @ghidraAddress NTSC-U/C: 0x001a7110
+     * @ghidraAddress PAL: 0x001ace78
      */
     Mixer(int nTrack, unsigned char nChannel);
 
     /**
-     * @ghidraAddress 0x001a8130
+     * @ghidraAddress NTSC-U/C: 0x001a8130
+     * @ghidraAddress PAL: 0x001ade98
      */
     virtual ~Mixer();
 
@@ -62,7 +64,8 @@ public:
      *
      * @param nIndex Which factor, 0 through 3.
      * @param nFactor The factor, 0 through 127.
-     * @ghidraAddress 0x001a73a8
+     * @ghidraAddress NTSC-U/C: 0x001a73a8
+     * @ghidraAddress PAL: 0x001ad110
      */
     void SetGainFactor(int nIndex, unsigned char nFactor);
 
@@ -73,7 +76,8 @@ public:
      * muted sends zero. A call that does not change the flag sends nothing.
      *
      * @param bMuted Non-zero to mute.
-     * @ghidraAddress 0x001a7490
+     * @ghidraAddress NTSC-U/C: 0x001a7490
+     * @ghidraAddress PAL: 0x001ad1f8
      */
     void SetMuted(int bMuted);
 
@@ -90,7 +94,8 @@ public:
      * copy of the jump table, which is why two addresses exist for one member.
      *
      * @param pMsg The control-change message.
-     * @ghidraAddress 0x001a8390
+     * @ghidraAddress NTSC-U/C: 0x001a8390
+     * @ghidraAddress PAL: 0x001ae0f8
      */
     void ApplyControlChange(StdMidiMsg *pMsg);
 
@@ -101,7 +106,8 @@ public:
      * table to one of 0, 0, 0x20, 0x40, 0x60, and 0x7f, which it sends as controller 10. An index
      * the table does not reach sends zero.
      *
-     * @ghidraAddress 0x001a72b8
+     * @ghidraAddress NTSC-U/C: 0x001a72b8
+     * @ghidraAddress PAL: 0x001ad020
      */
     void SendPan();
 
@@ -114,7 +120,8 @@ protected:
      * mLastSection and, when mOwnsPan is set, sends the pan.
      *
      * @param pMsg The TrackSelectMsg.
-     * @ghidraAddress 0x001a75d8
+     * @ghidraAddress NTSC-U/C: 0x001a75d8
+     * @ghidraAddress PAL: 0x001ad340
      */
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
@@ -125,7 +132,8 @@ protected:
      * the gain.
      *
      * @param pMsg The TracksOnMsg.
-     * @ghidraAddress 0x001a76d0
+     * @ghidraAddress NTSC-U/C: 0x001a76d0
+     * @ghidraAddress PAL: 0x001ad438
      */
     void OnTracksOn(TracksOnMsg *pMsg);
 
@@ -138,7 +146,8 @@ protected:
      * Inline. OnTrackSelect() and OnTracksOn() expand it, and the image keeps this out-of-line
      * copy.
      *
-     * @ghidraAddress 0x001a82f0
+     * @ghidraAddress NTSC-U/C: 0x001a82f0
+     * @ghidraAddress PAL: 0x001ae058
      */
     void RecomputeGain();
 
@@ -148,7 +157,8 @@ protected:
      * Table slot 3.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001a7780
+     * @ghidraAddress NTSC-U/C: 0x001a7780
+     * @ghidraAddress PAL: 0x001ad4e8
      */
     virtual void HandleMessage(Message *pMsg);
 

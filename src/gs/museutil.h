@@ -18,6 +18,7 @@ class MultiMuse;
  * @param pMuse The sequence to copy.
  * @param nTrans The semitones to add to every note.
  * @return A new sequence with one reference, which the caller releases.
- * @ghidraAddress 0x001ab6d8
+ * @ghidraAddress NTSC-U/C: 0x001ab6d8
+ * @ghidraAddress PAL: 0x001b1440
  */
 MultiMuse *TransposeMuse(MultiMuse *pMuse, int nTrans);

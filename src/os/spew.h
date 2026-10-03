@@ -55,14 +55,16 @@ public:
     /**
      * Construct an empty registry.
      *
-     * @ghidraAddress 0x004b32b8
+     * @ghidraAddress NTSC-U/C: 0x004b32b8
+     * @ghidraAddress PAL: 0x004f14f8
      */
     Spew();
 
     /**
      * Close every channel and release both lists.
      *
-     * @ghidraAddress 0x004b32e8
+     * @ghidraAddress NTSC-U/C: 0x004b32e8
+     * @ghidraAddress PAL: 0x004f1528
      */
     ~Spew();
 
@@ -73,7 +75,8 @@ public:
      * out-of-line copy.
      *
      * @return The registry.
-     * @ghidraAddress 0x004b4470
+     * @ghidraAddress NTSC-U/C: 0x004b4470
+     * @ghidraAddress PAL: 0x004f2780
      */
     static Spew &shared() {
         static Spew instance;
@@ -88,7 +91,8 @@ public:
      *
      * @param ppStream The file's stream pointer.
      * @param pszFile The source file name.
-     * @ghidraAddress 0x004b3528
+     * @ghidraAddress NTSC-U/C: 0x004b3528
+     * @ghidraAddress PAL: 0x004f1790
      */
     void Register(std::ostream **ppStream, const char *pszFile);
 
@@ -101,7 +105,8 @@ public:
      *
      * @param file The source file's base name.
      * @param channel The channel name: `off`, `console`, `debug`, or a file to write.
-     * @ghidraAddress 0x004b36b8
+     * @ghidraAddress NTSC-U/C: 0x004b36b8
+     * @ghidraAddress PAL: 0x004f1960
      */
     void Connect(const HxStr &file, const HxStr &channel);
 
@@ -109,17 +114,18 @@ public:
      * Write every registration and its channel name, one per line.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x004b4550
+     * @ghidraAddress NTSC-U/C: 0x004b4550
+     * @ghidraAddress PAL: 0x004f2860
      */
     void PrintConnections(std::ostream &stream);
 
 private:
-    // 0x004b3898
+    // NTSC-U/C: 0x004b3898, PAL: 0x004f1b80
     // Builds a channel. `off` and `debug` discard their output, `console` writes to
     // cout, and any other name opens a file for writing. The receiver is unread.
     Channel *NewChannel(const HxStr &name);
 
-    // 0x004b3448
+    // NTSC-U/C: 0x004b3448, PAL: 0x004f16a0
     // Flushes and deletes every channel's stream, deletes the channels, and empties
     // mChannels. The destructor is the one caller.
     void CloseChannels();

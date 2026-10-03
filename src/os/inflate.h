@@ -37,7 +37,8 @@ struct Huft {
  * @param pnLookupBits The preferred lookup bits on entry, and the bits used on return.
  * @return kInflateOk, kInflateError for an incomplete code set that is not a single code,
  *     kInflateBadCodes for over-subscribed lengths, or kInflateOutOfMemory.
- * @ghidraAddress 0x0063c748
+ * @ghidraAddress NTSC-U/C: 0x0063c748
+ * @ghidraAddress PAL: 0x0067d2d8
  */
 int huft_build(const unsigned *pLengths,
                unsigned nCodes,
@@ -55,7 +56,8 @@ int huft_build(const unsigned *pLengths,
  * @param nLiteralBits The lookup bits of the literal and length table.
  * @param nDistanceBits The lookup bits of the distance table.
  * @return kInflateOk at the end-of-block code, or kInflateError for an invalid code.
- * @ghidraAddress 0x0063cd50
+ * @ghidraAddress NTSC-U/C: 0x0063cd50
+ * @ghidraAddress PAL: 0x0067d8e0
  */
 int inflate_codes(Huft *pLiteralTable, Huft *pDistanceTable, int nLiteralBits, int nDistanceBits);
 
@@ -63,7 +65,8 @@ int inflate_codes(Huft *pLiteralTable, Huft *pDistanceTable, int nLiteralBits, i
  * Copy a stored block into the window.
  *
  * @return kInflateOk, or kInflateError when the length does not match its complement.
- * @ghidraAddress 0x0063d348
+ * @ghidraAddress NTSC-U/C: 0x0063d348
+ * @ghidraAddress PAL: 0x0067ded8
  */
 int inflate_stored();
 
@@ -71,7 +74,8 @@ int inflate_stored();
  * Decode a block that uses the fixed codes.
  *
  * @return kInflateOk, or the failure of huft_build() or inflate_codes().
- * @ghidraAddress 0x0063d5c8
+ * @ghidraAddress NTSC-U/C: 0x0063d5c8
+ * @ghidraAddress PAL: 0x0067e158
  */
 int inflate_fixed();
 
@@ -82,7 +86,8 @@ int inflate_fixed();
  *
  * @return kInflateOk, or kInflateError for bad counts or corrupt data, or the failure of
  *     huft_build().
- * @ghidraAddress 0x0063d720
+ * @ghidraAddress NTSC-U/C: 0x0063d720
+ * @ghidraAddress PAL: 0x0067e2b0
  */
 int inflate_dynamic();
 
@@ -91,7 +96,8 @@ int inflate_dynamic();
  *
  * @param pnLast Receives one when this block is the last of the stream.
  * @return kInflateOk, the failure of the block decoder, or kInflateBadCodes for block type 3.
- * @ghidraAddress 0x0063def8
+ * @ghidraAddress NTSC-U/C: 0x0063def8
+ * @ghidraAddress PAL: 0x0067ea88
  */
 int inflate_block(int *pnLast);
 
@@ -102,7 +108,8 @@ int inflate_block(int *pnLast);
  * buffer are returned to the staging buffer. The gzip trailer is neither read nor checked.
  *
  * @return kInflateOk, or the failure of inflate_block().
- * @ghidraAddress 0x0063e0b0
+ * @ghidraAddress NTSC-U/C: 0x0063e0b0
+ * @ghidraAddress PAL: 0x0067ec40
  */
 int inflate();
 
@@ -111,7 +118,8 @@ int inflate();
  *
  * inflate() includes an inlined copy of the body, and this routine is never called.
  *
- * @ghidraAddress 0x0063e1a8
+ * @ghidraAddress NTSC-U/C: 0x0063e1a8
+ * @ghidraAddress PAL: 0x0067ed38
  */
 void HuftReset();
 
@@ -123,7 +131,8 @@ void HuftReset();
  *
  * @param nEntries The number of entries, including the link entry.
  * @return The table, or null after logging when the pool is exhausted.
- * @ghidraAddress 0x0063e1e0
+ * @ghidraAddress NTSC-U/C: 0x0063e1e0
+ * @ghidraAddress PAL: 0x0067ed70
  */
 Huft *HuftAlloc(unsigned nEntries);
 
@@ -132,6 +141,7 @@ Huft *HuftAlloc(unsigned nEntries);
  *
  * @param pTable The first table.
  * @return Zero.
- * @ghidraAddress 0x0063e230
+ * @ghidraAddress NTSC-U/C: 0x0063e230
+ * @ghidraAddress PAL: 0x0067edc0
  */
 int huft_free(Huft *pTable);

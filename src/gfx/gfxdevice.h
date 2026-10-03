@@ -61,7 +61,8 @@ public:
      * feedback rectangle covers the whole display at an alpha of 0.78, the clear colour is opaque
      * black, and mAdTag becomes an A+D GIFtag with one register and no loops.
      *
-     * @ghidraAddress 0x0049ac50
+     * @ghidraAddress NTSC-U/C: 0x0049ac50
+     * @ghidraAddress PAL: 0x004d8bd0
      */
     GfxDevice();
 
@@ -83,7 +84,8 @@ public:
      * the default camera, and Rnd::PsEnviron's is called rather than inlined. The routine ends by
      * calling g_vramTable's destructor explicitly. The name is inferred.
      *
-     * @ghidraAddress 0x0049afe0
+     * @ghidraAddress NTSC-U/C: 0x0049afe0
+     * @ghidraAddress PAL: 0x004d8ff8
      */
     void Terminate();
 
@@ -93,7 +95,8 @@ public:
      * MetSonyScreen calls it before handing the display to another renderer. The name is
      * inferred.
      *
-     * @ghidraAddress 0x0049fef0
+     * @ghidraAddress NTSC-U/C: 0x0049fef0
+     * @ghidraAddress PAL: 0x004ddf78
      */
     void ResetVramAndSavePacket();
 
@@ -102,7 +105,8 @@ public:
      *
      * The length copied is the whole quadwords between mpBuffer and mpWrite. The name is inferred.
      *
-     * @ghidraAddress 0x0049ff28
+     * @ghidraAddress NTSC-U/C: 0x0049ff28
+     * @ghidraAddress PAL: 0x004ddfb0
      */
     void SavePacket();
 
@@ -111,7 +115,8 @@ public:
      *
      * InitDisplayMode() is the one caller. The name is inferred.
      *
-     * @ghidraAddress 0x0049ff98
+     * @ghidraAddress NTSC-U/C: 0x0049ff98
+     * @ghidraAddress PAL: 0x004de020
      */
     void RestorePacket();
 
@@ -125,7 +130,8 @@ public:
      *
      * @param nCause The interrupt cause the kernel passes, unused.
      * @return 0.
-     * @ghidraAddress 0x0049fea0
+     * @ghidraAddress NTSC-U/C: 0x0049fea0
+     * @ghidraAddress PAL: 0x004ddf28
      */
     static int VblankHandler(int nCause);
 
@@ -134,14 +140,18 @@ public:
      *
      * Labels g_profileTimers records 8 to 13 "setup", "vram", "billboard", "vert", "prim", and
      * "sync", records the display geometry with mnPixelBytes as nBitDepth / 8, points the packet
-     * buffer at the first scratchpad half, and runs InitDisplayMode(). It then installs the
+     * buffer at the first scratchpad half, and runs InitDisplayMode(). The PAL build instead rounds
+     * the width down to 640, 512, 384, or 256 and the height down to 512, 448, 256, or 224, chooses
+     * NTSC output for 448 and 224 and PAL output otherwise, and takes two bytes a pixel for a depth
+     * under 32 bits and four otherwise. It then installs the
      * PlayStation 2 creators for meshes, cameras, materials, textures, environments, particle
      * systems, and multi-meshes, and initialises g_vramTable.
      *
      * @param nWidth The display width in pixels.
      * @param nHeight The display height in pixels.
      * @param nBitDepth The framebuffer depth in bits.
-     * @ghidraAddress 0x0049ae20
+     * @ghidraAddress NTSC-U/C: 0x0049ae20
+     * @ghidraAddress PAL: 0x004d8da0
      */
     void Init(int nWidth, int nHeight, int nBitDepth);
 
@@ -153,7 +163,8 @@ public:
      * into g_lastFrameProfileTimers, and every record of g_profileTimers then has its cycles and
      * depth cleared.
      *
-     * @ghidraAddress 0x0049b930
+     * @ghidraAddress NTSC-U/C: 0x0049b930
+     * @ghidraAddress PAL: 0x004d9950
      */
     void BeginFrame();
 
@@ -164,7 +175,8 @@ public:
      * video memory frame. A swap then runs SwapBuffers() and inverts mnDrawBuffer once more.
      *
      * @param nSwapBuffers Non-zero to flip the framebuffer.
-     * @ghidraAddress 0x0049bac8
+     * @ghidraAddress NTSC-U/C: 0x0049bac8
+     * @ghidraAddress PAL: 0x004d9ae8
      */
     void PresentFrame(int nSwapBuffers);
 
@@ -172,13 +184,15 @@ public:
      * Program the GS display registers for the recorded geometry.
      *
      * Every register shadow is set to all ones (FOGCOL's to 1), and the GS, the DMA controller,
-     * and the display are reset for NTSC interlaced field output. The pixel depth selects the frame
+     * and the display are reset for NTSC interlaced field output (in the PAL build, PAL output
+     * unless mnNtscOutput is set). The pixel depth selects the frame
      * and depth buffer formats and mnDepthBytes; a depth other than 16, 24, or 32 bits reports
      * "Unsupported video mode" and falls back to 32. The double buffer is then built and shown,
      * the vertical blank handler installed, the saved packet restored, and the VU0 and VU1
      * microcode sent before VU1 runs its program at 0x3c0.
      *
-     * @ghidraAddress 0x0049b138
+     * @ghidraAddress NTSC-U/C: 0x0049b138
+     * @ghidraAddress PAL: 0x004d9150
      */
     void InitDisplayMode();
 
@@ -190,7 +204,8 @@ public:
      * buffers, and the display geometry at mnDepthBytes a pixel adds the depth buffer itself.
      *
      * @return Words in use, at four bytes each.
-     * @ghidraAddress 0x0049fec0
+     * @ghidraAddress NTSC-U/C: 0x0049fec0
+     * @ghidraAddress PAL: 0x004ddf48
      */
     int GetReservedVramWords() const;
 
@@ -210,7 +225,8 @@ public:
      * @param nReg The GS register number.
      * @param qwValue The value to set, of which only the masked bits are used.
      * @param qwMask The bits of the register this call owns.
-     * @ghidraAddress 0x0049ffd0
+     * @ghidraAddress NTSC-U/C: 0x0049ffd0
+     * @ghidraAddress PAL: 0x004de058
      */
     void SetGsReg(int nReg, unsigned long long qwValue, unsigned long long qwMask);
 
@@ -227,7 +243,8 @@ public:
      * needed once the bulk data has been measured.
      *
      * @param nQuadwords The space to reserve.
-     * @ghidraAddress 0x0049fd98
+     * @ghidraAddress NTSC-U/C: 0x0049fd98
+     * @ghidraAddress PAL: 0x004dde20
      */
     void ReserveGifSpace(int nQuadwords);
 
@@ -237,7 +254,8 @@ public:
      * Calling it twice returns to where it started. That is how a caller alternates between the
      * reserved region and the main stream. It does nothing unless a reservation is open.
      *
-     * @ghidraAddress 0x0049fe08
+     * @ghidraAddress NTSC-U/C: 0x0049fe08
+     * @ghidraAddress PAL: 0x004dde90
      */
     void SwapGifWrite();
 
@@ -247,7 +265,8 @@ public:
      * The quadword count comes from how far the region's own write pointer advanced. Nothing is
      * copied when the region is empty, and the reservation is closed either way.
      *
-     * @ghidraAddress 0x0049fe38
+     * @ghidraAddress NTSC-U/C: 0x0049fe38
+     * @ghidraAddress PAL: 0x004ddec0
      */
     void FlushReservedGif();
 
@@ -262,7 +281,8 @@ public:
      * Ending the packet on the VU1 path also fills in the count of the open VIF DIRECT code.
      *
      * @param bEndOfPacket Non-zero to set the tag's end-of-packet bit.
-     * @ghidraAddress 0x004a0158
+     * @ghidraAddress NTSC-U/C: 0x004a0158
+     * @ghidraAddress PAL: 0x004de1e0
      */
     void CloseGifTag(int bEndOfPacket);
 
@@ -273,7 +293,8 @@ public:
      * code goes ahead of the tag unless one is already open.
      *
      * @param pTag The tag to write, whose loop count CloseGifTag() fills in later.
-     * @ghidraAddress 0x0049b5a8
+     * @ghidraAddress NTSC-U/C: 0x0049b5a8
+     * @ghidraAddress PAL: 0x004d95c8
      */
     void WriteGifTag(const GifQuadword *pTag);
 
@@ -290,7 +311,8 @@ public:
      * @param bRetainOpenTag Non-zero to reopen the current tag in the new buffer half.
      * @param bOnlyWhenFull Non-zero to submit only once the buffer is full.
      * @return Non-zero when a packet was sent.
-     * @ghidraAddress 0x0049b478
+     * @ghidraAddress NTSC-U/C: 0x0049b478
+     * @ghidraAddress PAL: 0x004d9498
      */
     int FlushGifPacket(int bRetainOpenTag, int bOnlyWhenFull);
 
@@ -301,7 +323,8 @@ public:
      * buffer has before switching, because a packet built for one path cannot be sent down the
      * other.
      *
-     * @ghidraAddress 0x004a0348
+     * @ghidraAddress NTSC-U/C: 0x004a0348
+     * @ghidraAddress PAL: 0x004de3d0
      */
     void EnterVu1Path();
 
@@ -311,7 +334,8 @@ public:
      * Does nothing unless the VU1 path is selected. Otherwise it ends the open tag, submits the
      * buffer, and waits for the GS paths to drain before switching.
      *
-     * @ghidraAddress 0x0049b838
+     * @ghidraAddress NTSC-U/C: 0x0049b838
+     * @ghidraAddress PAL: 0x004d9858
      */
     void LeaveVu1Path();
 
@@ -322,7 +346,8 @@ public:
      * come from the draw environment of the half mnDrawBuffer selects, and the binary open-codes
      * the body of SetGsReg() for each.
      *
-     * @ghidraAddress 0x0049b6b8
+     * @ghidraAddress NTSC-U/C: 0x0049b6b8
+     * @ghidraAddress PAL: 0x004d96d8
      */
     void RestoreFrameBufferTarget();
 
@@ -334,7 +359,8 @@ public:
      * written back, because the double buffer is read through its uncached alias.
      *
      * @param color The clear colour, each component from 0 to 1.
-     * @ghidraAddress 0x0049b368
+     * @ghidraAddress NTSC-U/C: 0x0049b368
+     * @ghidraAddress PAL: 0x004d9388
      */
     void SetClearColor(const Color &color);
 
@@ -344,7 +370,8 @@ public:
      * One line each for the frame rate and for every RenderStats counter, then the kilobytes of
      * texture the VRAM table uploaded in the last frame.
      *
-     * @ghidraAddress 0x0049bec8
+     * @ghidraAddress NTSC-U/C: 0x0049bec8
+     * @ghidraAddress PAL: 0x004d9ee8
      */
     void DrawRenderStatsOverlay();
 
@@ -352,7 +379,8 @@ public:
      * Draw one bar per profiler timer, scaled against a full-scale time.
      *
      * @param nFullScaleMs Milliseconds a bar spanning 95 per cent of the display width stands for.
-     * @ghidraAddress 0x0049c778
+     * @ghidraAddress NTSC-U/C: 0x0049c778
+     * @ghidraAddress PAL: 0x004da798
      */
     void DrawSubsystemTimingGraph(int nFullScaleMs);
 
@@ -365,7 +393,8 @@ public:
      * mFeedbackInset at both corners. The title covers only the register setup, although
      * the routine also draws. Renderer::Draw() calls it while g_nLsdMode is set.
      *
-     * @ghidraAddress 0x0049ccb8
+     * @ghidraAddress NTSC-U/C: 0x0049ccb8
+     * @ghidraAddress PAL: 0x004dacd8
      */
     void SetupGsDrawContext();
 
@@ -384,6 +413,14 @@ public:
     std::vector<GifQuadword> mSavedPacket;
     /** GIFtag whose loop count is still to be filled in, or null when none is open. */
     GifQuadword *mpOpenTag;
+#ifdef VIDEO_STANDARD_PAL
+    /**
+     * Non-zero when Init() chose NTSC output for the requested height, and zero for PAL output.
+     *
+     * InitDisplayMode() selects the video mode by it.
+     */
+    int mnNtscOutput;
+#endif
     /** Display width in pixels, as Init() recorded it. Rnd::PsCam::ScreenToPixels() reads it. */
     int mnDisplayWidth;
     /** Display height in pixels. Read alongside the width by the same routine. */
@@ -430,7 +467,8 @@ public:
      *
      * InitDisplayMode() and MetLoadGameScreen::OnFadeInDone() at `0x0028e118` are the callers.
      *
-     * @ghidraAddress 0x004a0388
+     * @ghidraAddress NTSC-U/C: 0x004a0388
+     * @ghidraAddress PAL: 0x004de410
      */
     void FlipFrameBuffer();
 
@@ -505,7 +543,8 @@ private:
 /**
  * The display device.
  *
- * @ghidraAddress 0x006f2a80
+ * @ghidraAddress NTSC-U/C: 0x006f2a80
+ * @ghidraAddress PAL: 0x007364c0
  */
 extern GfxDevice g_gfxDevice;
 
@@ -515,7 +554,8 @@ extern GfxDevice g_gfxDevice;
  * GfxDevice::VblankHandler() increments it. SwapBuffers() busy-waits on it, reloading it on every
  * pass.
  *
- * @ghidraAddress 0x006f2f20
+ * @ghidraAddress NTSC-U/C: 0x006f2f20
+ * @ghidraAddress PAL: 0x00736970
  */
 extern volatile int g_nVblankCounter;
 
@@ -529,7 +569,8 @@ extern "C" {
  * and 0x258 for sprites. InitDisplayMode() sends the chain on the VIF1 channel. The name is
  * inferred.
  *
- * @ghidraAddress 0x00664ab0
+ * @ghidraAddress NTSC-U/C: 0x00664ab0
+ * @ghidraAddress PAL: 0x006a5640
  */
 extern GifQuadword g_vu1MicrocodeChain[];
 
@@ -539,7 +580,8 @@ extern GifQuadword g_vu1MicrocodeChain[];
  * The chain and the microprogram it uploads are DVP assembly. InitDisplayMode() sends the chain
  * on the VIF0 channel. The name is inferred.
  *
- * @ghidraAddress 0x00666de0
+ * @ghidraAddress NTSC-U/C: 0x00666de0
+ * @ghidraAddress PAL: 0x006a7970
  */
 extern GifQuadword g_vu0MicrocodeChain[];
 }

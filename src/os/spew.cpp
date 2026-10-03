@@ -21,16 +21,16 @@ inline void LowerCase(HxStr &text) {
 
 } // namespace
 
-// 0x004b32b8
+// NTSC-U/C: 0x004b32b8, PAL: 0x004f14f8
 Spew::Spew() {
 }
 
-// 0x004b32e8
+// NTSC-U/C: 0x004b32e8, PAL: 0x004f1528
 Spew::~Spew() {
     CloseChannels();
 }
 
-// 0x004b3528
+// NTSC-U/C: 0x004b3528, PAL: 0x004f1790
 void Spew::Register(std::ostream **ppStream, const char *pszFile) {
     HxStr name(pszFile);
     int nPos = name.ReverseFind('.');
@@ -45,7 +45,7 @@ void Spew::Register(std::ostream **ppStream, const char *pszFile) {
     mConnections.push_back(Connection(name, ppStream, nullptr));
 }
 
-// 0x004b36b8
+// NTSC-U/C: 0x004b36b8, PAL: 0x004f1960
 void Spew::Connect(const HxStr &file, const HxStr &channel) {
     Channel *pChannel = nullptr;
     HxStr channelName(channel);
@@ -73,7 +73,7 @@ void Spew::Connect(const HxStr &file, const HxStr &channel) {
     }
 }
 
-// 0x004b3898
+// NTSC-U/C: 0x004b3898, PAL: 0x004f1b80
 Spew::Channel *Spew::NewChannel(const HxStr &name) {
     std::ostream *pStream = nullptr;
     if (name == kChannelOff) {
@@ -88,7 +88,7 @@ Spew::Channel *Spew::NewChannel(const HxStr &name) {
     return new Channel(name, pStream);
 }
 
-// 0x004b3448
+// NTSC-U/C: 0x004b3448, PAL: 0x004f16a0
 void Spew::CloseChannels() {
     for (Channel *pChannel : mChannels) {
         if (pChannel == nullptr) {
@@ -104,7 +104,7 @@ void Spew::CloseChannels() {
     mChannels.erase(mChannels.begin(), mChannels.end());
 }
 
-// 0x004b4550
+// NTSC-U/C: 0x004b4550, PAL: 0x004f2860
 void Spew::PrintConnections(std::ostream &stream) {
     for (const auto &connection : mConnections) {
         stream << connection.mFile;

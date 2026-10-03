@@ -8,7 +8,7 @@ constexpr unsigned char kControlLiteralFlag = 0x80;
 
 } // namespace
 
-// 0x0060da78
+// NTSC-U/C: 0x0060da78, PAL: 0x0064e6e8
 // The keyed and the opaque walks are separate code in the binary rather than one walk
 // with the comparison inside it, and the shape here reproduces that.
 unsigned char *ARleReader::DecodeRow(unsigned char *pDest) {
@@ -69,14 +69,14 @@ unsigned char *ARleReader::DecodeRow(unsigned char *pDest) {
     return pDest;
 }
 
-// 0x0060dc98
+// NTSC-U/C: 0x0060dc98, PAL: 0x0064e908
 void ARleReader::DecodeRows(unsigned char *pDest) {
     while (*mSource != kControlTerminator) {
         pDest = DecodeRow(pDest);
     }
 }
 
-// 0x0060dc10
+// NTSC-U/C: 0x0060dc10, PAL: 0x0064e880
 // mWidth is read once before the first row and re-derived from a register afterwards,
 // so a width written between rows would not be seen.
 void ARleReader::SkipRows(int nRows) {

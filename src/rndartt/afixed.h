@@ -11,7 +11,8 @@
  * immediates. That translation unit defines nothing else, so its name is inferred from the
  * values it defines.
  *
- * @ghidraAddress 0x007a82c0
+ * @ghidraAddress NTSC-U/C: 0x007a82c0
+ * @ghidraAddress PAL: 0x007ebfc0
  */
 extern int g_nFixedHalf;
 
@@ -20,7 +21,8 @@ extern int g_nFixedHalf;
  *
  * No reader was located.
  *
- * @ghidraAddress 0x007a82c8
+ * @ghidraAddress NTSC-U/C: 0x007a82c8
+ * @ghidraAddress PAL: 0x007ebfc8
  */
 extern int g_nFixedE;
 
@@ -29,7 +31,8 @@ extern int g_nFixedE;
  *
  * No reader was located.
  *
- * @ghidraAddress 0x007a82d0
+ * @ghidraAddress NTSC-U/C: 0x007a82d0
+ * @ghidraAddress PAL: 0x007ebfd0
  */
 extern int g_nFixedPi;
 
@@ -39,7 +42,8 @@ extern int g_nFixedPi;
  * ACanvas::ClipLineToRect() subtracts it from the exclusive right and bottom clip edges, which
  * places a clipped endpoint on the last column or row that remains inside.
  *
- * @ghidraAddress 0x007a82d8
+ * @ghidraAddress NTSC-U/C: 0x007a82d8
+ * @ghidraAddress PAL: 0x007ebfd8
  */
 extern int g_nFixedEpsilon;
 
@@ -48,6 +52,7 @@ extern int g_nFixedEpsilon;
  *
  * No reader was located.
  *
- * @ghidraAddress 0x007a82e0
+ * @ghidraAddress NTSC-U/C: 0x007a82e0
+ * @ghidraAddress PAL: 0x007ebfe0
  */
 extern int g_nFixedMax;

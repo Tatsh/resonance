@@ -44,6 +44,7 @@ struct RenderStats {
 /**
  * The renderer's counters.
  *
- * @ghidraAddress 0x006f3940
+ * @ghidraAddress NTSC-U/C: 0x006f3940
+ * @ghidraAddress PAL: 0x00737380
  */
 extern RenderStats g_renderStats;

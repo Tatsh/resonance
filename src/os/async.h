@@ -109,7 +109,8 @@ struct AsyncRequest {
  * installed as the drive completion callback. The routine is idempotent through the initialised
  * flag, and every queue entry point calls it first.
  *
- * @ghidraAddress 0x0045f000
+ * @ghidraAddress NTSC-U/C: 0x0045f000
+ * @ghidraAddress PAL: 0x0049c6c0
  */
 void InitAsync();
 
@@ -119,7 +120,8 @@ void InitAsync();
  * Performs no work when the layer was never brought up. The initialised flag is
  * not cleared, so the layer cannot be brought up again afterwards.
  *
- * @ghidraAddress 0x00460b98
+ * @ghidraAddress NTSC-U/C: 0x00460b98
+ * @ghidraAddress PAL: 0x0049e258
  */
 void ShutdownAsync();
 
@@ -138,7 +140,8 @@ void ShutdownAsync();
  * @param pCallback Receiver notified once the request completes, or null.
  * @param bOwnsBuffer Non-zero to have a cancelled request release pBuffer.
  * @return The request identifier, which AsyncPollComplete() and AsyncCancelRequest() match on.
- * @ghidraAddress 0x00460bd0
+ * @ghidraAddress NTSC-U/C: 0x00460bd0
+ * @ghidraAddress PAL: 0x0049e290
  */
 int AsyncSubmitRequest(int nFile,
                        void *pBuffer,
@@ -169,7 +172,8 @@ int AsyncSubmitRequest(int nFile,
  *                stream-advance call.
  * @param pCallback Receiver notified once the request completes, or null.
  * @return The request identifier.
- * @ghidraAddress 0x0045f148
+ * @ghidraAddress NTSC-U/C: 0x0045f148
+ * @ghidraAddress PAL: 0x0049c808
  */
 int AsyncLoadFileByPath(const char *pszPath,
                         void *pBuffer,
@@ -189,7 +193,8 @@ int AsyncLoadFileByPath(const char *pszPath,
  * immediately.
  *
  * @param request The request to queue.
- * @ghidraAddress 0x0045fc90
+ * @ghidraAddress NTSC-U/C: 0x0045fc90
+ * @ghidraAddress PAL: 0x0049d350
  */
 void AsyncQueueRequest(AsyncRequest request);
 
@@ -202,7 +207,8 @@ void AsyncQueueRequest(AsyncRequest request);
  *
  * @param pRequest The request to finish.
  * @param nStatus The status to record.
- * @ghidraAddress 0x0045ffa8
+ * @ghidraAddress NTSC-U/C: 0x0045ffa8
+ * @ghidraAddress PAL: 0x0049d668
  */
 void AsyncJobComplete(AsyncRequest *pRequest, int nStatus);
 
@@ -214,7 +220,8 @@ void AsyncJobComplete(AsyncRequest *pRequest, int nStatus);
  *
  * @param nFile The file handle.
  * @return The resolved file, or -1 when no stream record has that handle.
- * @ghidraAddress 0x00460d58
+ * @ghidraAddress NTSC-U/C: 0x00460d58
+ * @ghidraAddress PAL: 0x0049e418
  */
 int ResolveAsyncStreamFile(int nFile);
 
@@ -227,7 +234,8 @@ int ResolveAsyncStreamFile(int nFile);
  * @param nFile The resolved file.
  * @param nSector The 64 KiB chunk index.
  * @return Non-zero when the current operation is filling that chunk.
- * @ghidraAddress 0x00460f78
+ * @ghidraAddress NTSC-U/C: 0x00460f78
+ * @ghidraAddress PAL: 0x0049e638
  */
 int MatchesCurrentAsyncOp(int nFile, int nSector);
 
@@ -253,7 +261,8 @@ int MatchesCurrentAsyncOp(int nFile, int nSector);
  *
  * @param nBlocking Non-zero to keep waiting until the command settles, zero to return as soon as
  *                  the drive reports that it is still busy.
- * @ghidraAddress 0x00460590
+ * @ghidraAddress NTSC-U/C: 0x00460590
+ * @ghidraAddress PAL: 0x0049dc50
  */
 void AsyncCheck(int nBlocking);
 
@@ -269,7 +278,8 @@ void AsyncCheck(int nBlocking);
  * is erased. A request with no callback is erased in the same pass. A caller that wants the buffer
  * back through AsyncPollComplete() therefore has to poll before the next pump.
  *
- * @ghidraAddress 0x0045f8d8
+ * @ghidraAddress NTSC-U/C: 0x0045f8d8
+ * @ghidraAddress PAL: 0x0049cf98
  */
 void AsyncPumpCompletedRequests();
 
@@ -280,7 +290,8 @@ void AsyncPumpCompletedRequests();
  * `met_disc_prob.view` while the report is 0. The name is inferred from that view.
  *
  * @return 1.
- * @ghidraAddress 0x00460b20
+ * @ghidraAddress NTSC-U/C: 0x00460b20
+ * @ghidraAddress PAL: 0x0049e1e0
  */
 int IsMediaReady();
 
@@ -292,7 +303,8 @@ int IsMediaReady();
  * raises the flag AsyncCheck() waits on. Every other code only latches the error.
  *
  * @param nFunction The libcdvd function code of the finished command.
- * @ghidraAddress 0x00460b28
+ * @ghidraAddress NTSC-U/C: 0x00460b28
+ * @ghidraAddress PAL: 0x0049e1e8
  */
 void AsyncMediaEventCallback(int nFunction);
 
@@ -305,7 +317,8 @@ void AsyncMediaEventCallback(int nFunction);
  * @param ppBuffer Receives the request's buffer, or null to discard it.
  * @param pnLength Receives the number of bytes the request covers, or null to discard it.
  * @return The request's status, or -1 when no completed request has that identifier.
- * @ghidraAddress 0x0045f658
+ * @ghidraAddress NTSC-U/C: 0x0045f658
+ * @ghidraAddress PAL: 0x0049cd18
  */
 int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength);
 
@@ -317,14 +330,16 @@ int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength);
  * async.cpp lines 481 and 499.
  *
  * @param nHandle The identifier AsyncSubmitRequest() reported.
- * @ghidraAddress 0x0045f738
+ * @ghidraAddress NTSC-U/C: 0x0045f738
+ * @ghidraAddress PAL: 0x0049cdf8
  */
 void AsyncCancelRequest(int nHandle);
 
 /**
  * Report the queue to the log.
  *
- * @ghidraAddress 0x0045faf0
+ * @ghidraAddress NTSC-U/C: 0x0045faf0
+ * @ghidraAddress PAL: 0x0049d1b0
  */
 void AsyncDump();
 
@@ -338,7 +353,8 @@ void AsyncDump();
  * @param pnPending Receives the number of queued requests.
  * @param pnCompleted Receives the number of finished requests no caller has taken yet.
  * @param pnFreeJobs Receives the number of job records still free.
- * @ghidraAddress 0x0045fa38
+ * @ghidraAddress NTSC-U/C: 0x0045fa38
+ * @ghidraAddress PAL: 0x0049d0f8
  */
 void CountAsyncQueues(int *pnPending, int *pnCompleted, int *pnFreeJobs);
 
@@ -348,7 +364,8 @@ void CountAsyncQueues(int *pnPending, int *pnCompleted, int *pnFreeJobs);
  * Exhausting the free list is fatal.
  *
  * @return The job, unlinked from the free list.
- * @ghidraAddress 0x00460d90
+ * @ghidraAddress NTSC-U/C: 0x00460d90
+ * @ghidraAddress PAL: 0x0049e450
  */
 AsyncJob *AsyncGetFreeJobChain();
 
@@ -360,7 +377,8 @@ AsyncJob *AsyncGetFreeJobChain();
  * produces no work.
  *
  * @param pChain The head of the chain to release.
- * @ghidraAddress 0x00460dd8
+ * @ghidraAddress NTSC-U/C: 0x00460dd8
+ * @ghidraAddress PAL: 0x0049e498
  */
 void AsyncReleaseJobChain(AsyncJob *pChain);
 
@@ -386,7 +404,8 @@ void AsyncReleaseJobChain(AsyncJob *pChain);
  * @param pszPath The file to open.
  * @param nFlags The newlib open flags.
  * @return The file. A negative result reports that the open failed.
- * @ghidraAddress 0x0047c9c0
+ * @ghidraAddress NTSC-U/C: 0x0047c9c0
+ * @ghidraAddress PAL: 0x004ba650
  */
 int FileOpen(const char *pszPath, int nFlags, ...);
 
@@ -402,7 +421,8 @@ int FileOpen(const char *pszPath, int nFlags, ...);
  * @param pBuffer The destination.
  * @param nLength The number of bytes to read.
  * @return The number of bytes transferred, which is not positive on failure.
- * @ghidraAddress 0x0047e060
+ * @ghidraAddress NTSC-U/C: 0x0047e060
+ * @ghidraAddress PAL: 0x004bbd38
  */
 int FileRead(int nFile, void *pBuffer, int nLength);
 
@@ -417,7 +437,8 @@ int FileRead(int nFile, void *pBuffer, int nLength);
  * @param nOffset The offset to move by.
  * @param nOrigin One of FileSeekOrigin.
  * @return The resulting position.
- * @ghidraAddress 0x0047e1c8
+ * @ghidraAddress NTSC-U/C: 0x0047e1c8
+ * @ghidraAddress PAL: 0x004bbea0
  */
 int FileSeek(int nFile, int nOffset, int nOrigin);
 
@@ -430,7 +451,8 @@ int FileSeek(int nFile, int nOffset, int nOrigin);
  *
  * @param nFile The file to close.
  * @return The result of the close.
- * @ghidraAddress 0x0047dfb0
+ * @ghidraAddress NTSC-U/C: 0x0047dfb0
+ * @ghidraAddress PAL: 0x004bbc88
  */
 int FileClose(int nFile);
 
@@ -446,7 +468,8 @@ int FileClose(int nFile);
  * @param pBuffer The source.
  * @param nLength The number of bytes to write.
  * @return The number of bytes transferred, or -1 on failure.
- * @ghidraAddress 0x0047e178
+ * @ghidraAddress NTSC-U/C: 0x0047e178
+ * @ghidraAddress PAL: 0x004bbe50
  */
 int FileWrite(int nFile, const void *pBuffer, int nLength);
 
@@ -460,7 +483,8 @@ int FileWrite(int nFile, const void *pBuffer, int nLength);
  *
  * @param nFile The file to test.
  * @return Non-zero for a terminal.
- * @ghidraAddress 0x0047e2f0
+ * @ghidraAddress NTSC-U/C: 0x0047e2f0
+ * @ghidraAddress PAL: 0x004bbfc8
  */
 int FileIsatty(int nFile);
 
@@ -472,7 +496,8 @@ int FileIsatty(int nFile);
  *
  * @param nStream The ark stream handle, kFileHandleArkStream included.
  * @return The position, or -1 when no stream record has that handle.
- * @ghidraAddress 0x0055c028
+ * @ghidraAddress NTSC-U/C: 0x0055c028
+ * @ghidraAddress PAL: 0x0059d248
  */
 int GetArkStreamPosition(int nStream);
 
@@ -486,6 +511,7 @@ int GetArkStreamPosition(int nStream);
  * @param nOffset The offset to move by.
  * @param nOrigin One of FileSeekOrigin.
  * @return The resulting position, or -1 when no stream record has that handle.
- * @ghidraAddress 0x0055bd38
+ * @ghidraAddress NTSC-U/C: 0x0055bd38
+ * @ghidraAddress PAL: 0x0059cf58
  */
 int SeekArkStream(int nStream, int nOffset, int nOrigin);

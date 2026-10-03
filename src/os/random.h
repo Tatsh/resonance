@@ -5,7 +5,8 @@
  *
  * NextRandomValue() is the only reader and the only writer.
  *
- * @ghidraAddress 0x0072407c
+ * @ghidraAddress NTSC-U/C: 0x0072407c
+ * @ghidraAddress PAL: 0x00767c6c
  */
 extern int g_nRandomSeed;
 
@@ -16,6 +17,7 @@ extern int g_nRandomSeed;
  * non-negative and odd.
  *
  * @return The new seed.
- * @ghidraAddress 0x0054f770
+ * @ghidraAddress NTSC-U/C: 0x0054f770
+ * @ghidraAddress PAL: 0x0058fdb0
  */
 int NextRandomValue();

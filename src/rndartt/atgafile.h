@@ -30,7 +30,8 @@ public:
      * A colour map, or an image type other than 2 and 10, gives kAGfxFileBadFormat.
      *
      * @return An AGfxFileResult code.
-     * @ghidraAddress 0x0061fff8
+     * @ghidraAddress NTSC-U/C: 0x0061fff8
+     * @ghidraAddress PAL: 0x00660b88
      */
     virtual int ReadHeader();
 
@@ -44,7 +45,8 @@ public:
      * @param pImage Receives the image.
      * @param pbEnd Set to one when mImageRead is set.
      * @return An AGfxFileResult code.
-     * @ghidraAddress 0x00620508
+     * @ghidraAddress NTSC-U/C: 0x00620508
+     * @ghidraAddress PAL: 0x00661098
      */
     virtual int ReadImage(ABitmap *pImage, int *pbEnd);
 
@@ -53,7 +55,8 @@ public:
      *
      * @param bitmap The bitmap, not read.
      * @return kAGfxFileUnsupported.
-     * @ghidraAddress 0x00620500
+     * @ghidraAddress NTSC-U/C: 0x00620500
+     * @ghidraAddress PAL: 0x00661090
      */
     virtual int Write(const ABitmap &bitmap);
 
@@ -68,7 +71,8 @@ private:
      *
      * @param pImage The bitmap to fill.
      * @return kAGfxFileOk.
-     * @ghidraAddress 0x00620128
+     * @ghidraAddress NTSC-U/C: 0x00620128
+     * @ghidraAddress PAL: 0x00660cb8
      */
     int ReadPixels(ABitmap *pImage);
 

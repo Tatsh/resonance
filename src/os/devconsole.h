@@ -13,7 +13,8 @@
  * The name is inferred.
  *
  * @return Always 1, which the caller discards.
- * @ghidraAddress 0x005e5d08
+ * @ghidraAddress NTSC-U/C: 0x005e5d08
+ * @ghidraAddress PAL: 0x00627ec8
  */
 int InitDebugGs();
 
@@ -23,7 +24,8 @@ int InitDebugGs();
  * This is InitDebugConsole() without its call to InitDebugGs(). No caller survives in the shipped
  * program. The name is inferred.
  *
- * @ghidraAddress 0x005e5ed8
+ * @ghidraAddress NTSC-U/C: 0x005e5ed8
+ * @ghidraAddress PAL: 0x00628098
  */
 void OpenDebugConsole();
 
@@ -32,6 +34,7 @@ void OpenDebugConsole();
  *
  * No caller survives in the shipped program. The name is inferred.
  *
- * @ghidraAddress 0x005e5f60
+ * @ghidraAddress NTSC-U/C: 0x005e5f60
+ * @ghidraAddress PAL: 0x00628148
  */
 void ClearDebugConsole();

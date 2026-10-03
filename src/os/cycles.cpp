@@ -23,7 +23,7 @@ float g_flMillisecondsPerCycle;
 
 int g_nUnusedCycleCounter;
 
-// 0x004fefb0
+// NTSC-U/C: 0x004fefb0, PAL: 0x0053dd60
 void ResetCycleCounter() {
     g_flMillisecondsPerCycle = 1.0f / kCyclesPerMillisecond;
     (void)ReadCycleCount(); // Yes, the binary discards this reading.

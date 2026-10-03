@@ -74,22 +74,22 @@ constexpr int kLineBufferSize = 0x12a0;
 const char *const kSignature = "GIF";
 
 // The byte every block introducer and code size is read into.
-// 0x008e8168
+// NTSC-U/C: 0x008e8168, PAL: 0x0092d168
 signed char s_cByte;
 
-// 0x008e8170
+// NTSC-U/C: 0x008e8170, PAL: 0x0092d170
 APalette s_palette;
 
-// 0x008e8578
+// NTSC-U/C: 0x008e8578, PAL: 0x0092d578
 GifImageDescriptor s_image;
 
-// 0x008e8588
+// NTSC-U/C: 0x008e8588, PAL: 0x0092d588
 GifGraphicControl s_graphicControl;
 
-// 0x008e8590
+// NTSC-U/C: 0x008e8590, PAL: 0x0092d590
 GifScreenDescriptor s_screen;
 
-// 0x007b35e8
+// NTSC-U/C: 0x007b35e8, PAL: 0x007f72e8
 // the low n bits for each code size n.
 const unsigned short kCodeMasks[] = {0x0000,
                                      0x0001,
@@ -110,21 +110,21 @@ const unsigned short kCodeMasks[] = {0x0000,
 
 // Each is bounded at six entries by its neighbour, and the trailing zeros are what a fifth pass
 // reads.
-// 0x007b3608
+// NTSC-U/C: 0x007b3608, PAL: 0x007f7308
 const int kInterlaceStep[] = {8, 8, 4, 2, 0, 0};
-// 0x007b3620
+// NTSC-U/C: 0x007b3620, PAL: 0x007f7320
 const int kInterlaceStart[] = {0, 4, 2, 1, 0, 0};
 
-// 0x007b3638
+// NTSC-U/C: 0x007b3638, PAL: 0x007f7338
 unsigned char s_abStack[kMaxCodeCount];
 
-// 0x007b4638
+// NTSC-U/C: 0x007b4638, PAL: 0x007f8338
 unsigned char s_abSuffix[kMaxCodeCount];
 
-// 0x007b5638
+// NTSC-U/C: 0x007b5638, PAL: 0x007f9338
 short s_anPrefix[kMaxCodeCount];
 
-// 0x007b7638
+// NTSC-U/C: 0x007b7638, PAL: 0x007fb338
 unsigned char s_abLine[kLineBufferSize];
 
 // Step to the next data byte, reading the next sub-block when the current one is used up. A zero
@@ -150,7 +150,7 @@ NextDataByte(FILE *pFile, unsigned char *pBlock, unsigned char **ppByte, unsigne
 
 } // namespace
 
-// 0x0062a9c0
+// NTSC-U/C: 0x0062a9c0, PAL: 0x0066b550
 int AGifFile::ReadHeader() {
     GifScreenDescriptor screen;
     fread(&screen, 1, kScreenDescriptorSize, mFile);
@@ -172,7 +172,7 @@ int AGifFile::ReadHeader() {
     return kAGfxFileOk;
 }
 
-// 0x0062aaf8
+// NTSC-U/C: 0x0062aaf8, PAL: 0x0066b688
 int AGifFile::ReadImage(ABitmap *pImage, int *pbEnd) {
     *pbEnd = 0;
     for (;;) {
@@ -244,12 +244,12 @@ int AGifFile::ReadImage(ABitmap *pImage, int *pbEnd) {
     }
 }
 
-// 0x0062b6f0
+// NTSC-U/C: 0x0062b6f0, PAL: 0x0066c280
 int AGifFile::Write([[maybe_unused]] const ABitmap &bitmap) {
     return kAGfxFileUnsupported;
 }
 
-// 0x0062ae10
+// NTSC-U/C: 0x0062ae10, PAL: 0x0066b9a0
 void AGifFile::ReadExtensionBlock() {
     unsigned char nLabel;
     fread(&nLabel, 1, 1, mFile);
@@ -305,7 +305,7 @@ void AGifFile::ReadExtensionBlock() {
     }
 }
 
-// 0x0062b008
+// NTSC-U/C: 0x0062b008, PAL: 0x0066bb98
 int AGifFile::DecodeLzwImage(FILE *pFile, int nCodeSize, unsigned char *pDest) {
     unsigned char abBlock[kSubBlockSize];
     unsigned char *pByte = abBlock;

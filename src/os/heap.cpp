@@ -17,16 +17,16 @@ constexpr int kCyclesPerMicrosecond = 0x127;
 
 // Set while Realloc() drives Alloc() and Free() internally, so that the nested calls do not
 // accumulate their own timings on top of the enclosing one.
-// 0x00724578
+// NTSC-U/C: 0x00724578, PAL: 0x00768168
 int g_bHeapTimingSuspended = 0;
 
-// 0x0072457c
+// NTSC-U/C: 0x0072457c, PAL: 0x0076816c
 int g_nHeapAllocMicroseconds = 0;
 
-// 0x00724580
+// NTSC-U/C: 0x00724580, PAL: 0x00768170
 int g_nHeapReallocMicroseconds = 0;
 
-// 0x00724584
+// NTSC-U/C: 0x00724584, PAL: 0x00768174
 int g_nHeapFreeMicroseconds = 0;
 
 HeapNode *NodePrev(const HeapNode *pNode) {
@@ -121,7 +121,7 @@ void Heap::ReplaceFreeNode(HeapNode *pFrom, HeapNode *pTo) {
     }
 }
 
-// 0x00552040
+// NTSC-U/C: 0x00552040, PAL: 0x00592680
 Heap *Heap::Create(void *pBlock, unsigned nSize, unsigned nFlags) {
     if (pBlock == nullptr) {
         // Yes, the binary discards this call's result and then builds the heap at address zero.
@@ -157,14 +157,14 @@ Heap *Heap::Create(void *pBlock, unsigned nSize, unsigned nFlags) {
     return pHeap;
 }
 
-// 0x00552108
+// NTSC-U/C: 0x00552108, PAL: 0x00592748
 void Heap::Destroy() {
     if ((mFlags & kHeapFlagOwnsBlock) != 0) {
         MemFreeTagged(this, __FILE__, __LINE__);
     }
 }
 
-// 0x00551780
+// NTSC-U/C: 0x00551780, PAL: 0x00591dc0
 void *
 Heap::Alloc(unsigned nSize, [[maybe_unused]] const char *pszFile, [[maybe_unused]] int nLine) {
     unsigned nStart = ReadCycleCount();
@@ -237,7 +237,7 @@ Heap::Alloc(unsigned nSize, [[maybe_unused]] const char *pszFile, [[maybe_unused
     return NodePayload(pChosen);
 }
 
-// 0x00551d28
+// NTSC-U/C: 0x00551d28, PAL: 0x00592368
 void Heap::Free(void *pBlock, [[maybe_unused]] const char *pszFile, [[maybe_unused]] int nLine) {
     unsigned nStart = ReadCycleCount();
     if (pBlock == nullptr) {
@@ -295,7 +295,7 @@ void Heap::Free(void *pBlock, [[maybe_unused]] const char *pszFile, [[maybe_unus
     AccumulateMicroseconds(&g_nHeapFreeMicroseconds, nStart);
 }
 
-// 0x005519d0
+// NTSC-U/C: 0x005519d0, PAL: 0x00592010
 void *Heap::Realloc(void *pBlock,
                     unsigned nSize,
                     [[maybe_unused]] const char *pszFile,
@@ -377,7 +377,7 @@ void *Heap::Realloc(void *pBlock,
     return pMoved;
 }
 
-// 0x00552138
+// NTSC-U/C: 0x00552138, PAL: 0x00592778
 int Heap::Shrink(unsigned nSize) {
     if (nSize >= mLength) {
         return 0;
@@ -408,7 +408,7 @@ int Heap::Shrink(unsigned nSize) {
     return 1;
 }
 
-// 0x00551ec8
+// NTSC-U/C: 0x00551ec8, PAL: 0x00592508
 void Heap::DumpToFile(const char *pszPath) {
     FILE *pFile = fopen(pszPath, "w");
     if (pFile == nullptr) {
@@ -450,7 +450,7 @@ void Heap::DumpToFile(const char *pszPath) {
     fclose(pFile);
 }
 
-// 0x00552218
+// NTSC-U/C: 0x00552218, PAL: 0x00592858
 void Heap::DumpStats() {
     char szLine[0xa0];
     sprintf(szLine,
@@ -465,7 +465,7 @@ void Heap::DumpStats() {
     LogPrintf("%s\n", szLine);
 }
 
-// 0x00723998
+// NTSC-U/C: 0x00723998, PAL: 0x00767588
 Heap *g_pPythonHeap = nullptr;
 
 namespace {
@@ -477,7 +477,7 @@ constexpr int kPythonHeapFallbackSize = 0x200000;
 
 } // namespace
 
-// 0x0054d55c
+// NTSC-U/C: 0x0054d55c, PAL: 0x0058dafc
 // The heap setup Py_Initialize() runs first, before the interpreter allocates anything.
 extern "C" void PyHeap_Init(void) {
     const int nPreviousZone = ZoneGetCurrent();

@@ -42,12 +42,14 @@ enum EffectorType {
 class Effector : public MsgSource {
 public:
     /**
-     * @ghidraAddress 0x001a18c8
+     * @ghidraAddress NTSC-U/C: 0x001a18c8
+     * @ghidraAddress PAL: 0x001a7630
      */
     Effector();
 
     /**
-     * @ghidraAddress 0x001a24a8
+     * @ghidraAddress NTSC-U/C: 0x001a24a8
+     * @ghidraAddress PAL: 0x001a8210
      */
     virtual ~Effector();
 
@@ -66,7 +68,8 @@ public:
      * the request repeats the current position.
      *
      * @param bEnabled Non-zero to apply the effect.
-     * @ghidraAddress 0x001a2558
+     * @ghidraAddress NTSC-U/C: 0x001a2558
+     * @ghidraAddress PAL: 0x001a82c0
      */
     virtual void Enable(int bEnabled);
 
@@ -85,7 +88,8 @@ public:
      * @param nChannel The MIDI channel the effect sends on.
      * @param nTrack The track, substituted into the property lookups.
      * @return The new effect.
-     * @ghidraAddress 0x001a0df0
+     * @ghidraAddress NTSC-U/C: 0x001a0df0
+     * @ghidraAddress PAL: 0x001a6b58
      */
     static Effector *CreateForType(int nType, unsigned char nChannel, int nTrack);
 };

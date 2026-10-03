@@ -57,7 +57,8 @@ public:
      * @param nZTest Depth test, where zero also masks depth writes.
      * @param nZPsm Pixel storage format of the depth buffer.
      * @param nClear Passed through to SetDrawEnvs(), which never reads it.
-     * @ghidraAddress 0x0058e9b0
+     * @ghidraAddress NTSC-U/C: 0x0058e9b0
+     * @ghidraAddress PAL: 0x005d1d08
      */
     void
     SetDefaults(short nWidth, short nHeight, short nPsm, short nZTest, short nZPsm, short nClear);
@@ -74,7 +75,8 @@ public:
      * @param nPsm Pixel storage format.
      * @param nFbp0 Page of buffer 0.
      * @param nFbp1 Page of buffer 1.
-     * @ghidraAddress 0x0058e330
+     * @ghidraAddress NTSC-U/C: 0x0058e330
+     * @ghidraAddress PAL: 0x005d1688
      */
     void SetDispEnvs(short nWidth, short nHeight, short nPsm, short nFbp0, short nFbp1);
 
@@ -90,7 +92,8 @@ public:
      * @param nZTest Depth test, where zero also masks depth writes.
      * @param nZPsm Pixel storage format of the depth buffer.
      * @param nClear Never read. The caller passes it in the tenth argument slot on the stack.
-     * @ghidraAddress 0x0058e538
+     * @ghidraAddress NTSC-U/C: 0x0058e538
+     * @ghidraAddress PAL: 0x005d1890
      */
     void SetDrawEnvs(short nWidth,
                      short nHeight,
@@ -110,7 +113,8 @@ public:
      *
      * @param nHalf Zero for half 0, anything else for half 1.
      * @param bClear Non-zero to send the clear with the environment.
-     * @ghidraAddress 0x0058e7e8
+     * @ghidraAddress NTSC-U/C: 0x0058e7e8
+     * @ghidraAddress PAL: 0x005d1b40
      */
     void PutDrawEnv(int nHalf, int bClear);
 
@@ -122,7 +126,8 @@ public:
      *
      * @param nHalf Zero for half 0, anything else for half 1.
      * @param bEnableCircuit1 Non-zero to enable read circuit 1.
-     * @ghidraAddress 0x0058e860
+     * @ghidraAddress NTSC-U/C: 0x0058e860
+     * @ghidraAddress PAL: 0x005d1bb8
      */
     void PutDispEnv(int nHalf, int bEnableCircuit1);
 

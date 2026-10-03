@@ -48,7 +48,8 @@ public:
      *                        PitchingSTG
      *                        passes 1.
      * @param nUnreadOption Stored and never read. PitchingSTG passes zero.
-     * @ghidraAddress 0x001b1ce0
+     * @ghidraAddress NTSC-U/C: 0x001b1ce0
+     * @ghidraAddress PAL: 0x001b7ab8
      */
     NotePitcher(PhraseMgr *pPhraseMgr,
                 Quantizer *pQuantizer,
@@ -59,7 +60,8 @@ public:
                 int nUnreadOption);
 
     /**
-     * @ghidraAddress 0x001b39c0
+     * @ghidraAddress NTSC-U/C: 0x001b39c0
+     * @ghidraAddress PAL: 0x001b9798
      */
     virtual ~NotePitcher();
 
@@ -71,7 +73,8 @@ public:
      *
      * @param nElapsedTicks Ticks since the epoch.
      * @return 1 always.
-     * @ghidraAddress 0x001b3b98
+     * @ghidraAddress NTSC-U/C: 0x001b3b98
+     * @ghidraAddress PAL: 0x001b9970
      */
     virtual int Tick(int nElapsedTicks);
 
@@ -85,7 +88,8 @@ protected:
      * is stored in mLastPitchPosition.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001b1f10
+     * @ghidraAddress NTSC-U/C: 0x001b1f10
+     * @ghidraAddress PAL: 0x001b7ce8
      */
     void PostPitchMsg(PitchRiffMsg *pMsg);
 
@@ -99,7 +103,8 @@ protected:
      * cases.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001b20b0
+     * @ghidraAddress NTSC-U/C: 0x001b20b0
+     * @ghidraAddress PAL: 0x001b7e88
      */
     void PostAllNotesOffMsg(EraseMsg *pMsg);
 
@@ -110,7 +115,8 @@ protected:
      * posted at the message's bar with the force flag set.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001b22f0
+     * @ghidraAddress NTSC-U/C: 0x001b22f0
+     * @ghidraAddress PAL: 0x001b80c8
      */
     void PostSeekerMsg(TrackSelectMsg *pMsg);
 
@@ -126,7 +132,8 @@ protected:
      *
      * @param nGem The gem, the PitchRiffMsg's first word.
      * @param nTick The quantised song position.
-     * @ghidraAddress 0x001b2400
+     * @ghidraAddress NTSC-U/C: 0x001b2400
+     * @ghidraAddress PAL: 0x001b81d8
      */
     void PostPhraseCapturedMsg(int nGem, int nTick);
 
@@ -141,7 +148,8 @@ protected:
      *
      * @param nBar The bar to search from, clamped to zero.
      * @param bForce Non-zero to skip the Player::GetPlace() test.
-     * @ghidraAddress 0x001b2710
+     * @ghidraAddress NTSC-U/C: 0x001b2710
+     * @ghidraAddress PAL: 0x001b84e8
      */
     void PostSeekerMsgSecond(int nBar, int bForce);
 
@@ -151,18 +159,19 @@ protected:
      * Primary table slot 3.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001b3bd0
+     * @ghidraAddress NTSC-U/C: 0x001b3bd0
+     * @ghidraAddress PAL: 0x001b99a8
      */
     virtual void HandleMessage(Message *pMsg);
 
 private:
     // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
-    // 0x001b3a38
+    // NTSC-U/C: 0x001b3a38, PAL: 0x001b9810
     void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
 
     // Returns non-zero when nTick differs from mLastPitchPosition. PostPitchMsg() calls it at
-    // 0x001b1fa4.
-    // 0x001b3b88
+    // NTSC-U/C 0x001b1fa4 (PAL 0x001b7d7c).
+    // NTSC-U/C: 0x001b3b88, PAL: 0x001b9960
     int IsOtherTick(int nTick);
 
     // Reports whether mPlayer may play nBar. In play mode 1 that is TrackData::QueryBar() and
@@ -171,7 +180,7 @@ private:
     // belong to mPlayer.
     // PostSeekerMsgSecond() expands it inline, and PostPitchMsg() and PostPhraseCapturedMsg() call
     // the out-of-line copy. The title is inferred.
-    // 0x001b3a68
+    // NTSC-U/C: 0x001b3a68, PAL: 0x001b9840
     int CanPlayBar(int nBar, int nCurrentBar);
 
     PhraseMgr *mPhraseMgr; // +0x38

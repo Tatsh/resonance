@@ -28,7 +28,7 @@ constexpr int kRampMinimumEnd = 17;
 
 } // namespace
 
-// 0x00557970
+// NTSC-U/C: 0x00557970, PAL: 0x00598ac8
 void APalette::BuildRampPalette(const std::vector<NormalKey> &keys, APalette &palette) {
     palette.mEnd = static_cast<int>(keys.size()) * kRampLength;
     unsigned int *pEntry = palette.mEntries;
@@ -56,13 +56,13 @@ void APalette::BuildRampPalette(const std::vector<NormalKey> &keys, APalette &pa
     }
 }
 
-// 0x00613df8
+// NTSC-U/C: 0x00613df8, PAL: 0x00654988
 void APalette::SetEntries(const unsigned int *pEntries, int nFirst, int nCount) {
     memcpy(&mEntries[nFirst], pEntries, nCount * sizeof(unsigned int));
     mEnd = nFirst + nCount;
 }
 
-// 0x00613e48
+// NTSC-U/C: 0x00613e48, PAL: 0x006549d8
 void APalette::SetEntriesRGB(const unsigned char *pRGB, int nFirst, int nCount) {
     unsigned int *pEntry = &mEntries[nFirst];
     for (int nRemaining = nCount; nRemaining > 0; --nRemaining) {
@@ -72,7 +72,7 @@ void APalette::SetEntriesRGB(const unsigned char *pRGB, int nFirst, int nCount) 
     mEnd = nFirst + nCount;
 }
 
-// 0x00613f10
+// NTSC-U/C: 0x00613f10, PAL: 0x00654aa0
 int APalette::FindNearestEntry(unsigned int nColor, int nFirst, int nLast) const {
     const long long nRed = nColor & kChannelMask;
     const long long nGreen = (nColor >> kGreenShift) & kChannelMask;

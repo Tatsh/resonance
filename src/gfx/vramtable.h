@@ -147,14 +147,16 @@ public:
      *
      * @param nMemAddr First block of the run.
      * @param nBlocks Blocks in the run.
-     * @ghidraAddress 0x00515148
+     * @ghidraAddress NTSC-U/C: 0x00515148
+     * @ghidraAddress PAL: 0x00555478
      */
     void MakeFree(unsigned short nMemAddr, unsigned short nBlocks);
 
     /**
      * Forget which blocks the record described.
      *
-     * @ghidraAddress 0x00514ee8
+     * @ghidraAddress NTSC-U/C: 0x00514ee8
+     * @ghidraAddress PAL: 0x00555218
      */
     void Reset();
 
@@ -162,7 +164,8 @@ public:
      * Pin the record against eviction, or release the pin.
      *
      * @param bPinned Non-zero to pin.
-     * @ghidraAddress 0x00514ef8
+     * @ghidraAddress NTSC-U/C: 0x00514ef8
+     * @ghidraAddress PAL: 0x00555228
      */
     void SetPinned(int bPinned);
 
@@ -177,7 +180,8 @@ public:
      * @param nBitsPerPixel Bits per texel. The routine does not read it.
      * @param nPsm GS pixel storage mode.
      * @param nKind One of VramBlockKind.
-     * @ghidraAddress 0x00514f18
+     * @ghidraAddress NTSC-U/C: 0x00514f18
+     * @ghidraAddress PAL: 0x00555248
      */
     void SetupSurface(int nWidth, int nHeight, int nBitsPerPixel, int nPsm, int nKind);
 
@@ -193,7 +197,8 @@ public:
      * @param nBitsPerPixel Bits per texel. The routine does not read it.
      * @param nPsm GS pixel storage mode.
      * @return Blocks the image occupies.
-     * @ghidraAddress 0x00515058
+     * @ghidraAddress NTSC-U/C: 0x00515058
+     * @ghidraAddress PAL: 0x00555388
      */
     int BlocksForImage(int nWidth, int nHeight, int nBitsPerPixel, int nPsm) const;
 
@@ -205,7 +210,8 @@ public:
      * counts a miss and returns zero, and the caller is expected to upload.
      *
      * @return First block of the run, rounded up to a page for a render target.
-     * @ghidraAddress 0x00513690
+     * @ghidraAddress NTSC-U/C: 0x00513690
+     * @ghidraAddress PAL: 0x00553978
      */
     int GetBlockAddr();
 
@@ -218,7 +224,8 @@ public:
      * @param nBitsPerPixel Bits per texel. The routine does not read it.
      * @param nPsm GS pixel storage mode.
      * @return First block of the run, rounded up to a page for a render target.
-     * @ghidraAddress 0x00515160
+     * @ghidraAddress NTSC-U/C: 0x00515160
+     * @ghidraAddress PAL: 0x00555490
      */
     int UploadImage(const void *pSource, int nWidth, int nHeight, int nBitsPerPixel, int nPsm);
 
@@ -233,7 +240,8 @@ public:
      * @param nBitsPerPixel Bits per texel. The routine does not read it.
      * @param nPsm GS pixel storage mode.
      * @param nBlockOffset Blocks past mMemAddr to write at.
-     * @ghidraAddress 0x005152a8
+     * @ghidraAddress NTSC-U/C: 0x005152a8
+     * @ghidraAddress PAL: 0x005555d8
      */
     void UploadSubImage(const void *pSource,
                         int nWidth,
@@ -245,7 +253,8 @@ public:
     /**
      * Release the record, returning its blocks to the free list and itself to the pool.
      *
-     * @ghidraAddress 0x00514fa8
+     * @ghidraAddress NTSC-U/C: 0x00514fa8
+     * @ghidraAddress PAL: 0x005552d8
      */
     void FreeSelf();
 
@@ -295,7 +304,8 @@ public:
      * diagnostic "AllocBlock: trying to set vpalIndex: %d, already set".
      *
      * @return First block of the slot.
-     * @ghidraAddress 0x00513900
+     * @ghidraAddress NTSC-U/C: 0x00513900
+     * @ghidraAddress PAL: 0x00553be8
      */
     static int AllocBlock();
 
@@ -303,7 +313,8 @@ public:
      * Release up to sixteen unlocked palettes, oldest first.
      *
      * @return Slot index of the last palette released.
-     * @ghidraAddress 0x00513780
+     * @ghidraAddress NTSC-U/C: 0x00513780
+     * @ghidraAddress PAL: 0x00553a68
      */
     static int SwapOutOldest();
 
@@ -311,14 +322,16 @@ public:
      * Slot index of the record's blocks within the palette region.
      *
      * @return Index in the range zero to kVramPalSlots.
-     * @ghidraAddress 0x005153f0
+     * @ghidraAddress NTSC-U/C: 0x005153f0
+     * @ghidraAddress PAL: 0x00555720
      */
     int GetSlotIndex() const;
 
     /**
      * Release every lock on the record.
      *
-     * @ghidraAddress 0x005154c8
+     * @ghidraAddress NTSC-U/C: 0x005154c8
+     * @ghidraAddress PAL: 0x005557f8
      */
     void ClearLockMask();
 
@@ -326,7 +339,8 @@ public:
      * Mark the record as used this packet and return the GS address of its palette.
      *
      * @return First block of the slot, or zero while the record is not resident.
-     * @ghidraAddress 0x00513a40
+     * @ghidraAddress NTSC-U/C: 0x00513a40
+     * @ghidraAddress PAL: 0x00553d28
      */
     int GetBlockAddr();
 
@@ -339,14 +353,16 @@ public:
      * @param nBitsPerPixel Bits per entry. The routine does not read it.
      * @param nPsm GS pixel storage mode.
      * @return First block of the slot.
-     * @ghidraAddress 0x00515590
+     * @ghidraAddress NTSC-U/C: 0x00515590
+     * @ghidraAddress PAL: 0x005558c0
      */
     int UploadClut(const void *pSource, int nWidth, int nHeight, int nBitsPerPixel, int nPsm);
 
     /**
      * Release the record, freeing its slot and returning itself to the free list.
      *
-     * @ghidraAddress 0x005154d0
+     * @ghidraAddress NTSC-U/C: 0x005154d0
+     * @ghidraAddress PAL: 0x00555800
      */
     void FreeSelf();
 
@@ -407,14 +423,16 @@ public:
      * which is what identifies it as the destructor. GfxDevice::Terminate() also calls it
      * explicitly on g_vramTable as its last step.
      *
-     * @ghidraAddress 0x005149f0
+     * @ghidraAddress NTSC-U/C: 0x005149f0
+     * @ghidraAddress PAL: 0x00554d20
      */
     ~VramTable();
 
     /**
      * Reserve the palette region above the display buffers and link every record into the pool.
      *
-     * @ghidraAddress 0x00512850
+     * @ghidraAddress NTSC-U/C: 0x00512850
+     * @ghidraAddress PAL: 0x00552b38
      */
     void Init();
 
@@ -425,7 +443,8 @@ public:
      * "Clear() - resetting lock on entry %d".
      *
      * @param bClearPalettes Non-zero to release resident palettes as well as blocks.
-     * @ghidraAddress 0x00512970
+     * @ghidraAddress NTSC-U/C: 0x00512970
+     * @ghidraAddress PAL: 0x00552c58
      */
     void Clear(int bClearPalettes);
 
@@ -434,14 +453,16 @@ public:
      *
      * The body is empty. GfxDevice::BeginFrame() calls it.
      *
-     * @ghidraAddress 0x00514cd8
+     * @ghidraAddress NTSC-U/C: 0x00514cd8
+     * @ghidraAddress PAL: 0x00555008
      */
     void BeginFrame();
 
     /**
      * Release every lock, fold the frame counters into the running totals, and reset them.
      *
-     * @ghidraAddress 0x00513190
+     * @ghidraAddress NTSC-U/C: 0x00513190
+     * @ghidraAddress PAL: 0x00553478
      */
     void EndFrame();
 
@@ -451,7 +472,8 @@ public:
      * A record whose lock bit is already clear is reported through
      * "VRAM should have lockmask %d set but instead has %d".
      *
-     * @ghidraAddress 0x00513298
+     * @ghidraAddress NTSC-U/C: 0x00513298
+     * @ghidraAddress PAL: 0x00553580
      */
     void AdvanceLockCycle();
 
@@ -461,7 +483,8 @@ public:
      * No call site survives.
      *
      * @param pszPrefix Text written before each line.
-     * @ghidraAddress 0x00513438
+     * @ghidraAddress NTSC-U/C: 0x00513438
+     * @ghidraAddress PAL: 0x00553720
      */
     void PrintStats(const char *pszPrefix);
 
@@ -470,7 +493,8 @@ public:
      *
      * @param pnLoads Receives the transfers.
      * @param pnBlocks Receives the blocks those transfers moved.
-     * @ghidraAddress 0x00514ce0
+     * @ghidraAddress NTSC-U/C: 0x00514ce0
+     * @ghidraAddress PAL: 0x00555010
      */
     void GetLastFrameLoads(int *pnLoads, int *pnBlocks) const;
 
@@ -481,7 +505,8 @@ public:
      * null, which every caller dereferences without checking.
      *
      * @return The record, or null once the pool is empty.
-     * @ghidraAddress 0x005149f8
+     * @ghidraAddress NTSC-U/C: 0x005149f8
+     * @ghidraAddress PAL: 0x00554d28
      */
     VramTableEntry *AllocEntry();
 
@@ -489,7 +514,8 @@ public:
      * Take an unused record from the palette free list.
      *
      * @return The record.
-     * @ghidraAddress 0x00515360
+     * @ghidraAddress NTSC-U/C: 0x00515360
+     * @ghidraAddress PAL: 0x00555690
      */
     VramPalEntry *AllocPalEntry();
 
@@ -504,7 +530,8 @@ public:
      *
      * @param pEntry Record to make resident.
      * @param nBlocks Blocks to find.
-     * @ghidraAddress 0x00512e08
+     * @ghidraAddress NTSC-U/C: 0x00512e08
+     * @ghidraAddress PAL: 0x005530f0
      */
     void AllocBlock(VramTableEntry *pEntry, unsigned short nBlocks);
 
@@ -512,7 +539,8 @@ public:
      * Put a record on the free list and merge it with whichever neighbours are also free.
      *
      * @param pEntry Record to free.
-     * @ghidraAddress 0x00512b50
+     * @ghidraAddress NTSC-U/C: 0x00512b50
+     * @ghidraAddress PAL: 0x00552e38
      */
     void FreeBlock(VramTableEntry *pEntry);
 
@@ -522,7 +550,8 @@ public:
      * No call site survives. The body appears inline inside AllocBlock() and FreeBlock().
      *
      * @param pEntry Record to remove.
-     * @ghidraAddress 0x00512cf0
+     * @ghidraAddress NTSC-U/C: 0x00512cf0
+     * @ghidraAddress PAL: 0x00552fd8
      */
     void RemoveFromChain(VramTableEntry *pEntry);
 
@@ -531,7 +560,8 @@ public:
      *
      * @param pEntry Record to unlink.
      * @param nList One of VramList.
-     * @ghidraAddress 0x00514a48
+     * @ghidraAddress NTSC-U/C: 0x00514a48
+     * @ghidraAddress PAL: 0x00554d78
      */
     void UnlinkEntry(VramTableEntry *pEntry, int nList);
 
@@ -539,7 +569,8 @@ public:
      * Return a record to the pool and forget which blocks it described.
      *
      * @param pEntry Record to release.
-     * @ghidraAddress 0x00514b60
+     * @ghidraAddress NTSC-U/C: 0x00514b60
+     * @ghidraAddress PAL: 0x00554e90
      */
     void ReleaseEntry(VramTableEntry *pEntry);
 
@@ -551,7 +582,8 @@ public:
      *
      * @param pKeep Record that grows.
      * @param pAbsorb Record immediately above it, which is released.
-     * @ghidraAddress 0x00514bb8
+     * @ghidraAddress NTSC-U/C: 0x00514bb8
+     * @ghidraAddress PAL: 0x00554ee8
      */
     void MergeBlocks(VramTableEntry *pKeep, VramTableEntry *pAbsorb);
 
@@ -561,7 +593,8 @@ public:
      * No call site survives, so the receiver is unverified and the routine reads no member. Each
      * tile is reported through "Clearing vram at addr: %d ($%x)".
      *
-     * @ghidraAddress 0x00514db8
+     * @ghidraAddress NTSC-U/C: 0x00514db8
+     * @ghidraAddress PAL: 0x005550e8
      */
     static void WipeVram();
 
@@ -575,7 +608,8 @@ public:
      *
      * @param pBitmap Bitmap to fill, which supplies the shape and the destination.
      * @param nMemAddr First block to read.
-     * @ghidraAddress 0x00514d00
+     * @ghidraAddress NTSC-U/C: 0x00514d00
+     * @ghidraAddress PAL: 0x00555030
      */
     void ReadBackBitmap(ABitmap *pBitmap, unsigned short nMemAddr);
 
@@ -589,7 +623,8 @@ public:
      * are allocated.
      *
      * @param pszName Stem of the file to write.
-     * @ghidraAddress 0x00513528
+     * @ghidraAddress NTSC-U/C: 0x00513528
+     * @ghidraAddress PAL: 0x00553810
      */
     void Screendump(const char *pszName);
 
@@ -643,139 +678,159 @@ public:
  *
  * The run-length format maps to PSMT8, the form it is decompressed into before upload.
  *
- * @ghidraAddress 0x0070d3d0
+ * @ghidraAddress NTSC-U/C: 0x0070d3d0
+ * @ghidraAddress PAL: 0x007512c0
  */
 extern const int g_anGsPixelStorageModes[kABitmapFormatCount];
 
 /**
  * Bits per texel of each ABitmapFormat once it reaches GS memory, indexed by the format code.
  *
- * @ghidraAddress 0x0070d3e8
+ * @ghidraAddress NTSC-U/C: 0x0070d3e8
+ * @ghidraAddress PAL: 0x007512d8
  */
 extern const int g_anBitsPerPixelTable[kABitmapFormatCount];
 
 /**
  * The video memory cache.
  *
- * @ghidraAddress 0x0070d400
+ * @ghidraAddress NTSC-U/C: 0x0070d400
+ * @ghidraAddress PAL: 0x007512f0
  */
 extern VramTable g_vramTable;
 
 /**
  * Every block table record.
  *
- * @ghidraAddress 0x0070d468
+ * @ghidraAddress NTSC-U/C: 0x0070d468
+ * @ghidraAddress PAL: 0x00751358
  */
 extern VramTableEntry g_vramEntries[kVramTableEntries];
 
 /**
  * Every palette table record.
  *
- * @ghidraAddress 0x00714468
+ * @ghidraAddress NTSC-U/C: 0x00714468
+ * @ghidraAddress PAL: 0x00758358
  */
 extern VramPalEntry g_vramPalEntries[kVramPalEntries];
 
 /**
  * First unused palette record.
  *
- * @ghidraAddress 0x0086f6c0
+ * @ghidraAddress NTSC-U/C: 0x0086f6c0
+ * @ghidraAddress PAL: 0x008b3da0
  */
 extern VramPalEntry *g_pVramPalFree;
 
 /**
  * First resident palette record, most recently used first.
  *
- * @ghidraAddress 0x0086f6c4
+ * @ghidraAddress NTSC-U/C: 0x0086f6c4
+ * @ghidraAddress PAL: 0x008b3da4
  */
 extern VramPalEntry *g_pVramPalUsed;
 
 /**
  * Occupancy of the palette region, one bit per slot.
  *
- * @ghidraAddress 0x008ef098
+ * @ghidraAddress NTSC-U/C: 0x008ef098
+ * @ghidraAddress PAL: 0x00934098
  */
 extern unsigned g_adVramPalSlots[kVramPalSlotWords];
 
 /**
  * Block records each generation has locked.
  *
- * @ghidraAddress 0x008ef5a0
+ * @ghidraAddress NTSC-U/C: 0x008ef5a0
+ * @ghidraAddress PAL: 0x009345a0
  */
 extern int g_anVramLockCount[kVramLockGenerations];
 
 /**
  * Palette records each generation has locked.
  *
- * @ghidraAddress 0x008ef6f0
+ * @ghidraAddress NTSC-U/C: 0x008ef6f0
+ * @ghidraAddress PAL: 0x009346f0
  */
 extern int g_anVramPalLockCount[kVramLockGenerations];
 
 /**
  * Block records each generation has locked, in the order they were locked.
  *
- * @ghidraAddress 0x00902380
+ * @ghidraAddress NTSC-U/C: 0x00902380
+ * @ghidraAddress PAL: 0x009473a0
  */
 extern VramTableEntry *g_apVramLocked[kVramLockGenerations][kVramLockedPerGeneration];
 
 /**
  * Palette records each generation has locked, in the order they were locked.
  *
- * @ghidraAddress 0x008f0140
+ * @ghidraAddress NTSC-U/C: 0x008f0140
+ * @ghidraAddress PAL: 0x00935140
  */
 extern VramPalEntry *g_apVramPalLocked[kVramLockGenerations][kVramLockedPerGeneration];
 
 /**
  * Transfers the previous frame performed.
  *
- * @ghidraAddress 0x0089df80
+ * @ghidraAddress NTSC-U/C: 0x0089df80
+ * @ghidraAddress PAL: 0x008e2fc0
  */
 extern int g_nVramLoadsLastFrame;
 
 /**
  * Blocks the previous frame's transfers moved.
  *
- * @ghidraAddress 0x0089df84
+ * @ghidraAddress NTSC-U/C: 0x0089df84
+ * @ghidraAddress PAL: 0x008e2fc4
  */
 extern int g_nVramLoadBlocksLastFrame;
 
 /**
  * Transfer descriptor VramTableEntry::UploadImage() reuses.
  *
- * @ghidraAddress 0x0089de60
+ * @ghidraAddress NTSC-U/C: 0x0089de60
+ * @ghidraAddress PAL: 0x008e2ea0
  */
 extern sceGsLoadImage g_vramUploadLoadImage;
 
 /**
  * Transfer descriptor VramTableEntry::UploadSubImage() reuses.
  *
- * @ghidraAddress 0x0089dec0
+ * @ghidraAddress NTSC-U/C: 0x0089dec0
+ * @ghidraAddress PAL: 0x008e2f00
  */
 extern sceGsLoadImage g_vramUploadSubLoadImage;
 
 /**
  * Transfer descriptor VramPalEntry::UploadClut() reuses.
  *
- * @ghidraAddress 0x0089df20
+ * @ghidraAddress NTSC-U/C: 0x0089df20
+ * @ghidraAddress PAL: 0x008e2f60
  */
 extern sceGsLoadImage g_vramPalLoadImage;
 
 /**
  * Transfer descriptor VramTable::WipeVram() reuses.
  *
- * @ghidraAddress 0x0089de00
+ * @ghidraAddress NTSC-U/C: 0x0089de00
+ * @ghidraAddress PAL: 0x008e2e40
  */
 extern sceGsLoadImage g_vramWipeLoadImage;
 
 /**
  * Transfer descriptor VramTable::ReadBackBitmap() reuses, and therefore VramTable::Screendump().
  *
- * @ghidraAddress 0x0089dd90
+ * @ghidraAddress NTSC-U/C: 0x0089dd90
+ * @ghidraAddress PAL: 0x008e2dd0
  */
 extern sceGsStoreImage g_vramReadBackStoreImage;
 
 /**
  * Number the next VramTable::Screendump() file takes, advanced after each dump.
  *
- * @ghidraAddress 0x00718468
+ * @ghidraAddress NTSC-U/C: 0x00718468
+ * @ghidraAddress PAL: 0x0075c358
  */
 extern int g_nScreendumpIndex;

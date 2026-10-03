@@ -33,7 +33,8 @@ public:
      * @param nChannel The MIDI channel the controller changes go to.
      * @param nDepth The controller value at the top of the sweep.
      * @param nPeriod The oscillator period, in the ticks the task reports.
-     * @ghidraAddress 0x001a1ed8
+     * @ghidraAddress NTSC-U/C: 0x001a1ed8
+     * @ghidraAddress PAL: 0x001a7c40
      */
     WahEffector(Sch::TickClock *pClock, unsigned char nChannel, int nDepth, int nPeriod)
         : TickTask(pClock, Mid::MBT(kPeriodTicks).mTick, 0), mChannel(nChannel), mDepth(nDepth),
@@ -44,7 +45,8 @@ public:
     /**
      * Switch the effect off through this class's own Enable(), then release the oscillator.
      *
-     * @ghidraAddress 0x001a2040
+     * @ghidraAddress NTSC-U/C: 0x001a2040
+     * @ghidraAddress PAL: 0x001a7da8
      */
     virtual ~WahEffector();
 
@@ -52,7 +54,8 @@ public:
      * Report which effect this object applies.
      *
      * @return kEffectorTypeWah.
-     * @ghidraAddress 0x001a2128
+     * @ghidraAddress NTSC-U/C: 0x001a2128
+     * @ghidraAddress PAL: 0x001a7e90
      */
     virtual int Type();
 
@@ -62,7 +65,8 @@ public:
      * A request that repeats the current position sends nothing once a request has been sent.
      *
      * @param bEnabled Non-zero to apply the effect.
-     * @ghidraAddress 0x001a08f8
+     * @ghidraAddress NTSC-U/C: 0x001a08f8
+     * @ghidraAddress PAL: 0x001a6660
      */
     virtual void Enable(int bEnabled);
 
@@ -71,7 +75,8 @@ public:
      *
      * @param nElapsedTicks Ticks since the task's epoch.
      * @return 1 always.
-     * @ghidraAddress 0x001a0a10
+     * @ghidraAddress NTSC-U/C: 0x001a0a10
+     * @ghidraAddress PAL: 0x001a6778
      */
     virtual int Tick(int nElapsedTicks);
 

@@ -39,7 +39,8 @@ public:
      * class's own constructor is trivial and inlined away.
      *
      * @param bitmap The bitmap the canvas addresses.
-     * @ghidraAddress 0x00619008
+     * @ghidraAddress NTSC-U/C: 0x00619008
+     * @ghidraAddress PAL: 0x00659b98
      */
     explicit ACanvasLin15(const ABitmap &bitmap);
 
@@ -49,36 +50,76 @@ public:
      * The body restores ACanvas's table rather than ACanvas15's, because the inlined destructor
      * chain runs to the root and the intermediate store is dead.
      *
-     * @ghidraAddress 0x00618f68
+     * @ghidraAddress NTSC-U/C: 0x00618f68
+     * @ghidraAddress PAL: 0x00659af8
      */
     virtual ~ACanvasLin15();
 
-    /** Slot 12. Walks every pixel, keying the alpha bit off the colour. @ghidraAddress 0x00619040
+    /**
+     * Slot 12. Walks every pixel, keying the alpha bit off the colour.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00619040
+     * @ghidraAddress PAL: 0x00659bd0
      */
     virtual void BuildAlphaFromColorKey(unsigned int nColorKey);
 
     // Lookup only: this overload would otherwise hide the base's three-argument one.
     using ACanvas15::PutPixelNoClip;
 
-    /** Slot 13. @ghidraAddress 0x006190c0 */
+    /**
+     * Slot 13.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006190c0
+     * @ghidraAddress PAL: 0x00659c50
+     */
     virtual void PutPixelNoClip(int nX, int nY);
 
-    /** Slot 17. @ghidraAddress 0x006190e8 */
+    /**
+     * Slot 17.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006190e8
+     * @ghidraAddress PAL: 0x00659c78
+     */
     virtual void PutPixel15NoClip(int nX, int nY, unsigned short nColor);
 
-    /** Slot 27. @ghidraAddress 0x00619108 */
+    /**
+     * Slot 27.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00619108
+     * @ghidraAddress PAL: 0x00659c98
+     */
     virtual unsigned short GetPixel15NoClip(int nX, int nY);
 
-    /** Slot 35. @ghidraAddress 0x00619128 */
+    /**
+     * Slot 35.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00619128
+     * @ghidraAddress PAL: 0x00659cb8
+     */
     virtual void FillRowNoClip(int nY, int nLeft, int nRight);
 
-    /** Slot 37. @ghidraAddress 0x00619170 */
+    /**
+     * Slot 37.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00619170
+     * @ghidraAddress PAL: 0x00659d00
+     */
     virtual void FillColumnNoClip(int nX, int nTop, int nBottom);
 
-    /** Slot 39. @ghidraAddress 0x006191c0 */
+    /**
+     * Slot 39.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006191c0
+     * @ghidraAddress PAL: 0x00659d50
+     */
     virtual void FillRectNoClip(ARect rect);
 
-    /** Slot 46. @ghidraAddress 0x00619518 */
+    /**
+     * Slot 46.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00619518
+     * @ghidraAddress PAL: 0x0065a0a8
+     */
     virtual void TextureRowIndexed(int nY,
                                    int nLeft,
                                    int nRight,
@@ -86,21 +127,51 @@ public:
                                    APoint *pSourcePosition,
                                    const APoint *pSourceStep);
 
-    /** Slot 47. @ghidraAddress 0x00618b00 */
+    /**
+     * Slot 47.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00618b00
+     * @ghidraAddress PAL: 0x00659690
+     */
     virtual void Blit4NoClip(const ABitmap &source, int nX, int nY);
 
-    /** Slot 49. @ghidraAddress 0x00618c78 */
+    /**
+     * Slot 49.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00618c78
+     * @ghidraAddress PAL: 0x00659808
+     */
     virtual void Blit8NoClip(const ABitmap &source, int nX, int nY);
 
-    /** Slot 51. @ghidraAddress 0x00618e00 */
+    /**
+     * Slot 51.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00618e00
+     * @ghidraAddress PAL: 0x00659990
+     */
     virtual void Blit15NoClip(const ABitmap &source, int nX, int nY);
 
-    /** Slot 75. @ghidraAddress 0x00619280 */
+    /**
+     * Slot 75.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00619280
+     * @ghidraAddress PAL: 0x00659e10
+     */
     virtual void RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap);
 
-    /** Slot 79. @ghidraAddress 0x00619360 */
+    /**
+     * Slot 79.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00619360
+     * @ghidraAddress PAL: 0x00659ef0
+     */
     virtual void StretchRowIndexed(const AStretchSpan &span);
 
-    /** Slot 83. @ghidraAddress 0x00619430 */
+    /**
+     * Slot 83.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00619430
+     * @ghidraAddress PAL: 0x00659fc0
+     */
     virtual void StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap);
 };

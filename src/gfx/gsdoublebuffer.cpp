@@ -155,7 +155,7 @@ inline void WriteDisplayRegisters(GsDoubleBuffer::DispEnv &env, int bEnableCircu
 
 } // namespace
 
-// 0x0058e9b0
+// NTSC-U/C: 0x0058e9b0, PAL: 0x005d1d08
 void GsDoubleBuffer::SetDefaults(
     short nWidth, short nHeight, short nPsm, short nZTest, short nZPsm, short nClear) {
     mWidth = nWidth;
@@ -187,14 +187,14 @@ void GsDoubleBuffer::SetDefaults(
     SetDrawEnvs(nWidth, nHeight, nPsm, mFbp0, mFbp1, mZbp, nZTest, nZPsm, nClear);
 }
 
-// 0x0058e330
+// NTSC-U/C: 0x0058e330, PAL: 0x005d1688
 void GsDoubleBuffer::SetDispEnvs(
     short nWidth, short nHeight, short nPsm, short nFbp0, short nFbp1) {
     BuildDispEnv(mDisp[0], nWidth, nHeight, nPsm, nFbp0);
     BuildDispEnv(mDisp[1], nWidth, nHeight, nPsm, nFbp1);
 }
 
-// 0x0058e538
+// NTSC-U/C: 0x0058e538, PAL: 0x005d1890
 void GsDoubleBuffer::SetDrawEnvs(short nWidth,
                                  short nHeight,
                                  short nPsm,
@@ -215,7 +215,7 @@ void GsDoubleBuffer::SetDrawEnvs(short nWidth,
     BuildDrawHalf(mHalves[1], nWidth, nHeight, nPsm, nFbp1, qwZbuf, nZTest, nZPsm);
 }
 
-// 0x0058e7e8
+// NTSC-U/C: 0x0058e7e8, PAL: 0x005d1b40
 void GsDoubleBuffer::PutDrawEnv(int nHalf, int bClear) {
     const unsigned long long qwLoops = bClear != 0 ? kDrawAndClearPairs : kDrawEnvPairs;
     mHalves[0].mGifTag.mWords[0] = (mHalves[0].mGifTag.mWords[0] & ~kGifTagNLoopMask) | qwLoops;
@@ -227,7 +227,7 @@ void GsDoubleBuffer::PutDrawEnv(int nHalf, int bClear) {
     }
 }
 
-// 0x0058e860
+// NTSC-U/C: 0x0058e860, PAL: 0x005d1bb8
 void GsDoubleBuffer::PutDispEnv(int nHalf, int bEnableCircuit1) {
     if (nHalf == 0) {
         WriteDisplayRegisters(mDisp[0], bEnableCircuit1);

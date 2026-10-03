@@ -22,7 +22,7 @@ class Shifter : public MsgSink {
 public:
     // Builds a new sequence holding a copy of every entry, each transposed as HandleMessage()
     // decides, and returns it with one reference.
-    // 0x001ab4c8
+    // NTSC-U/C: 0x001ab4c8, PAL: 0x001b1230
     MultiMuse *Transpose(MultiMuse *pMuse, int nTrans) {
         mResult = new MultiMuse;
         mTrans = nTrans;
@@ -33,7 +33,7 @@ public:
         return mResult;
     }
 
-    // 0x001ab970
+    // NTSC-U/C: 0x001ab970, PAL: 0x001b16d8
     virtual void HandleMessage(Message *pMsg) {
         const int nType = pMsg->Type();
         if (nType == static_cast<int>(g_dwNoteMsgType)) {
@@ -47,7 +47,7 @@ public:
 
 private:
     // Adds a copy of the note with its number raised by mTrans, wrapping at 256.
-    // 0x001ab588
+    // NTSC-U/C: 0x001ab588, PAL: 0x001b12f0
     void OnNote(NoteMsg *pMsg) {
         NoteMsg shifted(*pMsg);
         shifted.mNote = static_cast<unsigned char>(pMsg->mNote + mTrans);
@@ -55,7 +55,7 @@ private:
     }
 
     // Adds a copy of the message, with the note number of a note-on or note-off raised by mTrans.
-    // 0x001ab620
+    // NTSC-U/C: 0x001ab620, PAL: 0x001b1388
     void OnStdMidi(StdMidiMsg *pMsg) {
         StdMidiMsg shifted(*pMsg);
         const unsigned char nKind = pMsg->mStatus & kStatusKindMask;
@@ -67,7 +67,7 @@ private:
 
     // The out-of-line copy of the branch HandleMessage() expands inline for any other message in
     // the MuseMsg identity range. The image has no caller of this copy.
-    // 0x001ab948
+    // NTSC-U/C: 0x001ab948, PAL: 0x001b16b0
     void AddUnchanged(MuseMsg *pMsg) {
         mResult->Add(pMsg, mPosition.mTick, kAppendFirst);
     }
@@ -79,7 +79,7 @@ private:
 
 } // namespace
 
-// 0x001ab6d8
+// NTSC-U/C: 0x001ab6d8, PAL: 0x001b1440
 MultiMuse *TransposeMuse(MultiMuse *pMuse, int nTrans) {
     Shifter shifter;
     return shifter.Transpose(pMuse, nTrans);

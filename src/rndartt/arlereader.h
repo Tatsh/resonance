@@ -31,7 +31,8 @@ struct ARleReader {
      *
      * @param pDest The row to write.
      * @return pDest advanced past the row.
-     * @ghidraAddress 0x0060da78
+     * @ghidraAddress NTSC-U/C: 0x0060da78
+     * @ghidraAddress PAL: 0x0064e6e8
      */
     unsigned char *DecodeRow(unsigned char *pDest);
 
@@ -43,7 +44,8 @@ struct ARleReader {
      * mWidth.
      *
      * @param pDest The first row to write.
-     * @ghidraAddress 0x0060dc98
+     * @ghidraAddress NTSC-U/C: 0x0060dc98
+     * @ghidraAddress PAL: 0x0064e908
      */
     void DecodeRows(unsigned char *pDest);
 
@@ -51,7 +53,8 @@ struct ARleReader {
      * Advance past a number of rows without writing.
      *
      * @param nRows The number of rows to consume.
-     * @ghidraAddress 0x0060dc10
+     * @ghidraAddress NTSC-U/C: 0x0060dc10
+     * @ghidraAddress PAL: 0x0064e880
      */
     void SkipRows(int nRows);
 

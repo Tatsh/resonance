@@ -35,7 +35,8 @@ public:
      * @param nChannel The MIDI channel the controller changes go to.
      * @param nPeriod The oscillator period. The task runs every half period.
      * @param nFloor The level the chop falls to.
-     * @ghidraAddress 0x001a21c8
+     * @ghidraAddress NTSC-U/C: 0x001a21c8
+     * @ghidraAddress PAL: 0x001a7f30
      */
     StutterEffector(Sch::TickClock *pClock, unsigned char nChannel, int nPeriod, int nFloor)
         : TickTask(pClock, Mid::MBT(nPeriod / 2).mTick, 1), mEnabled(0), mPending(0),
@@ -46,7 +47,8 @@ public:
     /**
      * Switch the effect off through this class's own Enable(), then release the oscillator.
      *
-     * @ghidraAddress 0x001a2338
+     * @ghidraAddress NTSC-U/C: 0x001a2338
+     * @ghidraAddress PAL: 0x001a80a0
      */
     virtual ~StutterEffector();
 
@@ -54,7 +56,8 @@ public:
      * Report which effect this object applies.
      *
      * @return kEffectorTypeStutter.
-     * @ghidraAddress 0x001a2420
+     * @ghidraAddress NTSC-U/C: 0x001a2420
+     * @ghidraAddress PAL: 0x001a8188
      */
     virtual int Type();
 
@@ -64,7 +67,8 @@ public:
      * A request that repeats the current position sends nothing once a request has been sent.
      *
      * @param bEnabled Non-zero to apply the effect.
-     * @ghidraAddress 0x001a0ae0
+     * @ghidraAddress NTSC-U/C: 0x001a0ae0
+     * @ghidraAddress PAL: 0x001a6848
      */
     virtual void Enable(int bEnabled);
 
@@ -76,7 +80,8 @@ public:
      *
      * @param nElapsedTicks Ticks since the task's epoch.
      * @return 1 always.
-     * @ghidraAddress 0x001a0cc8
+     * @ghidraAddress NTSC-U/C: 0x001a0cc8
+     * @ghidraAddress PAL: 0x001a6a30
      */
     virtual int Tick(int nElapsedTicks);
 

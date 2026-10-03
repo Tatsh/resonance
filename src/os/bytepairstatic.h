@@ -21,7 +21,8 @@ struct BytePairStatic {
      * shared() calls it. The body returns this in v0, which is what marks it as the constructor
      * rather than the routine it calls.
      *
-     * @ghidraAddress 0x00558d68
+     * @ghidraAddress NTSC-U/C: 0x00558d68
+     * @ghidraAddress PAL: 0x00599ec0
      */
     BytePairStatic();
 
@@ -31,7 +32,8 @@ struct BytePairStatic {
      * The constructor is the one caller. The routine writes no return value. The title is
      * inferred.
      *
-     * @ghidraAddress 0x00558d90
+     * @ghidraAddress NTSC-U/C: 0x00558d90
+     * @ghidraAddress PAL: 0x00599ee8
      */
     void Reset();
 
@@ -40,7 +42,8 @@ struct BytePairStatic {
      *
      * shared() registers this destructor with atexit.
      *
-     * @ghidraAddress 0x00558dd0
+     * @ghidraAddress NTSC-U/C: 0x00558dd0
+     * @ghidraAddress PAL: 0x00599f28
      */
     ~BytePairStatic();
 
@@ -48,7 +51,8 @@ struct BytePairStatic {
      * Return the shared instance, constructing it on first use.
      *
      * @return The instance.
-     * @ghidraAddress 0x00558d10
+     * @ghidraAddress NTSC-U/C: 0x00558d10
+     * @ghidraAddress PAL: 0x00599e68
      */
     static BytePairStatic *shared();
 

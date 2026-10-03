@@ -25,7 +25,8 @@ public:
      * Construct over a bitmap.
      *
      * @param bitmap The bitmap the canvas addresses.
-     * @ghidraAddress 0x00628600
+     * @ghidraAddress NTSC-U/C: 0x00628600
+     * @ghidraAddress PAL: 0x00669190
      */
     explicit ACanvasLin8(const ABitmap &bitmap);
 
@@ -35,35 +36,76 @@ public:
      * The body restores ACanvas's table rather than ACanvas8's, because the inlined destructor
      * chain runs to the root and the intermediate store is dead.
      *
-     * @ghidraAddress 0x00628568
+     * @ghidraAddress NTSC-U/C: 0x00628568
+     * @ghidraAddress PAL: 0x006690f8
      */
     virtual ~ACanvasLin8();
 
     // Lookup only, as in the base: this overload would otherwise hide the base's other one.
     using ACanvas8::PutPixelNoClip;
 
-    /** Slot 13. @ghidraAddress 0x00628638 */
+    /**
+     * Slot 13.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628638
+     * @ghidraAddress PAL: 0x006691c8
+     */
     virtual void PutPixelNoClip(int nX, int nY);
 
-    /** Slot 15. @ghidraAddress 0x00628658 */
+    /**
+     * Slot 15.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628658
+     * @ghidraAddress PAL: 0x006691e8
+     */
     virtual void PutPixelIndexedNoClip(int nX, int nY, int nIndex);
 
-    /** Slot 25. @ghidraAddress 0x00628678 */
+    /**
+     * Slot 25.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628678
+     * @ghidraAddress PAL: 0x00669208
+     */
     virtual int GetPixelIndexedNoClip(int nX, int nY);
 
-    /** Slot 35. One memset across the span. @ghidraAddress 0x00628698 */
+    /**
+     * Slot 35. One memset across the span.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628698
+     * @ghidraAddress PAL: 0x00669228
+     */
     virtual void FillRowNoClip(int nY, int nLeft, int nRight);
 
-    /** Slot 37. @ghidraAddress 0x006286d0 */
+    /**
+     * Slot 37.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006286d0
+     * @ghidraAddress PAL: 0x00669260
+     */
     virtual void FillColumnNoClip(int nX, int nTop, int nBottom);
 
-    /** Slot 39. One memset per row. @ghidraAddress 0x00628718 */
+    /**
+     * Slot 39. One memset per row.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628718
+     * @ghidraAddress PAL: 0x006692a8
+     */
     virtual void FillRectNoClip(ARect rect);
 
-    /** Slot 43. @ghidraAddress 0x006287b8 */
+    /**
+     * Slot 43.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006287b8
+     * @ghidraAddress PAL: 0x00669348
+     */
     virtual void RemapRectIndices(ARect rect, const unsigned char *pRemap);
 
-    /** Slot 46. @ghidraAddress 0x00628db0 */
+    /**
+     * Slot 46.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628db0
+     * @ghidraAddress PAL: 0x00669940
+     */
     virtual void TextureRowIndexed(int nY,
                                    int nLeft,
                                    int nRight,
@@ -71,7 +113,11 @@ public:
                                    APoint *pSourcePosition,
                                    const APoint *pSourceStep);
 
-    /** Slot 47. Unpacks nibbles, honouring the source's odd-start flag. @ghidraAddress 0x00628848
+    /**
+     * Slot 47. Unpacks nibbles, honouring the source's odd-start flag.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628848
+     * @ghidraAddress PAL: 0x006693d8
      */
     virtual void Blit4NoClip(const ABitmap &source, int nX, int nY);
 
@@ -82,14 +128,25 @@ public:
      * one block, an unkeyed source is copied a row at a time, and a keyed source is walked a byte
      * at a time.
      *
-     * @ghidraAddress 0x00628918
+     * @ghidraAddress NTSC-U/C: 0x00628918
+     * @ghidraAddress PAL: 0x006694a8
      */
     virtual void Blit8NoClip(const ABitmap &source, int nX, int nY);
 
-    /** Slot 57. Decodes through ARleReader, one row per call. @ghidraAddress 0x00628a48 */
+    /**
+     * Slot 57. Decodes through ARleReader, one row per call.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628a48
+     * @ghidraAddress PAL: 0x006695d8
+     */
     virtual void BlitRle8NoClip(const ABitmap &source, int nX, int nY);
 
-    /** Slot 75. @ghidraAddress 0x00628ae8 */
+    /**
+     * Slot 75.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628ae8
+     * @ghidraAddress PAL: 0x00669678
+     */
     virtual void RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap);
 
     /**
@@ -97,7 +154,8 @@ public:
      *
      * Skips a source index equal to the span transparent colour, where the base skips index zero.
      *
-     * @ghidraAddress 0x00628ba8
+     * @ghidraAddress NTSC-U/C: 0x00628ba8
+     * @ghidraAddress PAL: 0x00669738
      */
     virtual void BlendRowIndexed(const ARowSpan &span, const unsigned char *const *ppBlend);
 
@@ -107,13 +165,24 @@ public:
      * The routine occupies slot 79 of this class's table and does not appear in the 85 entries of
      * the four-bit sibling's table. The sibling does not override the slot.
      *
-     * @ghidraAddress 0x006284a0
+     * @ghidraAddress NTSC-U/C: 0x006284a0
+     * @ghidraAddress PAL: 0x00669030
      */
     virtual void StretchRowIndexed(const AStretchSpan &span);
 
-    /** Slot 83. @ghidraAddress 0x00628c80 */
+    /**
+     * Slot 83.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628c80
+     * @ghidraAddress PAL: 0x00669810
+     */
     virtual void StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap);
 
-    /** Slot 84. @ghidraAddress 0x00628d10 */
+    /**
+     * Slot 84.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00628d10
+     * @ghidraAddress PAL: 0x006698a0
+     */
     virtual void StretchRowBlend(const AStretchSpan &span, const unsigned char *const *ppBlend);
 };

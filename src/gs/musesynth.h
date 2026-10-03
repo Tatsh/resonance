@@ -37,14 +37,16 @@ class MuseSynth : public MsgSink, public MuseParent {
 public:
     /**
      * @param pClock The clock every player it creates is scheduled against.
-     * @ghidraAddress 0x001aa4d8
+     * @ghidraAddress NTSC-U/C: 0x001aa4d8
+     * @ghidraAddress PAL: 0x001b0240
      */
     MuseSynth(Sch::TickClock *pClock);
 
     /**
      * Release every player and then the splitter.
      *
-     * @ghidraAddress 0x001aa5d8
+     * @ghidraAddress NTSC-U/C: 0x001aa5d8
+     * @ghidraAddress PAL: 0x001b0340
      */
     virtual ~MuseSynth();
 
@@ -52,7 +54,8 @@ public:
      * Register a sink with the splitter every player sends to.
      *
      * @param pSink The sink to register.
-     * @ghidraAddress 0x001ab038
+     * @ghidraAddress NTSC-U/C: 0x001ab038
+     * @ghidraAddress PAL: 0x001b0da0
      */
     void AddSink(MsgSink *pSink);
 
@@ -63,17 +66,20 @@ public:
      * and `+0x28`, and points its downstream sink at this object's `+0x0c`. AxingSTG is the only
      * caller. The title is inferred from that body.
      *
-     * @ghidraAddress 0x001aafb0
+     * @ghidraAddress NTSC-U/C: 0x001aafb0
+     * @ghidraAddress PAL: 0x001b0d18
      */
     void CreateSustainer();
 
     /**
-     * @ghidraAddress 0x001aa908
+     * @ghidraAddress NTSC-U/C: 0x001aa908
+     * @ghidraAddress PAL: 0x001b0670
      */
     virtual void RetainOnly(MusePlayer *pPlayer);
 
     /**
-     * @ghidraAddress 0x001aa9f0
+     * @ghidraAddress NTSC-U/C: 0x001aa9f0
+     * @ghidraAddress PAL: 0x001b0758
      */
     virtual void PlayerFinished(MusePlayer *pPlayer);
 
@@ -83,14 +89,16 @@ public:
      * The body counts the nodes of mPlayers. The image has no caller. The title is inferred.
      *
      * @return Non-zero while mPlayers is not empty.
-     * @ghidraAddress 0x001aaf68
+     * @ghidraAddress NTSC-U/C: 0x001aaf68
+     * @ghidraAddress PAL: 0x001b0cd0
      */
     int HasPlayers();
 
     /**
      * Stop and release every player.
      *
-     * @ghidraAddress 0x001ab0d8
+     * @ghidraAddress NTSC-U/C: 0x001ab0d8
+     * @ghidraAddress PAL: 0x001b0e40
      */
     void ReleaseAllPlayers();
 
@@ -102,7 +110,8 @@ protected:
      * `+0x0c`, stores it, and starts it against mOutput.
      *
      * @param pMsg The NoteMsg.
-     * @ghidraAddress 0x001aa690
+     * @ghidraAddress NTSC-U/C: 0x001aa690
+     * @ghidraAddress PAL: 0x001b03f8
      */
     void StartNotePlayer(Message *pMsg);
 
@@ -115,7 +124,8 @@ protected:
      * base-class conversion.
      *
      * @param pMsg The MultiMuseMsg.
-     * @ghidraAddress 0x001aa7c0
+     * @ghidraAddress NTSC-U/C: 0x001aa7c0
+     * @ghidraAddress PAL: 0x001b0528
      */
     void StartMultiMusePlayer(Message *pMsg);
 
@@ -125,22 +135,23 @@ protected:
      * Primary table slot 3. MultiMusePlayer retains this body unchanged.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001ab170
+     * @ghidraAddress NTSC-U/C: 0x001ab170
+     * @ghidraAddress PAL: 0x001b0ed8
      */
     virtual void HandleMessage(Message *pMsg);
 
     // The out-of-line copy of the AllNotesOffMsg branch HandleMessage() expands inline. The message
     // is not read.
-    // 0x001ab0b8
+    // NTSC-U/C: 0x001ab0b8, PAL: 0x001b0e20
     void OnAllNotesOff();
 
     // The out-of-line copy of the StdMidiMsg branch HandleMessage() expands inline.
-    // 0x001ab058
+    // NTSC-U/C: 0x001ab058, PAL: 0x001b0dc0
     void OnStdMidi(StdMidiMsg *pMsg);
 
     // The out-of-line copy of the SustainNoteMsg branch HandleMessage() expands inline. Its body
     // compiles to the same bytes as OnStdMidi().
-    // 0x001ab088
+    // NTSC-U/C: 0x001ab088, PAL: 0x001b0df0
     void OnSustainNote(SustainNoteMsg *pMsg);
 
     // The clock every player is scheduled against.

@@ -15,7 +15,8 @@ extern "C" {
  * library.
  *
  * @param pszFormat A printf-style format string.
- * @ghidraAddress 0x0053dde0
+ * @ghidraAddress NTSC-U/C: 0x0053dde0
+ * @ghidraAddress PAL: 0x0057da10
  */
 void LogPrintf(const char *pszFormat, ...);
 
@@ -32,7 +33,8 @@ void LogPrintf(const char *pszFormat, ...);
  * the display path with the failure reports and not with LogPrintf().
  *
  * @param pszFormat A printf-style format string.
- * @ghidraAddress 0x0052e3e8
+ * @ghidraAddress NTSC-U/C: 0x0052e3e8
+ * @ghidraAddress PAL: 0x0056da60
  */
 void Warn(const char *pszFormat, ...);
 
@@ -51,7 +53,8 @@ void Warn(const char *pszFormat, ...);
  * tail). This declaration omits the attribute for the same reason.
  *
  * @param pszFormat A printf-style format string.
- * @ghidraAddress 0x0052e868
+ * @ghidraAddress NTSC-U/C: 0x0052e868
+ * @ghidraAddress PAL: 0x0056df18
  */
 void Fatal(const char *pszFormat, ...);
 
@@ -65,7 +68,8 @@ void Fatal(const char *pszFormat, ...);
  * The name is inferred. Nothing in the image attests it.
  *
  * @param pszFormat A printf-style format string.
- * @ghidraAddress 0x0052e960
+ * @ghidraAddress NTSC-U/C: 0x0052e960
+ * @ghidraAddress PAL: 0x0056e018
  */
 void Error(const char *pszFormat, ...);
 
@@ -79,7 +83,8 @@ void Error(const char *pszFormat, ...);
  * @param pszMessage The message.
  * @param pszFile The reporting file.
  * @param nLine The reporting line.
- * @ghidraAddress 0x0052e510
+ * @ghidraAddress NTSC-U/C: 0x0052e510
+ * @ghidraAddress PAL: 0x0056dbc0
  */
 void ReportAssertion(const char *pszMessage, const char *pszFile, int nLine)
     __attribute__((noreturn));
@@ -92,7 +97,8 @@ void ReportAssertion(const char *pszMessage, const char *pszFile, int nLine)
  * inferred.
  *
  * @param nTemplate The template identifier.
- * @ghidraAddress 0x0052ea68
+ * @ghidraAddress NTSC-U/C: 0x0052ea68
+ * @ghidraAddress PAL: 0x0056e160
  */
 void AlertScriptTemplate(int nTemplate, ...);
 
@@ -112,7 +118,8 @@ void AlertScriptTemplate(int nTemplate, ...);
  * @param args The arguments for it.
  * @param nUnused A word the body never reads. Warn passes 1, and every other caller passes 0.
  * @return The formatted message.
- * @ghidraAddress 0x005e4178
+ * @ghidraAddress NTSC-U/C: 0x005e4178
+ * @ghidraAddress PAL: 0x00626338
  */
 HxStr FormatMessage(const HxStr &format, va_list args, int nUnused);
 
@@ -125,7 +132,8 @@ HxStr FormatMessage(const HxStr &format, va_list args, int nUnused);
  * @param format The format string.
  * @param args The arguments for it.
  * @return The formatted message.
- * @ghidraAddress 0x005e4148
+ * @ghidraAddress NTSC-U/C: 0x005e4148
+ * @ghidraAddress PAL: 0x00626308
  */
 HxStr FormatMessage(const HxStr &format, va_list args);
 
@@ -137,7 +145,8 @@ HxStr FormatMessage(const HxStr &format, va_list args);
  *
  * @param pszFormat A printf-style format string.
  * @return The formatted message.
- * @ghidraAddress 0x005e2c80
+ * @ghidraAddress NTSC-U/C: 0x005e2c80
+ * @ghidraAddress PAL: 0x00624d90
  */
 HxStr FormatHxStr(const char *pszFormat, ...);
 
@@ -149,7 +158,8 @@ HxStr FormatHxStr(const char *pszFormat, ...);
  *
  * @param nTemplate The template identifier.
  * @return The formatted message.
- * @ghidraAddress 0x005e2d38
+ * @ghidraAddress NTSC-U/C: 0x005e2d38
+ * @ghidraAddress PAL: 0x00624e68
  */
 HxStr FormatScriptTemplate(int nTemplate, ...);
 
@@ -163,7 +173,8 @@ HxStr FormatScriptTemplate(int nTemplate, ...);
  *
  * @param text The message.
  * @param nDuration How long to show it, in the same unit ShowScreenMessage() takes.
- * @ghidraAddress 0x00466368
+ * @ghidraAddress NTSC-U/C: 0x00466368
+ * @ghidraAddress PAL: 0x004a3d98
  */
 void ShowReportedMessage(const HxStr &text, int nDuration);
 
@@ -176,7 +187,8 @@ void ShowReportedMessage(const HxStr &text, int nDuration);
  * The name is inferred from the prefix.
  *
  * @param text The message.
- * @ghidraAddress 0x004663d8
+ * @ghidraAddress NTSC-U/C: 0x004663d8
+ * @ghidraAddress PAL: 0x004a3e08
  */
 void ShowAlertMessage(const HxStr &text);
 #endif
@@ -195,6 +207,7 @@ void ShowAlertMessage(const HxStr &text);
  *
  * @param pszText The message.
  * @param nDuration How long to show it.
- * @ghidraAddress 0x005e5ed0
+ * @ghidraAddress NTSC-U/C: 0x005e5ed0
+ * @ghidraAddress PAL: 0x00628090
  */
 void ShowScreenMessage(const char *pszText, int nDuration);

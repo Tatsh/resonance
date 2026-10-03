@@ -64,17 +64,17 @@ constexpr unsigned int kConsoleRows = 30;
 
 } // namespace
 
-// 0x0077d5d0
+// NTSC-U/C: 0x0077d5d0, PAL: 0x007c13a8
 // Nothing in the image reads it.
 int g_nDebugGsResetWord = 0;
 
-// 0x008e4f20
+// NTSC-U/C: 0x008e4f20, PAL: 0x00929f20
 int g_nDebugConsole = 0;
 
-// 0x008e4f30
+// NTSC-U/C: 0x008e4f30, PAL: 0x00929f30
 sceGsDBuff g_debugDoubleBuffer;
 
-// 0x005e5d08
+// NTSC-U/C: 0x005e5d08, PAL: 0x00627ec8
 int InitDebugGs() {
     sceGifTag adTag;
     adTag.mWords[0] = kAdGifTagLo;
@@ -135,18 +135,18 @@ int InitDebugGs() {
     return 1;
 }
 
-// 0x005e5ed0
+// NTSC-U/C: 0x005e5ed0, PAL: 0x00628090
 void ShowScreenMessage([[maybe_unused]] const char *pszText, [[maybe_unused]] int nDuration) {
 }
 
-// 0x005e5ed8
+// NTSC-U/C: 0x005e5ed8, PAL: 0x00628098
 void OpenDebugConsole() {
     sceDevConsInit();
     g_nDebugConsole = sceDevConsOpen(kConsoleGsX, kConsoleGsY, kConsoleColumns, kConsoleRows);
     sceDevConsClear(g_nDebugConsole);
 }
 
-// 0x005e5f18
+// NTSC-U/C: 0x005e5f18, PAL: 0x006280d8
 void InitDebugConsole() {
     (void)InitDebugGs(); // Yes, the binary discards the result.
     sceDevConsInit();
@@ -154,7 +154,14 @@ void InitDebugConsole() {
     sceDevConsClear(g_nDebugConsole);
 }
 
-// 0x005e5f60
+// NTSC-U/C: 0x005e5f60, PAL: 0x00628148
 void ClearDebugConsole() {
     sceDevConsClear(g_nDebugConsole);
 }
+
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x00628120
+void CloseDebugConsole() {
+    sceDevConsClose(g_nDebugConsole);
+}
+#endif

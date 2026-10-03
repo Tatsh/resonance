@@ -15,14 +15,14 @@ constexpr int kFormatMessageBufferSize = 0x1000;
 
 } // namespace
 
-// 0x005e4178
+// NTSC-U/C: 0x005e4178, PAL: 0x00626338
 HxStr FormatMessage(const HxStr &format, va_list args, [[maybe_unused]] int nUnused) {
     char szMessage[kFormatMessageBufferSize];
     vsprintf(szMessage, format.mStr != nullptr ? format.mStr : g_szEmptyString, args);
     return HxStr(szMessage);
 }
 
-// 0x005e2c80
+// NTSC-U/C: 0x005e2c80, PAL: 0x00624d90
 HxStr FormatHxStr(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -31,7 +31,7 @@ HxStr FormatHxStr(const char *pszFormat, ...) {
     return message;
 }
 
-// 0x005e2d38
+// NTSC-U/C: 0x005e2d38, PAL: 0x00624e68
 HxStr FormatScriptTemplate(int nTemplate, ...) {
     va_list args;
     va_start(args, nTemplate);
@@ -40,7 +40,7 @@ HxStr FormatScriptTemplate(int nTemplate, ...) {
     return message;
 }
 
-// 0x005e4148
+// NTSC-U/C: 0x005e4148, PAL: 0x00626308
 HxStr FormatMessage(const HxStr &format, va_list args) {
     return FormatMessage(format, args, kFormatUnusedWord);
 }

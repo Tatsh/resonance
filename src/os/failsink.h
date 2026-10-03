@@ -52,7 +52,8 @@ public:
      * program, and the name is inferred from the report text.
      *
      * @param path The file to write the log to.
-     * @ghidraAddress 0x004ddfb8
+     * @ghidraAddress NTSC-U/C: 0x004ddfb8
+     * @ghidraAddress PAL: 0x0051c570
      */
     void OpenLog(const HxStr &path);
 
@@ -61,7 +62,8 @@ public:
      *
      * OpenLog() is the one caller. The name is inferred.
      *
-     * @ghidraAddress 0x004de0a0
+     * @ghidraAddress NTSC-U/C: 0x004de0a0
+     * @ghidraAddress PAL: 0x0051c658
      */
     void CloseLog();
 
@@ -71,7 +73,8 @@ public:
      * A null handler restores the built-in handler at 0x004ddf68.
      *
      * @param pfnReport The handler to install, or null for the built-in handler.
-     * @ghidraAddress 0x004ddf90
+     * @ghidraAddress NTSC-U/C: 0x004ddf90
+     * @ghidraAddress PAL: 0x0051c548
      */
     void SetReportHandler(FailReportProc pfnReport);
 
@@ -81,7 +84,8 @@ public:
      * This is the only member that produces output.
      *
      * @param pszFormat A printf-style format string.
-     * @ghidraAddress 0x004dde28
+     * @ghidraAddress NTSC-U/C: 0x004dde28
+     * @ghidraAddress PAL: 0x0051c3e0
      */
     void Report(const char *pszFormat, ...);
 
@@ -90,7 +94,8 @@ public:
      *
      * @param pszFormat A printf-style format string.
      * @return This sink, allowing calls to be chained.
-     * @ghidraAddress 0x004dde98
+     * @ghidraAddress NTSC-U/C: 0x004dde98
+     * @ghidraAddress PAL: 0x0051c450
      */
     FailSink *Format(const char *pszFormat, ...);
 
@@ -101,7 +106,8 @@ public:
      *
      * @param pszText The text to write.
      * @return This sink, allowing calls to be chained.
-     * @ghidraAddress 0x004ddfb0
+     * @ghidraAddress NTSC-U/C: 0x004ddfb0
+     * @ghidraAddress PAL: 0x0051c568
      */
     FailSink *Print(const char *pszText);
 
@@ -137,6 +143,7 @@ private:
 /**
  * Engine-wide failure sink.
  *
- * @ghidraAddress 0x00702470
+ * @ghidraAddress NTSC-U/C: 0x00702470
+ * @ghidraAddress PAL: 0x00745ec0
  */
 extern FailSink g_failSink;

@@ -109,35 +109,37 @@ constexpr unsigned kRepeatZeroLongBase = 11;
 constexpr int kLiteralLookupBits = 9;
 constexpr int kDistanceLookupBits = 6;
 
-// 0x007c3a98, border: the order the code length code lengths arrive in.
+// NTSC-U/C: 0x007c3a98, PAL: 0x00807798, border: the order the code length code lengths arrive in.
 constexpr unsigned kLengthCodeOrder[] = {
     16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15,
 };
 
-// 0x007c3ae8, cplens: the length bases, with two unused codes padded with zero.
+// NTSC-U/C: 0x007c3ae8, PAL: 0x008077e8, cplens: the length bases, with two unused codes
+// padded with zero.
 constexpr unsigned short kLengthBase[] = {
     3,  4,  5,  6,  7,  8,  9,  10,  11,  13,  15,  17,  19,  23, 27, 31,
     35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 0,  0,
 };
 
-// 0x007c3b28, cplext: the length extra bits, with the two unused codes marked invalid.
+// NTSC-U/C: 0x007c3b28, PAL: 0x00807828, cplext: the length extra bits, with the two unused
+// codes marked invalid.
 constexpr unsigned short kLengthExtraBits[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0, 99, 99,
 };
 
-// 0x007c3b68, cpdist: the distance bases.
+// NTSC-U/C: 0x007c3b68, PAL: 0x00807868, cpdist: the distance bases.
 constexpr unsigned short kDistanceBase[] = {
     1,   2,   3,   4,   5,   7,    9,    13,   17,   25,   33,   49,   65,    97,    129,
     193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577,
 };
 
-// 0x007c3ba8, cpdext: the distance extra bits.
+// NTSC-U/C: 0x007c3ba8, PAL: 0x008078a8, cpdext: the distance extra bits.
 constexpr unsigned short kDistanceExtraBits[] = {
     0, 0, 0, 0, 1, 1, 2, 2,  3,  3,  4,  4,  5,  5,  6,
     6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13,
 };
 
-// 0x007c3be8, mask_bits: the mask of each bit count up to 16.
+// NTSC-U/C: 0x007c3be8, PAL: 0x008078e8, mask_bits: the mask of each bit count up to 16.
 constexpr unsigned short kMaskBits[] = {
     0x0000,
     0x0001,
@@ -211,31 +213,31 @@ inline void FlushWindowIfFull(unsigned &nWindow) {
 
 } // namespace
 
-// 0x008ee930
+// NTSC-U/C: 0x008ee930, PAL: 0x00933930
 // The bit buffer, bb.
 unsigned long long g_llGzipBitBuffer = 0;
 
-// 0x008ee938
+// NTSC-U/C: 0x008ee938, PAL: 0x00933938
 // The number of valid bits in the bit buffer, bk.
 unsigned g_nGzipBitCount = 0;
 
-// 0x008ee93c
+// NTSC-U/C: 0x008ee93c, PAL: 0x0093393c
 // The table entries the current block allocated, hufts. Only huft_build() reads the count.
 unsigned g_nGzipHuftCount = 0;
 
-// 0x008ea930
+// NTSC-U/C: 0x008ea930, PAL: 0x0092f930
 // The pool the decoding tables are carved from.
 Huft g_aGzipHuftPool[kHuftPoolSize] = {};
 
-// 0x007c3a90
+// NTSC-U/C: 0x007c3a90, PAL: 0x00807790
 // The next free entry of the pool.
 Huft *g_pGzipHuftPoolNext = g_aGzipHuftPool;
 
-// 0x007c3a94
+// NTSC-U/C: 0x007c3a94, PAL: 0x00807794
 // The most pool entries one block has used. Only HuftReset() reads the count.
 int g_nGzipHuftPeak = 0;
 
-// 0x0063c748
+// NTSC-U/C: 0x0063c748, PAL: 0x0067d2d8
 int huft_build(const unsigned *pLengths,
                unsigned nCodes,
                unsigned nSimple,
@@ -399,7 +401,7 @@ int huft_build(const unsigned *pLengths,
     return (nUnused != 0 && nMaxCodeBits != 1) ? kInflateError : kInflateOk;
 }
 
-// 0x0063cd50
+// NTSC-U/C: 0x0063cd50, PAL: 0x0067d8e0
 int inflate_codes(Huft *pLiteralTable, Huft *pDistanceTable, int nLiteralBits, int nDistanceBits) {
     unsigned long long llBits = g_llGzipBitBuffer;
     unsigned nBitCount = g_nGzipBitCount;
@@ -468,7 +470,7 @@ int inflate_codes(Huft *pLiteralTable, Huft *pDistanceTable, int nLiteralBits, i
     return kInflateOk;
 }
 
-// 0x0063d348
+// NTSC-U/C: 0x0063d348, PAL: 0x0067ded8
 int inflate_stored() {
     unsigned long long llBits = g_llGzipBitBuffer;
     unsigned nBitCount = g_nGzipBitCount;
@@ -498,7 +500,7 @@ int inflate_stored() {
     return kInflateOk;
 }
 
-// 0x0063d5c8
+// NTSC-U/C: 0x0063d5c8, PAL: 0x0067e158
 int inflate_fixed() {
     unsigned aLengths[kFixedLiteralCodes];
 
@@ -554,7 +556,7 @@ int inflate_fixed() {
     return kInflateOk;
 }
 
-// 0x0063d720
+// NTSC-U/C: 0x0063d720, PAL: 0x0067e2b0
 int inflate_dynamic() {
     unsigned aLengths[kMaxLiteralCodes + kMaxDistanceCodes];
     unsigned long long llBits = g_llGzipBitBuffer;
@@ -689,7 +691,7 @@ int inflate_dynamic() {
     return kInflateOk;
 }
 
-// 0x0063def8
+// NTSC-U/C: 0x0063def8, PAL: 0x0067ea88
 int inflate_block(int *pnLast) {
     unsigned long long llBits = g_llGzipBitBuffer;
     unsigned nBitCount = g_nGzipBitCount;
@@ -717,7 +719,7 @@ int inflate_block(int *pnLast) {
     return kInflateBadCodes;
 }
 
-// 0x0063e0b0
+// NTSC-U/C: 0x0063e0b0, PAL: 0x0067ec40
 int inflate() {
     g_nGzipWindowPosition = 0;
     g_nGzipBitCount = 0;
@@ -742,7 +744,7 @@ int inflate() {
     return kInflateOk;
 }
 
-// 0x0063e1a8
+// NTSC-U/C: 0x0063e1a8, PAL: 0x0067ed38
 void HuftReset() {
     const int nUsed = static_cast<int>(g_pGzipHuftPoolNext - g_aGzipHuftPool);
     if (g_nGzipHuftPeak < nUsed) {
@@ -751,7 +753,7 @@ void HuftReset() {
     g_pGzipHuftPoolNext = g_aGzipHuftPool;
 }
 
-// 0x0063e1e0
+// NTSC-U/C: 0x0063e1e0, PAL: 0x0067ed70
 Huft *HuftAlloc(unsigned nEntries) {
     Huft *pTable = g_pGzipHuftPoolNext;
     g_pGzipHuftPoolNext = pTable + nEntries;
@@ -762,7 +764,7 @@ Huft *HuftAlloc(unsigned nEntries) {
     return nullptr;
 }
 
-// 0x0063e230
+// NTSC-U/C: 0x0063e230, PAL: 0x0067edc0
 int huft_free(Huft *pTable) {
     (void)pTable;
     return 0;

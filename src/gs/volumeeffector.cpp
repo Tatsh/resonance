@@ -14,22 +14,22 @@ constexpr unsigned char kControllerFull = 0x7f;
 
 } // namespace
 
-// 0x001a1a10
+// NTSC-U/C: 0x001a1a10, PAL: 0x001a7778
 VolumeEffector::VolumeEffector(unsigned char nChannel, int nAppliedLevel)
     : mChannel(nChannel), mAppliedLevel(nAppliedLevel), mEnabled(0) {
 }
 
-// 0x001a1a68
+// NTSC-U/C: 0x001a1a68, PAL: 0x001a77d0
 VolumeEffector::~VolumeEffector() {
     Enable(0);
 }
 
-// 0x001a1b30
+// NTSC-U/C: 0x001a1b30, PAL: 0x001a7898
 int VolumeEffector::Type() {
     return kEffectorTypeVolume;
 }
 
-// 0x001a07c0
+// NTSC-U/C: 0x001a07c0, PAL: 0x001a6528
 void VolumeEffector::Enable(int bEnabled) {
     if (bEnabled == mEnabled) {
         return;

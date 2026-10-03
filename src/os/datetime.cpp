@@ -14,7 +14,7 @@ constexpr int kBcdTextSize = 16;
 constexpr int kBcdDigitShift = 4;
 constexpr unsigned char kBcdDigitMask = 0x0f;
 
-// 0x0053a4d8
+// NTSC-U/C: 0x0053a4d8, PAL: 0x00579f00
 // The one out-of-line copy has no caller. FormatCurrentDateTime() inlines every use.
 inline void FormatBcdByte(unsigned char nBcd, HxStr &text, bool bAppend) {
     char szDigits[kBcdTextSize];
@@ -28,7 +28,7 @@ inline void FormatBcdByte(unsigned char nBcd, HxStr &text, bool bAppend) {
 
 } // namespace
 
-// 0x0053a108
+// NTSC-U/C: 0x0053a108, PAL: 0x00579a38
 bool FormatCurrentDateTime(HxStr &text) {
     sceCdCLOCK clock;
     if (sceCdReadClock(&clock) == 0) {

@@ -36,7 +36,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x001a9490
+     * @ghidraAddress NTSC-U/C: 0x001a9490
+     * @ghidraAddress PAL: 0x001af1f8
      */
     void *operator new(size_t nSize);
 
@@ -44,14 +45,16 @@ public:
      * Release a sequence to the tagged heap.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x001a94b0
+     * @ghidraAddress NTSC-U/C: 0x001a94b0
+     * @ghidraAddress PAL: 0x001af218
      */
     void operator delete(void *pBlock);
 
     /**
      * Delete every stored message, then release the vector.
      *
-     * @ghidraAddress 0x001a8448
+     * @ghidraAddress NTSC-U/C: 0x001a8448
+     * @ghidraAddress PAL: 0x001ae1b0
      */
     virtual ~MultiMuse();
 
@@ -64,7 +67,8 @@ public:
      * spaces to the column at which the previous entry began.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001a8580
+     * @ghidraAddress NTSC-U/C: 0x001a8580
+     * @ghidraAddress PAL: 0x001ae2e8
      */
     virtual void Print(std::ostream &stream);
 
@@ -76,7 +80,8 @@ public:
      * as the loop condition, which is faithful and not a reconstruction artefact.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001a9738
+     * @ghidraAddress NTSC-U/C: 0x001a9738
+     * @ghidraAddress PAL: 0x001af4a0
      */
     void SaveFields(OBStream &stream);
 
@@ -88,7 +93,8 @@ public:
      * creates a fresh sequence for every read.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x001a8a88
+     * @ghidraAddress NTSC-U/C: 0x001a8a88
+     * @ghidraAddress PAL: 0x001ae7f0
      */
     void LoadFields(IBStream &stream);
 
@@ -103,7 +109,8 @@ public:
      * @param pMsg The message to copy.
      * @param nTick The song position, in MIDI ticks.
      * @param bCheckLast Whether to try appending before searching.
-     * @ghidraAddress 0x001a9650
+     * @ghidraAddress NTSC-U/C: 0x001a9650
+     * @ghidraAddress PAL: 0x001af3b8
      */
     void Add(MuseMsg *pMsg, int nTick, int bCheckLast);
 
@@ -114,7 +121,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @return The stored message, or null when no entry sits at nTick.
-     * @ghidraAddress 0x001a96c8
+     * @ghidraAddress NTSC-U/C: 0x001a96c8
+     * @ghidraAddress PAL: 0x001af430
      */
     MuseMsg *Find(int nTick);
 
@@ -126,7 +134,8 @@ public:
      * caller, and the name is inferred.
      *
      * @param other The sequence to copy from.
-     * @ghidraAddress 0x001a8808
+     * @ghidraAddress NTSC-U/C: 0x001a8808
+     * @ghidraAddress PAL: 0x001ae570
      */
     void Append(const MultiMuse &other);
 
@@ -151,6 +160,7 @@ public:
  * @param position The song position.
  * @param pMsg The message.
  * @return The stream.
- * @ghidraAddress 0x001a97e8
+ * @ghidraAddress NTSC-U/C: 0x001a97e8
+ * @ghidraAddress PAL: 0x001af550
  */
 std::ostream &PrintMuseEntry(std::ostream &stream, Mid::MBT position, MuseMsg *pMsg);

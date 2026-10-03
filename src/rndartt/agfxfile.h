@@ -46,7 +46,8 @@ public:
      * @param pnError Receives kAGfxFileOk, or kAGfxFileOpenFailed when the file cannot be opened.
      * @param bRead True to open for reading, false to open for writing.
      * @return The reader, or null when the file cannot be opened.
-     * @ghidraAddress 0x005f9bc8
+     * @ghidraAddress NTSC-U/C: 0x005f9bc8
+     * @ghidraAddress PAL: 0x0063a8d8
      */
     static AGfxFile *Open(const char *pszPath, int *pnError, bool bRead);
 
@@ -58,7 +59,8 @@ public:
      * @param pszPath The file to write.
      * @param bitmap The bitmap to write.
      * @return An AGfxFileResult code.
-     * @ghidraAddress 0x005f9d18
+     * @ghidraAddress NTSC-U/C: 0x005f9d18
+     * @ghidraAddress PAL: 0x0063aa28
      */
     static int WriteBitmap(const char *pszPath, const ABitmap &bitmap);
 
@@ -71,7 +73,8 @@ public:
      *
      * @param pszPath The path.
      * @return The packed extension, `BMP` being 0x504d42.
-     * @ghidraAddress 0x0062f560
+     * @ghidraAddress NTSC-U/C: 0x0062f560
+     * @ghidraAddress PAL: 0x006700f0
      */
     static int ExtensionCode(const char *pszPath);
 
@@ -99,7 +102,8 @@ public:
      * not recovered.
      *
      * @param nWord The value to store.
-     * @ghidraAddress 0x0061d4c0
+     * @ghidraAddress NTSC-U/C: 0x0061d4c0
+     * @ghidraAddress PAL: 0x0065e050
      */
     virtual void SetUnreadWord(int nWord) {
         mUnreadWord = nWord;
@@ -120,7 +124,8 @@ public:
      * Inline. Each subclass destructor is the same body emitted again, at 0x0061d4c8, 0x00620408,
      * and 0x0062b5f8.
      *
-     * @ghidraAddress 0x0061d6c0
+     * @ghidraAddress NTSC-U/C: 0x0061d6c0
+     * @ghidraAddress PAL: 0x0065e250
      */
     virtual ~AGfxFile() {
         if (mFile != nullptr) {

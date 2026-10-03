@@ -51,18 +51,18 @@ inline unsigned int KeyFromChannels(const unsigned char *pRGB) {
 
 } // namespace
 
-// 0x00618470
+// NTSC-U/C: 0x00618470, PAL: 0x00659000
 ACanvasLin24::ACanvasLin24(const ABitmap &bitmap) : ACanvas24(bitmap) {
     mColorNative = 0;
 }
 
-// 0x006184a8
+// NTSC-U/C: 0x006184a8, PAL: 0x00659038
 // Empty in the binary, and the slot exists only because ACanvas24 declares it pure.
 void ACanvasLin24::BuildAlphaFromColorKey(unsigned int nColorKey) {
     (void)nColorKey;
 }
 
-// 0x006184b0
+// NTSC-U/C: 0x006184b0, PAL: 0x00659040
 void ACanvasLin24::PutPixelNoClip(int nX, int nY) {
     unsigned char *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
     pPixel[0] = mColorChannels[0];
@@ -70,7 +70,7 @@ void ACanvasLin24::PutPixelNoClip(int nX, int nY) {
     pPixel[2] = mColorChannels[2];
 }
 
-// 0x006184e8
+// NTSC-U/C: 0x006184e8, PAL: 0x00659078
 void ACanvasLin24::PutPixelRGBNoClip(int nX, int nY, const unsigned char *pRGB) {
     unsigned char *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
     pPixel[0] = pRGB[0];
@@ -78,7 +78,7 @@ void ACanvasLin24::PutPixelRGBNoClip(int nX, int nY, const unsigned char *pRGB) 
     pPixel[2] = pRGB[2];
 }
 
-// 0x00618528
+// NTSC-U/C: 0x00618528, PAL: 0x006590b8
 void ACanvasLin24::GetPixelRGBNoClip(int nX, int nY, unsigned char *pRGB) {
     const unsigned char *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
     pRGB[0] = pPixel[0];
@@ -86,7 +86,7 @@ void ACanvasLin24::GetPixelRGBNoClip(int nX, int nY, unsigned char *pRGB) {
     pRGB[2] = pPixel[2];
 }
 
-// 0x00618568
+// NTSC-U/C: 0x00618568, PAL: 0x006590f8
 // The three colour bytes are re-read from the object on every iteration rather than
 // hoisted, and the destination advances one byte at a time rather than three at once.
 void ACanvasLin24::FillRowNoClip(int nY, int nLeft, int nRight) {
@@ -101,7 +101,7 @@ void ACanvasLin24::FillRowNoClip(int nY, int nLeft, int nRight) {
     }
 }
 
-// 0x006185d0
+// NTSC-U/C: 0x006185d0, PAL: 0x00659160
 // The row pitch is re-read from the bitmap on every iteration.
 void ACanvasLin24::FillColumnNoClip(int nX, int nTop, int nBottom) {
     unsigned char *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nTop);
@@ -113,7 +113,7 @@ void ACanvasLin24::FillColumnNoClip(int nX, int nTop, int nBottom) {
     }
 }
 
-// 0x00618630
+// NTSC-U/C: 0x00618630, PAL: 0x006591c0
 void ACanvasLin24::FillRectNoClip(ARect rect) {
     const short nColumns = static_cast<short>(rect.mRight - rect.mLeft);
     const int nRowAdvance = mBitmap.mBytesPerRow - (nColumns * kBytesPerPixel);
@@ -131,7 +131,7 @@ void ACanvasLin24::FillRectNoClip(ARect rect) {
     }
 }
 
-// 0x00618a28
+// NTSC-U/C: 0x00618a28, PAL: 0x006595b8
 void ACanvasLin24::TextureRowIndexed(int nY,
                                      int nLeft,
                                      int nRight,
@@ -154,7 +154,7 @@ void ACanvasLin24::TextureRowIndexed(int nY,
     }
 }
 
-// 0x006186f8
+// NTSC-U/C: 0x006186f8, PAL: 0x00659288
 // The key is compared against the low byte of the transparent colour, and the flag is
 // re-read for every pixel.
 void ACanvasLin24::Blit8NoClip(const ABitmap &source, int nX, int nY) {
@@ -178,7 +178,7 @@ void ACanvasLin24::Blit8NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00618270
+// NTSC-U/C: 0x00618270, PAL: 0x00658e00
 // Unlike the eight and 1555 layouts there is no whole-rectangle copy tier. A keyed row
 // compares the pixel's three bytes, widened with a zero, against the whole transparent colour.
 void ACanvasLin24::Blit24NoClip(const ABitmap &source, int nX, int nY) {
@@ -206,7 +206,7 @@ void ACanvasLin24::Blit24NoClip(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// 0x00618800
+// NTSC-U/C: 0x00618800, PAL: 0x00659390
 // The key is compared against the low byte of the transparent colour.
 void ACanvasLin24::RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap) {
     if (span.mPalette == nullptr) {
@@ -224,7 +224,7 @@ void ACanvasLin24::RemapRowIndexed(const ARowSpan &span, const unsigned char *pR
     }
 }
 
-// 0x006188b0
+// NTSC-U/C: 0x006188b0, PAL: 0x00659440
 void ACanvasLin24::StretchRowIndexed(const AStretchSpan &span) {
     if (span.mPalette == nullptr) {
         return;
@@ -242,7 +242,7 @@ void ACanvasLin24::StretchRowIndexed(const AStretchSpan &span) {
     }
 }
 
-// 0x00618968
+// NTSC-U/C: 0x00618968, PAL: 0x006594f8
 void ACanvasLin24::StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap) {
     if (span.mPalette == nullptr) {
         return;

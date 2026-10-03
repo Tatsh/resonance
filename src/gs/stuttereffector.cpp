@@ -18,7 +18,7 @@ constexpr float kLevelScale = 127.0f;
 
 } // namespace
 
-// 0x001a0ae0
+// NTSC-U/C: 0x001a0ae0, PAL: 0x001a6848
 void StutterEffector::Enable(int bEnabled) {
     if (bEnabled == mEnabled && mPending != 0) {
         return;
@@ -41,7 +41,7 @@ void StutterEffector::Enable(int bEnabled) {
     Send(&off);
 }
 
-// 0x001a0cc8
+// NTSC-U/C: 0x001a0cc8, PAL: 0x001a6a30
 int StutterEffector::Tick(int nElapsedTicks) {
     float flValue;
     mOscillator->Sample(static_cast<float>(nElapsedTicks), &flValue);
@@ -54,13 +54,13 @@ int StutterEffector::Tick(int nElapsedTicks) {
     return 1;
 }
 
-// 0x001a2338
+// NTSC-U/C: 0x001a2338, PAL: 0x001a80a0
 StutterEffector::~StutterEffector() {
     StutterEffector::Enable(0); // The binary calls this class's own body rather than dispatching.
     delete mOscillator;
 }
 
-// 0x001a2420
+// NTSC-U/C: 0x001a2420, PAL: 0x001a8188
 int StutterEffector::Type() {
     return kEffectorTypeStutter;
 }

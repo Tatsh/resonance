@@ -43,17 +43,17 @@ public:
     Cmd(NotePlayer *pOwner, int nTick) : mOwner(pOwner), mTick(nTick) {
     }
 
-    // 0x001b42c8
+    // NTSC-U/C: 0x001b42c8, PAL: 0x001ba0a0
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x001b42d8
+    // NTSC-U/C: 0x001b42d8, PAL: 0x001ba0b0
     virtual void Execute() {
         mOwner->OnCommand(mTick);
     }
 
-    // 0x001b42f8
+    // NTSC-U/C: 0x001b42f8, PAL: 0x001ba0d0
     virtual void Print(std::ostream &stream) {
         stream << "{MidiNoteOff}";
     }
@@ -70,7 +70,7 @@ int Cmd::sCmdID;
 
 } // namespace
 
-// 0x001b4328
+// NTSC-U/C: 0x001b4328, PAL: 0x001ba100
 NotePlayer::NotePlayer(unsigned char nNote,
                        unsigned char nVelocity,
                        int nDuration,
@@ -86,12 +86,12 @@ NotePlayer::NotePlayer(unsigned char nNote,
     }
 }
 
-// 0x001b4460
+// NTSC-U/C: 0x001b4460, PAL: 0x001ba238
 NotePlayer::~NotePlayer() {
     Stop();
 }
 
-// 0x001b3d58
+// NTSC-U/C: 0x001b3d58, PAL: 0x001b9b30
 void NotePlayer::Start(MsgSink *pSink) {
     mSink = pSink;
     const int nNow = mClock->SongTick();
@@ -106,7 +106,7 @@ void NotePlayer::Start(MsgSink *pSink) {
     }
 }
 
-// 0x001b3ee0
+// NTSC-U/C: 0x001b3ee0, PAL: 0x001b9cb8
 void NotePlayer::Stop() {
     if (mSink != nullptr) {
         StdMidiMsg msg(mClock->SongTick(), kNoteOffStatus | mChannel, mNote, kReleaseVelocity);
@@ -116,13 +116,13 @@ void NotePlayer::Stop() {
     mSink = nullptr;
 }
 
-// 0x001b3fb8
+// NTSC-U/C: 0x001b3fb8, PAL: 0x001b9d90
 void NotePlayer::PostStdMidiMsg(int nTick) {
     StdMidiMsg msg(nTick, kNoteOnStatus | mChannel, mNote, mVelocity);
     mSink->Handle(&msg);
 }
 
-// 0x001b4040
+// NTSC-U/C: 0x001b4040, PAL: 0x001b9e18
 void NotePlayer::OnCommand(int nTick) {
     StdMidiMsg msg(nTick, kNoteOffStatus | mChannel, mNote, kReleaseVelocity);
     mSink->Handle(&msg);
@@ -130,7 +130,7 @@ void NotePlayer::OnCommand(int nTick) {
     mParent->PlayerFinished(this);
 }
 
-// 0x001b41c0
+// NTSC-U/C: 0x001b41c0, PAL: 0x001b9f98
 int NotePlayer::DisplacesSiblings() {
     return 0;
 }

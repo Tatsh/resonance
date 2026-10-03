@@ -6,7 +6,7 @@
 #include "rndartt/apoint.h"
 #include "rndartt/apolygonedge.h"
 
-// 0x005ebfe0
+// NTSC-U/C: 0x005ebfe0, PAL: 0x0062e128
 int APolygon::FindTopVertex() const {
     int nTop = 0;
     int nTopY = mPoints[mIndices[0]].mY;
@@ -20,7 +20,7 @@ int APolygon::FindTopVertex() const {
     return nTop;
 }
 
-// 0x005e97c8
+// NTSC-U/C: 0x005e97c8, PAL: 0x0062b910
 void APolygon::SetupEdge(APolygonEdge *pEdge, short nFrom, int nDirection) const {
     pEdge->mFrom = nFrom;
     pEdge->mTo = static_cast<short>(nFrom + nDirection);
@@ -42,7 +42,7 @@ void APolygon::SetupEdge(APolygonEdge *pEdge, short nFrom, int nDirection) const
     }
 }
 
-// 0x005e9bd8
+// NTSC-U/C: 0x005e9bd8, PAL: 0x0062bd20
 // The texture coordinates are indexed by the edge's vertex positions directly, where
 // the vertex positions go through mIndices. Both match the binary.
 void APolygon::SetupTexturedEdge(APolygonEdge *pEdge,

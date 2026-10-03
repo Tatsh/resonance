@@ -35,7 +35,8 @@ struct APolygon {
      * A tie resolves to the earlier position.
      *
      * @return The index into mIndices.
-     * @ghidraAddress 0x005ebfe0
+     * @ghidraAddress NTSC-U/C: 0x005ebfe0
+     * @ghidraAddress PAL: 0x0062e128
      */
     int FindTopVertex() const;
 
@@ -50,7 +51,8 @@ struct APolygon {
      * @param pEdge The edge to fill.
      * @param nFrom The vertex position in mIndices the edge starts at.
      * @param nDirection 1 to walk forward through mIndices, -1 to walk backward.
-     * @ghidraAddress 0x005e97c8
+     * @ghidraAddress NTSC-U/C: 0x005e97c8
+     * @ghidraAddress PAL: 0x0062b910
      */
     void SetupEdge(APolygonEdge *pEdge, short nFrom, int nDirection) const;
 
@@ -64,7 +66,8 @@ struct APolygon {
      * @param nFrom The vertex position in mIndices the edge starts at.
      * @param nDirection 1 to walk forward through mIndices, -1 to walk backward.
      * @param pTexture The texture whose extent scales the coordinates.
-     * @ghidraAddress 0x005e9bd8
+     * @ghidraAddress NTSC-U/C: 0x005e9bd8
+     * @ghidraAddress PAL: 0x0062bd20
      */
     void SetupTexturedEdge(APolygonEdge *pEdge,
                            short nFrom,

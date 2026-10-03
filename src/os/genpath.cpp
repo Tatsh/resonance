@@ -17,10 +17,10 @@ constexpr char kLowercaseOffset = 'a' - 'A';
 
 } // namespace
 
-// 0x00725840
+// NTSC-U/C: 0x00725840, PAL: 0x007694e0
 const char *g_szGenDirectory = "gen/";
 
-// 0x005585a8
+// NTSC-U/C: 0x005585a8, PAL: 0x00599700
 char *BuildBitmapCacheFileName(char *pszPath, const char *pszExtension) {
     char *pszName = strrchr(pszPath, '/');
     char *pszBackslash = strrchr(pszPath, '\\');
@@ -46,7 +46,7 @@ char *BuildBitmapCacheFileName(char *pszPath, const char *pszExtension) {
     return strcat(pszPath, pszExtension);
 }
 
-// 0x00558538
+// NTSC-U/C: 0x00558538, PAL: 0x00599690
 int LoadBitmapFileFromPath(const char *pszPath) {
     char szPath[kMaxPathLength];
     strcpy(szPath, pszPath);
@@ -59,7 +59,7 @@ int LoadBitmapFileFromPath(const char *pszPath) {
     return pFile != nullptr;
 }
 
-// 0x005586b0
+// NTSC-U/C: 0x005586b0, PAL: 0x00599808
 void ReplaceFileNameExtension(char *pszPath, const char *pszExtension) {
     char *pszDot = strrchr(pszPath, '.');
     if (pszDot == nullptr) {

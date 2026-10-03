@@ -1,6 +1,6 @@
 #include "rndartt/arect.h"
 
-// 0x00613b58
+// NTSC-U/C: 0x00613b58, PAL: 0x006546e8
 ARect ARect::Intersection(const ARect &other) const {
     ARect result;
     result.mLeft = other.mLeft < mLeft ? mLeft : other.mLeft;
