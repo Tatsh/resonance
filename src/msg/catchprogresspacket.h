@@ -18,10 +18,10 @@ class Player;
  * constructor at `0x003f38d0`. Clone() delegates to it. The four words Packet provides are
  * declared there rather than here.
  *
- * The member at `+0x1c` is a Mid::MBT. Print() hands it to Mid::MBT::Print() after the label ` @`,
- * and New() initialises it to kMBTInfinity. The transfer through the emission at `0x004acf28`
- * alone could not distinguish it from a CmdID. Print() labels `+0x20` as `track` and `+0x24` as
- * `succ`. The player reference at `+0x14` is transferred but not printed.
+ * The member at `+0x1c` is a Mid::MBT. PrintExtra() hands it to Mid::MBT::Print() after the label
+ * ` @`, and New() initialises it to kMBTInfinity. The transfer through the emission at
+ * `0x004acf28` alone could not distinguish it from a CmdID. PrintExtra() labels `+0x20` as `track`
+ * and `+0x24` as `succ`. The player reference at `+0x14` is transferred but not printed.
  *
  * Every member is public because Catcher::HandleMessage() at `0x001adbec` reads the payload
  * directly with no accessor in the image.
@@ -67,7 +67,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f0af8
      * @ghidraAddress PAL: 0x00429100
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write ` @`, the position, ` track:`, the track, ` succ:`, and the success value to a
@@ -77,7 +77,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2648
      * @ghidraAddress PAL: 0x0042ab90
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words, the player's identifier, the position, the track, and the success
@@ -87,21 +87,21 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e7430
      * @ghidraAddress PAL: 0x0041f710
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
-     * Read the fields back in place in the order Save() wrote them.
+     * Read the fields back in place in the order saveGuts() wrote them.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x003e7568
      * @ghidraAddress PAL: 0x0041f848
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     IDablePtr<Player> mPlayer; /*!< The catching player. +0x14 */
     Mid::MBT mPosition;        /*!< The song position, printed after ` @`. +0x1c */
-    int mTrack;                /*!< Labelled `track` by Print(). +0x20 */
-    float mSucc;               /*!< Labelled `succ` by Print(). +0x24 */
+    int mTrack;                /*!< Labelled `track` by PrintExtra(). +0x20 */
+    float mSucc;               /*!< Labelled `succ` by PrintExtra(). +0x24 */
 };
 
 /**

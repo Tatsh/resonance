@@ -14,7 +14,7 @@ class Player;
  * The payload layout comes from the run of field copies in Clone(). mOwner and mType are public
  * because Overlay::OnChoosePowerup() at `0x0041e9b8` reads both directly with no accessor in the
  * image. It compares mOwner with HudTrack::mPlayer and passes mType to script template 1016. The
- * selected entry is read only by Print() and remains private.
+ * selected entry is read only by PrintExtra() and remains private.
  *
  * The destructor at `0x003dcfc8` is compiler-generated and has no declaration here.
  */
@@ -79,7 +79,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dd120
      * @ghidraAddress PAL: 0x00415558
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the selected entry to a diagnostic stream as a number.
@@ -88,7 +88,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3ce0
      * @ghidraAddress PAL: 0x0041beb0
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 private:
     // The three names come from the two collections, the only producers of the message, which

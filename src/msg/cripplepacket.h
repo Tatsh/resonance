@@ -18,10 +18,10 @@ class Player;
  * constructor at `0x003f3938`. Clone() delegates to it, and the payload accounts for the
  * allocation exactly. The four words Packet provides are declared there rather than here.
  *
- * The packet carries one player reference and a vector of further references. Load() resizes the
- * vector with a default reference of a null pointer and -1 as the fill value, which is the same
- * pair New() stores in the single reference and what identifies the element type. Print() writes
- * the players' addresses, not their identifiers.
+ * The packet includes one player reference and a vector of further references. restoreGuts()
+ * resizes the vector with a default reference of a null pointer and -1 as the fill value, which is
+ * the same pair New() stores in the single reference and what identifies the element type.
+ * PrintExtra() writes the players' addresses, not their identifiers.
  *
  * The destructor at `0x003ee2d8` is compiler-generated and has no declaration here.
  */
@@ -87,7 +87,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f0ce8
      * @ghidraAddress PAL: 0x004292f0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the first player's address and then every other player's address in parentheses,
@@ -97,7 +97,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e7c38
      * @ghidraAddress PAL: 0x0041ff18
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words, the first player's identifier, the vector's count, and every other
@@ -107,7 +107,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e7938
      * @ghidraAddress PAL: 0x0041fc18
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the Packet words, the first identifier, and the count, resize the vector, and read every
@@ -117,7 +117,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e7aa0
      * @ghidraAddress PAL: 0x0041fd80
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
 private:
     IDablePtr<Player> mAttacker; // +0x14

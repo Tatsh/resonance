@@ -13,8 +13,9 @@
  * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). New() initialises `+0x04` to
- * kMBTInfinity, the one store it makes, which marks that word as a position. Print() writes only
- * the word at `+0x0c`. Readers of the fields have not been traced, so they are private by default.
+ * kMBTInfinity, the one store it makes, which marks that word as a position. PrintExtra() writes
+ * only the word at `+0x0c`. Readers of the fields have not been traced, so they are private by
+ * default.
  *
  * The destructor at `0x003dfb38` is compiler-generated and has no declaration here.
  */
@@ -57,7 +58,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dfc90
      * @ghidraAddress PAL: 0x004180e8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the word at `+0x0c` to a diagnostic stream as a number.
@@ -66,11 +67,11 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3e80
      * @ghidraAddress PAL: 0x0041c050
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 private:
     // The controller and value titles are inferred from the class name, a MIDI continuous
-    // controller change, whose value is the word Print() writes.
+    // controller change, whose value is the word PrintExtra() writes.
     Mid::MBT mPosition; // +0x04
     int mController;    // +0x08
     int mValue;         // +0x0c

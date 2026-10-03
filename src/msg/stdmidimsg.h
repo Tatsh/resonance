@@ -87,7 +87,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dc020
      * @ghidraAddress PAL: 0x00414458
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the message to a diagnostic stream.
@@ -100,7 +100,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d7ec0
      * @ghidraAddress PAL: 0x0040fff8
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the three bytes to a stream, one byte each through OBStream::WriteBytes().
@@ -111,7 +111,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3658
      * @ghidraAddress PAL: 0x0041b9f8
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the three bytes back in place, one byte each through IBStream::ReadBytes().
@@ -120,7 +120,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e36e8
      * @ghidraAddress PAL: 0x0041ba88
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * The three bytes of one Standard MIDI channel message. +0x08, +0x09, and +0x0a

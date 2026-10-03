@@ -88,7 +88,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0019d728
      * @ghidraAddress PAL: 0x001a3490
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     Player *mPlayer; /*!< The player who erased the range. +0x04 */
     int mTrack;      /*!< The erased track. +0x08 */

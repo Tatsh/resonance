@@ -22,12 +22,12 @@ int AutoCatchMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e2600, PAL: 0x0041aaa0
-const char *AutoCatchMsg::Name() {
+const char *AutoCatchMsg::GetName() const {
     return "AutoCatchMsg";
 }
 
 // NTSC-U/C: 0x003e4208, PAL: 0x0041c438
-void AutoCatchMsg::Print(std::ostream &stream) {
+void AutoCatchMsg::PrintExtra(std::ostream &stream) const {
     stream << "tr#" << mTrack;
     stream << " p#" << mPlayer->mPlayerId << " " << mBar;
 }

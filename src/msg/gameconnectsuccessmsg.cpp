@@ -20,10 +20,10 @@ int GameConnectSuccessMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e15f0, PAL: 0x00419a48
-const char *GameConnectSuccessMsg::Name() {
+const char *GameConnectSuccessMsg::GetName() const {
     return "GameConnectSuccessMsg";
 }
 
 // NTSC-U/C: 0x003e4040, PAL: 0x0041c270
-void GameConnectSuccessMsg::Print(std::ostream &) {
+void GameConnectSuccessMsg::PrintExtra(std::ostream &) const {
 }

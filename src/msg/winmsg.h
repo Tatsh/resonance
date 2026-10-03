@@ -74,7 +74,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001163f0
      * @ghidraAddress PAL: 0x00116898
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Append one winning player.

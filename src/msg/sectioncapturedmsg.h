@@ -13,9 +13,9 @@ class Player;
  * and its vtable is at `0x008126a8`. The members below are the whole of the class. No other
  * routine in the image refers to this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(). Print() labels a bar range at
- * `+0x04` and `+0x08` and the track at `+0x0c`, and it writes the colour name of the player at
- * `+0x10`. The word at `+0x14` is not printed. The last four members are public because
+ * The payload layout comes from the run of field copies in Clone(). PrintExtra() labels a bar
+ * range at `+0x04` and `+0x08` and the track at `+0x0c`, and it writes the colour name of the
+ * player at `+0x10`. The word at `+0x14` is not printed. The last four members are public because
  * AppTunnel's section handler at `0x00448530` reads them directly with no accessor in the image.
  * It scales mEndBar by the 1920 ticks of a bar.
  *
@@ -85,7 +85,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dee90
      * @ghidraAddress PAL: 0x004172e8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write `b `, the bar range joined by `--`, ` tr# `, the track, a space, and the player's
@@ -95,7 +95,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d8578
      * @ghidraAddress PAL: 0x00410950
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 private:
     int mFirstBar; // +0x04

@@ -23,13 +23,13 @@ int TrackSelectMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dc9a0, PAL: 0x00414dd8
-const char *TrackSelectMsg::Name() {
+const char *TrackSelectMsg::GetName() const {
     return "TrackSelectMsg";
 }
 
 // NTSC-U/C: 0x003e3ae8, PAL: 0x00410358
 // The colour name is copied into a temporary before it is written.
-void TrackSelectMsg::Print(std::ostream &stream) {
+void TrackSelectMsg::PrintExtra(std::ostream &stream) const {
     mPosition.Print(stream << HxStr(mPlayer->mColorName) << " tr#" << mTrack << "/" << mPlace
                            << " ");
 }

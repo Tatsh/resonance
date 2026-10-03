@@ -20,11 +20,11 @@ int IsRecordingMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e2c78, PAL: 0x0041b118
-const char *IsRecordingMsg::Name() {
+const char *IsRecordingMsg::GetName() const {
     return "IsRecordingMsg";
 }
 
 // NTSC-U/C: 0x003e44b0, PAL: 0x0041c6e0
-void IsRecordingMsg::Print(std::ostream &stream) {
+void IsRecordingMsg::PrintExtra(std::ostream &stream) const {
     stream << "IsRecordingMsg " << mIsRecording;
 }

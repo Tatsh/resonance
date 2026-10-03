@@ -18,6 +18,6 @@ int LoopToolMsg::Type() {
 }
 
 // NTSC-U/C: 0x0011d948, PAL: 0x0011ded0
-const char *LoopToolMsg::Name() {
+const char *LoopToolMsg::GetName() const {
     return "LoopToolMsg";
 }

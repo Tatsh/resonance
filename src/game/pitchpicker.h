@@ -40,7 +40,7 @@ public:
     /**
      * Act on a message.
      *
-     * Slot 3. A MultiMuseMsg goes to FindRiffRange(), a StdMidiMsg to the branch OnStdMidi()
+     * Slot 3. A MultiMuseMsg goes to OnMsg(), a StdMidiMsg to the branch OnStdMidi()
      * copies, and a SustainNoteMsg to PostSustainNoteMsg(). An AxisRegisterMsg from mPlayer sets
      * mAxis to its value times 1024, and a TrackSelectMsg for this track with a zero second word
      * sets mPlayer. Every other message is discarded.
@@ -66,7 +66,7 @@ private:
     // Records the lowest and highest note of the riff the message carries in mRiffLow and
     // mRiffHigh, through a stack RiffRangeFinder that visits every message of the sequence.
     // NTSC-U/C: 0x001c2c60, PAL: 0x001c8aa8
-    void FindRiffRange(MultiMuseMsg *pMsg);
+    void OnMsg(const MultiMuseMsg &msg);
 
     // Records the message's tick in mSustainTick and sends a SustainNoteMsg at that tick for the
     // pitch GetSustainPitch() reports for its note.

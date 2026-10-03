@@ -20,11 +20,11 @@ int PlayerLeftGameMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e1ee0, PAL: 0x0041a380
-const char *PlayerLeftGameMsg::Name() {
+const char *PlayerLeftGameMsg::GetName() const {
     return "PlayerLeftGameMsg";
 }
 
 // NTSC-U/C: 0x003e40a0, PAL: 0x0041c2d0
-void PlayerLeftGameMsg::Print(std::ostream &stream) {
+void PlayerLeftGameMsg::PrintExtra(std::ostream &stream) const {
     stream << mPlayerId;
 }

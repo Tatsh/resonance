@@ -13,8 +13,8 @@
  *
  * Its table at `0x007ce600` has eight entries. This class supplies slots 3, 4, and 5,
  * and inherits the rest, slot 1 being the `Sch::Command` destructor at `0x00116b48` and the
- * last two being `Sch::Command::Save` at `0x00539f20` and `Load` at `0x00539f28`, which is
- * what identifies the base.
+ * last two being `Sch::Command::saveGuts` at `0x00539f20` and `restoreGuts` at `0x00539f28`,
+ * which is what identifies the base.
  *
  * `Sch::Command` is 0x0c bytes, so this class's own two members start at `+0x0c`.
  *

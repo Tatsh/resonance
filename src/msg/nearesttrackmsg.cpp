@@ -20,12 +20,12 @@ int NearestTrackMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dd818, PAL: 0x00415c50
-const char *NearestTrackMsg::Name() {
+const char *NearestTrackMsg::GetName() const {
     return "NearestTrackMsg";
 }
 
 // NTSC-U/C: 0x003e3d50, PAL: 0x0041bf20
-void NearestTrackMsg::Print(std::ostream &stream) {
+void NearestTrackMsg::PrintExtra(std::ostream &stream) const {
     if (mTrack == -1) {
         stream << "reset";
     } else {

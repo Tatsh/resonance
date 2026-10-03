@@ -294,8 +294,8 @@ public:
      * Receive one message.
      *
      * The only `MsgSink` virtual this class overrides, at slot 3 of its `MsgSink` table. An
-     * UpdateScorePacket naming this player adds its delta without notifying, and a
-     * PhraseCapturedMsg is awarded through AwardCapture() whichever player it names. Every other
+     * UpdateScorePacket for this player adds its delta without notifying, and a
+     * PhraseCapturedMsg is awarded through OnMsg() whichever player it identifies. Every other
      * message is discarded.
      *
      * @param pMsg The message.
@@ -407,14 +407,13 @@ public:
     /**
      * Add a captured phrase's score and juice, announcing both.
      *
-     * LocalPlayer::HandleMessage() and the routine at `0x00122be8` are the callers. The title is
-     * inferred.
+     * LocalPlayer::HandleMessage() and the routine at `0x00122be8` are the callers.
      *
-     * @param pMsg The capture.
+     * @param msg The capture.
      * @ghidraAddress NTSC-U/C: 0x001331c8
      * @ghidraAddress PAL: 0x00133a18
      */
-    void AwardCapture(PhraseCapturedMsg *pMsg);
+    void OnMsg(const PhraseCapturedMsg &msg);
 
     /**
      * Report whether the player has an input slot.

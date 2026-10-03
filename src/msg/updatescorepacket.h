@@ -17,9 +17,9 @@
  * overrides. Both transfer members open by expanding the Packet pair inline rather than calling it,
  * which every one of the twenty overriding packet classes does identically.
  *
- * Print() labels the two members `pid:` and ` score-delta:`. The builds in two Player routines at
- * `0x0012f904` and `0x0012fa6c` store the player's identifier from its `+0x20` and the amount
- * added, which settles both names.
+ * PrintExtra() labels the two members `pid:` and ` score-delta:`. The builds in two Player
+ * routines at `0x0012f904` and `0x0012fa6c` store the player's identifier from its `+0x20` and the
+ * amount added, which settles both names.
  *
  * The destructor at `0x003f0648` is compiler-generated and has no declaration here.
  */
@@ -84,7 +84,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f0748
      * @ghidraAddress PAL: 0x00428d50
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the payload to a diagnostic stream.
@@ -95,7 +95,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2510
      * @ghidraAddress PAL: 0x0042aa58
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the packet to a stream.
@@ -106,7 +106,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e7018
      * @ghidraAddress PAL: 0x0041f2f8
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the packet back from a stream.
@@ -117,7 +117,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e7120
      * @ghidraAddress PAL: 0x0041f400
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
 public:
     /** The identifier of the scoring player. Player::HandleMessage() reads it. +0x14 */

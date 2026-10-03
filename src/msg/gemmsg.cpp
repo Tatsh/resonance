@@ -23,13 +23,13 @@ int GemMsg::Type() {
 }
 
 // NTSC-U/C: 0x003df5b8, PAL: 0x00417a10
-const char *GemMsg::Name() {
+const char *GemMsg::GetName() const {
     return "GemMsg";
 }
 
 // NTSC-U/C: 0x003d8830, PAL: 0x00410c48
 // The colour name is copied into a temporary before it is written.
-void GemMsg::Print(std::ostream &stream) {
+void GemMsg::PrintExtra(std::ostream &stream) const {
     std::ostream &rest = stream << mTrack << " ";
     mPosition.Print(rest);
     rest << " " << mGem << " " << HxStr(mPlayer->mColorName);

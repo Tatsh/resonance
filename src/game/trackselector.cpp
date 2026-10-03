@@ -142,19 +142,19 @@ int TrackSelector::RebuildChannelGrid(BumpPacket *pPacket) {
 
 // The address below is the out-of-line copy.
 // NTSC-U/C: 0x0013f5a0, PAL: 0x0013ff68
-inline void TrackSelector::OnRotLeft(RotLeftMsg *pMsg) {
-    Player *pPlayer = pMsg->mPlayer;
+inline void TrackSelector::OnMsg(const RotLeftMsg &msg) {
+    Player *pPlayer = msg.mPlayer;
     if (pPlayer->HasInputSlot()) {
-        AddLightToChannel(pPlayer, pMsg->mPosition.mTick, kRotateDown);
+        AddLightToChannel(pPlayer, msg.mPosition.mTick, kRotateDown);
     }
 }
 
 // The address below is the out-of-line copy.
 // NTSC-U/C: 0x0013f608, PAL: 0x0013ffd0
-inline void TrackSelector::OnRotRight(RotRightMsg *pMsg) {
-    Player *pPlayer = pMsg->mPlayer;
+inline void TrackSelector::OnMsg(const RotRightMsg &msg) {
+    Player *pPlayer = msg.mPlayer;
     if (pPlayer->HasInputSlot()) {
-        AddLightToChannel(pPlayer, pMsg->mPosition.mTick, kRotateUp);
+        AddLightToChannel(pPlayer, msg.mPosition.mTick, kRotateUp);
     }
 }
 
@@ -178,9 +178,9 @@ inline void TrackSelector::OnRemoteTrackSelect(RemoteTrackSelectMsg *pMsg) {
 void TrackSelector::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nRotLeftMsgType) {
-        OnRotLeft(static_cast<RotLeftMsg *>(pMsg));
+        OnMsg(*static_cast<RotLeftMsg *>(pMsg));
     } else if (nType == g_nRotRightMsgType) {
-        OnRotRight(static_cast<RotRightMsg *>(pMsg));
+        OnMsg(*static_cast<RotRightMsg *>(pMsg));
     } else if (nType == g_nPhraseMuffedMsgType) {
         OnPhraseMuffed(static_cast<PhraseMuffedMsg *>(pMsg));
     } else if (nType == g_nBumpPacketType) {

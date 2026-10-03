@@ -89,7 +89,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001b10f0
      * @ghidraAddress PAL: 0x001b6ea0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     int mTick = kMBTInfinity; /*!< The scheduler time of the gem. +0x04 */
     int mTrack;               /*!< The track the gem lies on. +0x08 */

@@ -9,9 +9,9 @@
  * Its RTTI descriptor is at `0x008ef330`. It has Message as its one base. Its vtable is at
  * `0x007dd628`. Every one of the 4 derived Clone() routines installs it before the derived
  * table. That table has eight entries and a zero terminator at index 8. Slots 2, 3, and 4 address
- * the pure-virtual handler, and slots 5, 6, and 7 retain Message::Print(), Message::Save(), and
- * Message::Load(), so the class implements none of the virtuals it inherits and is never
- * instantiated. It is declared because its derived classes need it.
+ * the pure-virtual handler, and slots 5, 6, and 7 retain Message::PrintExtra(),
+ * Message::saveGuts(), and Message::restoreGuts(), so the class implements none of the virtuals
+ * it inherits and is never instantiated. It is declared because its derived classes need it.
  *
  * The destructor at slot 1 is byte-identical to Message's, because it stores its own table pointer,
  * the inlined base destructor overwrites it, and the compiler drops the dead first store. It is
@@ -54,14 +54,13 @@ public:
      * Copy this message and move the copy to a song position.
      *
      * The copy comes from Clone(), and the caller owns it. Sequencer::Dispatch() is the caller.
-     * The title is inferred.
      *
      * @param nTick The song position of the copy, in MIDI ticks.
      * @return The copy.
      * @ghidraAddress NTSC-U/C: 0x003e3620
      * @ghidraAddress PAL: 0x0041b9c0
      */
-    MuseMsg *CloneAt(int nTick);
+    MuseMsg *CloneAndShift(int nTick);
 
     /**
      * The song position, in MIDI ticks. +0x04

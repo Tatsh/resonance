@@ -234,7 +234,7 @@ void AxePhraseMaker::HandleMessage(Message *pMsg) {
     } else if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
         OnTrackSelect(static_cast<TrackSelectMsg *>(pMsg));
     } else if (nType == g_nInvalidateSeekerMsgType) {
-        OnInvalidateSeeker(static_cast<InvalidateSeekerMsg *>(pMsg));
+        OnMsg(*static_cast<InvalidateSeekerMsg *>(pMsg));
     }
 }
 
@@ -256,9 +256,9 @@ void AxePhraseMaker::OnTrackSelect(TrackSelectMsg *pMsg) {
 }
 
 // NTSC-U/C: 0x0019d8f0, PAL: 0x001a3658
-void AxePhraseMaker::OnInvalidateSeeker(InvalidateSeekerMsg *pMsg) {
-    if (pMsg->mTrack == mTrack) {
-        PostSeekerMsg(pMsg->mBar);
+void AxePhraseMaker::OnMsg(const InvalidateSeekerMsg &msg) {
+    if (msg.mTrack == mTrack) {
+        PostSeekerMsg(msg.mBar);
     }
 }
 

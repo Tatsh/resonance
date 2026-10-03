@@ -20,11 +20,11 @@ int CaughtPowerbarMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dcf70, PAL: 0x004153a8
-const char *CaughtPowerbarMsg::Name() {
+const char *CaughtPowerbarMsg::GetName() const {
     return "CaughtPowerbarMsg";
 }
 
 // NTSC-U/C: 0x003e3cb8, PAL: 0x0041be88
-void CaughtPowerbarMsg::Print(std::ostream &stream) {
+void CaughtPowerbarMsg::PrintExtra(std::ostream &stream) const {
     stream << mKind;
 }

@@ -8,9 +8,9 @@
  * Its RTTI descriptor is at `0x008ef860`. It has Message as its one base. Its vtable is at
  * `0x007e46b8`. Every one of the 5 derived Clone() routines installs it before the derived
  * table. That table has eight entries and a zero terminator at index 8. Slots 2, 3, and 4 address
- * the pure-virtual handler, and slots 5, 6, and 7 retain Message::Print(), Message::Save(), and
- * Message::Load(), so the class implements none of the virtuals it inherits and is never
- * instantiated. It is declared because its derived classes need it.
+ * the pure-virtual handler, and slots 5, 6, and 7 retain Message::PrintExtra(),
+ * Message::saveGuts(), and Message::restoreGuts(), so the class implements none of the virtuals
+ * it inherits and is never instantiated. It is declared because its derived classes need it.
  *
  * The destructor at slot 1 is byte-identical to Message's, because it stores its own table pointer,
  * the inlined base destructor overwrites it, and the compiler drops the dead first store. It is
@@ -23,7 +23,7 @@
  * at `0x001c9878` to learn whether a receiver acted, so it is a result the receiver fills in.
  *
  * The words at `+0x08` and `+0x0c` belong to the derived classes, because their types differ
- * between them. CrippleMsg's Print() dereferences `+0x08` as a player and writes `+0x0c` as a
+ * between them. CrippleMsg's PrintExtra() dereferences `+0x08` as a player and writes `+0x0c` as a
  * track number, while PhraseNeutralizer builds a PlayersTrackNeutralizedMsg at `0x001c0b2c` with
  * a player at `+0x0c`. No single declaration here could type both.
  */

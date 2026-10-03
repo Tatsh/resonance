@@ -12,8 +12,8 @@ namespace {
  * Scheduler command that hands one line of script text to the script sink when it runs.
  *
  * `Q234_GLOBAL_$N$CmdPostScript.cppdKuhgb9ScriptCmd` in the RTTI, with Sch::Command as its one
- * base. Its vtable at `0x007d64f8` retains Sch::Command::Print(), Save(), and Load(). The
- * `hx.PostScript` binding at `0x001597b8` expands the constructor into its 0x14-byte allocation
+ * base. Its vtable at `0x007d64f8` retains Sch::Command::Print(), saveGuts(), and restoreGuts().
+ * The `hx.PostScript` binding at `0x001597b8` expands the constructor into its 0x14-byte allocation
  * and posts the command on the song clock.
  *
  * The destructor at `0x0015a350` is implicitly declared. It releases the string, stores the base

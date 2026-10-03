@@ -58,7 +58,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001a4550
      * @ghidraAddress PAL: 0x001aa2b8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     int mStripId;              /*!< The sustain strip. +0x04 */
     int mStop;                 /*!< Non-zero to stop the strip. +0x08 */

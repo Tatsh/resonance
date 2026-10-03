@@ -54,7 +54,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00193fe8
      * @ghidraAddress PAL: 0x00199c20
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     int mDuration; /*!< The length of the fade in milliseconds. +0x04 */
     int mFadeIn;   /*!< Non-zero to fade the game in, zero to fade it out. +0x08 */

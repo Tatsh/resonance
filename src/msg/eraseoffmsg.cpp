@@ -23,13 +23,13 @@ int EraseOffMsg::Type() {
 }
 
 // NTSC-U/C: 0x003db620, PAL: 0x00413a58
-const char *EraseOffMsg::Name() {
+const char *EraseOffMsg::GetName() const {
     return "EraseOffMsg";
 }
 
 // NTSC-U/C: 0x003e33d0, PAL: 0x0041b710
 // The colour name is copied into a temporary before it is written.
-void EraseOffMsg::Print(std::ostream &stream) {
+void EraseOffMsg::PrintExtra(std::ostream &stream) const {
     mPosition.Print(stream);
     stream << " " << HxStr(mPlayer->mColorName);
 }

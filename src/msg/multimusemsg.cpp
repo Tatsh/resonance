@@ -20,7 +20,7 @@ int MultiMuseMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dc618, PAL: 0x00414a50
-const char *MultiMuseMsg::Name() {
+const char *MultiMuseMsg::GetName() const {
     return "MultiMuseMsg";
 }
 
@@ -46,7 +46,7 @@ MultiMuseMsg::~MultiMuseMsg() {
 }
 
 // NTSC-U/C: 0x003e3990, PAL: 0x0041bd30
-void MultiMuseMsg::Print(std::ostream &stream) {
+void MultiMuseMsg::PrintExtra(std::ostream &stream) const {
     // MuseMsg's member is a Mid::MBT rather than a plain int, which this body proves by handing
     // it to Mid::MBT::Print(). Its header still types it as an int.
     Mid::MBT position;
@@ -56,12 +56,12 @@ void MultiMuseMsg::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x003e39f8, PAL: 0x0041bd98
-void MultiMuseMsg::Save(OBStream &stream) {
+void MultiMuseMsg::saveGuts(OBStream &stream) const {
     mMuse->SaveFields(stream);
 }
 
 // NTSC-U/C: 0x003d8180, PAL: 0x004102e8
-void MultiMuseMsg::Load(IBStream &stream) {
+void MultiMuseMsg::restoreGuts(IBStream &stream) {
     // Whatever sequence the message already stored is replaced without being released.
     mMuse = new MultiMuse();
     mMuse->LoadFields(stream);

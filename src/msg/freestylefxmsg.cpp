@@ -18,6 +18,6 @@ int FreestyleFXMsg::Type() {
 }
 
 // NTSC-U/C: 0x00116568, PAL: 0x00116a10
-const char *FreestyleFXMsg::Name() {
+const char *FreestyleFXMsg::GetName() const {
     return "FreestyleFXMsg";
 }

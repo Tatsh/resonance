@@ -32,19 +32,19 @@ int BSLoadLevelPacket::Type() {
 }
 
 // NTSC-U/C: 0x003f11a0, PAL: 0x00429708
-const char *BSLoadLevelPacket::Name() {
+const char *BSLoadLevelPacket::GetName() const {
     return "BSLoadLevelPacket";
 }
 
 // NTSC-U/C: 0x003f2780, PAL: 0x0042acc8
-void BSLoadLevelPacket::Print(std::ostream &stream) {
+void BSLoadLevelPacket::PrintExtra(std::ostream &stream) const {
     mParams.Print(stream);
 }
 
 // NTSC-U/C: 0x003e7fa0, PAL: 0x00420280
 // The word at +0x0c crosses the wire twice.
-void BSLoadLevelPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void BSLoadLevelPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
     mParams.Save(&stream);
 
     int clientId = mClientId;
@@ -52,8 +52,8 @@ void BSLoadLevelPacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e80a0, PAL: 0x00420380
-void BSLoadLevelPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void BSLoadLevelPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
     mParams.Load(&stream);
     stream.Read(&mClientId, sizeof(mClientId));
 }

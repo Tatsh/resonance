@@ -23,12 +23,12 @@ int NoteMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dc290, PAL: 0x004146c8
-const char *NoteMsg::Name() {
+const char *NoteMsg::GetName() const {
     return "NoteMsg";
 }
 
 // NTSC-U/C: 0x003e3760, PAL: 0x0041bb00
-void NoteMsg::Print(std::ostream &stream) {
+void NoteMsg::PrintExtra(std::ostream &stream) const {
     Mid::MBT position;
     position.mTick = mTick;
     position.Print(stream);
@@ -40,7 +40,7 @@ void NoteMsg::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x003d80c0, PAL: 0x00410228
-void NoteMsg::Save(OBStream &stream) {
+void NoteMsg::saveGuts(OBStream &stream) const {
     unsigned char channel = mChannel;
     unsigned char note = mNote;
     unsigned char velocity = mVelocity;
@@ -52,7 +52,7 @@ void NoteMsg::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e3808, PAL: 0x0041bba8
-void NoteMsg::Load(IBStream &stream) {
+void NoteMsg::restoreGuts(IBStream &stream) {
     unsigned short length;
     stream.ReadBytes(&mChannel, sizeof(mChannel))
         .ReadBytes(&mNote, sizeof(mNote))

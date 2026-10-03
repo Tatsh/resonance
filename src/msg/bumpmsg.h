@@ -12,7 +12,7 @@ class Player;
  * Its RTTI descriptor is at `0x008ef350`. It has CmdMsg as its one base. The object is 0x14 bytes
  * and its vtable is at `0x00811fa0`. The word at `+0x04` belongs to CmdMsg.
  *
- * Print() writes the colour name of the player at `+0x10`, which types that word. The words at
+ * PrintExtra() writes the colour name of the player at `+0x10`, which types that word. The words at
  * `+0x08` and `+0x0c` are not printed, and no producer of the message has been traced.
  *
  * The destructor at `0x003e12b0` is compiler-generated and has no declaration here.
@@ -55,7 +55,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e1450
      * @ghidraAddress PAL: 0x004198a8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the player's colour name to a diagnostic stream.
@@ -64,7 +64,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3fb8
      * @ghidraAddress PAL: 0x0041c1c8
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 private:
     // Both titles follow the bar and track that BumpPacket includes in the same order.

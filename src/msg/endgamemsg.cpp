@@ -18,6 +18,6 @@ int EndGameMsg::Type() {
 }
 
 // NTSC-U/C: 0x00193a10, PAL: 0x00199638
-const char *EndGameMsg::Name() {
+const char *EndGameMsg::GetName() const {
     return "EndGameMsg";
 }

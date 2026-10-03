@@ -25,11 +25,11 @@ int ChoosePowerupMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dd120, PAL: 0x00415558
-const char *ChoosePowerupMsg::Name() {
+const char *ChoosePowerupMsg::GetName() const {
     return "ChoosePowerupMsg";
 }
 
 // NTSC-U/C: 0x003e3ce0, PAL: 0x0041beb0
-void ChoosePowerupMsg::Print(std::ostream &stream) {
+void ChoosePowerupMsg::PrintExtra(std::ostream &stream) const {
     stream << mIndex;
 }

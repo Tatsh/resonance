@@ -24,12 +24,12 @@ int SustainNoteMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dc7e8, PAL: 0x00414c20
-const char *SustainNoteMsg::Name() {
+const char *SustainNoteMsg::GetName() const {
     return "SustainNoteMsg";
 }
 
 // NTSC-U/C: 0x003e3a18, PAL: 0x0041bdb8
-void SustainNoteMsg::Print(std::ostream &stream) {
+void SustainNoteMsg::PrintExtra(std::ostream &stream) const {
     Mid::MBT position;
     position.mTick = mTick;
     position.Print(stream);
@@ -38,12 +38,12 @@ void SustainNoteMsg::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x003e3a70, PAL: 0x0041be10
-void SustainNoteMsg::Save(OBStream &stream) {
+void SustainNoteMsg::saveGuts(OBStream &stream) const {
     unsigned char note = mNote;
     stream.WriteBytes(&note, sizeof(note));
 }
 
 // NTSC-U/C: 0x003e3ab0, PAL: 0x0041be50
-void SustainNoteMsg::Load(IBStream &stream) {
+void SustainNoteMsg::restoreGuts(IBStream &stream) {
     stream.ReadBytes(&mNote, sizeof(mNote));
 }

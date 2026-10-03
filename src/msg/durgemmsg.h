@@ -55,7 +55,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001a4410
      * @ghidraAddress PAL: 0x001aa178
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     int mLane;                      /*!< The lane. +0x04 */
     int mStartFrame = kMBTInfinity; /*!< The frame the gem starts at. +0x08 */

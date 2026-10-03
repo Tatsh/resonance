@@ -23,12 +23,12 @@ int BumpMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e1450, PAL: 0x004198a8
-const char *BumpMsg::Name() {
+const char *BumpMsg::GetName() const {
     return "BumpMsg";
 }
 
 // NTSC-U/C: 0x003e3fb8, PAL: 0x0041c1c8
 // The colour name is copied into a temporary before it is written.
-void BumpMsg::Print(std::ostream &stream) {
+void BumpMsg::PrintExtra(std::ostream &stream) const {
     stream << HxStr(mPlayer->mColorName);
 }

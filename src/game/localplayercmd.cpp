@@ -32,9 +32,9 @@ void LocalPlayerCmd::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x00122850, PAL: 0x00122e68
-void LocalPlayerCmd::Save(OBStream &) {
+void LocalPlayerCmd::saveGuts(OBStream &) const {
 }
 
 // NTSC-U/C: 0x00122858, PAL: 0x00122e70
-void LocalPlayerCmd::Load(IBStream &) {
+void LocalPlayerCmd::restoreGuts(IBStream &) {
 }

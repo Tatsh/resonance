@@ -74,7 +74,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e1a60
      * @ghidraAddress PAL: 0x00419ee0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the string to a diagnostic stream.
@@ -86,10 +86,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e4070
      * @ghidraAddress PAL: 0x0041c2a0
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 private:
-    HxStr mReason; // +0x04, the text Print() writes, with a title after the loss it reports
+    HxStr mReason; // +0x04, the text PrintExtra() writes, with a title after the loss it reports
 };
 
 /**

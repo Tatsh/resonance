@@ -18,6 +18,6 @@ int WinMsg::Type() {
 }
 
 // NTSC-U/C: 0x001163f0, PAL: 0x00116898
-const char *WinMsg::Name() {
+const char *WinMsg::GetName() const {
     return "WinMsg";
 }

@@ -12,8 +12,8 @@ class Player;
  * Its RTTI descriptor is at `0x008f0010`. It has CmdMsg as its one base. The object is 0x14 bytes
  * and its vtable is at `0x00811c88`. The word at `+0x04` belongs to CmdMsg.
  *
- * Print() labels `+0x0c` as a track number and writes the identifier of the player at `+0x10`
- * after ` p#`, followed by the bar at `+0x08`.
+ * PrintExtra() labels `+0x0c` as a track number and writes the identifier of the player at
+ * `+0x10` after ` p#`, followed by the bar at `+0x08`.
  *
  * The three members are public because code outside the class accesses them directly with no
  * accessor in the image. AutocatchPowerup::Deploy() at `0x001c9628` writes all three into a stack
@@ -60,7 +60,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e2600
      * @ghidraAddress PAL: 0x0041aaa0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write `tr#`, the track, ` p#`, the player's identifier, a space, and the word at `+0x08` to
@@ -70,7 +70,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e4208
      * @ghidraAddress PAL: 0x0041c438
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     int mBar;        /*!< The bar to catch automatically. +0x08 */
     int mTrack;      /*!< The track the bar lies on. +0x0c */

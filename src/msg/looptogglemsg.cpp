@@ -18,6 +18,6 @@ int LoopToggleMsg::Type() {
 }
 
 // NTSC-U/C: 0x00122550, PAL: 0x00122b68
-const char *LoopToggleMsg::Name() {
+const char *LoopToggleMsg::GetName() const {
     return "LoopToggleMsg";
 }

@@ -20,11 +20,11 @@ int PhraseMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e1250, PAL: 0x004196a8
-const char *PhraseMsg::Name() {
+const char *PhraseMsg::GetName() const {
     return "PhraseMsg";
 }
 
 // NTSC-U/C: 0x003e42f8, PAL: 0x0041c528
-void PhraseMsg::Print(std::ostream &stream) {
+void PhraseMsg::PrintExtra(std::ostream &stream) const {
     stream << static_cast<void *>(mPhrase) << " [" << mBar << "]";
 }

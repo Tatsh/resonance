@@ -27,23 +27,23 @@ int SCPlayerJoinedPacket::Type() {
 }
 
 // NTSC-U/C: 0x003ef7a0, PAL: 0x00427d90
-const char *SCPlayerJoinedPacket::Name() {
+const char *SCPlayerJoinedPacket::GetName() const {
     return "SCPlayerJoinedPacket";
 }
 
 // NTSC-U/C: 0x003f2100, PAL: 0x0042a648
-void SCPlayerJoinedPacket::Print(std::ostream &stream) {
+void SCPlayerJoinedPacket::PrintExtra(std::ostream &stream) const {
     mPlayerInfo.Print(stream);
 }
 
 // NTSC-U/C: 0x003e5fb8, PAL: 0x0041e298
-void SCPlayerJoinedPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void SCPlayerJoinedPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
     mPlayerInfo.Save(stream);
 }
 
 // NTSC-U/C: 0x003f2048, PAL: 0x0042a590
-void SCPlayerJoinedPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void SCPlayerJoinedPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
     mPlayerInfo.Load(stream);
 }

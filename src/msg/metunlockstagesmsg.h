@@ -54,12 +54,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e2f88
      * @ghidraAddress PAL: 0x0041b428
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the literal `MetFreqEndedMsg ` to a diagnostic stream.
      *
-     * The literal belongs to a different class, MetFreqEndedMsg, whose own Print() writes the same
+     * The literal belongs to a different class, MetFreqEndedMsg, whose PrintExtra() writes the same
      * text at `0x003e44f0` before its word. The image has no `MetUnlockStagesMsg ` literal, so this
      * is faithful rather than a reconstruction error. The body was not claimed as a routine by the
      * disassembler until this reconstruction, because only the vtable reaches it.
@@ -68,7 +68,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e4530
      * @ghidraAddress PAL: 0x0041c760
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 };
 
 /**

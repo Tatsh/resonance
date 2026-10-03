@@ -171,7 +171,7 @@ void Gamer::Withdraw() {
 void Gamer::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nAdvanceSectionMsgType) {
-        OnAdvanceSection(static_cast<AdvanceSectionMsg *>(pMsg));
+        OnMsg(*static_cast<AdvanceSectionMsg *>(pMsg));
     } else if (nType == g_nPhraseCapturedMsgType) {
         OnPhraseCaptured(static_cast<PhraseCapturedMsg *>(pMsg));
     } else if (nType == g_nEnableFreestyleMsgType) {
@@ -184,15 +184,15 @@ void Gamer::HandleMessage(Message *pMsg) {
 }
 
 // NTSC-U/C: 0x00116920, PAL: 0x00116dd8
-void Gamer::OnAdvanceSection(AdvanceSectionMsg *pMsg) {
+void Gamer::OnMsg(const AdvanceSectionMsg &msg) {
     const bool bJamAdvance = mPlayMode == kPlayModeJam && mGameMode != kGameModeNet;
     if (!bJamAdvance && mTutorial == 0) {
         return;
     }
-    if (pMsg->mPlayer->GetInputSlot() != 0) {
+    if (msg.mPlayer->GetInputSlot() != 0) {
         return;
     }
-    AdvanceAt(pMsg->mPosition);
+    AdvanceAt(msg.mPosition);
 }
 
 // NTSC-U/C: 0x001169a8, PAL: 0x00116e60

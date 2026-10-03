@@ -22,7 +22,7 @@ int PointAmountMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e0aa8, PAL: 0x00418f00
-const char *PointAmountMsg::Name() {
+const char *PointAmountMsg::GetName() const {
     return "PointAmountMsg";
 }
 
@@ -37,6 +37,6 @@ float PointAmountMsg::GetScoreFraction() {
 }
 
 // NTSC-U/C: 0x003e4138, PAL: 0x0041c368
-void PointAmountMsg::Print(std::ostream &stream) {
+void PointAmountMsg::PrintExtra(std::ostream &stream) const {
     mPlayer->Print(stream);
 }

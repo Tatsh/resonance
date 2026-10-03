@@ -23,13 +23,13 @@ int AxisRegisterMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dab60, PAL: 0x00412f98
-const char *AxisRegisterMsg::Name() {
+const char *AxisRegisterMsg::GetName() const {
     return "AxisRegisterMsg";
 }
 
 // NTSC-U/C: 0x003e3160, PAL: 0x0040fd08
 // The colour name is copied into a temporary before it is written.
-void AxisRegisterMsg::Print(std::ostream &stream) {
+void AxisRegisterMsg::PrintExtra(std::ostream &stream) const {
     mPosition.Print(stream);
     stream << " " << HxStr(mPlayer->mColorName) << " " << mValue;
 }

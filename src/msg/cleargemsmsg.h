@@ -54,7 +54,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0019d5f0
      * @ghidraAddress PAL: 0x001a3358
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     int mBar;   /*!< The bar to clear. +0x04 */
     int mTrack; /*!< The track. +0x08 */

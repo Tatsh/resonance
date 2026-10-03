@@ -76,7 +76,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001b1210
      * @ghidraAddress PAL: 0x001b6fc0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     // Public because LocalPlayer::HandleMessage() reads both directly at `0x0011efa0` and
     // `0x0011efac`, and the image has no accessor.

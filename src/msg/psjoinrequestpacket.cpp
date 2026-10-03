@@ -12,7 +12,7 @@ Message *PSJoinRequestPacket::New() {
 }
 
 // NTSC-U/C: 0x003f1f38, PAL: 0x0042a480
-void PSJoinRequestPacket::Print(std::ostream &stream) {
+void PSJoinRequestPacket::PrintExtra(std::ostream &stream) const {
     mAppearance.Print(stream);
 }
 
@@ -29,12 +29,12 @@ int PSJoinRequestPacket::Type() {
 }
 
 // NTSC-U/C: 0x003eef40, PAL: 0x00427490
-const char *PSJoinRequestPacket::Name() {
+const char *PSJoinRequestPacket::GetName() const {
     return "PSJoinRequestPacket";
 }
 
 // NTSC-U/C: 0x003e5538, PAL: 0x0041d7e0
-void PSJoinRequestPacket::Save(OBStream &stream) {
+void PSJoinRequestPacket::saveGuts(OBStream &stream) const {
     int destination = mDestination;
     stream.Write(&destination, sizeof(destination));
 
@@ -55,7 +55,7 @@ void PSJoinRequestPacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e5638, PAL: 0x0041d8e0
-void PSJoinRequestPacket::Load(IBStream &stream) {
+void PSJoinRequestPacket::restoreGuts(IBStream &stream) {
     stream.Read(&mDestination, sizeof(mDestination));
     stream.Read(&mDestinationSystem, sizeof(mDestinationSystem));
     stream.Read(&mClientId, sizeof(mClientId));

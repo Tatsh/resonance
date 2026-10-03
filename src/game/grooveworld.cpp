@@ -172,9 +172,10 @@ constexpr int kExitModeRestart = 3;
 /**
  * Scheduler command that calls one member of the world.
  *
- * It has Sch::Command as its one base. Its vtable at `0x007dc378` retains Sch::Command::Save() and
- * Load(). The GrooveWorld routines that queue one allocate 0x18 bytes and expand the constructor
- * inline, storing the world at `+0x0c` and an eight-byte pointer to member function at `+0x10`.
+ * It has Sch::Command as its one base. Its vtable at `0x007dc378` retains
+ * Sch::Command::saveGuts() and restoreGuts(). The GrooveWorld routines that queue one allocate 0x18
+ * bytes and expand the constructor inline, storing the world at `+0x0c` and an eight-byte pointer
+ * to member function at `+0x10`.
  *
  * The destructor at `0x001947d8` is implicitly declared. It stores the base table pointer and runs
  * Attachment's destructor, which is what the compiler generates.
@@ -246,7 +247,7 @@ public:
     }
 
     // NTSC-U/C: 0x00194a50, PAL: 0x0019a6d0
-    virtual void Save(OBStream &stream) {
+    virtual void saveGuts(OBStream &stream) const {
         const int nMode = mMode;
         stream.Write(&nMode, sizeof(nMode));
         stream << mContinueJukebox;
@@ -254,7 +255,7 @@ public:
     }
 
     // NTSC-U/C: 0x00194ab8, PAL: 0x0019a738
-    virtual void Load(IBStream &stream) {
+    virtual void restoreGuts(IBStream &stream) {
         int nMode;
         stream.Read(&nMode, sizeof(nMode));
         mMode = nMode;

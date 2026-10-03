@@ -92,7 +92,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00133930
      * @ghidraAddress PAL: 0x00134198
      */
-    virtual void Print(std::ostream &stream);
+    virtual void Print(std::ostream &stream) const;
 
     /**
      * Write the identity to a stream.
@@ -103,7 +103,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00133578
      * @ghidraAddress PAL: 0x00133de0
      */
-    virtual void Save(OBStream &stream);
+    virtual void Save(OBStream &stream) const;
 
     /**
      * Read the identity back from a stream.

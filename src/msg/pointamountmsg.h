@@ -13,7 +13,7 @@ class Player;
  * and its vtable is at `0x00812198`. The members below are the whole of the class. No other
  * routine in the image refers to this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(). Print() dispatches
+ * The payload layout comes from the run of field copies in Clone(). PrintExtra() dispatches
  * Player::Print() through the word at `+0x04`, which types it. Player::AddScore() fills the word
  * at `+0x08` with the capped score ceiling. mPlayer is public because Overlay::OnPointAmount() at
  * `0x0042aff0` reads it directly with no accessor in the image, comparing it with
@@ -59,7 +59,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e0aa8
      * @ghidraAddress PAL: 0x00418f00
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the player to a diagnostic stream through Player::Print().
@@ -68,7 +68,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e4138
      * @ghidraAddress PAL: 0x0041c368
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Report the player's score.

@@ -37,28 +37,28 @@ public:
     virtual void HandleMessage(Message *pMsg) {
         const int nType = pMsg->Type();
         if (nType == static_cast<int>(g_dwNoteMsgType)) {
-            OnNote(static_cast<NoteMsg *>(pMsg));
+            OnMsg(*static_cast<NoteMsg *>(pMsg));
         } else if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
-            OnStdMidi(static_cast<StdMidiMsg *>(pMsg));
+            OnMsg(*static_cast<StdMidiMsg *>(pMsg));
         } else if (nType >= g_nFirstMuseMsgType && nType < g_nEndMuseMsgType) {
-            AddUnchanged(static_cast<MuseMsg *>(pMsg));
+            OnMsg(*static_cast<MuseMsg *>(pMsg));
         }
     }
 
 private:
     // Adds a copy of the note with its number raised by mTrans, wrapping at 256.
     // NTSC-U/C: 0x001ab588, PAL: 0x001b12f0
-    void OnNote(NoteMsg *pMsg) {
-        NoteMsg shifted(*pMsg);
-        shifted.mNote = static_cast<unsigned char>(pMsg->mNote + mTrans);
+    void OnMsg(const NoteMsg &msg) {
+        NoteMsg shifted(msg);
+        shifted.mNote = static_cast<unsigned char>(msg.mNote + mTrans);
         mResult->Add(&shifted, mPosition.mTick, kAppendFirst);
     }
 
     // Adds a copy of the message, with the note number of a note-on or note-off raised by mTrans.
     // NTSC-U/C: 0x001ab620, PAL: 0x001b1388
-    void OnStdMidi(StdMidiMsg *pMsg) {
-        StdMidiMsg shifted(*pMsg);
-        const unsigned char nKind = pMsg->mStatus & kStatusKindMask;
+    void OnMsg(const StdMidiMsg &msg) {
+        StdMidiMsg shifted(msg);
+        const unsigned char nKind = msg.mStatus & kStatusKindMask;
         if (nKind == kStatusNoteOn || nKind == kStatusNoteOff) {
             shifted.mData1 = static_cast<unsigned char>(shifted.mData1 + mTrans);
         }
@@ -68,8 +68,8 @@ private:
     // The out-of-line copy of the branch HandleMessage() expands inline for any other message in
     // the MuseMsg identity range. The image has no caller of this copy.
     // NTSC-U/C: 0x001ab948, PAL: 0x001b16b0
-    void AddUnchanged(MuseMsg *pMsg) {
-        mResult->Add(pMsg, mPosition.mTick, kAppendFirst);
+    void OnMsg(MuseMsg &msg) {
+        mResult->Add(&msg, mPosition.mTick, kAppendFirst);
     }
 
     int mTrans;         // +0x04, read back as its low byte

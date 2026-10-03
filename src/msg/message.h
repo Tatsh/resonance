@@ -17,7 +17,7 @@ class OBStream;
  * Every vtable in the family is eight entries, and the declaration order below reproduces the
  * order after the compiler-generated slot 0. Each one was read off the concrete implementations
  * rather than off the declaration: a scan of the derived tables found 80 classes that implement
- * Clone(), Type(), and Name(), while Packet and eight others inherit all three as pure and are
+ * Clone(), Type(), and GetName(), while Packet and eight others inherit all three as pure and are
  * therefore abstract themselves.
  *
  * This class's own table is at `0x007ccbf8`, which its destructor stores at offset 0. It has eight
@@ -113,7 +113,7 @@ public:
      *
      * @return The name.
      */
-    virtual const char *Name() = 0;
+    virtual const char *GetName() const = 0;
 
     /**
      * Write this message's payload to a stream.
@@ -125,7 +125,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001051f0
      * @ghidraAddress PAL: 0x001051f0
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write this message's payload to an output stream.
@@ -133,15 +133,13 @@ public:
      * Vtable slot 6. The default does nothing. An override copies each field into a temporary and
      * hands the temporary to OBStream::Write(), chaining on the stream the call returns, which is
      * how PSJoinRequestPacket's override at `0x003e5538` writes its four words and then delegates
-     * its FreqAppearance member to that class's own slot 2. The verb is inferred from the shape
-     * and from the position ahead of the reading half. No string in the image identifies either
-     * slot.
+     * its FreqAppearance member to that class's own slot 2.
      *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x001051f8
      * @ghidraAddress PAL: 0x001051f8
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read this message's payload from an input stream.
@@ -157,12 +155,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00105200
      * @ghidraAddress PAL: 0x00105200
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
-     * Write this message to a diagnostic stream as `{Name() Print()}`.
+     * Write this message to a diagnostic stream as `{GetName() PrintExtra()}`.
      *
-     * The payload comes from Print(). PrintMuseEntry() is the one caller, and it discards the
+     * The payload comes from PrintExtra(). PrintMuseEntry() is the one caller, and it discards the
      * result. The title is inferred.
      *
      * @param stream The stream to write to.

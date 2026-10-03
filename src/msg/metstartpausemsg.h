@@ -53,7 +53,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e2b08
      * @ghidraAddress PAL: 0x0041afa8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the literal `MetStartPauseMsg` to a diagnostic stream.
@@ -65,7 +65,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e4488
      * @ghidraAddress PAL: 0x0041c6b8
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 };
 
 /**

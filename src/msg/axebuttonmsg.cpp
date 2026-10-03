@@ -18,6 +18,6 @@ int AxeButtonMsg::Type() {
 }
 
 // NTSC-U/C: 0x0019a7b0, PAL: 0x001a0518
-const char *AxeButtonMsg::Name() {
+const char *AxeButtonMsg::GetName() const {
     return "AxeButtonMsg";
 }

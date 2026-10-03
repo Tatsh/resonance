@@ -83,7 +83,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0019d850
      * @ghidraAddress PAL: 0x001a35b8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     Player *mPlayer; /*!< The player starting the phrase. +0x04 */
     int mPoints;     /*!< The points the phrase is worth. +0x08 */

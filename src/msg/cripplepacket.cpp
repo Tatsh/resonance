@@ -32,12 +32,12 @@ int CripplePacket::Type() {
 }
 
 // NTSC-U/C: 0x003f0ce8, PAL: 0x004292f0
-const char *CripplePacket::Name() {
+const char *CripplePacket::GetName() const {
     return "CripplePacket";
 }
 
 // NTSC-U/C: 0x003e7c38, PAL: 0x0041ff18
-void CripplePacket::Print(std::ostream &stream) {
+void CripplePacket::PrintExtra(std::ostream &stream) const {
     std::ostream &rest = stream << static_cast<void *>(static_cast<Player *>(mAttacker)) << " ";
     rest << "(";
     for (auto &player : mTargets) {
@@ -47,8 +47,8 @@ void CripplePacket::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x003e7938, PAL: 0x0041fc18
-void CripplePacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void CripplePacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
 
     int id = mAttacker.mId;
     OBStream &rest = stream.Write(&id, sizeof(id));
@@ -62,8 +62,8 @@ void CripplePacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e7aa0, PAL: 0x0041fd80
-void CripplePacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void CripplePacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
 
     IBStream &rest = stream.Read(&mAttacker.mId, sizeof(mAttacker.mId));
 

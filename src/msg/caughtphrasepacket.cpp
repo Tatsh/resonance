@@ -23,19 +23,19 @@ int CaughtPhrasePacket::Type() {
 }
 
 // NTSC-U/C: 0x003f0540, PAL: 0x00428b48
-const char *CaughtPhrasePacket::Name() {
+const char *CaughtPhrasePacket::GetName() const {
     return "CaughtPhrasePacket";
 }
 
 // NTSC-U/C: 0x003f24a8, PAL: 0x0042a9f0
-void CaughtPhrasePacket::Print(std::ostream &stream) {
+void CaughtPhrasePacket::PrintExtra(std::ostream &stream) const {
     stream << " tr:" << mTr << " b:" << mB << " ";
 }
 
 // NTSC-U/C: 0x003e6db0, PAL: 0x0041f090
 // The word at +0x0c crosses the wire twice.
-void CaughtPhrasePacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void CaughtPhrasePacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
 
     int id = mPlayer.mId;
     unsigned int tr = mTr;
@@ -48,8 +48,8 @@ void CaughtPhrasePacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e6f00, PAL: 0x0041f1e0
-void CaughtPhrasePacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void CaughtPhrasePacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
     stream.Read(&mPlayer.mId, sizeof(mPlayer.mId))
         .Read(&mTr, sizeof(mTr))
         .Read(&mB, sizeof(mB))

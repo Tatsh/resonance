@@ -29,25 +29,25 @@ int SPJoinDenyPacket::Type() {
 }
 
 // NTSC-U/C: 0x003ef5e0, PAL: 0x00427bc8
-const char *SPJoinDenyPacket::Name() {
+const char *SPJoinDenyPacket::GetName() const {
     return "SPJoinDenyPacket";
 }
 
 // NTSC-U/C: 0x003f2000, PAL: 0x0042a548
-void SPJoinDenyPacket::Print(std::ostream &stream) {
+void SPJoinDenyPacket::PrintExtra(std::ostream &stream) const {
     stream << mReasonCode << " " << mReason;
 }
 
 // NTSC-U/C: 0x003e5d58, PAL: 0x0041e038
-void SPJoinDenyPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void SPJoinDenyPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
 
     int reasonCode = mReasonCode;
     SaveHxStr(stream.Write(&reasonCode, sizeof(reasonCode)), mReason);
 }
 
 // NTSC-U/C: 0x003e5e98, PAL: 0x0041e178
-void SPJoinDenyPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void SPJoinDenyPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
     LoadHxStr(stream.Read(&mReasonCode, sizeof(mReasonCode)), mReason);
 }

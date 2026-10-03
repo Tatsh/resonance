@@ -13,8 +13,8 @@ class Player;
  * and its vtable is at `0x008122b8`. The word at `+0x04` belongs to CmdMsg.
  *
  * NeutralizePowerup builds the message at `0x001c9c64` from the three arguments of its slot 2,
- * storing the second at `+0x08`, the first at `+0x0c`, and the player at `+0x10`. Print() writes
- * only that player's colour name. All three members are public because
+ * storing the second at `+0x08`, the first at `+0x0c`, and the player at `+0x10`. PrintExtra()
+ * writes only that player's colour name. All three members are public because
  * PhraseNeutralizer::PostTrackNeutralizedMsg() at `0x001c0980` reads them directly with no accessor
  * in the image. It compares mTrack with its own track, neutralises the four bars after mBar
  * (mBar + 1 through mBar + 4), and copies mPlayer into the DeployedPowerupMsg it sends.
@@ -59,7 +59,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e0428
      * @ghidraAddress PAL: 0x00418880
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the player's colour name to a diagnostic stream.
@@ -68,7 +68,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3ea8
      * @ghidraAddress PAL: 0x0041c078
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     int mBar;        /*!< The bar the four neutralised bars follow. +0x08 */
     int mTrack;      /*!< The track to neutralise. +0x0c */

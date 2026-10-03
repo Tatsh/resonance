@@ -53,7 +53,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dbd50
      * @ghidraAddress PAL: 0x00414188
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
 private:
     int mStreak; // +0x04, with a title after the streak the class name reports as over

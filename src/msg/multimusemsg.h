@@ -20,13 +20,13 @@
  *
  * That word is a MultiMuse, and the class is how a sequence of timed messages moves between a
  * MsgSource and a MsgSink. The copy constructor at `0x003e38a8` retains it, the destructor
- * releases it, Print() writes it through MultiMuse::Print(), Save() writes it through
- * MultiMuse::SaveFields(), and Load() replaces it with a freshly allocated sequence.
+ * releases it, PrintExtra() writes it through MultiMuse::Print(), saveGuts() writes it through
+ * MultiMuse::SaveFields(), and restoreGuts() replaces it with a freshly allocated sequence.
  *
- * Print() also settles MuseMsg's own member. It copies that word into a temporary and writes the
- * temporary through Mid::MBT::Print(), so MuseMsg's payload is a song position. Both this class
- * and StdMidiMsg initialise it to `0x2aaaaaab`, which Mid::MBT documents as inside its positive
- * infinity range.
+ * PrintExtra() also settles MuseMsg's own member. It copies that word into a temporary and writes
+ * the temporary through Mid::MBT::Print(), so MuseMsg's payload is a song position. Both this
+ * class and StdMidiMsg initialise it to `0x2aaaaaab`, which Mid::MBT documents as inside its
+ * positive infinity range.
  */
 class MultiMuseMsg : public MuseMsg {
 public:
@@ -87,7 +87,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dc618
      * @ghidraAddress PAL: 0x00414a50
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the message to a diagnostic stream.
@@ -98,7 +98,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3990
      * @ghidraAddress PAL: 0x0041bd30
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the sequence to an output stream.
@@ -109,7 +109,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e39f8
      * @ghidraAddress PAL: 0x0041bd98
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the sequence back from an input stream.
@@ -122,12 +122,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d8180
      * @ghidraAddress PAL: 0x004102e8
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * The sequence. +0x08
      *
-     * Public because PitchPicker::FindRiffRange() at `0x001c2c84` reads it directly with no
+     * Public because PitchPicker::OnMsg() at `0x001c2c84` reads it directly with no
      * accessor in the image.
      */
     MultiMuse *mMuse;

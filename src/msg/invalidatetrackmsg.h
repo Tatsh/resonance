@@ -9,8 +9,8 @@
  * and its vtable is at `0x00812858`. The members below are the whole of the class. No other
  * routine in the image refers to this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(). Print() labels mTrack as a
- * track number and mFirstBar through mEndBar as a range of song bars. The end is one past the
+ * The payload layout comes from the run of field copies in Clone(). PrintExtra() labels mTrack as
+ * a track number and mFirstBar through mEndBar as a range of song bars. The end is one past the
  * last bar, because the stack build at `0x00101e6c` invalidates a single bar as that bar and the
  * bar after it.
  *
@@ -80,7 +80,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003de4b8
      * @ghidraAddress PAL: 0x00416910
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write `tr#`, the word at `+0x0c`, ` song-bars `, and the two words at `+0x04` and `+0x08`
@@ -90,7 +90,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3d90
      * @ghidraAddress PAL: 0x0041bf60
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     int mFirstBar; /*!< The first song bar of the range. +0x04 */
     int mEndBar;   /*!< The song bar one past the last of the range. +0x08 */

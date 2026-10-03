@@ -18,6 +18,6 @@ int InvalidateSeekerMsg::Type() {
 }
 
 // NTSC-U/C: 0x00116110, PAL: 0x001165b8
-const char *InvalidateSeekerMsg::Name() {
+const char *InvalidateSeekerMsg::GetName() const {
     return "InvalidateSeekerMsg";
 }

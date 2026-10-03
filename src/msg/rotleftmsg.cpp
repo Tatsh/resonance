@@ -18,6 +18,6 @@ int RotLeftMsg::Type() {
 }
 
 // NTSC-U/C: 0x0011d398, PAL: 0x0011d920
-const char *RotLeftMsg::Name() {
+const char *RotLeftMsg::GetName() const {
     return "RotLeftMsg";
 }

@@ -254,7 +254,7 @@ private:
     // NTSC-U/C: 0x00116920, PAL: 0x00116dd8
     // Outside jam or in a network game, and outside the tutorial, ignores the message. Otherwise
     // advances at the message's position unless the player's GetInputSlot() is non-zero.
-    void OnAdvanceSection(AdvanceSectionMsg *pMsg);
+    void OnMsg(const AdvanceSectionMsg &msg);
 
     // NTSC-U/C: 0x001169a8, PAL: 0x00116e60
     // Outside jam and before the game ends, passes the message to the capturing

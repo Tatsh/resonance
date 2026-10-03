@@ -102,9 +102,9 @@ public:
      *
      * Inline. The check is an IsFiniteMBT() call whose result is discarded, the shape of an
      * assertion compiled without its report, and it sits beside the store of the same value at
-     * every site that builds a position from a plain count. NoteMsg::Load() at `0x003e3890` is one,
-     * and the gameplay classes Phrase, GsPeriodical, TrackData, Catcher, and PhraseMaker show the
-     * same pairing.
+     * every site that builds a position from a plain count. NoteMsg::restoreGuts() at `0x003e3890`
+     * is one, and the gameplay classes Phrase, GsPeriodical, TrackData, Catcher, and PhraseMaker
+     * show the same pairing.
      *
      * @param nTick The position, in MIDI ticks.
      */
@@ -120,7 +120,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004acf28
      * @ghidraAddress PAL: 0x004eb0c8
      */
-    OBStream &Save(OBStream &stream);
+    OBStream &Save(OBStream &stream) const;
 
     /**
      * Read the position back.
@@ -139,7 +139,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004ace18
      * @ghidraAddress PAL: 0x004eafb8
      */
-    void Print(std::ostream &stream);
+    void Print(std::ostream &stream) const;
 
     /**
      * The position, in MIDI ticks at 480 per quarter note.

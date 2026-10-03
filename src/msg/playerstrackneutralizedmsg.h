@@ -13,8 +13,8 @@ class Player;
  * and its vtable is at `0x00812270`. The word at `+0x04` belongs to CmdMsg.
  *
  * PhraseNeutralizer::PostTrackNeutralizedMsg() builds the message at `0x001c0b2c`, once per
- * affected player, with a per-player total at `+0x08` and the player at `+0x0c`. Print() writes
- * only that player's colour name. New() zeroes both words.
+ * affected player, with a per-player total at `+0x08` and the player at `+0x0c`. PrintExtra()
+ * writes only that player's colour name. New() zeroes both words.
  *
  * Both members are public because Overlay::OnPlayersTrackNeutralized() at `0x00420588` reads them
  * directly with no accessor in the image. It compares mPlayer with HudTrack::mPlayer and formats
@@ -60,7 +60,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e0628
      * @ghidraAddress PAL: 0x00418a80
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the player's colour name to a diagnostic stream.
@@ -69,7 +69,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3f30
      * @ghidraAddress PAL: 0x0041c120
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     int mPoints = 0;           /*!< The points shown under `NEUTRALIZED!`. +0x08 */
     Player *mPlayer = nullptr; /*!< The player whose track was neutralised. +0x0c */

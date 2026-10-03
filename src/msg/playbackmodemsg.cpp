@@ -18,6 +18,6 @@ int PlaybackModeMsg::Type() {
 }
 
 // NTSC-U/C: 0x0011d5d8, PAL: 0x0011db60
-const char *PlaybackModeMsg::Name() {
+const char *PlaybackModeMsg::GetName() const {
     return "PlaybackModeMsg";
 }

@@ -92,11 +92,11 @@ public:
     }
 
     // NTSC-U/C: 0x001700e8, PAL: 0x001729f8
-    virtual void Save([[maybe_unused]] OBStream &stream) {
+    virtual void saveGuts([[maybe_unused]] OBStream &stream) const {
     }
 
     // NTSC-U/C: 0x001700f0, PAL: 0x00172a00
-    virtual void Load([[maybe_unused]] IBStream &stream) {
+    virtual void restoreGuts([[maybe_unused]] IBStream &stream) {
     }
 
     // NTSC-U/C: 0x00170140, PAL: 0x00172a50
@@ -135,11 +135,11 @@ public:
     }
 
     // NTSC-U/C: 0x001701f8, PAL: 0x00172b08
-    virtual void Save([[maybe_unused]] OBStream &stream) {
+    virtual void saveGuts([[maybe_unused]] OBStream &stream) const {
     }
 
     // NTSC-U/C: 0x00170200, PAL: 0x00172b10
-    virtual void Load([[maybe_unused]] IBStream &stream) {
+    virtual void restoreGuts([[maybe_unused]] IBStream &stream) {
     }
 
     // NTSC-U/C: 0x00170250, PAL: 0x00172b60

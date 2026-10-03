@@ -18,6 +18,6 @@ int GameOverMsg::Type() {
 }
 
 // NTSC-U/C: 0x00193c20, PAL: 0x00199848
-const char *GameOverMsg::Name() {
+const char *GameOverMsg::GetName() const {
     return "GameOverMsg";
 }

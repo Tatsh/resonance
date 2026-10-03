@@ -84,7 +84,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dc7e8
      * @ghidraAddress PAL: 0x00414c20
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the song position and the byte, as a character, to a diagnostic stream.
@@ -96,7 +96,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3a18
      * @ghidraAddress PAL: 0x0041bdb8
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the byte to a stream through OBStream::WriteBytes().
@@ -105,7 +105,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3a70
      * @ghidraAddress PAL: 0x0041be10
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the byte back in place through IBStream::ReadBytes().
@@ -114,7 +114,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3ab0
      * @ghidraAddress PAL: 0x0041be50
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * The note number, and the one byte the message includes. +0x08

@@ -23,20 +23,20 @@ int SCAllClientsStatusPacket::Type() {
 }
 
 // NTSC-U/C: 0x003efb30, PAL: 0x00428138
-const char *SCAllClientsStatusPacket::Name() {
+const char *SCAllClientsStatusPacket::GetName() const {
     return "SCAllClientsStatusPacket";
 }
 
 // NTSC-U/C: 0x003f2160, PAL: 0x0042a6a8
-void SCAllClientsStatusPacket::Print(std::ostream &stream) {
+void SCAllClientsStatusPacket::PrintExtra(std::ostream &stream) const {
     for (const auto &entry : mClients) {
         stream << "(id:" << entry.mId << " stat:" << entry.mStatus << ") ";
     }
 }
 
 // NTSC-U/C: 0x003e6288, PAL: 0x0041e568
-void SCAllClientsStatusPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void SCAllClientsStatusPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
 
     int count = static_cast<int>(mClients.size());
     stream.Write(&count, sizeof(count));
@@ -48,8 +48,8 @@ void SCAllClientsStatusPacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e63f0, PAL: 0x0041e6d0
-void SCAllClientsStatusPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void SCAllClientsStatusPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
 
     int count;
     stream.Read(&count, sizeof(count));

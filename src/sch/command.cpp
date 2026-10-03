@@ -62,7 +62,7 @@ OBStream &operator<<(OBStream &stream, Command &command) {
     OBStream &written = stream.WriteBytes(&cPresent, sizeof(cPresent));
     int nCmdID = command.CmdID(); // Yes, the binary dispatches this slot twice.
     written.Write(&nCmdID, sizeof(nCmdID));
-    command.Save(stream);
+    command.saveGuts(stream);
     return stream;
 }
 
@@ -77,7 +77,7 @@ IBStream &operator>>(IBStream &stream, Command &command) {
     if (command.CmdID() != nCmdID) {
         Fatal("Streamed Command ID %ld does not match expected id %ld.", nCmdID, command.CmdID());
     }
-    command.Load(stream);
+    command.restoreGuts(stream);
     return stream;
 }
 
@@ -91,11 +91,11 @@ void Command::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x00539f20, PAL: 0x00579850
-void Command::Save([[maybe_unused]] OBStream &stream) {
+void Command::saveGuts([[maybe_unused]] OBStream &stream) const {
 }
 
 // NTSC-U/C: 0x00539f28, PAL: 0x00579858
-void Command::Load([[maybe_unused]] IBStream &stream) {
+void Command::restoreGuts([[maybe_unused]] IBStream &stream) {
 }
 
 // NTSC-U/C: 0x00539fe8, PAL: 0x00579918
@@ -122,7 +122,7 @@ OBStream &operator<<(OBStream &stream, Command *pCommand) {
             stream.WriteBytes(&cPresent, sizeof(cPresent));
             int nCmdID = pCommand->CmdID(); // Yes, the binary dispatches this slot twice.
             stream.Write(&nCmdID, sizeof(nCmdID));
-            pCommand->Save(stream);
+            pCommand->saveGuts(stream);
             return stream;
         }
         pCommand->Print(std::cout);
@@ -152,7 +152,7 @@ IBStream &operator>>(IBStream &stream, Command *&pCommand) {
         Fatal("Cannot find ID %ld in Command Factory List", nCmdID);
     }
     (void)pNew->CmdID(); // Yes, the binary discards this call's result.
-    pNew->Load(stream);
+    pNew->restoreGuts(stream);
     pCommand = pNew;
     return stream;
 }

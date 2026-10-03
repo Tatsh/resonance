@@ -18,6 +18,6 @@ int PitchMsg::Type() {
 }
 
 // NTSC-U/C: 0x001b39b0, PAL: 0x001b9788
-const char *PitchMsg::Name() {
+const char *PitchMsg::GetName() const {
     return "PitchMsg";
 }

@@ -20,8 +20,8 @@ class Player;
  * when the press falls within 400,000,000 of the previous press time the player stores at `+0x40`,
  * and Scratcher widens the erased range to the whole section when it is set.
  *
- * Print() hands `+0x08` to Mid::MBT::Print() and writes the colour name of the player at `+0x04`,
- * which types both. New() initialises the position to kMBTInfinity.
+ * PrintExtra() hands `+0x08` to Mid::MBT::Print() and writes the colour name of the player at
+ * `+0x04`, which types both. New() initialises the position to kMBTInfinity.
  *
  * The destructor at `0x003db2f0` is compiler-generated and has no declaration here.
  */
@@ -88,7 +88,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003db450
      * @ghidraAddress PAL: 0x00413888
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the position and the player's colour name, separated by a space, to a diagnostic
@@ -98,7 +98,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3320
      * @ghidraAddress PAL: 0x0041b640
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 public:
     // Public because Voxer::HandleMessage(), Scratcher::HandleMessage(), and

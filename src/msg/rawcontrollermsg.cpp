@@ -20,11 +20,11 @@ int RawControllerMsg::Type() {
 }
 
 // NTSC-U/C: 0x003da278, PAL: 0x004126b0
-const char *RawControllerMsg::Name() {
+const char *RawControllerMsg::GetName() const {
     return "RawControllerMsg";
 }
 
 // NTSC-U/C: 0x003e2fb0, PAL: 0x0041b450
-void RawControllerMsg::Print(std::ostream &stream) {
+void RawControllerMsg::PrintExtra(std::ostream &stream) const {
     mReading.Print(stream);
 }

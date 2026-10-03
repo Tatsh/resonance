@@ -18,6 +18,6 @@ int ShowEraseEffectMsg::Type() {
 }
 
 // NTSC-U/C: 0x0019d728, PAL: 0x001a3490
-const char *ShowEraseEffectMsg::Name() {
+const char *ShowEraseEffectMsg::GetName() const {
     return "ShowEraseEffectMsg";
 }

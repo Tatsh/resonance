@@ -24,19 +24,19 @@ int BumpPacket::Type() {
 }
 
 // NTSC-U/C: 0x003f0f08, PAL: 0x00429510
-const char *BumpPacket::Name() {
+const char *BumpPacket::GetName() const {
     return "BumpPacket";
 }
 
 // NTSC-U/C: 0x003f26d8, PAL: 0x0042ac20
-void BumpPacket::Print(std::ostream &stream) {
+void BumpPacket::PrintExtra(std::ostream &stream) const {
     stream << static_cast<void *>(static_cast<Player *>(mPlayer)) << " bar " << mBar << " track "
            << mTrack;
 }
 
 // NTSC-U/C: 0x003e7d88, PAL: 0x00420068
-void BumpPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void BumpPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
 
     int id = mPlayer.mId;
     int bar = mBar;
@@ -45,8 +45,8 @@ void BumpPacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e7eb0, PAL: 0x00420190
-void BumpPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void BumpPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
     stream.Read(&mPlayer.mId, sizeof(mPlayer.mId))
         .Read(&mBar, sizeof(mBar))
         .Read(&mTrack, sizeof(mTrack));

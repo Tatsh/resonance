@@ -78,7 +78,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0019a680
      * @ghidraAddress PAL: 0x001a03e8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Report that this message is an all-notes-off message. Slot 8, the one virtual this class

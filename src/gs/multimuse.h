@@ -14,8 +14,8 @@
  * Sequence of messages, each at a song position.
  *
  * Its RTTI descriptor is at `0x008ef088`. It has Attachment as its one base. The allocation in
- * MultiMuseMsg::Load() measures the object at 0x14 bytes. Its layout is the reference count at
- * `+0x00`, the vptr at `+0x04`, and the vector over `+0x08` through `+0x13`. Its vtable is at
+ * MultiMuseMsg::restoreGuts() measures the object at 0x14 bytes. Its layout is the reference count
+ * at `+0x00`, the vptr at `+0x04`, and the vector over `+0x08` through `+0x13`. Its vtable is at
  * `0x007dfb78` and runs four entries, slot 2 retaining Attachment::Destroy().
  *
  * The element type is attested. The one Sequencer instantiation in the image is
@@ -32,7 +32,7 @@ public:
     /**
      * Allocate a sequence from the tagged heap under the tag "MultiMuse".
      *
-     * MultiMuseMsg::Load() and Phrase inline the call.
+     * MultiMuseMsg::restoreGuts() and Phrase inline the call.
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
@@ -61,10 +61,10 @@ public:
     /**
      * Write the sequence to a diagnostic stream.
      *
-     * Table slot 3. MultiMuseMsg::Print() is the one recovered caller. An empty sequence prints
-     * `[empty]`. Otherwise the entries print through PrintMuseEntry() inside one pair of brackets,
-     * one per line. When the stream's buffer is an nlfilebuf, each continuation line is padded with
-     * spaces to the column at which the previous entry began.
+     * Table slot 3. MultiMuseMsg::PrintExtra() is the one recovered caller. An empty sequence
+     * prints `[empty]`. Otherwise the entries print through PrintMuseEntry() inside one pair of
+     * brackets, one per line. When the stream's buffer is an nlfilebuf, each continuation line is
+     * padded with spaces to the column at which the previous entry began.
      *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x001a8580
@@ -89,8 +89,8 @@ public:
      * Read the sequence back from an input stream.
      *
      * Empties the sequence, reads the entry count as one four-byte transfer, and reads each entry
-     * as a position and a message pointer. MultiMuseMsg::Load() is the one recovered caller, and it
-     * creates a fresh sequence for every read.
+     * as a position and a message pointer. MultiMuseMsg::restoreGuts() is the one recovered
+     * caller, and it creates a fresh sequence for every read.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x001a8a88

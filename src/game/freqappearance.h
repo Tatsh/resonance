@@ -31,9 +31,10 @@ class Tex;
  * the destructor releases the detail object and the string buffer. The username and the detail
  * object are public for the readers their documentation lists, and the skill status is private.
  *
- * PSJoinRequestPacket::Save() and PlayerInfo::Save() both delegate an embedded FreqAppearance to
- * slot 2 of this table, and their Load() counterparts to slot 3, which is what establishes the two
- * slots as the transfer pair rather than inferring the roles from this class alone.
+ * PSJoinRequestPacket::saveGuts() and PlayerInfo::Save() both delegate an embedded FreqAppearance
+ * to slot 2 of this table, and PSJoinRequestPacket::restoreGuts() and PlayerInfo::Load() delegate
+ * it to slot 3, which is what establishes the two slots as the transfer pair rather than inferring
+ * the roles from this class alone.
  */
 class FreqAppearance {
 public:
@@ -100,7 +101,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00171060
      * @ghidraAddress PAL: 0x00173998
      */
-    virtual void Save(OBStream &stream);
+    virtual void Save(OBStream &stream) const;
 
     /**
      * Read the appearance back from a stream.
@@ -127,7 +128,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00174878
      * @ghidraAddress PAL: 0x00177280
      */
-    void Print(std::ostream &stream);
+    void Print(std::ostream &stream) const;
 
     /**
      * Replace the username and the detail object with another appearance's.

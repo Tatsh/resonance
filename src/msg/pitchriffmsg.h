@@ -18,7 +18,7 @@ class Player;
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * Print() hands `+0x0c` to Mid::MBT::Print(), writes the colour name of the player at `+0x08`,
+ * PrintExtra() hands `+0x0c` to Mid::MBT::Print(), writes the colour name of the player at `+0x08`,
  * and labels `+0x04` as `b#`. New() initialises the position to kMBTInfinity.
  *
  * The destructor at `0x003da530` is compiler-generated and has no declaration here.
@@ -42,7 +42,7 @@ public:
      * arguments are the four members in declaration order. The last is the track the player's
      * slot 4 reports.
      *
-     * @param nButton The button, labelled `b#` by Print().
+     * @param nButton The button, labelled `b#` by PrintExtra().
      * @param pPlayer The player whose riff starts.
      * @param position The song position of the start.
      * @param nTrack The player's track.
@@ -88,7 +88,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003da690
      * @ghidraAddress PAL: 0x00412ac8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the position, a space, the player's colour name, ` b#`, and the word at `+0x04` to a
@@ -98,13 +98,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e2fd0
      * @ghidraAddress PAL: 0x0041b470
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 public:
     // Public because Scratcher::HandleMessage() reads these directly, through a PitchRiffMsg
     // pointer from outside the hierarchy, and the image exposes no accessor. A friend declaration
     // fits equally well.
-    int mButton;        // +0x04, labelled `b#` by Print()
+    int mButton;        // +0x04, labelled `b#` by PrintExtra()
     Player *mPlayer;    // +0x08
     Mid::MBT mPosition; // +0x0c
     int mTrack;         // +0x10

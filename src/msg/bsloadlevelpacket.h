@@ -16,8 +16,8 @@ class OBStream;
  * `0x003f3bc0`. Clone() delegates to it, and the payload accounts for the allocation exactly. The
  * four words Packet provides are declared there rather than here.
  *
- * Save() and Load() transfer the game settings through GameParams' own virtual Save() and Load()
- * and then transfer the Packet word at `+0x0c` a second time.
+ * saveGuts() and restoreGuts() transfer the game settings through GameParams' own virtual Save()
+ * and Load() and then transfer the Packet word at `+0x0c` a second time.
  *
  * The destructor at `0x003f1038` is compiler-generated and has no declaration here.
  */
@@ -82,7 +82,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f11a0
      * @ghidraAddress PAL: 0x00429708
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the settings to a diagnostic stream through GameParams::Print().
@@ -91,7 +91,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2780
      * @ghidraAddress PAL: 0x0042acc8
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words, the settings, and the Packet word at `+0x0c` again to a stream.
@@ -100,16 +100,16 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e7fa0
      * @ghidraAddress PAL: 0x00420280
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
-     * Read the fields back in the order Save() wrote them.
+     * Read the fields back in the order saveGuts() wrote them.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x003e80a0
      * @ghidraAddress PAL: 0x00420380
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * Report the game settings.

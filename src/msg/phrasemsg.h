@@ -15,7 +15,7 @@ class Phrase;
  *
  * The payload layout comes from the run of field copies in Clone(). PhraseMgr::PostPhraseMsg()
  * fills the three words with its argument, a manager word, and the phrase it looked up, which
- * types `+0x0c`. Print() writes that phrase as an address followed by the word at `+0x04` in
+ * types `+0x0c`. PrintExtra() writes that phrase as an address followed by the word at `+0x04` in
  * brackets. Every member is public because the stack build and the readers named on each member
  * access them directly.
  *
@@ -59,7 +59,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e1250
      * @ghidraAddress PAL: 0x004196a8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the phrase's address, ` [`, the word at `+0x04`, and `]` to a diagnostic stream.
@@ -68,7 +68,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e42f8
      * @ghidraAddress PAL: 0x0041c528
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * The bar of the phrase. +0x04

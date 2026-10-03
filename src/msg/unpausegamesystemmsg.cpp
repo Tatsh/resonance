@@ -18,6 +18,6 @@ int UnpauseGameSystemMsg::Type() {
 }
 
 // NTSC-U/C: 0x00311cb0, PAL: 0x00337a10
-const char *UnpauseGameSystemMsg::Name() {
+const char *UnpauseGameSystemMsg::GetName() const {
     return "UnpauseGameSystemMsg";
 }

@@ -20,11 +20,11 @@ int MetFreqEndedMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e2e08, PAL: 0x0041b2a8
-const char *MetFreqEndedMsg::Name() {
+const char *MetFreqEndedMsg::GetName() const {
     return "MetFreqEndedMsg";
 }
 
 // NTSC-U/C: 0x003e44f0, PAL: 0x0041c720
-void MetFreqEndedMsg::Print(std::ostream &stream) {
+void MetFreqEndedMsg::PrintExtra(std::ostream &stream) const {
     stream << "MetFreqEndedMsg " << mStopJukebox;
 }

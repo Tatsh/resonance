@@ -14,9 +14,9 @@ class OBStream;
  * Its RTTI descriptor is at `0x008ef710`. It has ToAllOtherGameSystemsPacket as its one base. The
  * object is 0x2c bytes and its vtable is at `0x00814380`, with eight entries and a zero terminator
  * at index 8. Slot 1 is the compiler-generated destructor, slots 2 through 4 supply the three pure
- * slots Packet does not implement, and slots 5, 6, and 7 override Message::Print(),
- * Packet::Save(), and Packet::Load(). The four words Packet provides are declared there rather
- * than here.
+ * slots Packet does not implement, and slots 5, 6, and 7 override Message::PrintExtra(),
+ * Packet::saveGuts(), and Packet::restoreGuts(). The four words Packet provides are declared there
+ * rather than here.
  *
  * This class shares its RTTI accessor and vtable with ToAllOtherGameSystemsPacket, its own base,
  * which has no implementation of its own. The vtable belongs to this class.
@@ -24,9 +24,10 @@ class OBStream;
  * The payload layout is recovered from the three field routines rather than from the copy
  * constructor. The copy constructor at `0x003f3d18` moves `+0x14` through `+0x23` with two
  * unaligned 64-bit pairs, which reads as two eight-byte members and is the compiler merging
- * adjacent four-byte fields. Save() at `0x001a2560`, Load() at `0x001a2630`, and Print() at
- * `0x001a2ce0` transfer the same region as five separate four-byte lvalues, and Print() labels
- * each one, which is what recovers both the widths and the names.
+ * adjacent four-byte fields. Gem::saveGuts() at `0x001a2560`, Gem::restoreGuts() at
+ * `0x001a2630`, and Gem::Print() at `0x001a2ce0` transfer the same region as five separate
+ * four-byte lvalues, and Gem::Print() labels each one, which is what recovers both the widths and
+ * the names.
  *
  * The allocation tag on both the allocation in Clone() and the release in the destructor is `MSG`,
  * which is the tag Message declares rather than one of this class.
@@ -94,40 +95,40 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f17d8
      * @ghidraAddress PAL: 0x00429ca0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write a description of the packet to a diagnostic stream.
      *
-     * Slot 5, overriding Message::Print().
+     * Slot 5, overriding Message::PrintExtra().
      *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x003f2878
      * @ghidraAddress PAL: 0x0042adc0
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the packet to a stream.
      *
-     * Slot 6, overriding Packet::Save().
+     * Slot 6, overriding Packet::saveGuts().
      *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x003e8258
      * @ghidraAddress PAL: 0x00420538
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the packet back from a stream.
      *
-     * Slot 7, overriding Packet::Load().
+     * Slot 7, overriding Packet::restoreGuts().
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x003e8368
      * @ghidraAddress PAL: 0x00420648
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * The gem. +0x14
@@ -137,7 +138,7 @@ public:
     Gem mFields;
 
     /**
-     * The track, labelled ` tr:` by Print(). +0x28
+     * The track, labelled ` tr:` by PrintExtra(). +0x28
      *
      * PhraseMgr::PostGemMsg() compares it with the track the manager serves.
      */

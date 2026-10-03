@@ -83,7 +83,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0019a7b0
      * @ghidraAddress PAL: 0x001a0518
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     int mPressed;     /*!< Non-zero when the button goes down. +0x04 */
     int mRestartSpin; /*!< AppTunnel passes it to TnlPointer::Spin() on a press. +0x08 */

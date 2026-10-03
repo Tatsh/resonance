@@ -55,7 +55,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001caa70
      * @ghidraAddress PAL: 0x001d0928
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     int mBar;    /*!< The bar the effect toggles on. +0x04 */
     int mTrack;  /*!< The track, which PostRemixFxMsg() compares with its manager's. +0x08 */

@@ -18,6 +18,6 @@ int BeginGameLocalMsg::Type() {
 }
 
 // NTSC-U/C: 0x0010ba90, PAL: 0x0010bc18
-const char *BeginGameLocalMsg::Name() {
+const char *BeginGameLocalMsg::GetName() const {
     return "BeginGameLocalMsg";
 }

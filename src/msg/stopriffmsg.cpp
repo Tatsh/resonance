@@ -23,13 +23,13 @@ int StopRiffMsg::Type() {
 }
 
 // NTSC-U/C: 0x003da868, PAL: 0x00412ca0
-const char *StopRiffMsg::Name() {
+const char *StopRiffMsg::GetName() const {
     return "StopRiffMsg";
 }
 
 // NTSC-U/C: 0x003e3098, PAL: 0x0041b558
 // The colour name is copied into a temporary before it is written.
-void StopRiffMsg::Print(std::ostream &stream) {
+void StopRiffMsg::PrintExtra(std::ostream &stream) const {
     mPosition.Print(stream);
     stream << " " << HxStr(mPlayer->mColorName) << " b#" << mButton;
 }

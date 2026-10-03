@@ -23,13 +23,13 @@ int ButtonPowMsg::Type() {
 }
 
 // NTSC-U/C: 0x003db288, PAL: 0x004136c0
-const char *ButtonPowMsg::Name() {
+const char *ButtonPowMsg::GetName() const {
     return "ButtonPowMsg";
 }
 
 // NTSC-U/C: 0x003d7df0, PAL: 0x0040ff08
 // The colour name is copied into a temporary before it is written.
-void ButtonPowMsg::Print(std::ostream &stream) {
+void ButtonPowMsg::PrintExtra(std::ostream &stream) const {
     mPosition.Print(stream);
     stream << " " << HxStr(mPlayer->mColorName) << " " << mPlayMode;
 }

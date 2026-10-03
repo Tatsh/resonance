@@ -28,20 +28,20 @@ int SPJoinAcceptPacket::Type() {
 }
 
 // NTSC-U/C: 0x003ef100, PAL: 0x00427650
-const char *SPJoinAcceptPacket::Name() {
+const char *SPJoinAcceptPacket::GetName() const {
     return "SPJoinAcceptPacket";
 }
 
 // NTSC-U/C: 0x003f1f58, PAL: 0x0042a4a0
-void SPJoinAcceptPacket::Print(std::ostream &stream) {
+void SPJoinAcceptPacket::PrintExtra(std::ostream &stream) const {
     std::ostream &rest = stream << " plid:" << mPlayerId << " destid:" << mDestId;
     mParams.Print(rest);
     mAppearance.Print(rest << " clr:" << mColorName << " thm:");
 }
 
 // NTSC-U/C: 0x003e5718, PAL: 0x0041d9c0
-void SPJoinAcceptPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void SPJoinAcceptPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
 
     int playerId = mPlayerId;
     int destId = mDestId;
@@ -59,8 +59,8 @@ void SPJoinAcceptPacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e5930, PAL: 0x0041dbd8
-void SPJoinAcceptPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void SPJoinAcceptPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
 
     IBStream &rest = stream.Read(&mPlayerId, sizeof(mPlayerId)).Read(&mDestId, sizeof(mDestId));
     mParams.Load(&rest);

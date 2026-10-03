@@ -16,8 +16,8 @@ class OBStream;
  * `0x003f31c8`. Clone() delegates to it, and the payload accounts for the allocation exactly. The
  * four words Packet provides are declared there rather than here.
  *
- * The payload is one PlayerInfo, and Save(), Load(), and Print() hand it to PlayerInfo's own
- * virtual Save(), Load(), and Print() after the Packet words.
+ * The payload is one PlayerInfo, and saveGuts(), restoreGuts(), and PrintExtra() hand it to
+ * PlayerInfo's own virtual Save(), Load(), and Print() after the Packet words.
  *
  * The destructor at `0x003ed8f8` is compiler-generated and has no declaration here.
  */
@@ -70,7 +70,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003ef7a0
      * @ghidraAddress PAL: 0x00427d90
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the player record to a diagnostic stream through PlayerInfo::Print().
@@ -79,7 +79,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2100
      * @ghidraAddress PAL: 0x0042a648
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words and the player record to a stream.
@@ -88,7 +88,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e5fb8
      * @ghidraAddress PAL: 0x0041e298
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the Packet words and the player record back from a stream.
@@ -97,7 +97,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2048
      * @ghidraAddress PAL: 0x0042a590
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
 private:
     PlayerInfo mPlayerInfo; // +0x14

@@ -18,6 +18,6 @@ int CSInitiatePlayPacket::Type() {
 }
 
 // NTSC-U/C: 0x003efd30, PAL: 0x00428338
-const char *CSInitiatePlayPacket::Name() {
+const char *CSInitiatePlayPacket::GetName() const {
     return "CSInitiatePlayPacket";
 }

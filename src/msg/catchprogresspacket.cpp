@@ -23,12 +23,12 @@ int CatchProgressPacket::Type() {
 }
 
 // NTSC-U/C: 0x003f0af8, PAL: 0x00429100
-const char *CatchProgressPacket::Name() {
+const char *CatchProgressPacket::GetName() const {
     return "CatchProgressPacket";
 }
 
 // NTSC-U/C: 0x003f2648, PAL: 0x0042ab90
-void CatchProgressPacket::Print(std::ostream &stream) {
+void CatchProgressPacket::PrintExtra(std::ostream &stream) const {
     std::ostream &rest = stream << " @";
     mPosition.Print(rest);
     rest << " track:" << mTrack << " succ:" << mSucc;
@@ -36,8 +36,8 @@ void CatchProgressPacket::Print(std::ostream &stream) {
 
 // NTSC-U/C: 0x003e7430, PAL: 0x0041f710
 // The stream Mid::MBT::Save() returns is not used.
-void CatchProgressPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void CatchProgressPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
 
     int id = mPlayer.mId;
     OBStream &rest = stream.Write(&id, sizeof(id));
@@ -49,8 +49,8 @@ void CatchProgressPacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e7568, PAL: 0x0041f848
-void CatchProgressPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void CatchProgressPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
 
     IBStream &rest = stream.Read(&mPlayer.mId, sizeof(mPlayer.mId));
     mPosition.Load(rest);

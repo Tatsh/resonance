@@ -286,14 +286,14 @@ struct ABitmap {
      * packed stride the constructor would derive is replaced by it, with mByteCount recomputed.
      * mByteCount bytes are then allocated, tagged with the source file and line, and the pixels
      * are copied in one block when both strides agree and row by row otherwise. No call site
-     * survives in the shipped program, and the name is inferred.
+     * remains in the shipped program.
      *
      * @param source The bitmap to copy.
      * @return 0, or -1 when the allocation fails.
      * @ghidraAddress NTSC-U/C: 0x00558f28
      * @ghidraAddress PAL: 0x0059a080
      */
-    int Copy(const ABitmap &source);
+    int Clone(ABitmap &source);
 
     void *mPixels; /*!< The pixel rectangle, null until allocated. +0x00 */
     unsigned short mHasTransparentColor : 8; /*!< Whether mTransparentColor applies. +0x04 */

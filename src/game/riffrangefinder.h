@@ -8,7 +8,7 @@
  * Visitor that finds the lowest and highest note of a sequence.
  *
  * Its RTTI descriptor is at `0x008ef058`. It has MsgSink as its only base at offset 0. The object
- * is 0xc bytes. PitchPicker::FindRiffRange() builds one on its stack.
+ * is 0xc bytes. PitchPicker::OnMsg() builds one on its stack.
  *
  * The destructor at `0x001c4200` is implicitly declared. It restores MsgSink's table and, for the
  * deleting variant, releases the object under MsgSink's tag.
@@ -18,7 +18,7 @@ public:
     /**
      * Visit every message of a sequence and report the note range.
      *
-     * Inline. PitchPicker::FindRiffRange() expands it, and the image also keeps an out-of-line
+     * Inline. PitchPicker::OnMsg() expands it, and the image also retains an out-of-line
      * copy. The range starts at 127 for the low end and zero for the high end, which a sequence
      * without a NoteMsg reports unchanged.
      *

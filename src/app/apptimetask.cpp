@@ -19,7 +19,7 @@ constexpr char kDescription[] = "{TimeTask}";
 // Scheduler command that runs one TimeTask, holding a reference on it.
 //
 // `Cmd` in the anonymous namespace of AppTimeTask.cpp, which the RTTI records. Its table is
-// at 0x007d3160 and retains Sch::Command::Save() and Load().
+// at 0x007d3160 and retains Sch::Command::saveGuts() and restoreGuts().
 class Cmd : public Sch::Command {
 public:
     explicit Cmd(TimeTask *pTask) : mTask(pTask) {

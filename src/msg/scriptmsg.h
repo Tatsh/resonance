@@ -7,8 +7,8 @@
  * Message with a line of script text for a sink to run.
  *
  * Its RTTI descriptor is at `0x00901cd0`. It has Message as its one base. The object is 0xc bytes
- * and its vtable is at `0x007d6730`. It overrides Clone(), Type(), and Name(), and retains
- * Message's Print(), Save(), and Load().
+ * and its vtable is at `0x007d6730`. It overrides Clone(), Type(), and GetName(), and
+ * retains Message's PrintExtra(), saveGuts(), and restoreGuts().
  *
  * The payload is one HxStr. Clone() copy-constructs `+0x04` through HxStr::HxStr(const HxStr &),
  * the destructor at `0x0015a5f0` releases the buffer at `+0x08` with the inlined HxStr
@@ -66,7 +66,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0015a778
      * @ghidraAddress PAL: 0x0015c4f8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Script text to run. An empty string makes the reader fall back on the default text.

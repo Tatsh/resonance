@@ -10,13 +10,13 @@
 
 namespace {
 
-// Save() writes these three bytes ahead of the reading and the closing three behind it.
+// saveGuts() writes these three bytes ahead of the reading and the closing three behind it.
 constexpr char kTagC = 'C';
 constexpr char kTagM = 'M';
 constexpr char kTagOpen = '[';
 constexpr char kTagClose = ']';
 
-// Load() reads the six tag bytes into one buffer and never inspects it.
+// restoreGuts() reads the six tag bytes into one buffer and never inspects it.
 constexpr int kTagByteCount = 6;
 
 constexpr int kControllerCmdId = 2;
@@ -50,7 +50,7 @@ void ControllerCmd::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x001945a8, PAL: 0x0019a228
-void ControllerCmd::Save(OBStream &stream) {
+void ControllerCmd::saveGuts(OBStream &stream) const {
     const char cOpenC = kTagC;
     const char cOpenM = kTagM;
     const char cOpen = kTagOpen;
@@ -68,7 +68,7 @@ void ControllerCmd::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x001946b8, PAL: 0x0019a338
-void ControllerCmd::Load(IBStream &stream) {
+void ControllerCmd::restoreGuts(IBStream &stream) {
     char acTag[kTagByteCount];
     IBStream &body = stream.ReadBytes(&acTag[0], sizeof(acTag[0]))
                          .ReadBytes(&acTag[1], sizeof(acTag[1]))

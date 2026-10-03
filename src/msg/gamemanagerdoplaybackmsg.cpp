@@ -18,6 +18,6 @@ int GameManagerDoPlaybackMsg::Type() {
 }
 
 // NTSC-U/C: 0x002919b8, PAL: 0x002ad8d0
-const char *GameManagerDoPlaybackMsg::Name() {
+const char *GameManagerDoPlaybackMsg::GetName() const {
     return "GameManagerDoPlaybackMsg";
 }

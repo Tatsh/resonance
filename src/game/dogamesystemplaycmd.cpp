@@ -40,9 +40,9 @@ void DoGameSystemPlayCmd::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x0010bdc8, PAL: 0x0010bf60
-void DoGameSystemPlayCmd::Save(OBStream &) {
+void DoGameSystemPlayCmd::saveGuts(OBStream &) const {
 }
 
 // NTSC-U/C: 0x0010bdd0, PAL: 0x0010bf68
-void DoGameSystemPlayCmd::Load(IBStream &) {
+void DoGameSystemPlayCmd::restoreGuts(IBStream &) {
 }

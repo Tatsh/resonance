@@ -18,6 +18,6 @@ int SCStartPlayingPacket::Type() {
 }
 
 // NTSC-U/C: 0x003f0280, PAL: 0x00428888
-const char *SCStartPlayingPacket::Name() {
+const char *SCStartPlayingPacket::GetName() const {
     return "SCStartPlayingPacket";
 }

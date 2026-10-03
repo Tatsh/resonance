@@ -20,11 +20,11 @@ int InvalidateTrackMsg::Type() {
 }
 
 // NTSC-U/C: 0x003de4b8, PAL: 0x00416910
-const char *InvalidateTrackMsg::Name() {
+const char *InvalidateTrackMsg::GetName() const {
     return "InvalidateTrackMsg";
 }
 
 // NTSC-U/C: 0x003e3d90, PAL: 0x0041bf60
-void InvalidateTrackMsg::Print(std::ostream &stream) {
+void InvalidateTrackMsg::PrintExtra(std::ostream &stream) const {
     stream << "tr#" << mTrack << " song-bars " << mFirstBar << "-" << mEndBar;
 }

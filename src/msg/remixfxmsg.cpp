@@ -18,6 +18,6 @@ int RemixFXMsg::Type() {
 }
 
 // NTSC-U/C: 0x001a62c8, PAL: 0x001ac030
-const char *RemixFXMsg::Name() {
+const char *RemixFXMsg::GetName() const {
     return "RemixFXMsg";
 }

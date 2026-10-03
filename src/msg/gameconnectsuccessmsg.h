@@ -54,20 +54,21 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e15f0
      * @ghidraAddress PAL: 0x00419a48
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write nothing.
      *
-     * Slot 5. The empty body lies among the other message Print() bodies at `0x003e2fb0` through
-     * `0x003e4500` rather than after this class's destructor, where the re-emitted
-     * Message::Print() stub of each translation unit sits, so the override is this class's own.
+     * Slot 5. The empty body lies among the other message PrintExtra() bodies at `0x003e2fb0`
+     * through `0x003e4500` rather than after this class's destructor, where the re-emitted
+     * Message::PrintExtra() stub of each translation unit sits, so the override is this class's
+     * own.
      *
      * @param stream The stream, which is not written.
      * @ghidraAddress NTSC-U/C: 0x003e4040
      * @ghidraAddress PAL: 0x0041c270
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 };
 
 /**

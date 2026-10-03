@@ -16,8 +16,8 @@ class OBStream;
  * `0x003f3e58`. Clone() delegates to it, and the payload accounts for the allocation exactly. The
  * four words Packet provides are declared there rather than here.
  *
- * The layout matches GameChatPacket's, and Save() and Load() here are byte-identical to the
- * GameChatPacket routines. Slots 6 and 7 of this class's table address them. They are therefore
+ * The layout matches GameChatPacket's, and saveGuts() and restoreGuts() here are byte-identical to
+ * the GameChatPacket routines. Slots 6 and 7 of this class's table address them. They are therefore
  * this class's members.
  *
  * The destructor at `0x003f1b40` is compiler-generated and has no declaration here.
@@ -81,7 +81,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f1c80
      * @ghidraAddress PAL: 0x0042a1b0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write both strings to a diagnostic stream, with nothing between them.
@@ -90,7 +90,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2ab8
      * @ghidraAddress PAL: 0x0042b000
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words and then both strings to a stream.
@@ -99,7 +99,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e8720
      * @ghidraAddress PAL: 0x00420a00
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the Packet words and then both strings back from a stream.
@@ -108,7 +108,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e8890
      * @ghidraAddress PAL: 0x00420b70
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * Report the first string.

@@ -23,13 +23,13 @@ int AxisFXMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dad38, PAL: 0x00413170
-const char *AxisFXMsg::Name() {
+const char *AxisFXMsg::GetName() const {
     return "AxisFXMsg";
 }
 
 // NTSC-U/C: 0x003e3240, PAL: 0x0040fe08
 // The colour name is copied into a temporary before it is written.
-void AxisFXMsg::Print(std::ostream &stream) {
+void AxisFXMsg::PrintExtra(std::ostream &stream) const {
     mPosition.Print(stream);
     stream << " " << HxStr(mPlayer->mColorName) << " " << mValue;
 }

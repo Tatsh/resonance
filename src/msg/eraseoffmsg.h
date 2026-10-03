@@ -14,7 +14,7 @@ class Player;
  * and its vtable is at `0x00813118`. The members below are the whole of the class. No other
  * routine in the image refers to this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(). Print() hands `+0x08` to
+ * The payload layout comes from the run of field copies in Clone(). PrintExtra() hands `+0x08` to
  * Mid::MBT::Print() and writes the colour name of the player at `+0x04`, which types both. The
  * word at `+0x0c` is not printed.
  *
@@ -59,7 +59,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003db620
      * @ghidraAddress PAL: 0x00413a58
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the position and the player's colour name, separated by a space, to a diagnostic
@@ -69,7 +69,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e33d0
      * @ghidraAddress PAL: 0x0041b710
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 private:
     Player *mPlayer;    // +0x04

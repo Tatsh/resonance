@@ -16,7 +16,7 @@ constexpr int kTagNone = 0x6e6f6e65;     // 'none'
 } // namespace
 
 // NTSC-U/C: 0x00100f40, PAL: 0x00100f40
-void MetControllerReading::Print(std::ostream &stream) {
+void MetControllerReading::Print(std::ostream &stream) const {
     switch (mTag) {
     case kTagKeyboard:
         stream << "key";

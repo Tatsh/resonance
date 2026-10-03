@@ -66,7 +66,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003eef40
      * @ghidraAddress PAL: 0x00427490
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the packet to a stream.
@@ -78,18 +78,18 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e5538
      * @ghidraAddress PAL: 0x0041d7e0
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the packet back from a stream.
      *
-     * Slot 7. Mirrors Save(), including the repeated transfer of `+0x0c`.
+     * Slot 7. Mirrors saveGuts(), including the repeated transfer of `+0x0c`.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x003e5638
      * @ghidraAddress PAL: 0x0041d8e0
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * Write the appearance to a diagnostic stream through FreqAppearance::Print().
@@ -100,7 +100,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f1f38
      * @ghidraAddress PAL: 0x0042a480
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 private:
     FreqAppearance mAppearance; // +0x14

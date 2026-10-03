@@ -18,10 +18,10 @@ class Player;
  * constructor at `0x003f3868`. Clone() delegates to it. The four words Packet provides are
  * declared there rather than here.
  *
- * The member at `+0x14` is a Mid::MBT. Print() hands it to Mid::MBT::Print(), and New()
+ * The member at `+0x14` is a Mid::MBT. PrintExtra() hands it to Mid::MBT::Print(), and New()
  * initialises it to kMBTInfinity. The transfer through the emission at `0x004acf28` alone could
- * not distinguish it from a CmdID. Print() writes the player at `+0x18` through Player::Print()
- * and labels `+0x20` as `track` and `+0x24` as `place`.
+ * not distinguish it from a CmdID. PrintExtra() writes the player at `+0x18` through
+ * Player::Print() and labels `+0x20` as `track` and `+0x24` as `place`.
  *
  * The destructor at `0x003f07d0` is compiler-generated and has no declaration here.
  */
@@ -88,7 +88,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f08d0
      * @ghidraAddress PAL: 0x00428ed8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the position, a space, the player, ` track:`, the track, ` place:`, and the place to a
@@ -98,7 +98,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2568
      * @ghidraAddress PAL: 0x0042aab0
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words, the position, the player's identifier, the track, and the place to a
@@ -108,16 +108,16 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e71f8
      * @ghidraAddress PAL: 0x0041f4d8
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
-     * Read the fields back in place in the order Save() wrote them.
+     * Read the fields back in place in the order saveGuts() wrote them.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x003e7330
      * @ghidraAddress PAL: 0x0041f610
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
 public:
     /** The song position of the selection. NetPlayer's handler at `0x00122f78` reads it. +0x14 */

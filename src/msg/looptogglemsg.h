@@ -76,7 +76,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00122550
      * @ghidraAddress PAL: 0x00122b68
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     int mOn;         /*!< Non-zero when looping starts, zero when it stops. +0x04 */
     Player *mPlayer; /*!< The player who toggled looping. +0x08 */

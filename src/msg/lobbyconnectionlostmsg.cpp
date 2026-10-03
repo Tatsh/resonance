@@ -22,10 +22,10 @@ int LobbyConnectionLostMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e1ce0, PAL: 0x0041a178
-const char *LobbyConnectionLostMsg::Name() {
+const char *LobbyConnectionLostMsg::GetName() const {
     return "LobbyConnectionLostMsg";
 }
 
 // NTSC-U/C: 0x003e4098, PAL: 0x0041c2c8
-void LobbyConnectionLostMsg::Print(std::ostream &) {
+void LobbyConnectionLostMsg::PrintExtra(std::ostream &) const {
 }

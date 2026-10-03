@@ -22,12 +22,12 @@ int PhraseMuffedMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e00a8, PAL: 0x00418500
-const char *PhraseMuffedMsg::Name() {
+const char *PhraseMuffedMsg::GetName() const {
     return "PhraseMuffedMsg";
 }
 
 // NTSC-U/C: 0x003e4350, PAL: 0x0041c580
-void PhraseMuffedMsg::Print(std::ostream &stream) {
+void PhraseMuffedMsg::PrintExtra(std::ostream &stream) const {
     std::ostream &rest = stream << "tr#" << mTrack << " ";
     mPlayer->Print(rest);
     std::ostream &tail = rest << " ";

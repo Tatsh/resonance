@@ -14,14 +14,14 @@ class Player;
  * and its vtable is at `0x00812348`. The members below are the whole of the class. No other
  * routine in the image refers to this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(). Print() labels `+0x04` as a
- * track number and `+0x10` as `tried`, dispatches Player::Print() through `+0x08`, and hands
+ * The payload layout comes from the run of field copies in Clone(). PrintExtra() labels `+0x04` as
+ * a track number and `+0x10` as `tried`, dispatches Player::Print() through `+0x08`, and hands
  * `+0x0c` to Mid::MBT::Print(). New() initialises that position to kMBTInfinity. mPlayer is public
  * because Overlay::OnPhraseMuffed() at `0x0042b178` reads it directly, comparing it with
  * HudTrack::mPlayer. The other three are public because AppTunnel's muffed-phrase handler at
  * `0x00447ba8` reads them directly.
  *
- * After Name() the image retains uncalled out-of-line copies of the two constructors, at
+ * After GetName() the image retains uncalled out-of-line copies of the two constructors, at
  * `0x003e00b8` and `0x003e00d8`, and of four member accessors: the position at `0x003e0100`, the
  * track at `0x003e0108`, the player at `0x003e0110`, and `tried` at `0x003e0118`. No code calls
  * the accessors. They are not declared here.
@@ -93,7 +93,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e00a8
      * @ghidraAddress PAL: 0x00418500
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write `tr#`, the track, a space, the player, a space, the position, ` tried:`, and the word
@@ -103,7 +103,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e4350
      * @ghidraAddress PAL: 0x0041c580
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     int mTrack;         /*!< The track. +0x04 */
     Player *mPlayer;    /*!< The player who muffed the phrase. +0x08 */

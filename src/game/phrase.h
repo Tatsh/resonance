@@ -276,7 +276,7 @@ IBStream &operator>>(IBStream &stream, Phrase &phrase);
 /**
  * Write an optional phrase as the byte `0` for none or the byte `1` followed by the phrase.
  *
- * PhrasePacket::Save() and PhraseDatabase use this form.
+ * PhrasePacket::saveGuts() and PhraseDatabase use this form.
  *
  * @param stream The stream to write to.
  * @param pPhrase The phrase, or null.

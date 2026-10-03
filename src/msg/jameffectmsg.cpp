@@ -18,6 +18,6 @@ int JamEffectMsg::Type() {
 }
 
 // NTSC-U/C: 0x001caa70, PAL: 0x001d0928
-const char *JamEffectMsg::Name() {
+const char *JamEffectMsg::GetName() const {
     return "JamEffectMsg";
 }

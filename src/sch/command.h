@@ -17,9 +17,9 @@ namespace Sch {
  * adds one word at `+0x08`, and an instance is 0x0c bytes. Every derived class starts its own data
  * at `+0x0c`. Three independent measurements agree on that boundary. The inlined construction at
  * `0x0013a9a8` allocates 0x10 bytes and writes the reference count, the word at `+0x08`, the vtable
- * pointer, and one derived pointer at `+0x0c`; `ExitCmd::Save()` at `0x00194a50` streams `+0x0c`,
- * `+0x10`, and `+0x14`; and `GsPeriodical::PeriodicalCmd::Execute()` at `0x001b4820` reads `+0x0c`
- * and `+0x10`. The layout closes arithmetically with no unaccounted byte.
+ * pointer, and one derived pointer at `+0x0c`; `ExitCmd::saveGuts()` at `0x00194a50` streams
+ * `+0x0c`, `+0x10`, and `+0x14`; and `GsPeriodical::PeriodicalCmd::Execute()` at `0x001b4820` reads
+ * `+0x0c` and `+0x10`. The layout closes arithmetically with no unaccounted byte.
  *
  * The vtable at `0x008288c0` runs eight entries and then a zero entry. The interface is therefore
  * complete rather than partial:
@@ -30,8 +30,8 @@ namespace Sch {
  *  - 3, CmdID(), the `__pure_virtual` handler at `0x005381a8`
  *  - 4, Execute(), the same handler
  *  - 5, Print() at `0x0053a088`
- *  - 6, Save() at `0x00539f20`
- *  - 7, Load() at `0x00539f28`
+ *  - 6, saveGuts() at `0x00539f20`
+ *  - 7, restoreGuts() at `0x00539f28`
  *
  * Twenty-four classes derive from this one. Five are ordinary classes, `ControllerCmd`,
  * `SequencerCmd`, `LocalPlayerCmd`, `DoGameSystemPlayCmd`, and `EndRecordingCmd`. The other
@@ -41,9 +41,8 @@ namespace Sch {
  * `GsPhraseMgr.cpp`. Both slot 3 and slot 4 are pure here because every one of the twenty-four
  * supplies its own body for each.
  *
- * Two of the six member titles are recovered and four are inferred. Save() and Load() follow from
- * their bodies, and both bodies stream one field after another in the same order through the two
- * stream interfaces. CmdID() follows from the static member
+ * Both saveGuts() and restoreGuts() bodies stream one field after another in the same order
+ * through the two stream interfaces. CmdID() follows from the static member
  * `ControllerCmd::sCmdID` and from the two diagnostics `Streamed Command ID %ld` and `Cannot
  * find ID %ld in Command Factory List`; every slot-3 body returns one per-class word. The image
  * initialises four of the twenty-four words to a non-zero identifier, and each of the four has a
@@ -118,7 +117,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00539f20
      * @ghidraAddress PAL: 0x00579850
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read this command's payload back.
@@ -129,7 +128,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00539f28
      * @ghidraAddress PAL: 0x00579858
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * Produce a command of the identified class through the factory list.

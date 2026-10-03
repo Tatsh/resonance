@@ -18,7 +18,7 @@ int AllNotesOffMsg::Type() {
 }
 
 // NTSC-U/C: 0x0019a680, PAL: 0x001a03e8
-const char *AllNotesOffMsg::Name() {
+const char *AllNotesOffMsg::GetName() const {
     return "AllNotesOffMsg";
 }
 

@@ -83,7 +83,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001871b8
      * @ghidraAddress PAL: 0x0018c9b0
      */
-    virtual void Save(OBStream *pStream);
+    virtual void Save(OBStream *pStream) const;
 
     /**
      * Read the settings back from a stream.
@@ -136,7 +136,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00187570
      * @ghidraAddress PAL: 0x0018cd68
      */
-    void Print(std::ostream &stream);
+    void Print(std::ostream &stream) const;
 
     /**
      * The level the session plays. +0x00

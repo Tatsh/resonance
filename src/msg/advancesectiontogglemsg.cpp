@@ -18,6 +18,6 @@ int AdvanceSectionToggleMsg::Type() {
 }
 
 // NTSC-U/C: 0x00115ff0, PAL: 0x00116498
-const char *AdvanceSectionToggleMsg::Name() {
+const char *AdvanceSectionToggleMsg::GetName() const {
     return "AdvanceSectionToggleMsg";
 }

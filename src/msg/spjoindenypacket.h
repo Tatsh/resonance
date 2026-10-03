@@ -82,7 +82,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003ef5e0
      * @ghidraAddress PAL: 0x00427bc8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the word as a number, a space, and the string to a diagnostic stream.
@@ -91,7 +91,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2000
      * @ghidraAddress PAL: 0x0042a548
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words, the word, and the string to a stream.
@@ -100,7 +100,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e5d58
      * @ghidraAddress PAL: 0x0041e038
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the Packet words, the word, and the string back from a stream.
@@ -109,7 +109,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e5e98
      * @ghidraAddress PAL: 0x0041e178
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
 private:
     // Both titles are inferred from the class name, a refusal of a join request.

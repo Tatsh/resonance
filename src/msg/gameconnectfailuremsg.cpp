@@ -22,11 +22,11 @@ int GameConnectFailureMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e17e0, PAL: 0x00419c48
-const char *GameConnectFailureMsg::Name() {
+const char *GameConnectFailureMsg::GetName() const {
     return "GameConnectFailureMsg";
 }
 
 // NTSC-U/C: 0x003e4048, PAL: 0x0041c278
-void GameConnectFailureMsg::Print(std::ostream &stream) {
+void GameConnectFailureMsg::PrintExtra(std::ostream &stream) const {
     stream << mReason;
 }

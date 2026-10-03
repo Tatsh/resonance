@@ -80,7 +80,7 @@ public:
      * @ghidraAddress PAL: 0x00100e70
      */
     virtual void Dispatch() {
-        MuseMsg *pMsg = mCursor->mValue->CloneAt(mNextTick.mTick);
+        MuseMsg *pMsg = mCursor->mValue->CloneAndShift(mNextTick.mTick);
         mSink->Handle(pMsg);
         delete pMsg;
         ++mCursor;

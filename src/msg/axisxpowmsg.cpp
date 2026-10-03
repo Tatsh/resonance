@@ -23,13 +23,13 @@ int AxisXPowMsg::Type() {
 }
 
 // NTSC-U/C: 0x003db0c8, PAL: 0x00413500
-const char *AxisXPowMsg::Name() {
+const char *AxisXPowMsg::GetName() const {
     return "AxisXPowMsg";
 }
 
 // NTSC-U/C: 0x003e3550, PAL: 0x0041b8d0
 // The colour name is copied into a temporary before it is written.
-void AxisXPowMsg::Print(std::ostream &stream) {
+void AxisXPowMsg::PrintExtra(std::ostream &stream) const {
     mPosition.Print(stream);
     stream << " " << HxStr(mPlayer->mColorName) << " " << mValue;
 }

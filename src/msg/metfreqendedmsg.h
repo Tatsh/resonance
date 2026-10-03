@@ -50,7 +50,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e2e08
      * @ghidraAddress PAL: 0x0041b2a8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write `MetFreqEndedMsg ` and the word at `+0x04` to a diagnostic stream.
@@ -59,7 +59,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e44f0
      * @ghidraAddress PAL: 0x0041c720
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Whether the finished game world's GrooveWorld::mContinueJukebox was zero.

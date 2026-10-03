@@ -20,11 +20,11 @@ int MetStartPauseMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e2b08, PAL: 0x0041afa8
-const char *MetStartPauseMsg::Name() {
+const char *MetStartPauseMsg::GetName() const {
     return "MetStartPauseMsg";
 }
 
 // NTSC-U/C: 0x003e4488, PAL: 0x0041c6b8
-void MetStartPauseMsg::Print(std::ostream &stream) {
+void MetStartPauseMsg::PrintExtra(std::ostream &stream) const {
     stream << "MetStartPauseMsg";
 }

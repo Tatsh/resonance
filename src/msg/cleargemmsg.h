@@ -78,7 +78,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001bf948
      * @ghidraAddress PAL: 0x001c5768
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     Mid::MBT mPosition; /*!< The song position of the gem to clear. +0x04 */
     int mTrack;         /*!< The track. +0x08 */

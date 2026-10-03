@@ -267,7 +267,7 @@ void GameManagerImpl::HandleMessage(Message *pMsg) {
     } else if (nType == g_nGameManagerDoPlaybackMsgType) {
         OnDoPlayback(pMsg);
     } else {
-        Fatal("DISPATCH_CHECK: Unhandled Message: %s", pMsg->Name());
+        Fatal("DISPATCH_CHECK: Unhandled Message: %s", pMsg->GetName());
     }
 }
 

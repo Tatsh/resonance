@@ -18,6 +18,6 @@ int StreakOverMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dbd50, PAL: 0x00414188
-const char *StreakOverMsg::Name() {
+const char *StreakOverMsg::GetName() const {
     return "StreakOverMsg";
 }

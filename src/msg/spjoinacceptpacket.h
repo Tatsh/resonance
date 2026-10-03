@@ -20,11 +20,11 @@ class OBStream;
  * constructor at `0x003f2e48`. Clone() delegates to it, and the payload accounts for the
  * allocation exactly. The four words Packet provides are declared there rather than here.
  *
- * Print() labels the words at `+0x18` and `+0x14` as `plid` and `destid`, the string at `+0x54` as
- * `clr`, and the appearance at `+0x5c` as `thm`. The vector at `+0x70` holds PlayerInfo records.
- * Save() and Load() step through it 0x40 bytes at a time and dispatch each element's Save() and
- * Load() through the PlayerInfo vtable pointer at the element's `+0x3c`, and Load() resizes it with
- * a default-constructed PlayerInfo as the fill value.
+ * PrintExtra() labels the words at `+0x18` and `+0x14` as `plid` and `destid`, the string at
+ * `+0x54` as `clr`, and the appearance at `+0x5c` as `thm`. The vector at `+0x70` stores PlayerInfo
+ * records. saveGuts() and restoreGuts() step through it 0x40 bytes at a time and dispatch each
+ * element's Save() and Load() through the PlayerInfo vtable pointer at the element's `+0x3c`, and
+ * restoreGuts() resizes it with a default-constructed PlayerInfo as the fill value.
  *
  * The destructor at `0x003ed5e0` is compiler-generated and has no declaration here.
  */
@@ -78,7 +78,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003ef100
      * @ghidraAddress PAL: 0x00427650
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write ` plid:`, ` destid:`, the settings, ` clr:`, and ` thm:` with their values to a
@@ -90,7 +90,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f1f58
      * @ghidraAddress PAL: 0x0042a4a0
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words, both identifiers, the settings, the colour, the appearance, the
@@ -100,17 +100,17 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e5718
      * @ghidraAddress PAL: 0x0041d9c0
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
-     * Read the fields back in the order Save() wrote them, resizing the record vector to the count
-     * read.
+     * Read the fields back in the order saveGuts() wrote them, resizing the record vector to the
+     * count read.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x003e5930
      * @ghidraAddress PAL: 0x0041dbd8
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * Report the username of the carried appearance.

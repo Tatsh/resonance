@@ -83,7 +83,7 @@ FreqAppearance::~FreqAppearance() {
 }
 
 // NTSC-U/C: 0x00171060, PAL: 0x00173998
-void FreqAppearance::Save(OBStream &stream) {
+void FreqAppearance::Save(OBStream &stream) const {
     int version = kRecordVersion;
     stream.Write(&version, sizeof(version));
 
@@ -116,7 +116,7 @@ void FreqAppearance::Load(IBStream &stream) {
 }
 
 // NTSC-U/C: 0x00174878, PAL: 0x00177280
-void FreqAppearance::Print(std::ostream &stream) {
+void FreqAppearance::Print(std::ostream &stream) const {
     // The detail object is never written, so the two literals below arrive back to back.
     stream << "username=" << mUserName << " Freq=" << " SkillStatus=" << mSkillStatus;
 }

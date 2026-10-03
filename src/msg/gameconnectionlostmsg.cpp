@@ -22,11 +22,11 @@ int GameConnectionLostMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e1a60, PAL: 0x00419ee0
-const char *GameConnectionLostMsg::Name() {
+const char *GameConnectionLostMsg::GetName() const {
     return "GameConnectionLostMsg";
 }
 
 // NTSC-U/C: 0x003e4070, PAL: 0x0041c2a0
-void GameConnectionLostMsg::Print(std::ostream &stream) {
+void GameConnectionLostMsg::PrintExtra(std::ostream &stream) const {
     stream << mReason;
 }

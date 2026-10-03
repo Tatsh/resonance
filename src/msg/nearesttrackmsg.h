@@ -53,7 +53,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dd818
      * @ghidraAddress PAL: 0x00415c50
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the word to a diagnostic stream, or `reset` when it is -1.
@@ -62,10 +62,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3d50
      * @ghidraAddress PAL: 0x0041bf20
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 private:
-    int mTrack; // +0x04, or -1 (written as `reset` by Print())
+    int mTrack; // +0x04, or -1 (written as `reset` by PrintExtra())
 };
 
 /**

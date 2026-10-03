@@ -22,7 +22,7 @@ int JuiceAmountMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e0908, PAL: 0x00418d60
-const char *JuiceAmountMsg::Name() {
+const char *JuiceAmountMsg::GetName() const {
     return "JuiceAmountMsg";
 }
 
@@ -37,6 +37,6 @@ float JuiceAmountMsg::GetJuiceFraction() {
 }
 
 // NTSC-U/C: 0x003e41d8, PAL: 0x0041c408
-void JuiceAmountMsg::Print(std::ostream &stream) {
+void JuiceAmountMsg::PrintExtra(std::ostream &stream) const {
     mPlayer->Print(stream);
 }

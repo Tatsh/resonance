@@ -24,24 +24,24 @@ int TestArbiterPacket::Type() {
 }
 
 // NTSC-U/C: 0x003f1c80, PAL: 0x0042a1b0
-const char *TestArbiterPacket::Name() {
+const char *TestArbiterPacket::GetName() const {
     return "TestArbiterPacket";
 }
 
 // NTSC-U/C: 0x003f2ab8, PAL: 0x0042b000
-void TestArbiterPacket::Print(std::ostream &stream) {
+void TestArbiterPacket::PrintExtra(std::ostream &stream) const {
     stream << mSender << mText;
 }
 
 // NTSC-U/C: 0x003e8720, PAL: 0x00420a00
-void TestArbiterPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void TestArbiterPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
     SaveHxStr(SaveHxStr(stream, mSender), mText);
 }
 
 // NTSC-U/C: 0x003e8890, PAL: 0x00420b70
-void TestArbiterPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void TestArbiterPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
     LoadHxStr(LoadHxStr(stream, mSender), mText);
 }
 

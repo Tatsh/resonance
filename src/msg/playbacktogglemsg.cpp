@@ -18,6 +18,6 @@ int PlaybackToggleMsg::Type() {
 }
 
 // NTSC-U/C: 0x00116228, PAL: 0x001166d0
-const char *PlaybackToggleMsg::Name() {
+const char *PlaybackToggleMsg::GetName() const {
     return "PlaybackToggleMsg";
 }

@@ -18,6 +18,6 @@ int PauseGameSystemMsg::Type() {
 }
 
 // NTSC-U/C: 0x00193d28, PAL: 0x00199950
-const char *PauseGameSystemMsg::Name() {
+const char *PauseGameSystemMsg::GetName() const {
     return "PauseGameSystemMsg";
 }

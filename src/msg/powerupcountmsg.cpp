@@ -25,11 +25,11 @@ int PowerupCountMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dd2d8, PAL: 0x00415710
-const char *PowerupCountMsg::Name() {
+const char *PowerupCountMsg::GetName() const {
     return "PowerupCountMsg";
 }
 
 // NTSC-U/C: 0x003e3d08, PAL: 0x0041bed8
-void PowerupCountMsg::Print(std::ostream &stream) {
+void PowerupCountMsg::PrintExtra(std::ostream &stream) const {
     stream << mIndex << "/" << mCount;
 }

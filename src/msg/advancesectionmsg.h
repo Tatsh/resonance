@@ -82,7 +82,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0011d700
      * @ghidraAddress PAL: 0x0011dc88
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     Player *mPlayer;    /*!< The player the controller belongs to. +0x04 */
     Mid::MBT mPosition; /*!< The song position of the reading. +0x08 */

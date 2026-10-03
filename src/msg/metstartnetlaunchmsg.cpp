@@ -20,11 +20,11 @@ int MetStartNetLaunchMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e29a8, PAL: 0x0041ae48
-const char *MetStartNetLaunchMsg::Name() {
+const char *MetStartNetLaunchMsg::GetName() const {
     return "MetStartNetLaunchMsg";
 }
 
 // NTSC-U/C: 0x003e4460, PAL: 0x0041c690
-void MetStartNetLaunchMsg::Print(std::ostream &stream) {
+void MetStartNetLaunchMsg::PrintExtra(std::ostream &stream) const {
     stream << "MetStartNetLaunchMsg";
 }

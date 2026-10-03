@@ -14,8 +14,8 @@ class Player;
  *
  * CripplePowerup builds the message at `0x001c9854` from the three arguments of its slot 2,
  * storing the player at `+0x08`, the first argument at `+0x0c`, and the second at `+0x10`, and
- * reads the result word back after sending. Print() labels `+0x0c` as a track number and writes
- * the player's identifier after ` p#`.
+ * reads the result word back after sending. PrintExtra() labels `+0x0c` as a track number and
+ * writes the player's identifier after ` p#`.
  *
  * mPlayer and mTrack are public because Gamer's crippler handler at `0x00111230` reads them
  * directly with no accessor in the image, and sets CmdMsg::mResult to 1 when victims exist.
@@ -60,7 +60,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e2808
      * @ghidraAddress PAL: 0x0041aca8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write `tr#`, the track, ` p#`, and the player's identifier to a diagnostic stream.
@@ -69,10 +69,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e4290
      * @ghidraAddress PAL: 0x0041c4c0
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     Player *mPlayer; /*!< The player who deployed the crippler. +0x08 */
-    int mTrack;      /*!< The track, labelled by Print(). +0x0c */
+    int mTrack;      /*!< The track, labelled by PrintExtra(). +0x0c */
     /**
      * The bar the crippler is deployed at. +0x10
      *

@@ -29,7 +29,7 @@ int IsFiniteMBT(int nTick) {
 namespace Mid {
 
 // NTSC-U/C: 0x004ace18, PAL: 0x004eafb8
-void MBT::Print(std::ostream &stream) {
+void MBT::Print(std::ostream &stream) const {
     if (mTick > kMBTPrintMaximum) {
         stream << "[inf]tk";
         return;
@@ -45,7 +45,7 @@ void MBT::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x004acf28, PAL: 0x004eb0c8
-OBStream &MBT::Save(OBStream &stream) {
+OBStream &MBT::Save(OBStream &stream) const {
     const int nTick = mTick;
     return stream.Write(&nTick, sizeof(nTick));
 }

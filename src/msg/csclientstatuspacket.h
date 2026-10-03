@@ -62,7 +62,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003ef9f8
      * @ghidraAddress PAL: 0x00428000
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the payload to a diagnostic stream.
@@ -73,7 +73,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2120
      * @ghidraAddress PAL: 0x0042a668
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the packet to a stream.
@@ -84,7 +84,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e6090
      * @ghidraAddress PAL: 0x0041e370
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the packet back from a stream.
@@ -95,10 +95,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e6198
      * @ghidraAddress PAL: 0x0041e478
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
 private:
-    int mStatus; /*!< The client's status, labelled `ClientStatus: ` by Print(). +0x14 */
+    int mStatus; /*!< The client's status, labelled `ClientStatus: ` by PrintExtra(). +0x14 */
 };
 
 /**

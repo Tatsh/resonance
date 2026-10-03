@@ -308,7 +308,7 @@ inline void LocalPlayer::OnPhraseCaptured(PhraseCapturedMsg *pMsg) {
     ++mCaptures;
     mRunEndBar = pMsg->mRunEndBar;
     mLastCaughtBar = pMsg->mRunEndBar - 1;
-    AwardCapture(pMsg);
+    OnMsg(*pMsg);
 }
 
 // The address below is the out-of-line copy.

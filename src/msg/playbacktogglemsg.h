@@ -75,7 +75,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00116228
      * @ghidraAddress PAL: 0x001166d0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     int mOn; /*!< Non-zero when playback starts, zero when it stops. +0x04 */
 };

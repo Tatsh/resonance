@@ -18,6 +18,6 @@ int CaughtBarMsg::Type() {
 }
 
 // NTSC-U/C: 0x001b1210, PAL: 0x001b6fc0
-const char *CaughtBarMsg::Name() {
+const char *CaughtBarMsg::GetName() const {
     return "CaughtBarMsg";
 }

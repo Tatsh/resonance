@@ -41,12 +41,12 @@ int StdMidiMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dc020, PAL: 0x00414458
-const char *StdMidiMsg::Name() {
+const char *StdMidiMsg::GetName() const {
     return "StdMidiMsg";
 }
 
 // NTSC-U/C: 0x003d7ec0, PAL: 0x0040fff8
-void StdMidiMsg::Print(std::ostream &stream) {
+void StdMidiMsg::PrintExtra(std::ostream &stream) const {
     HxStr kind;
     switch (mStatus & kStatusKindMask) {
     case kStatusNoteOff:
@@ -83,7 +83,7 @@ void StdMidiMsg::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x003e3658, PAL: 0x0041b9f8
-void StdMidiMsg::Save(OBStream &stream) {
+void StdMidiMsg::saveGuts(OBStream &stream) const {
     unsigned char status = mStatus;
     unsigned char data1 = mData1;
     unsigned char data2 = mData2;
@@ -93,7 +93,7 @@ void StdMidiMsg::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e36e8, PAL: 0x0041ba88
-void StdMidiMsg::Load(IBStream &stream) {
+void StdMidiMsg::restoreGuts(IBStream &stream) {
     stream.ReadBytes(&mStatus, sizeof(mStatus))
         .ReadBytes(&mData1, sizeof(mData1))
         .ReadBytes(&mData2, sizeof(mData2));

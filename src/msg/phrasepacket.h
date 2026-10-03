@@ -16,12 +16,12 @@ class Phrase;
  * constructor at `0x003f3760`. Clone() delegates to it. The four words Packet provides are
  * declared there rather than here.
  *
- * Print() labels `+0x14` as `tr` and `+0x1c` as `b`, and writes the first through the unsigned
+ * PrintExtra() labels `+0x14` as `tr` and `+0x1c` as `b`, and writes the first through the unsigned
  * integer inserter. The phrase at `+0x18` crosses the wire through the Phrase stream operators,
  * which allocate a fresh phrase on the reading side, and the packet never releases it.
  *
- * Save() writes the Packet word at `+0x0c` a second time after the payload, and Load() reads it a
- * second time to match.
+ * saveGuts() writes the Packet word at `+0x0c` a second time after the payload, and restoreGuts()
+ * reads it a second time to match.
  *
  * The destructor at `0x003f02a8` is compiler-generated and has no declaration here.
  */
@@ -64,7 +64,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f03a8
      * @ghidraAddress PAL: 0x004289b0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write `tr:`, the track, ` b:`, the bar, a space, and then the phrase, or `[empty]` without
@@ -74,7 +74,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2408
      * @ghidraAddress PAL: 0x0042a950
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words, the track, the bar, the phrase, and the Packet word at `+0x0c` again
@@ -84,10 +84,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e6b70
      * @ghidraAddress PAL: 0x0041ee50
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
-     * Read the fields back in the order Save() wrote them.
+     * Read the fields back in the order saveGuts() wrote them.
      *
      * The phrase is replaced with a freshly allocated one without releasing the previous pointer.
      *
@@ -95,10 +95,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e6ca8
      * @ghidraAddress PAL: 0x0041ef88
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
-     * The track, labelled `tr` by Print(). +0x14
+     * The track, labelled `tr` by PrintExtra(). +0x14
      *
      * PhraseMgr::OnPhrasePacket() at `0x001c0010` compares it with the track the manager serves.
      */
@@ -112,7 +112,7 @@ public:
     Phrase *mPhrase;
 
     /**
-     * The phrase step, labelled `b` by Print(). +0x1c
+     * The phrase step, labelled `b` by PrintExtra(). +0x1c
      *
      * PhraseMgr::OnPhrasePacket() installs the phrase at it.
      */

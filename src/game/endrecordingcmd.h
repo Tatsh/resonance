@@ -11,9 +11,9 @@ class OBStream;
  * Scheduler command that ends a recording.
  *
  * `EndRecordingCmd` is one of the five ordinary Sch::Command subclasses. Its table at `0x007cdcb0`
- * has nine entries: it overrides Save() with an empty body of its own, inherits
- * Sch::Command::Load() at `0x00539f28`, and adds one virtual of its own at slot 8, which is empty.
- * GameRecorder::ScheduleEnd() allocates the 0x10-byte object with the untagged allocator and
+ * has nine entries: it overrides saveGuts() with an empty body of its own, inherits
+ * Sch::Command::restoreGuts() at `0x00539f28`, and adds one virtual of its own at slot 8, which is
+ * empty. GameRecorder::ScheduleEnd() allocates the 0x10-byte object with the untagged allocator and
  * expands the constructor. The static initialiser of the unit registers New() under identifier 6
  * with the factory registrar.
  *
@@ -77,7 +77,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0010efd8
      * @ghidraAddress PAL: 0x0010f438
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Do nothing. Slot 8, the one virtual this class adds.

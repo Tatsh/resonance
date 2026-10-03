@@ -58,8 +58,8 @@ Message *Message::NewMessage(int nType) {
 
 // NTSC-U/C: 0x00556290, PAL: 0x00596918
 std::ostream &Message::PrintBraced(std::ostream &stream) {
-    stream << "{" << Name() << " ";
-    Print(stream);
+    stream << "{" << GetName() << " ";
+    PrintExtra(stream);
     return stream << "}";
 }
 
@@ -74,7 +74,7 @@ IBStream &ReadMessageBodyFromStream(IBStream &stream, Message &msg) {
     if (msg.Type() != nType) {
         Fatal("Streamed Message ID %ld does not match expected id %ld.", nType, msg.Type());
     }
-    msg.Load(stream);
+    msg.restoreGuts(stream);
     return stream;
 }
 
@@ -97,7 +97,7 @@ IBStream &ReadMessagePointerFromStream(IBStream &stream, Message *&pMsg) {
         Fatal("Cannot find ID %ld in Message Factory List", nType);
     }
     (void)pNew->Type(); // Yes, the binary discards this call's result.
-    pNew->Load(stream);
+    pNew->restoreGuts(stream);
     pMsg = pNew;
     return stream;
 }
@@ -108,7 +108,7 @@ OBStream &WriteMessageBodyToStream(OBStream &stream, Message &msg) {
     const unsigned short nType = msg.Type();
     char cPresent = '1';
     stream.WriteBytes(&cPresent, sizeof(cPresent)).Write(&nType, sizeof(nType));
-    msg.Save(stream);
+    msg.saveGuts(stream);
     return stream;
 }
 
@@ -123,6 +123,6 @@ OBStream &WriteMessagePointerToStream(OBStream &stream, Message *pMsg) {
     OBStream &written = stream.WriteBytes(&cPresent, sizeof(cPresent));
     int nType = pMsg->Type();
     written.Write(&nType, sizeof(nType));
-    pMsg->Save(stream);
+    pMsg->saveGuts(stream);
     return stream;
 }

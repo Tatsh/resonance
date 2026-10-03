@@ -17,7 +17,7 @@ class Player;
  * The payload layout comes from the run of field copies in Clone(). Every member is public, and
  * each member's documentation identifies the reader outside the class that accesses it directly.
  *
- * Print() hands mPosition to Mid::MBT::Print(), and New() initialises it to kMBTInfinity.
+ * PrintExtra() hands mPosition to Mid::MBT::Print(), and New() initialises it to kMBTInfinity.
  *
  * The destructor at `0x003dc840` is compiler-generated and has no declaration here.
  */
@@ -60,7 +60,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dc9a0
      * @ghidraAddress PAL: 0x00414dd8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the player's colour name, ` tr#`, the two words at `+0x04` and `+0x08` joined by `/`,
@@ -70,7 +70,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3ae8
      * @ghidraAddress PAL: 0x00410358
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 public:
     /**

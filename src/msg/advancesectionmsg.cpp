@@ -18,6 +18,6 @@ int AdvanceSectionMsg::Type() {
 }
 
 // NTSC-U/C: 0x0011d700, PAL: 0x0011dc88
-const char *AdvanceSectionMsg::Name() {
+const char *AdvanceSectionMsg::GetName() const {
     return "AdvanceSectionMsg";
 }

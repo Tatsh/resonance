@@ -14,7 +14,7 @@ class Player;
  * and its vtable is at `0x00813238`. The members below are the whole of the class. No other
  * routine in the image refers to this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(). Print() hands `+0x0c` to
+ * The payload layout comes from the run of field copies in Clone(). PrintExtra() hands `+0x0c` to
  * Mid::MBT::Print() and writes the colour name of the player at `+0x04`, which types both.
  * InputMap::OnControllerReading(), the one builder, stores the reading's axis value truncated to
  * an integer at `+0x08`.
@@ -83,7 +83,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003daf08
      * @ghidraAddress PAL: 0x00413340
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the position, the player's colour name, and the word at `+0x08`, separated by
@@ -93,7 +93,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3480
      * @ghidraAddress PAL: 0x0041b7e0
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     // Public because LocalPlayer::HandleMessage() reads both directly at `0x0011ee04` and
     // `0x0011ee20`, and the image has no accessor.

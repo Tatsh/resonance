@@ -17,7 +17,8 @@ class OBStream;
  * allocation exactly. The four words Packet provides are declared there rather than here.
  *
  * Each string crosses the wire as a four-byte length followed by that many bytes of text with no
- * terminator. Save() and Load() have second emissions at `0x003e8720` and `0x003e8890`.
+ * terminator. saveGuts() and restoreGuts() have second emissions at `0x003e8720` and
+ * `0x003e8890`.
  *
  * The destructor at `0x003f1898` is compiler-generated and has no declaration here.
  */
@@ -80,7 +81,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f19d8
      * @ghidraAddress PAL: 0x00429ec8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write both strings to a diagnostic stream, with nothing between them.
@@ -89,7 +90,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f28e8
      * @ghidraAddress PAL: 0x0042ae30
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words and then both strings to a stream.
@@ -98,7 +99,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e8458
      * @ghidraAddress PAL: 0x00420738
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the Packet words and then both strings back from a stream.
@@ -109,7 +110,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e85c8
      * @ghidraAddress PAL: 0x004208a8
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * Report the first string.
@@ -134,8 +135,8 @@ public:
     HxStr GetText();
 
 private:
-    // Print() writes the two strings with nothing between them. Both titles are inferred from the
-    // class name, a chat line and the player who sent it.
+    // PrintExtra() writes the two strings with nothing between them. Both titles are inferred from
+    // the class name, a chat line and the player who sent it.
     HxStr mSender; // +0x14
     HxStr mText;   // +0x1c
 };

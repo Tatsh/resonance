@@ -31,24 +31,24 @@ int SCLoadLevelPacket::Type() {
 }
 
 // NTSC-U/C: 0x003f1428, PAL: 0x004298f0
-const char *SCLoadLevelPacket::Name() {
+const char *SCLoadLevelPacket::GetName() const {
     return "SCLoadLevelPacket";
 }
 
 // NTSC-U/C: 0x003f2858, PAL: 0x0042ada0
-void SCLoadLevelPacket::Print(std::ostream &stream) {
+void SCLoadLevelPacket::PrintExtra(std::ostream &stream) const {
     mParams.Print(stream);
 }
 
 // NTSC-U/C: 0x003e8180, PAL: 0x00420460
-void SCLoadLevelPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void SCLoadLevelPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
     mParams.Save(&stream);
 }
 
 // NTSC-U/C: 0x003f27a0, PAL: 0x0042ace8
-void SCLoadLevelPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void SCLoadLevelPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
     mParams.Load(&stream);
 }
 

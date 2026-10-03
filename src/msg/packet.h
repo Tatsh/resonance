@@ -7,8 +7,8 @@
  *
  * Its RTTI descriptor is at `0x009021a0`. It has Message as its one base. Its vtable at
  * `0x00814920` has eight entries and a zero terminator at index 8. Slots 2, 3, and 4 address the
- * pure-virtual handler, so the class implements none of Clone(), Type(), or Name() and is never
- * instantiated. Slot 5 retains Message::Print(). Slots 6 and 7 are the class's own overrides.
+ * pure-virtual handler, so the class implements none of Clone(), Type(), or GetName() and is never
+ * instantiated. Slot 5 retains Message::PrintExtra(). Slots 6 and 7 are the class's own overrides.
  *
  * Slot 0 of that table constructs the descriptor above from this class's type name at
  * `0x00814aa0`, which is what establishes the table as this class's rather than as a derived
@@ -18,7 +18,7 @@
  *
  * Both members are very likely inline in this header in the original, and the definitions in
  * `packet.cpp` are the out-of-line emission that fills the table slots. Every one of the twenty
- * overriding packet classes opens its own Save() with a byte-identical expansion of the four
+ * overriding packet classes opens its saveGuts() with a byte-identical expansion of the four
  * transfers below, and not one of them contains a call instruction to either address. A qualified
  * call to a non-inline out-of-line member would compile to a call, so the body was available for
  * expansion. That is the same evidence this tree already accepts for the inlined HxStr destructor.
@@ -43,19 +43,19 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f1de8
      * @ghidraAddress PAL: 0x0042a330
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the four words back from a stream.
      *
-     * Slot 7. The words come back in the order Save() wrote them, and each transfer fills its
+     * Slot 7. The words come back in the order saveGuts() wrote them, and each transfer fills its
      * field in place.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x003f1ea0
      * @ghidraAddress PAL: 0x0042a3e8
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
 protected:
     /**
@@ -85,8 +85,8 @@ protected:
     /**
      * The client the packet concerns, or -1 until set. +0x0c
      *
-     * GemPacket::Print() labels it `clid:`, and six packets transfer it a second time after their
-     * payload.
+     * GemPacket::PrintExtra() labels it `clid:`, and six packets transfer it a second time after
+     * their payload.
      */
     int mClientId;
 

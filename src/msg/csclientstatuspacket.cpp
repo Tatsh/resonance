@@ -23,18 +23,18 @@ int CSClientStatusPacket::Type() {
 }
 
 // NTSC-U/C: 0x003ef9f8, PAL: 0x00428000
-const char *CSClientStatusPacket::Name() {
+const char *CSClientStatusPacket::GetName() const {
     return "CSClientStatusPacket";
 }
 
 // NTSC-U/C: 0x003f2120, PAL: 0x0042a668
-void CSClientStatusPacket::Print(std::ostream &stream) {
+void CSClientStatusPacket::PrintExtra(std::ostream &stream) const {
     stream << "ClientStatus: " << mStatus;
 }
 
 // NTSC-U/C: 0x003e6090, PAL: 0x0041e370
-void CSClientStatusPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void CSClientStatusPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
 
     int status = mStatus;
     stream.Write(&status, sizeof(status));
@@ -45,8 +45,8 @@ void CSClientStatusPacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e6198, PAL: 0x0041e478
-void CSClientStatusPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void CSClientStatusPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
 
     int status = 0;
     stream.Read(&status, sizeof(status));

@@ -17,6 +17,6 @@ int ScriptMsg::Type() {
 }
 
 // NTSC-U/C: 0x0015a778, PAL: 0x0015c4f8
-const char *ScriptMsg::Name() {
+const char *ScriptMsg::GetName() const {
     return "ScriptMsg";
 }

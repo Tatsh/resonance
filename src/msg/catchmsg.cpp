@@ -18,6 +18,6 @@ int CatchMsg::Type() {
 }
 
 // NTSC-U/C: 0x001b10f0, PAL: 0x001b6ea0
-const char *CatchMsg::Name() {
+const char *CatchMsg::GetName() const {
     return "CatchMsg";
 }

@@ -18,6 +18,6 @@ int SusGemMsg::Type() {
 }
 
 // NTSC-U/C: 0x001a4550, PAL: 0x001aa2b8
-const char *SusGemMsg::Name() {
+const char *SusGemMsg::GetName() const {
     return "SusGemMsg";
 }

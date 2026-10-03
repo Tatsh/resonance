@@ -59,7 +59,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001b39b0
      * @ghidraAddress PAL: 0x001b9788
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * The quantised song position, in MIDI ticks. +0x04

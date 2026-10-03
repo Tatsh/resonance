@@ -59,7 +59,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0019fa88
      * @ghidraAddress PAL: 0x001a57f0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * The track of the now bar. +0x04

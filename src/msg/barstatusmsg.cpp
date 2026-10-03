@@ -13,7 +13,7 @@ Message *BarStatusMsg::New() {
 
 // NTSC-U/C: 0x003d8670, PAL: 0x00410a68
 // The colour name is copied into a temporary before it is written.
-void BarStatusMsg::Print(std::ostream &stream) {
+void BarStatusMsg::PrintExtra(std::ostream &stream) const {
     stream << "b#" << mBar << " tr#" << mTrack;
     if (mFlags & kFieldPlayer) {
         stream << " " << HxStr(GetPlayer()->mColorName);
@@ -46,11 +46,11 @@ int BarStatusMsg::Type() {
 }
 
 // NTSC-U/C: 0x003df060, PAL: 0x004174b8
-const char *BarStatusMsg::Name() {
+const char *BarStatusMsg::GetName() const {
     return "BarStatusMsg";
 }
 
 // NTSC-U/C: 0x003df1f8, PAL: 0x00417650
-int BarStatusMsg::Has(int nField) {
+int BarStatusMsg::Has(int nField) const {
     return (mFlags & nField) != 0;
 }

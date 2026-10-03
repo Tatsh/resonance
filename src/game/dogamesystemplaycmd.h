@@ -11,9 +11,9 @@ class OBStream;
  * Scheduler command that starts a play of the game system.
  *
  * `DoGameSystemPlayCmd` is one of the five ordinary Sch::Command subclasses. Its table is at
- * `0x007cd520` with eight entries, and it overrides Save() and Load() with empty bodies of its own.
- * It carries no payload, so the object is the 0x0c-byte base. The static initialiser at
- * `0x0010b530` registers New() under identifier 4 with the factory registrar.
+ * `0x007cd520` with eight entries, and it overrides saveGuts() and restoreGuts() with empty bodies
+ * of its own. It has no payload, and the object is the 0x0c-byte base. The static initialiser
+ * at `0x0010b530` registers New() under identifier 4 with the factory registrar.
  *
  * The destructor at `0x0010bd08` is implicitly declared.
  */
@@ -61,7 +61,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0010bdc8
      * @ghidraAddress PAL: 0x0010bf60
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read nothing.
@@ -70,7 +70,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0010bdd0
      * @ghidraAddress PAL: 0x0010bf68
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * Identifier the class streams itself under. The word at `0x006682b8` starts as 4.

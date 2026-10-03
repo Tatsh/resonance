@@ -54,8 +54,8 @@ PitchPicker::PitchPicker(const TrackData *pTrackData)
 }
 
 // NTSC-U/C: 0x001c2c60, PAL: 0x001c8aa8
-void PitchPicker::FindRiffRange(MultiMuseMsg *pMsg) {
-    RiffRangeFinder finder(pMsg->mMuse, &mRiffLow, &mRiffHigh);
+void PitchPicker::OnMsg(const MultiMuseMsg &msg) {
+    RiffRangeFinder finder(msg.mMuse, &mRiffLow, &mRiffHigh);
 }
 
 // NTSC-U/C: 0x001c2d40, PAL: 0x001c8b88
@@ -112,7 +112,7 @@ unsigned char PitchPicker::GetSustainPitch(int nTick, unsigned char nNote) {
 void PitchPicker::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwMultiMuseMsgType)) {
-        FindRiffRange(static_cast<MultiMuseMsg *>(pMsg));
+        OnMsg(*static_cast<MultiMuseMsg *>(pMsg));
     } else if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
         OnStdMidi(static_cast<StdMidiMsg *>(pMsg));
     } else if (nType == static_cast<int>(g_dwSustainNoteMsgType)) {

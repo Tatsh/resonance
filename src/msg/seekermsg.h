@@ -14,8 +14,8 @@ class Player;
  * and its vtable is at `0x00812cd8`. The members below are the whole of the class. No other
  * routine in the image refers to this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), and Print() labels most of
- * it. It writes the colour name of the player at `+0x04`, then either ` (off)` when the word at
+ * The payload layout comes from the run of field copies in Clone(), and PrintExtra() labels most
+ * of it. It writes the colour name of the player at `+0x04`, then either ` (off)` when the word at
  * `+0x14` is zero, or a range of bars from `+0x08` spanning `+0x0c` bars, the track at `+0x10`,
  * and the bar of the position at `+0x18`. New() sets the player to null and the position to
  * kMBTInfinity.
@@ -100,7 +100,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dcd60
      * @ghidraAddress PAL: 0x00415198
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the player's colour name and then either ` (off)` or the bar range, the track, and
@@ -113,7 +113,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d81f0
      * @ghidraAddress PAL: 0x00410568
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     // AppTunnel's seeker handler at 0x00447eb0 reads the five members below directly with no
     // accessor in the image.

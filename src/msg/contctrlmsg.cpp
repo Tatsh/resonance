@@ -20,11 +20,11 @@ int ContCtrlMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dfc90, PAL: 0x004180e8
-const char *ContCtrlMsg::Name() {
+const char *ContCtrlMsg::GetName() const {
     return "ContCtrlMsg";
 }
 
 // NTSC-U/C: 0x003e3e80, PAL: 0x0041c050
-void ContCtrlMsg::Print(std::ostream &stream) {
+void ContCtrlMsg::PrintExtra(std::ostream &stream) const {
     stream << mValue;
 }

@@ -10,9 +10,10 @@ class GenericSequencer;
  * Scheduler command that runs a sequencer's next dispatch.
  *
  * Its RTTI descriptor is at `0x008ef260`. It derives publicly from Sch::Command at offset 0. Its
- * type function is at `0x00100b00` and its table at `0x007cc838` retains Sch::Command::Save() and
- * Load(). Sequencer::ScheduleNext() allocates the 0x10-byte object with the untagged allocator and
- * expands the constructor. The destructor at `0x00100ad8` is implicitly declared.
+ * type function is at `0x00100b00` and its table at `0x007cc838` retains
+ * Sch::Command::saveGuts() and restoreGuts(). Sequencer::ScheduleNext() allocates the 0x10-byte
+ * object with the untagged allocator and expands the constructor. The destructor at `0x00100ad8` is
+ * implicitly declared.
  */
 class SequencerCmd : public Sch::Command {
 public:

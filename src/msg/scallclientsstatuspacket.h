@@ -16,8 +16,8 @@ class OBStream;
  * constructor at `0x003f3298`. Clone() delegates to it, and the payload accounts for the
  * allocation exactly. The four words Packet provides are declared there rather than here.
  *
- * The vector at `+0x14` is deep-copied, so the class owns its elements. Print() labels both words
- * of each element, which recovers their names.
+ * The vector at `+0x14` is deep-copied. The class manages its elements. PrintExtra() labels both
+ * words of each element, which recovers their names.
  *
  * The destructor at `0x003efb88` is compiler-generated and has no declaration here.
  */
@@ -27,7 +27,7 @@ public:
      * One client's status, eight bytes, from the stride the copy constructor divides by.
      *
      * Public because AppendEntry() takes one by value. The names are attested by the labels
-     * `(id:` and ` stat:` that Print() writes ahead of the two words.
+     * `(id:` and ` stat:` that PrintExtra() writes ahead of the two words.
      */
     struct ClientStatus {
         int mId;     /*!< Labelled `(id:`. +0x00 */
@@ -71,7 +71,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003efb30
      * @ghidraAddress PAL: 0x00428138
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write every entry to a diagnostic stream as `(id:` id ` stat:` status `) `.
@@ -80,7 +80,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2160
      * @ghidraAddress PAL: 0x0042a6a8
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words, the entry count, and both words of every entry to a stream.
@@ -89,7 +89,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e6288
      * @ghidraAddress PAL: 0x0041e568
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the Packet words and the entry count, resize the vector, and read every entry in place.
@@ -98,7 +98,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e63f0
      * @ghidraAddress PAL: 0x0041e6d0
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * Append one entry.

@@ -20,12 +20,13 @@ class OBStream;
  * what measures Packet.
  *
  * Slots 5, 6, and 7 of the table address three empty bodies of this class at `0x003f02a0`,
- * `0x003f0290`, and `0x003f0298`. The two transfer slots replace the non-empty Packet::Save() and
- * Packet::Load(). The packet therefore crosses the wire as zero bytes, without even the four
- * Packet words. The three bodies lie in the order Save(), Load(), Print() rather than in slot
- * order, the shape of three members defined in the class body in that order. Print() is
- * declared on that evidence alone, because an empty Print() at a unique address would otherwise
- * be indistinguishable from a re-emission of the empty Message::Print().
+ * `0x003f0290`, and `0x003f0298`. The two transfer slots replace the non-empty Packet::saveGuts()
+ * and Packet::restoreGuts(). The packet therefore crosses the wire as zero bytes, without even the
+ * four Packet words. The three bodies lie in the order saveGuts(), restoreGuts(), PrintExtra()
+ * rather than in slot order, the shape of three members defined in the class body in that order.
+ * PrintExtra() is declared on that evidence alone, because an empty PrintExtra() at a unique
+ * address would otherwise be indistinguishable from a re-emission of the empty
+ * Message::PrintExtra().
  *
  * The destructor at `0x003f01c0` is compiler-generated and has no declaration here.
  */
@@ -68,28 +69,28 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f0280
      * @ghidraAddress PAL: 0x00428888
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
-     * Write nothing, replacing Packet::Save().
+     * Write nothing, replacing Packet::saveGuts().
      *
      * Slot 6.
      *
      * @ghidraAddress NTSC-U/C: 0x003f0290
      * @ghidraAddress PAL: 0x00428898
      */
-    virtual void Save(OBStream &) {
+    virtual void saveGuts(OBStream &) const {
     }
 
     /**
-     * Read nothing, replacing Packet::Load().
+     * Read nothing, replacing Packet::restoreGuts().
      *
      * Slot 7.
      *
      * @ghidraAddress NTSC-U/C: 0x003f0298
      * @ghidraAddress PAL: 0x004288a0
      */
-    virtual void Load(IBStream &) {
+    virtual void restoreGuts(IBStream &) {
     }
 
     /**
@@ -100,7 +101,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f02a0
      * @ghidraAddress PAL: 0x004288a8
      */
-    virtual void Print(std::ostream &) {
+    virtual void PrintExtra(std::ostream &) const {
     }
 };
 

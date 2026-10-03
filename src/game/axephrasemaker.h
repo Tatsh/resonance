@@ -162,7 +162,7 @@ private:
 
     // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
     // NTSC-U/C: 0x0019d8f0, PAL: 0x001a3658
-    void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
+    void OnMsg(const InvalidateSeekerMsg &msg);
 
     // The out-of-line copy of the SustainNoteMsg branch HandleMessage() expands inline.
     // NTSC-U/C: 0x0019d920, PAL: 0x001a3688

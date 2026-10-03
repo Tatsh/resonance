@@ -24,24 +24,24 @@ int GameChatPacket::Type() {
 }
 
 // NTSC-U/C: 0x003f19d8, PAL: 0x00429ec8
-const char *GameChatPacket::Name() {
+const char *GameChatPacket::GetName() const {
     return "GameChatPacket";
 }
 
 // NTSC-U/C: 0x003f28e8, PAL: 0x0042ae30
-void GameChatPacket::Print(std::ostream &stream) {
+void GameChatPacket::PrintExtra(std::ostream &stream) const {
     stream << mSender << mText;
 }
 
 // NTSC-U/C: 0x003e8458, PAL: 0x00420738
-void GameChatPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void GameChatPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
     SaveHxStr(SaveHxStr(stream, mSender), mText);
 }
 
 // NTSC-U/C: 0x003e85c8, PAL: 0x004208a8
-void GameChatPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void GameChatPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
     LoadHxStr(LoadHxStr(stream, mSender), mText);
 }
 

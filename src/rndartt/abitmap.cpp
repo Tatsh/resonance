@@ -25,10 +25,10 @@ constexpr unsigned int kColorChannelsMask = 0xffffff;
 constexpr unsigned int kLowByteMask = 0xff;
 constexpr int kAlphaShift = 24;
 
-// The value Copy() returns when the allocation fails.
+// The value Clone() returns when the allocation fails.
 constexpr int kCopyFailed = -1;
 
-// The packed row stride of a format, as the constructor and Copy() both derive it.
+// The packed row stride of a format, as the constructor and Clone() both derive it.
 inline short PackedBytesPerRow(int nFormat, int nWidth) {
     if (nFormat == kABitmapFormatLinear4) {
         return static_cast<short>((nWidth + 2) / 2);
@@ -161,7 +161,7 @@ void ABitmap::Reverse32(unsigned char *pPixels, int nCount) {
 int g_nSkipColorSwap = 1;
 
 // NTSC-U/C: 0x00558f28, PAL: 0x0059a080
-int ABitmap::Copy(const ABitmap &source) {
+int ABitmap::Clone(ABitmap &source) {
     mFormat = source.mFormat;
     mHasTransparentColor = source.mHasTransparentColor;
     mOddNibbleStart = source.mOddNibbleStart;

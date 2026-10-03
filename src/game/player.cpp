@@ -183,9 +183,9 @@ void Player::AddScore(int nDelta, int bNotify) {
 }
 
 // NTSC-U/C: 0x001331c8, PAL: 0x00133a18
-void Player::AwardCapture(PhraseCapturedMsg *pMsg) {
-    AddScore(pMsg->mScore, 1);
-    AddJuice(pMsg->mJuice, 1);
+void Player::OnMsg(const PhraseCapturedMsg &msg) {
+    AddScore(msg.mScore, 1);
+    AddJuice(msg.mJuice, 1);
 }
 
 // NTSC-U/C: 0x0012f970, PAL: 0x00130128
@@ -252,6 +252,6 @@ void Player::HandleMessage(Message *pMsg) {
         OnUpdateScore(static_cast<UpdateScorePacket *>(pMsg));
     } else if (nType == g_nPhraseCapturedMsgType) {
         // Awarded whichever player the capture names.
-        AwardCapture(static_cast<PhraseCapturedMsg *>(pMsg));
+        OnMsg(*static_cast<PhraseCapturedMsg *>(pMsg));
     }
 }

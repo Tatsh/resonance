@@ -18,6 +18,6 @@ int ToggleGhostMsg::Type() {
 }
 
 // NTSC-U/C: 0x0011d820, PAL: 0x0011dda8
-const char *ToggleGhostMsg::Name() {
+const char *ToggleGhostMsg::GetName() const {
     return "ToggleGhostMsg";
 }

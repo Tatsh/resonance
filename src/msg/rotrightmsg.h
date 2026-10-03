@@ -79,7 +79,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0011d4b8
      * @ghidraAddress PAL: 0x0011da40
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
 public:
     /** The player to rotate. TrackSelector::HandleMessage() reads it at `0x0013b8f8`. +0x04 */

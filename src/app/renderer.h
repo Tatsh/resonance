@@ -5,6 +5,7 @@
 #include "app/msgsource.h"
 #include "app/rendererbase.h"
 #include "msg/barstatusmsg.h"
+#include "msg/gamebeginmsg.h"
 
 class AppTunnel;
 class GameParams;
@@ -99,7 +100,7 @@ public:
     /**
      * Dispatch one message.
      *
-     * RendererBase slot 3, pure in the base. A GameBeginMsg runs OnGameBegin(), a BarStatusMsg runs
+     * RendererBase slot 3, pure in the base. A GameBeginMsg runs OnMsg(), a BarStatusMsg runs
      * OnBarStatus(), and a PointAmountMsg runs OnPointAmount(). Every other message is sent on to
      * the sinks.
      *
@@ -243,7 +244,7 @@ private:
     // NTSC-U/C: 0x004322f8, PAL: 0x0046dfd0
     // Runs script template 1000. HandleMessage() inlines the body, and this copy has
     // no caller.
-    void OnGameBegin();
+    void OnMsg(const GameBeginMsg &msg);
 
     // NTSC-U/C: 0x0042d068, PAL: 0x00468c20
     // Merges the payload into the cell for its track and bar, then tells the overlay

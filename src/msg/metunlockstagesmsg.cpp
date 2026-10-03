@@ -20,12 +20,12 @@ int MetUnlockStagesMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e2f88, PAL: 0x0041b428
-const char *MetUnlockStagesMsg::Name() {
+const char *MetUnlockStagesMsg::GetName() const {
     return "MetUnlockStagesMsg";
 }
 
 // NTSC-U/C: 0x003e4530, PAL: 0x0041c760
 // Yes, the binary writes MetFreqEndedMsg's label here.
-void MetUnlockStagesMsg::Print(std::ostream &stream) {
+void MetUnlockStagesMsg::PrintExtra(std::ostream &stream) const {
     stream << "MetFreqEndedMsg ";
 }

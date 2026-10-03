@@ -57,7 +57,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x002919b8
      * @ghidraAddress PAL: 0x002ad8d0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 };
 
 /**

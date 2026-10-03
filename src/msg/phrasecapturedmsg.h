@@ -13,9 +13,9 @@ class Player;
  * and its vtable is at `0x008126f0`. The members below are the whole of the class. No other
  * routine in the image refers to this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(). Print() labels five of the
- * nine words: a bar range at `+0x04` and `+0x08`, the track at `+0x14`, the score at `+0x1c`, and
- * the juice at `+0x20`, and it writes the colour name of the player at `+0x18`. The words at
+ * The payload layout comes from the run of field copies in Clone(). PrintExtra() labels five of
+ * the nine words: a bar range at `+0x04` and `+0x08`, the track at `+0x14`, the score at `+0x1c`,
+ * and the juice at `+0x20`, and it writes the colour name of the player at `+0x18`. The words at
  * `+0x0c`, `+0x10`, and `+0x24` are not printed.
  *
  * mTrack, mPlayer, and mScore are public because Overlay::OnPhraseCaptured() at `0x0042b068`
@@ -101,7 +101,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dec78
      * @ghidraAddress PAL: 0x004170d0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write `b `, the bar range joined by `--`, ` tr# `, the track, ` score `, the score,
@@ -111,10 +111,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d8448
      * @ghidraAddress PAL: 0x00410800
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
-     * The first bar of the captured phrase, which Print() writes ahead of `--`. +0x04
+     * The first bar of the captured phrase, which PrintExtra() writes ahead of `--`. +0x04
      *
      * Public because Gamer's HandleMessage() at `0x00112a80` reads it directly with no accessor in
      * the image.
@@ -122,7 +122,7 @@ public:
     int mFirstBar;
 
 private:
-    int mEndBar; // +0x08, written after `--` by Print()
+    int mEndBar; // +0x08, written after `--` by PrintExtra()
 
 public:
     // Public because LocalPlayer::HandleMessage() reads both directly at `0x0011ee88` and
@@ -136,7 +136,7 @@ public:
     /**
      * The juice the capture earned, a value SingleCatcher reads from its TrackData.
      *
-     * Public because Player::AwardCapture() reads it directly at `0x001331ec`, and the image has
+     * Public because Player::OnMsg() reads it directly at `0x001331ec`, and the image has
      * no accessor. +0x20
      */
     int mJuice;

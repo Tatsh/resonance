@@ -18,6 +18,6 @@ int ClearGemsMsg::Type() {
 }
 
 // NTSC-U/C: 0x0019d5f0, PAL: 0x001a3358
-const char *ClearGemsMsg::Name() {
+const char *ClearGemsMsg::GetName() const {
     return "ClearGemsMsg";
 }

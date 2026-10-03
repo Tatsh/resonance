@@ -24,12 +24,12 @@ int PhrasePacket::Type() {
 }
 
 // NTSC-U/C: 0x003f03a8, PAL: 0x004289b0
-const char *PhrasePacket::Name() {
+const char *PhrasePacket::GetName() const {
     return "PhrasePacket";
 }
 
 // NTSC-U/C: 0x003f2408, PAL: 0x0042a950
-void PhrasePacket::Print(std::ostream &stream) {
+void PhrasePacket::PrintExtra(std::ostream &stream) const {
     stream << "tr:" << mTr << " b:" << mB << " ";
     if (mPhrase != nullptr) {
         stream << *mPhrase;
@@ -40,8 +40,8 @@ void PhrasePacket::Print(std::ostream &stream) {
 
 // NTSC-U/C: 0x003e6b70, PAL: 0x0041ee50
 // The word at +0x0c crosses the wire twice.
-void PhrasePacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void PhrasePacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
 
     unsigned int tr = mTr;
     int b = mB;
@@ -51,8 +51,8 @@ void PhrasePacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e6ca8, PAL: 0x0041ef88
-void PhrasePacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void PhrasePacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
     (stream.Read(&mTr, sizeof(mTr)).Read(&mB, sizeof(mB)) >> mPhrase)
         .Read(&mClientId, sizeof(mClientId));
 }

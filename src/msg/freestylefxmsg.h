@@ -77,7 +77,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00116568
      * @ghidraAddress PAL: 0x00116a10
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * The track. +0x04

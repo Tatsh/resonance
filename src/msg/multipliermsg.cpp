@@ -18,6 +18,6 @@ int MultiplierMsg::Type() {
 }
 
 // NTSC-U/C: 0x001cab98, PAL: 0x001d0a50
-const char *MultiplierMsg::Name() {
+const char *MultiplierMsg::GetName() const {
     return "MultiplierMsg";
 }

@@ -59,7 +59,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ca940
      * @ghidraAddress PAL: 0x001d07f8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     int mBar;        /*!< The bar freestyle starts at. +0x08 */
     Player *mPlayer; /*!< The player freestyle is enabled for. +0x0c */

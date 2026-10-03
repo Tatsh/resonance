@@ -12,10 +12,10 @@ class OBStream;
  * Scheduler command that runs a local player's per-bar update.
  *
  * `LocalPlayerCmd` is one of the five ordinary Sch::Command subclasses. Its table is at
- * `0x007cff18` with eight entries, and it overrides Save() and Load() with empty bodies of its own.
- * LocalPlayer allocates the 0x14-byte object with the untagged allocator and expands the
- * constructor, in LocalPlayer::AnnounceState() for the first bar and in LocalPlayer::OnBarTick()
- * for every bar after.
+ * `0x007cff18` with eight entries, and it overrides saveGuts() and restoreGuts() with empty bodies
+ * of its own. LocalPlayer allocates the 0x14-byte object with the untagged allocator and expands
+ * the constructor, in LocalPlayer::AnnounceState() for the first bar and in
+ * LocalPlayer::OnBarTick() for every bar after.
  */
 class LocalPlayerCmd : public Sch::Command {
 public:
@@ -67,7 +67,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00122850
      * @ghidraAddress PAL: 0x00122e68
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read nothing.
@@ -76,7 +76,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00122858
      * @ghidraAddress PAL: 0x00122e70
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * The class's command identifier, which the image initialises to zero.

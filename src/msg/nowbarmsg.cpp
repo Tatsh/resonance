@@ -18,6 +18,6 @@ int NowBarMsg::Type() {
 }
 
 // NTSC-U/C: 0x0019fa88, PAL: 0x001a57f0
-const char *NowBarMsg::Name() {
+const char *NowBarMsg::GetName() const {
     return "NowBarMsg";
 }

@@ -50,7 +50,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e2c78
      * @ghidraAddress PAL: 0x0041b118
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write `IsRecordingMsg ` and the word at `+0x04` to a diagnostic stream.
@@ -59,7 +59,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e44b0
      * @ghidraAddress PAL: 0x0041c6e0
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Non-zero when the game is being restored from a recording.

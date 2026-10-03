@@ -17,7 +17,7 @@ class OBStream;
  * allocation exactly. The four words Packet provides are declared there rather than here.
  *
  * The vector at `+0x14` is deep-copied, so the class owns its elements. Each element is 0x14 bytes,
- * a player identifier, an unlabelled word, and a vector of track numbers, which Print() labels
+ * a player identifier, an unlabelled word, and a vector of track numbers, which PrintExtra() labels
  * ` pid:` and ` tracks:`.
  *
  * The destructor at `0x003f0040` is compiler-generated and has no declaration here.
@@ -78,7 +78,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003effe8
      * @ghidraAddress PAL: 0x004285f0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write every entry to a diagnostic stream as ` pid:`, the identifier, ` tracks:`, the track
@@ -88,7 +88,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2278
      * @ghidraAddress PAL: 0x0042a7c0
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words, the entry count, and for every entry its two words, its track count,
@@ -98,17 +98,17 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e6578
      * @ghidraAddress PAL: 0x0041e858
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
-     * Read the fields back in the order Save() wrote them, resizing both levels of vector to the
-     * counts read.
+     * Read the fields back in the order saveGuts() wrote them, resizing both levels of vector to
+     * the counts read.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x003e6788
      * @ghidraAddress PAL: 0x0041ea68
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * Append a copy of one entry.

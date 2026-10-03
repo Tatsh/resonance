@@ -23,12 +23,12 @@ int SCAllPlayersInfoPacket::Type() {
 }
 
 // NTSC-U/C: 0x003effe8, PAL: 0x004285f0
-const char *SCAllPlayersInfoPacket::Name() {
+const char *SCAllPlayersInfoPacket::GetName() const {
     return "SCAllPlayersInfoPacket";
 }
 
 // NTSC-U/C: 0x003f2278, PAL: 0x0042a7c0
-void SCAllPlayersInfoPacket::Print(std::ostream &stream) {
+void SCAllPlayersInfoPacket::PrintExtra(std::ostream &stream) const {
     for (const auto &entry : mPlayers) {
         std::ostream &rest = stream << " pid:" << entry.mPid << " tracks:";
         rest << "(";
@@ -41,8 +41,8 @@ void SCAllPlayersInfoPacket::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x003e6578, PAL: 0x0041e858
-void SCAllPlayersInfoPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void SCAllPlayersInfoPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
 
     int count = static_cast<int>(mPlayers.size());
     stream.Write(&count, sizeof(count));
@@ -60,8 +60,8 @@ void SCAllPlayersInfoPacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e6788, PAL: 0x0041ea68
-void SCAllPlayersInfoPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void SCAllPlayersInfoPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
 
     int count;
     stream.Read(&count, sizeof(count));

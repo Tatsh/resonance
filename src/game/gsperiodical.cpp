@@ -22,8 +22,8 @@ inline int ClampPosition(int nTick) {
  * Scheduler command that runs one GsPeriodical at one song position.
  *
  * `Q235_GLOBAL_$N$GsPeriodical.cppdKuhgb13PeriodicalCmd` in the RTTI, with Sch::Command as its one
- * base. Its vtable at `0x007e1908` retains Sch::Command::Save() and Load(). GsPeriodical::PostAt()
- * expands the constructor into its 0x14-byte allocation.
+ * base. Its vtable at `0x007e1908` retains Sch::Command::saveGuts() and restoreGuts().
+ * GsPeriodical::PostAt() expands the constructor into its 0x14-byte allocation.
  *
  * The destructor at `0x001b4798` is implicitly declared. It stores the base table pointer and runs
  * Attachment's destructor, which is what the compiler generates.

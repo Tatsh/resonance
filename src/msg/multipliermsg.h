@@ -79,7 +79,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001cab98
      * @ghidraAddress PAL: 0x001d0a50
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
 private:
     Player *mPlayer; // +0x04, the player who deployed the powerup

@@ -20,11 +20,11 @@ int RefreshNetMsg::Type() {
 }
 
 // NTSC-U/C: 0x003de698, PAL: 0x00416af0
-const char *RefreshNetMsg::Name() {
+const char *RefreshNetMsg::GetName() const {
     return "RefreshNetMsg";
 }
 
 // NTSC-U/C: 0x003e3e08, PAL: 0x0041bfd8
-void RefreshNetMsg::Print(std::ostream &stream) {
+void RefreshNetMsg::PrintExtra(std::ostream &stream) const {
     stream << "tr#" << mTrack << " bars " << mFirstBar << " - " << mEndBar;
 }

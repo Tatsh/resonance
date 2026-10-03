@@ -25,7 +25,7 @@ GameParams::~GameParams() {
 }
 
 // NTSC-U/C: 0x001871b8, PAL: 0x0018c9b0
-void GameParams::Save(OBStream *pStream) {
+void GameParams::Save(OBStream *pStream) const {
     unsigned nLevelNameLength = mLevelName.mLen;
     pStream->Write(&nLevelNameLength, sizeof(nLevelNameLength));
     // An empty string has no buffer, and the stream receives the shared empty string in place of a
@@ -105,7 +105,7 @@ void GameParams::Load(IBStream *pStream) {
 }
 
 // NTSC-U/C: 0x00187570, PAL: 0x0018cd68
-void GameParams::Print(std::ostream &stream) {
+void GameParams::Print(std::ostream &stream) const {
     stream << "GameParams:" << " level=" << mLevelName << " arena=" << mArenaName
            << " friends=" << mFriends << " " << (mPlayMode == 1 ? " game" : " jam")
            << " difficulty=" << mDifficulty << " " << (mConstrainJam ? " constrain-jam" : "")

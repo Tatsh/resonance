@@ -7,13 +7,13 @@ Message::~Message() {
 }
 
 // NTSC-U/C: 0x001051f0, PAL: 0x001051f0
-void Message::Print(std::ostream &) {
+void Message::PrintExtra(std::ostream &) const {
 }
 
 // NTSC-U/C: 0x001051f8, PAL: 0x001051f8
-void Message::Save(OBStream &) {
+void Message::saveGuts(OBStream &) const {
 }
 
 // NTSC-U/C: 0x00105200, PAL: 0x00105200
-void Message::Load(IBStream &) {
+void Message::restoreGuts(IBStream &) {
 }

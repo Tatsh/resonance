@@ -28,13 +28,13 @@ int DisplayPointerMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dd9e8, PAL: 0x00415e20
-const char *DisplayPointerMsg::Name() {
+const char *DisplayPointerMsg::GetName() const {
     return "DisplayPointerMsg";
 }
 
 // NTSC-U/C: 0x003d8358, PAL: 0x004106f0
 // The colour name is copied into a temporary before it is written.
-void DisplayPointerMsg::Print(std::ostream &stream) {
+void DisplayPointerMsg::PrintExtra(std::ostream &stream) const {
     if (mPlayerValue == -1) {
         stream << "remove";
     } else {

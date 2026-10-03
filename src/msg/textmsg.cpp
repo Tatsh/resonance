@@ -18,6 +18,6 @@ int TextMsg::Type() {
 }
 
 // NTSC-U/C: 0x00193ec8, PAL: 0x00199b00
-const char *TextMsg::Name() {
+const char *TextMsg::GetName() const {
     return "TextMsg";
 }

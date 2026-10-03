@@ -23,12 +23,12 @@ int NeutralizeMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e0428, PAL: 0x00418880
-const char *NeutralizeMsg::Name() {
+const char *NeutralizeMsg::GetName() const {
     return "NeutralizeMsg";
 }
 
 // NTSC-U/C: 0x003e3ea8, PAL: 0x0041c078
 // The colour name is copied into a temporary before it is written.
-void NeutralizeMsg::Print(std::ostream &stream) {
+void NeutralizeMsg::PrintExtra(std::ostream &stream) const {
     stream << HxStr(mPlayer->mColorName);
 }

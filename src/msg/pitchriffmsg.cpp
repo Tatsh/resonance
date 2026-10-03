@@ -23,13 +23,13 @@ int PitchRiffMsg::Type() {
 }
 
 // NTSC-U/C: 0x003da690, PAL: 0x00412ac8
-const char *PitchRiffMsg::Name() {
+const char *PitchRiffMsg::GetName() const {
     return "PitchRiffMsg";
 }
 
 // NTSC-U/C: 0x003e2fd0, PAL: 0x0041b470
 // The colour name is copied into a temporary before it is written.
-void PitchRiffMsg::Print(std::ostream &stream) {
+void PitchRiffMsg::PrintExtra(std::ostream &stream) const {
     mPosition.Print(stream);
     stream << " " << HxStr(mPlayer->mColorName) << " b#" << mButton;
 }

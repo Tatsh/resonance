@@ -14,7 +14,7 @@ class Player;
  * and its vtable is at `0x00813358`. The members below are the whole of the class. No other
  * routine in the image refers to this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(). Print() hands `+0x0c` to
+ * The payload layout comes from the run of field copies in Clone(). PrintExtra() hands `+0x0c` to
  * Mid::MBT::Print(), writes the colour name of the player at `+0x08`, and labels `+0x04` as `b#`.
  * The word at `+0x10` is not printed.
  *
@@ -42,7 +42,7 @@ public:
      * InputMap::OnControllerReading() calls, and the build at `0x00119e74` expand it on their
      * stacks. The four arguments are the four members in declaration order.
      *
-     * @param nButton The button, labelled `b#` by Print().
+     * @param nButton The button, labelled `b#` by PrintExtra().
      * @param pPlayer The player whose riff stops.
      * @param position The song position of the stop.
      * @param nTrack The player's track.
@@ -88,7 +88,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003da868
      * @ghidraAddress PAL: 0x00412ca0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the position, a space, the player's colour name, ` b#`, and the word at `+0x04` to a
@@ -98,9 +98,9 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3098
      * @ghidraAddress PAL: 0x0041b558
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
-    int mButton;        /*!< The button, labelled `b#` by Print(). +0x04 */
+    int mButton;        /*!< The button, labelled `b#` by PrintExtra(). +0x04 */
     Player *mPlayer;    /*!< The player whose riff stops. +0x08 */
     Mid::MBT mPosition; /*!< The song position of the stop. +0x0c */
     int mTrack;         /*!< The player's track, from its slot 4. +0x10 */

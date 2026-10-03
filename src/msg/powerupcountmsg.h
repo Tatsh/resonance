@@ -78,7 +78,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dd2d8
      * @ghidraAddress PAL: 0x00415710
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the entry and the count to a diagnostic stream, separated by `/`.
@@ -87,7 +87,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3d08
      * @ghidraAddress PAL: 0x0041bed8
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 private:
     // The three names come from PowerupCollection, the one producer of the message, which writes

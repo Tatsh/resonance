@@ -24,12 +24,12 @@ int TrackSelectPacket::Type() {
 }
 
 // NTSC-U/C: 0x003f08d0, PAL: 0x00428ed8
-const char *TrackSelectPacket::Name() {
+const char *TrackSelectPacket::GetName() const {
     return "TrackSelectPacket";
 }
 
 // NTSC-U/C: 0x003f2568, PAL: 0x0042aab0
-void TrackSelectPacket::Print(std::ostream &stream) {
+void TrackSelectPacket::PrintExtra(std::ostream &stream) const {
     mPosition.Print(stream);
     std::ostream &rest = stream << " ";
     static_cast<Player *>(mPlayer)->Print(rest);
@@ -38,8 +38,8 @@ void TrackSelectPacket::Print(std::ostream &stream) {
 
 // NTSC-U/C: 0x003e71f8, PAL: 0x0041f4d8
 // The stream Mid::MBT::Save() returns is not used.
-void TrackSelectPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void TrackSelectPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
     mPosition.Save(stream);
 
     int id = mPlayer.mId;
@@ -49,8 +49,8 @@ void TrackSelectPacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e7330, PAL: 0x0041f610
-void TrackSelectPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void TrackSelectPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
     mPosition.Load(stream);
     stream.Read(&mPlayer.mId, sizeof(mPlayer.mId))
         .Read(&mTrack, sizeof(mTrack))

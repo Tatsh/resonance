@@ -18,6 +18,6 @@ int DurGemMsg::Type() {
 }
 
 // NTSC-U/C: 0x001a4410, PAL: 0x001aa178
-const char *DurGemMsg::Name() {
+const char *DurGemMsg::GetName() const {
     return "DurGemMsg";
 }

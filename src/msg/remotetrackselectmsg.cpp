@@ -23,13 +23,13 @@ int RemoteTrackSelectMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dcb78, PAL: 0x00414fb0
-const char *RemoteTrackSelectMsg::Name() {
+const char *RemoteTrackSelectMsg::GetName() const {
     return "RemoteTrackSelectMsg";
 }
 
 // NTSC-U/C: 0x003e3bd0, PAL: 0x00410460
 // The colour name is copied into a temporary before it is written.
-void RemoteTrackSelectMsg::Print(std::ostream &stream) {
+void RemoteTrackSelectMsg::PrintExtra(std::ostream &stream) const {
     mPosition.Print(stream << HxStr(mPlayer->mColorName) << " tr#" << mTrack << "/" << mPlace
                            << " ");
 }

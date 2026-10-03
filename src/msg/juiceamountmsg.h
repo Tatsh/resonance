@@ -55,7 +55,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e0908
      * @ghidraAddress PAL: 0x00418d60
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the player to a diagnostic stream through Player::Print().
@@ -64,7 +64,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e41d8
      * @ghidraAddress PAL: 0x0041c408
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Report the player's juice.

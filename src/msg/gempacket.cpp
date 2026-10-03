@@ -24,22 +24,22 @@ int GemPacket::Type() {
 }
 
 // NTSC-U/C: 0x003f17d8, PAL: 0x00429ca0
-const char *GemPacket::Name() {
+const char *GemPacket::GetName() const {
     return "GemPacket";
 }
 
 // NTSC-U/C: 0x003f2878, PAL: 0x0042adc0
-void GemPacket::Print(std::ostream &stream) {
+void GemPacket::PrintExtra(std::ostream &stream) const {
     mFields.Print(stream);
     stream << " tr:" << mTr << " clid:" << mClientId;
 }
 
 // NTSC-U/C: 0x003e8258, PAL: 0x00420538
-// The transfer of mClientId repeats the one the Packet prefix already performed, and Load() reads
-// the same word twice to match.
-void GemPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
-    mFields.Save(stream);
+// The transfer of mClientId repeats the one the Packet prefix already performed, and
+// restoreGuts() reads the same word twice to match.
+void GemPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
+    mFields.saveGuts(stream);
 
     int tr = mTr;
     int clientId = mClientId;
@@ -47,8 +47,8 @@ void GemPacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e8368, PAL: 0x00420648
-void GemPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
-    mFields.Load(stream);
+void GemPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
+    mFields.restoreGuts(stream);
     stream.Read(&mTr, sizeof(mTr)).Read(&mClientId, sizeof(mClientId));
 }

@@ -18,6 +18,6 @@ int RotRightMsg::Type() {
 }
 
 // NTSC-U/C: 0x0011d4b8, PAL: 0x0011da40
-const char *RotRightMsg::Name() {
+const char *RotRightMsg::GetName() const {
     return "RotRightMsg";
 }

@@ -171,7 +171,7 @@ Renderer::~Renderer() {
 void Renderer::HandleMessage(Message *pMsg) {
     int nType = pMsg->Type();
     if (nType == g_nGameBeginMsgType) {
-        OnGameBegin();
+        OnMsg(*static_cast<GameBeginMsg *>(pMsg));
     } else if (nType == g_nBarStatusMsgType) {
         OnBarStatus(static_cast<BarStatusMsg *>(pMsg));
     } else if (nType == g_nPointAmountMsgType) {
@@ -464,6 +464,6 @@ void Renderer::OnPointAmount(Message *pMsg) {
 }
 
 // NTSC-U/C: 0x004322f8, PAL: 0x0046dfd0
-void Renderer::OnGameBegin() {
+void Renderer::OnMsg([[maybe_unused]] const GameBeginMsg &msg) {
     CallScriptTemplate(kGameBeginScriptTemplate);
 }

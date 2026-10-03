@@ -22,12 +22,12 @@ int CrippleMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e2808, PAL: 0x0041aca8
-const char *CrippleMsg::Name() {
+const char *CrippleMsg::GetName() const {
     return "CrippleMsg";
 }
 
 // NTSC-U/C: 0x003e4290, PAL: 0x0041c4c0
-void CrippleMsg::Print(std::ostream &stream) {
+void CrippleMsg::PrintExtra(std::ostream &stream) const {
     stream << "tr#" << mTrack;
     stream << " p#" << mPlayer->mPlayerId;
 }

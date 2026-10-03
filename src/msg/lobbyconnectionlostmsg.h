@@ -13,7 +13,7 @@
  * copies it inline through HxStr::HxStr(const HxStr &) rather than delegating, and the cleanup
  * block that follows is the compiler unwinding the copy if it throws.
  *
- * Unlike its two siblings, Print() writes nothing, although the class carries the same string.
+ * Unlike its two siblings, PrintExtra() writes nothing, although the class has the same string.
  *
  * The destructor at `0x003e1b18` is compiler-generated and has no declaration here. So is the
  * string copy at `0x003e1d68`, the same shape as GameConnectFailureMsg's at `0x003e1868`.
@@ -76,12 +76,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e1ce0
      * @ghidraAddress PAL: 0x0041a178
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write nothing.
      *
-     * Slot 5. The empty body lies among the other message Print() bodies, directly after
+     * Slot 5. The empty body lies among the other message PrintExtra() bodies, directly after
      * GameConnectionLostMsg's, rather than after this class's destructor, so the override is this
      * class's own.
      *
@@ -89,7 +89,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e4098
      * @ghidraAddress PAL: 0x0041c2c8
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 private:
     HxStr mReason; // +0x04, with a title like GameConnectionLostMsg's printed string

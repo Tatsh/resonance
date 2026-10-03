@@ -19,8 +19,8 @@ class OBStream;
  * translation unit in the anonymous-namespace markers of ExitCmd and FuncCmd. Those two classes
  * share the unit with this one and with GrooveWorld, whose routines create all three.
  *
- * Save() frames the reading between the tags `CM[` and `]CM`, one byte per character, and Load()
- * reads six bytes around the reading without checking them.
+ * saveGuts() frames the reading between the tags `CM[` and `]CM`, one byte per character, and
+ * restoreGuts() reads six bytes around the reading without checking them.
  *
  * The destructor at `0x001944e8` is implicitly declared. It stores the base table pointer and runs
  * Attachment's destructor, which is what the compiler generates.
@@ -32,7 +32,7 @@ public:
     /**
      * Start with the reading unset.
      *
-     * Inline. NewCmd() expands it for Load() to fill.
+     * Inline. NewCmd() expands it for restoreGuts() to fill.
      */
     ControllerCmd() {
     }
@@ -81,7 +81,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001945a8
      * @ghidraAddress PAL: 0x0019a228
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the reading back, discarding the three tag bytes on each side.
@@ -90,7 +90,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001946b8
      * @ghidraAddress PAL: 0x0019a338
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * Produce a command with the reading unset, for the stream to load into.

@@ -18,8 +18,8 @@ class Player;
  * recovered. NetPlayer builds the message field by field on the stack, and TrackSelector reads
  * the fields back, so all four are public.
  *
- * The layout matches TrackSelectMsg's. Print() hands `+0x0c` to Mid::MBT::Print() and writes the
- * colour name of the player at `+0x10`, which types both.
+ * The layout matches TrackSelectMsg's. PrintExtra() hands `+0x0c` to Mid::MBT::Print() and writes
+ * the colour name of the player at `+0x10`, which types both.
  *
  * The destructor at `0x003dca18` is compiler-generated and has no declaration here.
  */
@@ -62,7 +62,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dcb78
      * @ghidraAddress PAL: 0x00414fb0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the player's colour name, ` tr#`, the two words at `+0x04` and `+0x08` joined by `/`,
@@ -72,7 +72,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3bd0
      * @ghidraAddress PAL: 0x00410460
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 public:
     /**

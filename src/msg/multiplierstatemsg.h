@@ -81,7 +81,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00122678
      * @ghidraAddress PAL: 0x00122c90
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     Player *mPlayer; /*!< The player whose multiplier changed. +0x04 */
     int mMultiplier; /*!< The base multiplier. +0x08 */

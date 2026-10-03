@@ -14,7 +14,7 @@ class Player;
  * and its vtable is at `0x00812588`. The members below are the whole of the class. No other
  * routine in the image refers to this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(). Print() hands `+0x04` to
+ * The payload layout comes from the run of field copies in Clone(). PrintExtra() hands `+0x04` to
  * Mid::MBT::Print() and writes the colour name of the player at `+0x10`. The track at `+0x08` and
  * the gem at `+0x0c` are printed without labels, and the word at `+0x14` is not printed. The two
  * names come from Catcher::SimulateRemoteGem() at `0x001ace78`, which stores the catcher's track
@@ -92,7 +92,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003df5b8
      * @ghidraAddress PAL: 0x00417a10
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the track, the position, the gem, and the player's colour name, separated by spaces,
@@ -102,7 +102,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d8830
      * @ghidraAddress PAL: 0x00410c48
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     Mid::MBT mPosition; /*!< The song position of the gem. +0x04 */
     int mTrack;         /*!< The track the gem lies on. +0x08 */

@@ -57,7 +57,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dcf70
      * @ghidraAddress PAL: 0x004153a8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the item kind to a diagnostic stream as a number.
@@ -66,7 +66,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3cb8
      * @ghidraAddress PAL: 0x0041be88
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     HudItemKind mKind; /*!< The captured item. +0x04 */
     Player *mPlayer;   /*!< The capturing player. +0x08 */

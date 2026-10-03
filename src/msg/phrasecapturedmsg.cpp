@@ -23,13 +23,13 @@ int PhraseCapturedMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dec78, PAL: 0x004170d0
-const char *PhraseCapturedMsg::Name() {
+const char *PhraseCapturedMsg::GetName() const {
     return "PhraseCapturedMsg";
 }
 
 // NTSC-U/C: 0x003d8448, PAL: 0x00410800
 // The colour name is copied into a temporary before it is written.
-void PhraseCapturedMsg::Print(std::ostream &stream) {
+void PhraseCapturedMsg::PrintExtra(std::ostream &stream) const {
     stream << "b " << mFirstBar << "--" << mEndBar << " tr# " << mTrack;
     stream << " score " << mScore << " juice " << mJuice << " " << HxStr(mPlayer->mColorName);
 }

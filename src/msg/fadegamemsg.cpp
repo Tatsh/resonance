@@ -18,6 +18,6 @@ int FadeGameMsg::Type() {
 }
 
 // NTSC-U/C: 0x00193fe8, PAL: 0x00199c20
-const char *FadeGameMsg::Name() {
+const char *FadeGameMsg::GetName() const {
     return "FadeGameMsg";
 }

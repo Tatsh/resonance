@@ -18,10 +18,10 @@ class OBStream;
  *
  * The payload layout comes from the run of field copies in Clone(). AxePhraseMaker::OnStdMidi()
  * builds one on its stack at `0x0019bad4` from its channel, a held note's number and velocity,
- * and the note's clamped length, which names the fields. Print() writes mChannel after the label
- * ` n`, the label StdMidiMsg::Print() places ahead of its channel. mLength at `+0x0c` is a tick
- * count, handed to Mid::MBT::Print() in place and initialised to kMBTInfinity by New(). Save() and
- * Load() move only its low sixteen bits.
+ * and the note's clamped length, which identifies the fields. PrintExtra() writes mChannel after
+ * the label ` n`, the label StdMidiMsg::PrintExtra() places ahead of its channel. mLength at
+ * `+0x0c` is a tick count, handed to Mid::MBT::Print() in place and initialised to kMBTInfinity by
+ * New(). saveGuts() and restoreGuts() move only its low sixteen bits.
  *
  * The destructor at `0x003dc0e8` is compiler-generated and has no declaration here.
  */
@@ -92,7 +92,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003dc290
      * @ghidraAddress PAL: 0x004146c8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the message to a diagnostic stream.
@@ -104,7 +104,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3760
      * @ghidraAddress PAL: 0x0041bb00
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the three bytes and the low sixteen bits of the second position to a stream.
@@ -116,7 +116,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d80c0
      * @ghidraAddress PAL: 0x00410228
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the three bytes and the second position back from a stream.
@@ -127,7 +127,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3808
      * @ghidraAddress PAL: 0x0041bba8
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * The MIDI channel. +0x08

@@ -145,11 +145,11 @@ private:
 
     // NTSC-U/C: 0x0013f5a0, PAL: 0x0013ff68
     // Moves the addressed player one channel down when it has an input slot.
-    void OnRotLeft(RotLeftMsg *pMsg);
+    void OnMsg(const RotLeftMsg &msg);
 
     // NTSC-U/C: 0x0013f608, PAL: 0x0013ffd0
     // Moves the addressed player one channel up when it has an input slot.
-    void OnRotRight(RotRightMsg *pMsg);
+    void OnMsg(const RotRightMsg &msg);
 
     // NTSC-U/C: 0x0013f670, PAL: 0x00140038
     // Passes a muff to the player's own sink when the player has an input slot.

@@ -9,9 +9,9 @@
  * and its vtable is at `0x00812780`. The members below are the whole of the class. No other
  * routine in the image refers to this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(), and Print() labels `+0x04` as
- * a bar and `+0x08` as tracks. Both members are public because Mixer::OnTracksOn() at `0x001a76d0`
- * reads them directly with no accessor in the image.
+ * The payload layout comes from the run of field copies in Clone(), and PrintExtra() labels `+0x04`
+ * as a bar and `+0x08` as tracks. Both members are public because Mixer::OnTracksOn() at
+ * `0x001a76d0` reads them directly with no accessor in the image.
  *
  * The destructor at `0x003de820` is compiler-generated and has no declaration here.
  */
@@ -75,7 +75,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003de970
      * @ghidraAddress PAL: 0x00416dc8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write `bar `, the word at `+0x04`, ` tracks `, and the word at `+0x08` to a diagnostic
@@ -85,10 +85,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e4408
      * @ghidraAddress PAL: 0x0041c638
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
-    int mBar;    /*!< The bar, labelled `bar` by Print(). +0x04 */
-    int mTracks; /*!< The number of tracks on, labelled `tracks` by Print(). +0x08 */
+    int mBar;    /*!< The bar, labelled `bar` by PrintExtra(). +0x04 */
+    int mTracks; /*!< The number of tracks on, labelled `tracks` by PrintExtra(). +0x08 */
 };
 
 /**

@@ -18,6 +18,6 @@ int EnableFreestyleMsg::Type() {
 }
 
 // NTSC-U/C: 0x001ca940, PAL: 0x001d07f8
-const char *EnableFreestyleMsg::Name() {
+const char *EnableFreestyleMsg::GetName() const {
     return "EnableFreestyleMsg";
 }

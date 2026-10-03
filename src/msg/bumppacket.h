@@ -17,8 +17,8 @@ class Player;
  * constructor at `0x003f3b58`. Clone() delegates to it. The four words Packet provides are
  * declared there rather than here.
  *
- * Print() labels `+0x1c` as a bar and `+0x20` as a track. mResult at `+0x24` is zeroed by New()
- * and is neither transferred nor printed.
+ * PrintExtra() labels `+0x1c` as a bar and `+0x20` as a track. mResult at `+0x24` is zeroed by
+ * New() and is neither transferred nor printed.
  *
  * The destructor at `0x003f0e08` is compiler-generated and has no declaration here.
  */
@@ -84,7 +84,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f0f08
      * @ghidraAddress PAL: 0x00429510
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the player's address, ` bar `, the bar, ` track `, and the track to a diagnostic
@@ -96,7 +96,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f26d8
      * @ghidraAddress PAL: 0x0042ac20
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words, the player's identifier, the bar, and the track to a stream.
@@ -105,7 +105,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e7d88
      * @ghidraAddress PAL: 0x00420068
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the Packet words, the player's identifier, the bar, and the track back in place.
@@ -114,7 +114,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e7eb0
      * @ghidraAddress PAL: 0x00420190
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
 public:
     /** The bumping player. TrackSelector::RebuildChannelGrid() resolves it. +0x14 */

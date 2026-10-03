@@ -18,6 +18,6 @@ int DeployedPowerupMsg::Type() {
 }
 
 // NTSC-U/C: 0x00122310, PAL: 0x00122928
-const char *DeployedPowerupMsg::Name() {
+const char *DeployedPowerupMsg::GetName() const {
     return "DeployedPowerupMsg";
 }

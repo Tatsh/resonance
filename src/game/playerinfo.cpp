@@ -7,12 +7,12 @@ PlayerInfo::~PlayerInfo() {
 }
 
 // NTSC-U/C: 0x00133930, PAL: 0x00134198
-void PlayerInfo::Print(std::ostream &stream) {
+void PlayerInfo::Print(std::ostream &stream) const {
     stream << "{AppPlayerInfo: " << mPlayerId << " " << mColorName << " ";
     mAppearance.Print(stream);
     stream << " " << mTrack << " " << mActive << " " << mReady << " ";
     stream << "(";
-    for (std::vector<int>::iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
+    for (std::vector<int>::const_iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
         stream << *it << " ";
     }
     stream << ")";
@@ -20,7 +20,7 @@ void PlayerInfo::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x00133578, PAL: 0x00133de0
-void PlayerInfo::Save(OBStream &stream) {
+void PlayerInfo::Save(OBStream &stream) const {
     unsigned playerId = mPlayerId;
     stream.Write(&playerId, sizeof(playerId));
 
@@ -43,7 +43,7 @@ void PlayerInfo::Save(OBStream &stream) {
 
     int count = mEntries.end() - mEntries.begin();
     stream.Write(&count, sizeof(count));
-    for (std::vector<int>::iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
+    for (std::vector<int>::const_iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
         int element = *it;
         stream.Write(&element, sizeof(element));
     }

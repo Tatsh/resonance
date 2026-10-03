@@ -20,11 +20,11 @@ int TracksOnMsg::Type() {
 }
 
 // NTSC-U/C: 0x003de970, PAL: 0x00416dc8
-const char *TracksOnMsg::Name() {
+const char *TracksOnMsg::GetName() const {
     return "TracksOnMsg";
 }
 
 // NTSC-U/C: 0x003e4408, PAL: 0x0041c638
-void TracksOnMsg::Print(std::ostream &stream) {
+void TracksOnMsg::PrintExtra(std::ostream &stream) const {
     stream << "bar " << mBar << " tracks " << mTracks;
 }

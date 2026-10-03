@@ -18,6 +18,6 @@ int LeaveGameMsg::Type() {
 }
 
 // NTSC-U/C: 0x003e0fc8, PAL: 0x00419420
-const char *LeaveGameMsg::Name() {
+const char *LeaveGameMsg::GetName() const {
     return "LeaveGameMsg";
 }

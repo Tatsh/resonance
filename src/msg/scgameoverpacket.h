@@ -62,7 +62,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f1658
      * @ghidraAddress PAL: 0x00429b20
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the payload to a diagnostic stream.
@@ -73,7 +73,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2a90
      * @ghidraAddress PAL: 0x0042afd8
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the packet to a stream.
@@ -84,7 +84,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f2920
      * @ghidraAddress PAL: 0x0042ae68
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
      * Read the packet back from a stream.
@@ -95,7 +95,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f29e8
      * @ghidraAddress PAL: 0x0042af30
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
 private:
     int mResult; /*!< The outcome of the game. The title is inferred from the class name. +0x14 */

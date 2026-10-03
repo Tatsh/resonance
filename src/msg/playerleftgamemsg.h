@@ -53,7 +53,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e1ee0
      * @ghidraAddress PAL: 0x0041a380
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the word at `+0x04` to a diagnostic stream as a number.
@@ -62,7 +62,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e40a0
      * @ghidraAddress PAL: 0x0041c2d0
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
 private:
     int mPlayerId; // +0x04, with a title after the player the class name reports as leaving

@@ -14,15 +14,15 @@ class Player;
  * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). The purpose of each field comes
- * from the Print() override at `0x003d8670`, which streams `b#<bar> tr#<track>` and then one
+ * from the PrintExtra() override at `0x003d8670`, which streams `b#<bar> tr#<track>` and then one
  * labelled part per flag set in mFlags: the player's colour name for kFieldPlayer, ` enabled` or
  * ` disabled` for kFieldEnabled, ` pow:<n>` for kFieldPowerup, and ` effect:<names>` for
  * kFieldEffects.
  *
  * A flagged field is read through an inline getter that runs Has() for its flag and discards the
- * result before the load. Renderer::OnBarStatus() at `0x0042d068` and Print() both show that shape
- * at every read. Has() is the out-of-line member the getters call, and each getter also has one
- * uncalled out-of-line copy, recorded on its declaration. The bar, the track, mRefreshing, and
+ * result before the load. Renderer::OnBarStatus() at `0x0042d068` and PrintExtra() both show that
+ * shape at every read. Has() is the out-of-line member the getters call, and each getter also has
+ * one uncalled out-of-line copy, recorded on its declaration. The bar, the track, mRefreshing, and
  * mFlags are read with no call at all, and the image has no accessor for them. Those four are
  * public.
  *
@@ -39,8 +39,8 @@ public:
     /**
      * One bit per effect kind.
      *
-     * Print() streams the mask through std::operator<<() for a thirteen-bit set at `0x003d9690`,
-     * and on this target the set is one eight-byte word.
+     * PrintExtra() streams the mask through std::operator<<() for a thirteen-bit set at
+     * `0x003d9690`, and on this target the set is one eight-byte word.
      */
     typedef std::bitset<kEffectCount> Effects;
 
@@ -113,7 +113,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003df060
      * @ghidraAddress PAL: 0x004174b8
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the bar, the track, and each set optional field.
@@ -125,7 +125,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d8670
      * @ghidraAddress PAL: 0x00410a68
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Report whether one optional field is set.
@@ -135,7 +135,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003df1f8
      * @ghidraAddress PAL: 0x00417650
      */
-    int Has(int nField);
+    int Has(int nField) const;
 
     /**
      * Report the player field.
@@ -144,7 +144,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003df130
      * @ghidraAddress PAL: 0x00417588
      */
-    Player *GetPlayer() {
+    Player *GetPlayer() const {
         Has(kFieldPlayer); // Yes, the binary discards this result.
         return mPlayer;
     }
@@ -156,7 +156,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003df160
      * @ghidraAddress PAL: 0x004175b8
      */
-    int GetEnabled() {
+    int GetEnabled() const {
         Has(kFieldEnabled); // Yes, the binary discards this result.
         return mEnabled;
     }
@@ -168,7 +168,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003df190
      * @ghidraAddress PAL: 0x004175e8
      */
-    int GetPowerup() {
+    int GetPowerup() const {
         Has(kFieldPowerup); // Yes, the binary discards this result.
         return mPowerup;
     }
@@ -180,7 +180,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003df1c0
      * @ghidraAddress PAL: 0x00417618
      */
-    Effects GetEffects() {
+    Effects GetEffects() const {
         Has(kFieldEffects); // Yes, the binary discards this result.
         return mEffects;
     }

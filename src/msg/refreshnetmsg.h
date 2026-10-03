@@ -9,9 +9,9 @@
  * and its vtable is at `0x00812810`. The members below are the whole of the class. No other
  * routine in the image refers to this type by anything but its vtable.
  *
- * The payload layout comes from the run of field copies in Clone(). Print() labels `+0x0c` as a
- * track number and `+0x04` through `+0x08` as a range of bars, and PhraseMgr::OnRefreshNet() reads
- * all three directly.
+ * The payload layout comes from the run of field copies in Clone(). PrintExtra() labels `+0x0c` as
+ * a track number and `+0x04` through `+0x08` as a range of bars, and PhraseMgr::OnRefreshNet()
+ * reads all three directly.
  *
  * The destructor at `0x003de540` is compiler-generated and has no declaration here.
  */
@@ -53,7 +53,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003de698
      * @ghidraAddress PAL: 0x00416af0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write `tr#`, the word at `+0x0c`, ` bars `, and the two words at `+0x04` and `+0x08` joined
@@ -63,24 +63,24 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e3e08
      * @ghidraAddress PAL: 0x0041bfd8
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
-     * The first bar of the range, written by Print() after ` bars `. +0x04
+     * The first bar of the range, written by PrintExtra() after ` bars `. +0x04
      *
      * PhraseMgr::OnRefreshNet() at `0x001ba928` starts its walk there.
      */
     int mFirstBar;
 
     /**
-     * The bar one past the last of the range, written by Print() after ` - `. +0x08
+     * The bar one past the last of the range, written by PrintExtra() after ` - `. +0x08
      *
      * PhraseMgr::OnRefreshNet() stops its walk there.
      */
     int mEndBar;
 
     /**
-     * The track, written by Print() after `tr#`. +0x0c
+     * The track, written by PrintExtra() after `tr#`. +0x0c
      *
      * PhraseMgr::OnRefreshNet() compares it with the track the manager serves.
      */

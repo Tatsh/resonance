@@ -14,8 +14,9 @@ class Player;
  * The five members form a subobject of GemPacket at `+0x14`, because the three routines below
  * receive `packet + 0x14` as their object and address it from zero. The class has no descriptor,
  * allocation tag, or literal. Its name comes from the debugging symbols of the North American demo
- * release. The demo's Save() and Print() have the same instructions as this class's Save() and
- * Print(). The name of each member is attested, from the label Print() writes ahead of it.
+ * release. The demo's saveGuts() and Print() have the same instructions as this class's
+ * saveGuts() and Print(). The name of each member is attested, from the label Print() writes
+ * ahead of it.
  *
  * Every member is public, because the three routines are the only code in the image that refers
  * to the subobject and no accessor exists.
@@ -31,7 +32,7 @@ struct Gem {
      * @ghidraAddress NTSC-U/C: 0x001a2560
      * @ghidraAddress PAL: 0x001a82c8
      */
-    void Save(OBStream &stream);
+    void saveGuts(OBStream &stream) const;
 
     /**
      * Read the five values back from a stream.
@@ -47,7 +48,7 @@ struct Gem {
      * @ghidraAddress NTSC-U/C: 0x001a2630
      * @ghidraAddress PAL: 0x001a8398
      */
-    void Load(IBStream &stream);
+    void restoreGuts(IBStream &stream);
 
     /**
      * Write the five values to a diagnostic stream.
@@ -56,7 +57,7 @@ struct Gem {
      * @ghidraAddress NTSC-U/C: 0x001a2ce0
      * @ghidraAddress PAL: 0x001a8a48
      */
-    void Print(std::ostream &stream);
+    void Print(std::ostream &stream) const;
 
     int mGem;        /*!< Labelled `gem: `. +0x00 */
     int mTrans;      /*!< Labelled ` trans:`. +0x04 */

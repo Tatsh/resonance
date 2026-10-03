@@ -18,6 +18,6 @@ int GameBeginMsg::Type() {
 }
 
 // NTSC-U/C: 0x00193b18, PAL: 0x00199740
-const char *GameBeginMsg::Name() {
+const char *GameBeginMsg::GetName() const {
     return "GameBeginMsg";
 }

@@ -40,8 +40,7 @@ public:
     /**
      * Forward the message unless it is a note the filter stops.
      *
-     * StdMidiMsg and NoteMsg go through PassStdMidi() and PassNote(), which are expanded inline
-     * here.
+     * StdMidiMsg and NoteMsg go through their OnMsg() overloads, which are expanded inline here.
      *
      * @param pMsg The message.
      * @ghidraAddress NTSC-U/C: 0x001a6f08
@@ -73,11 +72,11 @@ private:
     // NTSC-U/C: 0x001a6e60, PAL: 0x001acbc8
     // Forwards the message unless notes are stopped and its status is a note-off or a
     // note-on.
-    void PassStdMidi(StdMidiMsg *pMsg);
+    void OnMsg(StdMidiMsg &msg);
 
     // NTSC-U/C: 0x001a6eb0, PAL: 0x001acc18
     // Forwards the message unless notes are stopped.
-    void PassNote(NoteMsg *pMsg);
+    void OnMsg(NoteMsg &msg);
 
     int mEnabled; // +0x18
 };

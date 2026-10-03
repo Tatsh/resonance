@@ -13,8 +13,8 @@
  * and its vtable is at `0x00813478`.
  *
  * The payload is one controller reading at `+0x04` and a song position at `+0x14`. Clone() copies
- * the reading as two eight-byte pairs and the position as one word, Print() hands the reading to
- * MetControllerReading::Print(), and New() initialises only the position, to kMBTInfinity.
+ * the reading as two eight-byte pairs and the position as one word, PrintExtra() hands the reading
+ * to MetControllerReading::Print(), and New() initialises only the position, to kMBTInfinity.
  * MetaGameWorld builds the message on its stack from the four arguments of its RawController
  * slot, and MetRenderer reads the reading in place. Both are outside the hierarchy, and the image
  * exposes no accessor, so both members are public.
@@ -60,7 +60,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003da278
      * @ghidraAddress PAL: 0x004126b0
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write the reading to a diagnostic stream through MetControllerReading::Print().
@@ -69,7 +69,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e2fb0
      * @ghidraAddress PAL: 0x0041b450
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     MetControllerReading mReading; /*!< The reading. +0x04 */
     Mid::MBT mPosition;            /*!< Song position, kMBTInfinity until set. +0x14 */

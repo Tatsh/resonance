@@ -23,23 +23,23 @@ int SCGameOverPacket::Type() {
 }
 
 // NTSC-U/C: 0x003f1658, PAL: 0x00429b20
-const char *SCGameOverPacket::Name() {
+const char *SCGameOverPacket::GetName() const {
     return "SCGameOverPacket";
 }
 
 // NTSC-U/C: 0x003f2a90, PAL: 0x0042afd8
-void SCGameOverPacket::Print(std::ostream &stream) {
+void SCGameOverPacket::PrintExtra(std::ostream &stream) const {
     stream << mResult;
 }
 
 // NTSC-U/C: 0x003f2920, PAL: 0x0042ae68
-void SCGameOverPacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void SCGameOverPacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
     stream << mResult;
 }
 
 // NTSC-U/C: 0x003f29e8, PAL: 0x0042af30
-void SCGameOverPacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void SCGameOverPacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
     stream >> mResult;
 }

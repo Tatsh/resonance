@@ -18,6 +18,6 @@ int BeginPhraseCatchMsg::Type() {
 }
 
 // NTSC-U/C: 0x0019d850, PAL: 0x001a35b8
-const char *BeginPhraseCatchMsg::Name() {
+const char *BeginPhraseCatchMsg::GetName() const {
     return "BeginPhraseCatchMsg";
 }

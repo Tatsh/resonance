@@ -57,7 +57,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ca7d8
      * @ghidraAddress PAL: 0x001d0690
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     HudItemKind mKind; /*!< The powerup that failed. +0x04 */
     Player *mPlayer;   /*!< The player who deployed it. +0x08 */

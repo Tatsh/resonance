@@ -40,7 +40,7 @@ void EndRecordingCmd::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x0010efd8, PAL: 0x0010f438
-void EndRecordingCmd::Save(OBStream &) {
+void EndRecordingCmd::saveGuts(OBStream &) const {
 }
 
 // NTSC-U/C: 0x0010efe0, PAL: 0x0010f440

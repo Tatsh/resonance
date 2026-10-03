@@ -23,18 +23,18 @@ int UpdateScorePacket::Type() {
 }
 
 // NTSC-U/C: 0x003f0748, PAL: 0x00428d50
-const char *UpdateScorePacket::Name() {
+const char *UpdateScorePacket::GetName() const {
     return "UpdateScorePacket";
 }
 
 // NTSC-U/C: 0x003f2510, PAL: 0x0042aa58
-void UpdateScorePacket::Print(std::ostream &stream) {
+void UpdateScorePacket::PrintExtra(std::ostream &stream) const {
     stream << "pid:" << mPlayerId << " score-delta:" << mScoreDelta;
 }
 
 // NTSC-U/C: 0x003e7018, PAL: 0x0041f2f8
-void UpdateScorePacket::Save(OBStream &stream) {
-    Packet::Save(stream);
+void UpdateScorePacket::saveGuts(OBStream &stream) const {
+    Packet::saveGuts(stream);
 
     int playerId = mPlayerId;
     stream.Write(&playerId, sizeof(playerId));
@@ -44,8 +44,8 @@ void UpdateScorePacket::Save(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x003e7120, PAL: 0x0041f400
-void UpdateScorePacket::Load(IBStream &stream) {
-    Packet::Load(stream);
+void UpdateScorePacket::restoreGuts(IBStream &stream) {
+    Packet::restoreGuts(stream);
     stream.Read(&mPlayerId, sizeof(mPlayerId));
     stream.Read(&mScoreDelta, sizeof(mScoreDelta));
 }

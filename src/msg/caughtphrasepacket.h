@@ -17,11 +17,11 @@ class Player;
  * constructor at `0x003f37b8`. Clone() delegates to it. The four words Packet provides are
  * declared there rather than here.
  *
- * Print() labels `+0x1c` as `tr` and `+0x20` as `b`, and writes the first through the unsigned
- * integer inserter. The player reference at `+0x14` is transferred but not printed.
+ * PrintExtra() labels `+0x1c` as `tr` and `+0x20` as `b`, and writes the first through the
+ * unsigned integer inserter. The player reference at `+0x14` is transferred but not printed.
  *
- * Save() writes the Packet word at `+0x0c` a second time after the payload, and Load() reads it a
- * second time to match, as GemPacket does.
+ * saveGuts() writes the Packet word at `+0x0c` a second time after the payload, and restoreGuts()
+ * reads it a second time to match, as GemPacket does.
  *
  * The destructor at `0x003f0440` is compiler-generated and has no declaration here.
  */
@@ -87,7 +87,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f0540
      * @ghidraAddress PAL: 0x00428b48
      */
-    virtual const char *Name();
+    virtual const char *GetName() const;
 
     /**
      * Write ` tr:`, the track, ` b:`, the bar, and a space to a diagnostic stream.
@@ -96,7 +96,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f24a8
      * @ghidraAddress PAL: 0x0042a9f0
      */
-    virtual void Print(std::ostream &stream);
+    virtual void PrintExtra(std::ostream &stream) const;
 
     /**
      * Write the Packet words, the player's identifier, the track, the bar, and the Packet word at
@@ -106,16 +106,16 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003e6db0
      * @ghidraAddress PAL: 0x0041f090
      */
-    virtual void Save(OBStream &stream);
+    virtual void saveGuts(OBStream &stream) const;
 
     /**
-     * Read the fields back in place in the order Save() wrote them.
+     * Read the fields back in place in the order saveGuts() wrote them.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x003e6f00
      * @ghidraAddress PAL: 0x0041f1e0
      */
-    virtual void Load(IBStream &stream);
+    virtual void restoreGuts(IBStream &stream);
 
     /**
      * The player the phrase goes to. +0x14
@@ -125,14 +125,14 @@ public:
     IDablePtr<Player> mPlayer;
 
     /**
-     * The track, labelled `tr` by Print(). +0x1c
+     * The track, labelled `tr` by PrintExtra(). +0x1c
      *
      * PhraseMgr::OnCaughtPhrasePacket() compares it with the track the manager serves.
      */
     unsigned int mTr;
 
     /**
-     * The phrase step, labelled `b` by Print(). +0x20
+     * The phrase step, labelled `b` by PrintExtra(). +0x20
      *
      * PhraseMgr::OnCaughtPhrasePacket() starts its walk of the chained steps there.
      */

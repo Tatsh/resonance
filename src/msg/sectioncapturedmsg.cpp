@@ -23,13 +23,13 @@ int SectionCapturedMsg::Type() {
 }
 
 // NTSC-U/C: 0x003dee90, PAL: 0x004172e8
-const char *SectionCapturedMsg::Name() {
+const char *SectionCapturedMsg::GetName() const {
     return "SectionCapturedMsg";
 }
 
 // NTSC-U/C: 0x003d8578, PAL: 0x00410950
 // The colour name is copied into a temporary before it is written.
-void SectionCapturedMsg::Print(std::ostream &stream) {
+void SectionCapturedMsg::PrintExtra(std::ostream &stream) const {
     stream << "b " << mFirstBar << "--" << mEndBar << " tr# " << mTrack;
     stream << " " << HxStr(mPlayer->mColorName);
 }

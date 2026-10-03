@@ -33,7 +33,7 @@ struct MetControllerReading {
      * @ghidraAddress NTSC-U/C: 0x00100f40
      * @ghidraAddress PAL: 0x00100f40
      */
-    void Print(std::ostream &stream);
+    void Print(std::ostream &stream) const;
 
     int mTag;      /*!< Four characters, `joy `, `key `, `mous`, or `none`. +0x00 */
     int mPadIndex; /*!< Which controller produced the reading. +0x04 */

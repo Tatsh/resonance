@@ -18,6 +18,6 @@ int PowerupFailedMsg::Type() {
 }
 
 // NTSC-U/C: 0x001ca7d8, PAL: 0x001d0690
-const char *PowerupFailedMsg::Name() {
+const char *PowerupFailedMsg::GetName() const {
     return "PowerupFailedMsg";
 }
