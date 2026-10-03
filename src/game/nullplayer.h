@@ -42,11 +42,15 @@ public:
      * the family.
      *
      * @return Always non-zero.
-     * @ghidraAddress 0x00133530
+     * @ghidraAddress NTSC-U/C: 0x00133530
+     * @ghidraAddress PAL: 0x00133d98
      */
     virtual int IsNull();
 
-    /** @ghidraAddress 0x00133528 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00133528
+     * @ghidraAddress PAL: 0x00133d90
+     */
     virtual void HandleMessage(Message *message);
 };
 

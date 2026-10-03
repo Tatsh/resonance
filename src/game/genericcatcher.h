@@ -25,12 +25,14 @@
 class GenericCatcher : public MsgSink, public MsgSource {
 public:
     /**
-     * @ghidraAddress 0x001b0a98
+     * @ghidraAddress NTSC-U/C: 0x001b0a98
+     * @ghidraAddress PAL: 0x001b6848
      */
     GenericCatcher();
 
     /**
-     * @ghidraAddress 0x001b0b88
+     * @ghidraAddress NTSC-U/C: 0x001b0b88
+     * @ghidraAddress PAL: 0x001b6938
      */
     virtual ~GenericCatcher();
 
@@ -38,7 +40,8 @@ public:
      * Start catching. Slot 4. The default body is empty and Catcher overrides it with a body that
      * schedules two commands on the tick clock.
      *
-     * @ghidraAddress 0x001b0c58
+     * @ghidraAddress NTSC-U/C: 0x001b0c58
+     * @ghidraAddress PAL: 0x001b6a08
      */
     virtual void Start();
 
@@ -46,7 +49,8 @@ public:
      * Stop catching. Slot 5. The default body is empty and Catcher overrides it with a body that
      * withdraws the two scheduled commands.
      *
-     * @ghidraAddress 0x001b0c60
+     * @ghidraAddress NTSC-U/C: 0x001b0c60
+     * @ghidraAddress PAL: 0x001b6a10
      */
     virtual void Stop();
 

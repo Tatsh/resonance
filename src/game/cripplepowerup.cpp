@@ -14,12 +14,12 @@ constexpr int kNoTrack = -1;
 
 } // namespace
 
-// 0x001c9828
+// NTSC-U/C: 0x001c9828, PAL: 0x001cf6c8
 int CripplePowerup::Type() {
     return kHudItemCrippler;
 }
 
-// 0x001c9830
+// NTSC-U/C: 0x001c9830, PAL: 0x001cf6d0
 int CripplePowerup::Deploy(int nTrack, int nBar, Player *pPlayer, int) {
     CrippleMsg msg;
     msg.mResult = 0;

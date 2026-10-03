@@ -4,11 +4,11 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x00187a08
+// NTSC-U/C: 0x00187a08, PAL: 0x0018d230
 GameInfo::~GameInfo() {
 }
 
-// 0x001876f8
+// NTSC-U/C: 0x001876f8, PAL: 0x0018cef0
 void GameInfo::Save(OBStream &stream) {
     mAddress.Save(stream);
     unsigned int nWorldId = mMediusWorldId;
@@ -18,7 +18,7 @@ void GameInfo::Save(OBStream &stream) {
     out.Write(&nStatus, sizeof(nStatus));
 }
 
-// 0x00187800
+// NTSC-U/C: 0x00187800, PAL: 0x0018cff8
 void GameInfo::Load(IBStream &stream) {
     mAddress.Load(stream);
     IBStream &in = LoadHxStr(stream.Read(&mMediusWorldId, sizeof(mMediusWorldId)), mHost);
@@ -26,7 +26,7 @@ void GameInfo::Load(IBStream &stream) {
     in.Read(&mStatus, sizeof(mStatus));
 }
 
-// 0x00187c60
+// NTSC-U/C: 0x00187c60, PAL: 0x0018d4e8
 void GameInfo::Print(std::ostream &stream) {
     std::ostream &out = stream << "addr=" << "mediusWorldID=" << mMediusWorldId
                                << " host=" << mHost;

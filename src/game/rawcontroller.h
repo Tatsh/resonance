@@ -19,7 +19,8 @@
 class RawController {
 public:
     /**
-     * @ghidraAddress 0x00193628
+     * @ghidraAddress NTSC-U/C: 0x00193628
+     * @ghidraAddress PAL: 0x00199250
      */
     virtual ~RawController();
 

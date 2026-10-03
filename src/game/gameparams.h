@@ -44,7 +44,8 @@ public:
     /**
      * Start with every member clear.
      *
-     * @ghidraAddress 0x00187170
+     * @ghidraAddress NTSC-U/C: 0x00187170
+     * @ghidraAddress PAL: 0x0018c960
      */
     GameParams();
 
@@ -56,7 +57,8 @@ public:
      * the assignment operator below make necessary: a user-declared destructor deprecates an
      * implicit copy constructor, and the three packets that embed a GameParams copy one.
      *
-     * @ghidraAddress 0x001fc480
+     * @ghidraAddress NTSC-U/C: 0x001fc480
+     * @ghidraAddress PAL: 0x002038c8
      */
     GameParams(const GameParams &other) = default;
 
@@ -67,7 +69,8 @@ public:
      * slot 1. The body is empty, and the three releases are the compiler-generated member
      * destructor calls. The GameManagerImpl destructor inlines the whole sequence.
      *
-     * @ghidraAddress 0x00187940
+     * @ghidraAddress NTSC-U/C: 0x00187940
+     * @ghidraAddress PAL: 0x0018d138
      */
     virtual ~GameParams();
 
@@ -77,7 +80,8 @@ public:
      * Slot 2. GameManagerImpl::Save() runs it after writing its own three words.
      *
      * @param pStream The stream to write to.
-     * @ghidraAddress 0x001871b8
+     * @ghidraAddress NTSC-U/C: 0x001871b8
+     * @ghidraAddress PAL: 0x0018c9b0
      */
     virtual void Save(OBStream *pStream);
 
@@ -88,7 +92,8 @@ public:
      * back in the order Save() wrote them.
      *
      * @param pStream The stream to read from.
-     * @ghidraAddress 0x00187390
+     * @ghidraAddress NTSC-U/C: 0x00187390
+     * @ghidraAddress PAL: 0x0018cb88
      */
     virtual void Load(IBStream *pStream);
 
@@ -99,7 +104,8 @@ public:
      *
      * @param other The settings to copy.
      * @return This instance.
-     * @ghidraAddress 0x00187be8
+     * @ghidraAddress NTSC-U/C: 0x00187be8
+     * @ghidraAddress PAL: 0x0018d470
      */
     GameParams &operator=(const GameParams &other);
 
@@ -112,7 +118,8 @@ public:
      *
      * @param other The settings to compare with.
      * @return Whether every compared member is equal.
-     * @ghidraAddress 0x00187b20
+     * @ghidraAddress NTSC-U/C: 0x00187b20
+     * @ghidraAddress PAL: 0x0018d3a8
      */
     bool operator==(const GameParams &other) const;
 
@@ -126,7 +133,8 @@ public:
      * SCLoadLevelPacket call it from their own Print().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00187570
+     * @ghidraAddress NTSC-U/C: 0x00187570
+     * @ghidraAddress PAL: 0x0018cd68
      */
     void Print(std::ostream &stream);
 
@@ -196,7 +204,8 @@ public:
  * handler sets the word. The title is inferred.
  *
  * @return Non-zero when the win sequence is enabled.
- * @ghidraAddress 0x00187b00
+ * @ghidraAddress NTSC-U/C: 0x00187b00
+ * @ghidraAddress PAL: 0x0018d388
  */
 int GetDoWinSequence();
 
@@ -208,6 +217,7 @@ int GetDoWinSequence();
  * the result of the call before it. The title is inferred.
  *
  * @param nDoWinSequence Non-zero to enable the win sequence.
- * @ghidraAddress 0x00187b10
+ * @ghidraAddress NTSC-U/C: 0x00187b10
+ * @ghidraAddress PAL: 0x0018d398
  */
 void SetDoWinSequence(int nDoWinSequence);

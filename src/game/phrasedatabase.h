@@ -33,7 +33,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x001b8cc8
+     * @ghidraAddress NTSC-U/C: 0x001b8cc8
+     * @ghidraAddress PAL: 0x001beaa0
      */
     void *operator new(size_t nSize);
 
@@ -41,7 +42,8 @@ public:
      * Release a database to the tagged heap.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x001b8ce8
+     * @ghidraAddress NTSC-U/C: 0x001b8ce8
+     * @ghidraAddress PAL: 0x001beac0
      */
     void operator delete(void *pBlock);
 
@@ -49,14 +51,16 @@ public:
      * Construct an empty database over a play map.
      *
      * @param pMap The play map whose steps size both vectors.
-     * @ghidraAddress 0x001b72d8
+     * @ghidraAddress NTSC-U/C: 0x001b72d8
+     * @ghidraAddress PAL: 0x001bd0b0
      */
     PhraseDatabase(PlayMap *pMap);
 
     /**
      * Release every phrase.
      *
-     * @ghidraAddress 0x001b75e8
+     * @ghidraAddress NTSC-U/C: 0x001b75e8
+     * @ghidraAddress PAL: 0x001bd3c0
      */
     virtual ~PhraseDatabase();
 
@@ -64,7 +68,8 @@ public:
      * Give every step a phrase owned by one player, creating the phrases that do not exist yet.
      *
      * @param pPlayer The owner.
-     * @ghidraAddress 0x001b77a0
+     * @ghidraAddress NTSC-U/C: 0x001b77a0
+     * @ghidraAddress PAL: 0x001bd578
      */
     void SetOwners(Player *pPlayer);
 
@@ -72,7 +77,8 @@ public:
      * Write the database behind a version byte of 1.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001b7898
+     * @ghidraAddress NTSC-U/C: 0x001b7898
+     * @ghidraAddress PAL: 0x001bd670
      */
     void Save(OBStream &stream);
 
@@ -83,14 +89,16 @@ public:
      * match the play map.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x001b7a28
+     * @ghidraAddress NTSC-U/C: 0x001b7a28
+     * @ghidraAddress PAL: 0x001bd800
      */
     void Load(IBStream &stream);
 
     /**
      * Release every phrase and zero every value.
      *
-     * @ghidraAddress 0x001b8d60
+     * @ghidraAddress NTSC-U/C: 0x001b8d60
+     * @ghidraAddress PAL: 0x001beb38
      */
     void Clear();
 
@@ -99,21 +107,24 @@ public:
      *
      * The routine writes its own name in both log lines.
      *
-     * @ghidraAddress 0x001b8dc8
+     * @ghidraAddress NTSC-U/C: 0x001b8dc8
+     * @ghidraAddress PAL: 0x001beba0
      */
     void ClearOwners();
 
     /**
      * @param nBar The bar, mapped through PlayMap::MapBar().
      * @return The phrase of the mapped bar, or null.
-     * @ghidraAddress 0x001b8e50
+     * @ghidraAddress NTSC-U/C: 0x001b8e50
+     * @ghidraAddress PAL: 0x001bec28
      */
     Phrase *GetPhraseAt(int nBar);
 
     /**
      * @param nIndex The step.
      * @return The phrase of the step, or null.
-     * @ghidraAddress 0x001b8e98
+     * @ghidraAddress NTSC-U/C: 0x001b8e98
+     * @ghidraAddress PAL: 0x001bec70
      */
     Phrase *GetPhrase(int nIndex);
 
@@ -122,7 +133,8 @@ public:
      *
      * @param pPhrase The phrase, or null.
      * @param nTick The song position, in MIDI ticks.
-     * @ghidraAddress 0x001b8eb0
+     * @ghidraAddress NTSC-U/C: 0x001b8eb0
+     * @ghidraAddress PAL: 0x001bec88
      */
     void SetPhraseAt(Phrase *pPhrase, int nTick);
 
@@ -131,7 +143,8 @@ public:
      *
      * @param pPhrase The phrase, or null.
      * @param nIndex The step.
-     * @ghidraAddress 0x001b8f08
+     * @ghidraAddress NTSC-U/C: 0x001b8f08
+     * @ghidraAddress PAL: 0x001bece0
      */
     void SetPhrase(Phrase *pPhrase, int nIndex);
 
@@ -139,7 +152,8 @@ public:
      * Release the phrase at the step the play map places a song position in.
      *
      * @param nTick The song position, in MIDI ticks.
-     * @ghidraAddress 0x001b8f78
+     * @ghidraAddress NTSC-U/C: 0x001b8f78
+     * @ghidraAddress PAL: 0x001bed50
      */
     void ClearPhraseAt(int nTick);
 
@@ -147,7 +161,8 @@ public:
      * Release the phrase at a step.
      *
      * @param nIndex The step.
-     * @ghidraAddress 0x001b8fc0
+     * @ghidraAddress NTSC-U/C: 0x001b8fc0
+     * @ghidraAddress PAL: 0x001bed98
      */
     void ClearPhrase(int nIndex);
 
@@ -156,7 +171,8 @@ public:
      *
      * @param pPlayer The owner.
      * @param nTick The song position, in MIDI ticks.
-     * @ghidraAddress 0x001b9018
+     * @ghidraAddress NTSC-U/C: 0x001b9018
+     * @ghidraAddress PAL: 0x001bedf0
      */
     void SetOwnerAt(Player *pPlayer, int nTick);
 
@@ -165,14 +181,16 @@ public:
      *
      * @param pPlayer The owner.
      * @param nIndex The step.
-     * @ghidraAddress 0x001b9070
+     * @ghidraAddress NTSC-U/C: 0x001b9070
+     * @ghidraAddress PAL: 0x001bee48
      */
     void SetOwner(Player *pPlayer, int nIndex);
 
     /**
      * @param nIndex The step.
      * @return The owner of the phrase at the step, or the stand-in player when the step has none.
-     * @ghidraAddress 0x001b9130
+     * @ghidraAddress NTSC-U/C: 0x001b9130
+     * @ghidraAddress PAL: 0x001bef08
      */
     Player *GetOwner(int nIndex);
 
@@ -181,21 +199,24 @@ public:
      *
      * @param nIndex The step.
      * @param cValue The score.
-     * @ghidraAddress 0x001b9158
+     * @ghidraAddress NTSC-U/C: 0x001b9158
+     * @ghidraAddress PAL: 0x001bef30
      */
     void SetPhraseByte(int nIndex, char cValue);
 
     /**
      * @param nIndex The step.
      * @return Phrase::mScore of the phrase at the step, or zero when the step has none.
-     * @ghidraAddress 0x001b9178
+     * @ghidraAddress NTSC-U/C: 0x001b9178
+     * @ghidraAddress PAL: 0x001bef50
      */
     unsigned char GetPhraseByte(int nIndex);
 
     /**
      * @param nBar The bar.
      * @return The jam effect mask of the step at or before the bar PlayMap::MapBar() maps nBar to.
-     * @ghidraAddress 0x001b91a0
+     * @ghidraAddress NTSC-U/C: 0x001b91a0
+     * @ghidraAddress PAL: 0x001bef78
      */
     long long *GetStepValue(int nBar);
 
@@ -204,7 +225,8 @@ public:
      * step.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001b91f0
+     * @ghidraAddress NTSC-U/C: 0x001b91f0
+     * @ghidraAddress PAL: 0x001befc8
      */
     void Print(std::ostream &stream);
 

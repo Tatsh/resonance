@@ -27,7 +27,8 @@ class Message;
 class Delayer : public MsgSink, public MsgSource {
 public:
     /**
-     * @ghidraAddress 0x0040cee8
+     * @ghidraAddress NTSC-U/C: 0x0040cee8
+     * @ghidraAddress PAL: 0x00446928
      */
     virtual ~Delayer();
 
@@ -35,7 +36,8 @@ public:
      * Act on a message. Primary table slot 3.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x0040d0f0
+     * @ghidraAddress NTSC-U/C: 0x0040d0f0
+     * @ghidraAddress PAL: 0x00446b30
      */
     virtual void HandleMessage(Message *pMsg);
 };

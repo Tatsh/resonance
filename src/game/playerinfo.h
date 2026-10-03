@@ -46,7 +46,8 @@ public:
      *
      * Inline. The address is its uncalled out-of-line copy.
      *
-     * @ghidraAddress 0x00135d48
+     * @ghidraAddress NTSC-U/C: 0x00135d48
+     * @ghidraAddress PAL: 0x001365d8
      */
     PlayerInfo() {
     }
@@ -62,7 +63,8 @@ public:
      * @param colorName The colour name stored in mColorName.
      * @param appearance The appearance to copy.
      * @param nTrack The value stored in mTrack.
-     * @ghidraAddress 0x00135dd0
+     * @ghidraAddress NTSC-U/C: 0x00135dd0
+     * @ghidraAddress PAL: 0x00136678
      */
     PlayerInfo(unsigned nPlayerId,
                const HxStr &colorName,
@@ -75,7 +77,8 @@ public:
     /**
      * Release the vector, the appearance, and the name.
      *
-     * @ghidraAddress 0x00135e98
+     * @ghidraAddress NTSC-U/C: 0x00135e98
+     * @ghidraAddress PAL: 0x00136750
      */
     virtual ~PlayerInfo();
 
@@ -86,7 +89,8 @@ public:
      * image that writes a name for this class outside its RTTI.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00133930
+     * @ghidraAddress NTSC-U/C: 0x00133930
+     * @ghidraAddress PAL: 0x00134198
      */
     virtual void Print(std::ostream &stream);
 
@@ -96,7 +100,8 @@ public:
      * Slot 3.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00133578
+     * @ghidraAddress NTSC-U/C: 0x00133578
+     * @ghidraAddress PAL: 0x00133de0
      */
     virtual void Save(OBStream &stream);
 
@@ -106,7 +111,8 @@ public:
      * Slot 4. The members come back in the order Save() wrote them.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00133740
+     * @ghidraAddress NTSC-U/C: 0x00133740
+     * @ghidraAddress PAL: 0x00133fa8
      */
     virtual void Load(IBStream &stream);
 

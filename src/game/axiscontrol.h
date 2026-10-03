@@ -33,7 +33,8 @@ class AxisControl : public MsgSink, public MsgSource {
 public:
     /**
      * @param pTrackData The track description. The constructor copies its track and channel.
-     * @ghidraAddress 0x0019e940
+     * @ghidraAddress NTSC-U/C: 0x0019e940
+     * @ghidraAddress PAL: 0x001a46a8
      */
     AxisControl(const TrackData *pTrackData);
 
@@ -46,36 +47,37 @@ public:
      * other note-on, like an AllNotesOffMsg, ends a bend in progress with a centred pitch bend.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x0019ed80
+     * @ghidraAddress NTSC-U/C: 0x0019ed80
+     * @ghidraAddress PAL: 0x001a4ae8
      */
     virtual void HandleMessage(Message *pMsg);
 
 private:
     // Records the stick position. A new coarse position (the value times 1024, divided by 8)
     // sends a NowBarMsg for this track, and during a bend the stick drives the pitch bend.
-    // 0x0019ea80
+    // NTSC-U/C: 0x0019ea80, PAL: 0x001a47e8
     void OnAxisRegister(AxisRegisterMsg *pMsg);
 
     // Takes the player a TrackSelectMsg for this track names and, for a real player, sends a
     // NowBarMsg with the current lane. The message's second word is not tested.
-    // 0x0019ec10
+    // NTSC-U/C: 0x0019ec10, PAL: 0x001a4978
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
     // Sends a pitch bend on mChannel whose coarse byte is (nValue + 512) / 8 and whose fine byte
     // is zero.
-    // 0x0019ecf0
+    // NTSC-U/C: 0x0019ecf0, PAL: 0x001a4a58
     void SendPitchBend(int nTick, int nValue);
 
     // The out-of-line copy of the StdMidiMsg branch HandleMessage() expands inline. A note-on at
     // mSustainTick starts a bend from the stick position, snapped to the centre within 50, and
     // any other note-on ends a bend in progress with a centred pitch bend. The image has no
     // caller of this copy.
-    // 0x0019fab0
+    // NTSC-U/C: 0x0019fab0, PAL: 0x001a5818
     void OnStdMidi(StdMidiMsg *pMsg);
 
     // The out-of-line copy of the AllNotesOffMsg branch HandleMessage() expands inline. A bend in
     // progress ends with a centred pitch bend at the message's tick.
-    // 0x0019fb40
+    // NTSC-U/C: 0x0019fb40, PAL: 0x001a58a8
     void OnAllNotesOff(AllNotesOffMsg *pMsg);
 
     int mTrack;            // +0x18

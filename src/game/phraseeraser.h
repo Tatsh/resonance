@@ -30,7 +30,8 @@ public:
      * @param pPhraseMgr The phrase manager whose bar length divides an erase position.
      * @param nFourthArgument Stored at `+0x38`.
      * @param nFifthArgument Stored at `+0x28`.
-     * @ghidraAddress 0x001b99c8
+     * @ghidraAddress NTSC-U/C: 0x001b99c8
+     * @ghidraAddress PAL: 0x001bf7a0
      */
     PhraseEraser(int nTrack,
                  int nSecondArgument,
@@ -45,18 +46,19 @@ public:
      * copies, and every other message is discarded.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001b9ad0
+     * @ghidraAddress NTSC-U/C: 0x001b9ad0
+     * @ghidraAddress PAL: 0x001bf8a8
      */
     virtual void HandleMessage(Message *pMsg);
 
 private:
     // The out-of-line copy of the EraseMsg branch HandleMessage() expands inline. Marks the eraser
     // active, records the erased bar twice and the player, and passes the bar to EraseBar().
-    // 0x001b9a60
+    // NTSC-U/C: 0x001b9a60, PAL: 0x001bf838
     void OnEraseMsg(EraseMsg *pMsg);
 
     // An empty body. The title is inferred from its one argument, the erased bar.
-    // 0x001b9ac8
+    // NTSC-U/C: 0x001b9ac8, PAL: 0x001bf8a0
     void EraseBar(int nBar);
 
     int mActive;           // +0x18

@@ -32,12 +32,14 @@ struct BytePairStatic;
 class InputPoller {
 public:
     /**
-     * @ghidraAddress 0x001ded98
+     * @ghidraAddress NTSC-U/C: 0x001ded98
+     * @ghidraAddress PAL: 0x001e4e18
      */
     InputPoller();
 
     /**
-     * @ghidraAddress 0x001df080
+     * @ghidraAddress NTSC-U/C: 0x001df080
+     * @ghidraAddress PAL: 0x001e5100
      */
     virtual ~InputPoller();
 
@@ -50,7 +52,8 @@ public:
      * @param nPort The player, from 1.
      * @param nSmallMotor The small motor's state, 0 or 1.
      * @param nBigMotor The big motor's level.
-     * @ghidraAddress 0x001e1b78
+     * @ghidraAddress NTSC-U/C: 0x001e1b78
+     * @ghidraAddress PAL: 0x001e7c60
      */
     void SetVibration(int nPort, int nSmallMotor, int nBigMotor);
 
@@ -61,7 +64,8 @@ public:
      * RawController part during a game, or null where it has no world. The title is inferred.
      *
      * @param pController The receiver of the readings, or null.
-     * @ghidraAddress 0x001e1998
+     * @ghidraAddress NTSC-U/C: 0x001e1998
+     * @ghidraAddress PAL: 0x001e7a60
      */
     void SetController(RawController *pController);
 
@@ -72,7 +76,8 @@ public:
      * title is inferred.
      *
      * @param bActive The flag.
-     * @ghidraAddress 0x001e1a80
+     * @ghidraAddress NTSC-U/C: 0x001e1a80
+     * @ghidraAddress PAL: 0x001e7b68
      */
     void SetActive(int bActive);
 
@@ -82,7 +87,8 @@ public:
      * GameManagerImpl's pause handler passes 1 and its unpause handler 0. The title is inferred.
      *
      * @param bPaused The flag.
-     * @ghidraAddress 0x001e1c18
+     * @ghidraAddress NTSC-U/C: 0x001e1c18
+     * @ghidraAddress PAL: 0x001e7d00
      */
     void SetPaused(int bPaused);
 
@@ -93,7 +99,8 @@ public:
      * world. The title is inferred.
      *
      * @param pController The controller being withdrawn.
-     * @ghidraAddress 0x001e19a0
+     * @ghidraAddress NTSC-U/C: 0x001e19a0
+     * @ghidraAddress PAL: 0x001e7a68
      */
     void DetachController(RawController *pController);
 
@@ -103,7 +110,8 @@ public:
      * Runs ReadControllers() and then FinishPoll(). GameManagerImpl::PollPlayback() is the
      * caller. The title is inferred.
      *
-     * @ghidraAddress 0x001e1c28
+     * @ghidraAddress NTSC-U/C: 0x001e1c28
+     * @ghidraAddress PAL: 0x001e7d10
      */
     void Poll();
 
@@ -114,7 +122,8 @@ public:
      * GameManagerImpl::Load() passes 0. The title is inferred.
      *
      * @param bEnabled The flag.
-     * @ghidraAddress 0x001e1c20
+     * @ghidraAddress NTSC-U/C: 0x001e1c20
+     * @ghidraAddress PAL: 0x001e7d08
      */
     void SetGameInputEnabled(int bEnabled) {
         mGameInputEnabled = bEnabled;
@@ -125,7 +134,8 @@ public:
      *
      * The body is inline. The one out-of-line copy has no caller. The title is inferred.
      *
-     * @ghidraAddress 0x001e1958
+     * @ghidraAddress NTSC-U/C: 0x001e1958
+     * @ghidraAddress PAL: 0x001e7a18
      */
     void SetUnusedFlag() {
         mUnusedFlag = 1;
@@ -137,7 +147,8 @@ public:
      * The body is inline. GameManagerImpl's constructor expands it at `0x00106024`, and the one
      * out-of-line copy has no caller. The title is inferred.
      *
-     * @ghidraAddress 0x001e1968
+     * @ghidraAddress NTSC-U/C: 0x001e1968
+     * @ghidraAddress PAL: 0x001e7a28
      */
     void ClearUnusedFlag() {
         mUnusedFlag = 0;
@@ -149,7 +160,8 @@ public:
      * The body is inline, and the one out-of-line copy has no caller. Its place between the
      * other InputPoller accessor copies is the only evidence for the class. The title is inferred.
      *
-     * @ghidraAddress 0x001e1970
+     * @ghidraAddress NTSC-U/C: 0x001e1970
+     * @ghidraAddress PAL: 0x001e7a30
      */
     void EmptyStubA() {
     }
@@ -159,7 +171,8 @@ public:
      *
      * Recorded on the same evidence as EmptyStubA(). The title is inferred.
      *
-     * @ghidraAddress 0x001e1978
+     * @ghidraAddress NTSC-U/C: 0x001e1978
+     * @ghidraAddress PAL: 0x001e7a38
      */
     void EmptyStubB() {
     }
@@ -170,7 +183,8 @@ public:
      * The body is inline, and the one out-of-line copy has no caller. The title is inferred.
      *
      * @return Non-zero when the last read found a Joypad still at the digital setup level.
-     * @ghidraAddress 0x001e1980
+     * @ghidraAddress NTSC-U/C: 0x001e1980
+     * @ghidraAddress PAL: 0x001e7a40
      */
     int GetBusyJoypadSeen() {
         return mBusyJoypadSeen;
@@ -183,11 +197,36 @@ public:
      * has no caller. The title is inferred.
      *
      * @return mPressedThisPoll.
-     * @ghidraAddress 0x001e1988
+     * @ghidraAddress NTSC-U/C: 0x001e1988
+     * @ghidraAddress PAL: 0x001e7a48
      */
     int GetPressedThisPoll() {
         return mPressedThisPoll;
     }
+
+#ifdef VIDEO_STANDARD_PAL
+    /**
+     * Report whether a multitap is on port 0.
+     *
+     * Only the European release has the out-of-line copy, and it has no caller. The title is
+     * inferred.
+     *
+     * @return mMultitap0.
+     * @ghidraAddress PAL: 0x001e7a50
+     */
+    int GetMultitap0() {
+        return mMultitap0;
+    }
+
+    /**
+     * Shut libpad down through PadRecord::EndLibrary().
+     *
+     * Only the European release has the routine, and it has no caller. The title is inferred.
+     *
+     * @ghidraAddress PAL: 0x001e7b48
+     */
+    static void EndPadLibrary();
+#endif
 
 private:
     /**
@@ -196,7 +235,8 @@ private:
      * Called by the constructor. The table does not depend on the object, and the pointer is
      * forwarded to Setup() unread. The title is inferred.
      *
-     * @ghidraAddress 0x001e19b8
+     * @ghidraAddress NTSC-U/C: 0x001e19b8
+     * @ghidraAddress PAL: 0x001e7a80
      */
     void Init();
 
@@ -208,7 +248,8 @@ private:
      * the last one excepted. Without one, the first Joypad is player 1 and, unless a multitap
      * sits on port 1, the port 1 Joypad is player 2. The title is inferred.
      *
-     * @ghidraAddress 0x001df248
+     * @ghidraAddress NTSC-U/C: 0x001df248
+     * @ghidraAddress PAL: 0x001e52c8
      */
     void Setup();
 
@@ -218,7 +259,8 @@ private:
      * Nothing happens when mJoypads is already empty. The destructor is the caller. The title is
      * inferred.
      *
-     * @ghidraAddress 0x001df9d8
+     * @ghidraAddress NTSC-U/C: 0x001df9d8
+     * @ghidraAddress PAL: 0x001e5a58
      */
     void Shutdown();
 
@@ -230,7 +272,8 @@ private:
      * gone restores the single-pad numbering. Named after the file-private
      * FindJoypadConnectionsCmd.
      *
-     * @ghidraAddress 0x001df798
+     * @ghidraAddress NTSC-U/C: 0x001df798
+     * @ghidraAddress PAL: 0x001e5818
      */
     void FindJoypadConnections();
 
@@ -239,20 +282,22 @@ private:
      *
      * Each pressed or released control goes out as a `joy ` reading with the Joypad's player,
      * the control number from 1, and 0.99 or 0, and each moved stick axis as a reading with its
-     * axis control and its position scaled to 0 through 1. The four face buttons send only
+     * axis control and its position scaled to 0 through 1. The four d-pad directions send only
      * the first of them pressed while any stays held. A Joypad that reports 0 during a game pauses
      * the game when its player is one of the world's local players, and one that reports 1 sets
      * mBusyJoypadSeen. The routine returns at the first ready Joypad that has no player. The title
      * is inferred.
      *
-     * @ghidraAddress 0x001dfab0
+     * @ghidraAddress NTSC-U/C: 0x001dfab0
+     * @ghidraAddress PAL: 0x001e5b30
      */
     void ReadControllers();
 
     /**
      * Do nothing. Poll() calls it after ReadControllers().
      *
-     * @ghidraAddress 0x001e1c58
+     * @ghidraAddress NTSC-U/C: 0x001e1c58
+     * @ghidraAddress PAL: 0x001e7d40
      */
     void FinishPoll();
 
@@ -262,7 +307,8 @@ private:
      * Inline. FindJoypadConnections() expands it three times, and the out-of-line copy has no
      * caller. The title is inferred.
      *
-     * @ghidraAddress 0x001e1a88
+     * @ghidraAddress NTSC-U/C: 0x001e1a88
+     * @ghidraAddress PAL: 0x001e7b70
      */
     void ResetJoypads();
 
@@ -272,7 +318,8 @@ private:
      * A Joypad that is not connected keeps its player. The routine has no caller. The title is
      * inferred.
      *
-     * @ghidraAddress 0x001e1ad8
+     * @ghidraAddress NTSC-U/C: 0x001e1ad8
+     * @ghidraAddress PAL: 0x001e7bc0
      */
     void NumberConnectedJoypads();
 
@@ -288,8 +335,8 @@ private:
         int mControlStates[kControlCount]; // +0x00, zeroed by Setup() and never read
         char mAxes[kAxisCount];            // +0x40
         unsigned int mButtons;             // +0x44
-        // Set while a face button's press has gone out, cleared once all four are up.
-        int mFaceButtonHeld; // +0x48
+        // Set while a d-pad direction's press has gone out, cleared once all four are up.
+        int mDirectionHeld; // +0x48
     };
 
     std::vector<Entry> mEntries;     // +0x00

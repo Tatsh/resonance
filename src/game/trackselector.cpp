@@ -55,7 +55,7 @@ void ProbePlayer(Player *pPlayer) {
 
 } // namespace
 
-// 0x0013b250
+// NTSC-U/C: 0x0013b250, PAL: 0x0013bb98
 TrackSelector::TrackSelector(const std::vector<Player *> &players)
     : mChannelCount(kTrackSelectorChannelCount), mSlotCount(players.size()) {
     for (int nChannel = 0; nChannel < kTrackSelectorChannelCount; ++nChannel) {
@@ -72,7 +72,7 @@ TrackSelector::TrackSelector(const std::vector<Player *> &players)
     }
 }
 
-// 0x0013b480
+// NTSC-U/C: 0x0013b480, PAL: 0x0013bdc8
 void TrackSelector::RemoveLightFromColumn(Player *pPlayer, int nChannel, int nPayload) {
     if (nChannel == kNoChannel) {
         return;
@@ -97,7 +97,7 @@ void TrackSelector::RemoveLightFromColumn(Player *pPlayer, int nChannel, int nPa
     }
 }
 
-// 0x0013b5e8
+// NTSC-U/C: 0x0013b5e8, PAL: 0x0013bf30
 void TrackSelector::InsertLightForDrawable(Player *pPlayer, int nChannel, int nPayload) {
     for (int nSlot = 0; nSlot < mSlotCount; ++nSlot) {
         if (mGrid[nChannel][nSlot] == &g_nullPlayer) {
@@ -113,7 +113,7 @@ void TrackSelector::InsertLightForDrawable(Player *pPlayer, int nChannel, int nP
     }
 }
 
-// 0x0013b6a8
+// NTSC-U/C: 0x0013b6a8, PAL: 0x0013bff0
 int TrackSelector::RebuildChannelGrid(BumpPacket *pPacket) {
     const int nChannel = pPacket->mTrack;
     Player *pPlayer = pPacket->mPlayer;
@@ -141,7 +141,7 @@ int TrackSelector::RebuildChannelGrid(BumpPacket *pPacket) {
 }
 
 // The address below is the out-of-line copy.
-// 0x0013f5a0
+// NTSC-U/C: 0x0013f5a0, PAL: 0x0013ff68
 inline void TrackSelector::OnRotLeft(RotLeftMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
     if (pPlayer->HasInputSlot()) {
@@ -150,7 +150,7 @@ inline void TrackSelector::OnRotLeft(RotLeftMsg *pMsg) {
 }
 
 // The address below is the out-of-line copy.
-// 0x0013f608
+// NTSC-U/C: 0x0013f608, PAL: 0x0013ffd0
 inline void TrackSelector::OnRotRight(RotRightMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
     if (pPlayer->HasInputSlot()) {
@@ -159,7 +159,7 @@ inline void TrackSelector::OnRotRight(RotRightMsg *pMsg) {
 }
 
 // The address below is the out-of-line copy.
-// 0x0013f670
+// NTSC-U/C: 0x0013f670, PAL: 0x00140038
 inline void TrackSelector::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
     if (pPlayer->HasInputSlot()) {
@@ -168,13 +168,13 @@ inline void TrackSelector::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
 }
 
 // The address below is the out-of-line copy.
-// 0x0013f6d8
+// NTSC-U/C: 0x0013f6d8, PAL: 0x001400a0
 inline void TrackSelector::OnRemoteTrackSelect(RemoteTrackSelectMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
     RebindLightColumn(pPlayer, pPlayer->GetTrack(), pMsg->mTrack, pMsg->mPosition.mTick);
 }
 
-// 0x0013b868
+// NTSC-U/C: 0x0013b868, PAL: 0x0013c1b0
 void TrackSelector::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nRotLeftMsgType) {
@@ -190,7 +190,7 @@ void TrackSelector::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x0013ba08
+// NTSC-U/C: 0x0013ba08, PAL: 0x0013c350
 int TrackSelector::SelfTest() {
     std::vector<Player *> players;
     for (int nIndex = 0; nIndex < kTestPlayerCount; ++nIndex) {
@@ -244,16 +244,16 @@ int TrackSelector::SelfTest() {
     return 1;
 }
 
-// 0x0013f8e8
+// NTSC-U/C: 0x0013f8e8, PAL: 0x001402b0
 int TrackSelector::RunSelfTest() {
     return SelfTest();
 }
 
-// 0x0013f020
+// NTSC-U/C: 0x0013f020, PAL: 0x0013f9d8
 TrackSelector::~TrackSelector() {
 }
 
-// 0x0013f748
+// NTSC-U/C: 0x0013f748, PAL: 0x00140110
 void TrackSelector::RebindLightColumn(Player *pPlayer,
                                       int nFromChannel,
                                       int nToChannel,
@@ -262,7 +262,7 @@ void TrackSelector::RebindLightColumn(Player *pPlayer,
     InsertLightForDrawable(pPlayer, nToChannel, nPayload);
 }
 
-// 0x0013f7a8
+// NTSC-U/C: 0x0013f7a8, PAL: 0x00140170
 void TrackSelector::RebindLightIfChanged(Player *pPlayer, int nChannel, int nPayload) {
     if (mGrid[nChannel][0] == pPlayer && mGrid[nChannel][1] == &g_nullPlayer) {
         return;
@@ -271,7 +271,7 @@ void TrackSelector::RebindLightIfChanged(Player *pPlayer, int nChannel, int nPay
     InsertLightForDrawable(pPlayer, nChannel, nPayload);
 }
 
-// 0x0013f840
+// NTSC-U/C: 0x0013f840, PAL: 0x00140208
 int TrackSelector::AddLightToChannel(Player *pPlayer, int nPayload, int nDelta) {
     const int nChannel = pPlayer->GetTrack();
     const int nTarget = (nChannel + nDelta + mChannelCount) % mChannelCount;

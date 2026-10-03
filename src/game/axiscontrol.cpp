@@ -45,13 +45,13 @@ constexpr int kLaneDivisor = 8;
 
 } // namespace
 
-// 0x0019e940
+// NTSC-U/C: 0x0019e940, PAL: 0x001a46a8
 AxisControl::AxisControl(const TrackData *pTrackData)
     : mTrack(pTrackData->mIndex), mChannel(pTrackData->mChannel), mLane(kLaneCenter),
       mAxis(kNoAxis), mBending(0), mBendOrigin(0), mSustainTick(0), mPlayer(&g_nullPlayer) {
 }
 
-// 0x0019ea80
+// NTSC-U/C: 0x0019ea80, PAL: 0x001a47e8
 void AxisControl::OnAxisRegister(AxisRegisterMsg *pMsg) {
     const int bOwnTrack = pMsg->mTrack == mTrack;
     mAxis = static_cast<int>(pMsg->mValue * kAxisScale);
@@ -89,7 +89,7 @@ void AxisControl::OnAxisRegister(AxisRegisterMsg *pMsg) {
     }
 }
 
-// 0x0019ec10
+// NTSC-U/C: 0x0019ec10, PAL: 0x001a4978
 void AxisControl::OnTrackSelect(TrackSelectMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -105,7 +105,7 @@ void AxisControl::OnTrackSelect(TrackSelectMsg *pMsg) {
     Send(&nowBar);
 }
 
-// 0x0019ecf0
+// NTSC-U/C: 0x0019ecf0, PAL: 0x001a4a58
 void AxisControl::SendPitchBend(int nTick, int nValue) {
     const unsigned char nCoarse =
         static_cast<unsigned char>(((nValue + kAxisCenter) / kBendScale) & kDataByteMask);
@@ -113,7 +113,7 @@ void AxisControl::SendPitchBend(int nTick, int nValue) {
     Send(&msg);
 }
 
-// 0x0019ed80
+// NTSC-U/C: 0x0019ed80, PAL: 0x001a4ae8
 void AxisControl::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nAxisRegisterMsgType) {
@@ -140,7 +140,7 @@ void AxisControl::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x0019fab0
+// NTSC-U/C: 0x0019fab0, PAL: 0x001a5818
 void AxisControl::OnStdMidi(StdMidiMsg *pMsg) {
     if ((pMsg->mStatus & kStatusKindMask) != kStatusNoteOn) {
         return;
@@ -163,7 +163,7 @@ void AxisControl::OnStdMidi(StdMidiMsg *pMsg) {
     mBending = 0;
 }
 
-// 0x0019fb40
+// NTSC-U/C: 0x0019fb40, PAL: 0x001a58a8
 void AxisControl::OnAllNotesOff(AllNotesOffMsg *pMsg) {
     if (mBending == 0) {
         return;

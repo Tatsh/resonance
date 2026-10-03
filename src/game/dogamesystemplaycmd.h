@@ -23,7 +23,8 @@ public:
      * Produce a command on the heap.
      *
      * @return The command.
-     * @ghidraAddress 0x00105e40
+     * @ghidraAddress NTSC-U/C: 0x00105e40
+     * @ghidraAddress PAL: 0x00105e40
      */
     static Sch::Command *New();
 
@@ -31,14 +32,16 @@ public:
      * Report sCmdID.
      *
      * @return The class's command identifier.
-     * @ghidraAddress 0x0010bdb8
+     * @ghidraAddress NTSC-U/C: 0x0010bdb8
+     * @ghidraAddress PAL: 0x0010bf50
      */
     virtual int CmdID();
 
     /**
      * Run GameManagerImpl::StartPlay() on the application's game manager.
      *
-     * @ghidraAddress 0x0010bd80
+     * @ghidraAddress NTSC-U/C: 0x0010bd80
+     * @ghidraAddress PAL: 0x0010bf18
      */
     virtual void Execute();
 
@@ -46,7 +49,8 @@ public:
      * Write `{DoGameSystemPlayCmd}`.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x0010bdd8
+     * @ghidraAddress NTSC-U/C: 0x0010bdd8
+     * @ghidraAddress PAL: 0x0010bf70
      */
     virtual void Print(std::ostream &stream);
 
@@ -54,7 +58,8 @@ public:
      * Write nothing.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x0010bdc8
+     * @ghidraAddress NTSC-U/C: 0x0010bdc8
+     * @ghidraAddress PAL: 0x0010bf60
      */
     virtual void Save(OBStream &stream);
 
@@ -62,14 +67,16 @@ public:
      * Read nothing.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x0010bdd0
+     * @ghidraAddress NTSC-U/C: 0x0010bdd0
+     * @ghidraAddress PAL: 0x0010bf68
      */
     virtual void Load(IBStream &stream);
 
     /**
      * Identifier the class streams itself under. The word at `0x006682b8` starts as 4.
      *
-     * @ghidraAddress 0x006682b8
+     * @ghidraAddress NTSC-U/C: 0x006682b8
+     * @ghidraAddress PAL: 0x006a8e38
      */
     static int sCmdID;
 };

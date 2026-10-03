@@ -51,7 +51,8 @@ public:
          * mesh's material, and destroying mScreenMeshes restores every screen. The out-of-line
          * copy is the deleting form and has no caller.
          *
-         * @ghidraAddress 0x0040c8e8
+         * @ghidraAddress NTSC-U/C: 0x0040c8e8
+         * @ghidraAddress PAL: 0x00446310
          */
         ~ScreenMesh() {
             mMesh->SetMaterial(mMat);
@@ -63,7 +64,8 @@ public:
          * The out-of-line copy sits in the TnlArena unit. The title is inferred.
          *
          * @param pMat The material.
-         * @ghidraAddress 0x0040c938
+         * @ghidraAddress NTSC-U/C: 0x0040c938
+         * @ghidraAddress PAL: 0x00446360
          */
         void SetMaterial(Rnd::Mat *pMat) const;
 
@@ -81,7 +83,8 @@ public:
          * Record the player and resolve its material.
          *
          * @param pPlayer The player. Its word at `+0x20` fills the `%d`.
-         * @ghidraAddress 0x00406120
+         * @ghidraAddress NTSC-U/C: 0x00406120
+         * @ghidraAddress PAL: 0x0043fa20
          */
         PlayerMaterial(Player *pPlayer);
 
@@ -96,7 +99,8 @@ public:
      * animation it builds.
      *
      * @param pRenderer The renderer that constructs this object. The body does not read it.
-     * @ghidraAddress 0x004067e8
+     * @ghidraAddress NTSC-U/C: 0x004067e8
+     * @ghidraAddress PAL: 0x00440128
      */
     TnlArena(Renderer *pRenderer);
 
@@ -107,7 +111,8 @@ public:
      * each mesh's material twice over, once through ScreenMesh::SetMaterial() and once through the
      * ScreenMesh destructor.
      *
-     * @ghidraAddress 0x00406de0
+     * @ghidraAddress NTSC-U/C: 0x00406de0
+     * @ghidraAddress PAL: 0x00440740
      */
     virtual ~TnlArena();
 
@@ -120,7 +125,8 @@ public:
      * mode 1 with a non-empty winner list passes one level higher.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x00406ff0
+     * @ghidraAddress NTSC-U/C: 0x00406ff0
+     * @ghidraAddress PAL: 0x00440950
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -131,7 +137,8 @@ public:
      * is inferred from it.
      *
      * @param flFrame The song position, in MIDI ticks.
-     * @ghidraAddress 0x0040c958
+     * @ghidraAddress NTSC-U/C: 0x0040c958
+     * @ghidraAddress PAL: 0x00446380
      */
     void SetFrame(float flFrame);
 
@@ -178,6 +185,7 @@ private:
 /**
  * The arena that exists, or null.
  *
- * @ghidraAddress 0x006dd560
+ * @ghidraAddress NTSC-U/C: 0x006dd560
+ * @ghidraAddress PAL: 0x00720d70
  */
 extern TnlArena *g_pTnlArena;

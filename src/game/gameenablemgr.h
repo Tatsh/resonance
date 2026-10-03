@@ -29,7 +29,8 @@ public:
      * @param nTrackCount The level's track count.
      * @param pGamer The participant whose tracks the policy governs.
      * @param nReleaseWhenMet Non-zero to release a track's requirements once its state changes.
-     * @ghidraAddress 0x001011c8
+     * @ghidraAddress NTSC-U/C: 0x001011c8
+     * @ghidraAddress PAL: 0x001011c8
      */
     GameEnableMgr(int nConfigCode, int nTrackCount, Gamer *pGamer, int nReleaseWhenMet);
 
@@ -39,7 +40,8 @@ public:
      * @param nTrackCount The level's track count.
      * @param pGamer The participant whose tracks the policy governs.
      * @param nReleaseWhenMet Non-zero to release a track's requirements once its state changes.
-     * @ghidraAddress 0x00101588
+     * @ghidraAddress NTSC-U/C: 0x00101588
+     * @ghidraAddress PAL: 0x00101588
      */
     GameEnableMgr(int nTrackCount, Gamer *pGamer, int nReleaseWhenMet);
 
@@ -53,7 +55,8 @@ public:
      * @param nTrackCount The level's track count.
      * @param pGamer The participant.
      * @return The new policy.
-     * @ghidraAddress 0x00105280
+     * @ghidraAddress NTSC-U/C: 0x00105280
+     * @ghidraAddress PAL: 0x00105280
      */
     static GameEnableMgr *CreateReleasing(int nConfigCode, int nTrackCount, Gamer *pGamer);
 
@@ -66,7 +69,8 @@ public:
      * @param nTrackCount The level's track count.
      * @param pGamer The participant.
      * @return The new policy.
-     * @ghidraAddress 0x00105308
+     * @ghidraAddress NTSC-U/C: 0x00105308
+     * @ghidraAddress PAL: 0x00105308
      */
     static GameEnableMgr *CreateInvalidating(int nConfigCode, int nTrackCount, Gamer *pGamer);
 
@@ -78,7 +82,8 @@ public:
      * @param nTrackCount The level's track count.
      * @param pGamer The participant.
      * @return The new policy.
-     * @ghidraAddress 0x00105390
+     * @ghidraAddress NTSC-U/C: 0x00105390
+     * @ghidraAddress PAL: 0x00105390
      */
     static GameEnableMgr *CreateUnrestricted(int nTrackCount, Gamer *pGamer);
 
@@ -88,7 +93,8 @@ public:
      * @param nTrack The track.
      * @param nBar The bar.
      * @param pPlayer The new owner, or the null player.
-     * @ghidraAddress 0x00101d70
+     * @ghidraAddress NTSC-U/C: 0x00101d70
+     * @ghidraAddress PAL: 0x00101d70
      */
     virtual void SetBarOwner(int nTrack, int nBar, Player *pPlayer);
 
@@ -101,7 +107,8 @@ public:
      * @param nTrack The track.
      * @param nBar The current bar.
      * @param nUntilBar The first bar the requirements apply to again.
-     * @ghidraAddress 0x00101c68
+     * @ghidraAddress NTSC-U/C: 0x00101c68
+     * @ghidraAddress PAL: 0x00101c68
      */
     virtual void SetFreeUntil(int nTrack, int nBar, int nUntilBar);
 
@@ -111,7 +118,8 @@ public:
      * Replaces the track's requirement list with the single entry -1.
      *
      * @param nTrack The track.
-     * @ghidraAddress 0x00101bb0
+     * @ghidraAddress NTSC-U/C: 0x00101bb0
+     * @ghidraAddress PAL: 0x00101bb0
      */
     virtual void DisableTrack(int nTrack);
 
@@ -124,7 +132,8 @@ public:
      * @param nTrack The track.
      * @param nBar The bar.
      * @return Non-zero when the bar may be caught.
-     * @ghidraAddress 0x00105408
+     * @ghidraAddress NTSC-U/C: 0x00105408
+     * @ghidraAddress PAL: 0x00105408
      */
     virtual int QueryBar(int nTrack, int nBar);
 
@@ -134,18 +143,18 @@ private:
     // The requirement entry that disables a track.
     enum { kNeverEnabled = -1 };
 
-    // 0x00101f10
+    // NTSC-U/C: 0x00101f10, PAL: 0x00101f10
     // Clears the requirement lists, sizes them to mTrackCount, and fills each from
     // nConfigCode with the one-based track number as the lookup argument, storing each value less
     // one. The title is inferred.
     void Init(int nConfigCode);
 
-    // 0x00105498
+    // NTSC-U/C: 0x00105498, PAL: 0x00105498
     // Sets pOwned[i] for each of the kOwnedTrackCount tracks to whether the track has
     // an owner at nBar.
     void FindOwnedTracks(int *pOwned, int nBar);
 
-    // 0x00105530
+    // NTSC-U/C: 0x00105530, PAL: 0x00105530
     // Reports whether every requirement of nTrack is owned in pOwned.
     int IsTrackEnabled(int nTrack, const int *pOwned);
 

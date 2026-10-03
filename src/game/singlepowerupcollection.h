@@ -32,14 +32,16 @@ public:
      * Start with no powerup stored.
      *
      * @param pOwner The player whose collection this is.
-     * @ghidraAddress 0x001cb760
+     * @ghidraAddress NTSC-U/C: 0x001cb760
+     * @ghidraAddress PAL: 0x001d1618
      */
     explicit SinglePowerupCollection(LocalPlayer *pOwner);
 
     /**
      * Delete the stored powerup.
      *
-     * @ghidraAddress 0x001cb7b0
+     * @ghidraAddress NTSC-U/C: 0x001cb7b0
+     * @ghidraAddress PAL: 0x001d1668
      */
     virtual ~SinglePowerupCollection();
 
@@ -50,7 +52,8 @@ public:
      * queues. A ChoosePowerupMsg follows with the new kind.
      *
      * @param nType The kind.
-     * @ghidraAddress 0x001cb890
+     * @ghidraAddress NTSC-U/C: 0x001cb890
+     * @ghidraAddress PAL: 0x001d1748
      */
     virtual void AddPowerup(int nType);
 
@@ -60,7 +63,8 @@ public:
      * An empty override of its own at table slot 5, apart from the base's empty default.
      *
      * @param nDelta Not read.
-     * @ghidraAddress 0x001cc9f0
+     * @ghidraAddress NTSC-U/C: 0x001cc9f0
+     * @ghidraAddress PAL: 0x001d28a8
      */
     virtual void SelectRelative(int nDelta);
 
@@ -70,7 +74,8 @@ public:
      * An empty override of its own at table slot 6, apart from the base's empty default.
      *
      * @param nIndex Not read.
-     * @ghidraAddress 0x001cc9f8
+     * @ghidraAddress NTSC-U/C: 0x001cc9f8
+     * @ghidraAddress PAL: 0x001d28b0
      */
     virtual void Select(int nIndex);
 
@@ -83,7 +88,8 @@ public:
      *
      * @param nTrack Forwarded to Powerup::Deploy(). See PowerupCollectionI::Deploy().
      * @param nBar Forwarded to Powerup::Deploy(). See PowerupCollectionI::Deploy().
-     * @ghidraAddress 0x001cb948
+     * @ghidraAddress NTSC-U/C: 0x001cb948
+     * @ghidraAddress PAL: 0x001d1800
      */
     virtual void Deploy(int nTrack, int nBar);
 
@@ -91,7 +97,8 @@ public:
      * Report whether a powerup is stored.
      *
      * @return Non-zero unless the stored kind is -1.
-     * @ghidraAddress 0x001cca00
+     * @ghidraAddress NTSC-U/C: 0x001cca00
+     * @ghidraAddress PAL: 0x001d28b8
      */
     virtual int HasSelection();
 
@@ -101,7 +108,8 @@ public:
      * An empty store sends nothing. The test goes through the virtual HasSelection() rather than
      * reading the member.
      *
-     * @ghidraAddress 0x001cba20
+     * @ghidraAddress NTSC-U/C: 0x001cba20
+     * @ghidraAddress PAL: 0x001d18d8
      */
     virtual void AnnounceState();
 

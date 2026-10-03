@@ -21,7 +21,10 @@ class IDableBase {
     friend class IDablePtr;
 
 public:
-    /** @ghidraAddress 0x00121c68 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00121c68
+     * @ghidraAddress PAL: 0x00122270
+     */
     virtual ~IDableBase();
 
 protected:

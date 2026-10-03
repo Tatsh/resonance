@@ -17,7 +17,8 @@ class StdMidiMsg;
  * Zero at start. Its only readers are NextStripId() and the copy of it that
  * AxeNewGemMaker::PostGemMessages() expands.
  *
- * @ghidraAddress 0x00683f70
+ * @ghidraAddress NTSC-U/C: 0x00683f70
+ * @ghidraAddress PAL: 0x006c51d8
  */
 extern int g_nNextStripId;
 
@@ -43,7 +44,8 @@ class AxeOldGemMaker : public MsgSink, public MsgSource {
 public:
     /**
      * @param pTrackData The track description. The constructor copies its track.
-     * @ghidraAddress 0x001a31c8
+     * @ghidraAddress NTSC-U/C: 0x001a31c8
+     * @ghidraAddress PAL: 0x001a8f30
      */
     explicit AxeOldGemMaker(const TrackData *pTrackData);
 
@@ -54,7 +56,8 @@ public:
      * OnStdMidi(). Every other message is ignored.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001a47a8
+     * @ghidraAddress NTSC-U/C: 0x001a47a8
+     * @ghidraAddress PAL: 0x001aa510
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -65,7 +68,8 @@ public:
      * copy. The title is inferred.
      *
      * @return The identity, starting at zero.
-     * @ghidraAddress 0x001a4560
+     * @ghidraAddress NTSC-U/C: 0x001a4560
+     * @ghidraAddress PAL: 0x001aa2c8
      */
     static int NextStripId() {
         return g_nNextStripId++;
@@ -79,7 +83,8 @@ public:
      * @param nStep The step, from -3 to 3.
      * @return 0.7, 0.8, 0.9, 0.5, 0.3, 0.2, or 0.1 for steps -3 through 3, and 0 for any other
      *         step.
-     * @ghidraAddress 0x001a4578
+     * @ghidraAddress NTSC-U/C: 0x001a4578
+     * @ghidraAddress PAL: 0x001aa2e0
      */
     static float BlendForStep(int nStep);
 
@@ -91,7 +96,8 @@ public:
      *
      * @param flValue The axis value.
      * @return The blend.
-     * @ghidraAddress 0x001a4638
+     * @ghidraAddress NTSC-U/C: 0x001a4638
+     * @ghidraAddress PAL: 0x001aa3a0
      */
     static float BlendForAxis(float flValue) {
         return static_cast<float>((flValue * kAxisBlendScale) + kAxisBlendBase);
@@ -103,18 +109,18 @@ private:
 
     // Sends a DurGemMsg from mPosition, lasting the note's length less 60 ticks and at least
     // 60, blended by BlendForAxis() of the phrase's value at the position within its bar.
-    // 0x001a32f0
+    // NTSC-U/C: 0x001a32f0, PAL: 0x001a9058
     void PostDurGemMsg(NoteMsg *pMsg);
 
     // On controller 46, a zero value records mPosition as the sustain start when none is held,
     // and a non-zero value sends a DurGemMsg from the sustain start to mPosition at blend 0.5
     // and clears the start.
-    // 0x001a34e8
+    // NTSC-U/C: 0x001a34e8, PAL: 0x001a9250
     void OnStdMidi(StdMidiMsg *pMsg);
 
     // Replays every entry of the phrase's sequence through HandleMessage() with mPosition
     // advanced to the entry, then clears mPhrase.
-    // 0x001a3600
+    // NTSC-U/C: 0x001a3600, PAL: 0x001a9368
     void OnPhrase(PhraseMsg *pMsg);
 
     int mTrack;             // +0x18, copied from TrackData::mIndex

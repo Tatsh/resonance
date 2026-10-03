@@ -77,12 +77,14 @@ public:
      *
      * @param pApp The application.
      * @param pStats The game manager's statistics.
-     * @ghidraAddress 0x0018bef0
+     * @ghidraAddress NTSC-U/C: 0x0018bef0
+     * @ghidraAddress PAL: 0x00191998
      */
     GrooveWorld(Application *pApp, GameStats *pStats);
 
     /**
-     * @ghidraAddress 0x0018c368
+     * @ghidraAddress NTSC-U/C: 0x0018c368
+     * @ghidraAddress PAL: 0x00191e40
      */
     virtual ~GrooveWorld();
 
@@ -94,7 +96,8 @@ public:
      * matching neither is discarded. The two forwarders below are expanded inline here.
      *
      * @param pMsg The message to route.
-     * @ghidraAddress 0x00195388
+     * @ghidraAddress NTSC-U/C: 0x00195388
+     * @ghidraAddress PAL: 0x0019b008
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -114,7 +117,8 @@ public:
      * @param nPadIndex The controller that produced the reading, from 1.
      * @param nButton The button or axis control number.
      * @param flValue The reading's value.
-     * @ghidraAddress 0x0018ed98
+     * @ghidraAddress NTSC-U/C: 0x0018ed98
+     * @ghidraAddress PAL: 0x001948e8
      */
     virtual void OnControllerReading(int nTag, int nPadIndex, int nButton, float flValue);
 
@@ -126,7 +130,8 @@ public:
      * to InputMap's MsgSink half. ControllerCmd::Execute() is the recovered caller.
      *
      * @param pReading The reading.
-     * @ghidraAddress 0x0018f078
+     * @ghidraAddress NTSC-U/C: 0x0018f078
+     * @ghidraAddress PAL: 0x00194bc8
      */
     void ReplayControllerReading(const MetControllerReading *pReading);
 
@@ -141,7 +146,8 @@ public:
      * @param nMode The value Exit() stores in mExitMode.
      * @param bContinueJukebox The value Exit() stores in mContinueJukebox.
      * @param bRestart The value Exit() stores in mRestart.
-     * @ghidraAddress 0x0018e368
+     * @ghidraAddress NTSC-U/C: 0x0018e368
+     * @ghidraAddress PAL: 0x00193e98
      */
     void PostExit(int nMode, int bContinueJukebox, int bRestart);
 
@@ -160,7 +166,8 @@ public:
      * @param nMode The exit mode.
      * @param bContinueJukebox Stored in mContinueJukebox.
      * @param bRestart Stored in mRestart.
-     * @ghidraAddress 0x0018e478
+     * @ghidraAddress NTSC-U/C: 0x0018e478
+     * @ghidraAddress PAL: 0x00193fb0
      */
     void Exit(int nMode, int bContinueJukebox, int bRestart);
 
@@ -171,7 +178,8 @@ public:
      * `0x00194b20`.
      *
      * @param pMsg The packet.
-     * @ghidraAddress 0x00195348
+     * @ghidraAddress NTSC-U/C: 0x00195348
+     * @ghidraAddress PAL: 0x0019afc8
      */
     void OnCripplePacket(Message *pMsg);
 
@@ -181,7 +189,8 @@ public:
      * HandleMessage() expands this body inline.
      *
      * @param pMsg The packet.
-     * @ghidraAddress 0x00194b50
+     * @ghidraAddress NTSC-U/C: 0x00194b50
+     * @ghidraAddress PAL: 0x0019a7d0
      */
     void OnBumpPacket(Message *pMsg);
 
@@ -193,7 +202,8 @@ public:
      *
      * @param pSink The sink stored in mNetSink.
      * @param pSource The source stored in mNetSource in game mode 3.
-     * @ghidraAddress 0x00194b80
+     * @ghidraAddress NTSC-U/C: 0x00194b80
+     * @ghidraAddress PAL: 0x0019a800
      */
     void SetNetLink(MsgSink *pSink, MsgSource *pSource);
 
@@ -203,7 +213,8 @@ public:
      * The read is submitted with no zone current, and mState becomes 1.
      *
      * @param path The file to read. An empty path reads g_szEmptyString.
-     * @ghidraAddress 0x00194bc8
+     * @ghidraAddress NTSC-U/C: 0x00194bc8
+     * @ghidraAddress PAL: 0x0019a848
      */
     void StartLoad(const HxStr &path);
 
@@ -213,7 +224,8 @@ public:
      * A failed read is reported through Fatal().
      *
      * @return Non-zero once the read is complete.
-     * @ghidraAddress 0x00194ca0
+     * @ghidraAddress NTSC-U/C: 0x00194ca0
+     * @ghidraAddress PAL: 0x0019a920
      */
     int IsLoadDone();
 
@@ -222,7 +234,8 @@ public:
      *
      * The buffer the read filled is released, and mState becomes 2.
      *
-     * @ghidraAddress 0x00194d00
+     * @ghidraAddress NTSC-U/C: 0x00194d00
+     * @ghidraAddress PAL: 0x0019a980
      */
     void FinishLoad();
 
@@ -237,7 +250,8 @@ public:
      * GameManagerImpl's FinishWorldLoad() and Load() call it after FinishLoad(). The title is
      * inferred.
      *
-     * @ghidraAddress 0x0018dc88
+     * @ghidraAddress NTSC-U/C: 0x0018dc88
+     * @ghidraAddress PAL: 0x001937a0
      */
     void PrepareLevel();
 
@@ -254,7 +268,8 @@ public:
      * settings flag, the local player count, and a metronome 3200 ticks ahead).
      * GameManagerImpl::StartPlay() is the only caller. The title is inferred.
      *
-     * @ghidraAddress 0x0018de38
+     * @ghidraAddress NTSC-U/C: 0x0018de38
+     * @ghidraAddress PAL: 0x00193968
      */
     void StartPlay();
 
@@ -265,7 +280,8 @@ public:
      * @param nUnused Not read.
      * @param name The player's name.
      * @param pAppearance The appearance the player is drawn with.
-     * @ghidraAddress 0x00194de8
+     * @ghidraAddress NTSC-U/C: 0x00194de8
+     * @ghidraAddress PAL: 0x0019aa68
      */
     void AddNetPlayer(int nId, int nUnused, const HxStr &name, const FreqAppearance *pAppearance);
 
@@ -281,7 +297,8 @@ public:
      * @param nUnused Not read. GameManagerImpl::AddPersonaPlayers() passes the shuffled index.
      * @param colorName The player's colour name.
      * @param pPersona The persona the player plays as.
-     * @ghidraAddress 0x0018c600
+     * @ghidraAddress NTSC-U/C: 0x0018c600
+     * @ghidraAddress PAL: 0x001920f8
      */
     void AddLocalPlayer(
         int nId, int nInputSlot, int nUnused, const HxStr &colorName, MetPersonaData *pPersona);
@@ -290,14 +307,16 @@ public:
      * Remove the first player with an identifier from mPlayers, without destroying it.
      *
      * @param nId The identifier to match against Player::mPlayerId.
-     * @ghidraAddress 0x00194ef0
+     * @ghidraAddress NTSC-U/C: 0x00194ef0
+     * @ghidraAddress PAL: 0x0019ab70
      */
     void RemovePlayer(int nId);
 
     /**
      * Detach the renderer from every source that feeds it and delete it.
      *
-     * @ghidraAddress 0x00194f88
+     * @ghidraAddress NTSC-U/C: 0x00194f88
+     * @ghidraAddress PAL: 0x0019ac08
      */
     void DestroyRenderer();
 
@@ -305,7 +324,8 @@ public:
      * Write the phrase database of every score track graph.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00195058
+     * @ghidraAddress NTSC-U/C: 0x00195058
+     * @ghidraAddress PAL: 0x0019acd8
      */
     void SavePhrases(OBStream &stream);
 
@@ -314,14 +334,16 @@ public:
      *
      * @param stream The stream to read from.
      * @param bClearOwners Non-zero to return every loaded phrase to the stand-in player.
-     * @ghidraAddress 0x001950c0
+     * @ghidraAddress NTSC-U/C: 0x001950c0
+     * @ghidraAddress PAL: 0x0019ad40
      */
     void LoadPhrases(IBStream &stream, int bClearOwners);
 
     /**
      * Enable every entry of the input map.
      *
-     * @ghidraAddress 0x00195150
+     * @ghidraAddress NTSC-U/C: 0x00195150
+     * @ghidraAddress PAL: 0x0019add0
      */
     void EnableInput();
 
@@ -331,7 +353,8 @@ public:
      * Gamer posts it at the end of a song, the stop-game script command posts it, and
      * GameManagerImpl posts it when a press interrupts a playback.
      *
-     * @ghidraAddress 0x00195170
+     * @ghidraAddress NTSC-U/C: 0x00195170
+     * @ghidraAddress PAL: 0x0019adf0
      */
     void PostFinish();
 
@@ -340,7 +363,8 @@ public:
      *
      * The pause menu's quit item posts it.
      *
-     * @ghidraAddress 0x00195198
+     * @ghidraAddress NTSC-U/C: 0x00195198
+     * @ghidraAddress PAL: 0x0019ae18
      */
     void PostQuit();
 
@@ -349,7 +373,8 @@ public:
      *
      * The pause menu's restart item posts it.
      *
-     * @ghidraAddress 0x001951c0
+     * @ghidraAddress NTSC-U/C: 0x001951c0
+     * @ghidraAddress PAL: 0x0019ae40
      */
     void PostRestart();
 
@@ -361,7 +386,8 @@ public:
      * through StopNoteDestroyer() and DestroyNoteDestroyer(). The destructor is the recovered
      * caller.
      *
-     * @ghidraAddress 0x001951e8
+     * @ghidraAddress NTSC-U/C: 0x001951e8
+     * @ghidraAddress PAL: 0x0019ae68
      */
     void Shutdown();
 
@@ -371,7 +397,8 @@ public:
      * Globals::GetSongClock() is the out-of-line caller, and the constructor creates the clock.
      *
      * @return The clock.
-     * @ghidraAddress 0x001952a0
+     * @ghidraAddress NTSC-U/C: 0x001952a0
+     * @ghidraAddress PAL: 0x0019af20
      */
     Sch::TickClock *GetSongClock();
 
@@ -381,13 +408,15 @@ public:
      * Globals' accessor at `0x00118da0` is the recovered caller.
      *
      * @return The play map.
-     * @ghidraAddress 0x001952a8
+     * @ghidraAddress NTSC-U/C: 0x001952a8
+     * @ghidraAddress PAL: 0x0019af28
      */
     PlayMap *GetPlayMap();
 
     /**
      * @return The level.
-     * @ghidraAddress 0x001952d8
+     * @ghidraAddress NTSC-U/C: 0x001952d8
+     * @ghidraAddress PAL: 0x0019af58
      */
     LevelData *GetLevel();
 
@@ -398,14 +427,16 @@ public:
      * world when it is null.
      *
      * @return The renderer, or null when no renderer exists.
-     * @ghidraAddress 0x001952e0
+     * @ghidraAddress NTSC-U/C: 0x001952e0
+     * @ghidraAddress PAL: 0x0019af60
      */
     RendererBase *GetRendererSink();
 
     /**
      * Set the statistics word at `+0x14` of mStats to 1.
      *
-     * @ghidraAddress 0x00195378
+     * @ghidraAddress NTSC-U/C: 0x00195378
+     * @ghidraAddress PAL: 0x0019aff8
      */
     void MarkStatsFlag();
 
@@ -417,7 +448,8 @@ private:
      * mJoiner, mGamer, mTrackSelector, and mNetSink when set become sinks of the player.
      * PrepareLevel() is the caller. The title is inferred.
      *
-     * @ghidraAddress 0x0018c828
+     * @ghidraAddress NTSC-U/C: 0x0018c828
+     * @ghidraAddress PAL: 0x00192320
      */
     void ConnectPlayers();
 
@@ -427,7 +459,8 @@ private:
      * The player's own sinks are removed first, mGamer ahead of mJoiner, and the player is then
      * removed from mNetSource, mTrackSelector, and mInputMap in that order. The title is inferred.
      *
-     * @ghidraAddress 0x0018c960
+     * @ghidraAddress NTSC-U/C: 0x0018c960
+     * @ghidraAddress PAL: 0x00192458
      */
     void DisconnectPlayers();
 
@@ -436,7 +469,8 @@ private:
      *
      * Shutdown() is the caller. The title is inferred.
      *
-     * @ghidraAddress 0x0018c778
+     * @ghidraAddress NTSC-U/C: 0x0018c778
+     * @ghidraAddress PAL: 0x00192270
      */
     void DeletePlayers();
 
@@ -447,7 +481,8 @@ private:
      * TrackSelectMsg, and a SeekerMsg as well while the player's GetInputSlot() reports -1.
      * PrepareLevel() is the caller.
      *
-     * @ghidraAddress 0x0018caa8
+     * @ghidraAddress NTSC-U/C: 0x0018caa8
+     * @ghidraAddress PAL: 0x001925a0
      */
     void CreateRenderer();
 
@@ -460,7 +495,8 @@ private:
      * phrases are read back from the log FinishSong() wrote. PrepareLevel() is the caller. The
      * title is inferred.
      *
-     * @ghidraAddress 0x0018cce8
+     * @ghidraAddress NTSC-U/C: 0x0018cce8
+     * @ghidraAddress PAL: 0x001927e0
      */
     void BuildGraphs();
 
@@ -469,7 +505,8 @@ private:
      *
      * StopLevel() is the caller. The title is inferred.
      *
-     * @ghidraAddress 0x0018da60
+     * @ghidraAddress NTSC-U/C: 0x0018da60
+     * @ghidraAddress PAL: 0x00193578
      */
     void DestroyGraphs();
 
@@ -479,7 +516,8 @@ private:
      * The intro tracks' sequencers are deleted first. The world queues it as a FuncCmd, through
      * the pointer to member at `0x007dc280`. The title is inferred.
      *
-     * @ghidraAddress 0x0018e238
+     * @ghidraAddress NTSC-U/C: 0x0018e238
+     * @ghidraAddress PAL: 0x00193d68
      */
     void StartSequencers();
 
@@ -491,7 +529,8 @@ private:
      * and every other mode runs it at once. The world queues it as a FuncCmd, through the pointer
      * to member at `0x007dc2a0`. The title is inferred.
      *
-     * @ghidraAddress 0x0018e6f0
+     * @ghidraAddress NTSC-U/C: 0x0018e6f0
+     * @ghidraAddress PAL: 0x00194228
      */
     void FinishSong();
 
@@ -503,7 +542,8 @@ private:
      * and run the synthesiser's LoadBankSet4(), except in a jukebox session with mContinueJukebox
      * set. The title is inferred.
      *
-     * @ghidraAddress 0x0018eb70
+     * @ghidraAddress NTSC-U/C: 0x0018eb70
+     * @ghidraAddress PAL: 0x001946c0
      */
     void EndLevel();
 
@@ -514,7 +554,8 @@ private:
      * tick zero, and sets mState back to 2. Shutdown() runs it while mState is 6. The title is
      * inferred.
      *
-     * @ghidraAddress 0x0018ec90
+     * @ghidraAddress NTSC-U/C: 0x0018ec90
+     * @ghidraAddress PAL: 0x001947e0
      */
     void StopLevel();
 
@@ -526,7 +567,8 @@ public:
      * binding at `0x00153464` is the caller.
      *
      * @param text The text.
-     * @ghidraAddress 0x0018f140
+     * @ghidraAddress NTSC-U/C: 0x0018f140
+     * @ghidraAddress PAL: 0x00194c90
      */
     void DisplayText(const HxStr &text);
 
@@ -536,7 +578,8 @@ public:
      * The image has no caller. Overlay copies mSongName directly instead. The name is inferred.
      *
      * @return A copy of mSongName.
-     * @ghidraAddress 0x001937a8
+     * @ghidraAddress NTSC-U/C: 0x001937a8
+     * @ghidraAddress PAL: 0x001993d0
      */
     HxStr GetSongName() const;
 

@@ -57,12 +57,14 @@ public:
      * configuration code 0x2be. The phrase player is then installed in the phrase manager.
      *
      * @param pTrackData The track description.
-     * @ghidraAddress 0x001cee50
+     * @ghidraAddress NTSC-U/C: 0x001cee50
+     * @ghidraAddress PAL: 0x001d4d08
      */
     explicit ScoreTrackGraph(TrackData *pTrackData);
 
     /**
-     * @ghidraAddress 0x001cf840
+     * @ghidraAddress NTSC-U/C: 0x001cf840
+     * @ghidraAddress PAL: 0x001d56f8
      */
     virtual ~ScoreTrackGraph();
 
@@ -72,7 +74,8 @@ public:
      * GrooveWorld's phrase save and load paths call it for every stage.
      *
      * @return The phrase manager's database.
-     * @ghidraAddress 0x001cf978
+     * @ghidraAddress NTSC-U/C: 0x001cf978
+     * @ghidraAddress PAL: 0x001d5830
      */
     PhraseDatabase *GetPhraseDatabase();
 
@@ -83,7 +86,8 @@ public:
      * into the synthesiser so controllers and programs are current, and then builds and starts a
      * BarSequencer at the song start that plays the track into the synthesiser.
      *
-     * @ghidraAddress 0x001cf088
+     * @ghidraAddress NTSC-U/C: 0x001cf088
+     * @ghidraAddress PAL: 0x001d4f40
      */
     virtual void Start();
 
@@ -92,7 +96,8 @@ public:
      *
      * Slot 3. Withdraws the phrase manager's commands and deletes the sequencer Start() built.
      *
-     * @ghidraAddress 0x001cf918
+     * @ghidraAddress NTSC-U/C: 0x001cf918
+     * @ghidraAddress PAL: 0x001d57d0
      */
     virtual void Stop();
 
@@ -117,7 +122,8 @@ public:
      * override registers the mixer.
      *
      * @param pSource The source to register with.
-     * @ghidraAddress 0x001cf750
+     * @ghidraAddress NTSC-U/C: 0x001cf750
+     * @ghidraAddress PAL: 0x001d5608
      */
     virtual void AddMixerToSource(MsgSource *pSource);
 
@@ -162,7 +168,8 @@ public:
      * out of juice only once every stage reports non-zero.
      *
      * @return Non-zero when nothing is outstanding.
-     * @ghidraAddress 0x001cf758
+     * @ghidraAddress NTSC-U/C: 0x001cf758
+     * @ghidraAddress PAL: 0x001d5610
      */
     virtual int HasNothingPending();
 
@@ -176,7 +183,8 @@ public:
      *
      * @param nTick The song position the caller received. No implementation reads it.
      * @param pPlayer The player the phrases go to.
-     * @ghidraAddress 0x001cf760
+     * @ghidraAddress NTSC-U/C: 0x001cf760
+     * @ghidraAddress PAL: 0x001d5618
      */
     virtual void GivePhrases(int nTick, Player *pPlayer);
 
@@ -187,7 +195,8 @@ public:
      * body, returns 1. Gamer tests it before each GivePhrases() call.
      *
      * @return Zero here.
-     * @ghidraAddress 0x001cf768
+     * @ghidraAddress NTSC-U/C: 0x001cf768
+     * @ghidraAddress PAL: 0x001d5620
      */
     virtual int CanGivePhrases();
 
@@ -198,7 +207,8 @@ public:
      * override runs PhraseMgr::CreatePowerbarMgr(). GrooveWorld::BuildGraphs() calls it for each
      * catch track after loading saved phrases.
      *
-     * @ghidraAddress 0x001cf778
+     * @ghidraAddress NTSC-U/C: 0x001cf778
+     * @ghidraAddress PAL: 0x001d5630
      */
     virtual void CreatePowerbarMgr();
 
@@ -209,7 +219,8 @@ public:
      * address is its uncalled out-of-line copy.
      *
      * @return Always 0.
-     * @ghidraAddress 0x001cf6b8
+     * @ghidraAddress NTSC-U/C: 0x001cf6b8
+     * @ghidraAddress PAL: 0x001d5570
      */
     int CallStart();
 
@@ -220,7 +231,8 @@ public:
      * its uncalled out-of-line copy.
      *
      * @return Always 0.
-     * @ghidraAddress 0x001cf6e8
+     * @ghidraAddress NTSC-U/C: 0x001cf6e8
+     * @ghidraAddress PAL: 0x001d55a0
      */
     int CallStop();
 
@@ -230,7 +242,8 @@ public:
      * Inline. GrooveWorld::DestroyGraphs() passes it to std::for_each.
      *
      * @param pGraph The stage.
-     * @ghidraAddress 0x001cf718
+     * @ghidraAddress NTSC-U/C: 0x001cf718
+     * @ghidraAddress PAL: 0x001d55d0
      */
     static void Delete(ScoreTrackGraph *pGraph);
 
@@ -257,21 +270,21 @@ protected:
     BarSequencer *mSequencer;    // +0x24, built by Start() and deleted by Stop()
 };
 
-// 0x001cf6b8
+// NTSC-U/C: 0x001cf6b8, PAL: 0x001d5570
 // The out-of-line copy.
 inline int ScoreTrackGraph::CallStart() {
     Start();
     return 0;
 }
 
-// 0x001cf6e8
+// NTSC-U/C: 0x001cf6e8, PAL: 0x001d55a0
 // The out-of-line copy.
 inline int ScoreTrackGraph::CallStop() {
     Stop();
     return 0;
 }
 
-// 0x001cf718
+// NTSC-U/C: 0x001cf718, PAL: 0x001d55d0
 // The out-of-line copy.
 inline void ScoreTrackGraph::Delete(ScoreTrackGraph *pGraph) {
     delete pGraph;

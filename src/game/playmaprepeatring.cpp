@@ -19,32 +19,32 @@ constexpr std::vector<int>::size_type kInitialCapacity = 32;
 static const char *const kStepLabel = "";
 } // namespace
 
-// 0x0012b660
+// NTSC-U/C: 0x0012b660, PAL: 0x0012bd98
 PlayMapRepeatRing::PlayMapRepeatRing() {
     mSpanStarts.reserve(kInitialCapacity);
     mSpanStarts.push_back(0);
     mSpanStarts.push_back(kSpanTerminator);
 }
 
-// 0x0012d1b8
+// NTSC-U/C: 0x0012d1b8, PAL: 0x0012d900
 PlayMapRepeatRing::~PlayMapRepeatRing() {
 }
 
-// 0x0012d588
+// NTSC-U/C: 0x0012d588, PAL: 0x0012dce8
 inline int PlayMapRepeatRing::SpanIndex(int nBar) {
     const std::vector<int>::iterator it =
         std::upper_bound(mSpanStarts.begin(), mSpanStarts.end(), nBar) - 1;
     return static_cast<int>(it - mSpanStarts.begin());
 }
 
-// 0x0012d500
+// NTSC-U/C: 0x0012d500, PAL: 0x0012dc60
 int PlayMapRepeatRing::MapBar(int nBar) {
     const int nIndex = SpanIndex(nBar);
     const std::vector<int>::size_type nSection = nIndex % mSectionLengths.size();
     return mSteps[nSection] + ((nBar - mSpanStarts[nIndex]) % mSectionLengths[nSection]);
 }
 
-// 0x0012be68
+// NTSC-U/C: 0x0012be68, PAL: 0x0012c5b0
 std::vector<int> &PlayMapRepeatRing::FindBarsPlaying(int nStart, int nMin, int nEnd) {
     mFoundBars.clear();
     const int nStep = FindStepIndex(nStart);
@@ -71,7 +71,7 @@ std::vector<int> &PlayMapRepeatRing::FindBarsPlaying(int nStart, int nMin, int n
     return mFoundBars;
 }
 
-// 0x0012bd00
+// NTSC-U/C: 0x0012bd00, PAL: 0x0012c448
 int PlayMapRepeatRing::EndLoop(int nBar) {
     const int nIndex = SpanIndex(nBar);
     if (mSpanStarts[nIndex + 1] != kSpanTerminator) {
@@ -82,7 +82,7 @@ int PlayMapRepeatRing::EndLoop(int nBar) {
     return 1;
 }
 
-// 0x0012bdd8
+// NTSC-U/C: 0x0012bdd8, PAL: 0x0012c520
 int PlayMapRepeatRing::StartLoop(int nBar) {
     const int nIndex = SpanIndex(nBar);
     int &next = mSpanStarts[nIndex + 1];
@@ -94,7 +94,7 @@ int PlayMapRepeatRing::StartLoop(int nBar) {
     return 1;
 }
 
-// 0x0012d5d0
+// NTSC-U/C: 0x0012d5d0, PAL: 0x0012dd30
 int PlayMapRepeatRing::ToggleLoop(int nBar) {
     if (EndLoop(nBar) != 0) {
         return 1;
@@ -103,19 +103,19 @@ int PlayMapRepeatRing::ToggleLoop(int nBar) {
     return 0;
 }
 
-// 0x0012d4b0
+// NTSC-U/C: 0x0012d4b0, PAL: 0x0012dc10
 void PlayMapRepeatRing::AddUnlabeledStep(int nPosition) {
     PlayMap::AddStep(nPosition, HxStr(kStepLabel));
 }
 
-// 0x0012ba88
+// NTSC-U/C: 0x0012ba88, PAL: 0x0012c1d0
 void PlayMapRepeatRing::ResetSpans() {
     mSpanStarts.clear();
     mSpanStarts.push_back(0);
     mSpanStarts.push_back(kSpanTerminator);
 }
 
-// 0x0012bb60
+// NTSC-U/C: 0x0012bb60, PAL: 0x0012c2a8
 void PlayMapRepeatRing::SetBarCount(int nBarCount) {
     PlayMap::SetBarCount(nBarCount);
     ResetSpans(); // Dispatched through the table. A further subclass would run instead.
@@ -126,7 +126,7 @@ void PlayMapRepeatRing::SetBarCount(int nBarCount) {
     }
 }
 
-// 0x0012bc48
+// NTSC-U/C: 0x0012bc48, PAL: 0x0012c390
 void PlayMapRepeatRing::CloseSpan(int nRepeats) {
     // The binary takes the remainder with an unsigned divide, so the sizes stay unsigned here
     // rather than being narrowed to int.

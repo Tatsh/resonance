@@ -31,7 +31,8 @@ public:
      * @param pTrackData The track description.
      * @param pClock The clock the scheduled commands run on.
      * @param tick The scheduler time the base retains.
-     * @ghidraAddress 0x001b1a60
+     * @ghidraAddress NTSC-U/C: 0x001b1a60
+     * @ghidraAddress PAL: 0x001b7820
      */
     MultiCatcher(PhraseMgr *pPhraseMgr,
                  Quantizer *pQuantizer,
@@ -40,7 +41,8 @@ public:
                  Sch::Tick tick);
 
     /**
-     * @ghidraAddress 0x001b0d98
+     * @ghidraAddress NTSC-U/C: 0x001b0d98
+     * @ghidraAddress PAL: 0x001b6b48
      */
     virtual ~MultiCatcher();
 
@@ -56,7 +58,8 @@ public:
      * @param nBar The bar.
      * @param nRun The bars the run spans.
      * @param nAutoCatch Non-zero for an automatic catch.
-     * @ghidraAddress 0x001ad8e8
+     * @ghidraAddress NTSC-U/C: 0x001ad8e8
+     * @ghidraAddress PAL: 0x001b3650
      */
     virtual void CapturePhrase(int nBar, int nRun, int nAutoCatch);
 
@@ -66,7 +69,8 @@ public:
      * concrete.
      *
      * @param nBar The caught bar, unread.
-     * @ghidraAddress 0x001b0e00
+     * @ghidraAddress NTSC-U/C: 0x001b0e00
+     * @ghidraAddress PAL: 0x001b6bb0
      */
     virtual void ReportCaughtPowerbar(int nBar);
 };

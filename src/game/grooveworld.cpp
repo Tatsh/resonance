@@ -184,17 +184,17 @@ public:
     FuncCmd(GrooveWorld *pWorld, void (GrooveWorld::*pfnFunc)()) : mWorld(pWorld), mFunc(pfnFunc) {
     }
 
-    // 0x00194850
+    // NTSC-U/C: 0x00194850, PAL: 0x0019a4d0
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x00194860
+    // NTSC-U/C: 0x00194860, PAL: 0x0019a4e0
     virtual void Execute() {
         (mWorld->*mFunc)();
     }
 
-    // 0x001948e0
+    // NTSC-U/C: 0x001948e0, PAL: 0x0019a560
     virtual void Print(std::ostream &stream) {
         stream << "{GWFunc}";
     }
@@ -221,31 +221,31 @@ int FuncCmd::sCmdID;
  */
 class ExitCmd : public Sch::Command {
 public:
-    // 0x00194998
+    // NTSC-U/C: 0x00194998, PAL: 0x0019a618
     ExitCmd() {
     }
 
-    // 0x001949b8
+    // NTSC-U/C: 0x001949b8, PAL: 0x0019a638
     ExitCmd(int nMode, int bContinueJukebox, int bRestart)
         : mMode(nMode), mContinueJukebox(bContinueJukebox), mRestart(bRestart) {
     }
 
-    // 0x00194988
+    // NTSC-U/C: 0x00194988, PAL: 0x0019a608
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x001949e8
+    // NTSC-U/C: 0x001949e8, PAL: 0x0019a668
     virtual void Execute() {
         Application::shared()->GetWorld()->Exit(mMode, mContinueJukebox, mRestart);
     }
 
-    // 0x00194a28
+    // NTSC-U/C: 0x00194a28, PAL: 0x0019a6a8
     virtual void Print(std::ostream &stream) {
         stream << "{ExitCmd}";
     }
 
-    // 0x00194a50
+    // NTSC-U/C: 0x00194a50, PAL: 0x0019a6d0
     virtual void Save(OBStream &stream) {
         const int nMode = mMode;
         stream.Write(&nMode, sizeof(nMode));
@@ -253,7 +253,7 @@ public:
         stream << mRestart;
     }
 
-    // 0x00194ab8
+    // NTSC-U/C: 0x00194ab8, PAL: 0x0019a738
     virtual void Load(IBStream &stream) {
         int nMode;
         stream.Read(&nMode, sizeof(nMode));
@@ -262,7 +262,7 @@ public:
         stream >> mRestart;
     }
 
-    // 0x0018beb0
+    // NTSC-U/C: 0x0018beb0, PAL: 0x00191958
     // The factory the unit's static initialiser registers. The expanded default constructor sets
     // the reference count to 1 and leaves the three members unwritten.
     static Sch::Command *NewCmd() {
@@ -282,12 +282,12 @@ constexpr int kExitCmdId = 7;
 
 int ExitCmd::sCmdID = kExitCmdId;
 
-// 0x0067f250
+// NTSC-U/C: 0x0067f250, PAL: 0x006c0480
 const Sch::CommandFactory kExitCmdFactory(kExitCmdId, ExitCmd::NewCmd);
 
 } // namespace
 
-// 0x0018bef0
+// NTSC-U/C: 0x0018bef0, PAL: 0x00191998
 GrooveWorld::GrooveWorld(Application *pApp, GameStats *pStats)
     : mApp(pApp), mInputMap(nullptr), mTrackSelector(nullptr), mJoiner(nullptr), mLevel(nullptr),
       mNetSource(nullptr), mNetSink(nullptr), mDelayer(nullptr), mRenderer(nullptr),
@@ -299,12 +299,12 @@ GrooveWorld::GrooveWorld(Application *pApp, GameStats *pStats)
     mForceFeedback = new ForceFeedbackMgr;
 }
 
-// 0x0018c368
+// NTSC-U/C: 0x0018c368, PAL: 0x00191e40
 GrooveWorld::~GrooveWorld() {
     Shutdown();
 }
 
-// 0x001951e8
+// NTSC-U/C: 0x001951e8, PAL: 0x0019ae68
 void GrooveWorld::Shutdown() {
     if (mState == kStateEnded) {
         StopLevel();
@@ -318,7 +318,7 @@ void GrooveWorld::Shutdown() {
     DestroyNoteDestroyer();
 }
 
-// 0x0018dc88
+// NTSC-U/C: 0x0018dc88, PAL: 0x001937a0
 void GrooveWorld::PrepareLevel() {
     Ps2HardSynth *pSynth = mApp->GetSynth();
     pSynth->LoadBankSet5();
@@ -339,7 +339,7 @@ void GrooveWorld::PrepareLevel() {
     mState = kStatePrepared;
 }
 
-// 0x0018de38
+// NTSC-U/C: 0x0018de38, PAL: 0x00193968
 void GrooveWorld::StartPlay() {
     mInputMap->DisableEntries();
     mApp->GetWatchdog()->Flush();
@@ -383,7 +383,7 @@ void GrooveWorld::StartPlay() {
     mForceFeedback->StartMetronome(Mid::MBT(kMetronomeLeadTicks));
 }
 
-// 0x0018ed98
+// NTSC-U/C: 0x0018ed98, PAL: 0x001948e8
 void GrooveWorld::OnControllerReading(int nTag, int nPadIndex, int nButton, float flValue) {
     if (mState != kStatePlaying) {
         return;
@@ -428,7 +428,7 @@ void GrooveWorld::OnControllerReading(int nTag, int nPadIndex, int nButton, floa
     Attachment::ReleaseIfSet(pCommand);
 }
 
-// 0x0018f078
+// NTSC-U/C: 0x0018f078, PAL: 0x00194bc8
 void GrooveWorld::ReplayControllerReading(const MetControllerReading *pReading) {
     if (mInputMap == nullptr || mState != kStatePlaying) {
         return;
@@ -440,7 +440,7 @@ void GrooveWorld::ReplayControllerReading(const MetControllerReading *pReading) 
     mInputMap->Handle(&msg);
 }
 
-// 0x0018e368
+// NTSC-U/C: 0x0018e368, PAL: 0x00193e98
 void GrooveWorld::PostExit(int nMode, int bContinueJukebox, int bRestart) {
     if (mState != kStatePlaying) {
         return;
@@ -457,7 +457,7 @@ void GrooveWorld::PostExit(int nMode, int bContinueJukebox, int bRestart) {
     Attachment::ReleaseIfSet(pCommand);
 }
 
-// 0x0018e478
+// NTSC-U/C: 0x0018e478, PAL: 0x00193fb0
 void GrooveWorld::Exit(int nMode, int bContinueJukebox, int bRestart) {
     mExitMode = nMode;
     mContinueJukebox = bContinueJukebox;
@@ -501,7 +501,7 @@ void GrooveWorld::Exit(int nMode, int bContinueJukebox, int bRestart) {
     Attachment::ReleaseIfSet(pFinish);
 }
 
-// 0x00195388
+// NTSC-U/C: 0x00195388, PAL: 0x0019b008
 void GrooveWorld::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nCripplePacketType) {
@@ -511,17 +511,17 @@ void GrooveWorld::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x00195348
+// NTSC-U/C: 0x00195348, PAL: 0x0019afc8
 void GrooveWorld::OnCripplePacket(Message *pMsg) {
     mDelayer->Handle(pMsg);
 }
 
-// 0x00194b50
+// NTSC-U/C: 0x00194b50, PAL: 0x0019a7d0
 void GrooveWorld::OnBumpPacket(Message *pMsg) {
     mTrackSelector->Handle(pMsg);
 }
 
-// 0x00194b80
+// NTSC-U/C: 0x00194b80, PAL: 0x0019a800
 void GrooveWorld::SetNetLink(MsgSink *pSink, MsgSource *pSource) {
     mNetSink = pSink;
     if (mApp->GetGameMode() == kGameModeNet) {
@@ -531,7 +531,7 @@ void GrooveWorld::SetNetLink(MsgSink *pSink, MsgSource *pSource) {
     }
 }
 
-// 0x00194bc8
+// NTSC-U/C: 0x00194bc8, PAL: 0x0019a848
 void GrooveWorld::StartLoad(const HxStr &path) {
     mLevel = new LevelBuilder(QueryConfigValue(kTrackCountQuery));
     mLevelPath = path;
@@ -545,7 +545,7 @@ void GrooveWorld::StartLoad(const HxStr &path) {
     mState = kStateLoading;
 }
 
-// 0x00194ca0
+// NTSC-U/C: 0x00194ca0, PAL: 0x0019a920
 int GrooveWorld::IsLoadDone() {
     AsyncPumpCompletedRequests();
     const int nResult = AsyncPollComplete(mLoadHandle, &mLoadBuffer, &mLoadSize);
@@ -559,7 +559,7 @@ int GrooveWorld::IsLoadDone() {
     return 0;
 }
 
-// 0x00194d00
+// NTSC-U/C: 0x00194d00, PAL: 0x0019a980
 void GrooveWorld::FinishLoad() {
     LevelConverter converter;
     if (QueryConfigFlag(kLevelConverterOptionQuery) != 0) {
@@ -579,7 +579,7 @@ void GrooveWorld::FinishLoad() {
     mLoadSize = 0;
 }
 
-// 0x0018c828
+// NTSC-U/C: 0x0018c828, PAL: 0x00192320
 void GrooveWorld::ConnectPlayers() {
     for (std::vector<Player *>::iterator it = mPlayers.begin(); it != mPlayers.end(); ++it) {
         Player *pPlayer = *it;
@@ -597,7 +597,7 @@ void GrooveWorld::ConnectPlayers() {
     }
 }
 
-// 0x0018c960
+// NTSC-U/C: 0x0018c960, PAL: 0x00192458
 void GrooveWorld::DisconnectPlayers() {
     for (std::vector<Player *>::iterator it = mPlayers.begin(); it != mPlayers.end(); ++it) {
         Player *pPlayer = *it;
@@ -615,14 +615,14 @@ void GrooveWorld::DisconnectPlayers() {
     }
 }
 
-// 0x0018c778
+// NTSC-U/C: 0x0018c778, PAL: 0x00192270
 void GrooveWorld::DeletePlayers() {
     std::for_each(mPlayers.begin(), mPlayers.end(), Player::Delete);
     mPlayers.clear();
     mLocalPlayers.clear();
 }
 
-// 0x0018cce8
+// NTSC-U/C: 0x0018cce8, PAL: 0x001927e0
 void GrooveWorld::BuildGraphs() {
     CallScriptTemplate(kPlayerCountTemplate, mPlayers.size());
     if (mLevel == nullptr) {
@@ -743,7 +743,7 @@ void GrooveWorld::BuildGraphs() {
     mGamer->CreateEnableMgr(&mTrackGraphs);
 }
 
-// 0x0018caa8
+// NTSC-U/C: 0x0018caa8, PAL: 0x001925a0
 void GrooveWorld::CreateRenderer() {
     mRenderer = new Renderer;
     mDelayer->AddSink(mRenderer);
@@ -764,7 +764,7 @@ void GrooveWorld::CreateRenderer() {
     }
 }
 
-// 0x0018da60
+// NTSC-U/C: 0x0018da60, PAL: 0x00193578
 void GrooveWorld::DestroyGraphs() {
     std::for_each(mTrackGraphs.begin(), mTrackGraphs.end(), ScoreTrackGraph::Delete);
     std::for_each(mBackingGraphs.begin(), mBackingGraphs.end(), BGTrackGraph::Delete);
@@ -793,7 +793,7 @@ void GrooveWorld::DestroyGraphs() {
     }
 }
 
-// 0x0018e238
+// NTSC-U/C: 0x0018e238, PAL: 0x00193d68
 void GrooveWorld::StartSequencers() {
     std::for_each(
         mIntroGraphs.begin(), mIntroGraphs.end(), std::mem_fn(&BGTrackGraph::CallDeleteSequencer));
@@ -808,7 +808,7 @@ void GrooveWorld::StartSequencers() {
     mGamer->Start();
 }
 
-// 0x0018e6f0
+// NTSC-U/C: 0x0018e6f0, PAL: 0x00194228
 void GrooveWorld::FinishSong() {
     if (QueryConfigFlag(kStreamedAudioQuery) != 0) {
         StopSoundBankMovie();
@@ -866,7 +866,7 @@ void GrooveWorld::FinishSong() {
     }
 }
 
-// 0x0018eb70
+// NTSC-U/C: 0x0018eb70, PAL: 0x001946c0
 void GrooveWorld::EndLevel() {
     if (mExitMode == kExitModeRestart) {
         const Color black{0.0f, 0.0f, 0.0f, kOpaque};
@@ -885,7 +885,7 @@ void GrooveWorld::EndLevel() {
     }
 }
 
-// 0x0018ec90
+// NTSC-U/C: 0x0018ec90, PAL: 0x001947e0
 void GrooveWorld::StopLevel() {
     DisconnectPlayers();
     if (mDelayer != nullptr) {
@@ -902,7 +902,7 @@ void GrooveWorld::StopLevel() {
     mState = kStateLoaded;
 }
 
-// 0x0018f140
+// NTSC-U/C: 0x0018f140, PAL: 0x00194c90
 void GrooveWorld::DisplayText(const HxStr &text) {
     if (mDelayer != nullptr) {
         TextMsg msg(text);
@@ -910,12 +910,12 @@ void GrooveWorld::DisplayText(const HxStr &text) {
     }
 }
 
-// 0x001937a8
+// NTSC-U/C: 0x001937a8, PAL: 0x001993d0
 HxStr GrooveWorld::GetSongName() const {
     return mSongName;
 }
 
-// 0x00194de8
+// NTSC-U/C: 0x00194de8, PAL: 0x0019aa68
 void GrooveWorld::AddNetPlayer(int nId,
                                [[maybe_unused]] int nUnused,
                                const HxStr &name,
@@ -925,7 +925,7 @@ void GrooveWorld::AddNetPlayer(int nId,
     mPlayers.push_back(pPlayer);
 }
 
-// 0x0018c600
+// NTSC-U/C: 0x0018c600, PAL: 0x001920f8
 void GrooveWorld::AddLocalPlayer(int nId,
                                  int nInputSlot,
                                  [[maybe_unused]] int nUnused,
@@ -942,7 +942,7 @@ void GrooveWorld::AddLocalPlayer(int nId,
     mLocalPlayers.push_back(pPlayer);
 }
 
-// 0x00194ef0
+// NTSC-U/C: 0x00194ef0, PAL: 0x0019ab70
 void GrooveWorld::RemovePlayer(int nId) {
     for (std::vector<Player *>::iterator it = mPlayers.begin(); it != mPlayers.end(); ++it) {
         if ((*it)->mPlayerId == nId) {
@@ -952,7 +952,7 @@ void GrooveWorld::RemovePlayer(int nId) {
     }
 }
 
-// 0x00194f88
+// NTSC-U/C: 0x00194f88, PAL: 0x0019ac08
 void GrooveWorld::DestroyRenderer() {
     if (mDelayer != nullptr) {
         mDelayer->RemoveSink(GetRendererSink());
@@ -964,7 +964,7 @@ void GrooveWorld::DestroyRenderer() {
     mRenderer = nullptr;
 }
 
-// 0x00195058
+// NTSC-U/C: 0x00195058, PAL: 0x0019acd8
 void GrooveWorld::SavePhrases(OBStream &stream) {
     for (std::vector<ScoreTrackGraph *>::iterator it = mTrackGraphs.begin();
          it != mTrackGraphs.end();
@@ -973,7 +973,7 @@ void GrooveWorld::SavePhrases(OBStream &stream) {
     }
 }
 
-// 0x001950c0
+// NTSC-U/C: 0x001950c0, PAL: 0x0019ad40
 void GrooveWorld::LoadPhrases(IBStream &stream, int bClearOwners) {
     for (std::vector<ScoreTrackGraph *>::iterator it = mTrackGraphs.begin();
          it != mTrackGraphs.end();
@@ -986,47 +986,47 @@ void GrooveWorld::LoadPhrases(IBStream &stream, int bClearOwners) {
     }
 }
 
-// 0x00195150
+// NTSC-U/C: 0x00195150, PAL: 0x0019add0
 void GrooveWorld::EnableInput() {
     mInputMap->EnableEntries();
 }
 
-// 0x00195170
+// NTSC-U/C: 0x00195170, PAL: 0x0019adf0
 void GrooveWorld::PostFinish() {
     PostExit(kExitModeFinish, mContinueJukebox, 0);
 }
 
-// 0x00195198
+// NTSC-U/C: 0x00195198, PAL: 0x0019ae18
 void GrooveWorld::PostQuit() {
     PostExit(kExitModeQuit, 0, 0);
 }
 
-// 0x001951c0
+// NTSC-U/C: 0x001951c0, PAL: 0x0019ae40
 void GrooveWorld::PostRestart() {
     PostExit(kExitModeRestart, 0, 1);
 }
 
-// 0x001952a0
+// NTSC-U/C: 0x001952a0, PAL: 0x0019af20
 Sch::TickClock *GrooveWorld::GetSongClock() {
     return mSongClock;
 }
 
-// 0x001952a8
+// NTSC-U/C: 0x001952a8, PAL: 0x0019af28
 PlayMap *GrooveWorld::GetPlayMap() {
     return mLevel->GetPlayMap();
 }
 
-// 0x001952d8
+// NTSC-U/C: 0x001952d8, PAL: 0x0019af58
 LevelData *GrooveWorld::GetLevel() {
     return mLevel;
 }
 
-// 0x001952e0
+// NTSC-U/C: 0x001952e0, PAL: 0x0019af60
 RendererBase *GrooveWorld::GetRendererSink() {
     return mRenderer;
 }
 
-// 0x00195378
+// NTSC-U/C: 0x00195378, PAL: 0x0019aff8
 void GrooveWorld::MarkStatsFlag() {
     mStats->mRemixEdited = 1;
 }

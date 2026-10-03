@@ -26,7 +26,8 @@ public:
      * @param pTrackData The track description.
      * @param pClock The clock the scheduled commands run on.
      * @param tick The scheduler time the base retains.
-     * @ghidraAddress 0x001b19b0
+     * @ghidraAddress NTSC-U/C: 0x001b19b0
+     * @ghidraAddress PAL: 0x001b7770
      */
     SingleCatcher(PhraseMgr *pPhraseMgr,
                   Quantizer *pQuantizer,
@@ -35,7 +36,8 @@ public:
                   Sch::Tick tick);
 
     /**
-     * @ghidraAddress 0x001b0d30
+     * @ghidraAddress NTSC-U/C: 0x001b0d30
+     * @ghidraAddress PAL: 0x001b6ae0
      */
     virtual ~SingleCatcher();
 
@@ -51,7 +53,8 @@ public:
      * @param nRun The bars the run spans.
      * @param nAutoCatch Non-zero for an automatic catch. The PhraseCapturedMsg receives it inverted
      *                   and the SectionCapturedMsg unchanged.
-     * @ghidraAddress 0x001ad630
+     * @ghidraAddress NTSC-U/C: 0x001ad630
+     * @ghidraAddress PAL: 0x001b3398
      */
     virtual void CapturePhrase(int nBar, int nRun, int nAutoCatch);
 
@@ -63,7 +66,8 @@ public:
      * same message to the player directly through MsgSink::Handle().
      *
      * @param nBar The caught bar.
-     * @ghidraAddress 0x001ad840
+     * @ghidraAddress NTSC-U/C: 0x001ad840
+     * @ghidraAddress PAL: 0x001b35a8
      */
     virtual void ReportCaughtPowerbar(int nBar);
 
@@ -76,7 +80,8 @@ public:
      *
      * @param nTick The song position the caller received, unread.
      * @param pPlayer The player the phrases go to.
-     * @ghidraAddress 0x001b1a40
+     * @ghidraAddress NTSC-U/C: 0x001b1a40
+     * @ghidraAddress PAL: 0x001b7800
      */
     void ResetOwners(int nTick, Player *pPlayer);
 

@@ -42,12 +42,14 @@ public:
      * @param pClock The clock the riffer schedules against.
      * @param pQuantizer The quantiser for the track.
      * @param pTrackData The track description.
-     * @ghidraAddress 0x00199040
+     * @ghidraAddress NTSC-U/C: 0x00199040
+     * @ghidraAddress PAL: 0x0019eda8
      */
     AutoRiffer(Sch::TickClock *pClock, Quantizer *pQuantizer, const TrackData *pTrackData);
 
     /**
-     * @ghidraAddress 0x0019a3d0
+     * @ghidraAddress NTSC-U/C: 0x0019a3d0
+     * @ghidraAddress PAL: 0x001a0138
      */
     virtual ~AutoRiffer();
 
@@ -55,7 +57,8 @@ public:
      * Act on a message.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x00199910
+     * @ghidraAddress NTSC-U/C: 0x00199910
+     * @ghidraAddress PAL: 0x0019f678
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -67,7 +70,8 @@ public:
      * AxeButtonMsg for mPlayer that releases every button.
      *
      * @param nTick The song position the command was scheduled for.
-     * @ghidraAddress 0x00199688
+     * @ghidraAddress NTSC-U/C: 0x00199688
+     * @ghidraAddress PAL: 0x0019f3f0
      */
     void OnCommand(int nTick);
 
@@ -77,43 +81,44 @@ public:
      * The image has no caller. AxingSTG calls MsgSource::AddSink() on mSource directly.
      *
      * @param pSink The sink.
-     * @ghidraAddress 0x0019a508
+     * @ghidraAddress NTSC-U/C: 0x0019a508
+     * @ghidraAddress PAL: 0x001a0270
      */
     void AddSink(MsgSink *pSink);
 
 private:
     // Starts the riff of the message's level at its quantised position for this track's player.
     // A bar AxePhraseMaker::IsBarPlayable() rejects plays SND_INACTIVE instead.
-    // 0x00199160
+    // NTSC-U/C: 0x00199160, PAL: 0x0019eec8
     void OnPitchRiff(PitchRiffMsg *pMsg);
 
     // Clears the held flag of the message's level and switches to the lowest held level's riff at
     // the quantised position. With no level held it sends an AllNotesOffMsg, withdraws mCommand,
     // and releases the button, without the flag reset StopRiff() performs.
-    // 0x001992e0
+    // NTSC-U/C: 0x001992e0, PAL: 0x0019f048
     void OnStopRiff(StopRiffMsg *pMsg);
 
     // Stops the riff and hands the erase to AxePhraseMaker::Erase() when the bar is playable.
-    // 0x00199480
+    // NTSC-U/C: 0x00199480, PAL: 0x0019f1e8
     void OnErase(EraseMsg *pMsg);
 
     // When a riff is playing, clears every held flag, sends an AllNotesOffMsg, withdraws
     // mCommand, and releases every button with an AxeButtonMsg.
-    // 0x00199590
+    // NTSC-U/C: 0x00199590, PAL: 0x0019f2f8
     void StopRiff(int nTick);
 
     // Sends an AllNotesOffMsg to mSynth and the current riff as a MultiMuseMsg, then schedules
     // the file-local Cmd at the end of the riff after the rounded position.
-    // 0x00199758
+    // NTSC-U/C: 0x00199758, PAL: 0x0019f4c0
     void PlayRiff(int nTick);
 
     // The out-of-line copy of the GameOverMsg branch HandleMessage() expands inline. It stops the
     // riff at position zero and reads nothing from the message.
-    // 0x0019a920
+    // NTSC-U/C: 0x0019a920, PAL: 0x001a0688
     void OnGameOver();
 
     // The out-of-line copy of the TrackSelectMsg branch HandleMessage() expands inline.
-    // 0x0019a898
+    // NTSC-U/C: 0x0019a898, PAL: 0x001a0600
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
     int mTrack;                  // +0x04, copied from TrackData::mIndex

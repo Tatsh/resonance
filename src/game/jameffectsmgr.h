@@ -34,7 +34,8 @@ public:
      * @param pPlayMap The play map, from Globals::GetPlayMap().
      * @param pPhraseMgr The phrase manager whose step values the effects follow.
      * @param pSink The sink every effect sends its MIDI to, the stage's synthesiser.
-     * @ghidraAddress 0x001a5020
+     * @ghidraAddress NTSC-U/C: 0x001a5020
+     * @ghidraAddress PAL: 0x001aad88
      */
     JamEffectsMgr(int nTrack,
                   unsigned char nChannel,
@@ -45,7 +46,8 @@ public:
     /**
      * Delete every effect.
      *
-     * @ghidraAddress 0x001a5378
+     * @ghidraAddress NTSC-U/C: 0x001a5378
+     * @ghidraAddress PAL: 0x001ab0e0
      */
     virtual ~JamEffectsMgr();
 
@@ -55,7 +57,8 @@ public:
      * Slot 3. A JamEffectMsg goes to PostRemixFxMsg(), and every other message is discarded.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001a63d0
+     * @ghidraAddress NTSC-U/C: 0x001a63d0
+     * @ghidraAddress PAL: 0x001ac138
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -67,7 +70,8 @@ public:
      * through a `std::bitset` reference built on the stack. The title is inferred.
      *
      * @param nMask The step's mask, one bit per effect type.
-     * @ghidraAddress 0x001a56d8
+     * @ghidraAddress NTSC-U/C: 0x001a56d8
+     * @ghidraAddress PAL: 0x001ab440
      */
     void ApplyStepMask(long long nMask);
 
@@ -76,15 +80,15 @@ private:
     // enables or disables the effect to match, sends an InvalidateTrackMsg for the whole song to
     // the phrase manager, and sends a RemixFXMsg. An effect type from 5 through 10 also marks the
     // world's statistics.
-    // 0x001a54d8
+    // NTSC-U/C: 0x001a54d8, PAL: 0x001ab240
     void PostRemixFxMsg(JamEffectMsg *pMsg);
 
     // Returns the first effect whose Type() is nType, or null.
-    // 0x001a62d8
+    // NTSC-U/C: 0x001a62d8, PAL: 0x001ac040
     Effector *FindEffector(int nType);
 
     // Passes one flag to every effect's Enable(). The image has no caller.
-    // 0x001a6350
+    // NTSC-U/C: 0x001a6350, PAL: 0x001ac0b8
     void EnableAll(int bEnabled);
 
     PlayMap *mPlayMap;                  // +0x18, not read by any recovered routine

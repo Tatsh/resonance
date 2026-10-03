@@ -1,17 +1,17 @@
 #include "game/screenanim.h"
 
-// 0x0040c520
+// NTSC-U/C: 0x0040c520, PAL: 0x00445f48
 ScreenAnim::~ScreenAnim() {
 }
 
-// 0x0040c550
+// NTSC-U/C: 0x0040c550, PAL: 0x00445f78
 void ScreenAnim::SetFrame(float) {
 }
 
-// 0x0040c558
+// NTSC-U/C: 0x0040c558, PAL: 0x00445f80
 void ScreenAnim::SetLevel(int) {
 }
 
-// 0x0040c560
+// NTSC-U/C: 0x0040c560, PAL: 0x00445f88
 void ScreenAnim::UpdateLeaders() {
 }

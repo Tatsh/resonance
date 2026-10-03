@@ -1,5 +1,5 @@
 #include "game/inputcheatdetectormet.h"
 
-// 0x003d4788
+// NTSC-U/C: 0x003d4788, PAL: 0x0040c678
 void InputCheatDetectorMet::UnusedHook() {
 }

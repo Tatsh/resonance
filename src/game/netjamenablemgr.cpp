@@ -18,7 +18,7 @@ constexpr int kMaxTrackCount = 12;
 
 } // namespace
 
-// 0x00102790
+// NTSC-U/C: 0x00102790, PAL: 0x00102790
 NetJamEnableMgr::NetJamEnableMgr(int nTrackCount,
                                  int nMaxOwned,
                                  const std::vector<int> *pOpenTracks,
@@ -32,7 +32,7 @@ NetJamEnableMgr::NetJamEnableMgr(int nTrackCount,
         std::vector<std::vector<int> >(nSectionCount, std::vector<int>(mTrackCount, kNoOwner));
 }
 
-// 0x00105958
+// NTSC-U/C: 0x00105958, PAL: 0x00105958
 NetJamEnableMgr *NetJamEnableMgr::Create(int nTrackCount,
                                          int nMaxOwned,
                                          const std::vector<int> *pOpenTracks,
@@ -40,12 +40,12 @@ NetJamEnableMgr *NetJamEnableMgr::Create(int nTrackCount,
     return new NetJamEnableMgr(nTrackCount, nMaxOwned, pOpenTracks, pGamer);
 }
 
-// 0x00105b08
+// NTSC-U/C: 0x00105b08, PAL: 0x00105b08
 int NetJamEnableMgr::FindSection(int nBar) {
     return std::upper_bound(mSteps->begin(), mSteps->end(), nBar) - 1 - mSteps->begin();
 }
 
-// 0x00105a98
+// NTSC-U/C: 0x00105a98, PAL: 0x00105a98
 int NetJamEnableMgr::IsTrackAvailable(int nTrack, int nSection) {
     const std::vector<int> &owners = mOwners[nSection];
     const int nOwner = owners[nTrack];
@@ -58,7 +58,7 @@ int NetJamEnableMgr::IsTrackAvailable(int nTrack, int nSection) {
     return std::count(owners.begin(), owners.end(), mLocalId) < mMaxOwned;
 }
 
-// 0x00103158
+// NTSC-U/C: 0x00103158, PAL: 0x00103158
 void NetJamEnableMgr::SetBarOwner(int nTrack, int nBar, Player *) {
     if (mOpenTracks.size() < static_cast<unsigned>(mTrackCount)) {
         return;
@@ -88,7 +88,7 @@ void NetJamEnableMgr::SetBarOwner(int nTrack, int nBar, Player *) {
     }
 }
 
-// 0x001059f0
+// NTSC-U/C: 0x001059f0, PAL: 0x001059f0
 int NetJamEnableMgr::QueryBar(int nTrack, int nBar) {
     if (mOpenTracks.size() < static_cast<unsigned>(mTrackCount)) {
         return std::find(mOpenTracks.begin(), mOpenTracks.end(), nTrack) != mOpenTracks.end();

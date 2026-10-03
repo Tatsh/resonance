@@ -47,11 +47,15 @@ public:
      * @param nId The identifier, also recorded in mPlayerId.
      * @param colorName The player's colour name.
      * @param pAppearance The appearance the player is drawn with.
-     * @ghidraAddress 0x0012f5c0
+     * @ghidraAddress NTSC-U/C: 0x0012f5c0
+     * @ghidraAddress PAL: 0x0012fd78
      */
     Player(int nId, const HxStr &colorName, const FreqAppearance *pAppearance);
 
-    /** @ghidraAddress 0x00132ae8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00132ae8
+     * @ghidraAddress PAL: 0x00133318
+     */
     virtual ~Player();
 
     /**
@@ -61,7 +65,8 @@ public:
      * its constructor received, and InputMap matches a controller reading against it.
      *
      * @return The input slot, or kNoInputSlot.
-     * @ghidraAddress 0x00132c20
+     * @ghidraAddress NTSC-U/C: 0x00132c20
+     * @ghidraAddress PAL: 0x00133460
      */
     virtual int GetInputSlot();
 
@@ -72,7 +77,8 @@ public:
      * write "{player null}", which is what recovers the verb.
      *
      * @return Non-zero when this player is a stand-in.
-     * @ghidraAddress 0x00132c60
+     * @ghidraAddress NTSC-U/C: 0x00132c60
+     * @ghidraAddress PAL: 0x001334a0
      */
     virtual int IsNull();
 
@@ -83,7 +89,8 @@ public:
      * for the player chose, and powerups deploy and riffs play on it.
      *
      * @return The track, or -1.
-     * @ghidraAddress 0x00132c98
+     * @ghidraAddress NTSC-U/C: 0x00132c98
+     * @ghidraAddress PAL: 0x001334d8
      */
     virtual int GetTrack();
 
@@ -94,7 +101,8 @@ public:
      * TrackSelectMsg for the player, the place that TrackSelectPacket includes beside the track.
      *
      * @return The place.
-     * @ghidraAddress 0x00132ca0
+     * @ghidraAddress NTSC-U/C: 0x00132ca0
+     * @ghidraAddress PAL: 0x001334e0
      */
     virtual int GetPlace();
 
@@ -105,7 +113,8 @@ public:
      * The title records that the slot is unused.
      *
      * @return Always 0.
-     * @ghidraAddress 0x00132ca8
+     * @ghidraAddress NTSC-U/C: 0x00132ca8
+     * @ghidraAddress PAL: 0x001334e8
      */
     virtual int UnusedQuery();
 
@@ -115,7 +124,8 @@ public:
      * Slot 7. LocalPlayer's override is also empty, and the image has no caller of the slot. The
      * title records that the slot is unused.
      *
-     * @ghidraAddress 0x00132cb0
+     * @ghidraAddress NTSC-U/C: 0x00132cb0
+     * @ghidraAddress PAL: 0x001334f0
      */
     virtual void UnusedHook();
 
@@ -128,7 +138,8 @@ public:
      *
      * @param nStartBar The first bar of the span.
      * @param nEndBar The bar after the span.
-     * @ghidraAddress 0x00132cb8
+     * @ghidraAddress NTSC-U/C: 0x00132cb8
+     * @ghidraAddress PAL: 0x001334f8
      */
     virtual void SetFreestyleSpan(int nStartBar, int nEndBar);
 
@@ -140,7 +151,8 @@ public:
      *
      * @param nBar The bar.
      * @return Non-zero when the bar is in the span.
-     * @ghidraAddress 0x00132cc0
+     * @ghidraAddress NTSC-U/C: 0x00132cc0
+     * @ghidraAddress PAL: 0x00133500
      */
     virtual int IsFreestyleBar(int nBar);
 
@@ -151,7 +163,8 @@ public:
      * maintain.
      *
      * @return Non-zero when looping.
-     * @ghidraAddress 0x00132cc8
+     * @ghidraAddress NTSC-U/C: 0x00132cc8
+     * @ghidraAddress PAL: 0x00133508
      */
     virtual int IsLooping();
 
@@ -162,7 +175,8 @@ public:
      * clamped to a maximum of 800, and sends it through the `MsgSource` subobject. LocalPlayer adds
      * its track, powerups, score ceiling, ghost, and loop state.
      *
-     * @ghidraAddress 0x0012f788
+     * @ghidraAddress NTSC-U/C: 0x0012f788
+     * @ghidraAddress PAL: 0x0012ff40
      */
     virtual void AnnounceState();
 
@@ -173,7 +187,8 @@ public:
      * PowerupPlacer::Activate() that AnnounceState() runs. The image has no caller of the slot but
      * CallDeactivatePlacer(), itself uncalled. The title is inferred from the forwarding alone.
      *
-     * @ghidraAddress 0x00132d30
+     * @ghidraAddress NTSC-U/C: 0x00132d30
+     * @ghidraAddress PAL: 0x00133570
      */
     virtual void DeactivatePlacer();
 
@@ -185,7 +200,8 @@ public:
      * are what attest both this routine and IsNull().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00133110
+     * @ghidraAddress NTSC-U/C: 0x00133110
+     * @ghidraAddress PAL: 0x00133960
      */
     virtual void Print(std::ostream &stream);
 
@@ -198,7 +214,8 @@ public:
      * value is faithful to the image rather than a reconstruction error.
      *
      * @return The new count.
-     * @ghidraAddress 0x00132d70
+     * @ghidraAddress NTSC-U/C: 0x00132d70
+     * @ghidraAddress PAL: 0x001335b0
      */
     virtual int CountCaughtGem();
 
@@ -209,7 +226,8 @@ public:
      * here, as with CountCaughtGem(). LocalPlayer increments its count and returns the new value.
      *
      * @return The new count.
-     * @ghidraAddress 0x00132d78
+     * @ghidraAddress NTSC-U/C: 0x00132d78
+     * @ghidraAddress PAL: 0x001335b8
      */
     virtual int CountMissedGem();
 
@@ -221,7 +239,8 @@ public:
      *
      * @param nBar The bar.
      * @return The multiplier.
-     * @ghidraAddress 0x00132d80
+     * @ghidraAddress NTSC-U/C: 0x00132d80
+     * @ghidraAddress PAL: 0x001335c0
      */
     virtual int GetMultiplier(int nBar);
 
@@ -231,7 +250,8 @@ public:
      * Slot 17. Returns zero here. Gamer records it as the solo tally.
      *
      * @return The streak.
-     * @ghidraAddress 0x00132d88
+     * @ghidraAddress NTSC-U/C: 0x00132d88
+     * @ghidraAddress PAL: 0x001335c8
      */
     virtual int GetBestStreak();
 
@@ -241,7 +261,8 @@ public:
      * Slot 18. Returns 0.0f here. Gamer records it as the solo ratio.
      *
      * @return A fraction between 0 and 1.
-     * @ghidraAddress 0x00132d90
+     * @ghidraAddress NTSC-U/C: 0x00132d90
+     * @ghidraAddress PAL: 0x001335d0
      */
     virtual float GetCaptureRatio();
 
@@ -251,7 +272,8 @@ public:
      * Slot 19. Returns zero here.
      *
      * @return The game mode.
-     * @ghidraAddress 0x00132da0
+     * @ghidraAddress NTSC-U/C: 0x00132da0
+     * @ghidraAddress PAL: 0x001335e0
      */
     virtual int GetGameMode();
 
@@ -263,7 +285,8 @@ public:
      *
      * @param nBar The bar.
      * @return Non-zero when the bar is later than every bar recorded before.
-     * @ghidraAddress 0x00132db0
+     * @ghidraAddress NTSC-U/C: 0x00132db0
+     * @ghidraAddress PAL: 0x001335f0
      */
     virtual int MarkBarScored(int nBar);
 
@@ -276,7 +299,8 @@ public:
      * message is discarded.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x00133240
+     * @ghidraAddress NTSC-U/C: 0x00133240
+     * @ghidraAddress PAL: 0x00133a90
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -311,7 +335,8 @@ public:
      * announced maximum.
      *
      * @return The juice.
-     * @ghidraAddress 0x001330f8
+     * @ghidraAddress NTSC-U/C: 0x001330f8
+     * @ghidraAddress PAL: 0x00133948
      */
     int GetJuice();
 
@@ -322,7 +347,8 @@ public:
      * scores of every world player through this accessor to find the leader.
      *
      * @return The score.
-     * @ghidraAddress 0x001330e0
+     * @ghidraAddress NTSC-U/C: 0x001330e0
+     * @ghidraAddress PAL: 0x00133930
      */
     int GetScore();
 
@@ -333,7 +359,8 @@ public:
      *
      * @param nScore The score.
      * @param nMaxScore The ceiling.
-     * @ghidraAddress 0x001330e8
+     * @ghidraAddress NTSC-U/C: 0x001330e8
+     * @ghidraAddress PAL: 0x00133938
      */
     void SetScore(int nScore, int nMaxScore);
 
@@ -345,7 +372,8 @@ public:
      *
      * @param nJuice The juice.
      * @param nMaxJuice The ceiling.
-     * @ghidraAddress 0x00133100
+     * @ghidraAddress NTSC-U/C: 0x00133100
+     * @ghidraAddress PAL: 0x00133950
      */
     void SetJuice(int nJuice, int nMaxJuice);
 
@@ -358,7 +386,8 @@ public:
      *
      * @param nAmount The juice to add, which may be negative.
      * @param bNotify Non-zero to also send the UpdateScorePacket.
-     * @ghidraAddress 0x0012f970
+     * @ghidraAddress NTSC-U/C: 0x0012f970
+     * @ghidraAddress PAL: 0x00130128
      */
     void AddJuice(int nAmount, int bNotify);
 
@@ -371,7 +400,8 @@ public:
      *
      * @param nDelta The points to add, which may be negative.
      * @param bNotify Non-zero to also send the UpdateScorePacket.
-     * @ghidraAddress 0x0012f808
+     * @ghidraAddress NTSC-U/C: 0x0012f808
+     * @ghidraAddress PAL: 0x0012ffc0
      */
     void AddScore(int nDelta, int bNotify);
 
@@ -382,7 +412,8 @@ public:
      * inferred.
      *
      * @param pMsg The capture.
-     * @ghidraAddress 0x001331c8
+     * @ghidraAddress NTSC-U/C: 0x001331c8
+     * @ghidraAddress PAL: 0x00133a18
      */
     void AwardCapture(PhraseCapturedMsg *pMsg);
 
@@ -393,7 +424,8 @@ public:
      * out-of-line copy. The title is inferred.
      *
      * @return Non-zero when GetInputSlot() reports a value other than -1.
-     * @ghidraAddress 0x00132c30
+     * @ghidraAddress NTSC-U/C: 0x00132c30
+     * @ghidraAddress PAL: 0x00133470
      */
     int HasInputSlot() {
         return GetInputSlot() != kNoInputSlot;
@@ -406,7 +438,8 @@ public:
      * the out-of-line copy at this address. The title is inferred.
      *
      * @param pPlayer The player to delete, or null.
-     * @ghidraAddress 0x00132d38
+     * @ghidraAddress NTSC-U/C: 0x00132d38
+     * @ghidraAddress PAL: 0x00133578
      */
     static void Delete(Player *pPlayer) {
         delete pPlayer;
@@ -418,7 +451,8 @@ public:
      * Inline. The address is its uncalled out-of-line copy. The title is inferred.
      *
      * @return mColorName, by value.
-     * @ghidraAddress 0x00132c68
+     * @ghidraAddress NTSC-U/C: 0x00132c68
+     * @ghidraAddress PAL: 0x001334a8
      */
     HxStr GetColorName();
 
@@ -428,7 +462,8 @@ public:
      * Inline. The address is its uncalled out-of-line copy. The title is inferred.
      *
      * @return FreqAppearance::mUserName of mAppearance, by value.
-     * @ghidraAddress 0x001330a8
+     * @ghidraAddress NTSC-U/C: 0x001330a8
+     * @ghidraAddress PAL: 0x001338f8
      */
     HxStr GetUsername();
 
@@ -438,7 +473,8 @@ public:
      * Inline. The address is its uncalled out-of-line copy.
      *
      * @return Always 0.
-     * @ghidraAddress 0x00132cd0
+     * @ghidraAddress NTSC-U/C: 0x00132cd0
+     * @ghidraAddress PAL: 0x00133510
      */
     int CallAnnounceState();
 
@@ -448,12 +484,13 @@ public:
      * Inline. The address is its uncalled out-of-line copy.
      *
      * @return Always 0.
-     * @ghidraAddress 0x00132d00
+     * @ghidraAddress NTSC-U/C: 0x00132d00
+     * @ghidraAddress PAL: 0x00133540
      */
     int CallDeactivatePlacer();
 
 private:
-    // 0x00133210
+    // NTSC-U/C: 0x00133210, PAL: 0x00133a60
     // Inline, and HandleMessage() expands it. Adds the packet's delta without notifying when the
     // packet names this player.
     void OnUpdateScore(UpdateScorePacket *pPacket);

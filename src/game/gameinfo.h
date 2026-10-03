@@ -26,7 +26,8 @@ public:
     /**
      * Slot 1. The body is empty, and the compiler frees the members' strings in reverse order.
      *
-     * @ghidraAddress 0x00187a08
+     * @ghidraAddress NTSC-U/C: 0x00187a08
+     * @ghidraAddress PAL: 0x0018d230
      */
     virtual ~GameInfo();
 
@@ -36,7 +37,8 @@ public:
      * Everything after the address is chained through the stream each transfer returns.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001876f8
+     * @ghidraAddress NTSC-U/C: 0x001876f8
+     * @ghidraAddress PAL: 0x0018cef0
      */
     virtual void Save(OBStream &stream);
 
@@ -44,7 +46,8 @@ public:
      * Read back what Save() writes.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00187800
+     * @ghidraAddress NTSC-U/C: 0x00187800
+     * @ghidraAddress PAL: 0x0018cff8
      */
     virtual void Load(IBStream &stream);
 
@@ -55,7 +58,8 @@ public:
      * the address itself is not printed.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00187c60
+     * @ghidraAddress NTSC-U/C: 0x00187c60
+     * @ghidraAddress PAL: 0x0018d4e8
      */
     void Print(std::ostream &stream);
 

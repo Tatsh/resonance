@@ -40,7 +40,8 @@ public:
     /**
      * Construct a part with no template, run through Reset().
      *
-     * @ghidraAddress 0x00176f38
+     * @ghidraAddress NTSC-U/C: 0x00176f38
+     * @ghidraAddress PAL: 0x001799b0
      */
     FreqPart();
 
@@ -48,7 +49,8 @@ public:
      * Construct a part of one template at the origin.
      *
      * @param pTemplate The template the part is an instance of.
-     * @ghidraAddress 0x00176ed0
+     * @ghidraAddress NTSC-U/C: 0x00176ed0
+     * @ghidraAddress PAL: 0x00179948
      */
     explicit FreqPart(FreqPartTemplate *pTemplate);
 
@@ -56,14 +58,16 @@ public:
      * Copy another part through operator=().
      *
      * @param other The part to copy.
-     * @ghidraAddress 0x00176f78
+     * @ghidraAddress NTSC-U/C: 0x00176f78
+     * @ghidraAddress PAL: 0x001799f0
      */
     FreqPart(const FreqPart &other);
 
     /**
      * Delete the mesh.
      *
-     * @ghidraAddress 0x00176fd0
+     * @ghidraAddress NTSC-U/C: 0x00176fd0
+     * @ghidraAddress PAL: 0x00179a48
      */
     ~FreqPart();
 
@@ -76,7 +80,8 @@ public:
      * the palette position is copied last. The routine returns nothing.
      *
      * @param other The part to copy.
-     * @ghidraAddress 0x00174de8
+     * @ghidraAddress NTSC-U/C: 0x00174de8
+     * @ghidraAddress PAL: 0x00177818
      */
     void operator=(const FreqPart &other);
 
@@ -86,7 +91,8 @@ public:
      * Defined in the header. The out-of-line copy is called by FreqAppearanceDetail.
      *
      * @return The mesh, or null.
-     * @ghidraAddress 0x001770f8
+     * @ghidraAddress NTSC-U/C: 0x001770f8
+     * @ghidraAddress PAL: 0x00179b70
      */
     Rnd::Mesh *GetMesh() const {
         return mMesh;
@@ -96,7 +102,8 @@ public:
      * Replace the mesh, deleting the one this part had.
      *
      * @param pMesh The new mesh.
-     * @ghidraAddress 0x00177100
+     * @ghidraAddress NTSC-U/C: 0x00177100
+     * @ghidraAddress PAL: 0x00179b78
      */
     void SetMesh(Rnd::Mesh *pMesh);
 
@@ -107,7 +114,8 @@ public:
      * and FreqAppearanceDetail.
      *
      * @return The colour.
-     * @ghidraAddress 0x00177158
+     * @ghidraAddress NTSC-U/C: 0x00177158
+     * @ghidraAddress PAL: 0x00179bd0
      */
     Color *GetColor() {
         return &mColor;
@@ -119,7 +127,8 @@ public:
      * A part whose template does not take a colour records opaque black in its place.
      *
      * @param color The colour.
-     * @ghidraAddress 0x00177160
+     * @ghidraAddress NTSC-U/C: 0x00177160
+     * @ghidraAddress PAL: 0x00179bd8
      */
     void SetColor(const Color &color);
 
@@ -128,7 +137,8 @@ public:
      *
      * The palette position becomes (-1, -1) and the colour becomes g_freqMakerDefaultColor.
      *
-     * @ghidraAddress 0x001771b8
+     * @ghidraAddress NTSC-U/C: 0x001771b8
+     * @ghidraAddress PAL: 0x00179c30
      */
     void Reset();
 
@@ -138,7 +148,8 @@ public:
      * The palette position is clamped to the unit range, stored back, and scaled to a byte.
      *
      * @param pOut The record to write.
-     * @ghidraAddress 0x001771f8
+     * @ghidraAddress NTSC-U/C: 0x001771f8
+     * @ghidraAddress PAL: 0x00179c70
      */
     void Pack(Packed *pOut);
 
@@ -149,7 +160,8 @@ public:
      * and a negative identifier marks the part mirrored. The placement y is cleared.
      *
      * @param packed The record to read.
-     * @ghidraAddress 0x00177038
+     * @ghidraAddress NTSC-U/C: 0x00177038
+     * @ghidraAddress PAL: 0x00179ab0
      */
     void Unpack(const Packed &packed);
 

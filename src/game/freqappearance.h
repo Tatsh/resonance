@@ -64,7 +64,8 @@ public:
      * allocated, and the skill status is cleared. PSJoinRequestPacket, SPJoinAcceptPacket, and
      * PlayerInfo reach it through their own constructors.
      *
-     * @ghidraAddress 0x001745b8
+     * @ghidraAddress NTSC-U/C: 0x001745b8
+     * @ghidraAddress PAL: 0x00176f90
      */
     FreqAppearance();
 
@@ -77,14 +78,16 @@ public:
      * does not touch the skill status, a copy always reports a skill status of zero.
      *
      * @param other The appearance to copy.
-     * @ghidraAddress 0x00174668
+     * @ghidraAddress NTSC-U/C: 0x00174668
+     * @ghidraAddress PAL: 0x00177050
      */
     FreqAppearance(const FreqAppearance &other);
 
     /**
      * Release the detail object.
      *
-     * @ghidraAddress 0x00174730
+     * @ghidraAddress NTSC-U/C: 0x00174730
+     * @ghidraAddress PAL: 0x00177128
      */
     virtual ~FreqAppearance();
 
@@ -94,7 +97,8 @@ public:
      * Slot 2. A version word of 8 precedes the payload.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00171060
+     * @ghidraAddress NTSC-U/C: 0x00171060
+     * @ghidraAddress PAL: 0x00173998
      */
     virtual void Save(OBStream &stream);
 
@@ -105,7 +109,8 @@ public:
      * current one is handled differently.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x001747a8
+     * @ghidraAddress NTSC-U/C: 0x001747a8
+     * @ghidraAddress PAL: 0x001771b0
      */
     virtual void Load(IBStream &stream);
 
@@ -119,7 +124,8 @@ public:
      * embedded appearance.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00174878
+     * @ghidraAddress NTSC-U/C: 0x00174878
+     * @ghidraAddress PAL: 0x00177280
      */
     void Print(std::ostream &stream);
 
@@ -130,7 +136,8 @@ public:
      * routine returns nothing.
      *
      * @param other The appearance to copy.
-     * @ghidraAddress 0x001748e0
+     * @ghidraAddress NTSC-U/C: 0x001748e0
+     * @ghidraAddress PAL: 0x001772e8
      */
     void operator=(const FreqAppearance &other);
 
@@ -145,7 +152,8 @@ public:
      * routines at `0x003455a8` and `0x0035abf8` call it, and the name is inferred.
      *
      * @param nSlot The burn slot, 0 through 3.
-     * @ghidraAddress 0x00171138
+     * @ghidraAddress NTSC-U/C: 0x00171138
+     * @ghidraAddress PAL: 0x00173a70
      */
     void AttachToBurnSlot(int nSlot);
 
@@ -156,7 +164,8 @@ public:
      * both lists to four, resolves each camera and hides it, and resolves each hangpoint view and
      * shows it. The name is inferred.
      *
-     * @ghidraAddress 0x00171398
+     * @ghidraAddress NTSC-U/C: 0x00171398
+     * @ghidraAddress PAL: 0x00173cf0
      */
     static void InitBurnSlots();
 
@@ -170,7 +179,8 @@ public:
      * and the camera is hidden. MetRenderer::DrawFrontEnd() is the one caller, and the name is
      * inferred.
      *
-     * @ghidraAddress 0x001716d0
+     * @ghidraAddress NTSC-U/C: 0x001716d0
+     * @ghidraAddress PAL: 0x00174060
      */
     static void RenderBurnTextures();
 
@@ -184,7 +194,8 @@ public:
      *
      * @param nIndex Zero-based texture index.
      * @return The texture, or null when the manager has no such object.
-     * @ghidraAddress 0x001712c0
+     * @ghidraAddress NTSC-U/C: 0x001712c0
+     * @ghidraAddress PAL: 0x00173bf8
      */
     static Rnd::Tex *FindPersonaBurnTexture(int nIndex);
 
@@ -194,7 +205,8 @@ public:
      * The image has no caller. The name is inferred.
      *
      * @param other The appearance to copy.
-     * @ghidraAddress 0x00174458
+     * @ghidraAddress NTSC-U/C: 0x00174458
+     * @ghidraAddress PAL: 0x00176e30
      */
     void CopyFrom(const FreqAppearance &other);
 
@@ -206,7 +218,8 @@ public:
      * image has no caller, and the name is inferred.
      *
      * @param pRecord The record to fill.
-     * @ghidraAddress 0x00174930
+     * @ghidraAddress NTSC-U/C: 0x00174930
+     * @ghidraAddress PAL: 0x00177338
      */
     void Pack(Record *pRecord);
 
@@ -217,7 +230,8 @@ public:
      * inferred.
      *
      * @param record The record to read.
-     * @ghidraAddress 0x001749e8
+     * @ghidraAddress NTSC-U/C: 0x001749e8
+     * @ghidraAddress PAL: 0x001773f0
      */
     void Unpack(const Record &record);
 
@@ -231,7 +245,8 @@ public:
      *
      * @param record The record to encode.
      * @return The encoded string.
-     * @ghidraAddress 0x00170ca8
+     * @ghidraAddress NTSC-U/C: 0x00170ca8
+     * @ghidraAddress PAL: 0x001735b8
      */
     static HxStr EncodeRecord(const Record &record);
 
@@ -245,7 +260,8 @@ public:
      *
      * @param encoded The encoded string.
      * @param pRecord The record to fill.
-     * @ghidraAddress 0x00170ee0
+     * @ghidraAddress NTSC-U/C: 0x00170ee0
+     * @ghidraAddress PAL: 0x00173818
      */
     static void DecodeRecord(const HxStr &encoded, Record *pRecord);
 
@@ -256,7 +272,8 @@ public:
      * MetPersonaData::UpdateSkillStatus() expands the store where it is used.
      *
      * @param nStatus The status, 0 through 4.
-     * @ghidraAddress 0x00174478
+     * @ghidraAddress NTSC-U/C: 0x00174478
+     * @ghidraAddress PAL: 0x00176e50
      */
     void SetSkillStatus(int nStatus) {
         mSkillStatus = nStatus;
@@ -269,7 +286,8 @@ public:
      * forwarder at `0x0032e258`.
      *
      * @return The status, 0 through 4.
-     * @ghidraAddress 0x001747a0
+     * @ghidraAddress NTSC-U/C: 0x001747a0
+     * @ghidraAddress PAL: 0x001771a8
      */
     int GetSkillStatus() const {
         return mSkillStatus;
@@ -286,7 +304,7 @@ public:
     HxStr mUserName;
 
 private:
-    // 0x001744f8
+    // NTSC-U/C: 0x001744f8, PAL: 0x00176ed0
     // Fill bytes 7 through 14 of pDest with 0x80, copy seven source bytes with each zero replaced
     // by 0xff, and set bit n of byte 7 for each zero at position n. The image has no caller, and
     // the name is inferred.

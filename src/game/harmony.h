@@ -52,7 +52,8 @@ struct Harmony {
      * inferred.
      *
      * @param nNote The note.
-     * @ghidraAddress 0x001a4db0
+     * @ghidraAddress NTSC-U/C: 0x001a4db0
+     * @ghidraAddress PAL: 0x001aab18
      */
     void AddNote(unsigned char nNote);
 
@@ -66,7 +67,8 @@ struct Harmony {
      *
      * @param nNote The note.
      * @return The nearer note, or nNote when the harmony is empty.
-     * @ghidraAddress 0x001a4e28
+     * @ghidraAddress NTSC-U/C: 0x001a4e28
+     * @ghidraAddress PAL: 0x001aab90
      */
     unsigned char Snap(unsigned char nNote);
 
@@ -77,7 +79,8 @@ struct Harmony {
      *
      * @param pLow Receives the first note, or 20 when the harmony is empty.
      * @param pHigh Receives the last note, or 120 when the harmony is empty.
-     * @ghidraAddress 0x001a4eb0
+     * @ghidraAddress NTSC-U/C: 0x001a4eb0
+     * @ghidraAddress PAL: 0x001aac18
      */
     void GetRange(int *pLow, int *pHigh);
 
@@ -85,7 +88,8 @@ struct Harmony {
      * Write the notes to a diagnostic stream as `(` followed by each note and a space, then `)`.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001a4ee8
+     * @ghidraAddress NTSC-U/C: 0x001a4ee8
+     * @ghidraAddress PAL: 0x001aac50
      */
     void Print(std::ostream &stream);
 

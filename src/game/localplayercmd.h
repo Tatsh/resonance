@@ -28,21 +28,26 @@ public:
     LocalPlayerCmd(LocalPlayer *pPlayer, int nTick) : mPlayer(pPlayer), mTick(nTick) {
     }
 
-    /** @ghidraAddress 0x001227a8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001227a8
+     * @ghidraAddress PAL: 0x00122dc0
+     */
     virtual ~LocalPlayerCmd();
 
     /**
      * Report sCmdID.
      *
      * @return The class's command identifier.
-     * @ghidraAddress 0x00122840
+     * @ghidraAddress NTSC-U/C: 0x00122840
+     * @ghidraAddress PAL: 0x00122e58
      */
     virtual int CmdID();
 
     /**
      * Run LocalPlayer::OnBarTick() for the tick.
      *
-     * @ghidraAddress 0x00122820
+     * @ghidraAddress NTSC-U/C: 0x00122820
+     * @ghidraAddress PAL: 0x00122e38
      */
     virtual void Execute();
 
@@ -50,7 +55,8 @@ public:
      * Write `{LocalPlayerCmd}`.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00122860
+     * @ghidraAddress NTSC-U/C: 0x00122860
+     * @ghidraAddress PAL: 0x00122e78
      */
     virtual void Print(std::ostream &stream);
 
@@ -58,7 +64,8 @@ public:
      * Write nothing.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00122850
+     * @ghidraAddress NTSC-U/C: 0x00122850
+     * @ghidraAddress PAL: 0x00122e68
      */
     virtual void Save(OBStream &stream);
 
@@ -66,14 +73,16 @@ public:
      * Read nothing.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00122858
+     * @ghidraAddress NTSC-U/C: 0x00122858
+     * @ghidraAddress PAL: 0x00122e70
      */
     virtual void Load(IBStream &stream);
 
     /**
      * The class's command identifier, which the image initialises to zero.
      *
-     * @ghidraAddress 0x0066c508
+     * @ghidraAddress NTSC-U/C: 0x0066c508
+     * @ghidraAddress PAL: 0x006ad0d0
      */
     static int sCmdID;
 

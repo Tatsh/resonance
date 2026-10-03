@@ -34,24 +34,30 @@ public:
      * @param nTrack The track GetTrack() reports until a message replaces it.
      * @param name The player's name.
      * @param pAppearance The appearance the player is drawn with.
-     * @ghidraAddress 0x00122f10
+     * @ghidraAddress NTSC-U/C: 0x00122f10
+     * @ghidraAddress PAL: 0x00123540
      */
     NetPlayer(int nId, int nTrack, const HxStr &name, const FreqAppearance *pAppearance);
 
-    /** @ghidraAddress 0x00125a98 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00125a98
+     * @ghidraAddress PAL: 0x00126110
+     */
     virtual ~NetPlayer();
 
     /**
      * Report the track the last selection chose. The base implementation returns -1 instead.
      *
-     * @ghidraAddress 0x00125c48
+     * @ghidraAddress NTSC-U/C: 0x00125c48
+     * @ghidraAddress PAL: 0x001262d0
      */
     virtual int GetTrack();
 
     /**
      * Report the place the last selection chose. The base implementation returns zero instead.
      *
-     * @ghidraAddress 0x00125c50
+     * @ghidraAddress NTSC-U/C: 0x00125c50
+     * @ghidraAddress PAL: 0x001262d8
      */
     virtual int GetPlace();
 
@@ -64,12 +70,13 @@ public:
      * this player updates the two cached words, and anything else falls through to the base.
      *
      * @param message The message.
-     * @ghidraAddress 0x00125f70
+     * @ghidraAddress NTSC-U/C: 0x00125f70
+     * @ghidraAddress PAL: 0x00126608
      */
     virtual void HandleMessage(Message *message);
 
 private:
-    // 0x00122f78
+    // NTSC-U/C: 0x00122f78, PAL: 0x001235a8
     // Passes a selection packet naming this player on to the sinks as a RemoteTrackSelectMsg.
     void OnTrackSelectPacket(TrackSelectPacket *pPacket);
 

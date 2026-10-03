@@ -49,14 +49,16 @@ public:
      *
      * @param nTrack The track's index.
      * @param nUnmapped The value the sequencer receives as BarSequencer's nUnmapped.
-     * @ghidraAddress 0x0013fb10
+     * @ghidraAddress NTSC-U/C: 0x0013fb10
+     * @ghidraAddress PAL: 0x001404f0
      */
     BGTrackGraph(int nTrack, int nUnmapped);
 
     /**
      * Delete the sequencer, the filter, the synthesiser, and the mixer.
      *
-     * @ghidraAddress 0x00140338
+     * @ghidraAddress NTSC-U/C: 0x00140338
+     * @ghidraAddress PAL: 0x00140d18
      */
     ~BGTrackGraph();
 
@@ -67,7 +69,8 @@ public:
      * synthesiser through a MidiChase, then creates a BarSequencer on the song clock that sends
      * through the filter and starts it. The title is inferred.
      *
-     * @ghidraAddress 0x0013fc48
+     * @ghidraAddress NTSC-U/C: 0x0013fc48
+     * @ghidraAddress PAL: 0x00140628
      */
     void BuildSequencer();
 
@@ -75,7 +78,8 @@ public:
      * Record the track and build its mixer on the track's MIDI channel.
      *
      * @param pTrack The track.
-     * @ghidraAddress 0x001403e0
+     * @ghidraAddress NTSC-U/C: 0x001403e0
+     * @ghidraAddress PAL: 0x00140dc0
      */
     void CreateMixer(TrackData *pTrack);
 
@@ -83,7 +87,8 @@ public:
      * Register the mixer as a sink of a source.
      *
      * @param pSource The source.
-     * @ghidraAddress 0x00140468
+     * @ghidraAddress NTSC-U/C: 0x00140468
+     * @ghidraAddress PAL: 0x00140e48
      */
     void AttachMixerToSource(MsgSource *pSource);
 
@@ -91,7 +96,8 @@ public:
      * Feed the synthesiser's output to the mixer and the mixer's output to a synthesiser sink.
      *
      * @param pSynth The sink the mixer emits to.
-     * @ghidraAddress 0x00140498
+     * @ghidraAddress NTSC-U/C: 0x00140498
+     * @ghidraAddress PAL: 0x00140e78
      */
     void AttachMixerToSynth(MsgSink *pSynth);
 
@@ -99,14 +105,16 @@ public:
      * Register a sink with the synthesiser.
      *
      * @param pSink The sink.
-     * @ghidraAddress 0x001404d8
+     * @ghidraAddress NTSC-U/C: 0x001404d8
+     * @ghidraAddress PAL: 0x00140eb8
      */
     void AddSynthSink(MsgSink *pSink);
 
     /**
      * Delete the sequencer, if any.
      *
-     * @ghidraAddress 0x001404f8
+     * @ghidraAddress NTSC-U/C: 0x001404f8
+     * @ghidraAddress PAL: 0x00140ed8
      */
     void DeleteSequencer();
 
@@ -116,7 +124,8 @@ public:
      * Calls MidiDisabler::Enable(). Gamer's per-bar update calls it when its background enable
      * manager reports the bar for the track, and DisableMidi() otherwise.
      *
-     * @ghidraAddress 0x00140540
+     * @ghidraAddress NTSC-U/C: 0x00140540
+     * @ghidraAddress PAL: 0x00140f20
      */
     void EnableMidi();
 
@@ -125,7 +134,8 @@ public:
      *
      * Calls MidiDisabler::Disable(), which also silences the notes already sounding.
      *
-     * @ghidraAddress 0x00140560
+     * @ghidraAddress NTSC-U/C: 0x00140560
+     * @ghidraAddress PAL: 0x00140f40
      */
     void DisableMidi();
 
@@ -136,7 +146,8 @@ public:
      * address is its uncalled out-of-line copy in the GrooveWorld unit.
      *
      * @return Always 0.
-     * @ghidraAddress 0x00193ff8
+     * @ghidraAddress NTSC-U/C: 0x00193ff8
+     * @ghidraAddress PAL: 0x00199c30
      */
     int CallBuildSequencer();
 
@@ -147,7 +158,8 @@ public:
      * and the address is its uncalled out-of-line copy in the GrooveWorld unit.
      *
      * @return Always 0.
-     * @ghidraAddress 0x00194018
+     * @ghidraAddress NTSC-U/C: 0x00194018
+     * @ghidraAddress PAL: 0x00199c50
      */
     int CallDeleteSequencer();
 
@@ -158,7 +170,8 @@ public:
      * sits in the GrooveWorld unit.
      *
      * @param pGraph The graph.
-     * @ghidraAddress 0x00194038
+     * @ghidraAddress NTSC-U/C: 0x00194038
+     * @ghidraAddress PAL: 0x00199c70
      */
     static void Delete(BGTrackGraph *pGraph);
 
@@ -175,21 +188,21 @@ private:
     Mixer *mMixer;                // +0x20
 };
 
-// 0x00193ff8
+// NTSC-U/C: 0x00193ff8, PAL: 0x00199c30
 // The out-of-line copy.
 inline int BGTrackGraph::CallBuildSequencer() {
     BuildSequencer();
     return 0;
 }
 
-// 0x00194018
+// NTSC-U/C: 0x00194018, PAL: 0x00199c50
 // The out-of-line copy.
 inline int BGTrackGraph::CallDeleteSequencer() {
     DeleteSequencer();
     return 0;
 }
 
-// 0x00194038
+// NTSC-U/C: 0x00194038, PAL: 0x00199c70
 // The out-of-line copy.
 inline void BGTrackGraph::Delete(BGTrackGraph *pGraph) {
     delete pGraph;

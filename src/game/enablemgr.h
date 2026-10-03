@@ -15,7 +15,10 @@ class Player;
  */
 class EnableMgr {
 public:
-    /** @ghidraAddress 0x001050a0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001050a0
+     * @ghidraAddress PAL: 0x001050a0
+     */
     virtual ~EnableMgr();
 
     /**
@@ -38,7 +41,8 @@ public:
      * @param nTrack The track.
      * @param nBar The current bar.
      * @param nUntilBar The first bar the requirements apply to again.
-     * @ghidraAddress 0x001050d0
+     * @ghidraAddress NTSC-U/C: 0x001050d0
+     * @ghidraAddress PAL: 0x001050d0
      */
     virtual void SetFreeUntil(int nTrack, int nBar, int nUntilBar);
 
@@ -49,7 +53,8 @@ public:
      * mode.
      *
      * @param nTrack The track.
-     * @ghidraAddress 0x001050d8
+     * @ghidraAddress NTSC-U/C: 0x001050d8
+     * @ghidraAddress PAL: 0x001050d8
      */
     virtual void DisableTrack(int nTrack);
 

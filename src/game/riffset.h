@@ -47,14 +47,16 @@ struct RiffSet {
     /**
      * Construct a set with no riff at any level.
      *
-     * @ghidraAddress 0x001cecc0
+     * @ghidraAddress NTSC-U/C: 0x001cecc0
+     * @ghidraAddress PAL: 0x001d4b78
      */
     RiffSet();
 
     /**
      * Give back the reference to every riff the set has.
      *
-     * @ghidraAddress 0x001cecf0
+     * @ghidraAddress NTSC-U/C: 0x001cecf0
+     * @ghidraAddress PAL: 0x001d4ba8
      */
     ~RiffSet();
 
@@ -62,7 +64,8 @@ struct RiffSet {
      * Write every level to a diagnostic stream, one line each, with `[empty]` for a missing riff.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001ced70
+     * @ghidraAddress NTSC-U/C: 0x001ced70
+     * @ghidraAddress PAL: 0x001d4c28
      */
     void Print(std::ostream &stream);
 

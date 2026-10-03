@@ -43,7 +43,8 @@ public:
     /**
      * Start with the default mapping.
      *
-     * @ghidraAddress 0x00163a88
+     * @ghidraAddress NTSC-U/C: 0x00163a88
+     * @ghidraAddress PAL: 0x00165b38
      */
     ControllerConfig();
 
@@ -58,7 +59,8 @@ public:
      *
      * @param nRow The configuration row, 0 through 8.
      * @param nButtonIndex The button index, 0 through 9.
-     * @ghidraAddress 0x00163c28
+     * @ghidraAddress NTSC-U/C: 0x00163c28
+     * @ghidraAddress PAL: 0x00165cd8
      */
     void SetButton(int nRow, int nButtonIndex);
 
@@ -69,7 +71,8 @@ public:
      *
      * @param nSlot The slot.
      * @return The action code, or zero for a slot out of range.
-     * @ghidraAddress 0x00163d50
+     * @ghidraAddress NTSC-U/C: 0x00163d50
+     * @ghidraAddress PAL: 0x00165e00
      */
     int ActionCode(int nSlot);
 
@@ -80,7 +83,8 @@ public:
      * current contents.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00163e10
+     * @ghidraAddress NTSC-U/C: 0x00163e10
+     * @ghidraAddress PAL: 0x00165ec0
      */
     void Load(IBStream &stream);
 
@@ -89,7 +93,8 @@ public:
      *
      * @param nRow The configuration row, 0 through 8.
      * @return The button index, or -1 when the stored code has none.
-     * @ghidraAddress 0x00164b00
+     * @ghidraAddress NTSC-U/C: 0x00164b00
+     * @ghidraAddress PAL: 0x00166bb0
      */
     int GetButtonIndex(int nRow);
 
@@ -98,7 +103,8 @@ public:
      *
      * @param nButtonIndex The button index, 0 through 9.
      * @return The code, 500 or 501 for the two stick choices, or -1 out of range.
-     * @ghidraAddress 0x00164b40
+     * @ghidraAddress NTSC-U/C: 0x00164b40
+     * @ghidraAddress PAL: 0x00166bf0
      */
     int ButtonCode(int nButtonIndex);
 
@@ -109,7 +115,8 @@ public:
      *
      * @param nCode The code.
      * @return The button index, or -1 for a code with none.
-     * @ghidraAddress 0x00164bc0
+     * @ghidraAddress NTSC-U/C: 0x00164bc0
+     * @ghidraAddress PAL: 0x00166c70
      */
     int ButtonIndex(int nCode);
 
@@ -118,7 +125,8 @@ public:
      *
      * @param nRow The configuration row, 0 through 8.
      * @return The slot, or -1 out of range.
-     * @ghidraAddress 0x00164c40
+     * @ghidraAddress NTSC-U/C: 0x00164c40
+     * @ghidraAddress PAL: 0x00166cf0
      */
     int ActionSlot(int nRow);
 
@@ -129,7 +137,8 @@ public:
      *
      * @param nSlot The slot.
      * @return 0, 1, or 2 for the three pairs of pitch-riff slots, and 0 for every other slot.
-     * @ghidraAddress 0x00164cb8
+     * @ghidraAddress NTSC-U/C: 0x00164cb8
+     * @ghidraAddress PAL: 0x00166d68
      */
     int RiffIndex(int nSlot);
 
@@ -137,7 +146,8 @@ public:
      * Write the record version 4, the slot count, and every button code.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00164d00
+     * @ghidraAddress NTSC-U/C: 0x00164d00
+     * @ghidraAddress PAL: 0x00166db0
      */
     void Save(OBStream &stream);
 
@@ -146,7 +156,8 @@ public:
      *
      * @param other The mapping to copy.
      * @return This mapping.
-     * @ghidraAddress 0x00164dd0
+     * @ghidraAddress NTSC-U/C: 0x00164dd0
+     * @ghidraAddress PAL: 0x00166e80
      */
     ControllerConfig &operator=(const ControllerConfig &other);
 

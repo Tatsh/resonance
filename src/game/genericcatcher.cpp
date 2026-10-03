@@ -1,17 +1,17 @@
 #include "game/genericcatcher.h"
 
-// 0x001b0a98
+// NTSC-U/C: 0x001b0a98, PAL: 0x001b6848
 GenericCatcher::GenericCatcher() {
 }
 
-// 0x001b0b88
+// NTSC-U/C: 0x001b0b88, PAL: 0x001b6938
 GenericCatcher::~GenericCatcher() {
 }
 
-// 0x001b0c58
+// NTSC-U/C: 0x001b0c58, PAL: 0x001b6a08
 void GenericCatcher::Start() {
 }
 
-// 0x001b0c60
+// NTSC-U/C: 0x001b0c60, PAL: 0x001b6a10
 void GenericCatcher::Stop() {
 }

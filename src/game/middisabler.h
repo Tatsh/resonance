@@ -26,11 +26,15 @@ class MidiDisabler : public MsgSource, public MsgSink {
 public:
     /**
      * @param bEnabled Non-zero to start passing notes.
-     * @ghidraAddress 0x001a6e10
+     * @ghidraAddress NTSC-U/C: 0x001a6e10
+     * @ghidraAddress PAL: 0x001acb78
      */
     explicit MidiDisabler(int bEnabled);
 
-    /** @ghidraAddress 0x001a6ac0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001a6ac0
+     * @ghidraAddress PAL: 0x001ac828
+     */
     virtual ~MidiDisabler();
 
     /**
@@ -40,7 +44,8 @@ public:
      * here.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001a6f08
+     * @ghidraAddress NTSC-U/C: 0x001a6f08
+     * @ghidraAddress PAL: 0x001acc70
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -49,7 +54,8 @@ public:
      *
      * The title is inferred.
      *
-     * @ghidraAddress 0x001a6ef8
+     * @ghidraAddress NTSC-U/C: 0x001a6ef8
+     * @ghidraAddress PAL: 0x001acc60
      */
     void Enable();
 
@@ -58,17 +64,18 @@ public:
      *
      * The title is inferred.
      *
-     * @ghidraAddress 0x001a6a58
+     * @ghidraAddress NTSC-U/C: 0x001a6a58
+     * @ghidraAddress PAL: 0x001ac7c0
      */
     void Disable();
 
 private:
-    // 0x001a6e60
+    // NTSC-U/C: 0x001a6e60, PAL: 0x001acbc8
     // Forwards the message unless notes are stopped and its status is a note-off or a
     // note-on.
     void PassStdMidi(StdMidiMsg *pMsg);
 
-    // 0x001a6eb0
+    // NTSC-U/C: 0x001a6eb0, PAL: 0x001acc18
     // Forwards the message unless notes are stopped.
     void PassNote(NoteMsg *pMsg);
 

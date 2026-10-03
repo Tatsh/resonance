@@ -41,7 +41,8 @@ public:
      * @param nPort The port, from 0.
      * @param nSlot The multitap slot, from 0.
      * @param nDeadZone Stored in mDeadZone.
-     * @ghidraAddress 0x005bcf58
+     * @ghidraAddress NTSC-U/C: 0x005bcf58
+     * @ghidraAddress PAL: 0x00585f40
      */
     void Open(int nPort, int nSlot, int nDeadZone);
 
@@ -63,7 +64,8 @@ public:
      * @param pPressureDeltas Receives each pressure less its baseline, or null.
      * @return mReadyLevel, from 0 (no report) to 3 (pressure-sensitive), or 0 when the pad is not
      *         stable or the read fails.
-     * @ghidraAddress 0x005bc998
+     * @ghidraAddress NTSC-U/C: 0x005bc998
+     * @ghidraAddress PAL: 0x00585960
      */
     int Read(unsigned int *pButtons,
              unsigned char *pAxis0,
@@ -81,9 +83,22 @@ public:
      *
      * @param nSmallMotor Positive to run the small motor.
      * @param nBigMotor The big motor's level.
-     * @ghidraAddress 0x005bd0b0
+     * @ghidraAddress NTSC-U/C: 0x005bd0b0
+     * @ghidraAddress PAL: 0x00586098
      */
     void SetVibration(int nSmallMotor, int nBigMotor);
+
+#ifdef VIDEO_STANDARD_PAL
+    /**
+     * Shut libpad down through scePadEnd().
+     *
+     * Only the European release has the routine, and it has no caller. sPadLibraryStarted retains
+     * its value. The title is inferred.
+     *
+     * @ghidraAddress PAL: 0x00585f20
+     */
+    static void EndLibrary();
+#endif
 
     /** The area libpad writes reports into. +0x000 */
     alignas(64) scePadDmaFrame mDmaArea[kDmaFrameCount];

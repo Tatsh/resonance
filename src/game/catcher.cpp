@@ -94,17 +94,17 @@ public:
     PostGemCmd(Catcher *pOwner, int nTick) : mOwner(pOwner), mTick(nTick) {
     }
 
-    // 0x001b16f0
+    // NTSC-U/C: 0x001b16f0, PAL: 0x001b74b0
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x001b1700
+    // NTSC-U/C: 0x001b1700, PAL: 0x001b74c0
     virtual void Execute() {
         mOwner->ProcessGemCommand(mTick);
     }
 
-    // 0x001b1720
+    // NTSC-U/C: 0x001b1720, PAL: 0x001b74e0
     virtual void Print(std::ostream &stream) {
         stream << "{Catcher/PostGem}";
     }
@@ -135,17 +135,17 @@ public:
     GemCmd(Catcher *pOwner, int nTick) : mOwner(pOwner), mTick(nTick) {
     }
 
-    // 0x001b17c8
+    // NTSC-U/C: 0x001b17c8, PAL: 0x001b7588
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x001b17d8
+    // NTSC-U/C: 0x001b17d8, PAL: 0x001b7598
     virtual void Execute() {
         mOwner->SimulateRemoteGem(mTick);
     }
 
-    // 0x001b17f8
+    // NTSC-U/C: 0x001b17f8, PAL: 0x001b75b8
     virtual void Print(std::ostream &stream) {
         stream << "{Catcher/Gem}";
     }
@@ -162,7 +162,7 @@ int GemCmd::sCmdID;
 
 } // namespace
 
-// 0x001aba30
+// NTSC-U/C: 0x001aba30, PAL: 0x001b1798
 Catcher::Catcher(PhraseMgr *pPhraseMgr,
                  Quantizer *pQuantizer,
                  const TrackData *pTrackData,
@@ -181,12 +181,12 @@ Catcher::Catcher(PhraseMgr *pPhraseMgr,
     mTicksPerBar.mTick = pPhraseMgr->mBarTicks;
 }
 
-// 0x001abc10
+// NTSC-U/C: 0x001abc10, PAL: 0x001b1978
 Catcher::~Catcher() {
     Stop();
 }
 
-// 0x001abe50
+// NTSC-U/C: 0x001abe50, PAL: 0x001b1bb8
 void Catcher::MissGem(int nTick, int nGem) {
     switch (mPlayer->GetInputSlot()) {
     case kPlayerSlot1:
@@ -219,7 +219,7 @@ void Catcher::MissGem(int nTick, int nGem) {
     }
 }
 
-// 0x001abfd8
+// NTSC-U/C: 0x001abfd8, PAL: 0x001b1d40
 void Catcher::CatchGem(int nTick, int nGem) {
     // The tick is stored without the finiteness check.
     mLastCaughtPosition.mTick = nTick;
@@ -271,7 +271,7 @@ void Catcher::CatchGem(int nTick, int nGem) {
     }
 }
 
-// 0x001abcf8
+// NTSC-U/C: 0x001abcf8, PAL: 0x001b1a60
 int Catcher::SnapToNearestGem(int nTick) {
     Mid::MBT before(kMBTMinimum);
     Mid::MBT after(kMBTMaximum);
@@ -292,7 +292,7 @@ int Catcher::SnapToNearestGem(int nTick) {
     return nTick;
 }
 
-// 0x001ac370
+// NTSC-U/C: 0x001ac370, PAL: 0x001b20d8
 void Catcher::PostCatchMsg(PitchRiffMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -321,7 +321,7 @@ void Catcher::PostCatchMsg(PitchRiffMsg *pMsg) {
     }
 }
 
-// 0x001ac550
+// NTSC-U/C: 0x001ac550, PAL: 0x001b22b8
 void Catcher::OnTrackSelect(TrackSelectMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -350,7 +350,7 @@ void Catcher::OnTrackSelect(TrackSelectMsg *pMsg) {
     }
 }
 
-// 0x001ac688
+// NTSC-U/C: 0x001ac688, PAL: 0x001b23f0
 void Catcher::OnAutoCatch(AutoCatchMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -374,7 +374,7 @@ void Catcher::OnAutoCatch(AutoCatchMsg *pMsg) {
     }
 }
 
-// 0x001ac7e8
+// NTSC-U/C: 0x001ac7e8, PAL: 0x001b2550
 void Catcher::PostCaughtBarMsg(int nBar, int nNextBar) {
     if ((mMissedGems + mMuffedGems) != 0) {
         return;
@@ -402,7 +402,7 @@ void Catcher::PostCaughtBarMsg(int nBar, int nNextBar) {
     }
 }
 
-// 0x001ac958
+// NTSC-U/C: 0x001ac958, PAL: 0x001b26c0
 void Catcher::EndBar(int nBar) {
     if (mTrackData->IsStepStart(nBar)) {
         mPhraseRunBars = 0;
@@ -423,7 +423,7 @@ void Catcher::EndBar(int nBar) {
     mMissedGems = 0;
 }
 
-// 0x001aca48
+// NTSC-U/C: 0x001aca48, PAL: 0x001b27b0
 int Catcher::FindNextGemTick(int nTick) {
     Mid::MBT next;
     int nGem;
@@ -438,7 +438,7 @@ int Catcher::FindNextGemTick(int nTick) {
     return next.mTick;
 }
 
-// 0x001acba0
+// NTSC-U/C: 0x001acba0, PAL: 0x001b2908
 void Catcher::SchedulePostGemCommand(int nTick) {
     const int nGemTick = FindNextGemTick(nTick);
     const int nDelay = PostGemDelay(nGemTick);
@@ -451,7 +451,7 @@ void Catcher::SchedulePostGemCommand(int nTick) {
     }
 }
 
-// 0x001acca0
+// NTSC-U/C: 0x001acca0, PAL: 0x001b2a08
 void Catcher::ScheduleGemCommand(int nTick) {
     const int nGemTick = FindNextGemTick(nTick);
 
@@ -462,7 +462,7 @@ void Catcher::ScheduleGemCommand(int nTick) {
     }
 }
 
-// 0x001acd30
+// NTSC-U/C: 0x001acd30, PAL: 0x001b2a98
 int Catcher::PostGemDelay(int nTick) {
     const int nNext = FindNextGemTick(nTick);
     Mid::MBT delay(MakePosition(nTick + nNext).mTick / 2);
@@ -472,7 +472,7 @@ int Catcher::PostGemDelay(int nTick) {
     return delay.mTick;
 }
 
-// 0x001ace78
+// NTSC-U/C: 0x001ace78, PAL: 0x001b2be0
 void Catcher::SimulateRemoteGem(int nTick) {
     if (mRemotePlayer != &g_nullPlayer && mRemotePlayer->GetInputSlot() == kNoPlayerSlot) {
         const Mid::MBT window = MakePosition(mRemotePosition.mTick + Mid::MBT(kBarTicks).mTick);
@@ -503,7 +503,7 @@ void Catcher::SimulateRemoteGem(int nTick) {
     ScheduleGemCommand(nTick);
 }
 
-// 0x001ad0e8
+// NTSC-U/C: 0x001ad0e8, PAL: 0x001b2e50
 void Catcher::UpdateSeeker(int nBar) {
     if (mPlayer->IsNull()) {
         return;
@@ -544,7 +544,7 @@ void Catcher::UpdateSeeker(int nBar) {
     PostSeekerMsg();
 }
 
-// 0x001ad3b0
+// NTSC-U/C: 0x001ad3b0, PAL: 0x001b3118
 void Catcher::PostPhraseMuffedMsg(int nBar, Mid::MBT position) {
     if (nBar == mLastMuffedBar) {
         return;
@@ -562,14 +562,14 @@ void Catcher::PostPhraseMuffedMsg(int nBar, Mid::MBT position) {
     Send(&msg);
 }
 
-// 0x001ad4e0
+// NTSC-U/C: 0x001ad4e0, PAL: 0x001b3248
 void Catcher::PostSeekerMsg() {
     SeekerMsg msg(mPlayer);
     Send(&msg);
     mSeekerEnabled = 0;
 }
 
-// 0x001ad560
+// NTSC-U/C: 0x001ad560, PAL: 0x001b32c8
 void Catcher::PostSeekerRangeMsg(int nFirstBar, int nBarCount) {
     SeekerMsg msg(mPlayer, nFirstBar, nBarCount, mTrack, kSeekerOn, Mid::MBT(0));
     Send(&msg);
@@ -578,7 +578,7 @@ void Catcher::PostSeekerRangeMsg(int nFirstBar, int nBarCount) {
     mSeekerFirstBar = nFirstBar;
 }
 
-// 0x001adb78
+// NTSC-U/C: 0x001adb78, PAL: 0x001b38e0
 void Catcher::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nPitchRiffMsgType) {
@@ -599,7 +599,7 @@ void Catcher::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x001b1488
+// NTSC-U/C: 0x001b1488, PAL: 0x001b7248
 int Catcher::IsBarFree(int nBar) {
     if (nBar < 0) {
         return 0;
@@ -610,14 +610,14 @@ int Catcher::IsBarFree(int nBar) {
     return mPhraseMgr->GetPhraseOwner(nBar)->IsNull() != 0;
 }
 
-// 0x001b1578
+// NTSC-U/C: 0x001b1578, PAL: 0x001b7338
 void Catcher::OnInvalidateSeeker(InvalidateSeekerMsg *pMsg) {
     if (pMsg->mTrack == mTrack) {
         UpdateSeeker(pMsg->mBar);
     }
 }
 
-// 0x001b15a8
+// NTSC-U/C: 0x001b15a8, PAL: 0x001b7368
 void Catcher::Start() {
     SchedulePostGemCommand(Mid::MBT(kBeforeSongStart).mTick);
     if (Application::shared()->GetGameMode() == kGameModeNet) {
@@ -625,7 +625,7 @@ void Catcher::Start() {
     }
 }
 
-// 0x001b1610
+// NTSC-U/C: 0x001b1610, PAL: 0x001b73d0
 void Catcher::Stop() {
     mClock->Withdraw(mPostGemCommand);
     if (Application::shared()->GetGameMode() == kGameModeNet) {
@@ -633,7 +633,7 @@ void Catcher::Stop() {
     }
 }
 
-// 0x001b1828
+// NTSC-U/C: 0x001b1828, PAL: 0x001b75e8
 void Catcher::ProcessGemCommand(int nTick) {
     if (mLastCaughtPosition.mTick != nTick) {
         mPhraseRunBars = 0;
@@ -657,7 +657,7 @@ void Catcher::ProcessGemCommand(int nTick) {
     SchedulePostGemCommand(nTick);
 }
 
-// 0x001b1918
+// NTSC-U/C: 0x001b1918, PAL: 0x001b76d8
 void Catcher::SetPhraseOwners(int nFirstBar, int nEndBar, Player *pPlayer) {
     (void)pPlayer->IsNull(); // Yes, the binary discards this call's result.
     for (int nBar = nFirstBar; nBar < nEndBar; ++nBar) {
@@ -665,7 +665,7 @@ void Catcher::SetPhraseOwners(int nFirstBar, int nEndBar, Player *pPlayer) {
     }
 }
 
-// 0x001b19a0
+// NTSC-U/C: 0x001b19a0, PAL: 0x001b7760
 int Catcher::IsPhraseRunEmpty() {
     return mPhraseRunBars == 0;
 }

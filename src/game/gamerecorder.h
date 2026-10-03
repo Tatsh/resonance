@@ -16,14 +16,16 @@ class GameRecorder {
 public:
     /**
      * @param pManager The manager that installs the recorder.
-     * @ghidraAddress 0x0010f010
+     * @ghidraAddress NTSC-U/C: 0x0010f010
+     * @ghidraAddress PAL: 0x0010f470
      */
     explicit GameRecorder(GameManagerImpl *pManager);
 
     /**
      * Delete the stream, if any.
      *
-     * @ghidraAddress 0x0010f020
+     * @ghidraAddress NTSC-U/C: 0x0010f020
+     * @ghidraAddress PAL: 0x0010f480
      */
     ~GameRecorder();
 
@@ -39,7 +41,8 @@ public:
      *
      * @param nGameMode The manager's game mode.
      * @param params The manager's settings.
-     * @ghidraAddress 0x0010c910
+     * @ghidraAddress NTSC-U/C: 0x0010c910
+     * @ghidraAddress PAL: 0x0010cae0
      */
     void BeginRecording(int nGameMode, const GameParams &params);
 
@@ -48,7 +51,8 @@ public:
      *
      * EndRecordingCmd::Execute() is the caller. The title is inferred.
      *
-     * @ghidraAddress 0x0010f080
+     * @ghidraAddress NTSC-U/C: 0x0010f080
+     * @ghidraAddress PAL: 0x0010f4e0
      */
     void EndRecording();
 
@@ -58,7 +62,8 @@ public:
      * The command runs as soon as the timer allows, under a fresh handle, and is recorded.
      * GameManagerImpl::EndGame() is the caller. The title is inferred.
      *
-     * @ghidraAddress 0x0010cea0
+     * @ghidraAddress NTSC-U/C: 0x0010cea0
+     * @ghidraAddress PAL: 0x0010d178
      */
     void ScheduleEnd();
 

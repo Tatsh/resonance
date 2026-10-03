@@ -61,47 +61,56 @@ public:
      * for the identifier 0x384.
      *
      * @param nTrackCount The number of tracks to prepare for.
-     * @ghidraAddress 0x001ea838
+     * @ghidraAddress NTSC-U/C: 0x001ea838
+     * @ghidraAddress PAL: 0x001f0aa8
      */
     explicit LevelBuilder(unsigned nTrackCount);
 
     /**
-     * @ghidraAddress 0x001eafe8
+     * @ghidraAddress NTSC-U/C: 0x001eafe8
+     * @ghidraAddress PAL: 0x001f1270
      */
     virtual ~LevelBuilder();
 
     /**
-     * @ghidraAddress 0x001ec430
+     * @ghidraAddress NTSC-U/C: 0x001ec430
+     * @ghidraAddress PAL: 0x001f26b8
      */
     virtual int TrackCount();
 
     /**
-     * @ghidraAddress 0x001ec448
+     * @ghidraAddress NTSC-U/C: 0x001ec448
+     * @ghidraAddress PAL: 0x001f26d0
      */
     virtual int BackingTrackCount();
 
     /**
-     * @ghidraAddress 0x001ec6d0
+     * @ghidraAddress NTSC-U/C: 0x001ec6d0
+     * @ghidraAddress PAL: 0x001f2958
      */
     virtual TrackData *OwnTrack();
 
     /**
-     * @ghidraAddress 0x001ec6f0
+     * @ghidraAddress NTSC-U/C: 0x001ec6f0
+     * @ghidraAddress PAL: 0x001f2978
      */
     virtual TrackData *TrackAt(int nIndex);
 
     /**
-     * @ghidraAddress 0x001ec708
+     * @ghidraAddress NTSC-U/C: 0x001ec708
+     * @ghidraAddress PAL: 0x001f2990
      */
     virtual TrackData *BackingTrackAt(int nIndex);
 
     /**
-     * @ghidraAddress 0x001ec478
+     * @ghidraAddress NTSC-U/C: 0x001ec478
+     * @ghidraAddress PAL: 0x001f2700
      */
     virtual Sch::TempoMap *GetTempoMap();
 
     /**
-     * @ghidraAddress 0x001ec480
+     * @ghidraAddress NTSC-U/C: 0x001ec480
+     * @ghidraAddress PAL: 0x001f2708
      */
     virtual PlayMap *GetPlayMap();
 
@@ -109,7 +118,8 @@ public:
      * Report the play map's extent.
      *
      * @return PlayMap::GetExtent() of the play map.
-     * @ghidraAddress 0x001ec738
+     * @ghidraAddress NTSC-U/C: 0x001ec738
+     * @ghidraAddress PAL: 0x001f29c0
      */
     virtual int GetEndBar();
 
@@ -121,7 +131,8 @@ public:
      *
      * @param nIndex The position in mTracks.
      * @return The track.
-     * @ghidraAddress 0x001ec6d8
+     * @ghidraAddress NTSC-U/C: 0x001ec6d8
+     * @ghidraAddress PAL: 0x001f2960
      */
     TrackData *GetTrack(int nIndex);
 
@@ -134,7 +145,8 @@ public:
      *
      * @param nKind The collection, a LevelTrackKind.
      * @param nIndex The position in the collection. The none and own kinds do not read it.
-     * @ghidraAddress 0x001eb200
+     * @ghidraAddress NTSC-U/C: 0x001eb200
+     * @ghidraAddress PAL: 0x001f1488
      */
     void SelectTrack(int nKind, int nIndex);
 
@@ -145,7 +157,8 @@ public:
      * has no caller in the image.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001eb4a8
+     * @ghidraAddress NTSC-U/C: 0x001eb4a8
+     * @ghidraAddress PAL: 0x001f1730
      */
     void Print(std::ostream &stream);
 
@@ -155,7 +168,8 @@ public:
      * GrooveWorld::BuildGraphs() at `0x0018cd44` passes zero. The title is inferred.
      *
      * @param nBarCount The value stored in the play map's bar count.
-     * @ghidraAddress 0x001ec498
+     * @ghidraAddress NTSC-U/C: 0x001ec498
+     * @ghidraAddress PAL: 0x001f2720
      */
     void SetBarCount(int nBarCount);
 
@@ -167,7 +181,8 @@ public:
      *
      * @param nIndex The position in mIntroTracks.
      * @return The track, or null for a slot SelectTrack() passed over.
-     * @ghidraAddress 0x001ec720
+     * @ghidraAddress NTSC-U/C: 0x001ec720
+     * @ghidraAddress PAL: 0x001f29a8
      */
     TrackData *IntroTrackAt(int nIndex);
 
@@ -175,7 +190,8 @@ public:
      * Set the MIDI channel of the current track.
      *
      * @param nChannel The channel.
-     * @ghidraAddress 0x001ec488
+     * @ghidraAddress NTSC-U/C: 0x001ec488
+     * @ghidraAddress PAL: 0x001f2710
      */
     void SetChannel(unsigned char nChannel);
 
@@ -183,7 +199,8 @@ public:
      * Set the TrackMode of the current track.
      *
      * @param nKind The TrackMode.
-     * @ghidraAddress 0x001ec5c0
+     * @ghidraAddress NTSC-U/C: 0x001ec5c0
+     * @ghidraAddress PAL: 0x001f2848
      */
     void SetKind(int nKind);
 
@@ -192,7 +209,8 @@ public:
      *
      * @param nInstrument The instrument index.
      * @param name The track name, copied.
-     * @ghidraAddress 0x001ec5d0
+     * @ghidraAddress NTSC-U/C: 0x001ec5d0
+     * @ghidraAddress PAL: 0x001f2858
      */
     void SetInstrument(int nInstrument, const HxStr &name);
 
@@ -207,7 +225,8 @@ public:
      * @param nData1 The first data byte.
      * @param nData2 The second data byte, or zero for a one-byte event.
      * @param nChannel The channel, which the body ors into the status.
-     * @ghidraAddress 0x001ec4c8
+     * @ghidraAddress NTSC-U/C: 0x001ec4c8
+     * @ghidraAddress PAL: 0x001f2750
      */
     void AddEvent(int nTick,
                   unsigned char nStatus,
@@ -223,7 +242,8 @@ public:
      * @param nVelocity The note-on velocity.
      * @param nLength The length of the note, in MIDI ticks.
      * @param nChannel The MIDI channel.
-     * @ghidraAddress 0x001ec4f8
+     * @ghidraAddress NTSC-U/C: 0x001ec4f8
+     * @ghidraAddress PAL: 0x001f2780
      */
     void AddNoteMsg(int nTick,
                     unsigned char nNote,
@@ -236,7 +256,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @param nQuant The quantisation, in MIDI ticks.
-     * @ghidraAddress 0x001ec520
+     * @ghidraAddress NTSC-U/C: 0x001ec520
+     * @ghidraAddress PAL: 0x001f27a8
      */
     void SetQuant(int nTick, int nQuant);
 
@@ -245,7 +266,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @param pRiff The riff.
-     * @ghidraAddress 0x001ec540
+     * @ghidraAddress NTSC-U/C: 0x001ec540
+     * @ghidraAddress PAL: 0x001f27c8
      */
     void AddRiff(int nTick, Riff *pRiff);
 
@@ -255,7 +277,8 @@ public:
      * @param nTick The song position, in MIDI ticks.
      * @param nGem The gem.
      * @param pRiff The riff, or null.
-     * @ghidraAddress 0x001ec5a0
+     * @ghidraAddress NTSC-U/C: 0x001ec5a0
+     * @ghidraAddress PAL: 0x001f2828
      */
     void AddGem(int nTick, int nGem, Riff *pRiff);
 
@@ -267,7 +290,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @param harmony The harmony, copied by the track.
-     * @ghidraAddress 0x001ec560
+     * @ghidraAddress NTSC-U/C: 0x001ec560
+     * @ghidraAddress PAL: 0x001f27e8
      */
     void AddHarmony(int nTick, const Harmony &harmony);
 
@@ -279,7 +303,8 @@ public:
      *
      * @param nTick The event position, in MIDI ticks.
      * @param bActive Whether the controller value was non-zero.
-     * @ghidraAddress 0x001ec580
+     * @ghidraAddress NTSC-U/C: 0x001ec580
+     * @ghidraAddress PAL: 0x001f2808
      */
     void SetActive(int nTick, int bActive);
 
@@ -292,7 +317,8 @@ public:
      *
      * @param nTick The event position. No instruction in the body reads it.
      * @param nMicrosecondsPerQuarter The tempo the map is constructed from.
-     * @ghidraAddress 0x001ec5f8
+     * @ghidraAddress NTSC-U/C: 0x001ec5f8
+     * @ghidraAddress PAL: 0x001f2880
      */
     void SetTempo(int nTick, int nMicrosecondsPerQuarter);
 
@@ -302,7 +328,8 @@ public:
      * LevelConverter::Convert() calls it once the reader has been built and before the file is
      * read.
      *
-     * @ghidraAddress 0x001ec680
+     * @ghidraAddress NTSC-U/C: 0x001ec680
+     * @ghidraAddress PAL: 0x001f2908
      */
     void PrepareTracks();
 

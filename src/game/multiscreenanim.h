@@ -30,12 +30,16 @@ public:
      *
      * @param pScreens TnlArena::mScreenMeshes.
      * @param pPlayerMaterials TnlArena::mPlayerMaterials.
-     * @ghidraAddress 0x00406200
+     * @ghidraAddress NTSC-U/C: 0x00406200
+     * @ghidraAddress PAL: 0x0043fb20
      */
     MultiScreenAnim(const std::vector<TnlArena::ScreenMesh> *pScreens,
                     const std::vector<TnlArena::PlayerMaterial *> *pPlayerMaterials);
 
-    /** @ghidraAddress 0x0040c568 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0040c568
+     * @ghidraAddress PAL: 0x00445f90
+     */
     virtual ~MultiScreenAnim();
 
     /**
@@ -44,7 +48,8 @@ public:
      * Does nothing without a leader or within the step SetFrame() last applied.
      *
      * @param flFrame The song position, in MIDI ticks.
-     * @ghidraAddress 0x00406570
+     * @ghidraAddress NTSC-U/C: 0x00406570
+     * @ghidraAddress PAL: 0x0043fe90
      */
     virtual void SetFrame(float flFrame);
 
@@ -54,7 +59,8 @@ public:
      * A leader is every player whose Player::GetScore() is less than 4 below the highest score,
      * with the highest starting at 0.
      *
-     * @ghidraAddress 0x00406428
+     * @ghidraAddress NTSC-U/C: 0x00406428
+     * @ghidraAddress PAL: 0x0043fd48
      */
     virtual void UpdateLeaders();
 

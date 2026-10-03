@@ -27,11 +27,15 @@ public:
      * Runs the PlayMap constructor, reserves 32 elements in mSpanStarts, and appends 0 and then
      * 10000000, the same state ResetSpans() resets it to.
      *
-     * @ghidraAddress 0x0012b660
+     * @ghidraAddress NTSC-U/C: 0x0012b660
+     * @ghidraAddress PAL: 0x0012bd98
      */
     PlayMapRepeatRing();
 
-    /** @ghidraAddress 0x0012d1b8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0012d1b8
+     * @ghidraAddress PAL: 0x0012d900
+     */
     virtual ~PlayMapRepeatRing();
 
     /**
@@ -45,7 +49,8 @@ public:
      * full length.
      *
      * @param nBarCount The value to store.
-     * @ghidraAddress 0x0012bb60
+     * @ghidraAddress NTSC-U/C: 0x0012bb60
+     * @ghidraAddress PAL: 0x0012c2a8
      */
     virtual void SetBarCount(int nBarCount);
 
@@ -56,7 +61,8 @@ public:
      * span covering everything up to that terminator. The zero-length move at the top is the
      * inlined range erase that implements the clear.
      *
-     * @ghidraAddress 0x0012ba88
+     * @ghidraAddress NTSC-U/C: 0x0012ba88
+     * @ghidraAddress PAL: 0x0012c1d0
      */
     virtual void ResetSpans();
 
@@ -69,7 +75,8 @@ public:
      *
      * @param nBar The bar to map.
      * @return The mapped position.
-     * @ghidraAddress 0x0012d500
+     * @ghidraAddress NTSC-U/C: 0x0012d500
+     * @ghidraAddress PAL: 0x0012dc60
      */
     virtual int MapBar(int nBar);
 
@@ -84,7 +91,8 @@ public:
      * @param nMin The lowest position to collect.
      * @param nEnd The position to stop below.
      * @return mFoundBars.
-     * @ghidraAddress 0x0012be68
+     * @ghidraAddress NTSC-U/C: 0x0012be68
+     * @ghidraAddress PAL: 0x0012c5b0
      */
     virtual std::vector<int> &FindBarsPlaying(int nStart, int nMin, int nEnd);
 
@@ -97,7 +105,8 @@ public:
      * the repeat in this class's name.
      *
      * @param nRepeats The multiplier applied to the wrapped gap.
-     * @ghidraAddress 0x0012bc48
+     * @ghidraAddress NTSC-U/C: 0x0012bc48
+     * @ghidraAddress PAL: 0x0012c390
      */
     virtual void CloseSpan(int nRepeats);
 
@@ -107,7 +116,8 @@ public:
      * @param nBar The bar.
      * @return 1 when the span after the bar's span was the terminator and has been closed, and 0
      *         otherwise.
-     * @ghidraAddress 0x0012bd00
+     * @ghidraAddress NTSC-U/C: 0x0012bd00
+     * @ghidraAddress PAL: 0x0012c448
      */
     virtual int EndLoop(int nBar);
 
@@ -118,7 +128,8 @@ public:
      *
      * @param nBar The bar.
      * @return 0 when the span was already open, and 1 otherwise.
-     * @ghidraAddress 0x0012bdd8
+     * @ghidraAddress NTSC-U/C: 0x0012bdd8
+     * @ghidraAddress PAL: 0x0012c520
      */
     virtual int StartLoop(int nBar);
 
@@ -127,7 +138,8 @@ public:
      *
      * @param nBar The bar.
      * @return 1 when a span was closed, and 0 otherwise.
-     * @ghidraAddress 0x0012d5d0
+     * @ghidraAddress NTSC-U/C: 0x0012d5d0
+     * @ghidraAddress PAL: 0x0012dd30
      */
     virtual int ToggleLoop(int nBar);
 
@@ -137,7 +149,8 @@ public:
      * Slot 19.
      *
      * @param nPosition The step position.
-     * @ghidraAddress 0x0012d4b0
+     * @ghidraAddress NTSC-U/C: 0x0012d4b0
+     * @ghidraAddress PAL: 0x0012dc10
      */
     virtual void AddUnlabeledStep(int nPosition);
 

@@ -29,7 +29,8 @@ public:
      * @param nMaxOwned The tracks one player may own per section.
      * @param pOpenTracks The tracks that may be caught while the list is incomplete.
      * @param pGamer The participant.
-     * @ghidraAddress 0x00102790
+     * @ghidraAddress NTSC-U/C: 0x00102790
+     * @ghidraAddress PAL: 0x00102790
      */
     NetJamEnableMgr(int nTrackCount,
                     int nMaxOwned,
@@ -46,7 +47,8 @@ public:
      * @param pOpenTracks The tracks that may be caught while the list is incomplete.
      * @param pGamer The participant.
      * @return The new policy.
-     * @ghidraAddress 0x00105958
+     * @ghidraAddress NTSC-U/C: 0x00105958
+     * @ghidraAddress PAL: 0x00105958
      */
     static NetJamEnableMgr *
     Create(int nTrackCount, int nMaxOwned, const std::vector<int> *pOpenTracks, Gamer *pGamer);
@@ -60,7 +62,8 @@ public:
      * @param nTrack The track.
      * @param nBar The bar.
      * @param pPlayer The owner, which the body does not read.
-     * @ghidraAddress 0x00103158
+     * @ghidraAddress NTSC-U/C: 0x00103158
+     * @ghidraAddress PAL: 0x00103158
      */
     virtual void SetBarOwner(int nTrack, int nBar, Player *pPlayer);
 
@@ -70,7 +73,8 @@ public:
      * @param nTrack The track.
      * @param nBar The bar.
      * @return Non-zero when the bar may be caught.
-     * @ghidraAddress 0x001059f0
+     * @ghidraAddress NTSC-U/C: 0x001059f0
+     * @ghidraAddress PAL: 0x001059f0
      */
     virtual int QueryBar(int nTrack, int nBar);
 
@@ -78,11 +82,11 @@ private:
     // The owner identifier of a track nobody owns.
     enum { kNoOwner = -2 };
 
-    // 0x00105a98
+    // NTSC-U/C: 0x00105a98, PAL: 0x00105a98
     // Reports whether the local player may catch nTrack in nSection.
     int IsTrackAvailable(int nTrack, int nSection);
 
-    // 0x00105b08
+    // NTSC-U/C: 0x00105b08, PAL: 0x00105b08
     // Reports the play-map section a bar lies in.
     int FindSection(int nBar);
 

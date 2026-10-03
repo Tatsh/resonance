@@ -21,35 +21,35 @@ constexpr int kTagByteCount = 6;
 
 constexpr int kControllerCmdId = 2;
 
-// 0x0067f240
+// NTSC-U/C: 0x0067f240, PAL: 0x006c0470
 const Sch::CommandFactory kControllerCmdFactory(kControllerCmdId, ControllerCmd::NewCmd);
 
 } // namespace
 
-// 0x0067f238
+// NTSC-U/C: 0x0067f238, PAL: 0x006c0468
 int ControllerCmd::sCmdID = kControllerCmdId;
 
-// 0x0018be70
+// NTSC-U/C: 0x0018be70, PAL: 0x00191918
 Sch::Command *ControllerCmd::NewCmd() {
     return new ControllerCmd;
 }
 
-// 0x00194598
+// NTSC-U/C: 0x00194598, PAL: 0x0019a218
 int ControllerCmd::CmdID() {
     return sCmdID;
 }
 
-// 0x00194560
+// NTSC-U/C: 0x00194560, PAL: 0x0019a1e0
 void ControllerCmd::Execute() {
     Application::shared()->GetWorld()->ReplayControllerReading(&mReading);
 }
 
-// 0x00194790
+// NTSC-U/C: 0x00194790, PAL: 0x0019a410
 void ControllerCmd::Print(std::ostream &stream) {
     stream << "{" << "ControllerCmd" << "}";
 }
 
-// 0x001945a8
+// NTSC-U/C: 0x001945a8, PAL: 0x0019a228
 void ControllerCmd::Save(OBStream &stream) {
     const char cOpenC = kTagC;
     const char cOpenM = kTagM;
@@ -67,7 +67,7 @@ void ControllerCmd::Save(OBStream &stream) {
         .WriteBytes(&cCloseM, sizeof(cCloseM));
 }
 
-// 0x001946b8
+// NTSC-U/C: 0x001946b8, PAL: 0x0019a338
 void ControllerCmd::Load(IBStream &stream) {
     char acTag[kTagByteCount];
     IBStream &body = stream.ReadBytes(&acTag[0], sizeof(acTag[0]))

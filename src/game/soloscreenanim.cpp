@@ -25,7 +25,7 @@ constexpr int kLevelScriptTemplate = 1019;
 
 } // namespace
 
-// 0x004066d0
+// NTSC-U/C: 0x004066d0, PAL: 0x0043fff0
 SoloScreenAnim::SoloScreenAnim(const std::vector<TnlArena::ScreenMesh> *pScreens,
                                Rnd::Mat *pPlayerMat)
     : mPeriod(kBlinkPeriod), mPhase(kNoPhase), mLevel(kLevelOwn), mPlayerMat(pPlayerMat),
@@ -33,11 +33,11 @@ SoloScreenAnim::SoloScreenAnim(const std::vector<TnlArena::ScreenMesh> *pScreens
       mScreens(pScreens) {
 }
 
-// 0x0040c690
+// NTSC-U/C: 0x0040c690, PAL: 0x004460b8
 SoloScreenAnim::~SoloScreenAnim() {
 }
 
-// 0x0040c7f8
+// NTSC-U/C: 0x0040c7f8, PAL: 0x00446220
 void SoloScreenAnim::SetFrame(float flFrame) {
     if (mLevel != kLevelBlink) {
         return;
@@ -55,7 +55,7 @@ void SoloScreenAnim::SetFrame(float flFrame) {
     }
 }
 
-// 0x0040c738
+// NTSC-U/C: 0x0040c738, PAL: 0x00446160
 void SoloScreenAnim::SetLevel(int nLevel) {
     if (nLevel > kLevelBlink) {
         nLevel = kLevelBlink;

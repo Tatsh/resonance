@@ -14,15 +14,15 @@ constexpr unsigned char kStatusNoteOn = 0x90;
 
 } // namespace
 
-// 0x001a6e10
+// NTSC-U/C: 0x001a6e10, PAL: 0x001acb78
 MidiDisabler::MidiDisabler(int bEnabled) : mEnabled(bEnabled) {
 }
 
-// 0x001a6ac0
+// NTSC-U/C: 0x001a6ac0, PAL: 0x001ac828
 MidiDisabler::~MidiDisabler() {
 }
 
-// 0x001a6f08
+// NTSC-U/C: 0x001a6f08, PAL: 0x001acc70
 void MidiDisabler::HandleMessage(Message *pMsg) {
     const unsigned int dwType = pMsg->Type();
     if (dwType == g_dwStdMidiMsgType) {
@@ -34,19 +34,19 @@ void MidiDisabler::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x001a6ef8
+// NTSC-U/C: 0x001a6ef8, PAL: 0x001acc60
 void MidiDisabler::Enable() {
     mEnabled = 1;
 }
 
-// 0x001a6a58
+// NTSC-U/C: 0x001a6a58, PAL: 0x001ac7c0
 void MidiDisabler::Disable() {
     mEnabled = 0;
     AllNotesOffMsg message;
     Send(&message);
 }
 
-// 0x001a6e60
+// NTSC-U/C: 0x001a6e60, PAL: 0x001acbc8
 void MidiDisabler::PassStdMidi(StdMidiMsg *pMsg) {
     if (mEnabled == 0) {
         const unsigned char nKind = pMsg->mStatus & kStatusKindMask;
@@ -57,7 +57,7 @@ void MidiDisabler::PassStdMidi(StdMidiMsg *pMsg) {
     Send(pMsg);
 }
 
-// 0x001a6eb0
+// NTSC-U/C: 0x001a6eb0, PAL: 0x001acc18
 void MidiDisabler::PassNote(NoteMsg *pMsg) {
     if (mEnabled != 0) {
         Send(pMsg);

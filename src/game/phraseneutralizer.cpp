@@ -22,12 +22,12 @@ constexpr int kNeutralizeHandled = 1;
 
 } // namespace
 
-// 0x001c0918
+// NTSC-U/C: 0x001c0918, PAL: 0x001c6760
 PhraseNeutralizer::PhraseNeutralizer(const TrackData *pTrackData, PhraseMgr *pPhraseMgr)
     : mTrack(pTrackData->mIndex), mPhraseMgr(pPhraseMgr), mTrackData(pTrackData) {
 }
 
-// 0x001c0980
+// NTSC-U/C: 0x001c0980, PAL: 0x001c67c8
 void PhraseNeutralizer::PostTrackNeutralizedMsg(NeutralizeMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -68,7 +68,7 @@ void PhraseNeutralizer::PostTrackNeutralizedMsg(NeutralizeMsg *pMsg) {
     }
 }
 
-// 0x001c1700
+// NTSC-U/C: 0x001c1700, PAL: 0x001c7548
 void PhraseNeutralizer::HandleMessage(Message *pMsg) {
     if (pMsg->Type() == g_nNeutralizeMsgType) {
         PostTrackNeutralizedMsg(static_cast<NeutralizeMsg *>(pMsg));

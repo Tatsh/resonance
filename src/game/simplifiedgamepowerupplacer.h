@@ -21,14 +21,16 @@ public:
     /**
      * @param pOwner The player that owns this placer.
      * @param pCollection The owner's powerup collection.
-     * @ghidraAddress 0x001cde60
+     * @ghidraAddress NTSC-U/C: 0x001cde60
+     * @ghidraAddress PAL: 0x001d3d18
      */
     SimplifiedGamePowerupPlacer(LocalPlayer *pOwner, PowerupCollectionI *pCollection);
 
     /**
      * The body is the inlined base destructor.
      *
-     * @ghidraAddress 0x001cdb20
+     * @ghidraAddress NTSC-U/C: 0x001cdb20
+     * @ghidraAddress PAL: 0x001d39d8
      */
     virtual ~SimplifiedGamePowerupPlacer();
 
@@ -37,7 +39,8 @@ public:
      *
      * Does nothing from the level's last bar on, as PlayMap::GetEndBar() reports it.
      *
-     * @ghidraAddress 0x001cdeb8
+     * @ghidraAddress NTSC-U/C: 0x001cdeb8
+     * @ghidraAddress PAL: 0x001d3d70
      */
     virtual void DeployPowerup();
 

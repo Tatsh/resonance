@@ -36,7 +36,8 @@ class AxingSTG : public ScoreTrackGraph {
 public:
     /**
      * @param pTrackData The track description the base retains.
-     * @ghidraAddress 0x0019daf0
+     * @ghidraAddress NTSC-U/C: 0x0019daf0
+     * @ghidraAddress PAL: 0x001a3858
      */
     AxingSTG(TrackData *pTrackData);
 
@@ -47,7 +48,8 @@ public:
      * releases the periodical post and the eight objects it built, in an order that is not the
      * order of their offsets.
      *
-     * @ghidraAddress 0x0019de08
+     * @ghidraAddress NTSC-U/C: 0x0019de08
+     * @ghidraAddress PAL: 0x001a3b70
      */
     virtual ~AxingSTG();
 
@@ -57,7 +59,8 @@ public:
      * Slot 2. In play mode 2 the routine sends controller 0x52 with value 0x7f on the track's MIDI
      * channel, then starts the base and queues the periodical post.
      *
-     * @ghidraAddress 0x0019e720
+     * @ghidraAddress NTSC-U/C: 0x0019e720
+     * @ghidraAddress PAL: 0x001a4488
      */
     virtual void Start();
 
@@ -67,7 +70,8 @@ public:
      * Slot 3. In play mode 2 the routine sends controller 0x52 with value zero on the track's MIDI
      * channel, then withdraws the periodical post and stops the base.
      *
-     * @ghidraAddress 0x0019e798
+     * @ghidraAddress NTSC-U/C: 0x0019e798
+     * @ghidraAddress PAL: 0x001a4500
      */
     virtual void Stop();
 
@@ -79,7 +83,8 @@ public:
      * @param pPrimary The source the stage registers eight of its objects with.
      * @param pOptional A further source, which receives the phrase manager when it is supplied.
      * @param pSecondary The source that receives the phrase manager and the phrase maker.
-     * @ghidraAddress 0x0019df58
+     * @ghidraAddress NTSC-U/C: 0x0019df58
+     * @ghidraAddress PAL: 0x001a3cc0
      */
     virtual void ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
 
@@ -89,7 +94,8 @@ public:
      * Slot 6.
      *
      * @param pOutput The sink the mixer sends to, stored in Mixer::mOutput.
-     * @ghidraAddress 0x0019e810
+     * @ghidraAddress NTSC-U/C: 0x0019e810
+     * @ghidraAddress PAL: 0x001a4578
      */
     virtual void SetMixerOutput(MsgSink *pOutput);
 
@@ -99,7 +105,8 @@ public:
      * Slot 7.
      *
      * @param pSink The sink to register.
-     * @ghidraAddress 0x0019e850
+     * @ghidraAddress NTSC-U/C: 0x0019e850
+     * @ghidraAddress PAL: 0x001a45b8
      */
     virtual void AddSinkToSources(MsgSink *pSink);
 
@@ -109,7 +116,8 @@ public:
      * Slot 8.
      *
      * @param pSink The sink to install, ignored when null.
-     * @ghidraAddress 0x0019e928
+     * @ghidraAddress NTSC-U/C: 0x0019e928
+     * @ghidraAddress PAL: 0x001a4690
      */
     virtual void SetNetSink(MsgSink *pSink);
 

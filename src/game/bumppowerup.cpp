@@ -6,12 +6,12 @@
 #include "msg/bumppacket.h"
 #include "msg/powerupfailedmsg.h"
 
-// 0x001c9dd8
+// NTSC-U/C: 0x001c9dd8, PAL: 0x001cfc78
 int BumpPowerup::Type() {
     return kHudItemBumper;
 }
 
-// 0x001c9de0
+// NTSC-U/C: 0x001c9de0, PAL: 0x001cfc80
 int BumpPowerup::Deploy(int nTrack, int nBar, Player *pPlayer, int) {
     BumpPacket packet(pPlayer, nBar, nTrack);
     pPlayer->Send(&packet);

@@ -1,6 +1,6 @@
 #include "game/msgjoiner.h"
 
-// 0x00195b70
+// NTSC-U/C: 0x00195b70, PAL: 0x0019b808
 void MsgJoiner::HandleMessage(Message *pMsg) {
     Send(pMsg);
 }

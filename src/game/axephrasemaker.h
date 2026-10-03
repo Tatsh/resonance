@@ -42,7 +42,8 @@ public:
      * @param pQuantizer The quantiser for the track.
      * @param pTrackData The track description. The constructor copies its track and channel.
      * @param pClock Not read.
-     * @ghidraAddress 0x0019b5d0
+     * @ghidraAddress NTSC-U/C: 0x0019b5d0
+     * @ghidraAddress PAL: 0x001a1338
      */
     AxePhraseMaker(PhraseMgr *pPhraseMgr,
                    Quantizer *pQuantizer,
@@ -58,7 +59,8 @@ public:
      * OnInvalidateSeeker() copies.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x0019c408
+     * @ghidraAddress NTSC-U/C: 0x0019c408
+     * @ghidraAddress PAL: 0x001a2170
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -70,7 +72,8 @@ public:
      * for mChannel.
      *
      * @param nBar The bar.
-     * @ghidraAddress 0x0019d990
+     * @ghidraAddress NTSC-U/C: 0x0019d990
+     * @ghidraAddress PAL: 0x001a36f8
      */
     virtual void OnPeriod(int nBar);
 
@@ -78,7 +81,8 @@ public:
      * Report the song position periods are counted from. Slot 5.
      *
      * @return 6 always, after a discarded finiteness test on the same value.
-     * @ghidraAddress 0x0019d438
+     * @ghidraAddress NTSC-U/C: 0x0019d438
+     * @ghidraAddress PAL: 0x001a31a0
      */
     virtual int GetPeriodOrigin();
 
@@ -90,7 +94,8 @@ public:
      * @param nBar The bar.
      * @return Non-zero when TrackData::QueryBar() accepts the bar and Player::IsFreestyleBar()
      *         reports non-zero for it.
-     * @ghidraAddress 0x0019da58
+     * @ghidraAddress NTSC-U/C: 0x0019da58
+     * @ghidraAddress PAL: 0x001a37c0
      */
     int IsBarPlayable(int nBar);
 
@@ -107,7 +112,8 @@ public:
      * @param pPlayer The player the erase is for.
      * @param nTick The song position, in MIDI ticks.
      * @param bWholeStep Non-zero to erase the whole step around the position.
-     * @ghidraAddress 0x0019bf80
+     * @ghidraAddress NTSC-U/C: 0x0019bf80
+     * @ghidraAddress PAL: 0x001a1ce8
      */
     void Erase(Player *pPlayer, int nTick, int bWholeStep);
 
@@ -127,39 +133,39 @@ private:
     // as mChannel. A note-off records the first held note of its number as a NoteMsg lasting
     // until the note-off, and drops it. Any other channel message starts the phrase and is
     // recorded as it is.
-    // 0x0019b958
+    // NTSC-U/C: 0x0019b958, PAL: 0x001a16c0
     void OnStdMidi(StdMidiMsg *pMsg);
 
     // Records one message into mPhrase at its offset in mPhraseBar, with mValue as the value.
-    // 0x0019bbd8
+    // NTSC-U/C: 0x0019bbd8, PAL: 0x001a1940
     void RecordMuseMsg(MuseMsg *pMsg);
 
     // Unless mPhrase is already recording the bar of nTick, finishes the phrase in progress and
     // starts a new one for the player there, announcing it with a ClearGemsMsg, a BarStatusMsg,
     // a BeginPhraseCatchMsg, and a PhraseCapturedMsg.
-    // 0x0019bce0
+    // NTSC-U/C: 0x0019bce0, PAL: 0x001a1a48
     void StartPhrase(int nTick);
 
     // Gives every held note a NoteMsg ending one tick after the bar, installs mPhrase in the
     // phrase manager at mPhraseBar, and releases it.
-    // 0x0019c118
+    // NTSC-U/C: 0x0019c118, PAL: 0x001a1e80
     void FinishPhrase();
 
     // Sends a SeekerMsg that turns mPlayer's seeker off, unless mPlayer is the stand-in. The bar
     // is not read.
-    // 0x0019c368
+    // NTSC-U/C: 0x0019c368, PAL: 0x001a20d0
     void PostSeekerMsg(int nBar);
 
     // The out-of-line copy of the TrackSelectMsg branch HandleMessage() expands inline.
-    // 0x0019d860
+    // NTSC-U/C: 0x0019d860, PAL: 0x001a35c8
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
     // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
-    // 0x0019d8f0
+    // NTSC-U/C: 0x0019d8f0, PAL: 0x001a3658
     void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
 
     // The out-of-line copy of the SustainNoteMsg branch HandleMessage() expands inline.
-    // 0x0019d920
+    // NTSC-U/C: 0x0019d920, PAL: 0x001a3688
     void OnSustainNote(SustainNoteMsg *pMsg);
 
     PhraseMgr *mPhraseMgr;            // +0x18

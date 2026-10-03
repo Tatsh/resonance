@@ -12,17 +12,17 @@ constexpr int kTicksPerBar = 1920;
 
 } // namespace
 
-// 0x001cdf88
+// NTSC-U/C: 0x001cdf88, PAL: 0x001d3e40
 JamPowerupPlacer::JamPowerupPlacer(LocalPlayer *pOwner, PowerupCollectionI *pCollection)
     : mOwner(pOwner), mCollection(pCollection) {
 }
 
-// 0x001cdc58
+// NTSC-U/C: 0x001cdc58, PAL: 0x001d3b10
 // Everything left in the body is the expansion of the MsgSource destructor.
 JamPowerupPlacer::~JamPowerupPlacer() {
 }
 
-// 0x001cdfe0
+// NTSC-U/C: 0x001cdfe0, PAL: 0x001d3e98
 void JamPowerupPlacer::DeployPowerup() {
     const int nBar =
         Application::shared()->GetSongClock()->SongTick() / Mid::MBT(kTicksPerBar).mTick;

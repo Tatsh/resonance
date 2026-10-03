@@ -6,12 +6,12 @@
 #include "msg/neutralizemsg.h"
 #include "msg/powerupfailedmsg.h"
 
-// 0x001c9c38
+// NTSC-U/C: 0x001c9c38, PAL: 0x001cfad8
 int NeutralizePowerup::Type() {
     return kHudItemNeutralizer;
 }
 
-// 0x001c9c40
+// NTSC-U/C: 0x001c9c40, PAL: 0x001cfae0
 int NeutralizePowerup::Deploy(int nTrack, int nBar, Player *pPlayer, int) {
     NeutralizeMsg msg;
     msg.mResult = 0;

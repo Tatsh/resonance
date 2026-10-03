@@ -122,7 +122,8 @@ public:
      * mWorldLoadFlag and mDrawSuppressed both start at 1. mDrawSuppressed stops the first frame
      * after construction from drawing until SetDrawEnabled() runs.
      *
-     * @ghidraAddress 0x00105f50
+     * @ghidraAddress NTSC-U/C: 0x00105f50
+     * @ghidraAddress PAL: 0x00105f50
      */
     GameManagerImpl();
 
@@ -131,7 +132,8 @@ public:
      *
      * The game world is not deleted here. CheckState() runs first and its result is discarded.
      *
-     * @ghidraAddress 0x001062d0
+     * @ghidraAddress NTSC-U/C: 0x001062d0
+     * @ghidraAddress PAL: 0x00106310
      */
     virtual ~GameManagerImpl();
 
@@ -144,7 +146,8 @@ public:
      * Unless drawing is suppressed, slot 8 then runs on each renderer between the display device's
      * frame pair, inside the VU1 path.
      *
-     * @ghidraAddress 0x001065a8
+     * @ghidraAddress NTSC-U/C: 0x001065a8
+     * @ghidraAddress PAL: 0x00106620
      */
     virtual void DrawFrame();
 
@@ -156,7 +159,8 @@ public:
      * screen during a long operation. RendererBase slot 9 runs before the frame pair and slot 10
      * inside it.
      *
-     * @ghidraAddress 0x0010bfa0
+     * @ghidraAddress NTSC-U/C: 0x0010bfa0
+     * @ghidraAddress PAL: 0x0010c158
      */
     virtual void DrawFrameSimple();
 
@@ -165,7 +169,8 @@ public:
      *
      * Calls GrooveWorld::StartPlay() and nothing else. DoGameSystemPlayCmd runs it.
      *
-     * @ghidraAddress 0x0010c128
+     * @ghidraAddress NTSC-U/C: 0x0010c128
+     * @ghidraAddress PAL: 0x0010c2e0
      */
     virtual void StartPlay();
 
@@ -176,7 +181,8 @@ public:
      * `Cannot start recording from this state` when mState is non-zero. The two diagnostics are
      * what establish mState as a state word. Otherwise it installs a GameRecorder.
      *
-     * @ghidraAddress 0x0010c420
+     * @ghidraAddress NTSC-U/C: 0x0010c420
+     * @ghidraAddress PAL: 0x0010c5d8
      */
     virtual void StartRecording();
 
@@ -192,7 +198,8 @@ public:
      *
      * @param file The recording to replay.
      * @param nUnusedFlag Passed unchanged to the installed object, and not read there.
-     * @ghidraAddress 0x0010c4b8
+     * @ghidraAddress NTSC-U/C: 0x0010c4b8
+     * @ghidraAddress PAL: 0x0010c670
      */
     virtual void StartPlayback(const HxStr &file, int nUnusedFlag);
 
@@ -202,7 +209,8 @@ public:
      * Slot 9. No caller is recovered.
      *
      * @return mWorldLoadFlag.
-     * @ghidraAddress 0x0010b870
+     * @ghidraAddress NTSC-U/C: 0x0010b870
+     * @ghidraAddress PAL: 0x0010b9f8
      */
     virtual int GetWorldLoadFlag();
 
@@ -214,7 +222,8 @@ public:
      * element type of mPersonas.
      *
      * @param persona The persona to copy.
-     * @ghidraAddress 0x00105e80
+     * @ghidraAddress NTSC-U/C: 0x00105e80
+     * @ghidraAddress PAL: 0x00105e80
      */
     virtual void AddPersona(const MetPersonaData &persona);
 
@@ -224,7 +233,8 @@ public:
      * Slot 11.
      *
      * @return The roster.
-     * @ghidraAddress 0x0010b888
+     * @ghidraAddress NTSC-U/C: 0x0010b888
+     * @ghidraAddress PAL: 0x0010ba10
      */
     virtual std::vector<MetPersonaData *> *GetPersonas();
 
@@ -234,7 +244,8 @@ public:
      * Slot 12. Each element is destroyed through its own vtable slot 1, which sits at `+0x168`
      * inside a MetPersonaData.
      *
-     * @ghidraAddress 0x0010be20
+     * @ghidraAddress NTSC-U/C: 0x0010be20
+     * @ghidraAddress PAL: 0x0010bfb8
      */
     virtual void ClearPersonas();
 
@@ -243,7 +254,8 @@ public:
      *
      * Slot 13.
      *
-     * @ghidraAddress 0x0010c168
+     * @ghidraAddress NTSC-U/C: 0x0010c168
+     * @ghidraAddress PAL: 0x0010c320
      */
     virtual void Start();
 
@@ -256,7 +268,8 @@ public:
      * mode through GrooveWorld::PostFinish(). MainLoop drives it from one of its two periodic
      * timers.
      *
-     * @ghidraAddress 0x00106e28
+     * @ghidraAddress NTSC-U/C: 0x00106e28
+     * @ghidraAddress PAL: 0x00106eb8
      */
     virtual void PollPlayback();
 
@@ -266,7 +279,8 @@ public:
      * Slot 15. Null until CreateWorld() runs.
      *
      * @return The game world, or null in the front end.
-     * @ghidraAddress 0x0010b890
+     * @ghidraAddress NTSC-U/C: 0x0010b890
+     * @ghidraAddress PAL: 0x0010ba18
      */
     virtual GrooveWorld *GetWorld();
 
@@ -276,7 +290,8 @@ public:
      * Slot 16. Null until Start() runs.
      *
      * @return The front-end world.
-     * @ghidraAddress 0x0010b898
+     * @ghidraAddress NTSC-U/C: 0x0010b898
+     * @ghidraAddress PAL: 0x0010ba20
      */
     virtual MetaGameWorld *GetMetaWorld();
 
@@ -286,7 +301,8 @@ public:
      * Slot 17.
      *
      * @return The poller the constructor created.
-     * @ghidraAddress 0x0010b8a0
+     * @ghidraAddress NTSC-U/C: 0x0010b8a0
+     * @ghidraAddress PAL: 0x0010ba28
      */
     virtual InputPoller *GetPoller();
 
@@ -296,7 +312,8 @@ public:
      * Slot 18. No caller is recovered, and the word is zero for the life of the manager.
      *
      * @return mUnwrittenValue.
-     * @ghidraAddress 0x0010b8a8
+     * @ghidraAddress NTSC-U/C: 0x0010b8a8
+     * @ghidraAddress PAL: 0x0010ba30
      */
     virtual int GetUnwrittenValue();
 
@@ -307,7 +324,8 @@ public:
      * load.
      *
      * @return The tally.
-     * @ghidraAddress 0x0010b8b0
+     * @ghidraAddress NTSC-U/C: 0x0010b8b0
+     * @ghidraAddress PAL: 0x0010ba38
      */
     virtual GameStats *GetStats();
 
@@ -318,7 +336,8 @@ public:
      * themselves afterwards through their own slot 2.
      *
      * @param pStream The stream to write to.
-     * @ghidraAddress 0x0010c588
+     * @ghidraAddress NTSC-U/C: 0x0010c588
+     * @ghidraAddress PAL: 0x0010c740
      */
     virtual void Save(OBStream *pStream);
 
@@ -333,7 +352,8 @@ public:
      * then has mIsPlayback set, and the poller stops handing readings to it.
      *
      * @param pStream The stream to read from.
-     * @ghidraAddress 0x001072b0
+     * @ghidraAddress NTSC-U/C: 0x001072b0
+     * @ghidraAddress PAL: 0x00107360
      */
     virtual void Load(IBStream *pStream);
 
@@ -343,7 +363,8 @@ public:
      * Slot 22.
      *
      * @return Non-zero while a playback exists.
-     * @ghidraAddress 0x0010b8b8
+     * @ghidraAddress NTSC-U/C: 0x0010b8b8
+     * @ghidraAddress PAL: 0x0010ba40
      */
     virtual int IsPlaybackActive();
 
@@ -356,7 +377,8 @@ public:
      * test for `net`, and the change counter advances.
      *
      * @param nMode The mode, 0 through 3.
-     * @ghidraAddress 0x0010c290
+     * @ghidraAddress NTSC-U/C: 0x0010c290
+     * @ghidraAddress PAL: 0x0010c448
      */
     virtual void SetGameMode(int nMode);
 
@@ -366,7 +388,8 @@ public:
      * Slot 24.
      *
      * @return The mode SetGameMode() recorded.
-     * @ghidraAddress 0x0010b8c8
+     * @ghidraAddress NTSC-U/C: 0x0010b8c8
+     * @ghidraAddress PAL: 0x0010ba50
      */
     virtual int GetGameMode();
 
@@ -376,7 +399,8 @@ public:
      * Slot 25. The subobject is embedded, so the accessor is an address computation.
      *
      * @return The settings.
-     * @ghidraAddress 0x0010b8d0
+     * @ghidraAddress NTSC-U/C: 0x0010b8d0
+     * @ghidraAddress PAL: 0x0010ba58
      */
     virtual GameParams *GetParams();
 
@@ -387,7 +411,8 @@ public:
      * count by one, and nothing resets it.
      *
      * @return The count.
-     * @ghidraAddress 0x0010b8d8
+     * @ghidraAddress NTSC-U/C: 0x0010b8d8
+     * @ghidraAddress PAL: 0x0010ba60
      */
     virtual int GetChangeCount();
 
@@ -398,7 +423,8 @@ public:
      * the script layer sees the values already recorded. The change counter advances.
      *
      * @param params The settings to copy.
-     * @ghidraAddress 0x0010c210
+     * @ghidraAddress NTSC-U/C: 0x0010c210
+     * @ghidraAddress PAL: 0x0010c3c8
      */
     virtual void SetParams(const GameParams &params);
 
@@ -410,7 +436,8 @@ public:
      * advances.
      *
      * @param nDifficulty The difficulty.
-     * @ghidraAddress 0x0010c3e0
+     * @ghidraAddress NTSC-U/C: 0x0010c3e0
+     * @ghidraAddress PAL: 0x0010c598
      */
     virtual void SetDifficulty(int nDifficulty);
 
@@ -423,7 +450,8 @@ public:
      * the whole evidence for the value set. The change counter advances.
      *
      * @param nMode The mode, 0 through 2.
-     * @ghidraAddress 0x0010c348
+     * @ghidraAddress NTSC-U/C: 0x0010c348
+     * @ghidraAddress PAL: 0x0010c500
      */
     virtual void SetPlayMode(int nMode);
 
@@ -433,7 +461,8 @@ public:
      * Slot 30.
      *
      * @return GameParams::mDifficulty.
-     * @ghidraAddress 0x0010b8e0
+     * @ghidraAddress NTSC-U/C: 0x0010b8e0
+     * @ghidraAddress PAL: 0x0010ba68
      */
     virtual int GetDifficulty();
 
@@ -443,7 +472,8 @@ public:
      * Slot 31. Returns the settings field mPlayMode.
      *
      * @return The mode SetPlayMode() recorded.
-     * @ghidraAddress 0x0010b8e8
+     * @ghidraAddress NTSC-U/C: 0x0010b8e8
+     * @ghidraAddress PAL: 0x0010ba70
      */
     virtual int GetPlayMode();
 
@@ -454,7 +484,8 @@ public:
      * the queue itself, so it reaches MsgQueue::HandleMessage() virtually.
      *
      * @param pMsg The message to store.
-     * @ghidraAddress 0x0010bee0
+     * @ghidraAddress NTSC-U/C: 0x0010bee0
+     * @ghidraAddress PAL: 0x0010c078
      */
     virtual void QueueMessage(Message *pMsg);
 
@@ -465,7 +496,8 @@ public:
      * while it is clear.
      *
      * @param nEnabled Non-zero to draw.
-     * @ghidraAddress 0x0010b878
+     * @ghidraAddress NTSC-U/C: 0x0010b878
+     * @ghidraAddress PAL: 0x0010ba00
      */
     virtual void SetDrawEnabled(int nEnabled);
 
@@ -474,7 +506,8 @@ protected:
      * Act on a message.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x00107540
+     * @ghidraAddress NTSC-U/C: 0x00107540
+     * @ghidraAddress PAL: 0x00107610
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -489,7 +522,8 @@ protected:
      * ignored, and HandleMessage() passes it all the same.
      *
      * @param pMsg The message, ignored.
-     * @ghidraAddress 0x00106720
+     * @ghidraAddress NTSC-U/C: 0x00106720
+     * @ghidraAddress PAL: 0x00106798
      */
     virtual void OnBeginGameLocal(Message *pMsg);
 
@@ -499,7 +533,8 @@ protected:
      * Slot 35. Forwards EndGameMsg::mRestart to EndGame().
      *
      * @param pMsg The EndGameMsg.
-     * @ghidraAddress 0x0010c148
+     * @ghidraAddress NTSC-U/C: 0x0010c148
+     * @ghidraAddress PAL: 0x0010c300
      */
     virtual void OnEndGame(Message *pMsg);
 
@@ -512,7 +547,8 @@ protected:
      * front-end renderer a MetStartPauseMsg. The message itself is ignored.
      *
      * @param pMsg The message, ignored.
-     * @ghidraAddress 0x001069a8
+     * @ghidraAddress NTSC-U/C: 0x001069a8
+     * @ghidraAddress PAL: 0x00106a38
      */
     virtual void OnPauseGameSystem(Message *pMsg);
 
@@ -524,7 +560,8 @@ protected:
      * input map while the world's mIsTutorial is zero. The message itself is ignored.
      *
      * @param pMsg The message, ignored.
-     * @ghidraAddress 0x00106af8
+     * @ghidraAddress NTSC-U/C: 0x00106af8
+     * @ghidraAddress PAL: 0x00106b88
      */
     virtual void OnUnpauseGameSystem(Message *pMsg);
 
@@ -535,50 +572,51 @@ protected:
      * ignored.
      *
      * @param pMsg The message, ignored.
-     * @ghidraAddress 0x0010bf10
+     * @ghidraAddress NTSC-U/C: 0x0010bf10
+     * @ghidraAddress PAL: 0x0010c0a8
      */
     virtual void OnDoPlayback(Message *pMsg);
 
 private:
-    // 0x0010bec8
+    // NTSC-U/C: 0x0010bec8, PAL: 0x0010c060
     // Reads mState and returns 1 on both paths, so the branch on the state has no
     // effect. The constructor, the destructor, SetParams(), and OnBeginGameLocal() all run it and
     // all discard the result.
     int CheckState();
 
-    // 0x0010b8f0
+    // NTSC-U/C: 0x0010b8f0, PAL: 0x0010ba78
     // Runs CheckState() and discards its result. No caller is recovered. The title is inferred.
     void RunStateCheck();
 
-    // 0x0010c050
+    // NTSC-U/C: 0x0010c050, PAL: 0x0010c208
     // Snapshots the watchdog, withdraws the world from the poller, deletes it, and clears
     // mpWorld. EndGame() expands the same sequence, and no caller of this copy is recovered. The
     // title is inferred.
     void DestroyWorld();
 
-    // 0x001068a0
+    // NTSC-U/C: 0x001068a0, PAL: 0x00106918
     // Creates the game world with the application and this manager's tally, publishes
     // two of the settings under script symbols 0x277 and 0x27b, and hands the world the container
     // name from script symbol 0x38e. Load() and OnBeginGameLocal() are its two callers.
     void CreateWorld();
 
-    // 0x0010c0c0
+    // NTSC-U/C: 0x0010c0c0, PAL: 0x0010c278
     // Sets mWorldLoadFlag, spins on the world's load report at 0x00194ca0 until it
     // finishes, completes the load, adds the players, prepares the level, and reconnects the
     // poller. Load() inlines the same sequence rather than calling this.
     void FinishWorldLoad();
 
-    // 0x0010c1f0
+    // NTSC-U/C: 0x0010c1f0, PAL: 0x0010c3a8
     // Forwards to AddPersonaPlayers(). FinishWorldLoad() and Load() call it.
     void AddPlayers();
 
-    // 0x00106ec0
+    // NTSC-U/C: 0x00106ec0, PAL: 0x00106f50
     // Adds a local player for each persona through GrooveWorld::AddLocalPlayer(), in
     // persona order, each with one of the colour names at 0x007cd3b0. It also shuffles the
     // persona indices, but AddLocalPlayer() does not read the shuffled index.
     void AddPersonaPlayers();
 
-    // 0x00106c08
+    // NTSC-U/C: 0x00106c08, PAL: 0x00106c98
     // The out-of-line body of OnEndGame(). Deletes the game world, ends a recording
     // and a playback, and then either queues a BeginGameLocalMsg or returns to the front end.
     void EndGame(int bRestart);

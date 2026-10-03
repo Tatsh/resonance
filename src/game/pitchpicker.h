@@ -32,7 +32,8 @@ class PitchPicker : public MsgSink, public MsgSource {
 public:
     /**
      * @param pTrackData The track description. The constructor copies its track number.
-     * @ghidraAddress 0x001c29c8
+     * @ghidraAddress NTSC-U/C: 0x001c29c8
+     * @ghidraAddress PAL: 0x001c8810
      */
     PitchPicker(const TrackData *pTrackData);
 
@@ -45,7 +46,8 @@ public:
      * sets mPlayer. Every other message is discarded.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001c3130
+     * @ghidraAddress NTSC-U/C: 0x001c3130
+     * @ghidraAddress PAL: 0x001c8f78
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -63,39 +65,39 @@ public:
 private:
     // Records the lowest and highest note of the riff the message carries in mRiffLow and
     // mRiffHigh, through a stack RiffRangeFinder that visits every message of the sequence.
-    // 0x001c2c60
+    // NTSC-U/C: 0x001c2c60, PAL: 0x001c8aa8
     void FindRiffRange(MultiMuseMsg *pMsg);
 
     // Records the message's tick in mSustainTick and sends a SustainNoteMsg at that tick for the
     // pitch GetSustainPitch() reports for its note.
-    // 0x001c2d40
+    // NTSC-U/C: 0x001c2d40, PAL: 0x001c8b88
     void PostSustainNoteMsg(SustainNoteMsg *pMsg);
 
     // Picks the pitch of a note-on (reusing the sustained pitch at mSustainTick), records the
     // pairing in mHeldNotes, and sends the note-on at that pitch.
-    // 0x001c2dd0
+    // NTSC-U/C: 0x001c2dd0, PAL: 0x001c8c18
     void PostNoteOn(int nTick, unsigned char nStatus, unsigned char nNote, unsigned char nVelocity);
 
     // Clears mSustainNotes unless nTick is mSustainTick, then sends a note-off with zero velocity
     // for the first held pairing of nNote and removes that pairing. A note without a pairing
     // sends nothing.
-    // 0x001c2f08
+    // NTSC-U/C: 0x001c2f08, PAL: 0x001c8d50
     void PostNoteOff(int nTick, unsigned char nStatus, unsigned char nNote);
 
     // Returns the pitch mSustainNotes pairs with nNote, or picks one and records the pairing.
-    // 0x001c3060
+    // NTSC-U/C: 0x001c3060, PAL: 0x001c8ea8
     unsigned char GetSustainPitch(int nTick, unsigned char nNote);
 
     // Routes a note-off to PostNoteOff() and a note-on to PostNoteOn(), and sends every other
     // channel message on unchanged. The out-of-line copy of the branch HandleMessage() expands
     // inline.
-    // 0x001c43b0
+    // NTSC-U/C: 0x001c43b0, PAL: 0x001ca1f8
     void OnStdMidi(StdMidiMsg *pMsg);
 
     // Returns nNote unchanged when no harmony is in force at nTick. Otherwise the axis position
     // maps linearly from 0..1023 onto the offsets that move the riff's range onto the harmony's,
     // and the offset note snaps to the nearer harmony note.
-    // 0x001c4488
+    // NTSC-U/C: 0x001c4488, PAL: 0x001ca2d0
     unsigned char PickPitch(int nTick, unsigned char nNote);
 
     const TrackData *mTrackData;            // +0x18

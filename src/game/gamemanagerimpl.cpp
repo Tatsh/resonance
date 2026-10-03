@@ -73,7 +73,7 @@ constexpr int kRecordable = 1;
 
 } // namespace
 
-// 0x0010bec8
+// NTSC-U/C: 0x0010bec8, PAL: 0x0010c060
 int GameManagerImpl::CheckState() {
     // Yes, the binary branches on the state and then returns 1 either way. The instruction that
     // looks like the taken path is the branch-likely delay slot.
@@ -83,12 +83,12 @@ int GameManagerImpl::CheckState() {
     return 1;
 }
 
-// 0x0010b8f0
+// NTSC-U/C: 0x0010b8f0, PAL: 0x0010ba78
 void GameManagerImpl::RunStateCheck() {
     CheckState(); // Yes, the binary discards this call's result.
 }
 
-// 0x0010c050
+// NTSC-U/C: 0x0010c050, PAL: 0x0010c208
 void GameManagerImpl::DestroyWorld() {
     Application::shared()->GetWatchdog()->Snapshot();
     mpPoller->DetachController(mpWorld);
@@ -96,24 +96,24 @@ void GameManagerImpl::DestroyWorld() {
     mpWorld = nullptr;
 }
 
-// 0x0010b870
+// NTSC-U/C: 0x0010b870, PAL: 0x0010b9f8
 int GameManagerImpl::GetWorldLoadFlag() {
     return mWorldLoadFlag;
 }
 
-// 0x00105e80
+// NTSC-U/C: 0x00105e80, PAL: 0x00105e80
 void GameManagerImpl::AddPersona(const MetPersonaData &persona) {
     MetPersonaData *pPersona = new MetPersonaData;
     *pPersona = persona;
     mPersonas.push_back(pPersona);
 }
 
-// 0x0010b888
+// NTSC-U/C: 0x0010b888, PAL: 0x0010ba10
 std::vector<MetPersonaData *> *GameManagerImpl::GetPersonas() {
     return &mPersonas;
 }
 
-// 0x0010be20
+// NTSC-U/C: 0x0010be20, PAL: 0x0010bfb8
 void GameManagerImpl::ClearPersonas() {
     for (std::vector<MetPersonaData *>::iterator it = mPersonas.begin(); it != mPersonas.end();
          ++it) {
@@ -123,32 +123,32 @@ void GameManagerImpl::ClearPersonas() {
     mPersonas.erase(mPersonas.begin(), mPersonas.end());
 }
 
-// 0x0010b890
+// NTSC-U/C: 0x0010b890, PAL: 0x0010ba18
 GrooveWorld *GameManagerImpl::GetWorld() {
     return mpWorld;
 }
 
-// 0x0010b898
+// NTSC-U/C: 0x0010b898, PAL: 0x0010ba20
 MetaGameWorld *GameManagerImpl::GetMetaWorld() {
     return mpMetaWorld;
 }
 
-// 0x0010b8a0
+// NTSC-U/C: 0x0010b8a0, PAL: 0x0010ba28
 InputPoller *GameManagerImpl::GetPoller() {
     return mpPoller;
 }
 
-// 0x0010b8a8
+// NTSC-U/C: 0x0010b8a8, PAL: 0x0010ba30
 int GameManagerImpl::GetUnwrittenValue() {
     return mUnwrittenValue;
 }
 
-// 0x0010b8b0
+// NTSC-U/C: 0x0010b8b0, PAL: 0x0010ba38
 GameStats *GameManagerImpl::GetStats() {
     return &mStats;
 }
 
-// 0x0010c588
+// NTSC-U/C: 0x0010c588, PAL: 0x0010c740
 void GameManagerImpl::Save(OBStream *pStream) {
     pStream->Write(&mState, sizeof(mState))
         .Write(&mSavedWord, sizeof(mSavedWord))
@@ -156,12 +156,12 @@ void GameManagerImpl::Save(OBStream *pStream) {
     mParams.Save(pStream);
 }
 
-// 0x0010b8b8
+// NTSC-U/C: 0x0010b8b8, PAL: 0x0010ba40
 int GameManagerImpl::IsPlaybackActive() {
     return mpPlayback != nullptr;
 }
 
-// 0x0010c290
+// NTSC-U/C: 0x0010c290, PAL: 0x0010c448
 void GameManagerImpl::SetGameMode(int nMode) {
     const char *pszName = "";
     mGameMode = nMode;
@@ -184,22 +184,22 @@ void GameManagerImpl::SetGameMode(int nMode) {
     ++mChangeCount;
 }
 
-// 0x0010b8c8
+// NTSC-U/C: 0x0010b8c8, PAL: 0x0010ba50
 int GameManagerImpl::GetGameMode() {
     return mGameMode;
 }
 
-// 0x0010b8d0
+// NTSC-U/C: 0x0010b8d0, PAL: 0x0010ba58
 GameParams *GameManagerImpl::GetParams() {
     return &mParams;
 }
 
-// 0x0010b8d8
+// NTSC-U/C: 0x0010b8d8, PAL: 0x0010ba60
 int GameManagerImpl::GetChangeCount() {
     return mChangeCount;
 }
 
-// 0x0010c210
+// NTSC-U/C: 0x0010c210, PAL: 0x0010c3c8
 void GameManagerImpl::SetParams(const GameParams &params) {
     CheckState(); // Yes, the binary discards this call's result.
     mParams = params;
@@ -210,7 +210,7 @@ void GameManagerImpl::SetParams(const GameParams &params) {
     CheckState(); // Yes, the binary discards this call's result.
 }
 
-// 0x0010c3e0
+// NTSC-U/C: 0x0010c3e0, PAL: 0x0010c598
 void GameManagerImpl::SetDifficulty(int nDifficulty) {
     mParams.mDifficulty = nDifficulty;
     // No literal maps the value, and the raw word goes out as the template argument.
@@ -218,7 +218,7 @@ void GameManagerImpl::SetDifficulty(int nDifficulty) {
     ++mChangeCount;
 }
 
-// 0x0010c348
+// NTSC-U/C: 0x0010c348, PAL: 0x0010c500
 void GameManagerImpl::SetPlayMode(int nMode) {
     const char *pszName = "";
     mParams.mPlayMode = nMode;
@@ -237,23 +237,23 @@ void GameManagerImpl::SetPlayMode(int nMode) {
     ++mChangeCount;
 }
 
-// 0x0010b8e0
+// NTSC-U/C: 0x0010b8e0, PAL: 0x0010ba68
 int GameManagerImpl::GetDifficulty() {
     return mParams.mDifficulty;
 }
 
-// 0x0010b8e8
+// NTSC-U/C: 0x0010b8e8, PAL: 0x0010ba70
 int GameManagerImpl::GetPlayMode() {
     return mParams.mPlayMode;
 }
 
-// 0x0010b878
+// NTSC-U/C: 0x0010b878, PAL: 0x0010ba00
 void GameManagerImpl::SetDrawEnabled(int nEnabled) {
     // Yes, the binary inverts the low bit rather than the whole value, so 2 records 3.
     mDrawSuppressed = nEnabled ^ 1;
 }
 
-// 0x00107540
+// NTSC-U/C: 0x00107540, PAL: 0x00107610
 void GameManagerImpl::HandleMessage(Message *pMsg) {
     int nType = pMsg->Type();
     if (nType == g_nBeginGameLocalMsgType) {
@@ -271,7 +271,7 @@ void GameManagerImpl::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x00105f50
+// NTSC-U/C: 0x00105f50, PAL: 0x00105f50
 GameManagerImpl::GameManagerImpl()
     : mState(0), mSavedWord(0), mpWorld(nullptr), mpMetaWorld(nullptr), mUnwrittenValue(0),
       mGameMode(0), mChangeCount(0), mFrontEndActive(0), mpRecorder(nullptr), mpPlayback(nullptr),
@@ -282,7 +282,7 @@ GameManagerImpl::GameManagerImpl()
     CheckState(); // Yes, the binary discards this call's result.
 }
 
-// 0x001062d0
+// NTSC-U/C: 0x001062d0, PAL: 0x00106310
 GameManagerImpl::~GameManagerImpl() {
     CheckState(); // Yes, the binary discards this call's result.
     delete mpRecorder;
@@ -293,7 +293,7 @@ GameManagerImpl::~GameManagerImpl() {
     mpPoller = nullptr;
 }
 
-// 0x001068a0
+// NTSC-U/C: 0x001068a0, PAL: 0x00106918
 void GameManagerImpl::CreateWorld() {
     mpWorld = new GrooveWorld(Application::shared(), &mStats);
     const HxStr &level = mParams.mLevelName;
@@ -307,7 +307,7 @@ void GameManagerImpl::CreateWorld() {
     mpWorld->StartLoad(container);
 }
 
-// 0x0010c168
+// NTSC-U/C: 0x0010c168, PAL: 0x0010c320
 void GameManagerImpl::Start() {
     mpMetaWorld = new MetaGameWorld;
     mpPoller->SetController(mpMetaWorld);
@@ -315,7 +315,7 @@ void GameManagerImpl::Start() {
     mpPoller->SetActive(1);
 }
 
-// 0x001069a8
+// NTSC-U/C: 0x001069a8, PAL: 0x00106a38
 void GameManagerImpl::OnPauseGameSystem(Message *) {
     if (mPaused != 0) {
         return;
@@ -338,12 +338,12 @@ void GameManagerImpl::OnPauseGameSystem(Message *) {
     mpMetaWorld->GetRenderer()->Handle(&pause);
 }
 
-// 0x0010c148
+// NTSC-U/C: 0x0010c148, PAL: 0x0010c300
 void GameManagerImpl::OnEndGame(Message *pMsg) {
     EndGame(static_cast<EndGameMsg *>(pMsg)->mRestart);
 }
 
-// 0x00106c08
+// NTSC-U/C: 0x00106c08, PAL: 0x00106c98
 void GameManagerImpl::EndGame(int bRestart) {
     CheckState(); // Yes, the binary discards this call's result.
     const int nWorldExitFlag = mpWorld->mContinueJukebox;
@@ -376,7 +376,7 @@ void GameManagerImpl::EndGame(int bRestart) {
     CheckState(); // Yes, the binary discards this call's result.
 }
 
-// 0x00106af8
+// NTSC-U/C: 0x00106af8, PAL: 0x00106b88
 void GameManagerImpl::OnUnpauseGameSystem(Message *) {
     if (mPaused == 0) {
         return;
@@ -398,7 +398,7 @@ void GameManagerImpl::OnUnpauseGameSystem(Message *) {
     }
 }
 
-// 0x0010c0c0
+// NTSC-U/C: 0x0010c0c0, PAL: 0x0010c278
 void GameManagerImpl::FinishWorldLoad() {
     mWorldLoadFlag = 1;
     while (mpWorld->IsLoadDone() == 0) {
@@ -409,7 +409,7 @@ void GameManagerImpl::FinishWorldLoad() {
     mpPoller->SetController(mpWorld);
 }
 
-// 0x001065a8
+// NTSC-U/C: 0x001065a8, PAL: 0x00106620
 void GameManagerImpl::DrawFrame() {
     mQueue.Poll();
 
@@ -441,7 +441,7 @@ void GameManagerImpl::DrawFrame() {
     g_gfxDevice.PresentFrame(kNoBufferSwap);
 }
 
-// 0x0010bfa0
+// NTSC-U/C: 0x0010bfa0, PAL: 0x0010c158
 void GameManagerImpl::DrawFrameSimple() {
     if (mpMetaWorld == nullptr || mpWorld != nullptr || mDrawSuppressed != 0) {
         return;
@@ -454,7 +454,7 @@ void GameManagerImpl::DrawFrameSimple() {
     g_gfxDevice.PresentFrame(kNoBufferSwap);
 }
 
-// 0x00106e28
+// NTSC-U/C: 0x00106e28, PAL: 0x00106eb8
 void GameManagerImpl::PollPlayback() {
     mpPoller->Poll();
     Application::shared()->GetWatchdog(); // Yes, the binary discards this call's result.
@@ -464,7 +464,7 @@ void GameManagerImpl::PollPlayback() {
     }
 }
 
-// 0x00106720
+// NTSC-U/C: 0x00106720, PAL: 0x00106798
 void GameManagerImpl::OnBeginGameLocal(Message *) {
     CheckState(); // Yes, the binary discards this call's result.
     if (mRestartPending != 0) {
@@ -500,7 +500,7 @@ void GameManagerImpl::OnBeginGameLocal(Message *) {
     CheckState(); // Yes, the binary discards this call's result.
 }
 
-// 0x001072b0
+// NTSC-U/C: 0x001072b0, PAL: 0x00107360
 void GameManagerImpl::Load(IBStream *pStream) {
     int nState;
     pStream->Read(&nState, sizeof(nState));
@@ -533,17 +533,17 @@ void GameManagerImpl::Load(IBStream *pStream) {
     mpPoller->SetGameInputEnabled(0);
 }
 
-// 0x0010c128
+// NTSC-U/C: 0x0010c128, PAL: 0x0010c2e0
 void GameManagerImpl::StartPlay() {
     mpWorld->StartPlay();
 }
 
-// 0x0010c1f0
+// NTSC-U/C: 0x0010c1f0, PAL: 0x0010c3a8
 void GameManagerImpl::AddPlayers() {
     AddPersonaPlayers();
 }
 
-// 0x00106ec0
+// NTSC-U/C: 0x00106ec0, PAL: 0x00106f50
 void GameManagerImpl::AddPersonaPlayers() {
     const char *colors[] = {"green", "purple", "yellow", "red"};
     const int nCount = mPersonas.size();
@@ -560,7 +560,7 @@ void GameManagerImpl::AddPersonaPlayers() {
     }
 }
 
-// 0x0010c420
+// NTSC-U/C: 0x0010c420, PAL: 0x0010c5d8
 void GameManagerImpl::StartRecording() {
     if (mpRecorder != nullptr) {
         Fatal(kRecordingInProgress);
@@ -571,7 +571,7 @@ void GameManagerImpl::StartRecording() {
     mpRecorder = new GameRecorder(this);
 }
 
-// 0x0010c4b8
+// NTSC-U/C: 0x0010c4b8, PAL: 0x0010c670
 void GameManagerImpl::StartPlayback(const HxStr &file, int nUnusedFlag) {
     if (mState != 0) {
         Fatal(kCannotRecreateGame);
@@ -587,13 +587,13 @@ void GameManagerImpl::StartPlayback(const HxStr &file, int nUnusedFlag) {
     mpPlayback = new GamePlayback(file, this, nUnusedFlag);
 }
 
-// 0x0010bee0
+// NTSC-U/C: 0x0010bee0, PAL: 0x0010c078
 void GameManagerImpl::QueueMessage(Message *pMsg) {
     MsgSink *pQueueSink = &mQueue;
     pQueueSink->HandleMessage(pMsg);
 }
 
-// 0x0010bf10
+// NTSC-U/C: 0x0010bf10, PAL: 0x0010c0a8
 void GameManagerImpl::OnDoPlayback(Message *) {
     HxStr file = QueryConfigString(kPlaybackFileConfigCode);
     StartPlayback(file, 0);

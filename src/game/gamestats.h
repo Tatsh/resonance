@@ -35,7 +35,8 @@ public:
      * The constructor does not write mCheated, mProgress, or mRemixEdited. A tally starts with
      * three indeterminate fields.
      *
-     * @ghidraAddress 0x0010f150
+     * @ghidraAddress NTSC-U/C: 0x0010f150
+     * @ghidraAddress PAL: 0x0010f5b0
      */
     GameStats();
 
@@ -44,7 +45,8 @@ public:
      *
      * The GameStats unit also emits an unreferenced, byte-identical copy at `0x0010fda0`.
      *
-     * @ghidraAddress 0x0010b648
+     * @ghidraAddress NTSC-U/C: 0x0010b648
+     * @ghidraAddress PAL: 0x0010b7d0
      */
     virtual ~GameStats();
 
@@ -54,61 +56,70 @@ public:
      * The title is inferred.
      *
      * @param nPlayers The number of players.
-     * @ghidraAddress 0x0010f1a8
+     * @ghidraAddress NTSC-U/C: 0x0010f1a8
+     * @ghidraAddress PAL: 0x0010f608
      */
     void Reset(int nPlayers);
 
     /**
      * @param nPlayer The player's index.
      * @return The player's final score.
-     * @ghidraAddress 0x0010ff20
+     * @ghidraAddress NTSC-U/C: 0x0010ff20
+     * @ghidraAddress PAL: 0x00110380
      */
     int GetScore(int nPlayer);
 
     /**
      * @param nPlayer The player's index.
      * @param nScore The player's final score.
-     * @ghidraAddress 0x0010ff38
+     * @ghidraAddress NTSC-U/C: 0x0010ff38
+     * @ghidraAddress PAL: 0x00110398
      */
     void SetScore(int nPlayer, int nScore);
 
     /**
      * @return The fraction of the song reached, 1.0 when it was completed.
-     * @ghidraAddress 0x0010ff50
+     * @ghidraAddress NTSC-U/C: 0x0010ff50
+     * @ghidraAddress PAL: 0x001103b0
      */
     float GetProgress();
 
     /**
      * @param flProgress The fraction of the song reached.
-     * @ghidraAddress 0x0010ff58
+     * @ghidraAddress NTSC-U/C: 0x0010ff58
+     * @ghidraAddress PAL: 0x001103b8
      */
     void SetProgress(float flProgress);
 
     /**
      * @param nPlayer The player's index.
      * @return The player's Player::GetCaptureRatio() fraction at the end of the game.
-     * @ghidraAddress 0x0010ff60
+     * @ghidraAddress NTSC-U/C: 0x0010ff60
+     * @ghidraAddress PAL: 0x001103c0
      */
     float GetRatio(int nPlayer);
 
     /**
      * @param nPlayer The player's index.
      * @param flRatio The player's Player::GetCaptureRatio() fraction.
-     * @ghidraAddress 0x0010ff78
+     * @ghidraAddress NTSC-U/C: 0x0010ff78
+     * @ghidraAddress PAL: 0x001103d8
      */
     void SetRatio(int nPlayer, float flRatio);
 
     /**
      * @param nPlayer The player's index.
      * @return The player's Player::GetBestStreak() count at the end of the game.
-     * @ghidraAddress 0x0010ff90
+     * @ghidraAddress NTSC-U/C: 0x0010ff90
+     * @ghidraAddress PAL: 0x001103f0
      */
     int GetTally(int nPlayer);
 
     /**
      * @param nPlayer The player's index.
      * @param nTally The player's Player::GetBestStreak() count.
-     * @ghidraAddress 0x0010ffa8
+     * @ghidraAddress NTSC-U/C: 0x0010ffa8
+     * @ghidraAddress PAL: 0x00110408
      */
     void SetTally(int nPlayer, int nTally);
 

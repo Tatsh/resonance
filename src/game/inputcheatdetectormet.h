@@ -35,7 +35,8 @@ public:
     /**
      * Do nothing. Slot 3.
      *
-     * @ghidraAddress 0x003d4788
+     * @ghidraAddress NTSC-U/C: 0x003d4788
+     * @ghidraAddress PAL: 0x0040c678
      */
     virtual void UnusedHook();
 };

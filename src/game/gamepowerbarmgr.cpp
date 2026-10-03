@@ -33,7 +33,7 @@ struct PowerbarWeightRow {
     float mThreshold;
 };
 
-// 0x0068c718
+// NTSC-U/C: 0x0068c718, PAL: 0x006cd990
 const PowerbarWeight g_aPowerbarWeightsEarly[] = {
     {3, 0.2f},
     {4, 0.6f},
@@ -42,7 +42,7 @@ const PowerbarWeight g_aPowerbarWeightsEarly[] = {
     {0, 1.01f},
 };
 
-// 0x0068c740
+// NTSC-U/C: 0x0068c740, PAL: 0x006cd9b8
 const PowerbarWeight g_aPowerbarWeightsMiddle[] = {
     {3, 0.2f},
     {4, 0.4f},
@@ -51,7 +51,7 @@ const PowerbarWeight g_aPowerbarWeightsMiddle[] = {
     {0, 1.01f},
 };
 
-// 0x0068c768
+// NTSC-U/C: 0x0068c768, PAL: 0x006cd9e0
 const PowerbarWeight g_aPowerbarWeightsLate[] = {
     {3, 0.16f},
     {4, 0.33f},
@@ -60,7 +60,7 @@ const PowerbarWeight g_aPowerbarWeightsLate[] = {
     {0, 1.01f},
 };
 
-// 0x0068c790
+// NTSC-U/C: 0x0068c790, PAL: 0x006cda08
 const PowerbarWeightRow g_aPowerbarWeightRows[] = {
     {g_aPowerbarWeightsEarly, 0.25f},
     {g_aPowerbarWeightsMiddle, 0.6f},
@@ -69,7 +69,7 @@ const PowerbarWeightRow g_aPowerbarWeightRows[] = {
 
 } // namespace
 
-// 0x001c4fb0
+// NTSC-U/C: 0x001c4fb0, PAL: 0x001cadf8
 GamePowerbarMgr::GamePowerbarMgr(PlayMap *pMap,
                                  PhraseDatabase *pDatabase,
                                  const TrackData *pTrackData,
@@ -114,7 +114,7 @@ GamePowerbarMgr::GamePowerbarMgr(PlayMap *pMap,
     }
 }
 
-// 0x001c6258
+// NTSC-U/C: 0x001c6258, PAL: 0x001cc0a0
 int GamePowerbarMgr::GetPowerbar(int nBar) {
     return mBars[nBar].mPowerbar;
 }

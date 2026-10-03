@@ -38,7 +38,8 @@ public:
      * The body here discards the finiteness test on zero and returns zero.
      *
      * @return The origin, in MIDI ticks.
-     * @ghidraAddress 0x0019d370
+     * @ghidraAddress NTSC-U/C: 0x0019d370
+     * @ghidraAddress PAL: 0x001a30d8
      */
     virtual int GetPeriodOrigin();
 };

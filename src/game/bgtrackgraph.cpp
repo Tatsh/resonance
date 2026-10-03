@@ -37,7 +37,7 @@ void BGTrackGraph::operator delete(void *pBlock) {
     FreeTaggedMemory(pBlock, kBGTrackGraphTag);
 }
 
-// 0x0013fb10
+// NTSC-U/C: 0x0013fb10, PAL: 0x001404f0
 BGTrackGraph::BGTrackGraph(int nTrack, int nUnmapped)
     : mSequencer(nullptr), mUnsetLowByte(kUnsetByte), mUnsetHighByte(kUnsetByte), mTrack(nTrack),
       mTrackData(nullptr), mUnmapped(nUnmapped), mMuseSynth(nullptr), mMixer(nullptr) {
@@ -46,7 +46,7 @@ BGTrackGraph::BGTrackGraph(int nTrack, int nUnmapped)
     mDisabler->AddSink(mMuseSynth);
 }
 
-// 0x00140338
+// NTSC-U/C: 0x00140338, PAL: 0x00140d18
 BGTrackGraph::~BGTrackGraph() {
     DeleteSequencer();
     delete mDisabler;
@@ -54,7 +54,7 @@ BGTrackGraph::~BGTrackGraph() {
     delete mMixer;
 }
 
-// 0x0013fc48
+// NTSC-U/C: 0x0013fc48, PAL: 0x00140628
 void BGTrackGraph::BuildSequencer() {
     MidiChase chase;
     const int nBarCount = Application::shared()->GetPlayMap()->mBarCount;
@@ -69,40 +69,40 @@ void BGTrackGraph::BuildSequencer() {
     mSequencer->Start(Mid::MBT(0).mTick);
 }
 
-// 0x001403e0
+// NTSC-U/C: 0x001403e0, PAL: 0x00140dc0
 void BGTrackGraph::CreateMixer(TrackData *pTrack) {
     mTrackData = pTrack;
     mMixer = new Mixer(kNoMixerTrack, pTrack->mChannel);
 }
 
-// 0x00140468
+// NTSC-U/C: 0x00140468, PAL: 0x00140e48
 void BGTrackGraph::AttachMixerToSource(MsgSource *pSource) {
     pSource->AddSink(mMixer);
 }
 
-// 0x00140498
+// NTSC-U/C: 0x00140498, PAL: 0x00140e78
 void BGTrackGraph::AttachMixerToSynth(MsgSink *pSynth) {
     mMuseSynth->AddSink(mMixer);
     mMixer->mOutput = pSynth;
 }
 
-// 0x001404d8
+// NTSC-U/C: 0x001404d8, PAL: 0x00140eb8
 void BGTrackGraph::AddSynthSink(MsgSink *pSink) {
     mMuseSynth->AddSink(pSink);
 }
 
-// 0x001404f8
+// NTSC-U/C: 0x001404f8, PAL: 0x00140ed8
 void BGTrackGraph::DeleteSequencer() {
     delete mSequencer;
     mSequencer = nullptr;
 }
 
-// 0x00140540
+// NTSC-U/C: 0x00140540, PAL: 0x00140f20
 void BGTrackGraph::EnableMidi() {
     mDisabler->Enable();
 }
 
-// 0x00140560
+// NTSC-U/C: 0x00140560, PAL: 0x00140f40
 void BGTrackGraph::DisableMidi() {
     mDisabler->Disable();
 }

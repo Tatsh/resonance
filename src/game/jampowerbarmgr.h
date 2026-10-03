@@ -17,7 +17,8 @@ public:
     /**
      * @param nBar The bar. Not read.
      * @return -1, for no powerbar.
-     * @ghidraAddress 0x001c07f0
+     * @ghidraAddress NTSC-U/C: 0x001c07f0
+     * @ghidraAddress PAL: 0x001c6638
      */
     virtual int GetPowerbar([[maybe_unused]] int nBar) {
         return -1;

@@ -24,14 +24,16 @@ public:
     /**
      * Start with no template selected, an unset scale, and the FreQ maker default colour.
      *
-     * @ghidraAddress 0x0024f300
+     * @ghidraAddress NTSC-U/C: 0x0024f300
+     * @ghidraAddress PAL: 0x00264728
      */
     FreqMakerCursor();
 
     /**
      * Delete the preview mesh.
      *
-     * @ghidraAddress 0x0024f3b0
+     * @ghidraAddress NTSC-U/C: 0x0024f3b0
+     * @ghidraAddress PAL: 0x002647d8
      */
     ~FreqMakerCursor();
 
@@ -41,7 +43,8 @@ public:
      * FreqAppearanceDetail::placeCursor() runs it when the cursor is editing. The title is
      * inferred.
      *
-     * @ghidraAddress 0x0024f2e8
+     * @ghidraAddress NTSC-U/C: 0x0024f2e8
+     * @ghidraAddress PAL: 0x00264710
      */
     void deselect();
 

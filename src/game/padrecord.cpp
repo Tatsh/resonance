@@ -93,7 +93,7 @@ constexpr int kVibrationReady = 2;
 
 int PadRecord::sPadLibraryStarted;
 
-// 0x005bcf58
+// NTSC-U/C: 0x005bcf58, PAL: 0x00585f40
 void PadRecord::Open(int nPort, int nSlot, int nDeadZone) {
     for (int i = 0; i < kActuatorByteCount; ++i) {
         mActDirect[i] = 0;
@@ -219,7 +219,7 @@ inline void PadRecord::AdvancePhase(int nState) {
     }
 }
 
-// 0x005bc998
+// NTSC-U/C: 0x005bc998, PAL: 0x00585960
 int PadRecord::Read(unsigned int *pButtons,
                     unsigned char *pAxis0,
                     unsigned char *pAxis1,
@@ -340,7 +340,7 @@ int PadRecord::Read(unsigned int *pButtons,
     return mReadyLevel;
 }
 
-// 0x005bd0b0
+// NTSC-U/C: 0x005bd0b0, PAL: 0x00586098
 void PadRecord::SetVibration(int nSmallMotor, int nBigMotor) {
     if (mReadyLevel < kVibrationReady) {
         return;
@@ -349,3 +349,10 @@ void PadRecord::SetVibration(int nSmallMotor, int nBigMotor) {
     mActDirect[kBigMotor] = nBigMotor;
     scePadSetActDirect(mPort, mSlot, mActDirect);
 }
+
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x00585f20
+void PadRecord::EndLibrary() {
+    scePadEnd();
+}
+#endif

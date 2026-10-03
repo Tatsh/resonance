@@ -38,7 +38,8 @@ public:
      *
      * @param nSize The object size, which the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x0018b988
+     * @ghidraAddress NTSC-U/C: 0x0018b988
+     * @ghidraAddress PAL: 0x00191418
      */
     void *operator new(size_t nSize);
 
@@ -46,7 +47,8 @@ public:
      * Release an instance to the tagged heap.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x0018b9a8
+     * @ghidraAddress NTSC-U/C: 0x0018b9a8
+     * @ghidraAddress PAL: 0x00191438
      */
     void operator delete(void *pBlock);
 
@@ -54,12 +56,14 @@ public:
      * Start with the default mappings, options, and keyboard macros, the address `127.0.0.2`, the
      * port `2000`, and one memory-card location, `1`.
      *
-     * @ghidraAddress 0x00187d00
+     * @ghidraAddress NTSC-U/C: 0x00187d00
+     * @ghidraAddress PAL: 0x0018d588
      */
     GlobalSettings();
 
     /**
-     * @ghidraAddress 0x00188370
+     * @ghidraAddress NTSC-U/C: 0x00188370
+     * @ghidraAddress PAL: 0x0018dc90
      */
     virtual ~GlobalSettings();
 
@@ -70,7 +74,8 @@ public:
      * the options, the macro count and the keyboard macros, and the tutorial flag.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001885d0
+     * @ghidraAddress NTSC-U/C: 0x001885d0
+     * @ghidraAddress PAL: 0x0018df28
      */
     virtual void Save(OBStream &stream);
 
@@ -83,7 +88,8 @@ public:
      * record has the tutorial flag.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x001887d0
+     * @ghidraAddress NTSC-U/C: 0x001887d0
+     * @ghidraAddress PAL: 0x0018e128
      */
     virtual void Load(IBStream &stream);
 
@@ -91,21 +97,24 @@ public:
      * Report the instance.
      *
      * @return The instance, or null outside the lifetime of the front-end renderer.
-     * @ghidraAddress 0x0018b9c8
+     * @ghidraAddress NTSC-U/C: 0x0018b9c8
+     * @ghidraAddress PAL: 0x00191458
      */
     static GlobalSettings *shared();
 
     /**
      * Allocate the instance.
      *
-     * @ghidraAddress 0x0018b9d8
+     * @ghidraAddress NTSC-U/C: 0x0018b9d8
+     * @ghidraAddress PAL: 0x00191468
      */
     static void Create();
 
     /**
      * Delete the instance and clear the pointer shared() reports.
      *
-     * @ghidraAddress 0x0018ba48
+     * @ghidraAddress NTSC-U/C: 0x0018ba48
+     * @ghidraAddress PAL: 0x001914d8
      */
     static void Destroy();
 
@@ -116,7 +125,8 @@ public:
      * no caller.
      *
      * @param macros The macros.
-     * @ghidraAddress 0x00188cc0
+     * @ghidraAddress NTSC-U/C: 0x00188cc0
+     * @ghidraAddress PAL: 0x0018e6a0
      */
     void SetMacros(std::vector<HxStr> macros);
 
@@ -126,7 +136,8 @@ public:
      * The image has no caller.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x0018ba90
+     * @ghidraAddress NTSC-U/C: 0x0018ba90
+     * @ghidraAddress PAL: 0x00191520
      */
     void Print(std::ostream &stream);
 
@@ -137,7 +148,8 @@ public:
      * nothing. The image has no caller.
      *
      * @param other The settings to copy.
-     * @ghidraAddress 0x0018bb50
+     * @ghidraAddress NTSC-U/C: 0x0018bb50
+     * @ghidraAddress PAL: 0x001915e0
      */
     void operator=(const GlobalSettings &other);
 
@@ -147,7 +159,7 @@ public:
     GameOptions mGameOptions;
 
 private:
-    // 0x00188b90
+    // NTSC-U/C: 0x00188b90, PAL: 0x0018e550
     // Read and discard the macro list of a record older than version 3. The body does not read
     // this object.
     void SkipLegacyMacros(IBStream &stream);
@@ -170,7 +182,8 @@ public:
      */
     std::vector<MemcardConnectState> mCardSlots;
     /**
-     * The free space the game needs on the first card. Starts at 256. +0x6c
+     * The free space the game needs on the first card. Starts at 256, or 128 in the PAL build.
+     * +0x6c
      *
      * MinimumSaveSpaceMCT seeds its measurement from it, and MetMemDetectScreen raises the
      * no-space message when the reported requirement equals it.
@@ -185,7 +198,7 @@ public:
     int mMinimumFreeClusters;
 
     /**
-     * The free space a persona save needs. Starts at 24. +0x74
+     * The free space a persona save needs. Starts at 24, or 2 in the PAL build. +0x74
      *
      * Public because MetPersonaSaverScreen::OnConnectState() and OnPersonasSaved() compare the
      * target card's MemcardConnectState::mFree against it and write it into the copy warning, and

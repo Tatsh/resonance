@@ -55,7 +55,7 @@ constexpr int kSmallMotorOn = 1;
 constexpr int kPowerupRunning = 1;
 constexpr int kPowerupDone = 0;
 
-// 0x0067a3f0
+// NTSC-U/C: 0x0067a3f0, PAL: 0x006bb340
 // The instance the commands run against, set by the constructor.
 ForceFeedbackMgr *g_pForceFeedbackMgr;
 
@@ -76,30 +76,30 @@ inline Sch::TickClock *SongClock() {
  */
 class SteadyFBCmd : public Sch::Command {
 public:
-    // 0x001700d8
+    // NTSC-U/C: 0x001700d8, PAL: 0x001729e8
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x001700b0
+    // NTSC-U/C: 0x001700b0, PAL: 0x001729c0
     virtual void Execute() {
         g_pForceFeedbackMgr->PulseBeat();
     }
 
-    // 0x001700f8
+    // NTSC-U/C: 0x001700f8, PAL: 0x00172a08
     virtual void Print(std::ostream &stream) {
         stream << "{" << "SteadyFBCmd" << "}";
     }
 
-    // 0x001700e8
+    // NTSC-U/C: 0x001700e8, PAL: 0x001729f8
     virtual void Save([[maybe_unused]] OBStream &stream) {
     }
 
-    // 0x001700f0
+    // NTSC-U/C: 0x001700f0, PAL: 0x00172a00
     virtual void Load([[maybe_unused]] IBStream &stream) {
     }
 
-    // 0x00170140
+    // NTSC-U/C: 0x00170140, PAL: 0x00172a50
     // The factory the unit's static initialiser registers under identifier zero.
     static Sch::Command *NewCmd() {
         return nullptr;
@@ -119,30 +119,30 @@ int SteadyFBCmd::sCmdID;
  */
 class StartMetronomeFBCmd : public Sch::Command {
 public:
-    // 0x001701e8
+    // NTSC-U/C: 0x001701e8, PAL: 0x00172af8
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x001701c0
+    // NTSC-U/C: 0x001701c0, PAL: 0x00172ad0
     virtual void Execute() {
         g_pForceFeedbackMgr->SyncMetronome();
     }
 
-    // 0x00170208
+    // NTSC-U/C: 0x00170208, PAL: 0x00172b18
     virtual void Print(std::ostream &stream) {
         stream << "{" << "StartMetronomeFBCmd" << "}";
     }
 
-    // 0x001701f8
+    // NTSC-U/C: 0x001701f8, PAL: 0x00172b08
     virtual void Save([[maybe_unused]] OBStream &stream) {
     }
 
-    // 0x00170200
+    // NTSC-U/C: 0x00170200, PAL: 0x00172b10
     virtual void Load([[maybe_unused]] IBStream &stream) {
     }
 
-    // 0x00170250
+    // NTSC-U/C: 0x00170250, PAL: 0x00172b60
     // The factory the unit's static initialiser registers under identifier zero.
     static Sch::Command *NewCmd() {
         return nullptr;
@@ -165,17 +165,17 @@ public:
     SetPowerupFBCmd(int nPlayerSlot, int bPowerup) : mPlayerSlot(nPlayerSlot), mPowerup(bPowerup) {
     }
 
-    // 0x001702d0
+    // NTSC-U/C: 0x001702d0, PAL: 0x00172be0
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x001702e0
+    // NTSC-U/C: 0x001702e0, PAL: 0x00172bf0
     virtual void Execute() {
         g_pForceFeedbackMgr->SetPowerup(mPlayerSlot, mPowerup);
     }
 
-    // 0x00170310
+    // NTSC-U/C: 0x00170310, PAL: 0x00172c20
     // The factory the unit's static initialiser registers under identifier zero.
     static Sch::Command *NewCmd() {
         return nullptr;
@@ -202,17 +202,17 @@ public:
     SetSmallMotorCmd(int nPlayerSlot, int nState) : mPlayerSlot(nPlayerSlot), mState(nState) {
     }
 
-    // 0x00170390
+    // NTSC-U/C: 0x00170390, PAL: 0x00172ca0
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x001703a0
+    // NTSC-U/C: 0x001703a0, PAL: 0x00172cb0
     virtual void Execute() {
         g_pForceFeedbackMgr->SetSmallMotor(mPlayerSlot, mState);
     }
 
-    // 0x001703d0
+    // NTSC-U/C: 0x001703d0, PAL: 0x00172ce0
     // The factory the unit's static initialiser registers under identifier zero.
     static Sch::Command *NewCmd() {
         return nullptr;
@@ -236,7 +236,7 @@ int SetSmallMotorCmd::sCmdID;
  */
 class SetLargeMotorCmd : public Sch::Command {
 public:
-    // 0x001703d8
+    // NTSC-U/C: 0x001703d8, PAL: 0x00172ce8
     // The factory the unit's static initialiser registers under identifier zero.
     static Sch::Command *NewCmd() {
         return nullptr;
@@ -260,17 +260,17 @@ public:
         : mPlayerSlot(nPlayerSlot), mSmallState(nSmallState), mBigLevel(nBigLevel) {
     }
 
-    // 0x00170458
+    // NTSC-U/C: 0x00170458, PAL: 0x00172d68
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x00170468
+    // NTSC-U/C: 0x00170468, PAL: 0x00172d78
     virtual void Execute() {
         g_pForceFeedbackMgr->SetBothMotors(mPlayerSlot, mSmallState, mBigLevel);
     }
 
-    // 0x00170498
+    // NTSC-U/C: 0x00170498, PAL: 0x00172da8
     // The factory the unit's static initialiser registers under identifier zero.
     static Sch::Command *NewCmd() {
         return nullptr;
@@ -297,19 +297,19 @@ inline void PostAt(Sch::TickClock *pClock, Sch::Command *pCommand, int nTick) {
 
 } // namespace
 
-// 0x0016dae0
+// NTSC-U/C: 0x0016dae0, PAL: 0x001703f0
 ForceFeedbackMgr::ForceFeedbackMgr() : mFlags(0), mUnusedTime(0), mPulseLength{0} {
     LoadConfig();
     g_pForceFeedbackMgr = this;
 }
 
-// 0x0016dca8
+// NTSC-U/C: 0x0016dca8, PAL: 0x001705b8
 ForceFeedbackMgr::~ForceFeedbackMgr() {
     mEffects.clear();
     g_pForceFeedbackMgr = nullptr;
 }
 
-// 0x0016de58
+// NTSC-U/C: 0x0016de58, PAL: 0x00170768
 void ForceFeedbackMgr::LoadConfig() {
     std::vector<int> values;
     QueryConfigVector(&values, kMetronomeQuery);
@@ -335,7 +335,7 @@ void ForceFeedbackMgr::LoadConfig() {
     mSlots.clear();
 }
 
-// 0x0016e1b8
+// NTSC-U/C: 0x0016e1b8, PAL: 0x00170ac8
 void ForceFeedbackMgr::StartMetronome(const Mid::MBT &delay) {
     mFlags &= ~kFlagStopped;
     if (mFlags != 0 && mFlags != kFlagPaused) {
@@ -346,7 +346,7 @@ void ForceFeedbackMgr::StartMetronome(const Mid::MBT &delay) {
     PostAt(SongClock(), pCommand, when.mTick);
 }
 
-// 0x0016e2b8
+// NTSC-U/C: 0x0016e2b8, PAL: 0x00170bc8
 void ForceFeedbackMgr::SetPlayerCount(unsigned int nPlayers) {
     mSlots.resize(nPlayers, Slot());
     if (static_cast<int>(nPlayers) <= kMaxVibratingPlayers) { // The binary tests the count signed.
@@ -359,7 +359,7 @@ void ForceFeedbackMgr::SetPlayerCount(unsigned int nPlayers) {
     mFlags |= kFlagTooManyPlayers;
 }
 
-// 0x0016e408
+// NTSC-U/C: 0x0016e408, PAL: 0x00170d18
 void ForceFeedbackMgr::PulseBeat() {
     if (mFlags == 0) {
         for (unsigned int i = 0; i < mSlots.size(); ++i) {
@@ -384,7 +384,7 @@ void ForceFeedbackMgr::PulseBeat() {
     PostAt(pClock, pNext, when.mTick);
 }
 
-// 0x0016e610
+// NTSC-U/C: 0x0016e610, PAL: 0x00170f20
 void ForceFeedbackMgr::SyncMetronome() {
     Sch::TempoMap *pTempo = SongClock()->mTempoMap;
     const int nNow = SongClock()->SongTick();
@@ -406,7 +406,7 @@ void ForceFeedbackMgr::SyncMetronome() {
     PostAt(pClock, pCommand, when.mTick);
 }
 
-// 0x0016e848
+// NTSC-U/C: 0x0016e848, PAL: 0x00171158
 void ForceFeedbackMgr::PlayEffect(int nPlayerSlot, int nEffect) {
     if (mFlags != 0 || nPlayerSlot == kNoPlayerSlot) {
         return;
@@ -437,7 +437,7 @@ void ForceFeedbackMgr::PlayEffect(int nPlayerSlot, int nEffect) {
     PostAt(pClock, pDone, doneWhen.mTick);
 }
 
-// 0x001704c8
+// NTSC-U/C: 0x001704c8, PAL: 0x00172dd8
 void ForceFeedbackMgr::Suspend(unsigned char nMask) {
     for (unsigned int i = 0; i < mSlots.size(); ++i) {
         SetBothMotors(i, kMotorOff, kMotorOff);
@@ -445,7 +445,7 @@ void ForceFeedbackMgr::Suspend(unsigned char nMask) {
     mFlags |= nMask;
 }
 
-// 0x00170588
+// NTSC-U/C: 0x00170588, PAL: 0x00172e98
 void ForceFeedbackMgr::SetPaused(int bPaused) {
     if (!bPaused) {
         mFlags &= ~kFlagPaused;
@@ -457,7 +457,7 @@ void ForceFeedbackMgr::SetPaused(int bPaused) {
     mFlags |= kFlagPaused;
 }
 
-// 0x00170648
+// NTSC-U/C: 0x00170648, PAL: 0x00172f58
 void ForceFeedbackMgr::SetJukeboxMode(int bJukebox) {
     if (!bJukebox) {
         mFlags &= ~kFlagJukebox;
@@ -469,7 +469,7 @@ void ForceFeedbackMgr::SetJukeboxMode(int bJukebox) {
     mFlags |= kFlagJukebox;
 }
 
-// 0x00170708
+// NTSC-U/C: 0x00170708, PAL: 0x00173018
 void ForceFeedbackMgr::SetPlaybackMode(int bPlayback) {
     if (!bPlayback) {
         mFlags &= ~kFlagPlayback;
@@ -481,7 +481,7 @@ void ForceFeedbackMgr::SetPlaybackMode(int bPlayback) {
     mFlags |= kFlagPlayback;
 }
 
-// 0x001707c8
+// NTSC-U/C: 0x001707c8, PAL: 0x001730d8
 void ForceFeedbackMgr::SetEnabled(int bEnabled) {
     if (bEnabled) {
         mFlags &= ~kFlagDisabled;
@@ -493,14 +493,14 @@ void ForceFeedbackMgr::SetEnabled(int bEnabled) {
     mFlags |= kFlagDisabled;
 }
 
-// 0x00170890
+// NTSC-U/C: 0x00170890, PAL: 0x001731a0
 void ForceFeedbackMgr::SetPowerup(unsigned int nPlayerSlot, int bPowerup) {
     if (nPlayerSlot < mSlots.size()) {
         mSlots[nPlayerSlot].mPowerup = bPowerup;
     }
 }
 
-// 0x001708d0
+// NTSC-U/C: 0x001708d0, PAL: 0x001731e0
 void ForceFeedbackMgr::StopAll([[maybe_unused]] Mid::MBT when) {
     for (unsigned int i = 0; i < mSlots.size(); ++i) {
         SetBothMotors(i, kMotorOff, kMotorOff);
@@ -512,7 +512,7 @@ void ForceFeedbackMgr::StopAll([[maybe_unused]] Mid::MBT when) {
     mFlags |= kFlagStopped;
 }
 
-// 0x001709f8
+// NTSC-U/C: 0x001709f8, PAL: 0x00173308
 void ForceFeedbackMgr::SetBigMotor(int nPlayerSlot, int nLevel) {
     if (mFlags != 0) {
         return;
@@ -521,7 +521,7 @@ void ForceFeedbackMgr::SetBigMotor(int nPlayerSlot, int nLevel) {
     ApplyMotors(nPlayerSlot);
 }
 
-// 0x00170a30
+// NTSC-U/C: 0x00170a30, PAL: 0x00173340
 void ForceFeedbackMgr::SetSmallMotor(int nPlayerSlot, int nState) {
     if (mFlags != 0) {
         return;
@@ -530,7 +530,7 @@ void ForceFeedbackMgr::SetSmallMotor(int nPlayerSlot, int nState) {
     ApplyMotors(nPlayerSlot);
 }
 
-// 0x00170a68
+// NTSC-U/C: 0x00170a68, PAL: 0x00173378
 void ForceFeedbackMgr::SetBothMotors(int nPlayerSlot, int nSmallState, int nBigLevel) {
     if (mFlags != 0) {
         return;
@@ -540,34 +540,34 @@ void ForceFeedbackMgr::SetBothMotors(int nPlayerSlot, int nSmallState, int nBigL
     ApplyMotors(nPlayerSlot);
 }
 
-// 0x00170ab0
+// NTSC-U/C: 0x00170ab0, PAL: 0x001733c0
 void ForceFeedbackMgr::ApplyMotors(int nPlayerSlot) {
     InputPoller *pPoller = Application::shared()->GetGameManager()->GetPoller();
     const Slot &slot = mSlots[nPlayerSlot];
     pPoller->SetVibration(nPlayerSlot + 1, slot.mSmallMotor, slot.mBigMotor);
 }
 
-// 0x00170b20
+// NTSC-U/C: 0x00170b20, PAL: 0x00173430
 void ForceFeedbackMgr::PlayUnusedEffect(Player *pPlayer) {
     PlayEffect(pPlayer->GetInputSlot(), kEffectUnused);
 }
 
-// 0x00170b68
+// NTSC-U/C: 0x00170b68, PAL: 0x00173478
 void ForceFeedbackMgr::PlayBumpEffect(Player *pPlayer) {
     PlayEffect(pPlayer->GetInputSlot(), kEffectBump);
 }
 
-// 0x00170bb0
+// NTSC-U/C: 0x00170bb0, PAL: 0x001734c0
 void ForceFeedbackMgr::PlayAutocatchEffect(Player *pPlayer) {
     PlayEffect(pPlayer->GetInputSlot(), kEffectAutocatch);
 }
 
-// 0x00170bf8
+// NTSC-U/C: 0x00170bf8, PAL: 0x00173508
 void ForceFeedbackMgr::PlayNeutralizedEffect(Player *pPlayer) {
     PlayEffect(pPlayer->GetInputSlot(), kEffectNeutralized);
 }
 
-// 0x00170c40
+// NTSC-U/C: 0x00170c40, PAL: 0x00173550
 void ForceFeedbackMgr::PlayCrippleEffect(Player *pPlayer) {
     PlayEffect(pPlayer->GetInputSlot(), kEffectCripple);
 }

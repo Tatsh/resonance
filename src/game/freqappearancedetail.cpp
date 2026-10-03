@@ -68,14 +68,14 @@ inline void PlaceMesh(Rnd::Mesh *pMesh, const Vector3 &position) {
 
 } // namespace
 
-// 0x00249c40
+// NTSC-U/C: 0x00249c40, PAL: 0x0025ef88
 FreqAppearanceDetail::FreqAppearanceDetail() {
     mView = new Rnd::View(MetFreqMakerAssetManager::shared()->NextMeshName());
     mView->SetShowing(1);
     mParts.resize(0); // Yes, the binary resizes the empty list to zero.
 }
 
-// 0x00249e58
+// NTSC-U/C: 0x00249e58, PAL: 0x0025f1c0
 FreqAppearanceDetail::FreqAppearanceDetail(const FreqAppearanceDetail &other) {
     mView = new Rnd::View(MetFreqMakerAssetManager::shared()->NextMeshName());
     mView->SetShowing(1);
@@ -83,14 +83,14 @@ FreqAppearanceDetail::FreqAppearanceDetail(const FreqAppearanceDetail &other) {
     copyFrom(other);
 }
 
-// 0x0024edc8
+// NTSC-U/C: 0x0024edc8, PAL: 0x002641f0
 FreqAppearanceDetail::~FreqAppearanceDetail() {
     clear();
     delete mView;
     mView = nullptr;
 }
 
-// 0x0024a4b0
+// NTSC-U/C: 0x0024a4b0, PAL: 0x0025f838
 void FreqAppearanceDetail::clear() {
     int nCount = mParts.size();
     for (int i = 0; i < nCount; ++i) {
@@ -107,7 +107,7 @@ void FreqAppearanceDetail::clear() {
     mView->SetShowing(1);
 }
 
-// 0x0024a088
+// NTSC-U/C: 0x0024a088, PAL: 0x0025f410
 void FreqAppearanceDetail::copyFrom(const FreqAppearanceDetail &other) {
     std::map<Rnd::Drawable *, FreqPart *> partsByMesh;
     for (std::list<FreqPart *>::const_iterator it = other.mParts.begin(); it != other.mParts.end();
@@ -128,7 +128,7 @@ void FreqAppearanceDetail::copyFrom(const FreqAppearanceDetail &other) {
     }
 }
 
-// 0x0024b898
+// NTSC-U/C: 0x0024b898, PAL: 0x00260c78
 void FreqAppearanceDetail::unpack(const FreqPart::Packed *pRecords, int nCount) {
     MetFreqMakerAssetManager::shared()->PollLoad(); // Yes, the binary discards the result.
     for (int i = 0; i < nCount; ++i) {
@@ -138,7 +138,7 @@ void FreqAppearanceDetail::unpack(const FreqPart::Packed *pRecords, int nCount) 
     }
 }
 
-// 0x0024b160
+// NTSC-U/C: 0x0024b160, PAL: 0x00260508
 void FreqAppearanceDetail::save(OBStream &stream) {
     int nCount = mParts.size();
     stream.Write(&nCount, sizeof(nCount));
@@ -163,7 +163,7 @@ void FreqAppearanceDetail::save(OBStream &stream) {
     }
 }
 
-// 0x0024b340
+// NTSC-U/C: 0x0024b340, PAL: 0x002606e8
 void FreqAppearanceDetail::load(IBStream &stream) {
     MetFreqMakerAssetManager::shared()->PollLoad(); // Yes, the binary discards the result.
     int nCount;
@@ -228,7 +228,7 @@ inline void FreqAppearanceDetail::addLoadedPart(FreqPart *pPart) {
     mCursorMirrored = 0;
 }
 
-// 0x0024c398
+// NTSC-U/C: 0x0024c398, PAL: 0x00261798
 void FreqAppearanceDetail::pack(FreqPart::Packed *pOut, int *pCount) {
     int nCount = 0;
     for (std::list<FreqPart *>::iterator it = mParts.begin(); it != mParts.end(); ++it) {
@@ -240,7 +240,7 @@ void FreqAppearanceDetail::pack(FreqPart::Packed *pOut, int *pCount) {
     *pCount = nCount;
 }
 
-// 0x00249b48
+// NTSC-U/C: 0x00249b48, PAL: 0x0025ee70
 void FreqAppearanceDetail::ensureCursorMesh() {
     if (mCursorMesh == nullptr) {
         MetFreqMakerAssetManager::shared()->PollLoad(); // Yes, the binary discards the result.
@@ -254,7 +254,7 @@ void FreqAppearanceDetail::ensureCursorMesh() {
     mCursorX = 0;
 }
 
-// 0x0024ee60
+// NTSC-U/C: 0x0024ee60, PAL: 0x00264288
 void FreqAppearanceDetail::resetCursor() {
     ensureCursorMesh();
     mCursorMesh->SetShowing(0);
@@ -272,7 +272,7 @@ void FreqAppearanceDetail::resetCursor() {
     mCursorMirrored = 0;
 }
 
-// 0x0024a5f0
+// NTSC-U/C: 0x0024a5f0, PAL: 0x0025f978
 void FreqAppearanceDetail::selectTemplate(const HxStr &name) {
     ensureCursorMesh();
     mSelected = nullptr;
@@ -298,7 +298,7 @@ void FreqAppearanceDetail::selectTemplate(const HxStr &name) {
     mView->AddTrans(mCursorMesh);
 }
 
-// 0x0024a770
+// NTSC-U/C: 0x0024a770, PAL: 0x0025faf8
 void FreqAppearanceDetail::placeCursor() {
     if (mPlacing == 1) {
         if (mTemplate == nullptr) {
@@ -328,7 +328,7 @@ void FreqAppearanceDetail::placeCursor() {
     }
 }
 
-// 0x0024a9e8
+// NTSC-U/C: 0x0024a9e8, PAL: 0x0025fd90
 void FreqAppearanceDetail::nudgeCursor(int nStepX, int nStepZ) {
     if (mParts.size() >= kMaxParts && mPlacing == 1) {
         return;
@@ -392,7 +392,7 @@ void FreqAppearanceDetail::nudgeCursor(int nStepX, int nStepZ) {
     }
 }
 
-// 0x0024ae20
+// NTSC-U/C: 0x0024ae20, PAL: 0x002601c8
 FreqPart *FreqAppearanceDetail::selectPart(int nIndex) {
     ensureCursorMesh();
     mPlacing = 0;
@@ -427,7 +427,7 @@ FreqPart *FreqAppearanceDetail::selectPart(int nIndex) {
     return mSelected;
 }
 
-// 0x0024bc50
+// NTSC-U/C: 0x0024bc50, PAL: 0x00261050
 void FreqAppearanceDetail::deletePart(int nIndex) {
     ensureCursorMesh();
     resetCursor();
@@ -445,7 +445,7 @@ void FreqAppearanceDetail::deletePart(int nIndex) {
     delete pPart;
 }
 
-// 0x0024be00
+// NTSC-U/C: 0x0024be00, PAL: 0x00261200
 void FreqAppearanceDetail::revertSelection() {
     if (mSelected == nullptr) {
         return;
@@ -467,7 +467,7 @@ void FreqAppearanceDetail::revertSelection() {
     mSelected = nullptr;
 }
 
-// 0x0024bfc8
+// NTSC-U/C: 0x0024bfc8, PAL: 0x002613c8
 void FreqAppearanceDetail::randomize() {
     MetFreqMakerAssetManager::shared()->PollLoad(); // Yes, the binary discards the result.
     for (std::list<FreqPart *>::iterator it = mParts.begin(); it != mParts.end(); ++it) {
@@ -511,7 +511,7 @@ void FreqAppearanceDetail::randomize() {
     }
 }
 
-// 0x0024c218
+// NTSC-U/C: 0x0024c218, PAL: 0x00261618
 void FreqAppearanceDetail::recentrePart(int nIndex) {
     if (nIndex < 0 || nIndex >= static_cast<int>(mParts.size())) {
         return;
@@ -535,17 +535,17 @@ void FreqAppearanceDetail::recentrePart(int nIndex) {
     }
 }
 
-// 0x0024ef08
+// NTSC-U/C: 0x0024ef08, PAL: 0x00264330
 void FreqAppearanceDetail::sendBackward() {
     moveCursorDraw(-1);
 }
 
-// 0x0024ef80
+// NTSC-U/C: 0x0024ef80, PAL: 0x002643a8
 void FreqAppearanceDetail::bringForward() {
     moveCursorDraw(1);
 }
 
-// 0x0024eff8
+// NTSC-U/C: 0x0024eff8, PAL: 0x00264420
 int FreqAppearanceDetail::drawIndexOf(FreqPart *pPart) {
     Rnd::Mesh *pMesh = pPart->GetMesh();
     std::list<Rnd::Drawable *> &draws = mView->GetDraws();
@@ -559,7 +559,7 @@ int FreqAppearanceDetail::drawIndexOf(FreqPart *pPart) {
     return nIndex;
 }
 
-// 0x0024f060
+// NTSC-U/C: 0x0024f060, PAL: 0x00264488
 void FreqAppearanceDetail::toggleMirror() {
     if (mPlacing == 1) {
         mCursorMirrored ^= 1;
@@ -570,7 +570,7 @@ void FreqAppearanceDetail::toggleMirror() {
     }
 }
 
-// 0x0024f178
+// NTSC-U/C: 0x0024f178, PAL: 0x002645a0
 void FreqAppearanceDetail::setColor(const Color &color, const Vector2 &palettePosition) {
     mColor = color;
     mPalettePosition = palettePosition;
@@ -583,13 +583,13 @@ void FreqAppearanceDetail::setColor(const Color &color, const Vector2 &palettePo
     }
 }
 
-// 0x0024f238
+// NTSC-U/C: 0x0024f238, PAL: 0x00264660
 void FreqAppearanceDetail::attachTo(Rnd::View *pParent) {
     pParent->AddDraw(mView, nullptr);
     pParent->AddTrans(mView);
 }
 
-// 0x0024f290
+// NTSC-U/C: 0x0024f290, PAL: 0x002646b8
 void FreqAppearanceDetail::detachFrom(Rnd::View *pParent) {
     pParent->RemoveDraw(mView);
     pParent->RemoveTrans(mView);

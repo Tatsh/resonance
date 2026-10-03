@@ -12,17 +12,17 @@ constexpr char kDescription[] = "{Gamer}";
 // destructor at `0x00116b48`, which installs the base table at `0x008288c0`; this class
 // declares no destructor of its own.
 
-// 0x00116bc0
+// NTSC-U/C: 0x00116bc0, PAL: 0x00117078
 int GamerCmd::CmdID() {
     return g_nGamerCmdID;
 }
 
-// 0x00116bd0
+// NTSC-U/C: 0x00116bd0, PAL: 0x00117088
 void GamerCmd::Execute() {
     mGamer->OnBar(mBar);
 }
 
-// 0x00116bf0
+// NTSC-U/C: 0x00116bf0, PAL: 0x001170a8
 void GamerCmd::Print(std::ostream &stream) {
     stream << kDescription;
 }

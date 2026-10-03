@@ -2,7 +2,7 @@
 
 #include "mid/mbt.h"
 
-// 0x0019d370
+// NTSC-U/C: 0x0019d370, PAL: 0x001a30d8
 int PhraseMaker::GetPeriodOrigin() {
     return Mid::MBT(0).mTick;
 }

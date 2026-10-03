@@ -55,12 +55,14 @@ public:
      * The vectors are zeroed by the compiler-generated member initialisation, and the written
      * body is the ResetCounters() call. The member at `+0x0c` is not initialised.
      *
-     * @ghidraAddress 0x00140580
+     * @ghidraAddress NTSC-U/C: 0x00140580
+     * @ghidraAddress PAL: 0x00140f60
      */
     CampaignStats();
 
     /**
-     * @ghidraAddress 0x00140768
+     * @ghidraAddress NTSC-U/C: 0x00140768
+     * @ghidraAddress PAL: 0x00141148
      */
     virtual ~CampaignStats();
 
@@ -70,7 +72,8 @@ public:
      * One stack LevelStats is reset, named, and staged for each album level and appended. The
      * counters are not recounted. MetFreqLoader runs it on each persona it parses.
      *
-     * @ghidraAddress 0x00140908
+     * @ghidraAddress NTSC-U/C: 0x00140908
+     * @ghidraAddress PAL: 0x001412e8
      */
     void RebuildLevelList();
 
@@ -80,7 +83,8 @@ public:
      * Vtable slot 2. The record version 2 precedes the level count, and each level writes itself.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00145110
+     * @ghidraAddress NTSC-U/C: 0x00145110
+     * @ghidraAddress PAL: 0x00145c28
      */
     virtual void Save(OBStream &stream);
 
@@ -92,7 +96,8 @@ public:
      * stored count before any element reads itself.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00141ed8
+     * @ghidraAddress NTSC-U/C: 0x00141ed8
+     * @ghidraAddress PAL: 0x001429c8
      */
     virtual void Load(IBStream &stream);
 
@@ -104,7 +109,8 @@ public:
      * unit emits.
      *
      * @return The index, or the element count when no record matches.
-     * @ghidraAddress 0x00144ba8
+     * @ghidraAddress NTSC-U/C: 0x00144ba8
+     * @ghidraAddress PAL: 0x001456c0
      */
     int FindLevelIndex(const HxStr &name) {
         unsigned nIndex = 0;
@@ -125,7 +131,8 @@ public:
      * @param nDifficulty The difficulty, 0 through 2.
      * @param name The level's name.
      * @return SkillStats::mBeaten of the level at that difficulty.
-     * @ghidraAddress 0x00144f08
+     * @ghidraAddress NTSC-U/C: 0x00144f08
+     * @ghidraAddress PAL: 0x00145a20
      */
     int GetLevelBeaten(int nDifficulty, const HxStr &name);
 
@@ -137,7 +144,8 @@ public:
      * @param nDifficulty The difficulty, 0 through 2.
      * @param name The level's name.
      * @return SkillStats::mHighScore of the level at that difficulty.
-     * @ghidraAddress 0x00144ca8
+     * @ghidraAddress NTSC-U/C: 0x00144ca8
+     * @ghidraAddress PAL: 0x001457c0
      */
     int GetLevelHighScore(int nDifficulty, const HxStr &name);
 
@@ -150,7 +158,8 @@ public:
      *
      * @param nDifficulty The difficulty, 0 through 2.
      * @param name The level's name.
-     * @ghidraAddress 0x00141798
+     * @ghidraAddress NTSC-U/C: 0x00141798
+     * @ghidraAddress PAL: 0x00142210
      */
     void RecordLevelBeaten(int nDifficulty, const HxStr &name);
 
@@ -162,7 +171,8 @@ public:
      * @param nDifficulty The difficulty, 0 through 2.
      * @param name The level's name.
      * @param nScore The score.
-     * @ghidraAddress 0x00144d68
+     * @ghidraAddress NTSC-U/C: 0x00144d68
+     * @ghidraAddress PAL: 0x00145880
      */
     void RecordHighScore(int nDifficulty, const HxStr &name, int nScore);
 
@@ -172,7 +182,8 @@ public:
      * @param nDifficulty The difficulty, 0 through 2.
      * @param nStage The stage, counted from 1.
      * @return The flag RecountStageScore() last stored.
-     * @ghidraAddress 0x00145028
+     * @ghidraAddress NTSC-U/C: 0x00145028
+     * @ghidraAddress PAL: 0x00145b40
      */
     int GetStageScoreBeaten(int nDifficulty, int nStage);
 
@@ -182,7 +193,8 @@ public:
      * @param nDifficulty The difficulty, 0 through 2.
      * @param nStage The stage, counted from 1.
      * @return The total RecountStageScore() last stored.
-     * @ghidraAddress 0x00145048
+     * @ghidraAddress NTSC-U/C: 0x00145048
+     * @ghidraAddress PAL: 0x00145b60
      */
     int GetStageScore(int nDifficulty, int nStage);
 
@@ -197,7 +209,8 @@ public:
      * @param nDifficulty The difficulty, 0 through 2.
      * @param nStage The stage, counted from 1.
      * @return 1 when the stage is complete, otherwise 0.
-     * @ghidraAddress 0x00144e58
+     * @ghidraAddress NTSC-U/C: 0x00144e58
+     * @ghidraAddress PAL: 0x00145970
      */
     int IsStageComplete(int nDifficulty, int nStage);
 
@@ -206,7 +219,8 @@ public:
      *
      * @param nDifficulty The difficulty, 0 through 2.
      * @return 1 when the difficulty is complete, otherwise 0.
-     * @ghidraAddress 0x00140d40
+     * @ghidraAddress NTSC-U/C: 0x00140d40
+     * @ghidraAddress PAL: 0x00141740
      */
     int IsDifficultyComplete(int nDifficulty);
 
@@ -219,7 +233,8 @@ public:
      * @param nStage The stage, counted from 1.
      * @return The name, or an empty string when the stage is empty or has no bonus level at that
      * difficulty.
-     * @ghidraAddress 0x00141690
+     * @ghidraAddress NTSC-U/C: 0x00141690
+     * @ghidraAddress PAL: 0x001420e8
      */
     HxStr GetBonusLevelName(int nDifficulty, int nStage);
 
@@ -232,7 +247,8 @@ public:
      * unit emits for callers in other units.
      *
      * @return 1 when unlocked, otherwise 0.
-     * @ghidraAddress 0x00144fc8
+     * @ghidraAddress NTSC-U/C: 0x00144fc8
+     * @ghidraAddress PAL: 0x00145ae0
      */
     int IsSecretUnlocked() {
         int bUnlocked = 0;
@@ -249,7 +265,8 @@ public:
      * must have at least two levels.
      *
      * @return 1 when unlocked, otherwise 0.
-     * @ghidraAddress 0x001410f0
+     * @ghidraAddress NTSC-U/C: 0x001410f0
+     * @ghidraAddress PAL: 0x00141b10
      */
     int IsSuperSecretUnlocked();
 
@@ -263,7 +280,8 @@ public:
      *
      * @param nStage The stage, counted from 1.
      * @return Non-zero when one of those difficulties has completed the stage.
-     * @ghidraAddress 0x00140ef8
+     * @ghidraAddress NTSC-U/C: 0x00140ef8
+     * @ghidraAddress PAL: 0x00141918
      */
     int IsStageCompleteAtAnyDifficulty(int nStage);
 
@@ -277,7 +295,8 @@ public:
      *
      * @param params The session, whose level name and difficulty are read.
      * @return Non-zero when the level is the last one left.
-     * @ghidraAddress 0x00141578
+     * @ghidraAddress NTSC-U/C: 0x00141578
+     * @ghidraAddress PAL: 0x00141fd0
      */
     int IsLastLevelRemaining(const GameParams &params);
 
@@ -290,7 +309,8 @@ public:
      * return value. The title is inferred.
      *
      * @param other The record to copy.
-     * @ghidraAddress 0x00142288
+     * @ghidraAddress NTSC-U/C: 0x00142288
+     * @ghidraAddress PAL: 0x00142d78
      */
     void Assign(const CampaignStats &other);
 
@@ -302,7 +322,8 @@ public:
      * `0x0032e380` is the caller.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001451e0
+     * @ghidraAddress NTSC-U/C: 0x001451e0
+     * @ghidraAddress PAL: 0x00145cf8
      */
     void PrintLevels(std::ostream &stream);
 
@@ -318,18 +339,18 @@ private:
     // score, and then recompute the unlock level.
     void RecountAll();
 
-    // 0x00141b90
+    // NTSC-U/C: 0x00141b90, PAL: 0x00142648
     // Recount the beaten levels of one stage at one difficulty into mStageCompleted. Each level's
     // name is copied and discarded, which matches the binary.
     void RecountStageCompleted(int nDifficulty, int nStage);
 
-    // 0x00141898
+    // NTSC-U/C: 0x00141898, PAL: 0x00142310
     // Recount the total high score of the beaten levels of one stage at one difficulty into
     // mStageScores, and set mStageScoreBeaten when the stage is complete and the total reaches the
     // stage's album value.
     void RecountStageScore(int nDifficulty, int nStage);
 
-    // 0x00141cb8
+    // NTSC-U/C: 0x00141cb8, PAL: 0x00142780
     // Recompute mUnlockLevel from stage completion and return it.
     int UpdateUnlockLevel();
 
@@ -348,7 +369,8 @@ public:
      * MetExpansionPakScreen::UpdateIdle() calls it on every persona once the expansion disc
      * is mounted.
      *
-     * @ghidraAddress 0x00142070
+     * @ghidraAddress NTSC-U/C: 0x00142070
+     * @ghidraAddress PAL: 0x00142b60
      */
     void MergeLevelList();
 

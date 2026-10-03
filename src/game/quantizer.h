@@ -17,7 +17,8 @@ public:
      * Retain the track description.
      *
      * @param pTrackData The track this quantiser works over.
-     * @ghidraAddress 0x001ce670
+     * @ghidraAddress NTSC-U/C: 0x001ce670
+     * @ghidraAddress PAL: 0x001d4528
      */
     Quantizer(const TrackData *pTrackData);
 
@@ -26,7 +27,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @return The rounded position.
-     * @ghidraAddress 0x001ce680
+     * @ghidraAddress NTSC-U/C: 0x001ce680
+     * @ghidraAddress PAL: 0x001d4538
      */
     int Quantize(int nTick);
 
@@ -35,7 +37,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @return TrackData::GetQuant() for the bar, in MIDI ticks.
-     * @ghidraAddress 0x001ce6b0
+     * @ghidraAddress NTSC-U/C: 0x001ce6b0
+     * @ghidraAddress PAL: 0x001d4568
      */
     int GetQuantum(int nTick);
 
@@ -48,7 +51,8 @@ public:
      * @param nTick The song position, in MIDI ticks.
      * @param nQuantum The quantum, in MIDI ticks.
      * @return The rounded position.
-     * @ghidraAddress 0x001ce710
+     * @ghidraAddress NTSC-U/C: 0x001ce710
+     * @ghidraAddress PAL: 0x001d45c8
      */
     static unsigned Round(unsigned nTick, unsigned nQuantum);
 

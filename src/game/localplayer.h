@@ -56,7 +56,8 @@ public:
      * @param pAppearance The appearance the player is drawn with.
      * @param pClock The clock the per-bar command is posted on.
      * @param nTrack The track GetTrack() reports.
-     * @ghidraAddress 0x0011e000
+     * @ghidraAddress NTSC-U/C: 0x0011e000
+     * @ghidraAddress PAL: 0x0011e5a0
      */
     LocalPlayer(int nId,
                 int nInputSlot,
@@ -68,32 +69,57 @@ public:
     /**
      * Delete the placer and the collection.
      *
-     * @ghidraAddress 0x0011e348
+     * @ghidraAddress NTSC-U/C: 0x0011e348
+     * @ghidraAddress PAL: 0x0011e8f8
      */
     virtual ~LocalPlayer();
 
-    /** @ghidraAddress 0x00121ea0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00121ea0
+     * @ghidraAddress PAL: 0x001224a8
+     */
     virtual int GetInputSlot();
 
-    /** @ghidraAddress 0x00121e90 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00121e90
+     * @ghidraAddress PAL: 0x00122498
+     */
     virtual int GetTrack();
 
-    /** @ghidraAddress 0x00121e98 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00121e98
+     * @ghidraAddress PAL: 0x001224a0
+     */
     virtual int GetPlace();
 
-    /** @ghidraAddress 0x00122890 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00122890
+     * @ghidraAddress PAL: 0x00122ea8
+     */
     virtual int UnusedQuery();
 
-    /** @ghidraAddress 0x00121ea8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00121ea8
+     * @ghidraAddress PAL: 0x001224b0
+     */
     virtual void UnusedHook();
 
-    /** @ghidraAddress 0x00122898 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00122898
+     * @ghidraAddress PAL: 0x00122eb0
+     */
     virtual void SetFreestyleSpan(int nStartBar, int nEndBar);
 
-    /** @ghidraAddress 0x001228a8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001228a8
+     * @ghidraAddress PAL: 0x00122ec0
+     */
     virtual int IsFreestyleBar(int nBar);
 
-    /** @ghidraAddress 0x00121eb0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00121eb0
+     * @ghidraAddress PAL: 0x001224b8
+     */
     virtual int IsLooping();
 
     /**
@@ -104,7 +130,8 @@ public:
      * ToggleGhostMsg, and a LoopToggleMsg. It then posts a LocalPlayerCmd at the end of the first
      * bar under mCommand.
      *
-     * @ghidraAddress 0x0011e4e0
+     * @ghidraAddress NTSC-U/C: 0x0011e4e0
+     * @ghidraAddress PAL: 0x0011eaa0
      */
     virtual void AnnounceState();
 
@@ -116,14 +143,21 @@ public:
      * re-emitted copy each. The shared address proves the empty body is inherited rather than a
      * local override. This dispatch is therefore real and does nothing.
      *
-     * @ghidraAddress 0x001228c8
+     * @ghidraAddress NTSC-U/C: 0x001228c8
+     * @ghidraAddress PAL: 0x00122ee0
      */
     virtual void DeactivatePlacer();
 
-    /** @ghidraAddress 0x00121ec0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00121ec0
+     * @ghidraAddress PAL: 0x001224c8
+     */
     virtual int CountCaughtGem();
 
-    /** @ghidraAddress 0x00121ed0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00121ed0
+     * @ghidraAddress PAL: 0x001224d8
+     */
     virtual int CountMissedGem();
 
     /**
@@ -132,14 +166,16 @@ public:
      * A bar after the end of the last caught run earns only the bonus plus one, and a bar inside
      * it adds the streak multiplier.
      *
-     * @ghidraAddress 0x00122ca0
+     * @ghidraAddress NTSC-U/C: 0x00122ca0
+     * @ghidraAddress PAL: 0x001232b8
      */
     virtual int GetMultiplier(int nBar);
 
     /**
      * Report the best streak of consecutive captures.
      *
-     * @ghidraAddress 0x00121ee0
+     * @ghidraAddress NTSC-U/C: 0x00121ee0
+     * @ghidraAddress PAL: 0x001224e8
      */
     virtual int GetBestStreak();
 
@@ -149,14 +185,21 @@ public:
      * Returns zero when nothing was captured, so the division never runs on an empty total.
      *
      * @return A fraction between 0 and 1.
-     * @ghidraAddress 0x00122cc8
+     * @ghidraAddress NTSC-U/C: 0x00122cc8
+     * @ghidraAddress PAL: 0x001232e0
      */
     virtual float GetCaptureRatio();
 
-    /** @ghidraAddress 0x00121ee8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00121ee8
+     * @ghidraAddress PAL: 0x001224f0
+     */
     virtual int GetGameMode();
 
-    /** @ghidraAddress 0x00122c00 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00122c00
+     * @ghidraAddress PAL: 0x00123218
+     */
     virtual int MarkBarScored(int nBar);
 
     /**
@@ -167,7 +210,8 @@ public:
      *
      * @param bLooping Non-zero to loop.
      * @param position The song position of the change.
-     * @ghidraAddress 0x0011e810
+     * @ghidraAddress NTSC-U/C: 0x0011e810
+     * @ghidraAddress PAL: 0x0011edd0
      */
     virtual void SetLooping(int bLooping, const Mid::MBT &position);
 
@@ -180,7 +224,8 @@ public:
      * recovered caller.
      *
      * @param bGhost Non-zero to show the ghost.
-     * @ghidraAddress 0x0011e908
+     * @ghidraAddress NTSC-U/C: 0x0011e908
+     * @ghidraAddress PAL: 0x0011eec8
      */
     virtual void SetGhost(int bGhost);
 
@@ -191,14 +236,21 @@ public:
      * every message it does not recognise to Player::HandleMessage().
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x0011ed98
+     * @ghidraAddress NTSC-U/C: 0x0011ed98
+     * @ghidraAddress PAL: 0x0011f358
      */
     virtual void HandleMessage(Message *pMsg);
 
-    /** @ghidraAddress 0x001228f8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001228f8
+     * @ghidraAddress PAL: 0x00122f10
+     */
     virtual void AddSink(MsgSink *pSink);
 
-    /** @ghidraAddress 0x00122968 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00122968
+     * @ghidraAddress PAL: 0x00122f80
+     */
     virtual void RemoveSink(MsgSink *pSink);
 
     /**
@@ -209,7 +261,8 @@ public:
      * is the caller. The title is inferred.
      *
      * @param nTick The song position.
-     * @ghidraAddress 0x0011ec00
+     * @ghidraAddress NTSC-U/C: 0x0011ec00
+     * @ghidraAddress PAL: 0x0011f1c0
      */
     void OnBarTick(int nTick);
 
@@ -220,48 +273,49 @@ public:
      * LoopToggleMsg. The title is inferred.
      *
      * @param position The song position of the change.
-     * @ghidraAddress 0x0011e700
+     * @ghidraAddress NTSC-U/C: 0x0011e700
+     * @ghidraAddress PAL: 0x0011ecc0
      */
     void ToggleLoop(const Mid::MBT &position);
 
 private:
-    // 0x0011e980
+    // NTSC-U/C: 0x0011e980, PAL: 0x0011ef40
     // Records a selection of this player's track and place, and tells the other game
     // systems unless the player stayed on the same track and dropped back.
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
-    // 0x0011eaa8
+    // NTSC-U/C: 0x0011eaa8, PAL: 0x0011f068
     // Toggles the ghost display of this player and announces it.
     void OnToggleGhost(ToggleGhostMsg *pMsg);
 
-    // 0x0011eb20
+    // NTSC-U/C: 0x0011eb20, PAL: 0x0011f0e0
     // Starts a multiplier bonus of 2 for eight bars from the message's bar.
     void OnMultiplier(MultiplierMsg *pMsg);
 
     // The six handlers below are inline, and HandleMessage() expands each. The addresses are
     // their uncalled out-of-line copies.
 
-    // 0x00122a20
+    // NTSC-U/C: 0x00122a20, PAL: 0x00123038
     // Moves the collection's selection when the message addresses this player.
     void OnAxisYPow(AxisYPowMsg *pMsg);
 
-    // 0x00122ae0
+    // NTSC-U/C: 0x00122ae0, PAL: 0x001230f8
     // Toggles looping at the message's position when it addresses this player.
     void OnLoopTool(LoopToolMsg *pMsg);
 
-    // 0x00122b38
+    // NTSC-U/C: 0x00122b38, PAL: 0x00123150
     // Updates the streak, multiplier, and capture counts, then awards the capture.
     void OnPhraseCaptured(PhraseCapturedMsg *pMsg);
 
-    // 0x00122c20
+    // NTSC-U/C: 0x00122c20, PAL: 0x00123238
     // Counts a tried muff once per bar.
     void OnPhraseMuffed(PhraseMuffedMsg *pMsg);
 
-    // 0x001229d8
+    // NTSC-U/C: 0x001229d8, PAL: 0x00122ff0
     // Forwards a button press to the placer.
     void OnButtonPow(ButtonPowMsg *pMsg);
 
-    // 0x00122a68
+    // NTSC-U/C: 0x00122a68, PAL: 0x00123080
     // Adds the caught powerup to the collection, plays its sounds, and passes the message on.
     void OnCaughtPowerbar(CaughtPowerbarMsg *pMsg);
 

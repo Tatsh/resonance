@@ -67,12 +67,14 @@ public:
      * reports a channel other than -1 is then inserted into that channel with a zero payload.
      *
      * @param players The roster. Only its size and its elements are read.
-     * @ghidraAddress 0x0013b250
+     * @ghidraAddress NTSC-U/C: 0x0013b250
+     * @ghidraAddress PAL: 0x0013bb98
      */
     TrackSelector(const std::vector<Player *> &players);
 
     /**
-     * @ghidraAddress 0x0013f020
+     * @ghidraAddress NTSC-U/C: 0x0013f020
+     * @ghidraAddress PAL: 0x0013f9d8
      */
     virtual ~TrackSelector();
 
@@ -87,7 +89,8 @@ public:
      * is discarded.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x0013b868
+     * @ghidraAddress NTSC-U/C: 0x0013b868
+     * @ghidraAddress PAL: 0x0013c1b0
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -100,7 +103,8 @@ public:
      * not the players. Nothing in the shipped game calls it apart from the test registry.
      *
      * @return Always 1.
-     * @ghidraAddress 0x0013ba08
+     * @ghidraAddress NTSC-U/C: 0x0013ba08
+     * @ghidraAddress PAL: 0x0013c350
      */
     static int SelfTest();
 
@@ -110,7 +114,8 @@ public:
      * The unit's static initialiser registers it. The integer result reaches the `hx.test`
      * command through the return register, which decides its `ok` report.
      *
-     * @ghidraAddress 0x0013f8e8
+     * @ghidraAddress NTSC-U/C: 0x0013f8e8
+     * @ghidraAddress PAL: 0x001402b0
      */
     static int RunSelfTest();
 
@@ -119,51 +124,52 @@ private:
     // down, filling the last with the NullPlayer, and announcing each move with a TrackSelectMsg
     // whose payload is the channel, the slot moved into, nPayload, and the player moved in. A
     // channel of -1 is ignored.
-    // 0x0013b480
+    // NTSC-U/C: 0x0013b480, PAL: 0x0013bdc8
     void RemoveLightFromColumn(Player *pPlayer, int nChannel, int nPayload);
 
     // Store a player in the first slot of a channel's column that still holds the NullPlayer and
     // announce it with a TrackSelectMsg whose payload is the channel, that slot, nPayload, and the
     // player. A full column is ignored.
-    // 0x0013b5e8
+    // NTSC-U/C: 0x0013b5e8, PAL: 0x0013bf30
     void InsertLightForDrawable(Player *pPlayer, int nChannel, int nPayload);
 
     // Rebind a column from a BumpPacket. When the packet's player reports a step through
     // Player::GetPlace(), announce a bumper with a DeployedPowerupMsg, rebind the head of the
     // column for as long as the player continues reporting one, and mark the packet handled. The
-    // position is the packet's bar in ticks, clamped to the finite range. 0x0013b6a8
+    // position is the packet's bar in ticks, clamped to the finite range.
+    // NTSC-U/C: 0x0013b6a8, PAL: 0x0013bff0
     int RebuildChannelGrid(BumpPacket *pPacket);
 
     // The four handlers below are inline, and HandleMessage() expands each. The addresses are
     // their uncalled out-of-line copies.
 
-    // 0x0013f5a0
+    // NTSC-U/C: 0x0013f5a0, PAL: 0x0013ff68
     // Moves the addressed player one channel down when it has an input slot.
     void OnRotLeft(RotLeftMsg *pMsg);
 
-    // 0x0013f608
+    // NTSC-U/C: 0x0013f608, PAL: 0x0013ffd0
     // Moves the addressed player one channel up when it has an input slot.
     void OnRotRight(RotRightMsg *pMsg);
 
-    // 0x0013f670
+    // NTSC-U/C: 0x0013f670, PAL: 0x00140038
     // Passes a muff to the player's own sink when the player has an input slot.
     void OnPhraseMuffed(PhraseMuffedMsg *pMsg);
 
-    // 0x0013f6d8
+    // NTSC-U/C: 0x0013f6d8, PAL: 0x001400a0
     // Moves the player from its own channel to the one the message selects.
     void OnRemoteTrackSelect(RemoteTrackSelectMsg *pMsg);
 
     // Move a player from one channel to another.
-    // 0x0013f748
+    // NTSC-U/C: 0x0013f748, PAL: 0x00140110
     void RebindLightColumn(Player *pPlayer, int nFromChannel, int nToChannel, int nPayload);
 
     // Rebind a channel unless the player already occupies its first slot and its second slot is
     // unoccupied.
-    // 0x0013f7a8
+    // NTSC-U/C: 0x0013f7a8, PAL: 0x00140170
     void RebindLightIfChanged(Player *pPlayer, int nChannel, int nPayload);
 
     // Move a player the given number of channels from its own, wrapping at the channel count.
-    // 0x0013f840
+    // NTSC-U/C: 0x0013f840, PAL: 0x00140208
     int AddLightToChannel(Player *pPlayer, int nPayload, int nDelta);
 
     int mChannelCount; // +0x18, always kTrackSelectorChannelCount

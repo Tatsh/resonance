@@ -44,7 +44,8 @@ public:
      * @param bMultiplayer Stored in mMultiplayer. SoloPowerbarMgr passes 0 and MultiPowerbarMgr 1.
      * @param nMinGap The shortest gap between two dealt bars.
      * @param nMaxGap The gap the draw stops below.
-     * @ghidraAddress 0x001c4fb0
+     * @ghidraAddress NTSC-U/C: 0x001c4fb0
+     * @ghidraAddress PAL: 0x001cadf8
      */
     GamePowerbarMgr(PlayMap *pMap,
                     PhraseDatabase *pDatabase,
@@ -58,7 +59,8 @@ public:
     /**
      * @param nBar The bar.
      * @return The powerbar mBars records for the bar, or -1.
-     * @ghidraAddress 0x001c6258
+     * @ghidraAddress NTSC-U/C: 0x001c6258
+     * @ghidraAddress PAL: 0x001cc0a0
      */
     virtual int GetPowerbar(int nBar);
 

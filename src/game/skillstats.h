@@ -37,7 +37,8 @@ public:
     }
 
     /**
-     * @ghidraAddress 0x001452f8
+     * @ghidraAddress NTSC-U/C: 0x001452f8
+     * @ghidraAddress PAL: 0x00145e10
      */
     virtual ~SkillStats();
 
@@ -49,7 +50,8 @@ public:
      * stored in g_nStatsRecordVersion rather than on this byte.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00145338
+     * @ghidraAddress NTSC-U/C: 0x00145338
+     * @ghidraAddress PAL: 0x00145e50
      */
     virtual void Save(OBStream &stream);
 
@@ -61,7 +63,8 @@ public:
      * members retain their previous values.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00142f88
+     * @ghidraAddress NTSC-U/C: 0x00142f88
+     * @ghidraAddress PAL: 0x00143a88
      */
     virtual void Load(IBStream &stream);
 
@@ -71,7 +74,8 @@ public:
      * LevelStats::Reset() runs it on each of the three records it appends, after the inline
      * constructor has stored only the vtable pointer. The title is inferred.
      *
-     * @ghidraAddress 0x00145328
+     * @ghidraAddress NTSC-U/C: 0x00145328
+     * @ghidraAddress PAL: 0x00145e40
      */
     void Clear();
 
@@ -93,6 +97,7 @@ public:
  * and SkillStats then branch on it rather than receiving it as an argument. Nothing else in the
  * image writes it.
  *
- * @ghidraAddress 0x00672c80
+ * @ghidraAddress NTSC-U/C: 0x00672c80
+ * @ghidraAddress PAL: 0x006b3890
  */
 extern int g_nStatsRecordVersion;

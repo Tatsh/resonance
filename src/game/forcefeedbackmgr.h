@@ -46,14 +46,16 @@ public:
     /**
      * Load the configuration and register the object as the unit's instance.
      *
-     * @ghidraAddress 0x0016dae0
+     * @ghidraAddress NTSC-U/C: 0x0016dae0
+     * @ghidraAddress PAL: 0x001703f0
      */
     ForceFeedbackMgr();
 
     /**
      * Clear mEffects and the unit's instance pointer.
      *
-     * @ghidraAddress 0x0016dca8
+     * @ghidraAddress NTSC-U/C: 0x0016dca8
+     * @ghidraAddress PAL: 0x001705b8
      */
     ~ForceFeedbackMgr();
 
@@ -64,7 +66,8 @@ public:
      * or the paused flag alone is set.
      *
      * @param delay The delay, in MIDI ticks.
-     * @ghidraAddress 0x0016e1b8
+     * @ghidraAddress NTSC-U/C: 0x0016e1b8
+     * @ghidraAddress PAL: 0x00170ac8
      */
     void StartMetronome(const Mid::MBT &delay);
 
@@ -72,7 +75,8 @@ public:
      * Size mSlots to the players and suspend everything for three players or more.
      *
      * @param nPlayers The player count.
-     * @ghidraAddress 0x0016e2b8
+     * @ghidraAddress NTSC-U/C: 0x0016e2b8
+     * @ghidraAddress PAL: 0x00170bc8
      */
     void SetPlayerCount(unsigned int nPlayers);
 
@@ -81,7 +85,8 @@ public:
      *
      * The file-local SteadyFBCmd runs it.
      *
-     * @ghidraAddress 0x0016e408
+     * @ghidraAddress NTSC-U/C: 0x0016e408
+     * @ghidraAddress PAL: 0x00170d18
      */
     void PulseBeat();
 
@@ -92,7 +97,8 @@ public:
      * milliseconds plus 90000000, converted to MIDI ticks through the song clock's tempo map. A
      * beat closer than the lead moves the pulse one beat on.
      *
-     * @ghidraAddress 0x0016e610
+     * @ghidraAddress NTSC-U/C: 0x0016e610
+     * @ghidraAddress PAL: 0x00170f20
      */
     void SyncMetronome();
 
@@ -105,7 +111,8 @@ public:
      *
      * @param nPlayerSlot The player's slot, as Player::GetInputSlot() reports it.
      * @param nEffect The effect number, an index into mEffects.
-     * @ghidraAddress 0x0016e848
+     * @ghidraAddress NTSC-U/C: 0x0016e848
+     * @ghidraAddress PAL: 0x00171158
      */
     void PlayEffect(int nPlayerSlot, int nEffect);
 
@@ -113,7 +120,8 @@ public:
      * Stop every motor and set flags in mFlags. The image has no caller.
      *
      * @param nMask The flags to set.
-     * @ghidraAddress 0x001704c8
+     * @ghidraAddress NTSC-U/C: 0x001704c8
+     * @ghidraAddress PAL: 0x00172dd8
      */
     void Suspend(unsigned char nMask);
 
@@ -123,7 +131,8 @@ public:
      * GameManagerImpl's pause and unpause handlers are the recovered callers.
      *
      * @param bPaused Non-zero to pause.
-     * @ghidraAddress 0x00170588
+     * @ghidraAddress NTSC-U/C: 0x00170588
+     * @ghidraAddress PAL: 0x00172e98
      */
     void SetPaused(int bPaused);
 
@@ -133,7 +142,8 @@ public:
      * GrooveWorld passes Globals::IsJukeboxMode().
      *
      * @param bJukebox Non-zero in jukebox mode.
-     * @ghidraAddress 0x00170648
+     * @ghidraAddress NTSC-U/C: 0x00170648
+     * @ghidraAddress PAL: 0x00172f58
      */
     void SetJukeboxMode(int bJukebox);
 
@@ -143,7 +153,8 @@ public:
      * GrooveWorld passes GrooveWorld::mIsPlayback.
      *
      * @param bPlayback Non-zero while a recording plays back.
-     * @ghidraAddress 0x00170708
+     * @ghidraAddress NTSC-U/C: 0x00170708
+     * @ghidraAddress PAL: 0x00173018
      */
     void SetPlaybackMode(int bPlayback);
 
@@ -151,7 +162,8 @@ public:
      * Clear the disabled flag, or stop every motor and set it.
      *
      * @param bEnabled Non-zero to allow vibration.
-     * @ghidraAddress 0x001707c8
+     * @ghidraAddress NTSC-U/C: 0x001707c8
+     * @ghidraAddress PAL: 0x001730d8
      */
     void SetEnabled(int bEnabled);
 
@@ -160,7 +172,8 @@ public:
      *
      * @param nPlayerSlot The slot.
      * @param bPowerup The mark.
-     * @ghidraAddress 0x00170890
+     * @ghidraAddress NTSC-U/C: 0x00170890
+     * @ghidraAddress PAL: 0x001731a0
      */
     void SetPowerup(unsigned int nPlayerSlot, int bPowerup);
 
@@ -171,21 +184,24 @@ public:
      * does not read.
      *
      * @param when The song position, which the body does not read.
-     * @ghidraAddress 0x001708d0
+     * @ghidraAddress NTSC-U/C: 0x001708d0
+     * @ghidraAddress PAL: 0x001731e0
      */
     void StopAll(Mid::MBT when);
 
     /**
      * @param nPlayerSlot The slot.
      * @param nLevel The big motor's level.
-     * @ghidraAddress 0x001709f8
+     * @ghidraAddress NTSC-U/C: 0x001709f8
+     * @ghidraAddress PAL: 0x00173308
      */
     void SetBigMotor(int nPlayerSlot, int nLevel);
 
     /**
      * @param nPlayerSlot The slot.
      * @param nState The small motor's state.
-     * @ghidraAddress 0x00170a30
+     * @ghidraAddress NTSC-U/C: 0x00170a30
+     * @ghidraAddress PAL: 0x00173340
      */
     void SetSmallMotor(int nPlayerSlot, int nState);
 
@@ -193,7 +209,8 @@ public:
      * @param nPlayerSlot The slot.
      * @param nSmallState The small motor's state.
      * @param nBigLevel The big motor's level.
-     * @ghidraAddress 0x00170a68
+     * @ghidraAddress NTSC-U/C: 0x00170a68
+     * @ghidraAddress PAL: 0x00173378
      */
     void SetBothMotors(int nPlayerSlot, int nSmallState, int nBigLevel);
 
@@ -201,7 +218,8 @@ public:
      * Pass a slot's motor state to the controller through InputPoller::SetVibration().
      *
      * @param nPlayerSlot The slot. The controller's port is one more.
-     * @ghidraAddress 0x00170ab0
+     * @ghidraAddress NTSC-U/C: 0x00170ab0
+     * @ghidraAddress PAL: 0x001733c0
      */
     void ApplyMotors(int nPlayerSlot);
 
@@ -209,7 +227,8 @@ public:
      * Play effect 4, configuration 0x4b6, on a player's controller. The image has no caller.
      *
      * @param pPlayer The player.
-     * @ghidraAddress 0x00170b20
+     * @ghidraAddress NTSC-U/C: 0x00170b20
+     * @ghidraAddress PAL: 0x00173430
      */
     void PlayUnusedEffect(Player *pPlayer);
 
@@ -219,7 +238,8 @@ public:
      * AppTunnel's powerup routine at `0x00448d58` calls it for a bumper.
      *
      * @param pPlayer The player that was bumped.
-     * @ghidraAddress 0x00170b68
+     * @ghidraAddress NTSC-U/C: 0x00170b68
+     * @ghidraAddress PAL: 0x00173478
      */
     void PlayBumpEffect(Player *pPlayer);
 
@@ -229,7 +249,8 @@ public:
      * AppTunnel's powerup routine at `0x00448d58` calls it for an autocatcher.
      *
      * @param pPlayer The player that used the autocatcher.
-     * @ghidraAddress 0x00170bb0
+     * @ghidraAddress NTSC-U/C: 0x00170bb0
+     * @ghidraAddress PAL: 0x001734c0
      */
     void PlayAutocatchEffect(Player *pPlayer);
 
@@ -239,7 +260,8 @@ public:
      * AppTunnel's handler of PlayersTrackNeutralizedMsg calls it.
      *
      * @param pPlayer The player whose track was neutralized.
-     * @ghidraAddress 0x00170bf8
+     * @ghidraAddress NTSC-U/C: 0x00170bf8
+     * @ghidraAddress PAL: 0x00173508
      */
     void PlayNeutralizedEffect(Player *pPlayer);
 
@@ -249,14 +271,15 @@ public:
      * TnlCrippleFX's frame routine at `0x0043e500` is the recovered caller.
      *
      * @param pPlayer The player that was hit.
-     * @ghidraAddress 0x00170c40
+     * @ghidraAddress NTSC-U/C: 0x00170c40
+     * @ghidraAddress PAL: 0x00173550
      */
     void PlayCrippleEffect(Player *pPlayer);
 
 private:
     // Reads the metronome settings (configuration 0x4b1) and the five effects (0x4b4, 0x4b5,
     // 0x4b2, 0x4b3, and 0x4b6), and empties mSlots.
-    // 0x0016de58
+    // NTSC-U/C: 0x0016de58, PAL: 0x00170768
     void LoadConfig();
 
     unsigned char mFlags;         // +0x00, any set bit suspends vibration

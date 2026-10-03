@@ -49,7 +49,7 @@ inline void SendAndRelease(PhrasePlayer *pPlayer, MultiMuse *pMuse) {
 
 } // namespace
 
-// 0x001c17d8
+// NTSC-U/C: 0x001c17d8, PAL: 0x001c7620
 PhrasePlayer::PhrasePlayer(PhraseMgr *pPhraseMgr,
                            Quantizer *pQuantizer,
                            const TrackData *pTrackData)
@@ -57,7 +57,7 @@ PhrasePlayer::PhrasePlayer(PhraseMgr *pPhraseMgr,
       mTrackKind(pTrackData->mKind), mJamEffects(nullptr), mLastBar(kNoBar) {
 }
 
-// 0x001c1860
+// NTSC-U/C: 0x001c1860, PAL: 0x001c76a8
 void PhrasePlayer::PlayBar(int nBar) {
     if (mJamEffects != nullptr) {
         mJamEffects->ApplyStepMask(*mPhraseMgr->GetStepValue(nBar));
@@ -87,7 +87,7 @@ void PhrasePlayer::PlayBar(int nBar) {
     }
 }
 
-// 0x001c1978
+// NTSC-U/C: 0x001c1978, PAL: 0x001c77c0
 void PhrasePlayer::PlayBarGems(Phrase *pPhrase, int nBar, Mid::MBT from, Mid::MBT elapsed) {
     if (pPhrase->mPlayer->IsNull()) {
         return;
@@ -109,7 +109,7 @@ void PhrasePlayer::PlayBarGems(Phrase *pPhrase, int nBar, Mid::MBT from, Mid::MB
     mLastBar = nBar;
 }
 
-// 0x001c1ba8
+// NTSC-U/C: 0x001c1ba8, PAL: 0x001c79f0
 void PhrasePlayer::PlayPhraseGems(Phrase *pPhrase, int nBar, Mid::MBT from, Mid::MBT elapsed) {
     MultiMuse *pMuse = new MultiMuse;
     for (std::vector<Phrase::Gem>::iterator it = pPhrase->mGems.begin(); it != pPhrase->mGems.end();
@@ -146,12 +146,12 @@ void PhrasePlayer::PlayPhraseGems(Phrase *pPhrase, int nBar, Mid::MBT from, Mid:
     mLastBar = nBar;
 }
 
-// 0x001c2810
+// NTSC-U/C: 0x001c2810, PAL: 0x001c8658
 void PhrasePlayer::SetJamEffectsMgr(JamEffectsMgr *pJamEffects) {
     mJamEffects = pJamEffects;
 }
 
-// 0x001c2818
+// NTSC-U/C: 0x001c2818, PAL: 0x001c8660
 void PhrasePlayer::PlayBarAt(int nBar, int nOffset, int nElapsed) {
     Phrase *pPhrase = mPhraseMgr->GetPhraseAt(nBar);
     if (mTrackKind == kTrackModeRiff) {
@@ -161,7 +161,7 @@ void PhrasePlayer::PlayBarAt(int nBar, int nOffset, int nElapsed) {
     }
 }
 
-// 0x001c28a0
+// NTSC-U/C: 0x001c28a0, PAL: 0x001c86e8
 void PhrasePlayer::PlayPhraseMuse(Phrase *pPhrase, int nBar) {
     if (pPhrase->mMuse != nullptr) {
         MultiMuseMsg msg(pPhrase->mMuse);
@@ -170,7 +170,7 @@ void PhrasePlayer::PlayPhraseMuse(Phrase *pPhrase, int nBar) {
     mLastBar = nBar;
 }
 
-// 0x001c2928
+// NTSC-U/C: 0x001c2928, PAL: 0x001c8770
 void PhrasePlayer::HandleMessage(Message *pMsg) {
     pMsg->Type(); // Yes, the binary discards this call's result.
 }

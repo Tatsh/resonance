@@ -27,7 +27,8 @@ class TempoMap;
 class LevelData {
 public:
     /**
-     * @ghidraAddress 0x001ec388
+     * @ghidraAddress NTSC-U/C: 0x001ec388
+     * @ghidraAddress PAL: 0x001f2610
      */
     virtual ~LevelData();
 

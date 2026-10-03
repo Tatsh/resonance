@@ -51,7 +51,8 @@ public:
      * Inline. MetRemixManager's constructor expands it, writing the vptr and the empty vector and
      * then running clear(). The one out-of-line copy has no caller.
      *
-     * @ghidraAddress 0x001e5ce8
+     * @ghidraAddress NTSC-U/C: 0x001e5ce8
+     * @ghidraAddress PAL: 0x001ebe68
      */
     JukeboxPlayList() {
         clear();
@@ -60,7 +61,8 @@ public:
     /**
      * Release every entry and the vector.
      *
-     * @ghidraAddress 0x001e5da8
+     * @ghidraAddress NTSC-U/C: 0x001e5da8
+     * @ghidraAddress PAL: 0x001ebf28
      */
     virtual ~JukeboxPlayList();
 
@@ -72,7 +74,8 @@ public:
      * slot it reaches, which MetPersonaData::Save() settles as OBStream slot 4.
      *
      * @param pStream The stream to write to.
-     * @ghidraAddress 0x001e1e38
+     * @ghidraAddress NTSC-U/C: 0x001e1e38
+     * @ghidraAddress PAL: 0x001e7f20
      */
     virtual void save(OBStream *pStream);
 
@@ -84,7 +87,8 @@ public:
      * entries the list held before are not released.
      *
      * @param pStream The stream to read from.
-     * @ghidraAddress 0x001e1f70
+     * @ghidraAddress NTSC-U/C: 0x001e1f70
+     * @ghidraAddress PAL: 0x001e8058
      */
     virtual void load(IBStream *pStream);
 
@@ -95,7 +99,8 @@ public:
      * MetRemixManager constructor runs it on its embedded instance. The name is inferred from the
      * two things the routine does.
      *
-     * @ghidraAddress 0x001e2248
+     * @ghidraAddress NTSC-U/C: 0x001e2248
+     * @ghidraAddress PAL: 0x001e8350
      */
     void clear();
 
@@ -105,7 +110,8 @@ public:
      * Each entry is looked up through MetRemixManager::FindRecord(), and an entry with no record is
      * erased from the vector without being released. The title is inferred.
      *
-     * @ghidraAddress 0x001e5f10
+     * @ghidraAddress NTSC-U/C: 0x001e5f10
+     * @ghidraAddress PAL: 0x001ec090
      */
     void RemoveStaleEntries();
 
@@ -116,7 +122,8 @@ public:
      *
      * @param nIndex The position, counted from zero.
      * @return The entry, or null for an empty list or a position past the end.
-     * @ghidraAddress 0x001e5ec0
+     * @ghidraAddress NTSC-U/C: 0x001e5ec0
+     * @ghidraAddress PAL: 0x001ec040
      */
     JukeboxPlayListEntry *GetEntry(int nIndex);
 
@@ -127,7 +134,8 @@ public:
      * flag. MetJukeboxBaseScreen's slot 19 is the caller. The title is inferred.
      *
      * @param record The remix to queue.
-     * @ghidraAddress 0x001e21b8
+     * @ghidraAddress NTSC-U/C: 0x001e21b8
+     * @ghidraAddress PAL: 0x001e82b8
      */
     void AddEntry(const MetRemixRecord &record);
 
@@ -138,7 +146,8 @@ public:
      * The title is inferred.
      *
      * @param nIndex The position, counted from zero.
-     * @ghidraAddress 0x001e20f8
+     * @ghidraAddress NTSC-U/C: 0x001e20f8
+     * @ghidraAddress PAL: 0x001e81e8
      */
     void RemoveEntry(int nIndex);
 
@@ -150,7 +159,8 @@ public:
      *
      * @param nFirst The first position.
      * @param nSecond The second position.
-     * @ghidraAddress 0x001e5fa0
+     * @ghidraAddress NTSC-U/C: 0x001e5fa0
+     * @ghidraAddress PAL: 0x001ec120
      */
     void SwapEntries(int nFirst, int nSecond);
 

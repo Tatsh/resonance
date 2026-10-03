@@ -24,12 +24,14 @@
 class PowerupPlacer : public MsgSource {
 public:
     /**
-     * @ghidraAddress 0x001cd958
+     * @ghidraAddress NTSC-U/C: 0x001cd958
+     * @ghidraAddress PAL: 0x001d3810
      */
     PowerupPlacer();
 
     /**
-     * @ghidraAddress 0x001ce0b0
+     * @ghidraAddress NTSC-U/C: 0x001ce0b0
+     * @ghidraAddress PAL: 0x001d3f68
      */
     virtual ~PowerupPlacer();
 
@@ -39,7 +41,8 @@ public:
      * The owning LocalPlayer dispatches it while it starts, before it announces its track.
      * GamePowerupPlacer's override starts its tick task.
      *
-     * @ghidraAddress 0x001cd990
+     * @ghidraAddress NTSC-U/C: 0x001cd990
+     * @ghidraAddress PAL: 0x001d3848
      */
     virtual void Activate();
 
@@ -48,7 +51,8 @@ public:
      *
      * GamePowerupPlacer's override stops its tick task.
      *
-     * @ghidraAddress 0x001cd998
+     * @ghidraAddress NTSC-U/C: 0x001cd998
+     * @ghidraAddress PAL: 0x001d3850
      */
     virtual void Deactivate();
 
@@ -60,7 +64,8 @@ public:
      * default reveals no parameter list of its own, so the arity rests on that one override.
      *
      * @param nStep The step, whose meaning beyond a signed increment is unrecovered.
-     * @ghidraAddress 0x001cd9a0
+     * @ghidraAddress NTSC-U/C: 0x001cd9a0
+     * @ghidraAddress PAL: 0x001d3858
      */
     virtual void MoveCursor(int nStep);
 
@@ -69,7 +74,8 @@ public:
      *
      * The owning LocalPlayer dispatches it after a track selection.
      *
-     * @ghidraAddress 0x001cd9a8
+     * @ghidraAddress NTSC-U/C: 0x001cd9a8
+     * @ghidraAddress PAL: 0x001d3860
      */
     virtual void AnnounceCursor();
 
@@ -79,7 +85,8 @@ public:
      * The owning LocalPlayer dispatches it on a ButtonPowMsg. JamPowerupPlacer overrides it at
      * `0x001cdfe0`.
      *
-     * @ghidraAddress 0x001ce1b0
+     * @ghidraAddress NTSC-U/C: 0x001ce1b0
+     * @ghidraAddress PAL: 0x001d4068
      */
     virtual void DeployPowerup();
 };

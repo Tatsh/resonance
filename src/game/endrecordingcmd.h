@@ -39,7 +39,8 @@ public:
      * Produce a command on the heap.
      *
      * @return The command.
-     * @ghidraAddress 0x0010c8d0
+     * @ghidraAddress NTSC-U/C: 0x0010c8d0
+     * @ghidraAddress PAL: 0x0010caa0
      */
     static Sch::Command *New();
 
@@ -47,14 +48,16 @@ public:
      * Report sCmdID.
      *
      * @return The class's command identifier.
-     * @ghidraAddress 0x0010efc8
+     * @ghidraAddress NTSC-U/C: 0x0010efc8
+     * @ghidraAddress PAL: 0x0010f428
      */
     virtual int CmdID();
 
     /**
      * Run GameRecorder::EndRecording() on the recorder.
      *
-     * @ghidraAddress 0x0010efa8
+     * @ghidraAddress NTSC-U/C: 0x0010efa8
+     * @ghidraAddress PAL: 0x0010f408
      */
     virtual void Execute();
 
@@ -62,7 +65,8 @@ public:
      * Write `{EndRecordingCmd}`.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x0010efe8
+     * @ghidraAddress NTSC-U/C: 0x0010efe8
+     * @ghidraAddress PAL: 0x0010f448
      */
     virtual void Print(std::ostream &stream);
 
@@ -70,7 +74,8 @@ public:
      * Write nothing.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x0010efd8
+     * @ghidraAddress NTSC-U/C: 0x0010efd8
+     * @ghidraAddress PAL: 0x0010f438
      */
     virtual void Save(OBStream &stream);
 
@@ -79,14 +84,16 @@ public:
      *
      * The body is empty and no caller is recovered.
      *
-     * @ghidraAddress 0x0010efe0
+     * @ghidraAddress NTSC-U/C: 0x0010efe0
+     * @ghidraAddress PAL: 0x0010f440
      */
     virtual void UnusedHook();
 
     /**
      * Identifier the class streams itself under. The word at `0x006693e8` starts as 6.
      *
-     * @ghidraAddress 0x006693e8
+     * @ghidraAddress NTSC-U/C: 0x006693e8
+     * @ghidraAddress PAL: 0x006a9f78
      */
     static int sCmdID;
 

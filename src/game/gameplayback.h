@@ -22,14 +22,16 @@ public:
      * @param file The recording.
      * @param pManager The manager that installs the playback.
      * @param nFlag The flag StartPlayback() passes. The body does not read it.
-     * @ghidraAddress 0x0010cf30
+     * @ghidraAddress NTSC-U/C: 0x0010cf30
+     * @ghidraAddress PAL: 0x0010d208
      */
     GamePlayback(const HxStr &file, GameManagerImpl *pManager, int nFlag);
 
     /**
      * Close the watchdog's playback.
      *
-     * @ghidraAddress 0x0010f0d8
+     * @ghidraAddress NTSC-U/C: 0x0010f0d8
+     * @ghidraAddress PAL: 0x0010f538
      */
     ~GamePlayback();
 

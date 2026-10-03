@@ -33,17 +33,17 @@ public:
     PeriodicalCmd(GsPeriodical *pOwner, int nTick) : mOwner(pOwner), mTick(nTick) {
     }
 
-    // 0x001b4810
+    // NTSC-U/C: 0x001b4810, PAL: 0x001ba5e8
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x001b4820
+    // NTSC-U/C: 0x001b4820, PAL: 0x001ba5f8
     virtual void Execute() {
         mOwner->Run(mTick);
     }
 
-    // 0x001b4840
+    // NTSC-U/C: 0x001b4840, PAL: 0x001ba618
     virtual void Print(std::ostream &stream) {
         stream << "{Periodical}";
     }
@@ -60,14 +60,14 @@ int PeriodicalCmd::sCmdID;
 
 } // namespace
 
-// 0x001b4738
+// NTSC-U/C: 0x001b4738, PAL: 0x001ba510
 GsPeriodical::GsPeriodical(Sch::TickClock *pClock, PhraseMaker *pPhraseMaker, int nPeriod)
     : mOrigin(kMBTInfinity), mPeriod(nPeriod), mClock(pClock), mPhraseMaker(pPhraseMaker) {
     mCommand.mValue = kUnallocatedCommand;
     mOrigin = pPhraseMaker->GetPeriodOrigin();
 }
 
-// 0x001b4548
+// NTSC-U/C: 0x001b4548, PAL: 0x001ba320
 void GsPeriodical::PostAt(int nTick) {
     PeriodicalCmd *pCommand = new PeriodicalCmd(this, nTick);
     mClock->PostAtSongTick(pCommand, nTick, mCommand);
@@ -76,7 +76,7 @@ void GsPeriodical::PostAt(int nTick) {
     }
 }
 
-// 0x001b45d0
+// NTSC-U/C: 0x001b45d0, PAL: 0x001ba3a8
 void GsPeriodical::Run(int nTick) {
     const Mid::MBT offset(ClampPosition(nTick - mOrigin));
     mPhraseMaker->OnPeriod(offset.mTick / mPeriod);
@@ -85,13 +85,13 @@ void GsPeriodical::Run(int nTick) {
     PostAt(next.mTick);
 }
 
-// 0x001b4870
+// NTSC-U/C: 0x001b4870, PAL: 0x001ba648
 void GsPeriodical::Post() {
     const Mid::MBT first(ClampPosition(mOrigin + mPeriod));
     PostAt(first.mTick);
 }
 
-// 0x001b48f8
+// NTSC-U/C: 0x001b48f8, PAL: 0x001ba6d0
 void GsPeriodical::Withdraw() {
     const CmdID command = mCommand;
     mClock->Withdraw(command);

@@ -49,7 +49,8 @@ public:
      *
      * An object that never registered retains kIDableUnregistered and skips the clear.
      *
-     * @ghidraAddress 0x00121db0
+     * @ghidraAddress NTSC-U/C: 0x00121db0
+     * @ghidraAddress PAL: 0x001223b8
      */
     virtual ~IDable();
 
@@ -73,7 +74,7 @@ constexpr int kIDableInitialSlots = 4;
 template <typename T>
 std::vector<T *> IDable<T>::sObjects(kIDableInitialSlots);
 
-// 0x00121db0
+// NTSC-U/C: 0x00121db0, PAL: 0x001223b8
 template <typename T>
 IDable<T>::~IDable() {
     if (mId != kIDableUnregistered) {

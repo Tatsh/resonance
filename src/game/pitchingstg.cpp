@@ -4,7 +4,7 @@
 #include "game/gamemanagerimpl.h"
 #include "mid/mbt.h"
 
-// 0x001c45b0
+// NTSC-U/C: 0x001c45b0, PAL: 0x001ca3f8
 PitchingSTG::PitchingSTG(TrackData *pTrackData)
     : ScoreTrackGraph(pTrackData), mPitcher(nullptr), mJamEffects(nullptr) {
     if (mTrackData->mKind == kTrackModeRiff) {
@@ -26,26 +26,26 @@ PitchingSTG::PitchingSTG(TrackData *pTrackData)
     }
 }
 
-// 0x001c4cf0
+// NTSC-U/C: 0x001c4cf0, PAL: 0x001cab38
 void PitchingSTG::Start() {
     ScoreTrackGraph::Start();
     mPitcher->Start(kMBTInfinity); // Unguarded, as in the binary, for a track of any other kind.
 }
 
-// 0x001c4d28
+// NTSC-U/C: 0x001c4d28, PAL: 0x001cab70
 void PitchingSTG::Stop() {
     mPitcher->Stop();
     ScoreTrackGraph::Stop();
 }
 
-// 0x001c4c68
+// NTSC-U/C: 0x001c4c68, PAL: 0x001caab0
 PitchingSTG::~PitchingSTG() {
     PitchingSTG::Stop(); // The binary calls this class's body rather than dispatching.
     delete mPitcher;
     delete mJamEffects;
 }
 
-// 0x001c4798
+// NTSC-U/C: 0x001c4798, PAL: 0x001ca5e0
 void PitchingSTG::ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
     pPrimary->AddSink(mMixer);
     pPrimary->AddSink(mPitcher);
@@ -68,13 +68,13 @@ void PitchingSTG::ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgS
     mPhrasePlayer->AddSink(mMuseSynth);
 }
 
-// 0x001c4d60
+// NTSC-U/C: 0x001c4d60, PAL: 0x001caba8
 void PitchingSTG::SetMixerOutput(MsgSink *pOutput) {
     mMuseSynth->AddSink(mMixer);
     mMixer->mOutput = pOutput;
 }
 
-// 0x001c4da0
+// NTSC-U/C: 0x001c4da0, PAL: 0x001cabe8
 void PitchingSTG::AddSinkToSources(MsgSink *pSink) {
     mPhraseMgr->AddSink(pSink);
     mPitcher->AddSink(pSink);
@@ -83,7 +83,7 @@ void PitchingSTG::AddSinkToSources(MsgSink *pSink) {
     }
 }
 
-// 0x001c4e30
+// NTSC-U/C: 0x001c4e30, PAL: 0x001cac78
 void PitchingSTG::SetNetSink(MsgSink *pSink) {
     if (pSink != nullptr) {
         mPhraseMgr->mNetSink = pSink;

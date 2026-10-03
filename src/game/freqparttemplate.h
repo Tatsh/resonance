@@ -33,7 +33,8 @@ public:
      * @param pMaterial The material built over the texture.
      * @param nScaleX The texture's bitmap width.
      * @param nScaleZ The texture's bitmap height.
-     * @ghidraAddress 0x002576c0
+     * @ghidraAddress NTSC-U/C: 0x002576c0
+     * @ghidraAddress PAL: 0x0026cde0
      */
     FreqPartTemplate(const HxStr &name, Rnd::Mat *pMaterial, int nScaleX, int nScaleZ);
 
@@ -43,7 +44,8 @@ public:
      * The destructor is not virtual. MetFreqMakerAssetManager::ReleaseParts() deletes templates
      * through its deleting form.
      *
-     * @ghidraAddress 0x00257730
+     * @ghidraAddress NTSC-U/C: 0x00257730
+     * @ghidraAddress PAL: 0x0026ce50
      */
     ~FreqPartTemplate();
 

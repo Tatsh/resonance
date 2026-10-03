@@ -45,7 +45,7 @@ constexpr int kLowLevel = 0;
 
 TnlArena *g_pTnlArena;
 
-// 0x00406010
+// NTSC-U/C: 0x00406010, PAL: 0x0043f910
 void Rnd::Mat::GetMeshReferrers(std::vector<Mesh *> &meshes) {
     for (std::list<Object *>::iterator it = mRefs.begin(); it != mRefs.end(); ++it) {
         if ((*it)->ClassName() == "Mesh") {
@@ -54,7 +54,7 @@ void Rnd::Mat::GetMeshReferrers(std::vector<Mesh *> &meshes) {
     }
 }
 
-// 0x004067e8
+// NTSC-U/C: 0x004067e8, PAL: 0x00440128
 TnlArena::TnlArena(Renderer *) {
     mGameMode = Application::shared()->GetGameMode();
     mLevel = kNeutralLevel;
@@ -95,18 +95,18 @@ TnlArena::TnlArena(Renderer *) {
     mScreenAnim->SetLevel(mLevel);
 }
 
-// 0x00406120
+// NTSC-U/C: 0x00406120, PAL: 0x0043fa20
 TnlArena::PlayerMaterial::PlayerMaterial(Player *pPlayer) : mPlayer(pPlayer) {
     mMat = dynamic_cast<Rnd::Mat *>(
         Rnd::g_manager.Find(HxStr(FormatString("HUD freq%d.mat", pPlayer->mPlayerId))));
 }
 
-// 0x0040c938
+// NTSC-U/C: 0x0040c938, PAL: 0x00446360
 void TnlArena::ScreenMesh::SetMaterial(Rnd::Mat *pMat) const {
     mMesh->SetMaterial(pMat);
 }
 
-// 0x00406de0
+// NTSC-U/C: 0x00406de0, PAL: 0x00440740
 TnlArena::~TnlArena() {
     mScreenAnim->SetLevel(kNeutralLevel);
     g_pTnlArena = nullptr;
@@ -123,7 +123,7 @@ TnlArena::~TnlArena() {
     }
 }
 
-// 0x00406ff0
+// NTSC-U/C: 0x00406ff0, PAL: 0x00440950
 void TnlArena::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nPointAmountMsgType) {
@@ -135,12 +135,12 @@ void TnlArena::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x0040caf8
+// NTSC-U/C: 0x0040caf8, PAL: 0x00446520
 inline void TnlArena::OnPointAmount([[maybe_unused]] PointAmountMsg *pMsg) {
     mScreenAnim->UpdateLeaders();
 }
 
-// 0x0040ca00
+// NTSC-U/C: 0x0040ca00, PAL: 0x00446428
 inline void TnlArena::OnJuiceAmount(JuiceAmountMsg *pMsg) {
     if (mJuiceLock != kNoJuiceLock) {
         return;
@@ -159,20 +159,20 @@ inline void TnlArena::OnJuiceAmount(JuiceAmountMsg *pMsg) {
     mScreenAnim->SetLevel(mLevel);
 }
 
-// 0x0040cb28
+// NTSC-U/C: 0x0040cb28, PAL: 0x00446550
 inline void TnlArena::OnWin(WinMsg *pMsg) {
     if (mGameMode == kGameModeSolo && pMsg->mWinners.size() != 0) {
         mScreenAnim->SetLevel(mLevel + 1);
     }
 }
 
-// 0x0040c988
+// NTSC-U/C: 0x0040c988, PAL: 0x004463b0
 void TnlArena::LockLevel() {
     mJuiceLock = kJuiceLocked;
     mScreenAnim->SetLevel(kNeutralLevel);
 }
 
-// 0x0040c958
+// NTSC-U/C: 0x0040c958, PAL: 0x00446380
 void TnlArena::SetFrame(float flFrame) {
     mScreenAnim->SetFrame(flFrame);
 }

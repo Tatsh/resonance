@@ -12,7 +12,7 @@
 
 namespace {
 
-// 0x001ec328
+// NTSC-U/C: 0x001ec328, PAL: 0x001f25b0
 // Deleter the destructor runs over all three collections. The class is file-private and
 // non-polymorphic, so the name is inferred from the body.
 void DeleteTrackData(TrackData *pTrack) {
@@ -63,7 +63,7 @@ PrintCollection(std::ostream &stream, const char *pszLabel, std::vector<TrackDat
 
 } // namespace
 
-// 0x001ea838
+// NTSC-U/C: 0x001ea838, PAL: 0x001f0aa8
 LevelBuilder::LevelBuilder(unsigned nTrackCount)
     : mOwnTrack(nullptr), mCurrentTrack(nullptr), mTempoMap(nullptr) {
     const int bStartLoop = QueryConfigFlag(kStartLoopQuery);
@@ -98,7 +98,7 @@ LevelBuilder::LevelBuilder(unsigned nTrackCount)
     }
 }
 
-// 0x001eafe8
+// NTSC-U/C: 0x001eafe8, PAL: 0x001f1270
 // The table store, the three vector deallocations, and the object release are compiler
 // expansions.
 LevelBuilder::~LevelBuilder() {
@@ -112,60 +112,60 @@ LevelBuilder::~LevelBuilder() {
     delete mPlayMap;
 }
 
-// 0x001ec430
+// NTSC-U/C: 0x001ec430, PAL: 0x001f26b8
 int LevelBuilder::TrackCount() {
     return static_cast<int>(mTracks.size());
 }
 
-// 0x001ec448
+// NTSC-U/C: 0x001ec448, PAL: 0x001f26d0
 int LevelBuilder::BackingTrackCount() {
     return static_cast<int>(mBackingTracks.size());
 }
 
-// 0x001ec6d0
+// NTSC-U/C: 0x001ec6d0, PAL: 0x001f2958
 TrackData *LevelBuilder::OwnTrack() {
     return mOwnTrack;
 }
 
-// 0x001ec6f0
+// NTSC-U/C: 0x001ec6f0, PAL: 0x001f2978
 // The index is not tested against the collection.
 TrackData *LevelBuilder::TrackAt(int nIndex) {
     return mTracks[nIndex];
 }
 
-// 0x001ec6d8
+// NTSC-U/C: 0x001ec6d8, PAL: 0x001f2960
 TrackData *LevelBuilder::GetTrack(int nIndex) {
     return mTracks[nIndex];
 }
 
-// 0x001ec708
+// NTSC-U/C: 0x001ec708, PAL: 0x001f2990
 // The index is not tested against the collection.
 TrackData *LevelBuilder::BackingTrackAt(int nIndex) {
     return mBackingTracks[nIndex];
 }
 
-// 0x001ec720
+// NTSC-U/C: 0x001ec720, PAL: 0x001f29a8
 // The index is not tested against the collection.
 TrackData *LevelBuilder::IntroTrackAt(int nIndex) {
     return mIntroTracks[nIndex];
 }
 
-// 0x001ec478
+// NTSC-U/C: 0x001ec478, PAL: 0x001f2700
 Sch::TempoMap *LevelBuilder::GetTempoMap() {
     return mTempoMap;
 }
 
-// 0x001ec480
+// NTSC-U/C: 0x001ec480, PAL: 0x001f2708
 PlayMap *LevelBuilder::GetPlayMap() {
     return mPlayMap;
 }
 
-// 0x001ec738
+// NTSC-U/C: 0x001ec738, PAL: 0x001f29c0
 int LevelBuilder::GetEndBar() {
     return mPlayMap->GetExtent();
 }
 
-// 0x001eb200
+// NTSC-U/C: 0x001eb200, PAL: 0x001f1488
 void LevelBuilder::SelectTrack(int nKind, int nIndex) {
     switch (nKind) {
     case kLevelTrackNone:
@@ -189,35 +189,35 @@ void LevelBuilder::SelectTrack(int nKind, int nIndex) {
     }
 }
 
-// 0x001eb4a8
+// NTSC-U/C: 0x001eb4a8, PAL: 0x001f1730
 void LevelBuilder::Print(std::ostream &stream) {
     PrintCollection(stream, "Score Track#", mTracks);
     PrintCollection(stream, "Backing Track#", mBackingTracks);
     PrintCollection(stream, "Intro Track#", mIntroTracks);
 }
 
-// 0x001ec498
+// NTSC-U/C: 0x001ec498, PAL: 0x001f2720
 void LevelBuilder::SetBarCount(int nBarCount) {
     mPlayMap->SetBarCount(nBarCount);
 }
 
-// 0x001ec488
+// NTSC-U/C: 0x001ec488, PAL: 0x001f2710
 void LevelBuilder::SetChannel(unsigned char nChannel) {
     mCurrentTrack->mChannel = nChannel;
 }
 
-// 0x001ec5c0
+// NTSC-U/C: 0x001ec5c0, PAL: 0x001f2848
 void LevelBuilder::SetKind(int nKind) {
     mCurrentTrack->mKind = nKind;
 }
 
-// 0x001ec5d0
+// NTSC-U/C: 0x001ec5d0, PAL: 0x001f2858
 void LevelBuilder::SetInstrument(int nInstrument, const HxStr &name) {
     mCurrentTrack->mInstrument = nInstrument;
     mCurrentTrack->mName = name;
 }
 
-// 0x001ec4c8
+// NTSC-U/C: 0x001ec4c8, PAL: 0x001f2750
 void LevelBuilder::AddEvent(int nTick,
                             unsigned char nStatus,
                             unsigned char nData1,
@@ -226,45 +226,45 @@ void LevelBuilder::AddEvent(int nTick,
     mCurrentTrack->AddMidiMsg(nTick, nChannel | nStatus, nData1, nData2);
 }
 
-// 0x001ec4f8
+// NTSC-U/C: 0x001ec4f8, PAL: 0x001f2780
 void LevelBuilder::AddNoteMsg(
     int nTick, unsigned char nNote, unsigned char nVelocity, int nLength, unsigned char nChannel) {
     mCurrentTrack->AddNoteMsg(nTick, nNote, nVelocity, nLength, nChannel);
 }
 
-// 0x001ec520
+// NTSC-U/C: 0x001ec520, PAL: 0x001f27a8
 void LevelBuilder::SetQuant(int nTick, int nQuant) {
     mCurrentTrack->SetQuant(nTick, nQuant);
 }
 
-// 0x001ec540
+// NTSC-U/C: 0x001ec540, PAL: 0x001f27c8
 void LevelBuilder::AddRiff(int nTick, Riff *pRiff) {
     mCurrentTrack->AddRiff(nTick, pRiff);
 }
 
-// 0x001ec560
+// NTSC-U/C: 0x001ec560, PAL: 0x001f27e8
 void LevelBuilder::AddHarmony(int nTick, const Harmony &harmony) {
     mCurrentTrack->AddHarmony(nTick, harmony);
 }
 
-// 0x001ec580
+// NTSC-U/C: 0x001ec580, PAL: 0x001f2808
 void LevelBuilder::SetActive(int nTick, int bActive) {
     mCurrentTrack->SetActive(nTick, bActive);
 }
 
-// 0x001ec5a0
+// NTSC-U/C: 0x001ec5a0, PAL: 0x001f2828
 void LevelBuilder::AddGem(int nTick, int nGem, Riff *pRiff) {
     mCurrentTrack->AddGem(nTick, nGem, pRiff);
 }
 
-// 0x001ec680
+// NTSC-U/C: 0x001ec680, PAL: 0x001f2908
 void LevelBuilder::PrepareTracks() {
     for (auto it = mTracks.begin(); it != mTracks.end(); ++it) {
         (*it)->ScoreBars();
     }
 }
 
-// 0x001ec5f8
+// NTSC-U/C: 0x001ec5f8, PAL: 0x001f2880
 void LevelBuilder::SetTempo([[maybe_unused]] int nTick, int nMicrosecondsPerQuarter) {
     if (mTempoMap != nullptr) {
         mTempoMap->Release();

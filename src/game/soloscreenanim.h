@@ -28,11 +28,15 @@ public:
      *
      * @param pScreens TnlArena::mScreenMeshes.
      * @param pPlayerMat The material of the one player.
-     * @ghidraAddress 0x004066d0
+     * @ghidraAddress NTSC-U/C: 0x004066d0
+     * @ghidraAddress PAL: 0x0043fff0
      */
     SoloScreenAnim(const std::vector<TnlArena::ScreenMesh> *pScreens, Rnd::Mat *pPlayerMat);
 
-    /** @ghidraAddress 0x0040c690 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0040c690
+     * @ghidraAddress PAL: 0x004460b8
+     */
     virtual ~SoloScreenAnim();
 
     /**
@@ -42,7 +46,8 @@ public:
      * their own materials in an odd one. Other levels do nothing.
      *
      * @param flFrame The song position, in MIDI ticks.
-     * @ghidraAddress 0x0040c7f8
+     * @ghidraAddress NTSC-U/C: 0x0040c7f8
+     * @ghidraAddress PAL: 0x00446220
      */
     virtual void SetFrame(float flFrame);
 
@@ -53,7 +58,8 @@ public:
      * screen, and then runs script template 1019 with the new level.
      *
      * @param nLevel The level.
-     * @ghidraAddress 0x0040c738
+     * @ghidraAddress NTSC-U/C: 0x0040c738
+     * @ghidraAddress PAL: 0x00446160
      */
     virtual void SetLevel(int nLevel);
 

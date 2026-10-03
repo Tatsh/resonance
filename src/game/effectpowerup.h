@@ -32,13 +32,15 @@ public:
      * @param pPlayer The deploying player.
      * @param nUnused Not read.
      * @return 1 always.
-     * @ghidraAddress 0x001c9fc0
+     * @ghidraAddress NTSC-U/C: 0x001c9fc0
+     * @ghidraAddress PAL: 0x001cfe60
      */
     virtual int Deploy(int nTrack, int nBar, Player *pPlayer, int nUnused);
 
     /**
      * @return mEffectType.
-     * @ghidraAddress 0x001c9fb8
+     * @ghidraAddress NTSC-U/C: 0x001c9fb8
+     * @ghidraAddress PAL: 0x001cfe58
      */
     virtual int Type();
 

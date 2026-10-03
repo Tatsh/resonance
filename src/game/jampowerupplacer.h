@@ -26,12 +26,14 @@ public:
     /**
      * @param pOwner The player that owns this placer.
      * @param pCollection The powerup collection the owner holds at its own `+0xa4`.
-     * @ghidraAddress 0x001cdf88
+     * @ghidraAddress NTSC-U/C: 0x001cdf88
+     * @ghidraAddress PAL: 0x001d3e40
      */
     JamPowerupPlacer(LocalPlayer *pOwner, PowerupCollectionI *pCollection);
 
     /**
-     * @ghidraAddress 0x001cdc58
+     * @ghidraAddress NTSC-U/C: 0x001cdc58
+     * @ghidraAddress PAL: 0x001d3b10
      */
     virtual ~JamPowerupPlacer();
 
@@ -41,7 +43,8 @@ public:
      * The bar is the song position divided by the 1920 ticks of a bar, and the track is the
      * owner's Player slot 4. Both go to PowerupCollectionI::Deploy() on mCollection.
      *
-     * @ghidraAddress 0x001cdfe0
+     * @ghidraAddress NTSC-U/C: 0x001cdfe0
+     * @ghidraAddress PAL: 0x001d3e98
      */
     virtual void DeployPowerup();
 

@@ -30,7 +30,8 @@ public:
      * The jam effects manager is installed in the phrase player.
      *
      * @param pTrackData The track description the base retains.
-     * @ghidraAddress 0x001da050
+     * @ghidraAddress NTSC-U/C: 0x001da050
+     * @ghidraAddress PAL: 0x001dffc0
      */
     VoxingSTG(TrackData *pTrackData);
 
@@ -40,7 +41,8 @@ public:
      * Slot 1. The release order is the two gem makers, the producer, and then the jam effects
      * manager, which is neither the order of their offsets nor the order they were built in.
      *
-     * @ghidraAddress 0x001da730
+     * @ghidraAddress NTSC-U/C: 0x001da730
+     * @ghidraAddress PAL: 0x001e06a0
      */
     virtual ~VoxingSTG();
 
@@ -50,7 +52,8 @@ public:
      * Slot 2. The routine starts the base and then posts the producer's tick task with the
      * position kMBTInfinity.
      *
-     * @ghidraAddress 0x001da7f8
+     * @ghidraAddress NTSC-U/C: 0x001da7f8
+     * @ghidraAddress PAL: 0x001e0768
      */
     virtual void Start();
 
@@ -59,7 +62,8 @@ public:
      *
      * Slot 3. The routine withdraws the producer's tick task and then stops the base.
      *
-     * @ghidraAddress 0x001da830
+     * @ghidraAddress NTSC-U/C: 0x001da830
+     * @ghidraAddress PAL: 0x001e07a0
      */
     virtual void Stop();
 
@@ -71,7 +75,8 @@ public:
      * @param pPrimary The source the stage registers five or six of its objects with.
      * @param pOptional A further source, which receives the phrase manager when it is supplied.
      * @param pSecondary The source that receives the phrase manager and the producer.
-     * @ghidraAddress 0x001da230
+     * @ghidraAddress NTSC-U/C: 0x001da230
+     * @ghidraAddress PAL: 0x001e01a0
      */
     virtual void ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
 
@@ -81,7 +86,8 @@ public:
      * Slot 6.
      *
      * @param pOutput The sink the mixer sends to, stored in Mixer::mOutput.
-     * @ghidraAddress 0x001da868
+     * @ghidraAddress NTSC-U/C: 0x001da868
+     * @ghidraAddress PAL: 0x001e07d8
      */
     virtual void SetMixerOutput(MsgSink *pOutput);
 
@@ -91,7 +97,8 @@ public:
      * Slot 7.
      *
      * @param pSink The sink to register.
-     * @ghidraAddress 0x001da8a8
+     * @ghidraAddress NTSC-U/C: 0x001da8a8
+     * @ghidraAddress PAL: 0x001e0818
      */
     virtual void AddSinkToSources(MsgSink *pSink);
 
@@ -101,7 +108,8 @@ public:
      * Slot 8.
      *
      * @param pSink The sink to install, ignored when null.
-     * @ghidraAddress 0x001da978
+     * @ghidraAddress NTSC-U/C: 0x001da978
+     * @ghidraAddress PAL: 0x001e08e8
      */
     virtual void SetNetSink(MsgSink *pSink);
 

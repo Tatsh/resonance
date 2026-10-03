@@ -27,16 +27,16 @@ constexpr int kBurnSlotCount = 4;
 static const char *const kBurnCamFormat = "persona_texburn_%i.cam";
 static const char *const kHangpointFormat = "%i_freq_hangpoint.view";
 
-// 0x0067af30
+// NTSC-U/C: 0x0067af30, PAL: 0x006bbe80
 // The camera of each burn slot.
 std::vector<Rnd::Cam *> g_burnCams;
-// 0x0067af3c
+// NTSC-U/C: 0x0067af3c, PAL: 0x006bbe8c
 // Non-zero once InitBurnSlots() has resolved both lists.
 int g_nBurnSlotsReady = 0;
-// 0x0067af40
+// NTSC-U/C: 0x0067af40, PAL: 0x006bbe90
 // The view each burn slot hangs its avatar from.
 std::vector<Rnd::View *> g_hangpoints;
-// 0x008efc80
+// NTSC-U/C: 0x008efc80, PAL: 0x00934c80
 // The detail object AttachToBurnSlot() last hung in each slot.
 FreqAppearanceDetail *g_apBurnSlotDetails[kBurnSlotCount];
 
@@ -66,23 +66,23 @@ constexpr unsigned char kDecodedZero = 1;
 
 } // namespace
 
-// 0x001745b8
+// NTSC-U/C: 0x001745b8, PAL: 0x00176f90
 FreqAppearance::FreqAppearance()
     : mUserName("initial name"), mDetail(new FreqAppearanceDetail), mSkillStatus(0) {
 }
 
-// 0x00174668
+// NTSC-U/C: 0x00174668, PAL: 0x00177050
 FreqAppearance::FreqAppearance(const FreqAppearance &other)
     : mUserName("initial name"), mDetail(new FreqAppearanceDetail), mSkillStatus(0) {
     *this = other;
 }
 
-// 0x00174730
+// NTSC-U/C: 0x00174730, PAL: 0x00177128
 FreqAppearance::~FreqAppearance() {
     delete mDetail;
 }
 
-// 0x00171060
+// NTSC-U/C: 0x00171060, PAL: 0x00173998
 void FreqAppearance::Save(OBStream &stream) {
     int version = kRecordVersion;
     stream.Write(&version, sizeof(version));
@@ -99,7 +99,7 @@ void FreqAppearance::Save(OBStream &stream) {
     stream.Write(&skillStatus, sizeof(skillStatus));
 }
 
-// 0x001747a8
+// NTSC-U/C: 0x001747a8, PAL: 0x001771b0
 void FreqAppearance::Load(IBStream &stream) {
     int version;
     stream.Read(&version, sizeof(version));
@@ -115,13 +115,13 @@ void FreqAppearance::Load(IBStream &stream) {
     stream.Read(&mSkillStatus, sizeof(mSkillStatus));
 }
 
-// 0x00174878
+// NTSC-U/C: 0x00174878, PAL: 0x00177280
 void FreqAppearance::Print(std::ostream &stream) {
     // The detail object is never written, so the two literals below arrive back to back.
     stream << "username=" << mUserName << " Freq=" << " SkillStatus=" << mSkillStatus;
 }
 
-// 0x001748e0
+// NTSC-U/C: 0x001748e0, PAL: 0x001772e8
 void FreqAppearance::operator=(const FreqAppearance &other) {
     if (&other != this) {
         mUserName = other.mUserName;
@@ -130,7 +130,7 @@ void FreqAppearance::operator=(const FreqAppearance &other) {
     }
 }
 
-// 0x00171138
+// NTSC-U/C: 0x00171138, PAL: 0x00173a70
 void FreqAppearance::AttachToBurnSlot(int nSlot) {
     InitBurnSlots();
     g_apBurnSlotDetails[nSlot] = mDetail;
@@ -148,7 +148,7 @@ void FreqAppearance::AttachToBurnSlot(int nSlot) {
     g_burnCams[nSlot]->SetShowing(1);
 }
 
-// 0x00171398
+// NTSC-U/C: 0x00171398, PAL: 0x00173cf0
 void FreqAppearance::InitBurnSlots() {
     if (g_nBurnSlotsReady != 0) {
         return;
@@ -169,7 +169,7 @@ void FreqAppearance::InitBurnSlots() {
     g_nBurnSlotsReady = 1;
 }
 
-// 0x001716d0
+// NTSC-U/C: 0x001716d0, PAL: 0x00174060
 void FreqAppearance::RenderBurnTextures() {
     if (g_nBurnSlotsReady == 0) {
         return;
@@ -205,18 +205,18 @@ void FreqAppearance::RenderBurnTextures() {
     }
 }
 
-// 0x001712c0
+// NTSC-U/C: 0x001712c0, PAL: 0x00173bf8
 Rnd::Tex *FreqAppearance::FindPersonaBurnTexture(int nIndex) {
     return dynamic_cast<Rnd::Tex *>(
         Rnd::g_manager.Find(HxStr(FormatString(kBurnTextureFormat, nIndex + 1))));
 }
 
-// 0x00174458
+// NTSC-U/C: 0x00174458, PAL: 0x00176e30
 void FreqAppearance::CopyFrom(const FreqAppearance &other) {
     *this = other;
 }
 
-// 0x001744f8
+// NTSC-U/C: 0x001744f8, PAL: 0x00176ed0
 void FreqAppearance::EncodeNonZeroBytes(const unsigned char *pSource, unsigned char *pDest) {
     memset(pDest + kEncodedMaskByte, kEncodedMaskBase, kEncodedFillLength);
     for (int i = 0; i < kEncodedDataLength; ++i) {
@@ -228,7 +228,7 @@ void FreqAppearance::EncodeNonZeroBytes(const unsigned char *pSource, unsigned c
     }
 }
 
-// 0x00174930
+// NTSC-U/C: 0x00174930, PAL: 0x00177338
 void FreqAppearance::Pack(Record *pRecord) {
     pRecord->mValid = true;
     pRecord->mSkillStatus = mSkillStatus;
@@ -248,7 +248,7 @@ void FreqAppearance::Pack(Record *pRecord) {
     pRecord->mPartCount = static_cast<unsigned char>(nCount); // The binary reads one byte back.
 }
 
-// 0x001749e8
+// NTSC-U/C: 0x001749e8, PAL: 0x001773f0
 void FreqAppearance::Unpack(const Record &record) {
     if (record.mValid) {
         mSkillStatus = record.mSkillStatus;
@@ -257,7 +257,7 @@ void FreqAppearance::Unpack(const Record &record) {
     }
 }
 
-// 0x00170ca8
+// NTSC-U/C: 0x00170ca8, PAL: 0x001735b8
 HxStr FreqAppearance::EncodeRecord(const Record &record) {
     unsigned char aDecoded[kEncodedGroupCount * kEncodedDataLength];
     memset(aDecoded, 0, sizeof(aDecoded));
@@ -274,7 +274,7 @@ HxStr FreqAppearance::EncodeRecord(const Record &record) {
     return encoded;
 }
 
-// 0x00170ee0
+// NTSC-U/C: 0x00170ee0, PAL: 0x00173818
 void FreqAppearance::DecodeRecord(const HxStr &encoded, Record *pRecord) {
     unsigned char aEncoded[kEncodedGroupCount * kEncodedGroupLength];
     memset(aEncoded, kDecodedZero, sizeof(aEncoded));

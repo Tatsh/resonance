@@ -91,14 +91,16 @@ public:
         /**
          * Construct an empty bar quantised to 120 ticks.
          *
-         * @ghidraAddress 0x001d2ef0
+         * @ghidraAddress NTSC-U/C: 0x001d2ef0
+         * @ghidraAddress PAL: 0x001d8da8
          */
         Bar();
 
         /**
          * Delete every MIDI message the bar holds and free the four lists.
          *
-         * @ghidraAddress 0x001d2f50
+         * @ghidraAddress NTSC-U/C: 0x001d2f50
+         * @ghidraAddress PAL: 0x001d8e08
          */
         ~Bar();
 
@@ -106,7 +108,8 @@ public:
          * Write every member Print() labels to a diagnostic stream.
          *
          * @param stream The stream to write to.
-         * @ghidraAddress 0x001d31d8
+         * @ghidraAddress NTSC-U/C: 0x001d31d8
+         * @ghidraAddress PAL: 0x001d9090
          */
         void Print(std::ostream &stream);
 
@@ -124,7 +127,8 @@ public:
      *
      * @param nIndex The track's index, stored in mIndex.
      * @param pMap The play map whose last step sizes mBars.
-     * @ghidraAddress 0x001d35a8
+     * @ghidraAddress NTSC-U/C: 0x001d35a8
+     * @ghidraAddress PAL: 0x001d9460
      */
     TrackData(int nIndex, PlayMap *pMap);
 
@@ -133,7 +137,8 @@ public:
      *
      * LevelBuilder's deleter at `0x001ec328` passes an in-charge value of 3.
      *
-     * @ghidraAddress 0x001d3900
+     * @ghidraAddress NTSC-U/C: 0x001d3900
+     * @ghidraAddress PAL: 0x001d97d0
      */
     ~TrackData();
 
@@ -146,7 +151,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @param pRiff The riff, stored at the index given by its mId.
-     * @ghidraAddress 0x001d3b18
+     * @ghidraAddress NTSC-U/C: 0x001d3b18
+     * @ghidraAddress PAL: 0x001d99f8
      */
     void AddRiff(int nTick, Riff *pRiff);
 
@@ -158,7 +164,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @param harmony The harmony, copied onto the heap.
-     * @ghidraAddress 0x001d3d10
+     * @ghidraAddress NTSC-U/C: 0x001d3d10
+     * @ghidraAddress PAL: 0x001d9bf0
      */
     void AddHarmony(int nTick, const Harmony &harmony);
 
@@ -170,7 +177,8 @@ public:
      * @param nTick The song position, in MIDI ticks.
      * @param nGem The gem.
      * @param pRiff The riff, or null.
-     * @ghidraAddress 0x001d3ee0
+     * @ghidraAddress NTSC-U/C: 0x001d3ee0
+     * @ghidraAddress PAL: 0x001d9dc0
      */
     void AddGem(int nTick, int nGem, Riff *pRiff);
 
@@ -184,7 +192,8 @@ public:
      * @param nStatus The status byte.
      * @param nData1 The first data byte.
      * @param nData2 The second data byte.
-     * @ghidraAddress 0x001d4088
+     * @ghidraAddress NTSC-U/C: 0x001d4088
+     * @ghidraAddress PAL: 0x001d9f68
      */
     void AddMidiMsg(int nTick, unsigned char nStatus, unsigned char nData1, unsigned char nData2);
 
@@ -198,7 +207,8 @@ public:
      * @param nVelocity The note-on velocity.
      * @param nLength The length of the note, in MIDI ticks.
      * @param nChannel The MIDI channel.
-     * @ghidraAddress 0x001d41c0
+     * @ghidraAddress NTSC-U/C: 0x001d41c0
+     * @ghidraAddress PAL: 0x001da0a0
      */
     void AddNoteMsg(int nTick,
                     unsigned char nNote,
@@ -212,7 +222,8 @@ public:
      * A track in one of the modes 1 through 3 takes a flat configured value for every bar, and any
      * other track scores each bar from its gems. The game mode is read and discarded.
      *
-     * @ghidraAddress 0x001d4308
+     * @ghidraAddress NTSC-U/C: 0x001d4308
+     * @ghidraAddress PAL: 0x001da1e8
      */
     void ScoreBars();
 
@@ -224,7 +235,8 @@ public:
      * @param pTick Receives the gem's song position.
      * @param pGem Receives the gem.
      * @return Non-zero when a gem was found.
-     * @ghidraAddress 0x001d4428
+     * @ghidraAddress NTSC-U/C: 0x001d4428
+     * @ghidraAddress PAL: 0x001da308
      */
     int FindGemAtOrBefore(int nTick, int *pTick, int *pGem) const;
 
@@ -235,7 +247,8 @@ public:
      * @param pTick Receives the gem's song position.
      * @param pGem Receives the gem.
      * @return Non-zero when a gem was found.
-     * @ghidraAddress 0x001d46f0
+     * @ghidraAddress NTSC-U/C: 0x001d46f0
+     * @ghidraAddress PAL: 0x001da5d0
      */
     int FindGemAtOrAfter(int nTick, int *pTick, int *pGem) const;
 
@@ -243,7 +256,8 @@ public:
      * Write the track and every bar to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001d4978
+     * @ghidraAddress NTSC-U/C: 0x001d4978
+     * @ghidraAddress PAL: 0x001da858
      */
     void Print(std::ostream &stream);
 
@@ -253,7 +267,8 @@ public:
      * @param nTick The song position, in MIDI ticks.
      * @param pBar Receives the bar.
      * @param offset Receives the offset within the bar.
-     * @ghidraAddress 0x001d4b40
+     * @ghidraAddress NTSC-U/C: 0x001d4b40
+     * @ghidraAddress PAL: 0x001daa20
      */
     void Locate(int nTick, Bar *&pBar, Mid::MBT &offset);
 
@@ -263,7 +278,8 @@ public:
      * @param nTick The song position, in MIDI ticks.
      * @param pBar Receives the bar.
      * @param offset Receives the offset within the bar.
-     * @ghidraAddress 0x001d4c58
+     * @ghidraAddress NTSC-U/C: 0x001d4c58
+     * @ghidraAddress PAL: 0x001dab38
      */
     void LocateMapped(int nTick, const Bar *&pBar, Mid::MBT &offset) const;
 
@@ -273,7 +289,8 @@ public:
      * GrooveWorld's setup path is the recovered caller.
      *
      * @param pDatabase The database.
-     * @ghidraAddress 0x001d4d90
+     * @ghidraAddress NTSC-U/C: 0x001d4d90
+     * @ghidraAddress PAL: 0x001dac70
      */
     void AddPhrases(PhraseDatabase *pDatabase);
 
@@ -284,7 +301,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @param nQuant The quantisation, in MIDI ticks.
-     * @ghidraAddress 0x001d7688
+     * @ghidraAddress NTSC-U/C: 0x001d7688
+     * @ghidraAddress PAL: 0x001dd568
      */
     void SetQuant(int nTick, int nQuant);
 
@@ -295,7 +313,8 @@ public:
      *
      * @param nTick The event position, not read.
      * @param bActive Whether the controller value was non-zero, not read.
-     * @ghidraAddress 0x001d7758
+     * @ghidraAddress NTSC-U/C: 0x001d7758
+     * @ghidraAddress PAL: 0x001dd638
      */
     void SetActive(int nTick, int bActive);
 
@@ -304,14 +323,16 @@ public:
      *
      * @param pPlayer The player.
      * @param nBar The bar.
-     * @ghidraAddress 0x001d7760
+     * @ghidraAddress NTSC-U/C: 0x001d7760
+     * @ghidraAddress PAL: 0x001dd640
      */
     void SetOwner(Player *pPlayer, int nBar) const;
 
     /**
      * @param nTick The song position, in MIDI ticks.
      * @return The harmony in force at the position, or null.
-     * @ghidraAddress 0x001d7788
+     * @ghidraAddress NTSC-U/C: 0x001d7788
+     * @ghidraAddress PAL: 0x001dd668
      */
     Harmony *GetHarmony(int nTick) const;
 
@@ -319,7 +340,8 @@ public:
      * @param nTick The song position, in MIDI ticks.
      * @param nLevel The difficulty level.
      * @return The riff of that level in the riff set in force at the position, or null.
-     * @ghidraAddress 0x001d77e0
+     * @ghidraAddress NTSC-U/C: 0x001d77e0
+     * @ghidraAddress PAL: 0x001dd6c0
      */
     Riff *GetRiff(int nTick, int nLevel) const;
 
@@ -328,7 +350,8 @@ public:
      * @param nOffset The offset within the bar.
      * @param nLevel The difficulty level.
      * @return The riff of that level in the riff set in force at the offset, or null.
-     * @ghidraAddress 0x001d7858
+     * @ghidraAddress NTSC-U/C: 0x001d7858
+     * @ghidraAddress PAL: 0x001dd738
      */
     Riff *GetRiffInMappedBar(int nBar, int nOffset, int nLevel) const;
 
@@ -337,49 +360,56 @@ public:
      * @param nOffset The offset within the bar.
      * @param nLevel The difficulty level.
      * @return The riff of that level in the riff set in force at the offset, or null.
-     * @ghidraAddress 0x001d78d0
+     * @ghidraAddress NTSC-U/C: 0x001d78d0
+     * @ghidraAddress PAL: 0x001dd7b0
      */
     Riff *GetRiffInBar(int nBar, int nOffset, int nLevel) const;
 
     /**
      * @param nTick The song position, in MIDI ticks.
      * @return The gem at exactly the position, or -1.
-     * @ghidraAddress 0x001d7948
+     * @ghidraAddress NTSC-U/C: 0x001d7948
+     * @ghidraAddress PAL: 0x001dd828
      */
     int GetGemAt(int nTick) const;
 
     /**
      * @param nBar The bar, mapped through PlayMap::MapBar().
      * @return The bar's quantisation.
-     * @ghidraAddress 0x001d79a8
+     * @ghidraAddress NTSC-U/C: 0x001d79a8
+     * @ghidraAddress PAL: 0x001dd888
      */
     int GetQuant(int nBar) const;
 
     /**
      * @param nBar The bar.
      * @return PlayMap::IsStepStart() for the bar.
-     * @ghidraAddress 0x001d79d0
+     * @ghidraAddress NTSC-U/C: 0x001d79d0
+     * @ghidraAddress PAL: 0x001dd8b0
      */
     int IsStepStart(int nBar) const;
 
     /**
      * @param nBar The bar.
      * @return PlayMap::StepStartBar() for the bar.
-     * @ghidraAddress 0x001d79f0
+     * @ghidraAddress NTSC-U/C: 0x001d79f0
+     * @ghidraAddress PAL: 0x001dd8d0
      */
     int StepStartBar(int nBar) const;
 
     /**
      * @param nBar The bar.
      * @return PlayMap::NextStepBar() for the bar.
-     * @ghidraAddress 0x001d7a10
+     * @ghidraAddress NTSC-U/C: 0x001d7a10
+     * @ghidraAddress PAL: 0x001dd8f0
      */
     int NextStepBar(int nBar) const;
 
     /**
      * @param nBar The bar.
      * @return PlayMap::FollowingStepBar() for the bar.
-     * @ghidraAddress 0x001d7a30
+     * @ghidraAddress NTSC-U/C: 0x001d7a30
+     * @ghidraAddress PAL: 0x001dd910
      */
     int FollowingStepBar(int nBar) const;
 
@@ -388,49 +418,56 @@ public:
      *
      * @param nBar The bar.
      * @return The gamer's answer.
-     * @ghidraAddress 0x001d7a50
+     * @ghidraAddress NTSC-U/C: 0x001d7a50
+     * @ghidraAddress PAL: 0x001dd930
      */
     int QueryBar(int nBar) const;
 
     /**
      * @param nBar The bar, mapped through PlayMap::MapBar().
      * @return The bar's points.
-     * @ghidraAddress 0x001d7a78
+     * @ghidraAddress NTSC-U/C: 0x001d7a78
+     * @ghidraAddress PAL: 0x001dd958
      */
     int GetPoints(int nBar) const;
 
     /**
      * @param nBar The bar, mapped through PlayMap::MapBar().
      * @return The bar's mCatchPoints.
-     * @ghidraAddress 0x001d7aa0
+     * @ghidraAddress NTSC-U/C: 0x001d7aa0
+     * @ghidraAddress PAL: 0x001dd980
      */
     int GetCatchPoints(int nBar) const;
 
     /**
      * @param nBar The index into mBars, not mapped.
      * @return The bar's MIDI messages.
-     * @ghidraAddress 0x001d7ac8
+     * @ghidraAddress NTSC-U/C: 0x001d7ac8
+     * @ghidraAddress PAL: 0x001dd9a8
      */
     const std::vector<TickObj<MuseMsg *> > *GetMidiInBar(int nBar) const;
 
     /**
      * @param nBar The index into mBars, not mapped.
      * @return The bar's gems.
-     * @ghidraAddress 0x001d7ae0
+     * @ghidraAddress NTSC-U/C: 0x001d7ae0
+     * @ghidraAddress PAL: 0x001dd9c0
      */
     const std::vector<TickObj<int> > *GetGemsInBar(int nBar) const;
 
     /**
      * @param nBar The bar, mapped through PlayMap::MapBar().
      * @return The bar's MIDI messages.
-     * @ghidraAddress 0x001d7af8
+     * @ghidraAddress NTSC-U/C: 0x001d7af8
+     * @ghidraAddress PAL: 0x001dd9d8
      */
     const std::vector<TickObj<MuseMsg *> > *GetMidi(int nBar) const;
 
     /**
      * @param nBar The bar, mapped through PlayMap::MapBar().
      * @return The bar's gems.
-     * @ghidraAddress 0x001d7b20
+     * @ghidraAddress NTSC-U/C: 0x001d7b20
+     * @ghidraAddress PAL: 0x001dda00
      */
     const std::vector<TickObj<int> > *GetGems(int nBar) const;
 
@@ -439,7 +476,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @param pBar Receives the bar.
-     * @ghidraAddress 0x001d7b48
+     * @ghidraAddress NTSC-U/C: 0x001d7b48
+     * @ghidraAddress PAL: 0x001dda28
      */
     void Locate(int nTick, Bar *&pBar);
 
@@ -448,7 +486,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @param pBar Receives the bar.
-     * @ghidraAddress 0x001d7b70
+     * @ghidraAddress NTSC-U/C: 0x001d7b70
+     * @ghidraAddress PAL: 0x001dda50
      */
     void LocateMapped(int nTick, const Bar *&pBar) const;
 
@@ -457,14 +496,16 @@ public:
      *
      * @param nBar The bar.
      * @param pBar Receives the bar.
-     * @ghidraAddress 0x001d7b98
+     * @ghidraAddress NTSC-U/C: 0x001d7b98
+     * @ghidraAddress PAL: 0x001dda78
      */
     void GetBar(int nBar, const Bar *&pBar) const;
 
     /**
      * @param nBar The bar.
      * @return The index of the step at or before the bar, through PlayMap::FindStepIndex().
-     * @ghidraAddress 0x001d7bf0
+     * @ghidraAddress NTSC-U/C: 0x001d7bf0
+     * @ghidraAddress PAL: 0x001ddad0
      */
     int FindStepIndex(int nBar) const;
 
@@ -486,11 +527,11 @@ public:
 private:
     // Scores a bar from its gems. Each gem adds the weight of the first divisor its position is a
     // multiple of, and the total is placed among the configured thresholds.
-    // 0x001d2e08
+    // NTSC-U/C: 0x001d2e08, PAL: 0x001d8cc0
     static int ScoreGems(const std::vector<TickObj<int> > &gems);
 
     // Fills the weights and thresholds ScoreGems() uses from the configuration, once.
-    // 0x001d2ca8
+    // NTSC-U/C: 0x001d2ca8, PAL: 0x001d8b60
     static void InitScoreTables();
 
     HxStr mName;                            // +0x14

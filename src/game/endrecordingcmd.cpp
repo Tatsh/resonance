@@ -9,40 +9,40 @@ namespace {
 
 constexpr int kEndRecordingCmdId = 6;
 
-// 0x006693f0
+// NTSC-U/C: 0x006693f0, PAL: 0x006a9f80
 const Sch::CommandFactory kEndRecordingCmdFactory(kEndRecordingCmdId, EndRecordingCmd::New);
 
 constexpr char kDescription[] = "{EndRecordingCmd}";
 
 } // namespace
 
-// 0x006693e8
+// NTSC-U/C: 0x006693e8, PAL: 0x006a9f78
 int EndRecordingCmd::sCmdID = kEndRecordingCmdId;
 
-// 0x0010c8d0
+// NTSC-U/C: 0x0010c8d0, PAL: 0x0010caa0
 Sch::Command *EndRecordingCmd::New() {
     return new EndRecordingCmd;
 }
 
-// 0x0010efc8
+// NTSC-U/C: 0x0010efc8, PAL: 0x0010f428
 int EndRecordingCmd::CmdID() {
     return sCmdID;
 }
 
-// 0x0010efa8
+// NTSC-U/C: 0x0010efa8, PAL: 0x0010f408
 void EndRecordingCmd::Execute() {
     mRecorder->EndRecording();
 }
 
-// 0x0010efe8
+// NTSC-U/C: 0x0010efe8, PAL: 0x0010f448
 void EndRecordingCmd::Print(std::ostream &stream) {
     stream << kDescription;
 }
 
-// 0x0010efd8
+// NTSC-U/C: 0x0010efd8, PAL: 0x0010f438
 void EndRecordingCmd::Save(OBStream &) {
 }
 
-// 0x0010efe0
+// NTSC-U/C: 0x0010efe0, PAL: 0x0010f440
 void EndRecordingCmd::UnusedHook() {
 }

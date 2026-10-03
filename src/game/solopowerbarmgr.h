@@ -19,7 +19,8 @@ public:
      * @param pDatabase The phrase database of the track.
      * @param pTrackData The track description.
      * @param nTrack The track's index.
-     * @ghidraAddress 0x001c6270
+     * @ghidraAddress NTSC-U/C: 0x001c6270
+     * @ghidraAddress PAL: 0x001cc0b8
      */
     SoloPowerbarMgr(PlayMap *pMap,
                     PhraseDatabase *pDatabase,

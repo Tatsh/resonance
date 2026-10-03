@@ -34,7 +34,8 @@ public:
     /**
      * @param pGlobals The globals whose song clock drives the filter and dates each message.
      * @param pTrackData The track description. The constructor copies its channel.
-     * @ghidraAddress 0x0019aa20
+     * @ghidraAddress NTSC-U/C: 0x0019aa20
+     * @ghidraAddress PAL: 0x001a0788
      */
     AxeFX(Globals *pGlobals, const TrackData *pTrackData);
 
@@ -45,7 +46,8 @@ public:
      * value times 128. A new controller value is stored, and sent while mPlaying is set.
      *
      * @param flValue The filter's output, from 0 to 1.
-     * @ghidraAddress 0x0019b4e0
+     * @ghidraAddress NTSC-U/C: 0x0019b4e0
+     * @ghidraAddress PAL: 0x001a1248
      */
     virtual void OnFilterValue(float flValue);
 
@@ -56,21 +58,22 @@ public:
      * (mPlaying set and the controller sent), and an AllNotesOffMsg ends it.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x0019b538
+     * @ghidraAddress NTSC-U/C: 0x0019b538
+     * @ghidraAddress PAL: 0x001a12a0
      */
     virtual void HandleMessage(Message *pMsg);
 
 private:
     // Sends controller mController on mChannel with mValue, dated at the song clock's tick.
-    // 0x0019abd8
+    // NTSC-U/C: 0x0019abd8, PAL: 0x001a0940
     void SendController();
 
     // The out-of-line copy of the AxisFXMsg branch HandleMessage() expands inline.
-    // 0x0019b498
+    // NTSC-U/C: 0x0019b498, PAL: 0x001a1200
     void OnAxisFX(AxisFXMsg *pMsg);
 
     // The out-of-line copy of the MultiMuseMsg branch HandleMessage() expands inline.
-    // 0x0019b4b8
+    // NTSC-U/C: 0x0019b4b8, PAL: 0x001a1220
     void OnMultiMuse();
 
     unsigned char mChannel;    // +0x1c

@@ -27,7 +27,8 @@ public:
      * The export lead is 120 ticks for each track index plus 120.
      *
      * @param pTrackData The track description the base retains.
-     * @ghidraAddress 0x0019fb80
+     * @ghidraAddress NTSC-U/C: 0x0019fb80
+     * @ghidraAddress PAL: 0x001a58e8
      */
     CatchingSTG(TrackData *pTrackData);
 
@@ -36,7 +37,8 @@ public:
      *
      * Slot 1.
      *
-     * @ghidraAddress 0x001a0450
+     * @ghidraAddress NTSC-U/C: 0x001a0450
+     * @ghidraAddress PAL: 0x001a61b8
      */
     virtual ~CatchingSTG();
 
@@ -46,7 +48,8 @@ public:
      * Slot 2. The routine starts the base and then schedules the catcher's commands through
      * Catcher::Start().
      *
-     * @ghidraAddress 0x001a04d8
+     * @ghidraAddress NTSC-U/C: 0x001a04d8
+     * @ghidraAddress PAL: 0x001a6240
      */
     virtual void Start();
 
@@ -56,7 +59,8 @@ public:
      * Slot 3. The routine withdraws the catcher's commands through Catcher::Stop() and then stops
      * the base.
      *
-     * @ghidraAddress 0x001a0518
+     * @ghidraAddress NTSC-U/C: 0x001a0518
+     * @ghidraAddress PAL: 0x001a6280
      */
     virtual void Stop();
 
@@ -69,7 +73,8 @@ public:
      * @param pOptional A further source, which receives the phrase manager and the catcher when it
      *                  is supplied.
      * @param pSecondary The source that receives the phrase manager and the catcher.
-     * @ghidraAddress 0x0019fd88
+     * @ghidraAddress NTSC-U/C: 0x0019fd88
+     * @ghidraAddress PAL: 0x001a5af0
      */
     virtual void ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
 
@@ -79,7 +84,8 @@ public:
      * Slot 5. This class is the only one of the four that overrides the base's empty default.
      *
      * @param pSource The source to register with.
-     * @ghidraAddress 0x001a0558
+     * @ghidraAddress NTSC-U/C: 0x001a0558
+     * @ghidraAddress PAL: 0x001a62c0
      */
     virtual void AddMixerToSource(MsgSource *pSource);
 
@@ -89,7 +95,8 @@ public:
      * Slot 6.
      *
      * @param pOutput The sink the mixer sends to, stored in Mixer::mOutput.
-     * @ghidraAddress 0x001a0588
+     * @ghidraAddress NTSC-U/C: 0x001a0588
+     * @ghidraAddress PAL: 0x001a62f0
      */
     virtual void SetMixerOutput(MsgSink *pOutput);
 
@@ -99,7 +106,8 @@ public:
      * Slot 7.
      *
      * @param pSink The sink to register.
-     * @ghidraAddress 0x001a05c8
+     * @ghidraAddress NTSC-U/C: 0x001a05c8
+     * @ghidraAddress PAL: 0x001a6330
      */
     virtual void AddSinkToSources(MsgSink *pSink);
 
@@ -109,7 +117,8 @@ public:
      * Slot 8.
      *
      * @param pSink The sink to install, ignored when null.
-     * @ghidraAddress 0x001a0650
+     * @ghidraAddress NTSC-U/C: 0x001a0650
+     * @ghidraAddress PAL: 0x001a63b8
      */
     virtual void SetNetSink(MsgSink *pSink);
 
@@ -119,7 +128,8 @@ public:
      * Slot 9. The routine forwards to Catcher::IsPhraseRunEmpty().
      *
      * @return Non-zero when the catcher has nothing outstanding.
-     * @ghidraAddress 0x001a06f0
+     * @ghidraAddress NTSC-U/C: 0x001a06f0
+     * @ghidraAddress PAL: 0x001a6458
      */
     virtual int HasNothingPending();
 
@@ -135,7 +145,8 @@ public:
      *
      * @param nTick The song position, forwarded unchanged.
      * @param pPlayer The player the phrases go to.
-     * @ghidraAddress 0x001a0668
+     * @ghidraAddress NTSC-U/C: 0x001a0668
+     * @ghidraAddress PAL: 0x001a63d0
      */
     virtual void GivePhrases(int nTick, Player *pPlayer);
 
@@ -145,7 +156,8 @@ public:
      * Slot 11. Returns 1 where the base returns zero.
      *
      * @return Always 1.
-     * @ghidraAddress 0x001a0428
+     * @ghidraAddress NTSC-U/C: 0x001a0428
+     * @ghidraAddress PAL: 0x001a6190
      */
     virtual int CanGivePhrases();
 
@@ -154,7 +166,8 @@ public:
      *
      * Slot 12. The whole body is PhraseMgr::CreatePowerbarMgr().
      *
-     * @ghidraAddress 0x001a0720
+     * @ghidraAddress NTSC-U/C: 0x001a0720
+     * @ghidraAddress PAL: 0x001a6488
      */
     virtual void CreatePowerbarMgr();
 

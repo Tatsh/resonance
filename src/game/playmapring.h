@@ -35,7 +35,8 @@ public:
      *
      * @param nBar The bar to wrap.
      * @return The wrapped position.
-     * @ghidraAddress 0x0012e408
+     * @ghidraAddress NTSC-U/C: 0x0012e408
+     * @ghidraAddress PAL: 0x0012eb80
      */
     virtual int MapBar(int nBar);
 
@@ -49,7 +50,8 @@ public:
      * @param nMin The lowest position to collect.
      * @param nEnd The position to stop below.
      * @return mFoundBars.
-     * @ghidraAddress 0x0012dad8
+     * @ghidraAddress NTSC-U/C: 0x0012dad8
+     * @ghidraAddress PAL: 0x0012e238
      */
     virtual std::vector<int> &FindBarsPlaying(int nStart, int nMin, int nEnd);
 
@@ -59,7 +61,8 @@ public:
      * The repeat count is configuration code 0x385, read through QueryConfigValue().
      *
      * @return One turn scaled by the repeat count.
-     * @ghidraAddress 0x0012e430
+     * @ghidraAddress NTSC-U/C: 0x0012e430
+     * @ghidraAddress PAL: 0x0012eba8
      */
     virtual int GetExtent();
 };

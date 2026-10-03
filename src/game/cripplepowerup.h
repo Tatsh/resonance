@@ -24,13 +24,15 @@ public:
      * @param pPlayer The deploying player.
      * @param nUnused Not read.
      * @return The message's result.
-     * @ghidraAddress 0x001c9830
+     * @ghidraAddress NTSC-U/C: 0x001c9830
+     * @ghidraAddress PAL: 0x001cf6d0
      */
     virtual int Deploy(int nTrack, int nBar, Player *pPlayer, int nUnused);
 
     /**
      * @return kHudItemCrippler.
-     * @ghidraAddress 0x001c9828
+     * @ghidraAddress NTSC-U/C: 0x001c9828
+     * @ghidraAddress PAL: 0x001cf6c8
      */
     virtual int Type();
 };

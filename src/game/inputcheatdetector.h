@@ -51,7 +51,8 @@ public:
      * routines at `0x001deb90` and `0x001deb30` append 0x14-byte records to them.
      *
      * @param pCheats The table to match against.
-     * @ghidraAddress 0x001daaf8
+     * @ghidraAddress NTSC-U/C: 0x001daaf8
+     * @ghidraAddress PAL: 0x001e0a68
      */
     explicit InputCheatDetector(std::vector<CheatSequence> *pCheats);
 
@@ -67,7 +68,8 @@ public:
      * @param nSlot The controller's slot, from 1.
      * @param nButton The button number.
      * @param flValue The reading's value.
-     * @ghidraAddress 0x001dc658
+     * @ghidraAddress NTSC-U/C: 0x001dc658
+     * @ghidraAddress PAL: 0x001e25e8
      */
     virtual void OnControllerReading(int nType, int nSlot, int nButton, float flValue);
 
@@ -83,16 +85,16 @@ public:
 private:
     // Fills g_metCheatSequences with three cheats and g_gameCheatSequences with eleven, reusing
     // one stack record, and sets the registered flag.
-    // 0x001dabc8
+    // NTSC-U/C: 0x001dabc8, PAL: 0x001e0b38
     void RegisterCheats();
 
     // Appends a copy of the cheat to g_gameCheatSequences. RegisterCheats() passes its own
     // receiver, which the body does not read. The title is inferred.
-    // 0x001deb30
+    // NTSC-U/C: 0x001deb30, PAL: 0x001e4bb0
     void AddGameCheat(const CheatSequence &cheat);
 
     // Appends a copy of the cheat to g_metCheatSequences, as AddGameCheat() does.
-    // 0x001deb90
+    // NTSC-U/C: 0x001deb90, PAL: 0x001e4c10
     void AddMetCheat(const CheatSequence &cheat);
 
     // The table the constructor stores. +0x04
@@ -105,7 +107,8 @@ private:
  * MetaGameWorld's constructor passes the address to the InputCheatDetectorMet it builds. The name
  * follows that one user.
  *
- * @ghidraAddress 0x00691e18
+ * @ghidraAddress NTSC-U/C: 0x00691e18
+ * @ghidraAddress PAL: 0x006d30a0
  */
 extern std::vector<InputCheatDetector::CheatSequence> g_metCheatSequences;
 
@@ -115,6 +118,7 @@ extern std::vector<InputCheatDetector::CheatSequence> g_metCheatSequences;
  * GrooveWorld's constructor passes the address to the detector it builds. The name follows that
  * one user.
  *
- * @ghidraAddress 0x00691e28
+ * @ghidraAddress NTSC-U/C: 0x00691e28
+ * @ghidraAddress PAL: 0x006d30b0
  */
 extern std::vector<InputCheatDetector::CheatSequence> g_gameCheatSequences;

@@ -2,11 +2,11 @@
 
 #include <iostream>
 
-// 0x00135e98
+// NTSC-U/C: 0x00135e98, PAL: 0x00136750
 PlayerInfo::~PlayerInfo() {
 }
 
-// 0x00133930
+// NTSC-U/C: 0x00133930, PAL: 0x00134198
 void PlayerInfo::Print(std::ostream &stream) {
     stream << "{AppPlayerInfo: " << mPlayerId << " " << mColorName << " ";
     mAppearance.Print(stream);
@@ -19,7 +19,7 @@ void PlayerInfo::Print(std::ostream &stream) {
     stream << "}";
 }
 
-// 0x00133578
+// NTSC-U/C: 0x00133578, PAL: 0x00133de0
 void PlayerInfo::Save(OBStream &stream) {
     unsigned playerId = mPlayerId;
     stream.Write(&playerId, sizeof(playerId));
@@ -49,7 +49,7 @@ void PlayerInfo::Save(OBStream &stream) {
     }
 }
 
-// 0x00133740
+// NTSC-U/C: 0x00133740, PAL: 0x00133fa8
 void PlayerInfo::Load(IBStream &stream) {
     stream.Read(&mPlayerId, sizeof(mPlayerId));
 

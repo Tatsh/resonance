@@ -47,25 +47,25 @@ inline PitchPicker::NoteMapping MakeMapping(unsigned char nNote, unsigned char n
 
 } // namespace
 
-// 0x001c29c8
+// NTSC-U/C: 0x001c29c8, PAL: 0x001c8810
 PitchPicker::PitchPicker(const TrackData *pTrackData)
     : mTrackData(pTrackData), mAxis(kAxisCenter), mSustainTick(kNoSustainTick), mRiffLow(kMiddleC),
       mRiffHigh(kMiddleC), mTrack(pTrackData->mIndex), mPlayer(&g_nullPlayer) {
 }
 
-// 0x001c2c60
+// NTSC-U/C: 0x001c2c60, PAL: 0x001c8aa8
 void PitchPicker::FindRiffRange(MultiMuseMsg *pMsg) {
     RiffRangeFinder finder(pMsg->mMuse, &mRiffLow, &mRiffHigh);
 }
 
-// 0x001c2d40
+// NTSC-U/C: 0x001c2d40, PAL: 0x001c8b88
 void PitchPicker::PostSustainNoteMsg(SustainNoteMsg *pMsg) {
     mSustainTick.mTick = pMsg->mTick; // The tick is stored without the finiteness check.
     SustainNoteMsg sustain(pMsg->mTick, GetSustainPitch(pMsg->mTick, pMsg->mNote));
     Send(&sustain);
 }
 
-// 0x001c2dd0
+// NTSC-U/C: 0x001c2dd0, PAL: 0x001c8c18
 void PitchPicker::PostNoteOn(int nTick,
                              unsigned char nStatus,
                              unsigned char nNote,
@@ -78,7 +78,7 @@ void PitchPicker::PostNoteOn(int nTick,
     Send(&msg);
 }
 
-// 0x001c2f08
+// NTSC-U/C: 0x001c2f08, PAL: 0x001c8d50
 void PitchPicker::PostNoteOff(int nTick, unsigned char nStatus, unsigned char nNote) {
     if (nTick != mSustainTick.mTick) {
         mSustainNotes.clear();
@@ -94,7 +94,7 @@ void PitchPicker::PostNoteOff(int nTick, unsigned char nStatus, unsigned char nN
     }
 }
 
-// 0x001c3060
+// NTSC-U/C: 0x001c3060, PAL: 0x001c8ea8
 unsigned char PitchPicker::GetSustainPitch(int nTick, unsigned char nNote) {
     for (std::vector<NoteMapping>::iterator it = mSustainNotes.begin(); it != mSustainNotes.end();
          ++it) {
@@ -108,7 +108,7 @@ unsigned char PitchPicker::GetSustainPitch(int nTick, unsigned char nNote) {
     return nPitch;
 }
 
-// 0x001c3130
+// NTSC-U/C: 0x001c3130, PAL: 0x001c8f78
 void PitchPicker::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwMultiMuseMsgType)) {
@@ -130,7 +130,7 @@ void PitchPicker::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x001c43b0
+// NTSC-U/C: 0x001c43b0, PAL: 0x001ca1f8
 void PitchPicker::OnStdMidi(StdMidiMsg *pMsg) {
     const unsigned char nStatus = pMsg->mStatus;
     switch (nStatus & kStatusKindMask) {
@@ -146,7 +146,7 @@ void PitchPicker::OnStdMidi(StdMidiMsg *pMsg) {
     }
 }
 
-// 0x001c4488
+// NTSC-U/C: 0x001c4488, PAL: 0x001ca2d0
 unsigned char PitchPicker::PickPitch(int nTick, unsigned char nNote) {
     Harmony *pHarmony = mTrackData->GetHarmony(nTick);
     if (pHarmony == nullptr) {

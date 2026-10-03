@@ -25,57 +25,57 @@ constexpr char kLocalText[] = " local}";
 
 } // namespace
 
-// 0x0012f5c0
+// NTSC-U/C: 0x0012f5c0, PAL: 0x0012fd78
 Player::Player(int nId, const HxStr &colorName, const FreqAppearance *pAppearance)
     : IDable<Player>(nId), mPlayerId(nId), mColorName(colorName), mAppearance(pAppearance),
       mJuice(0), mMaxJuice(kInitialCeiling), mScore(0), mMaxScore(kInitialCeiling),
       mLastEraseTime(0) {
 }
 
-// 0x00132c20
+// NTSC-U/C: 0x00132c20, PAL: 0x00133460
 int Player::GetInputSlot() {
     return -1;
 }
 
-// 0x00132c60
+// NTSC-U/C: 0x00132c60, PAL: 0x001334a0
 int Player::IsNull() {
     return 0;
 }
 
-// 0x00132c98
+// NTSC-U/C: 0x00132c98, PAL: 0x001334d8
 int Player::GetTrack() {
     return -1;
 }
 
-// 0x00132ca0
+// NTSC-U/C: 0x00132ca0, PAL: 0x001334e0
 int Player::GetPlace() {
     return 0;
 }
 
-// 0x00132ca8
+// NTSC-U/C: 0x00132ca8, PAL: 0x001334e8
 int Player::UnusedQuery() {
     return 0;
 }
 
-// 0x00132cb0
+// NTSC-U/C: 0x00132cb0, PAL: 0x001334f0
 void Player::UnusedHook() {
 }
 
-// 0x00132cb8
+// NTSC-U/C: 0x00132cb8, PAL: 0x001334f8
 void Player::SetFreestyleSpan(int, int) {
 }
 
-// 0x00132cc0
+// NTSC-U/C: 0x00132cc0, PAL: 0x00133500
 int Player::IsFreestyleBar(int) {
     return 0;
 }
 
-// 0x00132cc8
+// NTSC-U/C: 0x00132cc8, PAL: 0x00133508
 int Player::IsLooping() {
     return 0;
 }
 
-// 0x0012f788
+// NTSC-U/C: 0x0012f788, PAL: 0x0012ff40
 void Player::AnnounceState() {
     JuiceAmountMsg message;
     message.mPlayer = this;
@@ -84,11 +84,11 @@ void Player::AnnounceState() {
     Send(&message);
 }
 
-// 0x00132d30
+// NTSC-U/C: 0x00132d30, PAL: 0x00133570
 void Player::DeactivatePlacer() {
 }
 
-// 0x00133110
+// NTSC-U/C: 0x00133110, PAL: 0x00133960
 void Player::Print(std::ostream &stream) {
     if (IsNull() != 0) {
         stream << kNullText;
@@ -103,66 +103,66 @@ void Player::Print(std::ostream &stream) {
     }
 }
 
-// 0x00132d70
+// NTSC-U/C: 0x00132d70, PAL: 0x001335b0
 int Player::CountCaughtGem() {
     // The image leaves the return register untouched here, so the value is indeterminate.
     return 0;
 }
 
-// 0x00132d78
+// NTSC-U/C: 0x00132d78, PAL: 0x001335b8
 int Player::CountMissedGem() {
     // The image leaves the return register untouched here, so the value is indeterminate.
     return 0;
 }
 
-// 0x00132d80
+// NTSC-U/C: 0x00132d80, PAL: 0x001335c0
 int Player::GetMultiplier(int) {
     return 1;
 }
 
-// 0x00132d88
+// NTSC-U/C: 0x00132d88, PAL: 0x001335c8
 int Player::GetBestStreak() {
     return 0;
 }
 
-// 0x00132d90
+// NTSC-U/C: 0x00132d90, PAL: 0x001335d0
 float Player::GetCaptureRatio() {
     return 0.0f;
 }
 
-// 0x00132da0
+// NTSC-U/C: 0x00132da0, PAL: 0x001335e0
 int Player::GetGameMode() {
     return 0;
 }
 
-// 0x00132db0
+// NTSC-U/C: 0x00132db0, PAL: 0x001335f0
 int Player::MarkBarScored(int) {
     return 1;
 }
 
-// 0x001330e0
+// NTSC-U/C: 0x001330e0, PAL: 0x00133930
 int Player::GetScore() {
     return mScore;
 }
 
-// 0x001330f8
+// NTSC-U/C: 0x001330f8, PAL: 0x00133948
 int Player::GetJuice() {
     return mJuice;
 }
 
-// 0x001330e8
+// NTSC-U/C: 0x001330e8, PAL: 0x00133938
 void Player::SetScore(int nScore, int nMaxScore) {
     mMaxScore = nMaxScore;
     mScore = nScore;
 }
 
-// 0x00133100
+// NTSC-U/C: 0x00133100, PAL: 0x00133950
 void Player::SetJuice(int nJuice, int nMaxJuice) {
     mMaxJuice = nMaxJuice;
     mJuice = nJuice;
 }
 
-// 0x0012f808
+// NTSC-U/C: 0x0012f808, PAL: 0x0012ffc0
 void Player::AddScore(int nDelta, int bNotify) {
     const int nOldScore = mScore;
     mScore = std::max(0, std::min(mScore + nDelta, mMaxScore));
@@ -182,13 +182,13 @@ void Player::AddScore(int nDelta, int bNotify) {
     }
 }
 
-// 0x001331c8
+// NTSC-U/C: 0x001331c8, PAL: 0x00133a18
 void Player::AwardCapture(PhraseCapturedMsg *pMsg) {
     AddScore(pMsg->mScore, 1);
     AddJuice(pMsg->mJuice, 1);
 }
 
-// 0x0012f970
+// NTSC-U/C: 0x0012f970, PAL: 0x00130128
 void Player::AddJuice(int nAmount, int bNotify) {
     const int nOldJuice = mJuice;
     mJuice = std::max(0, std::min(mJuice + nAmount, mMaxJuice));
@@ -207,37 +207,37 @@ void Player::AddJuice(int nAmount, int bNotify) {
     }
 }
 
-// 0x00132ae8
+// NTSC-U/C: 0x00132ae8, PAL: 0x00133318
 Player::~Player() {
 }
 
-// 0x00132c68
+// NTSC-U/C: 0x00132c68, PAL: 0x001334a8
 // The out-of-line copy.
 inline HxStr Player::GetColorName() {
     return mColorName;
 }
 
-// 0x001330a8
+// NTSC-U/C: 0x001330a8, PAL: 0x001338f8
 // The out-of-line copy.
 inline HxStr Player::GetUsername() {
     return mAppearance->mUserName;
 }
 
-// 0x00132cd0
+// NTSC-U/C: 0x00132cd0, PAL: 0x00133510
 // The out-of-line copy.
 int Player::CallAnnounceState() {
     AnnounceState();
     return 0;
 }
 
-// 0x00132d00
+// NTSC-U/C: 0x00132d00, PAL: 0x00133540
 // The out-of-line copy.
 int Player::CallDeactivatePlacer() {
     DeactivatePlacer();
     return 0;
 }
 
-// 0x00133210
+// NTSC-U/C: 0x00133210, PAL: 0x00133a60
 // The out-of-line copy.
 inline void Player::OnUpdateScore(UpdateScorePacket *pPacket) {
     if (pPacket->mPlayerId == mPlayerId) {
@@ -245,7 +245,7 @@ inline void Player::OnUpdateScore(UpdateScorePacket *pPacket) {
     }
 }
 
-// 0x00133240
+// NTSC-U/C: 0x00133240, PAL: 0x00133a90
 void Player::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nUpdateScorePacketType) {

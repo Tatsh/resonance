@@ -18,7 +18,7 @@ constexpr int kNoPowerbar = -1;
 
 } // namespace
 
-// 0x001b19b0
+// NTSC-U/C: 0x001b19b0, PAL: 0x001b7770
 SingleCatcher::SingleCatcher(PhraseMgr *pPhraseMgr,
                              Quantizer *pQuantizer,
                              const TrackData *pTrackData,
@@ -28,11 +28,11 @@ SingleCatcher::SingleCatcher(PhraseMgr *pPhraseMgr,
       mLastStep(Application::shared()->GetPlayMap()->mSteps.back()) {
 }
 
-// 0x001b0d30
+// NTSC-U/C: 0x001b0d30, PAL: 0x001b6ae0
 SingleCatcher::~SingleCatcher() {
 }
 
-// 0x001ad630
+// NTSC-U/C: 0x001ad630, PAL: 0x001b3398
 void SingleCatcher::CapturePhrase(int nBar, int nRun, int nAutoCatch) {
     const int nRunEnd = nBar + 1;
     const int nStepStart = mTrackData->StepStartBar(nBar);
@@ -60,7 +60,7 @@ void SingleCatcher::CapturePhrase(int nBar, int nRun, int nAutoCatch) {
     Send(&section);
 }
 
-// 0x001ad840
+// NTSC-U/C: 0x001ad840, PAL: 0x001b35a8
 void SingleCatcher::ReportCaughtPowerbar(int nBar) {
     const int nPowerbar = mPhraseMgr->GetPowerbar(nBar);
     if (nPowerbar == kNoPowerbar) {
@@ -74,7 +74,7 @@ void SingleCatcher::ReportCaughtPowerbar(int nBar) {
     mPlayer->Handle(&msg);
 }
 
-// 0x001b1a40
+// NTSC-U/C: 0x001b1a40, PAL: 0x001b7800
 void SingleCatcher::ResetOwners(int, Player *pPlayer) {
     mPhraseMgr->ResetOwners(pPlayer);
 }

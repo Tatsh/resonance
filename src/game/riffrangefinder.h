@@ -25,7 +25,8 @@ public:
      * @param pMuse The sequence.
      * @param pLow Receives the lowest note number.
      * @param pHigh Receives the highest note number.
-     * @ghidraAddress 0x001c42b0
+     * @ghidraAddress NTSC-U/C: 0x001c42b0
+     * @ghidraAddress PAL: 0x001ca0f8
      */
     RiffRangeFinder(MultiMuse *pMuse, int *pLow, int *pHigh) : mLow(kHighestNote), mHigh(0) {
         for (const auto &entry : pMuse->mEntries) {
@@ -41,7 +42,8 @@ public:
      * Every other message is ignored.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001c4538
+     * @ghidraAddress NTSC-U/C: 0x001c4538
+     * @ghidraAddress PAL: 0x001ca380
      */
     virtual void HandleMessage(Message *pMsg);
 

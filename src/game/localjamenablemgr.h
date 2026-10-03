@@ -23,7 +23,8 @@ public:
      *
      * The out-of-line copy has no caller, and the two factories expand the body.
      *
-     * @ghidraAddress 0x00105838
+     * @ghidraAddress NTSC-U/C: 0x00105838
+     * @ghidraAddress PAL: 0x00105838
      */
     LocalJamEnableMgr();
 
@@ -34,7 +35,8 @@ public:
      * The body is identical to CreateLocal(). The title is inferred.
      *
      * @return The new policy.
-     * @ghidraAddress 0x001025f0
+     * @ghidraAddress NTSC-U/C: 0x001025f0
+     * @ghidraAddress PAL: 0x001025f0
      */
     static LocalJamEnableMgr *CreateSolo();
 
@@ -45,7 +47,8 @@ public:
      * kPlayModeGame. The title is inferred.
      *
      * @return The new policy.
-     * @ghidraAddress 0x001026c0
+     * @ghidraAddress NTSC-U/C: 0x001026c0
+     * @ghidraAddress PAL: 0x001026c0
      */
     static LocalJamEnableMgr *CreateLocal();
 
@@ -55,7 +58,8 @@ public:
      * @param nTrack The track.
      * @param nBar The bar.
      * @param pPlayer The owner.
-     * @ghidraAddress 0x00105830
+     * @ghidraAddress NTSC-U/C: 0x00105830
+     * @ghidraAddress PAL: 0x00105830
      */
     virtual void SetBarOwner(int nTrack, int nBar, Player *pPlayer);
 
@@ -69,7 +73,8 @@ public:
      * @param nTrack The track.
      * @param nBar The bar.
      * @return Non-zero when the bar may be caught.
-     * @ghidraAddress 0x00102488
+     * @ghidraAddress NTSC-U/C: 0x00102488
+     * @ghidraAddress PAL: 0x00102488
      */
     virtual int QueryBar(int nTrack, int nBar);
 

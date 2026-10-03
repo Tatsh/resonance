@@ -36,28 +36,28 @@ inline int AdjustRiffTick(int nTick) {
 
 } // namespace
 
-// 0x001ceb70
+// NTSC-U/C: 0x001ceb70, PAL: 0x001d4a28
 void *Riff::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, "Riff");
 }
 
-// 0x001ceb90
+// NTSC-U/C: 0x001ceb90, PAL: 0x001d4a48
 void Riff::operator delete(void *pBlock) {
     FreeTaggedMemory(pBlock, "Riff");
 }
 
-// 0x001cebb0
+// NTSC-U/C: 0x001cebb0, PAL: 0x001d4a68
 Riff::Riff(int nId) : mLength(0) {
     mId = nId;
 }
 
-// 0x001cec58
+// NTSC-U/C: 0x001cec58, PAL: 0x001d4b10
 void Riff::Print(std::ostream &stream) {
     stream << "riff[id=" << mId << "]";
     MultiMuse::Print(stream);
 }
 
-// 0x001ce778
+// NTSC-U/C: 0x001ce778, PAL: 0x001d4630
 void Riff::AddNoteMsg(
     int nTick, unsigned char nNote, unsigned char nVelocity, int nLength, unsigned char nChannel) {
     const int nAdjusted = AdjustRiffTick(nTick);
@@ -68,7 +68,7 @@ void Riff::AddNoteMsg(
     Add(&msg, nAdjusted, kCheckLast);
 }
 
-// 0x001ce8d0
+// NTSC-U/C: 0x001ce8d0, PAL: 0x001d4788
 void Riff::AddMidiMsg(int nTick,
                       unsigned char nStatus,
                       unsigned char nData1,

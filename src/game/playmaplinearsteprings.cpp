@@ -11,7 +11,7 @@ constexpr int kNoStep = -1;
 
 } // namespace
 
-// 0x00128410
+// NTSC-U/C: 0x00128410, PAL: 0x00128b40
 void PlayMapLinear::LoadStepRings() {
     for (int nSet = 0; nSet < kSetCount; ++nSet) {
         Py::Sequence rings(EvalScriptTemplate(kStepRingTemplate, nSet));

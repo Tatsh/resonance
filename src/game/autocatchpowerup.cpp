@@ -18,7 +18,7 @@ constexpr int kAutocatchBars = 4;
 
 } // namespace
 
-// 0x001c95b0
+// NTSC-U/C: 0x001c95b0, PAL: 0x001cf450
 int AutocatchPowerup::Deploy(int nTrack, int nBar, Player *pPlayer, int) {
     const int nBarCount =
         (pPlayer->GetGameMode() == kSingleBarPlayer) ? kSingleBar : kAutocatchBars;
@@ -52,7 +52,7 @@ int AutocatchPowerup::Deploy(int nTrack, int nBar, Player *pPlayer, int) {
     return bCaught;
 }
 
-// 0x001c95a8
+// NTSC-U/C: 0x001c95a8, PAL: 0x001cf448
 int AutocatchPowerup::Type() {
     return kHudItemAutocatcher;
 }

@@ -26,11 +26,15 @@ public:
     /**
      * Start with nothing collected.
      *
-     * @ghidraAddress 0x001a6888
+     * @ghidraAddress NTSC-U/C: 0x001a6888
+     * @ghidraAddress PAL: 0x001ac5f0
      */
     MidiChase();
 
-    /** @ghidraAddress 0x001a67d8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001a67d8
+     * @ghidraAddress PAL: 0x001ac540
+     */
     virtual ~MidiChase();
 
     /**
@@ -40,7 +44,8 @@ public:
      * Every other message is ignored.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001a6660
+     * @ghidraAddress NTSC-U/C: 0x001a6660
+     * @ghidraAddress PAL: 0x001ac3c8
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -51,7 +56,8 @@ public:
      *
      * @param pBegin The first message.
      * @param pEnd One past the last message.
-     * @ghidraAddress 0x001a6900
+     * @ghidraAddress NTSC-U/C: 0x001a6900
+     * @ghidraAddress PAL: 0x001ac668
      */
     void HandleRange(const TickObj<MuseMsg *> *pBegin, const TickObj<MuseMsg *> *pEnd);
 
@@ -63,7 +69,8 @@ public:
      * The title is inferred.
      *
      * @param pSink The sink.
-     * @ghidraAddress 0x001a6488
+     * @ghidraAddress NTSC-U/C: 0x001a6488
+     * @ghidraAddress PAL: 0x001ac1f0
      */
     void Replay(MsgSink *pSink);
 

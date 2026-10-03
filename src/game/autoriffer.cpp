@@ -49,17 +49,17 @@ public:
     Cmd(AutoRiffer *pOwner, int nTick) : mOwner(pOwner), mTick(nTick) {
     }
 
-    // 0x0019a838
+    // NTSC-U/C: 0x0019a838, PAL: 0x001a05a0
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x0019a848
+    // NTSC-U/C: 0x0019a848, PAL: 0x001a05b0
     virtual void Execute() {
         mOwner->OnCommand(mTick);
     }
 
-    // 0x0019a868
+    // NTSC-U/C: 0x0019a868, PAL: 0x001a05d0
     virtual void Print(std::ostream &stream) {
         stream << "{AutoRiffer}";
     }
@@ -76,7 +76,7 @@ int Cmd::sCmdID;
 
 } // namespace
 
-// 0x00199040
+// NTSC-U/C: 0x00199040, PAL: 0x0019eda8
 AutoRiffer::AutoRiffer(Sch::TickClock *pClock, Quantizer *pQuantizer, const TrackData *pTrackData)
     : mTrack(pTrackData->mIndex), mQuantizer(pQuantizer), mTrackData(pTrackData),
       mCurrentRiff(nullptr), mClock(pClock), mSynth(nullptr), mPhraseMaker(nullptr),
@@ -85,7 +85,7 @@ AutoRiffer::AutoRiffer(Sch::TickClock *pClock, Quantizer *pQuantizer, const Trac
     std::memset(mLevelHeld, 0, sizeof(mLevelHeld));
 }
 
-// 0x00199160
+// NTSC-U/C: 0x00199160, PAL: 0x0019eec8
 void AutoRiffer::OnPitchRiff(PitchRiffMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -118,7 +118,7 @@ void AutoRiffer::OnPitchRiff(PitchRiffMsg *pMsg) {
     mSource.Send(&press);
 }
 
-// 0x001992e0
+// NTSC-U/C: 0x001992e0, PAL: 0x0019f048
 void AutoRiffer::OnStopRiff(StopRiffMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -151,7 +151,7 @@ void AutoRiffer::OnStopRiff(StopRiffMsg *pMsg) {
     mSource.Send(&release);
 }
 
-// 0x00199480
+// NTSC-U/C: 0x00199480, PAL: 0x0019f1e8
 void AutoRiffer::OnErase(EraseMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -169,7 +169,7 @@ void AutoRiffer::OnErase(EraseMsg *pMsg) {
     mPhraseMaker->Erase(pMsg->mPlayer, pMsg->mPosition.mTick, pMsg->mDoubleTap);
 }
 
-// 0x00199590
+// NTSC-U/C: 0x00199590, PAL: 0x0019f2f8
 void AutoRiffer::StopRiff(int nTick) {
     if (mCurrentRiff == nullptr) {
         return;
@@ -185,7 +185,7 @@ void AutoRiffer::StopRiff(int nTick) {
     mSource.Send(&release);
 }
 
-// 0x00199688
+// NTSC-U/C: 0x00199688, PAL: 0x0019f3f0
 void AutoRiffer::OnCommand(int nTick) {
     if (mPhraseMaker->IsBarPlayable(nTick / Mid::MBT(kBarTicks).mTick) == 1) {
         PlayRiff(nTick);
@@ -195,7 +195,7 @@ void AutoRiffer::OnCommand(int nTick) {
     mSource.Send(&release);
 }
 
-// 0x00199758
+// NTSC-U/C: 0x00199758, PAL: 0x0019f4c0
 void AutoRiffer::PlayRiff(int nTick) {
     AllNotesOffMsg notesOff;
     mSynth->Handle(&notesOff);
@@ -217,7 +217,7 @@ void AutoRiffer::PlayRiff(int nTick) {
     }
 }
 
-// 0x00199910
+// NTSC-U/C: 0x00199910, PAL: 0x0019f678
 void AutoRiffer::HandleMessage(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nPitchRiffMsgType) {
@@ -249,16 +249,16 @@ void AutoRiffer::HandleMessage(Message *pMsg) {
     }
 }
 
-// 0x0019a3d0
+// NTSC-U/C: 0x0019a3d0, PAL: 0x001a0138
 AutoRiffer::~AutoRiffer() {
 }
 
-// 0x0019a508
+// NTSC-U/C: 0x0019a508, PAL: 0x001a0270
 void AutoRiffer::AddSink(MsgSink *pSink) {
     mSource.AddSink(pSink);
 }
 
-// 0x0019a898
+// NTSC-U/C: 0x0019a898, PAL: 0x001a0600
 void AutoRiffer::OnTrackSelect(TrackSelectMsg *pMsg) {
     if (pMsg->mTrack != mTrack || pMsg->mPlace != 0) {
         return;
@@ -270,7 +270,7 @@ void AutoRiffer::OnTrackSelect(TrackSelectMsg *pMsg) {
     mPlayer = pPlayer;
 }
 
-// 0x0019a920
+// NTSC-U/C: 0x0019a920, PAL: 0x001a0688
 void AutoRiffer::OnGameOver() {
     StopRiff(Mid::MBT(0).mTick);
 }

@@ -32,7 +32,7 @@ constexpr int kInitialLevel = 1;
 
 } // namespace
 
-// 0x00406200
+// NTSC-U/C: 0x00406200, PAL: 0x0043fb20
 MultiScreenAnim::MultiScreenAnim(const std::vector<TnlArena::ScreenMesh> *pScreens,
                                  const std::vector<TnlArena::PlayerMaterial *> *pPlayerMaterials)
     : mScreens(pScreens), mPlayerMaterials(pPlayerMaterials), mPeriod(kStepPeriod),
@@ -41,11 +41,11 @@ MultiScreenAnim::MultiScreenAnim(const std::vector<TnlArena::ScreenMesh> *pScree
     CallScriptTemplate(kLevelScriptTemplate, kInitialLevel);
 }
 
-// 0x0040c568
+// NTSC-U/C: 0x0040c568, PAL: 0x00445f90
 MultiScreenAnim::~MultiScreenAnim() {
 }
 
-// 0x00406570
+// NTSC-U/C: 0x00406570, PAL: 0x0043fe90
 void MultiScreenAnim::SetFrame(float flFrame) {
     if (mLeaderMats.size() == 0) {
         return;
@@ -73,7 +73,7 @@ void MultiScreenAnim::SetFrame(float flFrame) {
     }
 }
 
-// 0x00406428
+// NTSC-U/C: 0x00406428, PAL: 0x0043fd48
 void MultiScreenAnim::UpdateLeaders() {
     mLeaderMats.erase(mLeaderMats.begin(), mLeaderMats.end());
 

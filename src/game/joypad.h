@@ -23,14 +23,16 @@ public:
      * Claim slot nIndex.
      *
      * @param nIndex The slot, from 0.
-     * @ghidraAddress 0x004ec2b8
+     * @ghidraAddress NTSC-U/C: 0x004ec2b8
+     * @ghidraAddress PAL: 0x0052ae40
      */
     explicit Joypad(int nIndex);
 
     /**
      * Release the slot.
      *
-     * @ghidraAddress 0x004ec458
+     * @ghidraAddress NTSC-U/C: 0x004ec458
+     * @ghidraAddress PAL: 0x0052afe0
      */
     ~Joypad();
 
@@ -45,7 +47,8 @@ public:
      * @param pAxis2 Receives the third analog byte, or null.
      * @param pAxis3 Receives the fourth analog byte, or null.
      * @return PadRecord::Read()'s result.
-     * @ghidraAddress 0x004ecaf8
+     * @ghidraAddress NTSC-U/C: 0x004ecaf8
+     * @ghidraAddress PAL: 0x0052b680
      */
     int Read(unsigned int *pButtons,
              unsigned char *pAxis0,
@@ -59,7 +62,8 @@ public:
      * Clears PadRecord::mPhase and PadRecord::mReadyLevel. InputPoller::ResetJoypads() is the
      * caller, expanded inline in InputPoller::FindJoypadConnections(). The title is inferred.
      *
-     * @ghidraAddress 0x004ecb30
+     * @ghidraAddress NTSC-U/C: 0x004ecb30
+     * @ghidraAddress PAL: 0x0052b6d8
      */
     void Reset();
 
@@ -71,7 +75,8 @@ public:
      * @param nPort The port, from 0.
      * @param nSlot The multitap slot, from 0.
      * @param nDeadZone The analog dead zone, passed through.
-     * @ghidraAddress 0x004ecb60
+     * @ghidraAddress NTSC-U/C: 0x004ecb60
+     * @ghidraAddress PAL: 0x0052b708
      */
     void Open(int nPort, int nSlot, int nDeadZone);
 
@@ -80,7 +85,8 @@ public:
      *
      * InputPoller::Shutdown() is the caller. The title is inferred.
      *
-     * @ghidraAddress 0x004ecb90
+     * @ghidraAddress NTSC-U/C: 0x004ecb90
+     * @ghidraAddress PAL: 0x0052b738
      */
     void Close();
 
@@ -91,7 +97,8 @@ public:
      *
      * @param nSmallMotor Positive to run the small motor.
      * @param nBigMotor The big motor's level.
-     * @ghidraAddress 0x004ecbc8
+     * @ghidraAddress NTSC-U/C: 0x004ecbc8
+     * @ghidraAddress PAL: 0x0052b770
      */
     void SetVibration(int nSmallMotor, int nBigMotor);
 
@@ -101,9 +108,21 @@ public:
      * InputPoller::NumberConnectedJoypads() is the caller. The title is inferred.
      *
      * @return 1 unless scePadGetState() reports the slot disconnected or closed, else 0.
-     * @ghidraAddress 0x004ecbf8
+     * @ghidraAddress NTSC-U/C: 0x004ecbf8
+     * @ghidraAddress PAL: 0x0052b7a0
      */
     int IsConnected();
+
+#ifdef VIDEO_STANDARD_PAL
+    /**
+     * Shut libpad down through PadRecord::EndLibrary().
+     *
+     * Only the European release has the routine, and it has no caller. The title is inferred.
+     *
+     * @ghidraAddress PAL: 0x0052b6b8
+     */
+    static void EndLibrary();
+#endif
 
 private:
     int mIndex; // +0x00

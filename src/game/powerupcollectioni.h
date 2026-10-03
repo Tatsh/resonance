@@ -28,12 +28,14 @@
 class PowerupCollectionI : public MsgSource {
 public:
     /**
-     * @ghidraAddress 0x001cc7d0
+     * @ghidraAddress NTSC-U/C: 0x001cc7d0
+     * @ghidraAddress PAL: 0x001d2688
      */
     PowerupCollectionI();
 
     /**
-     * @ghidraAddress 0x001cca90
+     * @ghidraAddress NTSC-U/C: 0x001cca90
+     * @ghidraAddress PAL: 0x001d2948
      */
     virtual ~PowerupCollectionI();
 
@@ -43,7 +45,8 @@ public:
      * Slot 4, and an empty default.
      *
      * @param nType The kind, as Powerup::Type() reports it.
-     * @ghidraAddress 0x001ccb40
+     * @ghidraAddress NTSC-U/C: 0x001ccb40
+     * @ghidraAddress PAL: 0x001d29f8
      */
     virtual void AddPowerup(int nType);
 
@@ -54,7 +57,8 @@ public:
      * powerup arrives with nothing selected.
      *
      * @param nDelta The step, which the one implementation applies as an addition.
-     * @ghidraAddress 0x001ccb48
+     * @ghidraAddress NTSC-U/C: 0x001ccb48
+     * @ghidraAddress PAL: 0x001d2a00
      */
     virtual void SelectRelative(int nDelta);
 
@@ -64,7 +68,8 @@ public:
      * Slot 6, and an empty default.
      *
      * @param nIndex The entry, or -1 for none.
-     * @ghidraAddress 0x001ccb50
+     * @ghidraAddress NTSC-U/C: 0x001ccb50
+     * @ghidraAddress PAL: 0x001d2a08
      */
     virtual void Select(int nIndex);
 
@@ -78,7 +83,8 @@ public:
      * @param nTrack Whatever Player::GetTrack() reports for the deploying player, its track. The
      *               default in Player returns -1.
      * @param nBar The current bar, as the song tick divided by 1920.
-     * @ghidraAddress 0x001ccb58
+     * @ghidraAddress NTSC-U/C: 0x001ccb58
+     * @ghidraAddress PAL: 0x001d2a10
      */
     virtual void Deploy(int nTrack, int nBar);
 
@@ -90,7 +96,8 @@ public:
      * from the two implementations, which both compute a truth value into the register.
      *
      * @return Non-zero once an entry is selected.
-     * @ghidraAddress 0x001ccb60
+     * @ghidraAddress NTSC-U/C: 0x001ccb60
+     * @ghidraAddress PAL: 0x001d2a18
      */
     virtual int HasSelection();
 
@@ -99,7 +106,8 @@ public:
      *
      * Slot 9, and an empty default.
      *
-     * @ghidraAddress 0x001ccb68
+     * @ghidraAddress NTSC-U/C: 0x001ccb68
+     * @ghidraAddress PAL: 0x001d2a20
      */
     virtual void AnnounceState();
 };

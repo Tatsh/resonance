@@ -30,12 +30,14 @@ public:
      * which the compiler generates, so the written body is empty. mStage is not among the
      * members it initialises.
      *
-     * @ghidraAddress 0x001448b8
+     * @ghidraAddress NTSC-U/C: 0x001448b8
+     * @ghidraAddress PAL: 0x001453b8
      */
     LevelStats();
 
     /**
-     * @ghidraAddress 0x001424e8
+     * @ghidraAddress NTSC-U/C: 0x001424e8
+     * @ghidraAddress PAL: 0x00142fd8
      */
     virtual ~LevelStats();
 
@@ -47,7 +49,8 @@ public:
      * null buffer.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00142760
+     * @ghidraAddress NTSC-U/C: 0x00142760
+     * @ghidraAddress PAL: 0x00143260
      */
     virtual void Save(OBStream &stream);
 
@@ -61,7 +64,8 @@ public:
      * nothing.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00142880
+     * @ghidraAddress NTSC-U/C: 0x00142880
+     * @ghidraAddress PAL: 0x00143380
      */
     virtual void Load(IBStream &stream);
 
@@ -71,7 +75,8 @@ public:
      * CampaignStats::RebuildLevelList() and MergeLevelList() run it on the record they append.
      * The title is inferred.
      *
-     * @ghidraAddress 0x00142610
+     * @ghidraAddress NTSC-U/C: 0x00142610
+     * @ghidraAddress PAL: 0x00143110
      */
     void Reset();
 
@@ -83,7 +88,8 @@ public:
      * return value, so it is not an assignment operator. The title is inferred.
      *
      * @param other The record to copy.
-     * @ghidraAddress 0x00142d70
+     * @ghidraAddress NTSC-U/C: 0x00142d70
+     * @ghidraAddress PAL: 0x00143870
      */
     void Assign(const LevelStats &other);
 
@@ -94,7 +100,8 @@ public:
      * inferred.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001452f0
+     * @ghidraAddress NTSC-U/C: 0x001452f0
+     * @ghidraAddress PAL: 0x00145e08
      */
     void Print(std::ostream &stream) const;
 

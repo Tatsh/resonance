@@ -26,7 +26,8 @@ class AxeNewGemMaker : public MsgSink, public MsgSource {
 public:
     /**
      * @param pTrackData The track description. The constructor copies its track and retains it.
-     * @ghidraAddress 0x001a2da0
+     * @ghidraAddress NTSC-U/C: 0x001a2da0
+     * @ghidraAddress PAL: 0x001a8b08
      */
     explicit AxeNewGemMaker(const TrackData *pTrackData);
 
@@ -38,7 +39,8 @@ public:
      * and a StdMidiMsg goes to PostGemMessages().
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001a46e0
+     * @ghidraAddress NTSC-U/C: 0x001a46e0
+     * @ghidraAddress PAL: 0x001aa448
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -47,7 +49,7 @@ private:
     // AxeOldGemMaker::BlendForAxis() of mValue. On controller 46, a zero value with no strip open
     // opens one under AxeOldGemMaker::NextStripId(), and a non-zero value closes the open strip
     // with a SusGemMsg whose mStop is 2.
-    // 0x001a2f18
+    // NTSC-U/C: 0x001a2f18, PAL: 0x001a8c80
     void PostGemMessages(StdMidiMsg *pMsg);
 
     int mTrack;                  // +0x18, copied from TrackData::mIndex

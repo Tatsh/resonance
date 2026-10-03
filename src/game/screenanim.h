@@ -13,7 +13,10 @@
  */
 class ScreenAnim {
 public:
-    /** @ghidraAddress 0x0040c520 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0040c520
+     * @ghidraAddress PAL: 0x00445f48
+     */
     virtual ~ScreenAnim();
 
     /**
@@ -22,7 +25,8 @@ public:
      * Slot 2. The base implementation does nothing.
      *
      * @param flFrame The song position, in MIDI ticks.
-     * @ghidraAddress 0x0040c550
+     * @ghidraAddress NTSC-U/C: 0x0040c550
+     * @ghidraAddress PAL: 0x00445f78
      */
     virtual void SetFrame(float flFrame);
 
@@ -33,7 +37,8 @@ public:
      * destruction.
      *
      * @param nLevel The level, from 0 to 2.
-     * @ghidraAddress 0x0040c558
+     * @ghidraAddress NTSC-U/C: 0x0040c558
+     * @ghidraAddress PAL: 0x00445f80
      */
     virtual void SetLevel(int nLevel);
 
@@ -42,7 +47,8 @@ public:
      *
      * Slot 4. The base implementation does nothing. TnlArena runs it for each PointAmountMsg.
      *
-     * @ghidraAddress 0x0040c560
+     * @ghidraAddress NTSC-U/C: 0x0040c560
+     * @ghidraAddress PAL: 0x00445f88
      */
     virtual void UpdateLeaders();
 };

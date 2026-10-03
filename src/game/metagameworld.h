@@ -31,7 +31,8 @@ public:
      * Both members start null. CreateRenderer() runs next, and the detector is then allocated at
      * 8 bytes over g_metCheatSequences.
      *
-     * @ghidraAddress 0x003d3110
+     * @ghidraAddress NTSC-U/C: 0x003d3110
+     * @ghidraAddress PAL: 0x0040af90
      */
     MetaGameWorld();
 
@@ -39,7 +40,8 @@ public:
      * Release the cheat detector through its own table, then the renderer through
      * DestroyRenderer().
      *
-     * @ghidraAddress 0x003d4790
+     * @ghidraAddress NTSC-U/C: 0x003d4790
+     * @ghidraAddress PAL: 0x0040c680
      */
     virtual ~MetaGameWorld();
 
@@ -54,7 +56,8 @@ public:
      * @param nPadIndex The controller that produced the reading, from 1.
      * @param nButton The button or axis control number.
      * @param flValue The reading's value.
-     * @ghidraAddress 0x003d3288
+     * @ghidraAddress NTSC-U/C: 0x003d3288
+     * @ghidraAddress PAL: 0x0040b108
      */
     virtual void OnControllerReading(int nTag, int nPadIndex, int nButton, float flValue);
 
@@ -66,7 +69,8 @@ public:
      * byte-identical to every other two-instruction accessor of a pointer at `+0x04`.
      *
      * @return The renderer.
-     * @ghidraAddress 0x003d4858
+     * @ghidraAddress NTSC-U/C: 0x003d4858
+     * @ghidraAddress PAL: 0x0040c748
      */
     RendererBase *GetRenderer();
 
@@ -75,7 +79,8 @@ public:
      *
      * No caller is recovered.
      *
-     * @ghidraAddress 0x003d4860
+     * @ghidraAddress NTSC-U/C: 0x003d4860
+     * @ghidraAddress PAL: 0x0040c750
      */
     void StartFrontEnd();
 
@@ -85,7 +90,8 @@ public:
      * GameManagerImpl::OnBeginGameLocal(), GameManagerImpl::OnUnpauseGameSystem(), and
      * GameManagerImpl::StartPlayback() call it.
      *
-     * @ghidraAddress 0x003d4890
+     * @ghidraAddress NTSC-U/C: 0x003d4890
+     * @ghidraAddress PAL: 0x0040c780
      */
     void StopFrontEnd();
 
@@ -98,7 +104,8 @@ public:
      * Select is pressed. No caller is recovered.
      *
      * @return The word, or 0.
-     * @ghidraAddress 0x003d48c0
+     * @ghidraAddress NTSC-U/C: 0x003d48c0
+     * @ghidraAddress PAL: 0x0040c7b0
      */
     int IsAwaitingStart();
 
@@ -110,7 +117,8 @@ private:
      * RendererBase subobject lies at `+0x14`. The constructor is the one caller. GrooveWorld has
      * the routine of the same shape for the game renderer, which is where the name comes from.
      *
-     * @ghidraAddress 0x003d31c0
+     * @ghidraAddress NTSC-U/C: 0x003d31c0
+     * @ghidraAddress PAL: 0x0040b040
      */
     void CreateRenderer();
 
@@ -119,7 +127,8 @@ private:
      *
      * The destructor is the one caller.
      *
-     * @ghidraAddress 0x003d4810
+     * @ghidraAddress NTSC-U/C: 0x003d4810
+     * @ghidraAddress PAL: 0x0040c700
      */
     void DestroyRenderer();
 

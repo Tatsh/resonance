@@ -45,7 +45,8 @@ public:
         /**
          * Release the axis state.
          *
-         * @ghidraAddress 0x0011d958
+         * @ghidraAddress NTSC-U/C: 0x0011d958
+         * @ghidraAddress PAL: 0x0011dee0
          */
         ~Binding() {
             delete mState;
@@ -63,14 +64,16 @@ public:
      *
      * @param pGlobals The application globals.
      * @param pPlayers The world's player vector.
-     * @ghidraAddress 0x00119160
+     * @ghidraAddress NTSC-U/C: 0x00119160
+     * @ghidraAddress PAL: 0x001196c0
      */
     InputMap(Globals *pGlobals, std::vector<Player *> *pPlayers);
 
     /**
      * Clear g_pInputMap and release every binding.
      *
-     * @ghidraAddress 0x001193d0
+     * @ghidraAddress NTSC-U/C: 0x001193d0
+     * @ghidraAddress PAL: 0x00119930
      */
     virtual ~InputMap();
 
@@ -78,7 +81,8 @@ public:
      * Pass a RawControllerMsg to OnControllerReading() and ignore every other message.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x0011dc20
+     * @ghidraAddress NTSC-U/C: 0x0011dc20
+     * @ghidraAddress PAL: 0x0011e1a8
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -86,7 +90,8 @@ public:
      * Report the map that exists.
      *
      * @return g_pInputMap.
-     * @ghidraAddress 0x0011d9a0
+     * @ghidraAddress NTSC-U/C: 0x0011d9a0
+     * @ghidraAddress PAL: 0x0011df28
      */
     static InputMap *shared();
 
@@ -97,21 +102,24 @@ public:
      * @param nPort The one-based port.
      * @param nButton The button.
      * @return `((nDevice << 5 | nPort) << 16) | nButton`.
-     * @ghidraAddress 0x0011dc08
+     * @ghidraAddress NTSC-U/C: 0x0011dc08
+     * @ghidraAddress PAL: 0x0011e190
      */
     static int MakeKey(int nDevice, int nPort, int nButton);
 
     /**
      * Clear the enable word of every binding.
      *
-     * @ghidraAddress 0x0011db78
+     * @ghidraAddress NTSC-U/C: 0x0011db78
+     * @ghidraAddress PAL: 0x0011e100
      */
     void DisableEntries();
 
     /**
      * Set the enable word of every binding.
      *
-     * @ghidraAddress 0x0011dbc0
+     * @ghidraAddress NTSC-U/C: 0x0011dbc0
+     * @ghidraAddress PAL: 0x0011e148
      */
     void EnableEntries();
 
@@ -123,7 +131,8 @@ public:
      * @param nSlot The player slot.
      * @param nAction The action, a four-character code.
      * @param nEnabled Non-zero to enable.
-     * @ghidraAddress 0x0011db18
+     * @ghidraAddress NTSC-U/C: 0x0011db18
+     * @ghidraAddress PAL: 0x0011e0a0
      */
     void SetEnabled(int nSlot, int nAction, int nEnabled);
 
@@ -138,7 +147,8 @@ public:
      * @param nSlot The player slot.
      * @param nAction The action, a four-character code.
      * @param nExtra The action's configured argument.
-     * @ghidraAddress 0x0011a0f0
+     * @ghidraAddress NTSC-U/C: 0x0011a0f0
+     * @ghidraAddress PAL: 0x0011a650
      */
     void AddBinding(int nDevice, int nPort, int nButton, int nSlot, int nAction, int nExtra);
 
@@ -150,7 +160,8 @@ public:
      * GameOptions::mForceFeedback to the world's ForceFeedbackMgr, when the world has one.
      * GameManagerImpl::OnUnpauseGameSystem() and GrooveWorld call it. The title is inferred.
      *
-     * @ghidraAddress 0x0011a230
+     * @ghidraAddress NTSC-U/C: 0x0011a230
+     * @ghidraAddress PAL: 0x0011a790
      */
     void Rebuild();
 
@@ -159,7 +170,8 @@ public:
      *
      * Sends one StopRiffMsg per player and riff, then clears mRiffActive. The title is inferred.
      *
-     * @ghidraAddress 0x00119dd0
+     * @ghidraAddress NTSC-U/C: 0x00119dd0
+     * @ghidraAddress PAL: 0x0011a330
      */
     void StopAllRiffs();
 
@@ -185,25 +197,25 @@ private:
         kRiffCount = 3,
     };
 
-    // 0x00119518
+    // NTSC-U/C: 0x00119518, PAL: 0x00119a78
     // Turns one reading into the message its binding's action identifies, for the
     // player whose GetInputSlot() matches the binding's slot. An axis binding first quantises the
     // value to a step of -1, 0, or 1 and drops the reading unless the step changed.
     void OnControllerReading(RawControllerMsg *pMsg);
 
-    // 0x0011da68
+    // NTSC-U/C: 0x0011da68, PAL: 0x0011dff0
     void SendStopRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff);
 
-    // 0x0011d9b0
+    // NTSC-U/C: 0x0011d9b0, PAL: 0x0011df38
     // Sends a PitchRiffMsg after a Player::GetInputSlot() call whose result it discards.
     void SendPitchRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff);
 
-    // 0x00119f58
+    // NTSC-U/C: 0x00119f58, PAL: 0x0011a4b8
     // The binding equal to binding in slot, action, and argument, appended with a
     // fresh axis state for an axis action when none exists.
     std::list<Binding>::iterator FindOrAddBinding(const Binding &binding);
 
-    // 0x0011d1a0
+    // NTSC-U/C: 0x0011d1a0, PAL: 0x0011d728
     // Empties mBindingMap. The title is inferred.
     void ClearBindingMap();
 
@@ -219,6 +231,7 @@ private:
 /**
  * The map that exists, or null.
  *
- * @ghidraAddress 0x0066b6b0
+ * @ghidraAddress NTSC-U/C: 0x0066b6b0
+ * @ghidraAddress PAL: 0x006ac270
  */
 extern InputMap *g_pInputMap;

@@ -24,13 +24,15 @@ public:
      * @param pPlayer The deploying player.
      * @param nUnused Not read.
      * @return Non-zero when a catcher handled a bar.
-     * @ghidraAddress 0x001c95b0
+     * @ghidraAddress NTSC-U/C: 0x001c95b0
+     * @ghidraAddress PAL: 0x001cf450
      */
     virtual int Deploy(int nTrack, int nBar, Player *pPlayer, int nUnused);
 
     /**
      * @return kHudItemAutocatcher.
-     * @ghidraAddress 0x001c95a8
+     * @ghidraAddress NTSC-U/C: 0x001c95a8
+     * @ghidraAddress PAL: 0x001cf448
      */
     virtual int Type();
 };

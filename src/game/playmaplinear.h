@@ -33,11 +33,15 @@ public:
      * LevelBuilder's constructor passes 1, and SelfTest() passes 0.
      *
      * @param bLoadStepRings Whether to fill the partner tables from the script.
-     * @ghidraAddress 0x00127a80
+     * @ghidraAddress NTSC-U/C: 0x00127a80
+     * @ghidraAddress PAL: 0x001281a0
      */
     explicit PlayMapLinear(int bLoadStepRings);
 
-    /** @ghidraAddress 0x0012a4d8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0012a4d8
+     * @ghidraAddress PAL: 0x0012ac08
+     */
     virtual ~PlayMapLinear();
 
     /**
@@ -48,7 +52,8 @@ public:
      *
      * @param nBar The bar to map.
      * @return The mapped position.
-     * @ghidraAddress 0x0012ad58
+     * @ghidraAddress NTSC-U/C: 0x0012ad58
+     * @ghidraAddress PAL: 0x0012b490
      */
     virtual int MapBar(int nBar);
 
@@ -63,7 +68,8 @@ public:
      * @param nMin The lowest position to collect.
      * @param nEnd The position to stop below.
      * @return mFoundBars.
-     * @ghidraAddress 0x00128d08
+     * @ghidraAddress NTSC-U/C: 0x00128d08
+     * @ghidraAddress PAL: 0x00129438
      */
     virtual std::vector<int> &FindBarsPlaying(int nStart, int nMin, int nEnd);
 
@@ -76,7 +82,8 @@ public:
      * @param nPosition The position to map.
      * @param nSet The index into mStepRings.
      * @return The mapped position.
-     * @ghidraAddress 0x0012ae88
+     * @ghidraAddress NTSC-U/C: 0x0012ae88
+     * @ghidraAddress PAL: 0x0012b5c0
      */
     virtual int MapToLinkedStep(int nPosition, int nSet);
 
@@ -85,26 +92,30 @@ public:
      *
      * @return The start of the last window entry plus its section's length times its repeat count,
      *         or zero when the window is empty.
-     * @ghidraAddress 0x0012ae38
+     * @ghidraAddress NTSC-U/C: 0x0012ae38
+     * @ghidraAddress PAL: 0x0012b570
      */
     virtual int GetExtent();
 
     /**
      * @return The window end RecordPattern() recorded.
-     * @ghidraAddress 0x0012aa60
+     * @ghidraAddress NTSC-U/C: 0x0012aa60
+     * @ghidraAddress PAL: 0x0012b198
      */
     virtual int GetEndBar();
 
     /**
      * @return The number of sections in the recorded pattern.
-     * @ghidraAddress 0x0012aa68
+     * @ghidraAddress NTSC-U/C: 0x0012aa68
+     * @ghidraAddress PAL: 0x0012b1a0
      */
     virtual int GetSectionCount();
 
     /**
      * @param nIndex The index into the recorded pattern.
      * @return The section at that index.
-     * @ghidraAddress 0x0012aa80
+     * @ghidraAddress NTSC-U/C: 0x0012aa80
+     * @ghidraAddress PAL: 0x0012b1b8
      */
     virtual int GetPatternSection(int nIndex);
 
@@ -113,7 +124,8 @@ public:
      *
      * @param nBar The bar.
      * @return The window index modulo the pattern length.
-     * @ghidraAddress 0x0012af30
+     * @ghidraAddress NTSC-U/C: 0x0012af30
+     * @ghidraAddress PAL: 0x0012b668
      */
     virtual int GetPatternIndex(int nBar);
 
@@ -122,14 +134,16 @@ public:
      *
      * @param nBar The bar.
      * @return The window index plus the count of entries the trim has dropped.
-     * @ghidraAddress 0x0012afb8
+     * @ghidraAddress NTSC-U/C: 0x0012afb8
+     * @ghidraAddress PAL: 0x0012b6f0
      */
     virtual int GetAbsoluteSectionIndex(int nBar);
 
     /**
      * @param nBar The bar.
      * @return 1 when the window entry the bar falls in repeats forever, and 0 otherwise.
-     * @ghidraAddress 0x0012b028
+     * @ghidraAddress NTSC-U/C: 0x0012b028
+     * @ghidraAddress PAL: 0x0012b760
      */
     virtual int IsLooping(int nBar);
 
@@ -141,7 +155,8 @@ public:
      *
      * @param nBar The bar.
      * @return 1 when the entry was looping, and 0 otherwise.
-     * @ghidraAddress 0x00128ed8
+     * @ghidraAddress NTSC-U/C: 0x00128ed8
+     * @ghidraAddress PAL: 0x00129608
      */
     virtual int EndLoop(int nBar);
 
@@ -150,7 +165,8 @@ public:
      *
      * @param nBar The bar.
      * @return Always 1.
-     * @ghidraAddress 0x00129038
+     * @ghidraAddress NTSC-U/C: 0x00129038
+     * @ghidraAddress PAL: 0x00129768
      */
     virtual int StartLoop(int nBar);
 
@@ -159,7 +175,8 @@ public:
      *
      * @param nBar The bar.
      * @return 1 when a loop was ended, and 0 when one was started.
-     * @ghidraAddress 0x0012b0a8
+     * @ghidraAddress NTSC-U/C: 0x0012b0a8
+     * @ghidraAddress PAL: 0x0012b7e0
      */
     virtual int ToggleLoop(int nBar);
 
@@ -168,7 +185,8 @@ public:
      *
      * Slot 19.
      *
-     * @ghidraAddress 0x0012aa18
+     * @ghidraAddress NTSC-U/C: 0x0012aa18
+     * @ghidraAddress PAL: 0x0012b150
      */
     virtual void RecordPattern();
 
@@ -178,7 +196,8 @@ public:
      * LevelBuilder's constructor calls it once per value of configuration code 0x39d.
      *
      * @param nSection The index of the section's first step.
-     * @ghidraAddress 0x00128c38
+     * @ghidraAddress NTSC-U/C: 0x00128c38
+     * @ghidraAddress PAL: 0x00129368
      */
     virtual void AppendSection(int nSection);
 
@@ -189,7 +208,8 @@ public:
      * the shipped game calls it apart from the test registry.
      *
      * @return Always 1.
-     * @ghidraAddress 0x001293b0
+     * @ghidraAddress NTSC-U/C: 0x001293b0
+     * @ghidraAddress PAL: 0x00129ae0
      */
     static int SelfTest();
 
@@ -199,7 +219,8 @@ public:
      * The unit's static initialiser registers it. The integer result reaches the `hx.test`
      * command through the return register, which decides its `ok` report.
      *
-     * @ghidraAddress 0x0012b110
+     * @ghidraAddress NTSC-U/C: 0x0012b110
+     * @ghidraAddress PAL: 0x0012b848
      */
     static int RunSelfTest();
 
@@ -234,7 +255,8 @@ protected:
      * with its index, which yields a sequence of step rings. Each ring pairs every step with the
      * one after it, and the last with the first. A step is read through Py::Int.
      *
-     * @ghidraAddress 0x00128410
+     * @ghidraAddress NTSC-U/C: 0x00128410
+     * @ghidraAddress PAL: 0x00128b40
      */
     void LoadStepRings();
 
@@ -254,7 +276,8 @@ protected:
      * of the pattern.
      *
      * @param nLimit The value GetExtent() must exceed for the growth to stop.
-     * @ghidraAddress 0x00129150
+     * @ghidraAddress NTSC-U/C: 0x00129150
+     * @ghidraAddress PAL: 0x00129880
      */
     void GrowPastLimit(int nLimit);
 

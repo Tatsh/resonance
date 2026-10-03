@@ -6,6 +6,7 @@
 #include "game/inputmap.h"
 #include "game/inputpoller.h"
 #include "game/joypad.h"
+#include "game/padrecord.h"
 #include "game/rawcontroller.h"
 #include "msg/pausegamesystemmsg.h"
 #include "os/bytepairstatic.h"
@@ -15,54 +16,55 @@
 
 namespace {
 
-// The pad library's button bits, one per control.
-constexpr unsigned int kPadButtonSelect = 0x0001;
-constexpr unsigned int kPadButtonL3 = 0x0002;
-constexpr unsigned int kPadButtonR3 = 0x0004;
-constexpr unsigned int kPadButtonStart = 0x0008;
-constexpr unsigned int kPadButtonUp = 0x0010;
-constexpr unsigned int kPadButtonRight = 0x0020;
-constexpr unsigned int kPadButtonDown = 0x0040;
-constexpr unsigned int kPadButtonLeft = 0x0080;
-constexpr unsigned int kPadButtonL2 = 0x0100;
-constexpr unsigned int kPadButtonR2 = 0x0200;
-constexpr unsigned int kPadButtonL1 = 0x0400;
-constexpr unsigned int kPadButtonR1 = 0x0800;
-constexpr unsigned int kPadButtonTriangle = 0x1000;
-constexpr unsigned int kPadButtonCircle = 0x2000;
-constexpr unsigned int kPadButtonCross = 0x4000;
-constexpr unsigned int kPadButtonSquare = 0x8000;
+// The button bits of the word PadRecord::Read() reports, one per control. The word has the report's
+// first button byte in its high half, the reverse of the pad library's own button constants.
+constexpr unsigned int kPadButtonL2 = 0x0001;
+constexpr unsigned int kPadButtonR2 = 0x0002;
+constexpr unsigned int kPadButtonL1 = 0x0004;
+constexpr unsigned int kPadButtonR1 = 0x0008;
+constexpr unsigned int kPadButtonTriangle = 0x0010;
+constexpr unsigned int kPadButtonCircle = 0x0020;
+constexpr unsigned int kPadButtonCross = 0x0040;
+constexpr unsigned int kPadButtonSquare = 0x0080;
+constexpr unsigned int kPadButtonSelect = 0x0100;
+constexpr unsigned int kPadButtonL3 = 0x0200;
+constexpr unsigned int kPadButtonR3 = 0x0400;
+constexpr unsigned int kPadButtonStart = 0x0800;
+constexpr unsigned int kPadButtonUp = 0x1000;
+constexpr unsigned int kPadButtonRight = 0x2000;
+constexpr unsigned int kPadButtonDown = 0x4000;
+constexpr unsigned int kPadButtonLeft = 0x8000;
 
 // Control numbers, the positions in g_adwControlMasks.
 enum Control {
-    kControlUp = 0,
-    kControlRight = 1,
-    kControlDown = 2,
-    kControlLeft = 3,
-    kControlSelect = 4,
-    kControlL3 = 5,
-    kControlR3 = 6,
-    kControlStart = 7,
-    kControlL2 = 8,
-    kControlR1 = 9,
-    kControlL1 = 10,
-    kControlR2 = 11,
-    kControlTriangle = 12,
-    kControlCircle = 13,
-    kControlCross = 14,
-    kControlSquare = 15,
+    kControlTriangle = 0,
+    kControlCircle = 1,
+    kControlCross = 2,
+    kControlSquare = 3,
+    kControlL2 = 4,
+    kControlR2 = 5,
+    kControlL1 = 6,
+    kControlR1 = 7,
+    kControlSelect = 8,
+    kControlStart = 9,
+    kControlR3 = 10,
+    kControlL3 = 11,
+    kControlUp = 12,
+    kControlRight = 13,
+    kControlDown = 14,
+    kControlLeft = 15,
 };
 
-// The four face buttons, the controls from kControlTriangle onward.
-constexpr int kFaceButtonCount = 4;
+// The four d-pad directions, the controls from kControlUp onward.
+constexpr int kDirectionCount = 4;
 
-constexpr int kControlTotal = kControlSquare + 1;
+constexpr int kControlTotal = kControlLeft + 1;
 
-// 0x008efb60
+// NTSC-U/C: 0x008efb60, PAL: 0x00934b60
 // The button bit of each control, which Init() fills.
 unsigned int g_adwControlMasks[kControlTotal];
 
-// 0x00692440
+// NTSC-U/C: 0x00692440, PAL: 0x006d3700
 // The control each stick axis reading reports.
 int g_anAxisControls[] = {0x64, 0x65, 0x66, 0x67};
 
@@ -110,7 +112,7 @@ constexpr int kSecondPlayer = 2;
 // The Joypad on slot 0 of port 1, which Setup() opens after the four of port 0.
 constexpr int kPort1Joypad = kSlotsPerPort;
 
-// 0x0069245c
+// NTSC-U/C: 0x0069245c, PAL: 0x006d371c
 // Counts the calls to InputPoller::SetVibration() that reach a Joypad. Nothing reads it.
 int g_nVibrationCount;
 
@@ -122,7 +124,7 @@ int g_nVibrationCount;
  */
 class FindJoypadConnectionsCmd : public Sch::Command {
 public:
-    // 0x001e1990
+    // NTSC-U/C: 0x001e1990, PAL: 0x001e7a58
     // The factory the unit's static initialiser at 0x001e1750 registers under identifier zero.
     static Sch::Command *NewCmd() {
         return nullptr;
@@ -131,7 +133,7 @@ public:
 
 } // namespace
 
-// 0x001ded98
+// NTSC-U/C: 0x001ded98, PAL: 0x001e4e18
 InputPoller::InputPoller()
     : mNextJoypadId(0), mBytePairs(BytePairStatic::shared()), mUnusedWord(0), mUnusedFlag(1),
       mPressedThisPoll(0), mActive(1), mMultitap0(0), mMultitap1(0), mPaused(0),
@@ -139,33 +141,33 @@ InputPoller::InputPoller()
     Init();
 }
 
-// 0x001df080
+// NTSC-U/C: 0x001df080, PAL: 0x001e5100
 InputPoller::~InputPoller() {
     Shutdown();
 }
 
-// 0x001e19b8
+// NTSC-U/C: 0x001e19b8, PAL: 0x001e7a80
 void InputPoller::Init() {
-    g_adwControlMasks[kControlUp] = kPadButtonUp;
-    g_adwControlMasks[kControlRight] = kPadButtonRight;
-    g_adwControlMasks[kControlDown] = kPadButtonDown;
-    g_adwControlMasks[kControlLeft] = kPadButtonLeft;
-    g_adwControlMasks[kControlSelect] = kPadButtonSelect;
-    g_adwControlMasks[kControlL3] = kPadButtonL3;
-    g_adwControlMasks[kControlR3] = kPadButtonR3;
-    g_adwControlMasks[kControlStart] = kPadButtonStart;
-    g_adwControlMasks[kControlL2] = kPadButtonL2;
-    g_adwControlMasks[kControlR1] = kPadButtonR1;
-    g_adwControlMasks[kControlL1] = kPadButtonL1;
-    g_adwControlMasks[kControlR2] = kPadButtonR2;
     g_adwControlMasks[kControlTriangle] = kPadButtonTriangle;
     g_adwControlMasks[kControlCircle] = kPadButtonCircle;
     g_adwControlMasks[kControlCross] = kPadButtonCross;
     g_adwControlMasks[kControlSquare] = kPadButtonSquare;
+    g_adwControlMasks[kControlL2] = kPadButtonL2;
+    g_adwControlMasks[kControlR2] = kPadButtonR2;
+    g_adwControlMasks[kControlL1] = kPadButtonL1;
+    g_adwControlMasks[kControlR1] = kPadButtonR1;
+    g_adwControlMasks[kControlSelect] = kPadButtonSelect;
+    g_adwControlMasks[kControlStart] = kPadButtonStart;
+    g_adwControlMasks[kControlR3] = kPadButtonR3;
+    g_adwControlMasks[kControlL3] = kPadButtonL3;
+    g_adwControlMasks[kControlUp] = kPadButtonUp;
+    g_adwControlMasks[kControlRight] = kPadButtonRight;
+    g_adwControlMasks[kControlDown] = kPadButtonDown;
+    g_adwControlMasks[kControlLeft] = kPadButtonLeft;
     Setup();
 }
 
-// 0x001df248
+// NTSC-U/C: 0x001df248, PAL: 0x001e52c8
 void InputPoller::Setup() {
     for (int nSlot = 0; nSlot < kSlotsPerPort; ++nSlot) {
         Joypad *pJoypad = new Joypad((kPort0 << kSlotBits) | nSlot);
@@ -180,7 +182,7 @@ void InputPoller::Setup() {
         for (int i = kAxisCount - 1; i >= 0; --i) {
             entry.mAxes[i] = 0;
         }
-        entry.mFaceButtonHeld = 0;
+        entry.mDirectionHeld = 0;
         entry.mButtons = 0;
         mEntries.push_back(entry);
     }
@@ -197,7 +199,7 @@ void InputPoller::Setup() {
     for (int i = kAxisCount - 1; i >= 0; --i) {
         entry.mAxes[i] = 0;
     }
-    entry.mFaceButtonHeld = 0;
+    entry.mDirectionHeld = 0;
     entry.mButtons = 0;
     mEntries.push_back(entry);
 
@@ -221,7 +223,7 @@ void InputPoller::Setup() {
     }
 }
 
-// 0x001df9d8
+// NTSC-U/C: 0x001df9d8, PAL: 0x001e5a58
 void InputPoller::Shutdown() {
     if (mJoypads.size() == 0) {
         return;
@@ -234,14 +236,14 @@ void InputPoller::Shutdown() {
     mEntries.clear();
 }
 
-// 0x001e1a88
+// NTSC-U/C: 0x001e1a88, PAL: 0x001e7b70
 inline void InputPoller::ResetJoypads() {
     for (auto it = mJoypads.begin(); it != mJoypads.end(); ++it) {
         (*it)->Reset();
     }
 }
 
-// 0x001e1ad8
+// NTSC-U/C: 0x001e1ad8, PAL: 0x001e7bc0
 void InputPoller::NumberConnectedJoypads() {
     int nPlayer = kFirstPlayer;
     const int nJoypadCount = mJoypads.size();
@@ -254,7 +256,7 @@ void InputPoller::NumberConnectedJoypads() {
     }
 }
 
-// 0x001e1b78
+// NTSC-U/C: 0x001e1b78, PAL: 0x001e7c60
 void InputPoller::SetVibration(int nPort, int nSmallMotor, int nBigMotor) {
     unsigned i = 0;
     while (i < mJoypadPlayers.size() && mJoypadPlayers[i] != nPort) {
@@ -267,7 +269,7 @@ void InputPoller::SetVibration(int nPort, int nSmallMotor, int nBigMotor) {
     mJoypads[i]->SetVibration(nSmallMotor, nBigMotor);
 }
 
-// 0x001df798
+// NTSC-U/C: 0x001df798, PAL: 0x001e5818
 void InputPoller::FindJoypadConnections() {
     if (!mActive) {
         return;
@@ -304,7 +306,7 @@ void InputPoller::FindJoypadConnections() {
     }
 }
 
-// 0x001dfab0
+// NTSC-U/C: 0x001dfab0, PAL: 0x001e5b30
 void InputPoller::ReadControllers() {
     mPressedThisPoll = 0;
     if (mController == nullptr) {
@@ -355,11 +357,11 @@ void InputPoller::ReadControllers() {
         const unsigned int dwChanged = dwButtons ^ dwPrevious;
         const unsigned int dwPressed = dwChanged & dwButtons;
         const unsigned int dwReleased = dwChanged & ~dwButtons;
-        if (!(dwButtons & g_adwControlMasks[kControlTriangle]) &&
-            !(dwButtons & g_adwControlMasks[kControlCircle]) &&
-            !(dwButtons & g_adwControlMasks[kControlCross]) &&
-            !(dwButtons & g_adwControlMasks[kControlSquare])) {
-            entry.mFaceButtonHeld = 0;
+        if (!(dwButtons & g_adwControlMasks[kControlUp]) &&
+            !(dwButtons & g_adwControlMasks[kControlRight]) &&
+            !(dwButtons & g_adwControlMasks[kControlDown]) &&
+            !(dwButtons & g_adwControlMasks[kControlLeft])) {
+            entry.mDirectionHeld = 0;
         }
 
         for (int nControl = 0; nControl < kControlTotal;) {
@@ -371,17 +373,16 @@ void InputPoller::ReadControllers() {
                 }
                 continue;
             }
-            if (static_cast<unsigned>(nControl - kControlTriangle) <
-                static_cast<unsigned>(kFaceButtonCount)) {
-                if (entry.mFaceButtonHeld) {
-                    break; // Yes, a second face button ends the scan of the remaining controls.
+            if (static_cast<unsigned>(nControl - kControlUp) <
+                static_cast<unsigned>(kDirectionCount)) {
+                if (entry.mDirectionHeld) {
+                    break; // Yes, a second direction ends the scan of the remaining controls.
                 }
-                entry.mFaceButtonHeld = 1;
+                entry.mDirectionHeld = 1;
             }
-            if (DebugKeysEnabled() && nControl != kControlSelect &&
-                (dwButtons & kPadButtonSelect)) {
+            if (DebugKeysEnabled() && nControl != kControlL2 && (dwButtons & kPadButtonL2)) {
                 ++nControl;
-                if (dwButtons & kPadButtonR3) {
+                if (dwButtons & kPadButtonL1) {
                     CallScriptTemplate(kDebugKeyTemplate, nControl);
                 }
             } else {
@@ -406,34 +407,41 @@ void InputPoller::ReadControllers() {
     }
 }
 
-// 0x001e1c28
+// NTSC-U/C: 0x001e1c28, PAL: 0x001e7d10
 void InputPoller::Poll() {
     ReadControllers();
     FinishPoll();
 }
 
-// 0x001e1c58
+// NTSC-U/C: 0x001e1c58, PAL: 0x001e7d40
 void InputPoller::FinishPoll() {
 }
 
-// 0x001e1998
+// NTSC-U/C: 0x001e1998, PAL: 0x001e7a60
 void InputPoller::SetController(RawController *pController) {
     mController = pController;
 }
 
-// 0x001e1a80
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x001e7b48
+void InputPoller::EndPadLibrary() {
+    PadRecord::EndLibrary();
+}
+#endif
+
+// NTSC-U/C: 0x001e1a80, PAL: 0x001e7b68
 void InputPoller::SetActive(int bActive) {
     mActive = bActive;
 }
 
-// 0x001e19a0
+// NTSC-U/C: 0x001e19a0, PAL: 0x001e7a68
 void InputPoller::DetachController(RawController *pController) {
     if (mController == pController) {
         mController = nullptr;
     }
 }
 
-// 0x001e1c18
+// NTSC-U/C: 0x001e1c18, PAL: 0x001e7d00
 void InputPoller::SetPaused(int bPaused) {
     mPaused = bPaused;
 }

@@ -54,7 +54,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x00127118
+     * @ghidraAddress NTSC-U/C: 0x00127118
+     * @ghidraAddress PAL: 0x00127820
      */
     void *operator new(size_t nSize);
 
@@ -62,7 +63,8 @@ public:
      * Release a map to the tagged heap under the tag `PlayMap`.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x00127138
+     * @ghidraAddress NTSC-U/C: 0x00127138
+     * @ghidraAddress PAL: 0x00127840
      */
     void operator delete(void *pBlock);
 
@@ -72,7 +74,8 @@ public:
      * Reserves eight elements in mSteps and appends the zero step, then reserves eight in
      * mSectionLengths. Every subclass constructor runs it first.
      *
-     * @ghidraAddress 0x001263c0
+     * @ghidraAddress NTSC-U/C: 0x001263c0
+     * @ghidraAddress PAL: 0x00126a70
      */
     PlayMap();
 
@@ -80,7 +83,8 @@ public:
      * Inline. PlayMapLinear's destructor expands it, and the address is the out-of-line copy the
      * unit emits for the table.
      *
-     * @ghidraAddress 0x00127158
+     * @ghidraAddress NTSC-U/C: 0x00127158
+     * @ghidraAddress PAL: 0x00127860
      */
     virtual ~PlayMap() {
     }
@@ -99,7 +103,8 @@ public:
      *
      * @param nPosition The step position.
      * @param strLabel The label, passed by value.
-     * @ghidraAddress 0x001268b0
+     * @ghidraAddress NTSC-U/C: 0x001268b0
+     * @ghidraAddress PAL: 0x00126f70
      */
     virtual void AddStep(int nPosition, HxStr strLabel);
 
@@ -107,14 +112,16 @@ public:
      * Slot 3. Stores its argument in mBarCount and does nothing else.
      *
      * @param nBarCount The value to store.
-     * @ghidraAddress 0x00127488
+     * @ghidraAddress NTSC-U/C: 0x00127488
+     * @ghidraAddress PAL: 0x00127ba8
      */
     virtual void SetBarCount(int nBarCount);
 
     /**
      * Slot 4. Empty in this class. PlayMapRepeatRing resets its spans here.
      *
-     * @ghidraAddress 0x00127398
+     * @ghidraAddress NTSC-U/C: 0x00127398
+     * @ghidraAddress PAL: 0x00127ab8
      */
     virtual void ResetSpans();
 
@@ -161,14 +168,16 @@ public:
      * @param nPosition The position to map.
      * @param nSet The set PlayMapLinear selects its table with. Not read here.
      * @return nPosition.
-     * @ghidraAddress 0x001273b8
+     * @ghidraAddress NTSC-U/C: 0x001273b8
+     * @ghidraAddress PAL: 0x00127ad8
      */
     virtual int MapToLinkedStep(int nPosition, int nSet);
 
     /**
      * Slot 8. Returns the last element of mSteps, the end of the positions the map has set out.
      *
-     * @ghidraAddress 0x001273c0
+     * @ghidraAddress NTSC-U/C: 0x001273c0
+     * @ghidraAddress PAL: 0x00127ae0
      */
     virtual int GetExtent();
 
@@ -177,14 +186,16 @@ public:
      *
      * Callers read the result as the last bar of the level.
      *
-     * @ghidraAddress 0x001273d0
+     * @ghidraAddress NTSC-U/C: 0x001273d0
+     * @ghidraAddress PAL: 0x00127af0
      */
     virtual int GetEndBar();
 
     /**
      * Slot 10. Returns the number of sections, one less than the number of elements in mSteps.
      *
-     * @ghidraAddress 0x00127440
+     * @ghidraAddress NTSC-U/C: 0x00127440
+     * @ghidraAddress PAL: 0x00127b60
      */
     virtual int GetSectionCount();
 
@@ -195,7 +206,8 @@ public:
      *
      * @param nIndex The index into the pattern.
      * @return nIndex.
-     * @ghidraAddress 0x00127458
+     * @ghidraAddress NTSC-U/C: 0x00127458
+     * @ghidraAddress PAL: 0x00127b78
      */
     virtual int GetPatternSection(int nIndex);
 
@@ -209,7 +221,8 @@ public:
      *
      * @param nBar The bar to map through MapBar().
      * @return The step index.
-     * @ghidraAddress 0x001276a0
+     * @ghidraAddress NTSC-U/C: 0x001276a0
+     * @ghidraAddress PAL: 0x00127dc0
      */
     virtual int GetPatternIndex(int nBar);
 
@@ -223,7 +236,8 @@ public:
      *
      * @param nBar The bar to map through MapBar() and to fold in.
      * @return The step index plus the folded term.
-     * @ghidraAddress 0x00127700
+     * @ghidraAddress NTSC-U/C: 0x00127700
+     * @ghidraAddress PAL: 0x00127e20
      */
     virtual int GetAbsoluteSectionIndex(int nBar);
 
@@ -235,7 +249,8 @@ public:
      *
      * @param nBar The bar.
      * @return Zero here.
-     * @ghidraAddress 0x00127460
+     * @ghidraAddress NTSC-U/C: 0x00127460
+     * @ghidraAddress PAL: 0x00127b80
      */
     virtual int IsLooping(int nBar);
 
@@ -247,7 +262,8 @@ public:
      * the result, so the member takes an int.
      *
      * @param nRepeats The multiplier the override applies to a step gap.
-     * @ghidraAddress 0x00127468
+     * @ghidraAddress NTSC-U/C: 0x00127468
+     * @ghidraAddress PAL: 0x00127b88
      */
     virtual void CloseSpan(int nRepeats);
 
@@ -258,7 +274,8 @@ public:
      * what proves the bar parameter. Gamer calls it with the current bar.
      *
      * @param nBar The bar.
-     * @ghidraAddress 0x00127470
+     * @ghidraAddress NTSC-U/C: 0x00127470
+     * @ghidraAddress PAL: 0x00127b90
      */
     virtual int EndLoop(int nBar);
 
@@ -269,7 +286,8 @@ public:
      * routine at `0x00105de8`.
      *
      * @param nBar The bar.
-     * @ghidraAddress 0x00127478
+     * @ghidraAddress NTSC-U/C: 0x00127478
+     * @ghidraAddress PAL: 0x00127b98
      */
     virtual int StartLoop(int nBar);
 
@@ -279,7 +297,8 @@ public:
      * Both overrides forward a1 to EndLoop() and StartLoop().
      *
      * @param nBar The bar.
-     * @ghidraAddress 0x00127480
+     * @ghidraAddress NTSC-U/C: 0x00127480
+     * @ghidraAddress PAL: 0x00127ba0
      */
     virtual int ToggleLoop(int nBar);
 
@@ -291,7 +310,8 @@ public:
      *
      * @param nPosition The mapped position.
      * @return The index of the last step at or before nPosition, or -1 when every step follows it.
-     * @ghidraAddress 0x00127490
+     * @ghidraAddress NTSC-U/C: 0x00127490
+     * @ghidraAddress PAL: 0x00127bb0
      */
     int FindStepIndex(int nPosition);
 
@@ -301,7 +321,8 @@ public:
      * @param nBar The bar.
      * @return Non-zero when MapBar() of the bar is an element of mSteps. A negative bar reports
      *         zero.
-     * @ghidraAddress 0x001274d8
+     * @ghidraAddress NTSC-U/C: 0x001274d8
+     * @ghidraAddress PAL: 0x00127bf8
      */
     int IsStepStart(int nBar);
 
@@ -310,7 +331,8 @@ public:
      *
      * @param nBar The bar.
      * @return nBar less its distance past the last step at or before its mapped position.
-     * @ghidraAddress 0x00127548
+     * @ghidraAddress NTSC-U/C: 0x00127548
+     * @ghidraAddress PAL: 0x00127c68
      */
     int StepStartBar(int nBar);
 
@@ -320,7 +342,8 @@ public:
      * @param nBar The bar.
      * @return nBar plus its distance to the lower bound of its mapped position in mSteps. A
      *         negative bar reports zero.
-     * @ghidraAddress 0x001275b0
+     * @ghidraAddress NTSC-U/C: 0x001275b0
+     * @ghidraAddress PAL: 0x00127cd0
      */
     int NextStepBar(int nBar);
 
@@ -330,7 +353,8 @@ public:
      * @param nBar The bar.
      * @return nBar plus its distance to the upper bound of its mapped position in mSteps. A
      *         negative bar reports zero.
-     * @ghidraAddress 0x00127628
+     * @ghidraAddress NTSC-U/C: 0x00127628
+     * @ghidraAddress PAL: 0x00127d48
      */
     int FollowingStepBar(int nBar);
 

@@ -24,13 +24,15 @@ public:
      * @param pPlayer The deploying player.
      * @param nUnused Not read.
      * @return The message's result, non-zero when freestyle was enabled.
-     * @ghidraAddress 0x001c9a28
+     * @ghidraAddress NTSC-U/C: 0x001c9a28
+     * @ghidraAddress PAL: 0x001cf8c8
      */
     virtual int Deploy(int nTrack, int nBar, Player *pPlayer, int nUnused);
 
     /**
      * @return kHudItemFreestyler.
-     * @ghidraAddress 0x001c9a20
+     * @ghidraAddress NTSC-U/C: 0x001c9a20
+     * @ghidraAddress PAL: 0x001cf8c0
      */
     virtual int Type();
 };

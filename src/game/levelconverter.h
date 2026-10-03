@@ -99,12 +99,14 @@ public:
     };
 
     /**
-     * @ghidraAddress 0x001e6278
+     * @ghidraAddress NTSC-U/C: 0x001e6278
+     * @ghidraAddress PAL: 0x001ec410
      */
     LevelConverter();
 
     /**
-     * @ghidraAddress 0x001e9ee0
+     * @ghidraAddress NTSC-U/C: 0x001e9ee0
+     * @ghidraAddress PAL: 0x001f0128
      */
     virtual ~LevelConverter();
 
@@ -121,7 +123,8 @@ public:
      *                GrooveWorld::FinishLoad() passes the buffer its asynchronous read filled.
      * @param nLength The length of pBuffer in bytes, forwarded to the same object.
      * @param pBuilder The builder the events are appended to.
-     * @ghidraAddress 0x001e65e0
+     * @ghidraAddress NTSC-U/C: 0x001e65e0
+     * @ghidraAddress PAL: 0x001ec7b0
      */
     void Convert(const char *pszPath, void *pBuffer, int nLength, LevelBuilder *pBuilder);
 
@@ -132,7 +135,8 @@ public:
      * and the harmony all return to their unset values.
      *
      * @param nTrack The track index.
-     * @ghidraAddress 0x001e6880
+     * @ghidraAddress NTSC-U/C: 0x001e6880
+     * @ghidraAddress PAL: 0x001eca50
      */
     virtual void NewTrack(unsigned char nTrack);
 
@@ -146,7 +150,8 @@ public:
      * @param nNote The note number.
      * @param nVelocity The velocity.
      * @param nChannel The channel.
-     * @ghidraAddress 0x001e6fc0
+     * @ghidraAddress NTSC-U/C: 0x001e6fc0
+     * @ghidraAddress PAL: 0x001ed190
      */
     virtual void
     NoteOn(int nTick, unsigned char nNote, unsigned char nVelocity, unsigned char nChannel);
@@ -161,7 +166,8 @@ public:
      * @param nTick The event position, in MIDI ticks.
      * @param nNote The note number.
      * @param nChannel The channel.
-     * @ghidraAddress 0x001e7188
+     * @ghidraAddress NTSC-U/C: 0x001e7188
+     * @ghidraAddress PAL: 0x001ed358
      */
     virtual void NoteOff(int nTick, unsigned char nNote, unsigned char nChannel);
 
@@ -178,7 +184,8 @@ public:
      * @param nController The controller number.
      * @param nValue The value.
      * @param nChannel The channel.
-     * @ghidraAddress 0x001e7788
+     * @ghidraAddress NTSC-U/C: 0x001e7788
+     * @ghidraAddress PAL: 0x001ed958
      */
     virtual void
     Controller(int nTick, unsigned char nController, unsigned char nValue, unsigned char nChannel);
@@ -192,7 +199,8 @@ public:
      * @param nTick The event position, in MIDI ticks.
      * @param nProgram The program number.
      * @param nChannel The channel.
-     * @ghidraAddress 0x001ea370
+     * @ghidraAddress NTSC-U/C: 0x001ea370
+     * @ghidraAddress PAL: 0x001f05e0
      */
     virtual void ProgramChange(int nTick, unsigned char nProgram, unsigned char nChannel);
 
@@ -205,7 +213,8 @@ public:
      * @param nLow The low seven bits of the bend.
      * @param nHigh The high seven bits of the bend.
      * @param nChannel The channel.
-     * @ghidraAddress 0x001ea420
+     * @ghidraAddress NTSC-U/C: 0x001ea420
+     * @ghidraAddress PAL: 0x001f0690
      */
     virtual void
     PitchBend(int nTick, unsigned char nLow, unsigned char nHigh, unsigned char nChannel);
@@ -217,7 +226,8 @@ public:
      *
      * @param nTick The event position, in MIDI ticks.
      * @param nMicrosecondsPerQuarter The tempo.
-     * @ghidraAddress 0x001ea570
+     * @ghidraAddress NTSC-U/C: 0x001ea570
+     * @ghidraAddress PAL: 0x001f07e0
      */
     virtual void Tempo(int nTick, int nMicrosecondsPerQuarter);
 
@@ -231,7 +241,8 @@ public:
      * @param nTick The event position, in MIDI ticks.
      * @param pText The text.
      * @param nType The meta type.
-     * @ghidraAddress 0x001ea5a0
+     * @ghidraAddress NTSC-U/C: 0x001ea5a0
+     * @ghidraAddress PAL: 0x001f0810
      */
     virtual void TextEvent(int nTick, const char *pText, unsigned char nType);
 
@@ -243,7 +254,8 @@ public:
      * a note on with no note off are both reported, and otherwise a riff track empties the three
      * span collections.
      *
-     * @ghidraAddress 0x001e6a30
+     * @ghidraAddress NTSC-U/C: 0x001e6a30
+     * @ghidraAddress PAL: 0x001ecc00
      */
     virtual void EndTrack();
 
@@ -259,7 +271,8 @@ private:
      * path but a second name and a bad track number ends in ApplyTrackType().
      *
      * @param pText The track name.
-     * @ghidraAddress 0x001e8318
+     * @ghidraAddress NTSC-U/C: 0x001e8318
+     * @ghidraAddress PAL: 0x001ee4e8
      */
     void ParseTrackTypeString(const char *pText);
 
@@ -275,7 +288,8 @@ private:
      * finishes by pointing mNextSpan at the start of the difficulty's collection. The title is
      * inferred.
      *
-     * @ghidraAddress 0x001e6bd0
+     * @ghidraAddress NTSC-U/C: 0x001e6bd0
+     * @ghidraAddress PAL: 0x001ecda0
      */
     void ApplyTrackType();
 
@@ -294,7 +308,8 @@ private:
      * @param nVelocity The velocity.
      * @param nDuration The note's duration, in MIDI ticks.
      * @param nChannel The channel.
-     * @ghidraAddress 0x001e7420
+     * @ghidraAddress NTSC-U/C: 0x001e7420
+     * @ghidraAddress PAL: 0x001ed5f0
      */
     void AddNote(int nTick,
                  unsigned char nNote,
@@ -313,7 +328,8 @@ private:
      * @param nTick The gem's song position, in MIDI ticks.
      * @param nNote The note number.
      * @param nDuration The note's duration, in MIDI ticks.
-     * @ghidraAddress 0x001e7c20
+     * @ghidraAddress NTSC-U/C: 0x001e7c20
+     * @ghidraAddress PAL: 0x001eddf0
      */
     void AddGemSpan(int nTick, unsigned char nNote, int nDuration);
 
@@ -325,7 +341,8 @@ private:
      * @param nTick The song position, in MIDI ticks.
      * @return 1 with no riff open or before the riff's start, -1 at or after the next gem, and 0
      *         inside the riff.
-     * @ghidraAddress 0x001e7e00
+     * @ghidraAddress NTSC-U/C: 0x001e7e00
+     * @ghidraAddress PAL: 0x001edfd0
      */
     int CheckRiffPosition(int nTick);
 
@@ -336,7 +353,8 @@ private:
      * next index of that set, and more than three riffs in one set are reported. Any other track
      * opens a riff per gem through LevelBuilder::AddGem(). The title is inferred.
      *
-     * @ghidraAddress 0x001e7eb0
+     * @ghidraAddress NTSC-U/C: 0x001e7eb0
+     * @ghidraAddress PAL: 0x001ee080
      */
     void NextRiff();
 
@@ -348,7 +366,8 @@ private:
      * inferred.
      *
      * @param nTick The song position, in MIDI ticks.
-     * @ghidraAddress 0x001e8cb8
+     * @ghidraAddress NTSC-U/C: 0x001e8cb8
+     * @ghidraAddress PAL: 0x001eef00
      */
     void EmitRiffProgram(int nTick);
 
@@ -359,7 +378,8 @@ private:
      * position that falls before the riff it arrives at. The title is inferred.
      *
      * @param nTick The song position, in MIDI ticks.
-     * @ghidraAddress 0x001ea618
+     * @ghidraAddress NTSC-U/C: 0x001ea618
+     * @ghidraAddress PAL: 0x001f0888
      */
     void SyncRiff(int nTick);
 
@@ -372,7 +392,8 @@ private:
      *
      * @param nChannel The event's channel.
      * @param nTick The event position, in MIDI ticks.
-     * @ghidraAddress 0x001e8120
+     * @ghidraAddress NTSC-U/C: 0x001e8120
+     * @ghidraAddress PAL: 0x001ee2f0
      */
     void CheckChannel(unsigned char nChannel, int nTick);
 
@@ -384,7 +405,8 @@ private:
      *
      * @param nTick The note's song position, in MIDI ticks.
      * @param nNote The note number.
-     * @ghidraAddress 0x001e7ac0
+     * @ghidraAddress NTSC-U/C: 0x001e7ac0
+     * @ghidraAddress PAL: 0x001edc90
      */
     void AddHarmonyNote(int nTick, unsigned char nNote);
 
@@ -395,7 +417,8 @@ private:
      * a line that the file is free of errors to a freshly opened log, and one that reported writes
      * a line that it has errors, and the log is closed. The title is inferred.
      *
-     * @ghidraAddress 0x001e8af0
+     * @ghidraAddress NTSC-U/C: 0x001e8af0
+     * @ghidraAddress PAL: 0x001eed38
      */
     void FinishErrorLog();
 
@@ -410,7 +433,8 @@ private:
      *
      * @param nTick The song position, in MIDI ticks.
      * @param pszMessage The message.
-     * @ghidraAddress 0x001ea6e0
+     * @ghidraAddress NTSC-U/C: 0x001ea6e0
+     * @ghidraAddress PAL: 0x001f0950
      */
     void ReportError(int nTick, const char *pszMessage);
 

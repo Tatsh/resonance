@@ -33,21 +33,24 @@ public:
      * @param pPhraseMaker The phrase maker the post drives.
      * @param nPeriod The period in MIDI ticks. AxingSTG passes 0x780, one bar at 480 per quarter
      *                note.
-     * @ghidraAddress 0x001b4738
+     * @ghidraAddress NTSC-U/C: 0x001b4738
+     * @ghidraAddress PAL: 0x001ba510
      */
     GsPeriodical(Sch::TickClock *pClock, PhraseMaker *pPhraseMaker, int nPeriod);
 
     /**
      * Queue the first run, one period after the origin.
      *
-     * @ghidraAddress 0x001b4870
+     * @ghidraAddress NTSC-U/C: 0x001b4870
+     * @ghidraAddress PAL: 0x001ba648
      */
     void Post();
 
     /**
      * Withdraw the queued run.
      *
-     * @ghidraAddress 0x001b48f8
+     * @ghidraAddress NTSC-U/C: 0x001b48f8
+     * @ghidraAddress PAL: 0x001ba6d0
      */
     void Withdraw();
 
@@ -58,12 +61,13 @@ public:
      * PeriodicalCmd::Execute() is the one caller.
      *
      * @param nTick The song position the run was queued for, in MIDI ticks.
-     * @ghidraAddress 0x001b45d0
+     * @ghidraAddress NTSC-U/C: 0x001b45d0
+     * @ghidraAddress PAL: 0x001ba3a8
      */
     void Run(int nTick);
 
 private:
-    // 0x001b4548
+    // NTSC-U/C: 0x001b4548, PAL: 0x001ba320
     void PostAt(int nTick);
 
     int mOrigin;               // +0x00, from PhraseMaker::GetPeriodOrigin()

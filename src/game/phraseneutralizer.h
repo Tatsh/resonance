@@ -25,7 +25,8 @@ public:
     /**
      * @param pTrackData The track description. The constructor copies its track number.
      * @param pPhraseMgr The phrase manager of the track.
-     * @ghidraAddress 0x001c0918
+     * @ghidraAddress NTSC-U/C: 0x001c0918
+     * @ghidraAddress PAL: 0x001c6760
      */
     PhraseNeutralizer(const TrackData *pTrackData, PhraseMgr *pPhraseMgr);
 
@@ -36,7 +37,8 @@ public:
      * other message is discarded.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001c1700
+     * @ghidraAddress NTSC-U/C: 0x001c1700
+     * @ghidraAddress PAL: 0x001c7548
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -45,7 +47,7 @@ private:
     // loses the phrase's value from its score through the Player routine at 0x0012f808. When a
     // phrase was cleared, the message is marked handled, a DeployedPowerupMsg covering the four
     // bars is sent, and a PlayersTrackNeutralizedMsg follows for each player that lost points.
-    // 0x001c0980
+    // NTSC-U/C: 0x001c0980, PAL: 0x001c67c8
     void PostTrackNeutralizedMsg(NeutralizeMsg *pMsg);
 
     int mReservedWords[5];       // +0x18, neither read nor written by any routine

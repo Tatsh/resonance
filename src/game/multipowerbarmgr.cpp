@@ -10,7 +10,7 @@ constexpr int kMaxGap = 12;
 
 } // namespace
 
-// 0x001c62c0
+// NTSC-U/C: 0x001c62c0, PAL: 0x001cc108
 MultiPowerbarMgr::MultiPowerbarMgr(PlayMap *pMap,
                                    PhraseDatabase *pDatabase,
                                    const TrackData *pTrackData,

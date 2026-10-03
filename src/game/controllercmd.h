@@ -52,14 +52,16 @@ public:
      * Report the identifier this class streams itself under.
      *
      * @return sCmdID.
-     * @ghidraAddress 0x00194598
+     * @ghidraAddress NTSC-U/C: 0x00194598
+     * @ghidraAddress PAL: 0x0019a218
      */
     virtual int CmdID();
 
     /**
      * Hand the reading to the world of the running game.
      *
-     * @ghidraAddress 0x00194560
+     * @ghidraAddress NTSC-U/C: 0x00194560
+     * @ghidraAddress PAL: 0x0019a1e0
      */
     virtual void Execute();
 
@@ -67,7 +69,8 @@ public:
      * Write `{ControllerCmd}` to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00194790
+     * @ghidraAddress NTSC-U/C: 0x00194790
+     * @ghidraAddress PAL: 0x0019a410
      */
     virtual void Print(std::ostream &stream);
 
@@ -75,7 +78,8 @@ public:
      * Write the reading between the tags `CM[` and `]CM`.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001945a8
+     * @ghidraAddress NTSC-U/C: 0x001945a8
+     * @ghidraAddress PAL: 0x0019a228
      */
     virtual void Save(OBStream &stream);
 
@@ -83,7 +87,8 @@ public:
      * Read the reading back, discarding the three tag bytes on each side.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x001946b8
+     * @ghidraAddress NTSC-U/C: 0x001946b8
+     * @ghidraAddress PAL: 0x0019a338
      */
     virtual void Load(IBStream &stream);
 
@@ -94,14 +99,16 @@ public:
      * constructor writes only the base's words.
      *
      * @return The command.
-     * @ghidraAddress 0x0018be70
+     * @ghidraAddress NTSC-U/C: 0x0018be70
+     * @ghidraAddress PAL: 0x00191918
      */
     static Sch::Command *NewCmd();
 
     /**
      * Identifier the class streams itself under. The word at `0x0067f238` starts as 2.
      *
-     * @ghidraAddress 0x0067f238
+     * @ghidraAddress NTSC-U/C: 0x0067f238
+     * @ghidraAddress PAL: 0x006c0468
      */
     static int sCmdID;
 

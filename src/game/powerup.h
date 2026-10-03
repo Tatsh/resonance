@@ -50,7 +50,8 @@ public:
     }
 
     /**
-     * @ghidraAddress 0x001ca4c8
+     * @ghidraAddress NTSC-U/C: 0x001ca4c8
+     * @ghidraAddress PAL: 0x001d0380
      */
     virtual ~Powerup();
 
@@ -95,7 +96,8 @@ public:
      *
      * @param nType The kind, a HudItemKind.
      * @return The powerup, or a null pointer for a kind outside 0 through 12.
-     * @ghidraAddress 0x001c65f0
+     * @ghidraAddress NTSC-U/C: 0x001c65f0
+     * @ghidraAddress PAL: 0x001cc438
      */
     static Powerup *CreateForType(int nType);
 };

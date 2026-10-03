@@ -39,14 +39,16 @@ public:
      * Report the identifier this class streams itself under.
      *
      * @return The word at `0x00669cb8`, which is zero.
-     * @ghidraAddress 0x00116bc0
+     * @ghidraAddress NTSC-U/C: 0x00116bc0
+     * @ghidraAddress PAL: 0x00117078
      */
     virtual int CmdID();
 
     /**
      * Run Gamer::OnBar() for the bar.
      *
-     * @ghidraAddress 0x00116bd0
+     * @ghidraAddress NTSC-U/C: 0x00116bd0
+     * @ghidraAddress PAL: 0x00117088
      */
     virtual void Execute();
 
@@ -56,7 +58,8 @@ public:
      * Writes the single literal `{Gamer}` and nothing else.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00116bf0
+     * @ghidraAddress NTSC-U/C: 0x00116bf0
+     * @ghidraAddress PAL: 0x001170a8
      */
     virtual void Print(std::ostream &stream);
 
@@ -68,6 +71,7 @@ private:
 /**
  * Identifier GamerCmd::CmdID() reports, which is zero.
  *
- * @ghidraAddress 0x00669cb8
+ * @ghidraAddress NTSC-U/C: 0x00669cb8
+ * @ghidraAddress PAL: 0x006aa858
  */
 extern int g_nGamerCmdID;

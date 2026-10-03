@@ -14,7 +14,7 @@ constexpr int kDeployed = 1;
 
 } // namespace
 
-// 0x001ca0e8
+// NTSC-U/C: 0x001ca0e8, PAL: 0x001cff88
 int GhostNotesPowerup::Deploy(int, int, Player *pPlayer, int) {
     ToggleGhostMsg msg;
     msg.mPlayer = pPlayer;
@@ -23,7 +23,7 @@ int GhostNotesPowerup::Deploy(int, int, Player *pPlayer, int) {
     return kDeployed;
 }
 
-// 0x001ca0e0
+// NTSC-U/C: 0x001ca0e0, PAL: 0x001cff80
 int GhostNotesPowerup::Type() {
     return kHudItemGuides;
 }

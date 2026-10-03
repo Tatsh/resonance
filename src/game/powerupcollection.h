@@ -47,7 +47,8 @@ public:
          *
          * @param nType The kind.
          * @return Non-zero when Powerup::Type() reports nType.
-         * @ghidraAddress 0x001cc9b0
+         * @ghidraAddress NTSC-U/C: 0x001cc9b0
+         * @ghidraAddress PAL: 0x001d2868
          */
         bool IsType(int nType) const {
             return mPowerup->Type() == nType;
@@ -67,14 +68,16 @@ public:
      *
      * @param pOwner The player whose collection this is.
      * @param bUnlimited Non-zero to start every entry stocked and to stop Deploy() from spending.
-     * @ghidraAddress 0x001cad70
+     * @ghidraAddress NTSC-U/C: 0x001cad70
+     * @ghidraAddress PAL: 0x001d0c28
      */
     PowerupCollection(LocalPlayer *pOwner, int bUnlimited);
 
     /**
      * Delete every stored powerup.
      *
-     * @ghidraAddress 0x001cb090
+     * @ghidraAddress NTSC-U/C: 0x001cb090
+     * @ghidraAddress PAL: 0x001d0f48
      */
     virtual ~PowerupCollection();
 
@@ -85,7 +88,8 @@ public:
      * increase sends a PowerupCountMsg. With nothing selected, SelectRelative(1) follows.
      *
      * @param nType The kind.
-     * @ghidraAddress 0x001cb230
+     * @ghidraAddress NTSC-U/C: 0x001cb230
+     * @ghidraAddress PAL: 0x001d10e8
      */
     virtual void AddPowerup(int nType);
 
@@ -96,7 +100,8 @@ public:
      * and selects -1 when all of them are empty. Either outcome sends a ChoosePowerupMsg.
      *
      * @param nDelta The step to apply to the selected index.
-     * @ghidraAddress 0x001cb320
+     * @ghidraAddress NTSC-U/C: 0x001cb320
+     * @ghidraAddress PAL: 0x001d11d8
      */
     virtual void SelectRelative(int nDelta);
 
@@ -104,7 +109,8 @@ public:
      * Select one entry by index, without checking its count.
      *
      * @param nIndex The entry, or -1 for none.
-     * @ghidraAddress 0x001cb450
+     * @ghidraAddress NTSC-U/C: 0x001cb450
+     * @ghidraAddress PAL: 0x001d1308
      */
     virtual void Select(int nIndex);
 
@@ -118,7 +124,8 @@ public:
      *
      * @param nTrack Forwarded to Powerup::Deploy(). See PowerupCollectionI::Deploy().
      * @param nBar Forwarded to Powerup::Deploy(). See PowerupCollectionI::Deploy().
-     * @ghidraAddress 0x001cb500
+     * @ghidraAddress NTSC-U/C: 0x001cb500
+     * @ghidraAddress PAL: 0x001d13b8
      */
     virtual void Deploy(int nTrack, int nBar);
 
@@ -126,14 +133,16 @@ public:
      * Report whether an entry is selected.
      *
      * @return Non-zero unless the selected index is -1.
-     * @ghidraAddress 0x001cc9a0
+     * @ghidraAddress NTSC-U/C: 0x001cc9a0
+     * @ghidraAddress PAL: 0x001d2858
      */
     virtual int HasSelection();
 
     /**
      * Send one PowerupCountMsg for every non-empty entry, then one ChoosePowerupMsg.
      *
-     * @ghidraAddress 0x001cb620
+     * @ghidraAddress NTSC-U/C: 0x001cb620
+     * @ghidraAddress PAL: 0x001d14d8
      */
     virtual void AnnounceState();
 

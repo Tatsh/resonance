@@ -39,14 +39,16 @@ public:
      * @param pOwner The player whose placer this is.
      * @param pApplication The application the song clock is reached through.
      * @param pCollection The store the deployment draws from.
-     * @ghidraAddress 0x001ccb70
+     * @ghidraAddress NTSC-U/C: 0x001ccb70
+     * @ghidraAddress PAL: 0x001d2a28
      */
     GamePowerupPlacer(LocalPlayer *pOwner,
                       Application *pApplication,
                       PowerupCollectionI *pCollection);
 
     /**
-     * @ghidraAddress 0x001cd9b0
+     * @ghidraAddress NTSC-U/C: 0x001cd9b0
+     * @ghidraAddress PAL: 0x001d3868
      */
     virtual ~GamePowerupPlacer();
 
@@ -62,7 +64,8 @@ public:
      * announced with a DisplayPointerMsg.
      *
      * @param nStep The step, which the body negates.
-     * @ghidraAddress 0x001cccb0
+     * @ghidraAddress NTSC-U/C: 0x001cccb0
+     * @ghidraAddress PAL: 0x001d2b68
      */
     virtual void MoveCursor(int nStep);
 
@@ -71,7 +74,8 @@ public:
      *
      * A cursor of -1 sends nothing.
      *
-     * @ghidraAddress 0x001cce90
+     * @ghidraAddress NTSC-U/C: 0x001cce90
+     * @ghidraAddress PAL: 0x001d2d48
      */
     virtual void AnnounceCursor();
 
@@ -83,7 +87,8 @@ public:
      * Player::GetTrack() and the cursor bar, then sends a `remove` DisplayPointerMsg and sets the
      * cursor to -1.
      *
-     * @ghidraAddress 0x001ccf30
+     * @ghidraAddress NTSC-U/C: 0x001ccf30
+     * @ghidraAddress PAL: 0x001d2de8
      */
     virtual void DeployPowerup();
 
@@ -92,7 +97,8 @@ public:
      *
      * The routine starts the TickTask subobject with the epoch offset kMBTInfinity.
      *
-     * @ghidraAddress 0x001cde18
+     * @ghidraAddress NTSC-U/C: 0x001cde18
+     * @ghidraAddress PAL: 0x001d3cd0
      */
     virtual void Activate();
 
@@ -102,7 +108,8 @@ public:
      * The routine stops the TickTask subobject, which cancels the queued command and resets the
      * handle to -2.
      *
-     * @ghidraAddress 0x001cde40
+     * @ghidraAddress NTSC-U/C: 0x001cde40
+     * @ghidraAddress PAL: 0x001d3cf8
      */
     virtual void Deactivate();
 
@@ -117,7 +124,8 @@ public:
      *
      * @param nElapsedTicks Ticks between the task's epoch and the run now due.
      * @return 1 on every path.
-     * @ghidraAddress 0x001cd028
+     * @ghidraAddress NTSC-U/C: 0x001cd028
+     * @ghidraAddress PAL: 0x001d2ee0
      */
     virtual int Tick(int nElapsedTicks);
 

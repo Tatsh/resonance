@@ -28,14 +28,14 @@ constexpr int kFirstStatsEffect = 5;
 constexpr int kEndStatsEffect = 11;
 
 // Deleter the destructor runs over mEffectors.
-// 0x001a6050
+// NTSC-U/C: 0x001a6050, PAL: 0x001abdb8
 void DeleteEffector(Effector *pEffector) {
     delete pEffector;
 }
 
 } // namespace
 
-// 0x001a5020
+// NTSC-U/C: 0x001a5020, PAL: 0x001aad88
 JamEffectsMgr::JamEffectsMgr(
     int nTrack, unsigned char nChannel, PlayMap *pPlayMap, PhraseMgr *pPhraseMgr, MsgSink *pSink)
     : mPlayMap(pPlayMap), mPhraseMgr(pPhraseMgr), mTrack(nTrack), mChannel(nChannel) {
@@ -48,12 +48,12 @@ JamEffectsMgr::JamEffectsMgr(
     }
 }
 
-// 0x001a5378
+// NTSC-U/C: 0x001a5378, PAL: 0x001ab0e0
 JamEffectsMgr::~JamEffectsMgr() {
     std::for_each(mEffectors.begin(), mEffectors.end(), DeleteEffector);
 }
 
-// 0x001a56d8
+// NTSC-U/C: 0x001a56d8, PAL: 0x001ab440
 void JamEffectsMgr::ApplyStepMask(long long nMask) {
     std::bitset<kStepMaskBits> mask(nMask);
     for (std::vector<Effector *>::iterator it = mEffectors.begin(); it != mEffectors.end(); ++it) {
@@ -62,7 +62,7 @@ void JamEffectsMgr::ApplyStepMask(long long nMask) {
     }
 }
 
-// 0x001a54d8
+// NTSC-U/C: 0x001a54d8, PAL: 0x001ab240
 void JamEffectsMgr::PostRemixFxMsg(JamEffectMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -89,7 +89,7 @@ void JamEffectsMgr::PostRemixFxMsg(JamEffectMsg *pMsg) {
     }
 }
 
-// 0x001a62d8
+// NTSC-U/C: 0x001a62d8, PAL: 0x001ac040
 Effector *JamEffectsMgr::FindEffector(int nType) {
     for (std::vector<Effector *>::iterator it = mEffectors.begin(); it != mEffectors.end(); ++it) {
         if ((*it)->Type() == nType) {
@@ -99,14 +99,14 @@ Effector *JamEffectsMgr::FindEffector(int nType) {
     return nullptr;
 }
 
-// 0x001a6350
+// NTSC-U/C: 0x001a6350, PAL: 0x001ac0b8
 void JamEffectsMgr::EnableAll(int bEnabled) {
     for (std::vector<Effector *>::iterator it = mEffectors.begin(); it != mEffectors.end(); ++it) {
         (*it)->Enable(bEnabled);
     }
 }
 
-// 0x001a63d0
+// NTSC-U/C: 0x001a63d0, PAL: 0x001ac138
 void JamEffectsMgr::HandleMessage(Message *pMsg) {
     if (pMsg->Type() == g_nJamEffectMsgType) {
         PostRemixFxMsg(static_cast<JamEffectMsg *>(pMsg));

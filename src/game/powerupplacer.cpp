@@ -1,32 +1,32 @@
 #include "game/powerupplacer.h"
 
-// 0x001cd958
+// NTSC-U/C: 0x001cd958, PAL: 0x001d3810
 // The body adds nothing to the MsgSource construction the compiler expands ahead of
 // the table store.
 PowerupPlacer::PowerupPlacer() {
 }
 
-// 0x001ce0b0
+// NTSC-U/C: 0x001ce0b0, PAL: 0x001d3f68
 // Everything left in the body is the expansion of the MsgSource destructor.
 PowerupPlacer::~PowerupPlacer() {
 }
 
-// 0x001cd990
+// NTSC-U/C: 0x001cd990, PAL: 0x001d3848
 void PowerupPlacer::Activate() {
 }
 
-// 0x001cd998
+// NTSC-U/C: 0x001cd998, PAL: 0x001d3850
 void PowerupPlacer::Deactivate() {
 }
 
-// 0x001cd9a0
+// NTSC-U/C: 0x001cd9a0, PAL: 0x001d3858
 void PowerupPlacer::MoveCursor(int) {
 }
 
-// 0x001cd9a8
+// NTSC-U/C: 0x001cd9a8, PAL: 0x001d3860
 void PowerupPlacer::AnnounceCursor() {
 }
 
-// 0x001ce1b0
+// NTSC-U/C: 0x001ce1b0, PAL: 0x001d4068
 void PowerupPlacer::DeployPowerup() {
 }

@@ -29,7 +29,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x001ceb70
+     * @ghidraAddress NTSC-U/C: 0x001ceb70
+     * @ghidraAddress PAL: 0x001d4a28
      */
     void *operator new(size_t nSize);
 
@@ -37,7 +38,8 @@ public:
      * Release a riff to the tagged heap.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x001ceb90
+     * @ghidraAddress NTSC-U/C: 0x001ceb90
+     * @ghidraAddress PAL: 0x001d4a48
      */
     void operator delete(void *pBlock);
 
@@ -45,7 +47,8 @@ public:
      * Construct an empty riff for one difficulty level.
      *
      * @param nId The difficulty level.
-     * @ghidraAddress 0x001cebb0
+     * @ghidraAddress NTSC-U/C: 0x001cebb0
+     * @ghidraAddress PAL: 0x001d4a68
      */
     explicit Riff(int nId);
 
@@ -53,7 +56,8 @@ public:
      * Write `riff[id=` and the level, then the sequence through MultiMuse::Print().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001cec58
+     * @ghidraAddress NTSC-U/C: 0x001cec58
+     * @ghidraAddress PAL: 0x001d4b10
      */
     virtual void Print(std::ostream &stream);
 
@@ -69,7 +73,8 @@ public:
      * @param nVelocity The note-on velocity.
      * @param nLength The length of the note, in MIDI ticks.
      * @param nChannel The MIDI channel.
-     * @ghidraAddress 0x001ce778
+     * @ghidraAddress NTSC-U/C: 0x001ce778
+     * @ghidraAddress PAL: 0x001d4630
      */
     void AddNoteMsg(int nTick,
                     unsigned char nNote,
@@ -88,7 +93,8 @@ public:
      * @param nData1 The first data byte.
      * @param nData2 The second data byte.
      * @param nChannel The channel, combined into the status with a bitwise or.
-     * @ghidraAddress 0x001ce8d0
+     * @ghidraAddress NTSC-U/C: 0x001ce8d0
+     * @ghidraAddress PAL: 0x001d4788
      */
     void AddMidiMsg(int nTick,
                     unsigned char nStatus,

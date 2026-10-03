@@ -32,7 +32,8 @@ public:
      *
      * @param pMidi The range.
      * @param tick The position a note has to sound past.
-     * @ghidraAddress 0x00105660
+     * @ghidraAddress NTSC-U/C: 0x00105660
+     * @ghidraAddress PAL: 0x00105660
      */
     void Search(const std::vector<TickObj<MuseMsg *> > *pMidi, Mid::MBT tick) {
         mTick = tick;
@@ -47,7 +48,8 @@ public:
      * Pass a NoteMsg to OnNote() and ignore every other message.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001023b0
+     * @ghidraAddress NTSC-U/C: 0x001023b0
+     * @ghidraAddress PAL: 0x001023b0
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -67,7 +69,8 @@ private:
      * HandleMessage() expands the body. The title is inferred.
      *
      * @param pNote The note.
-     * @ghidraAddress 0x001056d8
+     * @ghidraAddress NTSC-U/C: 0x001056d8
+     * @ghidraAddress PAL: 0x001056d8
      */
     void OnNote(NoteMsg *pNote) {
         bool bSounding = false;

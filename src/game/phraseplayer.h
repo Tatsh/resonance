@@ -33,7 +33,8 @@ public:
      * @param pPhraseMgr The phrase manager of the track.
      * @param pQuantizer The quantiser of the track.
      * @param pTrackData The track description. The constructor copies its mode.
-     * @ghidraAddress 0x001c17d8
+     * @ghidraAddress NTSC-U/C: 0x001c17d8
+     * @ghidraAddress PAL: 0x001c7620
      */
     PhrasePlayer(PhraseMgr *pPhraseMgr, Quantizer *pQuantizer, const TrackData *pTrackData);
 
@@ -44,7 +45,8 @@ public:
      * answer, which is what remains of a dispatch with no case left in the release build.
      *
      * @param pMsg The message.
-     * @ghidraAddress 0x001c2928
+     * @ghidraAddress NTSC-U/C: 0x001c2928
+     * @ghidraAddress PAL: 0x001c8770
      */
     virtual void HandleMessage(Message *pMsg);
 
@@ -55,7 +57,8 @@ public:
      * when there is one. A bar after mLastBar with a phrase is then played from its start.
      *
      * @param nBar The bar.
-     * @ghidraAddress 0x001c1860
+     * @ghidraAddress NTSC-U/C: 0x001c1860
+     * @ghidraAddress PAL: 0x001c76a8
      */
     void PlayBar(int nBar);
 
@@ -68,7 +71,8 @@ public:
      * @param nBar The bar.
      * @param nOffset The offset within the bar, in MIDI ticks. Earlier gems are skipped.
      * @param nElapsed The ticks since the bar started, subtracted from every gem position.
-     * @ghidraAddress 0x001c2818
+     * @ghidraAddress NTSC-U/C: 0x001c2818
+     * @ghidraAddress PAL: 0x001c8660
      */
     void PlayBarAt(int nBar, int nOffset, int nElapsed);
 
@@ -78,24 +82,25 @@ public:
      * PitchingSTG's and VoxingSTG's constructors call it. The title is inferred.
      *
      * @param pJamEffects The manager, or null.
-     * @ghidraAddress 0x001c2810
+     * @ghidraAddress NTSC-U/C: 0x001c2810
+     * @ghidraAddress PAL: 0x001c8658
      */
     void SetJamEffectsMgr(JamEffectsMgr *pJamEffects);
 
 private:
     // Sends the riff of every gem of the bar from nFrom on, positioned nElapsed earlier, as one
     // sequence. A phrase without an owner plays nothing. Records the bar in mLastBar.
-    // 0x001c1978
+    // NTSC-U/C: 0x001c1978, PAL: 0x001c77c0
     void PlayBarGems(Phrase *pPhrase, int nBar, Mid::MBT from, Mid::MBT elapsed);
 
     // Sends the riff of every gem of the phrase from nFrom on as one sequence, transposing each by
     // the gem's transposition. A gem without a riff abandons the bar before anything is sent or
     // mLastBar changes.
-    // 0x001c1ba8
+    // NTSC-U/C: 0x001c1ba8, PAL: 0x001c79f0
     void PlayPhraseGems(Phrase *pPhrase, int nBar, Mid::MBT from, Mid::MBT elapsed);
 
     // Sends the phrase's own sequence when it has one, and records the bar in mLastBar.
-    // 0x001c28a0
+    // NTSC-U/C: 0x001c28a0, PAL: 0x001c86e8
     void PlayPhraseMuse(Phrase *pPhrase, int nBar);
 
     PhraseMgr *mPhraseMgr;       // +0x18

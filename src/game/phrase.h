@@ -94,7 +94,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x001b6a28
+     * @ghidraAddress NTSC-U/C: 0x001b6a28
+     * @ghidraAddress PAL: 0x001bc800
      */
     void *operator new(size_t nSize);
 
@@ -102,21 +103,24 @@ public:
      * Release a phrase to the tagged heap.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x001b6a48
+     * @ghidraAddress NTSC-U/C: 0x001b6a48
+     * @ghidraAddress PAL: 0x001bc820
      */
     void operator delete(void *pBlock);
 
     /**
      * Construct an empty phrase owned by the stand-in player.
      *
-     * @ghidraAddress 0x001b4940
+     * @ghidraAddress NTSC-U/C: 0x001b4940
+     * @ghidraAddress PAL: 0x001ba718
      */
     Phrase();
 
     /**
      * Release the message sequence, when one exists, and both vectors.
      *
-     * @ghidraAddress 0x001b4998
+     * @ghidraAddress NTSC-U/C: 0x001b4998
+     * @ghidraAddress PAL: 0x001ba770
      */
     virtual ~Phrase();
 
@@ -130,7 +134,8 @@ public:
      * @param nGem The gem.
      * @param nTrans The transposition.
      * @return The replaced gem's mGem, or -1 when no gem was replaced.
-     * @ghidraAddress 0x001b4b30
+     * @ghidraAddress NTSC-U/C: 0x001b4b30
+     * @ghidraAddress PAL: 0x001ba908
      */
     int AddGem(int nTick, int nGem, int nTrans);
 
@@ -139,7 +144,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @param pMsg The message. The sequence stores a clone of it.
-     * @ghidraAddress 0x001b4cd8
+     * @ghidraAddress NTSC-U/C: 0x001b4cd8
+     * @ghidraAddress PAL: 0x001baab0
      */
     void AddMuseMsg(int nTick, MuseMsg *pMsg);
 
@@ -147,7 +153,8 @@ public:
      * Write the phrase to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001b4d68
+     * @ghidraAddress NTSC-U/C: 0x001b4d68
+     * @ghidraAddress PAL: 0x001bab40
      */
     void Print(std::ostream &stream);
 
@@ -155,7 +162,8 @@ public:
      * Write the phrase behind a version byte of 2.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001b5018
+     * @ghidraAddress NTSC-U/C: 0x001b5018
+     * @ghidraAddress PAL: 0x001badf0
      */
     void Save(OBStream &stream);
 
@@ -167,7 +175,8 @@ public:
      * player.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x001b51f8
+     * @ghidraAddress NTSC-U/C: 0x001b51f8
+     * @ghidraAddress PAL: 0x001bafd0
      */
     void Load(IBStream &stream);
 
@@ -176,7 +185,8 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @param flValue The value.
-     * @ghidraAddress 0x001b6d88
+     * @ghidraAddress NTSC-U/C: 0x001b6d88
+     * @ghidraAddress PAL: 0x001bcb60
      */
     void AddValue(int nTick, float flValue);
 
@@ -185,17 +195,18 @@ public:
      *
      * @param nTick The song position, in MIDI ticks.
      * @return The value of the last entry at or before nTick, or 0.5 when none exists.
-     * @ghidraAddress 0x001b6db0
+     * @ghidraAddress NTSC-U/C: 0x001b6db0
+     * @ghidraAddress PAL: 0x001bcb88
      */
     float GetValue(int nTick);
 
 private:
     // Written behind the value list, as the count and the entries in a narrower form than the
     // gems use.
-    // 0x001b5500
+    // NTSC-U/C: 0x001b5500, PAL: 0x001bb2d8
     void SaveValues(OBStream &stream);
 
-    // 0x001b55f8
+    // NTSC-U/C: 0x001b55f8, PAL: 0x001bb3d0
     void LoadValues(IBStream &stream);
 
     std::vector<Gem> mGems;               // +0x08, labelled `gems: `
@@ -213,7 +224,8 @@ private:
  * @param stream The stream to write to.
  * @param gem The gem.
  * @return The stream.
- * @ghidraAddress 0x001b6ba0
+ * @ghidraAddress NTSC-U/C: 0x001b6ba0
+ * @ghidraAddress PAL: 0x001bc978
  */
 OBStream &operator<<(OBStream &stream, const Phrase::Gem &gem);
 
@@ -223,7 +235,8 @@ OBStream &operator<<(OBStream &stream, const Phrase::Gem &gem);
  * @param stream The stream to read from.
  * @param gem The gem to fill.
  * @return The stream.
- * @ghidraAddress 0x001b6c48
+ * @ghidraAddress NTSC-U/C: 0x001b6c48
+ * @ghidraAddress PAL: 0x001bca20
  */
 IBStream &operator>>(IBStream &stream, Phrase::Gem &gem);
 
@@ -233,7 +246,8 @@ IBStream &operator>>(IBStream &stream, Phrase::Gem &gem);
  * @param stream The stream to write to.
  * @param gem The gem.
  * @return The stream.
- * @ghidraAddress 0x001b6cf8
+ * @ghidraAddress NTSC-U/C: 0x001b6cf8
+ * @ghidraAddress PAL: 0x001bcad0
  */
 std::ostream &operator<<(std::ostream &stream, Phrase::Gem &gem);
 
@@ -243,7 +257,8 @@ std::ostream &operator<<(std::ostream &stream, Phrase::Gem &gem);
  * @param stream The stream to write to.
  * @param phrase The phrase.
  * @return The stream.
- * @ghidraAddress 0x001b6e28
+ * @ghidraAddress NTSC-U/C: 0x001b6e28
+ * @ghidraAddress PAL: 0x001bcc00
  */
 OBStream &operator<<(OBStream &stream, Phrase &phrase);
 
@@ -253,7 +268,8 @@ OBStream &operator<<(OBStream &stream, Phrase &phrase);
  * @param stream The stream to read from.
  * @param phrase The phrase to fill.
  * @return The stream.
- * @ghidraAddress 0x001b6e88
+ * @ghidraAddress NTSC-U/C: 0x001b6e88
+ * @ghidraAddress PAL: 0x001bcc60
  */
 IBStream &operator>>(IBStream &stream, Phrase &phrase);
 
@@ -265,7 +281,8 @@ IBStream &operator>>(IBStream &stream, Phrase &phrase);
  * @param stream The stream to write to.
  * @param pPhrase The phrase, or null.
  * @return The stream.
- * @ghidraAddress 0x001b6ee0
+ * @ghidraAddress NTSC-U/C: 0x001b6ee0
+ * @ghidraAddress PAL: 0x001bccb8
  */
 OBStream &operator<<(OBStream &stream, Phrase *pPhrase);
 
@@ -275,7 +292,8 @@ OBStream &operator<<(OBStream &stream, Phrase *pPhrase);
  * @param stream The stream to read from.
  * @param pPhrase Receives the new phrase, or null.
  * @return The stream.
- * @ghidraAddress 0x001b6f70
+ * @ghidraAddress NTSC-U/C: 0x001b6f70
+ * @ghidraAddress PAL: 0x001bcd48
  */
 IBStream &operator>>(IBStream &stream, Phrase *&pPhrase);
 
@@ -285,6 +303,7 @@ IBStream &operator>>(IBStream &stream, Phrase *&pPhrase);
  * @param stream The stream to write to.
  * @param phrase The phrase.
  * @return The stream.
- * @ghidraAddress 0x001b7038
+ * @ghidraAddress NTSC-U/C: 0x001b7038
+ * @ghidraAddress PAL: 0x001bce10
  */
 std::ostream &operator<<(std::ostream &stream, Phrase &phrase);

@@ -29,14 +29,15 @@ public:
      *
      * @param nValue The input value.
      * @return The mapped value, between the smaller and the larger of the two output ends.
-     * @ghidraAddress 0x00536fe0
+     * @ghidraAddress NTSC-U/C: 0x00536fe0
+     * @ghidraAddress PAL: 0x005768a0
      */
     int Map(int nValue);
 
 private:
     // Computes mSlope and mOffset in single precision from the four ends, and orders the two
     // output ends into mLower and mUpper.
-    // 0x00536f50
+    // NTSC-U/C: 0x00536f50, PAL: 0x00576810
     void Init();
 
     int mInMin;    // +0x00

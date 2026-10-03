@@ -38,7 +38,8 @@ public:
     /**
      * Start with an empty part list and a fresh view named by the FreQ maker asset manager.
      *
-     * @ghidraAddress 0x00249c40
+     * @ghidraAddress NTSC-U/C: 0x00249c40
+     * @ghidraAddress PAL: 0x0025ef88
      */
     FreqAppearanceDetail();
 
@@ -48,7 +49,8 @@ public:
      * The image has no caller.
      *
      * @param other The avatar to copy.
-     * @ghidraAddress 0x00249e58
+     * @ghidraAddress NTSC-U/C: 0x00249e58
+     * @ghidraAddress PAL: 0x0025f1c0
      */
     FreqAppearanceDetail(const FreqAppearanceDetail &other);
 
@@ -58,7 +60,8 @@ public:
      * The destructor is not virtual. FreqAppearance's own destructor releases this object through
      * a direct call rather than through a table.
      *
-     * @ghidraAddress 0x0024edc8
+     * @ghidraAddress NTSC-U/C: 0x0024edc8
+     * @ghidraAddress PAL: 0x002641f0
      */
     ~FreqAppearanceDetail();
 
@@ -69,7 +72,8 @@ public:
      * bytes), its palette x and y, its mirrored flag as one byte, and its placement x and z.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x0024b160
+     * @ghidraAddress NTSC-U/C: 0x0024b160
+     * @ghidraAddress PAL: 0x00260508
      */
     void save(OBStream &stream);
 
@@ -80,7 +84,8 @@ public:
      * also looked up in Rnd::g_manager as a texture, and that result is discarded.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x0024b340
+     * @ghidraAddress NTSC-U/C: 0x0024b340
+     * @ghidraAddress PAL: 0x002606e8
      */
     void load(IBStream &stream);
 
@@ -90,7 +95,8 @@ public:
      * The destructor runs this before releasing the view, and FreqAppearance::operator=() runs it
      * before copying the source in. The name is inferred from those two uses.
      *
-     * @ghidraAddress 0x0024a4b0
+     * @ghidraAddress NTSC-U/C: 0x0024a4b0
+     * @ghidraAddress PAL: 0x0025f838
      */
     void clear();
 
@@ -103,7 +109,8 @@ public:
      * inferred from that pairing.
      *
      * @param other The avatar to copy.
-     * @ghidraAddress 0x0024a088
+     * @ghidraAddress NTSC-U/C: 0x0024a088
+     * @ghidraAddress PAL: 0x0025f410
      */
     void copyFrom(const FreqAppearanceDetail &other);
 
@@ -114,7 +121,8 @@ public:
      * and by the routine at `0x00262270`.
      *
      * @return The part list.
-     * @ghidraAddress 0x0024f230
+     * @ghidraAddress NTSC-U/C: 0x0024f230
+     * @ghidraAddress PAL: 0x00264658
      */
     std::list<FreqPart *> &parts() {
         return mParts;
@@ -128,7 +136,8 @@ public:
      *
      * @param pOut The first record to write.
      * @param pCount Receives the number of parts written.
-     * @ghidraAddress 0x0024c398
+     * @ghidraAddress NTSC-U/C: 0x0024c398
+     * @ghidraAddress PAL: 0x00261798
      */
     void pack(FreqPart::Packed *pOut, int *pCount);
 
@@ -143,7 +152,8 @@ public:
      *
      * @param pRecords The first record to read.
      * @param nCount The number of records.
-     * @ghidraAddress 0x0024b898
+     * @ghidraAddress NTSC-U/C: 0x0024b898
+     * @ghidraAddress PAL: 0x00260c78
      */
     void unpack(const FreqPart::Packed *pRecords, int nCount);
 
@@ -153,7 +163,8 @@ public:
      *
      * The title is inferred.
      *
-     * @ghidraAddress 0x00249b48
+     * @ghidraAddress NTSC-U/C: 0x00249b48
+     * @ghidraAddress PAL: 0x0025ee70
      */
     void ensureCursorMesh();
 
@@ -163,7 +174,8 @@ public:
      *
      * unpack() expands the same body. The title is inferred.
      *
-     * @ghidraAddress 0x0024ee60
+     * @ghidraAddress NTSC-U/C: 0x0024ee60
+     * @ghidraAddress PAL: 0x00264288
      */
     void resetCursor();
 
@@ -175,7 +187,8 @@ public:
      * moved to the end of the view's lists. The title is inferred.
      *
      * @param name The template name.
-     * @ghidraAddress 0x0024a5f0
+     * @ghidraAddress NTSC-U/C: 0x0024a5f0
+     * @ghidraAddress PAL: 0x0025f978
      */
     void selectTemplate(const HxStr &name);
 
@@ -186,7 +199,8 @@ public:
      * before the preview mesh, with the current colour and mirroring, and the placement state is
      * reset. While editing, the selection is dropped and placing resumes. The title is inferred.
      *
-     * @ghidraAddress 0x0024a770
+     * @ghidraAddress NTSC-U/C: 0x0024a770
+     * @ghidraAddress PAL: 0x0025faf8
      */
     void placeCursor();
 
@@ -198,7 +212,8 @@ public:
      *
      * @param nStepX -1, 0, or 1 along x.
      * @param nStepZ -1, 0, or 1 along z.
-     * @ghidraAddress 0x0024a9e8
+     * @ghidraAddress NTSC-U/C: 0x0024a9e8
+     * @ghidraAddress PAL: 0x0025fd90
      */
     void nudgeCursor(int nStepX, int nStepZ);
 
@@ -209,7 +224,8 @@ public:
      *
      * @param nIndex The part's position in the part list.
      * @return The part, or null for an index outside the list.
-     * @ghidraAddress 0x0024ae20
+     * @ghidraAddress NTSC-U/C: 0x0024ae20
+     * @ghidraAddress PAL: 0x002601c8
      */
     FreqPart *selectPart(int nIndex);
 
@@ -220,7 +236,8 @@ public:
      *
      * @param nIndex The part's position in the part list. An index outside the list deletes
      *               nothing.
-     * @ghidraAddress 0x0024bc50
+     * @ghidraAddress NTSC-U/C: 0x0024bc50
+     * @ghidraAddress PAL: 0x00261050
      */
     void deletePart(int nIndex);
 
@@ -230,7 +247,8 @@ public:
      *
      * The title is inferred.
      *
-     * @ghidraAddress 0x0024be00
+     * @ghidraAddress NTSC-U/C: 0x0024be00
+     * @ghidraAddress PAL: 0x00261200
      */
     void revertSelection();
 
@@ -240,7 +258,8 @@ public:
      * With a chance of a third a part takes a random palette colour, and with another third a
      * random template of its category, unless the category is 1, 2, or 8. The title is inferred.
      *
-     * @ghidraAddress 0x0024bfc8
+     * @ghidraAddress NTSC-U/C: 0x0024bfc8
+     * @ghidraAddress PAL: 0x002613c8
      */
     void randomize();
 
@@ -250,7 +269,8 @@ public:
      * The title is inferred.
      *
      * @param nIndex The part's position in the part list.
-     * @ghidraAddress 0x0024c218
+     * @ghidraAddress NTSC-U/C: 0x0024c218
+     * @ghidraAddress PAL: 0x00261618
      */
     void recentrePart(int nIndex);
 
@@ -259,7 +279,8 @@ public:
      *
      * The title is inferred.
      *
-     * @ghidraAddress 0x0024ef08
+     * @ghidraAddress NTSC-U/C: 0x0024ef08
+     * @ghidraAddress PAL: 0x00264330
      */
     void sendBackward();
 
@@ -268,7 +289,8 @@ public:
      *
      * The title is inferred.
      *
-     * @ghidraAddress 0x0024ef80
+     * @ghidraAddress NTSC-U/C: 0x0024ef80
+     * @ghidraAddress PAL: 0x002643a8
      */
     void bringForward();
 
@@ -280,7 +302,8 @@ public:
      *
      * @param pPart The part.
      * @return The position, or the number of drawables when the mesh is not drawn.
-     * @ghidraAddress 0x0024eff8
+     * @ghidraAddress NTSC-U/C: 0x0024eff8
+     * @ghidraAddress PAL: 0x00264420
      */
     int drawIndexOf(FreqPart *pPart);
 
@@ -289,7 +312,8 @@ public:
      *
      * The title is inferred.
      *
-     * @ghidraAddress 0x0024f060
+     * @ghidraAddress NTSC-U/C: 0x0024f060
+     * @ghidraAddress PAL: 0x00264488
      */
     void toggleMirror();
 
@@ -300,7 +324,8 @@ public:
      *
      * @param color The colour.
      * @param palettePosition The palette position the colour came from.
-     * @ghidraAddress 0x0024f178
+     * @ghidraAddress NTSC-U/C: 0x0024f178
+     * @ghidraAddress PAL: 0x002645a0
      */
     void setColor(const Color &color, const Vector2 &palettePosition);
 
@@ -310,7 +335,8 @@ public:
      * The title is inferred.
      *
      * @param pParent The parent view.
-     * @ghidraAddress 0x0024f238
+     * @ghidraAddress NTSC-U/C: 0x0024f238
+     * @ghidraAddress PAL: 0x00264660
      */
     void attachTo(Rnd::View *pParent);
 
@@ -320,7 +346,8 @@ public:
      * The title is inferred.
      *
      * @param pParent The parent view.
-     * @ghidraAddress 0x0024f290
+     * @ghidraAddress NTSC-U/C: 0x0024f290
+     * @ghidraAddress PAL: 0x002646b8
      */
     void detachFrom(Rnd::View *pParent);
 

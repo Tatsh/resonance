@@ -15,15 +15,15 @@ const char *const kEmptyName = "";
 
 } // namespace
 
-// 0x001448b8
+// NTSC-U/C: 0x001448b8, PAL: 0x001453b8
 LevelStats::LevelStats() {
 }
 
-// 0x001424e8
+// NTSC-U/C: 0x001424e8, PAL: 0x00142fd8
 LevelStats::~LevelStats() {
 }
 
-// 0x00142760
+// NTSC-U/C: 0x00142760, PAL: 0x00143260
 void LevelStats::Save(OBStream &stream) {
     char nVersion = kRecordVersion;
     stream.WriteBytes(&nVersion, sizeof(nVersion));
@@ -42,7 +42,7 @@ void LevelStats::Save(OBStream &stream) {
     mSkills[2].Save(stream);
 }
 
-// 0x00142880
+// NTSC-U/C: 0x00142880, PAL: 0x00143380
 void LevelStats::Load(IBStream &stream) {
     if (g_nStatsRecordVersion == kFirstRecordVersion) {
         int nUnused;
@@ -96,7 +96,7 @@ void LevelStats::Load(IBStream &stream) {
     }
 }
 
-// 0x00142610
+// NTSC-U/C: 0x00142610, PAL: 0x00143110
 void LevelStats::Reset() {
     mName = kEmptyName;
     mStage = 0;
@@ -108,7 +108,7 @@ void LevelStats::Reset() {
     }
 }
 
-// 0x00142d70
+// NTSC-U/C: 0x00142d70, PAL: 0x00143870
 void LevelStats::Assign(const LevelStats &other) {
     mName = other.mName;
     mStage = other.mStage;
@@ -119,6 +119,6 @@ void LevelStats::Assign(const LevelStats &other) {
     }
 }
 
-// 0x001452f0
+// NTSC-U/C: 0x001452f0, PAL: 0x00145e08
 void LevelStats::Print([[maybe_unused]] std::ostream &stream) const {
 }
