@@ -46,9 +46,11 @@ public:
     /**
      * Write the message for mStep into the "boundary msg" text.
      *
-     * AppTunnel's handler for an AdvanceSectionToggleMsg calls it as well as SetFrame().
+     * AppTunnel's handler for an AdvanceSectionToggleMsg calls it as well as SetFrame(). The
+     * European release looks the message up in the current language.
      *
-     * @ghidraAddress 0x0043fdf0
+     * @ghidraAddress NTSC-U/C: 0x0043fdf0
+     * @ghidraAddress PAL: 0x0047c808
      */
     void UpdateText();
 

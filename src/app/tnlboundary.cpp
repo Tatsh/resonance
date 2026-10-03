@@ -4,6 +4,7 @@
 #include "app/tnlutil.h"
 #include "game/gamemanagerimpl.h"
 #include "game/playmap.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/text.h"
@@ -42,17 +43,17 @@ void TnlBoundary::SetFrame(float flFrame) {
     }
 }
 
-// 0x0043fdf0
+// NTSC-U/C: 0x0043fdf0, PAL: 0x0047c808
 void TnlBoundary::UpdateText() {
     HxStr message("");
     if (Application::shared()->GetPlayMode() == kPlayModeGame) {
         const int nSection = mPlayMap->GetAbsoluteSectionIndex(mStep);
         if (nSection == 0) {
-            message = "START";
+            message = MetText(kMetStrIngStart, "START");
         } else if (nSection == mStepCount - 1) {
-            message = "FINAL\nSECTION";
+            message = MetText(kMetStrIngFinal, "FINAL\nSECTION");
         } else if (nSection == mStepCount) {
-            message = "FINISH";
+            message = MetText(kMetStrIngFinish, "FINISH");
         }
     }
     mText->SetText(message);

@@ -16,7 +16,11 @@ public:
     /**
      * Resolve the group and hide it.
      *
-     * @ghidraAddress 0x00417a60
+     * The European release also writes the kMetStrIngCtrlPan text of the current language into
+     * `tc_pan.txt`.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00417a60
+     * @ghidraAddress PAL: 0x004518a8
      */
     HudTcGroup();
 

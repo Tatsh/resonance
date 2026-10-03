@@ -43,12 +43,12 @@ public:
     void SetFrame(float flTime);
 
     /**
-     * Show banked points leaving the readout.
+     * Show banked points exiting the readout.
      *
      * Hides the points text, sets the exit text, and plays the exit animation from frame 0 to
      * frame 100 at full flash. The title is inferred.
      *
-     * @param nPoints The points to show leaving.
+     * @param nPoints The points to show exiting.
      * @ghidraAddress 0x00418f90
      */
     void ShowExit(int nPoints);
@@ -68,7 +68,7 @@ public:
      * Overlay's CatchMsg handler at `0x0041fed8` inlines the body, and no out-of-line copy is
      * recovered. The title is inferred.
      *
-     * @param flFraction The share of the phrase caught so far, which the pulse falls back to.
+     * @param flFraction The share of the phrase caught so far. The pulse falls back to it.
      */
     void Pulse(float flFraction) {
         mPulseRest = flFraction;
@@ -89,10 +89,12 @@ public:
     /**
      * Show a multiplier as `x<n>`, visible only above 1.
      *
-     * The out-of-line copy has no caller. The title is inferred.
+     * The out-of-line copy has no caller. The title is inferred. The European release takes the
+     * format from the current language.
      *
      * @param nMultiplier The multiplier.
-     * @ghidraAddress 0x0042a0c8
+     * @ghidraAddress NTSC-U/C: 0x0042a0c8
+     * @ghidraAddress PAL: 0x00453258
      */
     void SetMultiplier(int nMultiplier);
 

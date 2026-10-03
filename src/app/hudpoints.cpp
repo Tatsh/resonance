@@ -5,6 +5,7 @@
 #include "app/overlay.h"
 #include "math/color.h"
 #include "math/vector3.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/blur.h"
@@ -76,7 +77,7 @@ void HudPoints::SetFrame(float flTime) {
     mExitView->SetShowing(mExit.Update(flTime));
 
     // The points text is scaled across and in depth by the pulse. Only the three basis rows are
-    // replaced, and the translation row is left as it was.
+    // replaced, and the translation row is not changed.
     const float flScale = mPulse * kHalf + kHalf;
     const Vector3 basis[] = {
         {flScale, 0.0f, 0.0f, 1.0f},
@@ -138,9 +139,15 @@ void HudPoints::SetPoints(int nPoints) {
     mPulseRest = 0.0f;
 }
 
-// 0x0042a0c8
+// NTSC-U/C: 0x0042a0c8, PAL: 0x00453258
 void HudPoints::SetMultiplier(int nMultiplier) {
     mMultiplier = nMultiplier;
+#ifdef VIDEO_STANDARD_PAL
+    const HxStr format = GetMetString(kMetStrIngMult);
+    mMultiplierText->SetText(
+        HxStr(FormatString(format.mStr != nullptr ? format.mStr : g_szEmptyString, mMultiplier)));
+#else
     mMultiplierText->SetText(HxStr(FormatString("x%d", nMultiplier)));
+#endif
     mMultiplierText->SetShowing(mMultiplier > 1);
 }
