@@ -8,7 +8,7 @@
 #include "math/plane.h"
 #include "math/transformops.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
 #include "os/random.h"
@@ -158,11 +158,11 @@ constexpr int kParticleListDumpLevel = 2;
 
 // The print helpers below reproduce the formatting the binary open-codes at every dump site.
 
-inline void PrintRange(FailSink &sink, float flLow, float flHigh) {
+inline void PrintRange(Dbg &sink, float flLow, float flHigh) {
     sink.Print("(x:")->Format("%.2f", flLow)->Print(" y:")->Format("%.2f", flHigh)->Print(")");
 }
 
-inline void PrintVector3(FailSink &sink, const Vector3 &vec) {
+inline void PrintVector3(Dbg &sink, const Vector3 &vec) {
     sink.Print("(x:")
         ->Format("%.2f", vec.x)
         ->Print(" y:")
@@ -172,7 +172,7 @@ inline void PrintVector3(FailSink &sink, const Vector3 &vec) {
         ->Print(")");
 }
 
-inline void PrintColor(FailSink &sink, const Color &color) {
+inline void PrintColor(Dbg &sink, const Color &color) {
     sink.Print("(r:")
         ->Format("%.2f", color.r)
         ->Print(" g:")
@@ -184,7 +184,7 @@ inline void PrintColor(FailSink &sink, const Color &color) {
         ->Print(")");
 }
 
-inline void PrintPlane(FailSink &sink, const Plane &plane) {
+inline void PrintPlane(Dbg &sink, const Plane &plane) {
     sink.Print("(a:")
         ->Format("%.2f", plane.a)
         ->Print(" b:")
@@ -196,11 +196,11 @@ inline void PrintPlane(FailSink &sink, const Plane &plane) {
         ->Print(")");
 }
 
-inline void PrintBool(FailSink &sink, int bValue) {
+inline void PrintBool(Dbg &sink, int bValue) {
     sink.Print(bValue != 0 ? "true" : "false");
 }
 
-inline void PrintObjectRef(FailSink &sink, const Object *pObject) {
+inline void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print("no object");
         return;
@@ -209,7 +209,7 @@ inline void PrintObjectRef(FailSink &sink, const Object *pObject) {
 }
 
 // NTSC-U/C: 0x00526308, PAL: 0x005668e0
-FailSink &operator<<(FailSink &sink, const Particle &particle) {
+Dbg &operator<<(Dbg &sink, const Particle &particle) {
     sink.Print("\n\tpos:");
     PrintVector3(sink, particle.mPos);
     sink.Print("\n\tprevPos:");
@@ -231,7 +231,7 @@ FailSink &operator<<(FailSink &sink, const Particle &particle) {
 }
 
 // NTSC-U/C: 0x00529c30, PAL: 0x0056a280
-FailSink &operator<<(FailSink &sink, const std::vector<Particle> &particles) {
+Dbg &operator<<(Dbg &sink, const std::vector<Particle> &particles) {
     sink.Print("(size:")->Format("%u", static_cast<unsigned>(particles.size()))->Print(")");
     for (std::vector<Particle>::const_iterator it = particles.begin(); it != particles.end();
          ++it) {
@@ -260,7 +260,7 @@ ParticleSys *(*g_pfnNewParticleSys)(const HxStr &name) = NewParticleSys;
 // NTSC-U/C: 0x0052c6a8, PAL: 0x0056cd20
 // The printer has no case for kModeSprite, so a sprite system writes no mode at all. The gap is in
 // the shipped build.
-FailSink &PrintParticleMode(FailSink &sink, ParticleSys::Mode nMode) {
+Dbg &PrintParticleMode(Dbg &sink, ParticleSys::Mode nMode) {
     if (nMode == ParticleSys::kModePoint) {
         sink.Print("Point");
     } else if (nMode == ParticleSys::kModeLine) {
@@ -463,7 +463,7 @@ Particle *ParticleSys::FreeParticle(Particle *pParticle) {
 }
 
 // NTSC-U/C: 0x00521f40, PAL: 0x005624c8
-void ParticleSys::DumpText(FailSink &sink) {
+void ParticleSys::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
     Transformable::DumpText(sink);

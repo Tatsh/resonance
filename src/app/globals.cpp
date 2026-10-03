@@ -1,9 +1,9 @@
 #include "app/globals.h"
 
 #include "app/mainloop.h"
+#include "app/scheduler.h"
 #include "app/scriptsink.h"
-#include "app/watchdog.h"
-#include "app/watchdogtimer.h"
+#include "app/timeclock.h"
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
 #include "game/grooveworld.h"
@@ -32,8 +32,8 @@ Globals::~Globals() {
 
 // NTSC-U/C: 0x001170d0, PAL: 0x001175a0
 void Globals::Init() {
-    mWatchdog = new Watchdog;
-    mWatchdogTimer = new WatchdogTimer(mWatchdog);
+    mWatchdog = new Sch::Scheduler;
+    mWatchdogTimer = new Sch::TimeClock(mWatchdog);
     mWatchdogTimer->SetOrigin(0);
     mScriptSink = new ScriptSink(this);
     mGameManager = new GameManagerImpl;
@@ -97,12 +97,12 @@ Ps2HardSynth *Globals::GetSynth() {
 }
 
 // NTSC-U/C: 0x00118eb0, PAL: 0x00119410
-Watchdog *Globals::GetWatchdog() {
+Sch::Scheduler *Globals::GetWatchdog() {
     return mWatchdog;
 }
 
 // NTSC-U/C: 0x00118e70, PAL: 0x001193d0
-WatchdogTimer *Globals::GetWatchdogTimer() {
+Sch::TimeClock *Globals::GetWatchdogTimer() {
     return mWatchdogTimer;
 }
 

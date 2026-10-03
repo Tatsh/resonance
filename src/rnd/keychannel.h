@@ -5,10 +5,10 @@
 #include "math/color.h"
 #include "math/vector3.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Stream;
-}
+} // namespace Rnd
 
 namespace Rnd {
 
@@ -89,7 +89,7 @@ struct Vector3Key {
  * @ghidraAddress NTSC-U/C: 0x004d8de8
  * @ghidraAddress PAL: 0x00517300
  */
-FailSink &DumpColorKeys(FailSink &sink, const std::list<ColorKey> &keys);
+Dbg &DumpColorKeys(Dbg &sink, const std::list<ColorKey> &keys);
 
 /**
  * Write a channel of scalar keyframes to the engine text sink.
@@ -103,7 +103,7 @@ FailSink &DumpColorKeys(FailSink &sink, const std::list<ColorKey> &keys);
  * @ghidraAddress NTSC-U/C: 0x004d8f08
  * @ghidraAddress PAL: 0x00517420
  */
-FailSink &DumpFloatKeys(FailSink &sink, const std::list<FloatKey> &keys);
+Dbg &DumpFloatKeys(Dbg &sink, const std::list<FloatKey> &keys);
 
 /**
  * Read a channel of colour keyframes from a `.rnd` stream.
@@ -170,7 +170,7 @@ Stream &ReadFloatKeys(Stream &stream, std::list<FloatKey> &keys);
  * @ghidraAddress NTSC-U/C: 0x004da9b0
  * @ghidraAddress PAL: 0x00518ec8
  */
-FailSink &DumpVector3Keys(FailSink &sink, const std::list<Vector3Key> &keys);
+Dbg &DumpVector3Keys(Dbg &sink, const std::list<Vector3Key> &keys);
 
 /**
  * Read a channel of vector keyframes from a `.rnd` stream.

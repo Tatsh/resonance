@@ -47,9 +47,9 @@ int UsingArkFiles();
  * 0x0070bf14.
  *
  * Both uses agree with that reading. InitAsync() starts the worker thread only when this reports
- * the disc, because a host-link read needs no latency hiding, and ArkFile::Open() searches the
- * path for a device prefix only then, because a prefix such as `cdrom0:` does not exist on any host
- * path.
+ * the disc, because a host-link read needs no latency hiding, and OpenArkObject::Open() searches
+ * the path for a device prefix only then, because a prefix such as `cdrom0:` does not exist on any
+ * host path.
  *
  * @return Non-zero when data is read from the disc.
  * @ghidraAddress NTSC-U/C: 0x0050efd0

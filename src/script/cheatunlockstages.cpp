@@ -6,7 +6,7 @@
 #include "script/cxx/config.h"
 #include "script/cxx/object.h"
 #include "script/cxx/tuple.h"
-#include "script/scriptfunc.h"
+#include "script/registercfunction.h"
 
 namespace {
 
@@ -39,6 +39,6 @@ PyObject *PyInvokeCheatUnlockstages(PyObject *, PyObject *pArgs) {
 
 // The script interface this file exports, registered in static initialisation.
 // NTSC-U/C: 0x00150580, PAL: 0x001512d0
-const ScriptFunc kCheatUnlockstagesFunc("cheat_unlockstages", PyInvokeCheatUnlockstages);
+const RegisterCFunction kCheatUnlockstagesFunc("cheat_unlockstages", PyInvokeCheatUnlockstages);
 
 } // namespace

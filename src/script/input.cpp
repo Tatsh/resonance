@@ -18,7 +18,7 @@
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
 #include "script/cxx/typeerror.h"
-#include "script/scriptfunc.h"
+#include "script/registercfunction.h"
 
 namespace {
 
@@ -203,8 +203,8 @@ PyObject *PyInvokeTrackCtrl(PyObject *, PyObject *pArgs) {
 
 // The script interface this file exports, registered in static initialisation.
 // NTSC-U/C: 0x00155b98, PAL: 0x00156b30
-const ScriptFunc kInputFunc("input", PyInvokeInput);
+const RegisterCFunction kInputFunc("input", PyInvokeInput);
 // NTSC-U/C: 0x00163438, PAL: 0x001654e8
-const ScriptFunc kTrackCtrlFunc("track_ctrl", PyInvokeTrackCtrl);
+const RegisterCFunction kTrackCtrlFunc("track_ctrl", PyInvokeTrackCtrl);
 
 } // namespace

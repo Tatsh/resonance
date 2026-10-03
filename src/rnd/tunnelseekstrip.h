@@ -121,7 +121,7 @@ struct TunnelSeekStrip {
      *
      * Does nothing unless the section the slice selects is placed on that slice. A dirty section
      * is updated first, and the level of detail is chosen against flScreenSize the way
-     * Rnd::TunnelMeshChain chooses it.
+     * Rnd::LodMesh chooses it.
      *
      * @param nSlice The slice being drawn.
      * @param flScreenSize The screen size used to pick the level of detail.

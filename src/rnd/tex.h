@@ -126,7 +126,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004e4738
      * @ghidraAddress PAL: 0x00523010
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write revision 4, the three dimensions, the path, mFlags, and mMipSelect.

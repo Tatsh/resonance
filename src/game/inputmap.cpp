@@ -2,7 +2,7 @@
 
 #include "app/application.h"
 #include "app/globals.h"
-#include "app/watchdogtimer.h"
+#include "app/timeclock.h"
 #include "game/controllerconfig.h"
 #include "game/forcefeedbackmgr.h"
 #include "game/gamemanagerimpl.h"

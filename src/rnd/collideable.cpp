@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <list>
 
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/object.h"
@@ -26,7 +26,7 @@ static const char *NameText(const Object *pObject) {
 }
 
 // NTSC-U/C: 0x00501c48, PAL: 0x00540a20
-static FailSink &operator<<(FailSink &sink, const std::list<Collideable *> &collides) {
+static Dbg &operator<<(Dbg &sink, const std::list<Collideable *> &collides) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, collides.size());
     sink.Print(")");
@@ -165,7 +165,7 @@ void Collideable::AcquireCollidesRefs() {
 }
 
 // NTSC-U/C: 0x00502880, PAL: 0x00541690
-void Collideable::DumpText(FailSink &sink) {
+void Collideable::DumpText(Dbg &sink) {
     if (sink.mDumpLevel <= 0) {
         return;
     }

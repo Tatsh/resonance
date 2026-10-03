@@ -7,8 +7,8 @@
 #include "rnd/animatable.h"
 #include "rnd/keychannel.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Mat;
 class Object;
 class Stream;
@@ -176,7 +176,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x004d3f70
          * @ghidraAddress PAL: 0x00512460
          */
-        void Dump(FailSink &sink);
+        void Dump(Dbg &sink);
 
         /**
          * Add a texture key and sort the channel by frame.
@@ -267,7 +267,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004d33b8
      * @ghidraAddress PAL: 0x00511858
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Serialise the animation.

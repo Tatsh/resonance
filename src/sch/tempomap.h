@@ -36,8 +36,8 @@ namespace Sch {
  * unscaled. The resolution is 480 ticks per quarter note, because the scale is the tempo times
  * 25/12, that is 1000 nanoseconds per microsecond over 480 ticks per quarter note, and because the
  * `song_bar` command at `0x001ac774` divides a song position by 1920, which is four quarter notes
- * at the same resolution. Scheduler time is in nanoseconds, because Watchdog's clock scales its
- * millisecond readings by `1.0e9 / 1000.0` at `0x005124c8`, and because the run loop at
+ * at the same resolution. Scheduler time is in nanoseconds, because Sch::Scheduler's clock scales
+ * its millisecond readings by `1.0e9 / 1000.0` at `0x005124c8`, and because the run loop at
  * `0x004aa8a4` treats a gap of 6000000000 as the point at which it stops catching up.
  */
 class TempoMap : public Attachment {

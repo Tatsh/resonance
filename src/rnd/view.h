@@ -8,8 +8,8 @@
 #include "rnd/drawable.h"
 #include "rnd/transformable.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Object;
 class Stream;
 } // namespace Rnd
@@ -87,7 +87,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004e3768
      * @ghidraAddress PAL: 0x00522020
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x004e37d0

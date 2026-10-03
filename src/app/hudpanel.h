@@ -1,7 +1,6 @@
 #pragma once
 
 #include "app/hudanalogstick.h"
-#include "app/hudanimramp.h"
 #include "app/hudfeedback.h"
 #include "app/hudgenmessage.h"
 #include "app/hudhighlight.h"
@@ -11,6 +10,7 @@
 #include "app/hudscreenflash.h"
 #include "app/hudtcgroup.h"
 #include "app/hudwinmessage.h"
+#include "app/ovyassembly.h"
 
 /**
  * The parts of the head-up display that belong to the whole screen rather than to one player.
@@ -56,8 +56,8 @@ public:
     HudPosition mPosition;       /*!< The song position bar. +0x00 */
     HudScreenFlash mScreenFlash; /*!< The full-screen fade. +0x40 */
     HudGenMessage mMessage;      /*!< `HUD genmsg.txt`. +0x54 */
-    HudAnimRamp mAssembly;       /*!< The assembly animation. +0x58 */
-    HudAnimRamp mLabelSwap;      /*!< The label swap animation. +0x74 */
+    OvyAssembly mAssembly;       /*!< The assembly animation. +0x58 */
+    OvyAssembly mLabelSwap;      /*!< The label swap animation. +0x74 */
     HudHighlight mHighlight;     /*!< The highlight box. +0x90 */
     HudAnalogStick mAnalogStick; /*!< The analog stick prompt. +0x104 */
     HudTcGroup mTcGroup;         /*!< `tc_hi_group.view`. +0x110 */

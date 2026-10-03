@@ -122,8 +122,8 @@ public:
      * Move nSize bytes into pDest, reversing their order when the stream swaps bytes.
      *
      * With mSwapBytes clear, or for a single byte, this is one Read(). Otherwise it reads one byte
-     * at a time from the last position of pDest to the first. Mid::FileReader reads every header
-     * and track field through it, and HxDataChunkId reads chunk sizes through it. The title is
+     * at a time from the last position of pDest to the first. Mid::Reader reads every header
+     * and track field through it, and HxChunkHeader reads chunk sizes through it. The title is
      * inferred.
      *
      * @param pDest The destination buffer.
@@ -259,7 +259,7 @@ protected:
  *
  * The value is cleared and each byte read through HxStream::ReadSwapped() adds its low seven bits
  * after a seven-bit shift, until a byte with its top bit clear ends the quantity. That is the
- * Standard MIDI File encoding. Mid::FileReader reads delta times and meta lengths through it, and
+ * Standard MIDI File encoding. Mid::Reader reads delta times and meta lengths through it, and
  * the two string readers in HxStream's translation unit read their length prefixes through it.
  * The title is inferred.
  *

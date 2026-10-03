@@ -309,10 +309,9 @@ public:
      * Identifier a message addresses this player by.
      *
      * Print() writes it after the "{player " literal and HandleMessage compares it against a
-     * field of an incoming message. GemPacket::Fields reads it directly at `0x001a2608` and
-     * `0x001a2d84` from outside the hierarchy and the image exposes no accessor, which is what
-     * makes the member public here. A friend declaration for GemPacket::Fields fits the image
-     * equally well.
+     * field of an incoming message. Gem reads it directly at `0x001a2608` and `0x001a2d84` from
+     * outside the hierarchy, and the image exposes no accessor. The member is therefore public
+     * here. A friend declaration for Gem fits the image equally well.
      *
      * +0x20
      */
@@ -513,7 +512,7 @@ protected:
 
 public:
     /**
-     * Watchdog time of this player's last erase press, in nanoseconds.
+     * Scheduler time of this player's last erase press, in nanoseconds.
      *
      * The constructor at `0x0012f5c0` zeroes it. InputMap::OnControllerReading() reads and writes
      * it directly at `0x00119a6c` and `0x00119adc` to detect a double tap, and the image has no

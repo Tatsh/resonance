@@ -6,8 +6,8 @@
  * One controller's pad-library state: the DMA area libpad fills and the decoder's working state.
  *
  * The class is not polymorphic, emits no RTTI, and has no embedded file path, so the title is
- * inferred. Joypad owns a table of eight at `0x00704bc0`, one per port and multitap slot, and
- * every Joypad member forwards to the record its index selects. The record is 0x180 bytes. The
+ * inferred. JoypadPS2 has a table of eight at `0x00704bc0`, one per port and multitap slot, and
+ * every JoypadPS2 member forwards to the record its index selects. The record is 0x180 bytes. The
  * first 0x100 bytes are the area scePadPortOpen() receives, which is why the record starts on a
  * 64-byte boundary.
  *
@@ -120,15 +120,15 @@ public:
     short mRawButtons; // +0x118, the latest report's button word, cleared by Open()
 
     /**
-     * Index into Read()'s setup state machine. Open() and Joypad::Reset() clear it. +0x11c
+     * Index into Read()'s setup state machine. Open() and JoypadPS2::Reset() clear it. +0x11c
      */
     int mPhase;
 
     int mReportMode; // +0x120, the latest report's mode byte, cleared by Open()
 
     /**
-     * Setup progress Read() records. SetVibration() acts only from 2, and Joypad::Reset() clears
-     * it. +0x124
+     * Setup progress Read() records. SetVibration() acts only from 2, and JoypadPS2::Reset()
+     * clears it. +0x124
      */
     int mReadyLevel;
 

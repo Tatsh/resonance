@@ -6,7 +6,7 @@
 #include "gfx/renderstats.h"
 #include "math/color.h"
 #include "math/sphere.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/cam.h"
 #include "rnd/drawverts.h"

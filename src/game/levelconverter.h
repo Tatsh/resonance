@@ -55,8 +55,8 @@ enum LevelConverterTrackType {
  * buffer at `0x00891a38`, reads two display-configuration codes, builds three stack objects for
  * the file, the byte stream, and the Standard MIDI File reader, hands itself to the reader as the
  * event sink, and runs it. The three stack objects are an HxMemStream with HxStream::mSwapBytes set
- * to 1, an HxDataChunkReader over the whole stream, and a Mid::FileReader. The file-static
- * comparator at `0x001e6450` is stored in Mid::FileReader::mCompare before Mid::FileReader::Read()
+ * to 1, an HxIListChunk over the whole stream, and a Mid::Reader. The file-static
+ * comparator at `0x001e6450` is stored in Mid::Reader::mCompare before Mid::Reader::Read()
  * runs. The comparator ranks each event by its status class (note off first, note on last).
  *
  * The five event handlers all follow one shape. They report through ReportError() on the error
@@ -114,7 +114,7 @@ public:
      * Read one Standard MIDI File and fill a builder from it.
      *
      * The error log path is the file's base name with `.err` appended. The file is read through
-     * an HxMemStream with byte swapping on, an HxDataChunkReader, and a Mid::FileReader whose
+     * an HxMemStream with byte swapping on, an HxIListChunk, and a Mid::Reader whose
      * events of one position are ordered by status class (note off first, note on last).
      * LevelBuilder::PrepareTracks() and FinishErrorLog() run after the file is read.
      *

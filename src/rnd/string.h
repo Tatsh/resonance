@@ -10,8 +10,8 @@
 #include "rnd/drawable.h"
 #include "rnd/transformable.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Mat;
 class Mesh;
 class Object;
@@ -329,7 +329,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004ba038
      * @ghidraAddress PAL: 0x004f7fb0
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write this ribbon's serialised form to stream.

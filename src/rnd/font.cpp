@@ -3,7 +3,7 @@
 #include <map>
 
 #include "math/vector2.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
 #include "rnd/manager.h"
@@ -77,7 +77,7 @@ const char *StringText(const HxStr &text) {
 // NTSC-U/C: 0x004d07e0, PAL: 0x0050ec18
 // A value outside the three produces nothing at all. The sink comes back out so that the three
 // printers chain, which is how DumpText() reaches them.
-FailSink *PrintFontType(FailSink &sink, FontType type) {
+Dbg *PrintFontType(Dbg &sink, FontType type) {
     switch (type) {
     case kFontTypeDefault:
         return sink.Print("Default");
@@ -90,16 +90,16 @@ FailSink *PrintFontType(FailSink &sink, FontType type) {
 }
 
 // NTSC-U/C: 0x004d0858, PAL: 0x0050ec90
-FailSink *PrintFontWeight(FailSink &sink, FontWeight weight) {
+Dbg *PrintFontWeight(Dbg &sink, FontWeight weight) {
     return sink.Print(kWeightTitles[weight]);
 }
 
 // NTSC-U/C: 0x004d0898, PAL: 0x0050ecd0
-FailSink *PrintFontFamily(FailSink &sink, FontFamily family) {
+Dbg *PrintFontFamily(Dbg &sink, FontFamily family) {
     return sink.Print(kFamilyTitles[family]);
 }
 
-void PrintObjectRef(FailSink &sink, const Object *pObject) {
+void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print(kNoObject);
         return;
@@ -212,7 +212,7 @@ void Font::GetBuiltin(int *nHeightOut,
 }
 
 // NTSC-U/C: 0x004ca470, PAL: 0x005086d8
-void Font::DumpText(FailSink &sink) {
+void Font::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     if (sink.mDumpLevel <= 0) {
         return;

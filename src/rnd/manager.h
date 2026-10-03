@@ -5,8 +5,8 @@
 
 #include "os/hxstr.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Object;
 class Stream;
 } // namespace Rnd
@@ -312,7 +312,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0051ad98
      * @ghidraAddress PAL: 0x0055b1d0
      */
-    void DumpText(FailSink &sink);
+    void DumpText(Dbg &sink);
 
     /**
      * Destroy every registered object that a file created.

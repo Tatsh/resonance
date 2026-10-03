@@ -9,14 +9,14 @@
 #include "rnd/animatable.h"
 #include "rnd/collideable.h"
 #include "rnd/drawable.h"
+#include "rnd/lodmesh.h"
 #include "rnd/manager.h"
 #include "rnd/raytest.h"
 #include "rnd/tunnelevent.h"
-#include "rnd/tunnelmeshchain.h"
 #include "rnd/tunnelseeker.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Mesh;
 class Object;
 class Stream;
@@ -119,7 +119,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004768b8
      * @ghidraAddress PAL: 0x004b4530
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Serialise the tunnel.
@@ -675,10 +675,10 @@ private:
     // lookup at 0x00477388, which then returns the finest level of the chain. The 0xc-byte stride
     // and the clear at 0x0046acf0 destroying each slot through the chain destructor at 0x00476a80
     // are what establish the element type.
-    std::vector<TunnelMeshChain> mCellChains;
+    std::vector<LodMesh> mCellChains;
     // +0xb0 One chain per slice, addressed as `[slice % mSliceCount]` by the lookup at 0x004773e8
     // on the same evidence as mCellChains.
-    std::vector<TunnelMeshChain> mSliceChains;
+    std::vector<LodMesh> mSliceChains;
     // +0xbc Starts at 0. The first slice of the window the scroll at 0x00476f48 walks, which runs
     // mSliceCount slices from here.
     int mWindowStartSlice;

@@ -5,12 +5,12 @@
 #include "game/grooveworld.h"
 #include "game/inputmap.h"
 #include "game/inputpoller.h"
-#include "game/joypad.h"
+#include "game/joypadps2.h"
 #include "game/padrecord.h"
 #include "game/rawcontroller.h"
 #include "msg/pausegamesystemmsg.h"
-#include "os/bytepairstatic.h"
 #include "os/hostmode.h"
+#include "os/keyboardmgr.h"
 #include "sch/command.h"
 #include "script/scripthost.h"
 
@@ -79,7 +79,7 @@ constexpr float kReleasedValue = 0.0f;
 constexpr double kAxisOffset = 128.0;
 constexpr double kAxisRange = 255.01;
 
-// Joypad::Read() results.
+// JoypadPS2::Read() results.
 constexpr int kReadNoPad = 0;
 constexpr int kReadBusy = 1;
 constexpr int kReadReady = 2;
@@ -95,25 +95,25 @@ constexpr int kPort0 = 0;
 constexpr int kPort1 = 1;
 constexpr int kSlotsPerPort = 4;
 
-// A Joypad's slot index is its port shifted past the multitap slot bits.
+// A JoypadPS2's slot index is its port shifted past the multitap slot bits.
 constexpr int kSlotBits = 2;
 
 // sceMtapGetConnection() reports 1 when a multitap is present.
 constexpr int kMultitapConnected = 1;
 
-// The analog dead zone Setup() passes to Joypad::Open().
+// The analog dead zone Setup() passes to JoypadPS2::Open().
 constexpr int kJoypadDeadZone = 4;
 
-// Players are numbered from 1, and 0 marks a Joypad with no player.
+// Players are numbered from 1, and 0 marks a JoypadPS2 with no player.
 constexpr int kNoPlayer = 0;
 constexpr int kFirstPlayer = 1;
 constexpr int kSecondPlayer = 2;
 
-// The Joypad on slot 0 of port 1, which Setup() opens after the four of port 0.
+// The JoypadPS2 on slot 0 of port 1, which Setup() opens after the four of port 0.
 constexpr int kPort1Joypad = kSlotsPerPort;
 
 // NTSC-U/C: 0x0069245c, PAL: 0x006d371c
-// Counts the calls to InputPoller::SetVibration() that reach a Joypad. Nothing reads it.
+// Counts the calls to InputPoller::SetVibration() that reach a JoypadPS2. It is never read.
 int g_nVibrationCount;
 
 /**
@@ -135,7 +135,7 @@ public:
 
 // NTSC-U/C: 0x001ded98, PAL: 0x001e4e18
 InputPoller::InputPoller()
-    : mNextJoypadId(0), mBytePairs(BytePairStatic::shared()), mUnusedWord(0), mUnusedFlag(1),
+    : mNextJoypadId(0), mBytePairs(KeyboardMgr::shared()), mUnusedWord(0), mUnusedFlag(1),
       mPressedThisPoll(0), mActive(1), mMultitap0(0), mMultitap1(0), mPaused(0),
       mGameInputEnabled(1), mBusyJoypadSeen(0), mController(nullptr) {
     Init();
@@ -170,7 +170,7 @@ void InputPoller::Init() {
 // NTSC-U/C: 0x001df248, PAL: 0x001e52c8
 void InputPoller::Setup() {
     for (int nSlot = 0; nSlot < kSlotsPerPort; ++nSlot) {
-        Joypad *pJoypad = new Joypad((kPort0 << kSlotBits) | nSlot);
+        JoypadPS2 *pJoypad = new JoypadPS2((kPort0 << kSlotBits) | nSlot);
         pJoypad->Open(kPort0, nSlot, kJoypadDeadZone);
         pJoypad->mId = mNextJoypadId;
         ++mNextJoypadId;
@@ -187,7 +187,7 @@ void InputPoller::Setup() {
         mEntries.push_back(entry);
     }
 
-    Joypad *pJoypad = new Joypad(kPort1Joypad);
+    JoypadPS2 *pJoypad = new JoypadPS2(kPort1Joypad);
     pJoypad->Open(kPort1, 0, kJoypadDeadZone);
     pJoypad->mId = mNextJoypadId;
     ++mNextJoypadId;
@@ -248,7 +248,7 @@ void InputPoller::NumberConnectedJoypads() {
     int nPlayer = kFirstPlayer;
     const int nJoypadCount = mJoypads.size();
     for (int i = 0; i < nJoypadCount; ++i) {
-        Joypad *pJoypad = mJoypads[i];
+        JoypadPS2 *pJoypad = mJoypads[i];
         if (pJoypad->IsConnected()) {
             mJoypadPlayers[pJoypad->mId] = nPlayer;
             ++nPlayer;
@@ -348,7 +348,7 @@ void InputPoller::ReadControllers() {
 
         const int nPlayer = mJoypadPlayers[nId];
         if (nPlayer == kNoPlayer) {
-            return; // Yes, the binary stops reading the remaining Joypads here.
+            return; // Yes, the binary stops reading the remaining JoypadPS2 objects here.
         }
 
         Entry &entry = mEntries[nIndex];

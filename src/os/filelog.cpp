@@ -13,10 +13,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "os/arkfile.h"
 #include "os/async.h"
 #include "os/hostmode.h"
 #include "os/loadfile.h"
+#include "os/openarkobject.h"
 
 namespace {
 

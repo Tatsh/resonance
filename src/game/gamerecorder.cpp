@@ -1,8 +1,8 @@
 #include "game/gamerecorder.h"
 
 #include "app/application.h"
-#include "app/watchdog.h"
-#include "app/watchdogtimer.h"
+#include "app/scheduler.h"
+#include "app/timeclock.h"
 #include "game/endrecordingcmd.h"
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"

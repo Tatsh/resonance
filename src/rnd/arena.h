@@ -12,8 +12,8 @@
 #include "rnd/raytest.h"
 #include "rnd/transformable.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Object;
 class Stream;
 class View;
@@ -172,7 +172,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005b5f08
      * @ghidraAddress PAL: 0x005f8570
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write revision 4 of the loop to stream.

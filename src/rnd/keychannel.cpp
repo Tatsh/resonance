@@ -4,7 +4,7 @@
 
 #include "math/color.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "rnd/stream.h"
 
 namespace Rnd {
@@ -12,7 +12,7 @@ namespace Rnd {
 namespace {
 
 // NTSC-U/C: 0x004d8c88, PAL: 0x005171a0
-FailSink &DumpColorKey(FailSink &sink, const ColorKey &key) {
+Dbg &DumpColorKey(Dbg &sink, const ColorKey &key) {
     sink.Print("(frame:");
     sink.Format("%.2f", key.mFrame);
     sink.Print(" value:");
@@ -52,7 +52,7 @@ Stream &WriteColorKey(Stream &stream, const ColorKey &key) {
 }
 
 // NTSC-U/C: 0x004da880, PAL: 0x00518d98
-FailSink &DumpVector3Key(FailSink &sink, const Vector3Key &key) {
+Dbg &DumpVector3Key(Dbg &sink, const Vector3Key &key) {
     sink.Print("(frame:");
     sink.Format("%.2f", key.mFrame);
     sink.Print(" value:");
@@ -70,7 +70,7 @@ FailSink &DumpVector3Key(FailSink &sink, const Vector3Key &key) {
 } // namespace
 
 // NTSC-U/C: 0x004d8de8, PAL: 0x00517300
-FailSink &DumpColorKeys(FailSink &sink, const std::list<ColorKey> &keys) {
+Dbg &DumpColorKeys(Dbg &sink, const std::list<ColorKey> &keys) {
     sink.Print("(size:");
     sink.Format("%u", keys.size());
     sink.Print(")");
@@ -87,7 +87,7 @@ FailSink &DumpColorKeys(FailSink &sink, const std::list<ColorKey> &keys) {
 }
 
 // NTSC-U/C: 0x004d8f08, PAL: 0x00517420
-FailSink &DumpFloatKeys(FailSink &sink, const std::list<FloatKey> &keys) {
+Dbg &DumpFloatKeys(Dbg &sink, const std::list<FloatKey> &keys) {
     sink.Print("(size:");
     sink.Format("%u", keys.size());
     sink.Print(")");
@@ -152,7 +152,7 @@ Stream &ReadFloatKeys(Stream &stream, std::list<FloatKey> &keys) {
 }
 
 // NTSC-U/C: 0x004da9b0, PAL: 0x00518ec8
-FailSink &DumpVector3Keys(FailSink &sink, const std::list<Vector3Key> &keys) {
+Dbg &DumpVector3Keys(Dbg &sink, const std::list<Vector3Key> &keys) {
     sink.Print("(size:");
     sink.Format("%u", keys.size());
     sink.Print(")");

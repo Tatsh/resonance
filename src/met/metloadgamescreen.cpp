@@ -4,7 +4,7 @@
 
 #include "app/application.h"
 #include "app/renderer.h"
-#include "app/watchdog.h"
+#include "app/scheduler.h"
 #include "game/campaignstats.h"
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
@@ -78,7 +78,7 @@ constexpr float kOpaque = 1.0f;
 
 // The watchdog time in nanoseconds.
 inline long long WatchdogNowNs() {
-    Watchdog *pWatchdog = Application::shared()->GetWatchdog();
+    Sch::Scheduler *pWatchdog = Application::shared()->GetWatchdog();
     return (GetElapsedMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
 }
 

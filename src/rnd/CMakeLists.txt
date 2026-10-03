@@ -1,4 +1,5 @@
 set(RESONANCE_RND_SRCS
+    amovieset.cpp
     animatable.cpp
     arena.cpp
     asyncloader.cpp
@@ -16,6 +17,7 @@ set(RESONANCE_RND_SRCS
     keychannel.cpp
     light.cpp
     lightanim.cpp
+    lodmesh.cpp
     manager.cpp
     mat.cpp
     matanim.cpp
@@ -23,7 +25,6 @@ set(RESONANCE_RND_SRCS
     mesh.cpp
     meshanim.cpp
     movie.cpp
-    moviestream.cpp
     multimesh.cpp
     object.cpp
     particlesys.cpp
@@ -45,7 +46,6 @@ set(RESONANCE_RND_SRCS
     transformable.cpp
     tunnel.cpp
     tunnelevent.cpp
-    tunnelmeshchain.cpp
     tunnelseeker.cpp
     tunnelseeksection.cpp
     tunnelseekstrip.cpp

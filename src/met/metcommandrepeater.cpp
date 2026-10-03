@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "app/application.h"
-#include "app/watchdog.h"
+#include "app/scheduler.h"
 #include "os/cycles.h"
 
 namespace {
@@ -24,9 +24,9 @@ constexpr float kIntervalScaleMs = 50.0f;
 constexpr long long kNanosecondsPerMillisecond = 1000000;
 constexpr long long kHalfMillisecondNs = kNanosecondsPerMillisecond / 2;
 
-// Reading of the frame clock in nanoseconds, measured from the origin the watchdog's clock
+// Reading of the frame clock in nanoseconds, measured from the origin the scheduler's clock
 // recorded when the run started. MetRenderer and MainLoop have their own copies of the same inline.
-inline long long FrameClockNs(Watchdog *pWatchdog) {
+inline long long FrameClockNs(Sch::Scheduler *pWatchdog) {
     return (GetElapsedMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
 }
 

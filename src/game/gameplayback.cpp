@@ -1,7 +1,7 @@
 #include "game/gameplayback.h"
 
 #include "app/application.h"
-#include "app/watchdog.h"
+#include "app/scheduler.h"
 #include "game/gamemanagerimpl.h"
 #include "msg/hxstrtransfer.h"
 #include "os/hostmode.h"

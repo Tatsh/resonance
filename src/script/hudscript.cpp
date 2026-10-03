@@ -1,9 +1,9 @@
 #include <exception>
 
-#include "app/hudanimramp.h"
 #include "app/hudpanel.h"
-#include "app/linearramp.h"
+#include "app/linearanim.h"
 #include "app/overlay.h"
+#include "app/ovyassembly.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
@@ -14,7 +14,7 @@
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
 #include "script/cxx/typeerror.h"
-#include "script/scriptfunc.h"
+#include "script/registercfunction.h"
 
 namespace {
 
@@ -252,12 +252,12 @@ PyObject *PyInvokeAnalogStickSetmat(PyObject *, PyObject *pArgs) {
 
 // The script interface this file exports, registered in static initialisation.
 // NTSC-U/C: 0x00429348, PAL: 0x00464950
-const ScriptFunc kActivatorLabelFunc("activator_label", PyInvokeActivatorLabel);
-const ScriptFunc kHighlightSnapFunc("highlight_snap", PyInvokeHighlightSnap);
-const ScriptFunc kHighlightSlideFunc("highlight_slide", PyInvokeHighlightSlide);
-const ScriptFunc kHighlightSetshowFunc("highlight_setshow", PyInvokeHighlightSetshow);
-const ScriptFunc kAnalogStickSetshowFunc("analog_stick_setshow", PyInvokeAnalogStickSetshow);
-const ScriptFunc kControllerSetshowFunc("controller_setshow", PyInvokeControllerSetshow);
-const ScriptFunc kAnalogStickSetmatFunc("analog_stick_setmat", PyInvokeAnalogStickSetmat);
+const RegisterCFunction kActivatorLabelFunc("activator_label", PyInvokeActivatorLabel);
+const RegisterCFunction kHighlightSnapFunc("highlight_snap", PyInvokeHighlightSnap);
+const RegisterCFunction kHighlightSlideFunc("highlight_slide", PyInvokeHighlightSlide);
+const RegisterCFunction kHighlightSetshowFunc("highlight_setshow", PyInvokeHighlightSetshow);
+const RegisterCFunction kAnalogStickSetshowFunc("analog_stick_setshow", PyInvokeAnalogStickSetshow);
+const RegisterCFunction kControllerSetshowFunc("controller_setshow", PyInvokeControllerSetshow);
+const RegisterCFunction kAnalogStickSetmatFunc("analog_stick_setmat", PyInvokeAnalogStickSetmat);
 
 } // namespace

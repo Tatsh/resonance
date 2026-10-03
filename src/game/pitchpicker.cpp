@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "game/harmony.h"
-#include "game/linearmap.h"
+#include "game/lineartransform.h"
 #include "game/nullplayer.h"
 #include "game/riffrangefinder.h"
 #include "msg/axisregistermsg.h"
@@ -156,6 +156,6 @@ unsigned char PitchPicker::PickPitch(int nTick, unsigned char nNote) {
     int nLow;
     int nHigh;
     pHarmony->GetRange(&nLow, &nHigh);
-    LinearMap map(kAxisMinimum, kAxisMaximum, nLow - mRiffLow, nHigh - mRiffHigh);
+    LinearTransform map(kAxisMinimum, kAxisMaximum, nLow - mRiffLow, nHigh - mRiffHigh);
     return pHarmony->Snap(static_cast<unsigned char>(nNote + map.Map(mAxis)));
 }

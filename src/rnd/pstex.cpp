@@ -3,15 +3,15 @@
 #include <string.h>
 
 #include "gfx/gfxdevice.h"
-#include "gfx/vramtable.h"
-#include "os/failsink.h"
+#include "gfx/vram.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "os/log.h"
 #include "os/zone.h"
 #include "rndartt/abitmap.h"
 #include "rndartt/acanvas.h"
 #include "rndartt/apalette.h"
-#include "rndartt/arlereader.h"
+#include "rndartt/arle8reader.h"
 
 namespace Rnd {
 
@@ -506,7 +506,7 @@ int PsTex::UploadBitmapMipToGs(int nMip) {
 
     unsigned char *pIndices =
         static_cast<unsigned char *>(ZoneGrabTemp(pBitmap->mWidth * pBitmap->mHeight));
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = static_cast<const unsigned char *>(pBitmap->mPixels);
     reader.mWidth = pBitmap->mWidth;
     reader.mTransparentValue = pBitmap->mHasTransparentColor ?
@@ -530,7 +530,7 @@ inline int PsTex::UploadPaletteClut() {
 }
 
 // NTSC-U/C: 0x0059acc0, PAL: 0x005de140
-inline void PsTex::UploadBitmapMipToSubImage(VramTableEntry *pPage, int nMip, int nBlockOffset) {
+inline void PsTex::UploadBitmapMipToSubImage(VRAM::Entry *pPage, int nMip, int nBlockOffset) {
     const ABitmap *pBitmap = mLoadedBitmaps[nMip];
 
     if (pBitmap->mFormat != kABitmapFormatRle8) {
@@ -545,7 +545,7 @@ inline void PsTex::UploadBitmapMipToSubImage(VramTableEntry *pPage, int nMip, in
 
     unsigned char *pIndices =
         static_cast<unsigned char *>(ZoneGrabTemp(pBitmap->mWidth * pBitmap->mHeight));
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = static_cast<const unsigned char *>(pBitmap->mPixels);
     reader.mWidth = pBitmap->mWidth;
     reader.mTransparentValue = pBitmap->mHasTransparentColor ?
@@ -687,7 +687,7 @@ int PsTex::UploadMipAndBuildMipTbp(int nMip, bool bSkipIfResident) {
         return 0;
     }
 
-    VramTableEntry *pPage = mGsMips[nMip].mPage;
+    VRAM::Entry *pPage = mGsMips[nMip].mPage;
     int nBlockAddr;
     if (nMip >= mFirstPackedMip) {
         nBlockAddr = mGsMips[mFirstPackedMip - 1].mPage->mMemAddr +

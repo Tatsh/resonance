@@ -16,7 +16,7 @@
 #include "os/loadfile.h"
 #include "os/log.h"
 #include "os/mem.h"
-#include "rnd/moviestream.h"
+#include "rnd/amovieset.h"
 #include "sch/tickclock.h"
 #include "script/configquery.h"
 #include "synth/callbackxferhdtoiop.h"
@@ -220,7 +220,7 @@ std::vector<BankSlot> g_bankSlots;
 
 // The streamed audio, or null while none plays.
 // NTSC-U/C: 0x006e9c58, PAL: 0x0072d618
-Rnd::MovieStream *g_pSynthStream;
+Rnd::AMovieSet *g_pSynthStream;
 
 // The frame PollSynthStream() passes to g_pSynthStream.
 // NTSC-U/C: 0x006e9c5c, PAL: 0x0072d61c
@@ -874,7 +874,7 @@ constexpr int kSoundSelectorXferChunk = 0x1070;
 constexpr int kSoundBankMovieTrack = 15;
 
 // Payload of an SNDH chunk, a whole bank already in memory.
-struct SndhChunk : Rnd::MovieStream::ChunkHeader {
+struct SndhChunk : Rnd::AMovieSet::ChunkHeader {
     int mLength;                  // +0x10
     int mTag;                     // +0x14 becomes g_nSynthXferTag
     unsigned char mReserved18[8]; // +0x18
@@ -882,7 +882,7 @@ struct SndhChunk : Rnd::MovieStream::ChunkHeader {
 };
 
 // Payload of an SNDB chunk, one piece of a bank at an offset into the destination.
-struct SndbChunk : Rnd::MovieStream::ChunkHeader {
+struct SndbChunk : Rnd::AMovieSet::ChunkHeader {
     int mOffset;                  // +0x10 bytes past g_nBankDestAddress
     int mLength;                  // +0x14
     unsigned char mReserved18[8]; // +0x18
@@ -907,7 +907,7 @@ inline int XferBankChunk(const void *pData, int nLength, int nOffset) {
 
 // NTSC-U/C: 0x00462770, PAL: 0x004a01b8
 // The handler reads its chunk through the header rather than the payload argument.
-void OnSoundBankMovieChunk(Rnd::MovieStream::ChunkHeader *pHeader,
+void OnSoundBankMovieChunk(Rnd::AMovieSet::ChunkHeader *pHeader,
                            [[maybe_unused]] void *pPayload,
                            [[maybe_unused]] void *pData) {
     (void)GetElapsedMilliseconds(); // Yes, the binary discards the time it reads.
@@ -935,7 +935,7 @@ void StartSoundBankMovie(const char *pszPath) {
     }
     g_nSynthStreamFrame = 0;
     int nError;
-    g_pSynthStream = new Rnd::MovieStream(pszPath, 1, &nError);
+    g_pSynthStream = new Rnd::AMovieSet(pszPath, 1, &nError);
     if (nError != 0) {
         LogPrintf("Problem starting sndbank movie: %s (errcode: %d)\n", pszPath, nError);
     }

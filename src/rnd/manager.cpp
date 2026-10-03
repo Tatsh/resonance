@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "app/longop.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "profile/profiler.h"
 #include "rnd/arena.h"
@@ -100,7 +100,7 @@ inline void SkipPastRecordMarker(Stream &stream) {
 // Writes the class registry as its entry count and then one indented line per entry.
 // The factory is reported as a truth value rather than as an address, which is what the two
 // literals "true" and "false" at 0x00826e20 and 0x00826e28 are for. Only DumpText() calls it.
-FailSink *DumpRegisteredClasses(FailSink *pSink, const std::map<HxStr, ClassFactory> &classes) {
+Dbg *DumpRegisteredClasses(Dbg *pSink, const std::map<HxStr, ClassFactory> &classes) {
     pSink->Print("(size:")->Format("%u", classes.size())->Print(")");
 
     for (const auto &entry : classes) {
@@ -410,7 +410,7 @@ void Manager::SaveFile(const HxStr &path) {
 }
 
 // NTSC-U/C: 0x0051ad98, PAL: 0x0055b1d0
-void Manager::DumpText(FailSink &sink) {
+void Manager::DumpText(Dbg &sink) {
     sink.Print("[Manager]\n");
     DumpRegisteredClasses(sink.Print("registeredClasses:"), mClasses)->Print("\n");
 

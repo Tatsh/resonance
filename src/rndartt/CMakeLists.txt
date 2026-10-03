@@ -17,7 +17,7 @@ set(RESONANCE_RNDARTT_SRCS
     apalette.cpp
     apolygon.cpp
     arect.cpp
-    arlereader.cpp
+    arle8reader.cpp
     atgafile.cpp
     normalkey.cpp)
 

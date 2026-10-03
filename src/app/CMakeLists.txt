@@ -1,5 +1,5 @@
 set(RESONANCE_APP_SRCS
-    animrange.cpp
+    animhelper.cpp
     appactivefilter.cpp
     application.cpp
     appticktask.cpp
@@ -13,7 +13,6 @@ set(RESONANCE_APP_SRCS
     durgemtrails.cpp
     globals.cpp
     hudanalogstick.cpp
-    hudanimramp.cpp
     hudbadge.cpp
     hudcountdown.cpp
     hudeffects.cpp
@@ -37,18 +36,24 @@ set(RESONANCE_APP_SRCS
     hudtracklabel.cpp
     hudwinmessage.cpp
     hudutil.cpp
-    linearramp.cpp
+    linearanim.cpp
     longop.cpp
     mainloop.cpp
     msgqueue.cpp
     msgsink.cpp
     msgsource.cpp
     overlay.cpp
+    ovyassembly.cpp
+    playbacker.cpp
     playsound.cpp
+    recorder.cpp
     renderer.cpp
     rendererbase.cpp
+    scheduler.cpp
     scriptsink.cpp
+    systemtime.cpp
     task.cpp
+    timeclock.cpp
     tnlactivator.cpp
     tnlarms.cpp
     tnlarrow.cpp
@@ -78,12 +83,7 @@ set(RESONANCE_APP_SRCS
     tnlseekerfade.cpp
     tnlsnake.cpp
     tnlutil.cpp
-    tunnelcache.cpp
-    watchdog.cpp
-    watchdogclock.cpp
-    watchdogplayback.cpp
-    watchdogrecorder.cpp
-    watchdogtimer.cpp)
+    tunnelcache.cpp)
 
 add_library(resonance_app STATIC ${RESONANCE_APP_SRCS})
 target_link_libraries(resonance_app PRIVATE resonance_common)

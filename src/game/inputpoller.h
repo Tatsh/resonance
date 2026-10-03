@@ -3,9 +3,9 @@
 #include <list>
 #include <vector>
 
-class Joypad;
+class JoypadPS2;
+struct KeyboardMgr;
 class RawController;
-struct BytePairStatic;
 
 /**
  * Reader of the physical controllers.
@@ -46,8 +46,8 @@ public:
     /**
      * Drive the vibration motors of the controller on one port.
      *
-     * The Joypad whose player is nPort receives both levels, and a player with no Joypad is
-     * ignored. ForceFeedbackMgr::ApplyMotors() is the recovered caller.
+     * The JoypadPS2 whose player is nPort receives both levels, and a player with no JoypadPS2
+     * is ignored. ForceFeedbackMgr::ApplyMotors() is the recovered caller.
      *
      * @param nPort The player, from 1.
      * @param nSmallMotor The small motor's state, 0 or 1.
@@ -182,7 +182,7 @@ public:
      *
      * The body is inline, and the one out-of-line copy has no caller. The title is inferred.
      *
-     * @return Non-zero when the last read found a Joypad still at the digital setup level.
+     * @return Non-zero when the last read found a JoypadPS2 still at the digital setup level.
      * @ghidraAddress NTSC-U/C: 0x001e1980
      * @ghidraAddress PAL: 0x001e7a40
      */
@@ -241,12 +241,12 @@ private:
     void Init();
 
     /**
-     * Open a Joypad on each of the four multitap slots of port 0 and on slot 0 of port 1.
+     * Open a JoypadPS2 on each of the four multitap slots of port 0 and on slot 0 of port 1.
      *
-     * Each Joypad takes the next id and an empty Entry, and mJoypadPlayers gains one zeroed word
-     * per Joypad. With a multitap on port 0 the Joypads are numbered as players 1 onward in order,
-     * the last one excepted. Without one, the first Joypad is player 1 and, unless a multitap
-     * sits on port 1, the port 1 Joypad is player 2. The title is inferred.
+     * Each JoypadPS2 takes the next id and an empty Entry, and mJoypadPlayers gains one zeroed
+     * word per JoypadPS2. With a multitap on port 0 the JoypadPS2 objects are numbered as players
+     * 1 onward in order, the last one excepted. Without one, the first JoypadPS2 is player 1 and,
+     * unless a multitap sits on port 1, the port 1 JoypadPS2 is player 2. The title is inferred.
      *
      * @ghidraAddress NTSC-U/C: 0x001df248
      * @ghidraAddress PAL: 0x001e52c8
@@ -254,7 +254,7 @@ private:
     void Setup();
 
     /**
-     * Close and delete every Joypad, and empty mJoypads and mEntries.
+     * Close and delete every JoypadPS2, and empty mJoypads and mEntries.
      *
      * Nothing happens when mJoypads is already empty. The destructor is the caller. The title is
      * inferred.
@@ -267,9 +267,9 @@ private:
     /**
      * Follow a multitap being connected or removed on either port.
      *
-     * Does nothing while mActive is clear. A change on port 1 restarts every Joypad. A multitap
-     * newly on port 0 renumbers the players in order and restarts every Joypad, and one newly
-     * gone restores the single-pad numbering. Named after the file-private
+     * Does nothing while mActive is clear. A change on port 1 restarts every JoypadPS2. A
+     * multitap newly on port 0 renumbers the players in order and restarts every JoypadPS2, and
+     * one newly gone restores the single-pad numbering. Named after the file-private
      * FindJoypadConnectionsCmd.
      *
      * @ghidraAddress NTSC-U/C: 0x001df798
@@ -278,15 +278,15 @@ private:
     void FindJoypadConnections();
 
     /**
-     * Read every Joypad and send the changes to mController.
+     * Read every JoypadPS2 and send the changes to mController.
      *
-     * Each pressed or released control goes out as a `joy ` reading with the Joypad's player,
+     * Each pressed or released control goes out as a `joy ` reading with the JoypadPS2's player,
      * the control number from 1, and 0.99 or 0, and each moved stick axis as a reading with its
      * axis control and its position scaled to 0 through 1. The four d-pad directions send only
-     * the first of them pressed while any stays held. A Joypad that reports 0 during a game pauses
-     * the game when its player is one of the world's local players, and one that reports 1 sets
-     * mBusyJoypadSeen. The routine returns at the first ready Joypad that has no player. The title
-     * is inferred.
+     * the first of them pressed while any stays held. A JoypadPS2 that reports 0 during a game
+     * pauses the game when its player is one of the world's local players, and one that reports 1
+     * sets mBusyJoypadSeen. The routine returns at the first ready JoypadPS2 that has no player.
+     * The title is inferred.
      *
      * @ghidraAddress NTSC-U/C: 0x001dfab0
      * @ghidraAddress PAL: 0x001e5b30
@@ -302,7 +302,7 @@ private:
     void FinishPoll();
 
     /**
-     * Restart every Joypad's setup state machine.
+     * Restart every JoypadPS2's setup state machine.
      *
      * Inline. FindJoypadConnections() expands it three times, and the out-of-line copy has no
      * caller. The title is inferred.
@@ -313,9 +313,9 @@ private:
     void ResetJoypads();
 
     /**
-     * Number the connected Joypads as players 1 onward, in order.
+     * Number the connected JoypadPS2 objects as players 1 onward, in order.
      *
-     * A Joypad that is not connected keeps its player. The routine has no caller. The title is
+     * A JoypadPS2 that is not connected keeps its player. The routine has no caller. The title is
      * inferred.
      *
      * @ghidraAddress NTSC-U/C: 0x001e1ad8
@@ -329,8 +329,8 @@ private:
     // Bytes of stick position per reading, one per axis.
     static constexpr int kAxisCount = 4;
 
-    // One record per Joypad, the last reading it sent. The class emits no RTTI, has no constructor
-    // or destructor of its own, and is copied into the vector byte for byte, so no name survives.
+    // One record per JoypadPS2, the last reading it sent. The class emits no RTTI, has no
+    // constructor or destructor, and is copied into the vector byte for byte. Its name is lost.
     struct Entry {
         int mControlStates[kControlCount]; // +0x00, zeroed by Setup() and never read
         char mAxes[kAxisCount];            // +0x40
@@ -339,12 +339,12 @@ private:
         int mDirectionHeld; // +0x48
     };
 
-    std::vector<Entry> mEntries;     // +0x00
-    std::vector<int> mJoypadPlayers; // +0x0c, the player of each Joypad from 1, or 0 for none
-    int mNextJoypadId;               // +0x18
-    std::vector<Joypad *> mJoypads;  // +0x1c
-    // Set from BytePairStatic::shared() and never read again.
-    BytePairStatic *mBytePairs; // +0x28
+    std::vector<Entry> mEntries;       // +0x00
+    std::vector<int> mJoypadPlayers;   // +0x0c, the player of each JoypadPS2 from 1, or 0 for none
+    int mNextJoypadId;                 // +0x18
+    std::vector<JoypadPS2 *> mJoypads; // +0x1c
+    // Set from KeyboardMgr::shared() and never read again.
+    KeyboardMgr *mBytePairs; // +0x28
     // Built by the constructor and destroyed by the destructor, with no other use.
     std::list<int> mUnusedList; // +0x2c element type not recovered, 16-byte node
     // Zeroed by the constructor and never read.
@@ -372,7 +372,7 @@ private:
     // Starts at 1. The reading routine at 0x001dfab0 tests it at 0x001dfb7c before it hands a
     // reading to a game world. +0x4c
     int mGameInputEnabled;
-    int mBusyJoypadSeen; // +0x50, set when a Joypad's read reports 1
+    int mBusyJoypadSeen; // +0x50, set when a JoypadPS2's read reports 1
     // The receiver of the readings, which SetController() installs.
     RawController *mController; // +0x54
 };

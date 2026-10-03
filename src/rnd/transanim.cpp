@@ -11,7 +11,7 @@
 #include "math/quaternion.h"
 #include "math/transformops.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/drawable.h"
@@ -73,7 +73,7 @@ constexpr float kTangentHalf = 0.5f;
 // De-inlined from the two places DumpText() repeats it for its two targets. The binary tests both
 // the pointer and the virtual-base pointer it converts to, and the second test is what g++ 2.x
 // emits for an upcast to a virtual base of a pointer that may be null.
-static inline FailSink &DumpTargetName(FailSink &sink, const Object *pTarget) {
+static inline Dbg &DumpTargetName(Dbg &sink, const Object *pTarget) {
     if (pTarget != nullptr) {
         sink.Format(kQuotedTextFormat, NameText(pTarget));
     } else {
@@ -275,7 +275,7 @@ static void AppendLegacyRotKey(std::list<TransAnim::RotKey> &keys, const LegacyR
 
 // NTSC-U/C: 0x004fd348, PAL: 0x0053c030
 // A mode outside the two below writes nothing rather than a fallback title.
-static FailSink &operator<<(FailSink &sink, TransAnim::Interp nInterp) {
+static Dbg &operator<<(Dbg &sink, TransAnim::Interp nInterp) {
     switch (nInterp) {
     case TransAnim::kInterpLinear:
         sink.Print("Linear");
@@ -288,7 +288,7 @@ static FailSink &operator<<(FailSink &sink, TransAnim::Interp nInterp) {
 }
 
 // NTSC-U/C: 0x004f9160, PAL: 0x00537e30
-static FailSink &operator<<(FailSink &sink, const TransAnim::RotKey &key) {
+static Dbg &operator<<(Dbg &sink, const TransAnim::RotKey &key) {
     sink.Print("(frame:");
     sink.Format(kFloatFormat, key.mFrame);
     sink.Print(" value:");
@@ -313,7 +313,7 @@ static FailSink &operator<<(FailSink &sink, const TransAnim::RotKey &key) {
 }
 
 // NTSC-U/C: 0x004f9480, PAL: 0x00538150
-static FailSink &operator<<(FailSink &sink, const TransAnim::TransKey &key) {
+static Dbg &operator<<(Dbg &sink, const TransAnim::TransKey &key) {
     sink.Print("(frame:");
     sink.Format(kFloatFormat, key.mFrame);
     sink.Print(" value:");
@@ -337,7 +337,7 @@ static FailSink &operator<<(FailSink &sink, const TransAnim::TransKey &key) {
 }
 
 // NTSC-U/C: 0x004f9360, PAL: 0x00538030
-static FailSink &operator<<(FailSink &sink, const std::list<TransAnim::RotKey> &keys) {
+static Dbg &operator<<(Dbg &sink, const std::list<TransAnim::RotKey> &keys) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, keys.size());
     sink.Print(")");
@@ -354,7 +354,7 @@ static FailSink &operator<<(FailSink &sink, const std::list<TransAnim::RotKey> &
 }
 
 // NTSC-U/C: 0x004f9668, PAL: 0x00538338
-static FailSink &operator<<(FailSink &sink, const std::list<TransAnim::TransKey> &keys) {
+static Dbg &operator<<(Dbg &sink, const std::list<TransAnim::TransKey> &keys) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, keys.size());
     sink.Print(")");
@@ -458,7 +458,7 @@ float TransAnim::StartFrame() {
 }
 
 // NTSC-U/C: 0x004f2ab0, PAL: 0x005316a0
-void TransAnim::DumpText(FailSink &sink) {
+void TransAnim::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
     Drawable::DumpText(sink);

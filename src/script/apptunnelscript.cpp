@@ -20,7 +20,7 @@
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
 #include "script/cxx/typeerror.h"
-#include "script/scriptfunc.h"
+#include "script/registercfunction.h"
 
 namespace {
 
@@ -235,11 +235,11 @@ PyObject *PyInvokeFadeActivator(PyObject *, PyObject *pArgs) {
 
 // The script interface this file exports, registered in static initialisation.
 // NTSC-U/C: 0x00453bc8, PAL: 0x004910c8
-const ScriptFunc kActivatorFunc("activator", PyInvokeActivatorShow);
-const ScriptFunc kNowringFunc("nowring", PyInvokeNowRing);
-const ScriptFunc kSectionsFunc("sections", PyInvokeSections);
-const ScriptFunc kSeekerFunc("seeker", PyInvokeSeeker);
-const ScriptFunc kFadeActivatorFunc("fade_activator", PyInvokeFadeActivator);
-const ScriptFunc kHudEnableFunc("hud_enable", PyInvokeHudEnable);
+const RegisterCFunction kActivatorFunc("activator", PyInvokeActivatorShow);
+const RegisterCFunction kNowringFunc("nowring", PyInvokeNowRing);
+const RegisterCFunction kSectionsFunc("sections", PyInvokeSections);
+const RegisterCFunction kSeekerFunc("seeker", PyInvokeSeeker);
+const RegisterCFunction kFadeActivatorFunc("fade_activator", PyInvokeFadeActivator);
+const RegisterCFunction kHudEnableFunc("hud_enable", PyInvokeHudEnable);
 
 } // namespace

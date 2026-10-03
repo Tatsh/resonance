@@ -4,7 +4,7 @@
 
 #include "app/application.h"
 #include "app/longop.h"
-#include "app/watchdog.h"
+#include "app/scheduler.h"
 #include "game/gamemanagerimpl.h"
 #include "os/cycles.h"
 #include "os/mem.h"
@@ -56,11 +56,11 @@ int s_nFramesThisWindow;
 int s_nPollTicks;
 int s_bInKeepAliveDraw;
 MainLoop *s_pPumpedLoop;
-Watchdog *s_pPumpedWatchdog;
+Sch::Scheduler *s_pPumpedWatchdog;
 
-// Reading of the frame clock in nanoseconds, measured from the origin the watchdog's clock
+// Reading of the frame clock in nanoseconds, measured from the origin the scheduler's clock
 // recorded when the run started.
-inline long long FrameClockNs(Watchdog *pWatchdog) {
+inline long long FrameClockNs(Sch::Scheduler *pWatchdog) {
     return (GetElapsedMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
 }
 
@@ -70,7 +70,7 @@ inline long long FrameClockNs(Watchdog *pWatchdog) {
 MainLoop *g_pMainLoop;
 
 // NTSC-U/C: 0x001ec998, PAL: 0x001f2c20
-MainLoop::MainLoop(int nInCharge, Watchdog *pWatchdog, GameManagerImpl *pGameManager) {
+MainLoop::MainLoop(int nInCharge, Sch::Scheduler *pWatchdog, GameManagerImpl *pGameManager) {
     // The call passes 1. The value selects virtual-base setup the compiler emits. The body
     // does not use the flag.
     (void)nInCharge;

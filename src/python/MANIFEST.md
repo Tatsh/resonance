@@ -276,7 +276,7 @@ only a hint, and no behaviour changes.
 shipped `types.py` therefore takes its `NameError` branch. `complexobject.c` is not compiled.
 
 `PC/pycompat.h` sets the `PYTHONPATH` default to the empty string at `0x0082c9f0`. A `.` entry
-would arrive at the archive lookup as a `./` path. `ArkFile::MapPathToArkIndex()` treats a `./`
+would arrive at the archive lookup as a `./` path. `OpenArkObject::MapPathToArkIndex()` treats a `./`
 path as fatal in retail and in the reconstruction.
 
 Every compiled file and every header under `Include/` writes the C `long` as `Py_LONG`.

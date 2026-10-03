@@ -28,9 +28,9 @@ namespace Sch {
  *
  * The count is in nanoseconds, and three independent measurements agree. Print() below divides it
  * by the double 1000000000.0 at `0x0083c130` and appends the literal `s` at `0x0083c0e8`, so one
- * unit is one thousand-millionth of a second. Watchdog's clock scales its millisecond readings by
- * `1.0e9 / 1000.0` at `0x005124c8` to produce one. The run loop at `0x004aa8a4` treats a gap of
- * 6000000000 as six seconds of arrears.
+ * unit is one thousand-millionth of a second. Sch::Scheduler's clock scales its millisecond
+ * readings by `1.0e9 / 1000.0` at `0x005124c8` to produce one. The run loop at `0x004aa8a4` treats
+ * a gap of 6000000000 as six seconds of arrears.
  *
  * A song position is a separate quantity and is not one of these. Sch::TickClock::SongTick()
  * reports a song position as a plain `int` in MIDI ticks at 480 per quarter note, and

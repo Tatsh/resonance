@@ -4,7 +4,7 @@
 #include <list>
 #include <string.h>
 
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/drawable.h"
 #include "rnd/font.h"
@@ -42,7 +42,7 @@ const char *NameText(const Object *pObject) {
 
 // DumpText() continues on the sink the preceding label returned and discards the result of the
 // name print.
-void PrintObjectName(FailSink *pSink, const Object *pObject) {
+void PrintObjectName(Dbg *pSink, const Object *pObject) {
     if (pObject != nullptr) {
         pSink->Format(kQuotedTextFormat, NameText(pObject));
     } else {
@@ -197,7 +197,7 @@ const HxStr &Blur::ClassName() const {
 }
 
 // NTSC-U/C: 0x004bfee0, PAL: 0x004fdf80
-void Blur::DumpText(FailSink &sink) {
+void Blur::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
 
@@ -206,7 +206,7 @@ void Blur::DumpText(FailSink &sink) {
     }
 
     sink.Print("[Blur]\n");
-    FailSink *pLine = sink.Print("mesh:");
+    Dbg *pLine = sink.Print("mesh:");
     PrintObjectName(pLine, mpMesh);
     pLine->Print(" length:")
         ->Format(kCountFormat, mLength)

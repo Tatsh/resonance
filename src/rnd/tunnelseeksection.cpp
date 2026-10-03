@@ -39,7 +39,7 @@ void TunnelSeekSection::Invalidate() {
 }
 
 // NTSC-U/C: 0x0046ed78, PAL: 0x004ac978
-void TunnelSeekSection::Build(const HxStr &name, const TunnelMeshChain &templates) {
+void TunnelSeekSection::Build(const HxStr &name, const LodMesh &templates) {
     mMeshes.Build(name, templates.size(), true);
     mMeshes.ShareFaces(templates);
     mMeshes.CopyScreenSizes(templates);
@@ -50,7 +50,7 @@ void TunnelSeekSection::Build(const HxStr &name, const TunnelMeshChain &template
 void TunnelSeekSection::Update(Tunnel *pTunnel, const Color &color) {
     const int nSlice = Tunnel::WrapIndex(mSlice, pTunnel->mSliceCount);
     const int nRing = Tunnel::WrapIndex(mRing, pTunnel->mRingCount);
-    const TunnelMeshChain &cell = pTunnel->mCellChains[nSlice * pTunnel->mRingCount + nRing];
+    const LodMesh &cell = pTunnel->mCellChains[nSlice * pTunnel->mRingCount + nRing];
     Mesh *pMesh = mMeshes.front();
     std::vector<MeshVert> &verts = pMesh->mVertsOwner->mVerts;
     verts = cell.front()->mVertsOwner->mVerts;

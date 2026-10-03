@@ -2,7 +2,7 @@
 
 #include <list>
 
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/stream.h"
@@ -23,7 +23,7 @@ static const char *NameText(const Object *pObject) {
 }
 
 // NTSC-U/C: 0x0053fa40, PAL: 0x0057f6f8
-static FailSink &operator<<(FailSink &sink, const std::list<Object *> &refs) {
+static Dbg &operator<<(Dbg &sink, const std::list<Object *> &refs) {
     sink.Print("(size:");
     sink.Format(kCountFormat, refs.size());
     sink.Print(")");
@@ -125,7 +125,7 @@ void Object::ReleaseAllRefs() {
 }
 
 // NTSC-U/C: 0x0053e5a8, PAL: 0x0057e238
-void Object::DumpText(FailSink &sink) {
+void Object::DumpText(Dbg &sink) {
     sink.Print("[Object]\n");
     sink.Print("name:");
     sink.Format(kQuotedTextFormat, NameText(this));

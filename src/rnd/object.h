@@ -4,10 +4,10 @@
 
 #include "os/hxstr.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Stream;
-}
+} // namespace Rnd
 
 namespace Rnd {
 
@@ -107,15 +107,15 @@ public:
      * Write a human-readable description of this object to sink.
      *
      * Vtable slot 2. The referrer list is included only when the dump level of sink is positive.
-     * FailSink::Print() is two instructions that discard their text in the shipped build, so this
-     * routine produces no output on this target. The literals it passes survive in `.rodata`
-     * regardless, which is where the recovered member titles came from.
+     * Dbg::Print() is two instructions that discard their text in the shipped build. The routine
+     * therefore produces no output on this target. The literals it passes remain in `.rodata`
+     * regardless, and the recovered member titles came from them.
      *
      * @param sink The diagnostic sink to write to.
      * @ghidraAddress NTSC-U/C: 0x0053e5a8
      * @ghidraAddress PAL: 0x0057e238
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write this object's serialised form to stream.

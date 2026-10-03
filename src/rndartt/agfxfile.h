@@ -54,7 +54,7 @@ public:
     /**
      * Write a bitmap to a file in the format its extension selects.
      *
-     * VramTable::Screendump() is the one caller.
+     * Rnd::VRAM::Screendump() is the one caller.
      *
      * @param pszPath The file to write.
      * @param bitmap The bitmap to write.

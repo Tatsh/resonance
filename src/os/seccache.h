@@ -45,8 +45,8 @@ struct SectorCacheRow {
  *
  * The cache takes the whole of the zone called `seccache` and divides it into as many
  * kSectorCacheRowSize buffers as fit, so the requested row count applies only when zones are
- * switched off. Every row starts empty. ArkFile::Open() is the caller, on the first mount, and it
- * requests eight rows.
+ * switched off. Every row starts empty. OpenArkObject::Open() is the caller, on the first mount,
+ * and it requests eight rows.
  *
  * @param nRows The row count to use when zones are switched off.
  * @ghidraAddress NTSC-U/C: 0x00554fb8

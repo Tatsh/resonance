@@ -4,7 +4,7 @@
 #include <list>
 #include <math.h>
 
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/object.h"
@@ -30,7 +30,7 @@ static const char *NameText(const Object *pObject) {
 }
 
 // NTSC-U/C: 0x00497ed8, PAL: 0x004d5e08
-static FailSink &operator<<(FailSink &sink, const std::list<Animatable::Filter *> &filters) {
+static Dbg &operator<<(Dbg &sink, const std::list<Animatable::Filter *> &filters) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, filters.size());
     sink.Print(")");
@@ -52,7 +52,7 @@ static FailSink &operator<<(FailSink &sink, const std::list<Animatable::Filter *
 }
 
 // NTSC-U/C: 0x00498078, PAL: 0x004d5fa8
-static FailSink &operator<<(FailSink &sink, const std::list<Animatable *> &anims) {
+static Dbg &operator<<(Dbg &sink, const std::list<Animatable *> &anims) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, anims.size());
     sink.Print(")");
@@ -76,7 +76,7 @@ static FailSink &operator<<(FailSink &sink, const std::list<Animatable *> &anims
 // No call site survives in the shipped build, and the five literals below are the only
 // record of the FilterType names. The routine is not static: an out-of-line copy with no caller is
 // what external linkage produces, where internal linkage would have let the compiler discard it.
-FailSink &operator<<(FailSink &sink, Animatable::FilterType nType) {
+Dbg &operator<<(Dbg &sink, Animatable::FilterType nType) {
     switch (nType) {
     case Animatable::kFilterScaleOffset:
         sink.Print("ScaleOffset");
@@ -188,7 +188,7 @@ float Animatable::ScaleOffset::Inverse(float flValue) {
 }
 
 // NTSC-U/C: 0x00498f20, PAL: 0x004d6e80
-void Animatable::ScaleOffset::Dump(FailSink &sink) {
+void Animatable::ScaleOffset::Dump(Dbg &sink) {
     sink.Print("(scale:");
     sink.Format(kFloatFormat, mScale);
     sink.Print(" offset:");
@@ -235,7 +235,7 @@ float Animatable::MinMaxLoop::Apply(float flValue) {
 }
 
 // NTSC-U/C: 0x004990f0, PAL: 0x004d7050
-void Animatable::MinMaxLoop::Dump(FailSink &sink) {
+void Animatable::MinMaxLoop::Dump(Dbg &sink) {
     sink.Print("(min:");
     sink.Format(kFloatFormat, mMin);
     sink.Print(" max:");
@@ -302,7 +302,7 @@ float Animatable::ZeroOrder::Inverse(float flValue) {
 }
 
 // NTSC-U/C: 0x00499348, PAL: 0x004d72a8
-void Animatable::ZeroOrder::Dump(FailSink &sink) {
+void Animatable::ZeroOrder::Dump(Dbg &sink) {
     sink.Print("(level:");
     sink.Format(kFloatFormat, mLevel);
     sink.Print(" maxDelta:");
@@ -347,7 +347,7 @@ float Animatable::FirstOrder::Inverse(float flValue) {
 }
 
 // NTSC-U/C: 0x00499528, PAL: 0x004d7488
-void Animatable::FirstOrder::Dump(FailSink &sink) {
+void Animatable::FirstOrder::Dump(Dbg &sink) {
     sink.Print("(level:");
     sink.Format(kFloatFormat, mLevel);
     sink.Print(" ratio:");
@@ -393,7 +393,7 @@ float Animatable::SecondOrder::Inverse([[maybe_unused]] float flValue) {
 }
 
 // NTSC-U/C: 0x00499700, PAL: 0x004d7660
-void Animatable::SecondOrder::Dump(FailSink &sink) {
+void Animatable::SecondOrder::Dump(Dbg &sink) {
     sink.Print("(level:");
     sink.Format(kFloatFormat, mLevel);
     sink.Print(" spring:");
@@ -656,7 +656,7 @@ void Animatable::AcquireAnimsRefs() {
 }
 
 // NTSC-U/C: 0x0049a640, PAL: 0x004d85a8
-void Animatable::DumpText(FailSink &sink) {
+void Animatable::DumpText(Dbg &sink) {
     if (sink.mDumpLevel <= 0) {
         return;
     }

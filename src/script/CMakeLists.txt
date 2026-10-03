@@ -24,10 +24,10 @@ set(RESONANCE_SCRIPT_SRCS
     pyinterpreter.cpp
     pyshell.cpp
     recinfo.cpp
+    registercfunction.cpp
     sceneanim.cpp
     scripteval.cpp
     scriptcalltemplates.cpp
-    scriptfunc.cpp
     scripthost.cpp
     scripttemplatemap.cpp
     testmap.cpp

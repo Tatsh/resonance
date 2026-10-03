@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/linearramp.h"
+#include "app/linearanim.h"
 
 namespace Rnd {
 class View;
@@ -61,5 +61,5 @@ public:
 
 private:
     Rnd::View *mView; // `HUD letterbox.view`
-    LinearRamp mRamp;
+    LinearAnim mRamp;
 };

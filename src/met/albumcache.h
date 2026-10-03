@@ -62,8 +62,8 @@ int GetAlbumJukeboxValue();
  *
  * The map of level stages is emptied, every word of the level-value cache is reset to -2, and the
  * jukebox value is reset to -2. The image lists no direct caller. The script function
- * `clear_album_cache` at `0x003f6860`, which the file-scope ScriptFunc at `0x00892370` registers,
- * repeats the same three steps inline.
+ * `clear_album_cache` at `0x003f6860` repeats the same three steps inline. The file-scope
+ * RegisterCFunction at `0x00892370` registers the script function.
  *
  * @ghidraAddress NTSC-U/C: 0x003f79a8
  * @ghidraAddress PAL: 0x004301b8

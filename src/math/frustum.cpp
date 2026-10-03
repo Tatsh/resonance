@@ -4,13 +4,13 @@
 
 #include "math/sphere.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 
 namespace {
 
 // One plane under its title, the way the frustum printer writes each of the six. Every call after
 // the title goes to the sink the previous call returned.
-void PrintPlane(FailSink &sink, const char *pszTitle, const Plane &plane) {
+void PrintPlane(Rnd::Dbg &sink, const char *pszTitle, const Plane &plane) {
     sink.Print(pszTitle)
         ->Print("(a:")
         ->Format("%.2f", plane.a)
@@ -66,7 +66,7 @@ Frustum &BuildFrustum(Frustum &frustum, float flNear, float flFar, float flFov, 
 }
 
 // NTSC-U/C: 0x0054f798, PAL: 0x0058fdd8
-FailSink &operator<<(FailSink &sink, const Frustum &frustum) {
+Rnd::Dbg &operator<<(Rnd::Dbg &sink, const Frustum &frustum) {
     PrintPlane(sink, "\n\tfront:", frustum.mFront);
     PrintPlane(sink, "\n\tback:", frustum.mBack);
     PrintPlane(sink, "\n\tleft:", frustum.mLeft);

@@ -6,8 +6,8 @@
 #include "rnd/drawable.h"
 #include "rnd/transformable.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Mesh;
 class Object;
 class Stream;
@@ -178,7 +178,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004bfee0
      * @ghidraAddress PAL: 0x004fdf80
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write this trail's serialised form to stream.

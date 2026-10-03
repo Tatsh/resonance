@@ -47,8 +47,9 @@ inline PyMethodDef method(const char *pszMethodName,
  * | 0 | compiler-generated type function | `0x005ab9d0` |
  * | 1 | `~MethodTable` | `0x005abb68` |
  *
- * The one instance in the image is the function-local static behind ScriptFunc's constructor,
- * which the game uses to register every script function exported to Python.
+ * The one instance in the image is the function-local static behind the RegisterCFunction
+ * constructor. The game registers every script function exported to Python through that
+ * constructor.
  */
 class MethodTable {
 public:

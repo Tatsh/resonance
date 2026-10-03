@@ -84,7 +84,7 @@ void ResetCycleCounter();
  * Report the milliseconds elapsed since the machine started.
  *
  * The body is here rather than in a source file because around thirty routines across the engine
- * inline it, among them MainLoop::PumpTimers(), WatchdogClock::Mark(), and the per-frame slots of
+ * inline it, among them MainLoop::PumpTimers(), Sch::SystemTime::Mark(), and the per-frame slots of
  * MetRenderer. Only one out-of-line copy exists, at the address below, and the two routines in the
  * asynchronous file layer are its only callers.
  *
@@ -111,7 +111,8 @@ inline int GetElapsedMilliseconds() {
  * The body is here rather than in a source file for the reason recorded on
  * GetElapsedMilliseconds(). Its one out-of-line copy follows that routine's copy directly, in the
  * unit whose static initialiser is at `0x004662d0` and which also defines ShowReportedMessage().
- * HudScreenFlash's constructor calls that copy, and WatchdogClock divides its scale by the result.
+ * HudScreenFlash's constructor calls that copy, and Sch::SystemTime divides its scale by the
+ * result.
  *
  * The name is inferred from the value. Nothing in the image attests it.
  *

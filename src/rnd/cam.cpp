@@ -7,7 +7,7 @@
 #include "math/plane.h"
 #include "math/transformops.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
 #include "rnd/collideable.h"
@@ -74,7 +74,7 @@ inline void SetRowPadding(Vector3 (&rows)[kXfmRowCount]) {
 }
 
 // One matrix as DumpText() writes it, a tab-indented line per row.
-void PrintMatrix(FailSink &sink, const Vector3 (&rows)[kXfmRowCount]) {
+void PrintMatrix(Dbg &sink, const Vector3 (&rows)[kXfmRowCount]) {
     for (const Vector3 &row : rows) {
         sink.Print("\n\t");
         sink.Print("(x:");
@@ -188,7 +188,7 @@ void Cam::CollideScreen(const Ray &ray, HitSink &sink) {
 }
 
 // NTSC-U/C: 0x004ad980, PAL: 0x004ebb40
-void Cam::DumpText(FailSink &sink) {
+void Cam::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Transformable::DumpText(sink);
     Drawable::DumpText(sink);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/animrange.h"
+#include "app/animhelper.h"
 
 namespace Rnd {
 class Blur;
@@ -38,7 +38,7 @@ public:
      * flash, the multiplier text takes the colour of the plain or the hot material, and the flash
      * and the pulse then fall by 0.2 and 0.05.
      *
-     * @param flTime The time AnimRange::Update() compares against.
+     * @param flTime The time AnimHelper::Update() compares against.
      * @ghidraAddress NTSC-U/C: 0x00418de8
      * @ghidraAddress PAL: 0x00452fa8
      */
@@ -140,5 +140,5 @@ private:
     Rnd::Mat *mHotMat;          // `HUD ptstmphot.mat`
     int mUnusedWord;            // +0x38 Zeroed by the constructor and never read.
     // The exit animation.
-    AnimRange mExit;
+    AnimHelper mExit;
 };

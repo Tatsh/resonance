@@ -6,7 +6,7 @@
 #include "math/transform.h"
 #include "math/transformops.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
 #include "os/random.h"
@@ -71,7 +71,7 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-void PrintObjectRef(FailSink &sink, const Object *pObject) {
+void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print(kNoObject);
         return;
@@ -90,12 +90,12 @@ void WriteObjectRef(Stream &stream, const Object *pObject) {
     stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
 }
 
-void PrintBool(FailSink &sink, int nValue) {
+void PrintBool(Dbg &sink, int nValue) {
     sink.Print(nValue != 0 ? kTrueText : kFalseText);
 }
 
 // The padding word of a row is not written.
-void PrintRow(FailSink &sink, const Vector3 &row) {
+void PrintRow(Dbg &sink, const Vector3 &row) {
     sink.Print("\n\t");
     sink.Print("(x:");
     sink.Format(kFloatFormat, row.x);
@@ -251,7 +251,7 @@ inline void SetIdentity(Transform &xfm) {
 HxStr g_generatorClassName("Generator");
 
 // NTSC-U/C: 0x0045b3d0, PAL: 0x00498a40
-static FailSink &operator<<(FailSink &sink, const Generator::Instance &instance) {
+static Dbg &operator<<(Dbg &sink, const Generator::Instance &instance) {
     sink.Print("(frameOrg: ");
     sink.Format(kFloatFormat, instance.mFrameOrg);
     sink.Print(" xfmMod:");
@@ -264,7 +264,7 @@ static FailSink &operator<<(FailSink &sink, const Generator::Instance &instance)
 }
 
 // NTSC-U/C: 0x0045d6d0, PAL: 0x0049ad68
-static FailSink &operator<<(FailSink &sink, const std::list<Generator::Instance> &instances) {
+static Dbg &operator<<(Dbg &sink, const std::list<Generator::Instance> &instances) {
     sink.Print("(size:");
     sink.Format(kCountFormat, instances.size());
     sink.Print(")");
@@ -665,7 +665,7 @@ void Generator::Regenerate() {
 }
 
 // NTSC-U/C: 0x00459618, PAL: 0x00496ba0
-void Generator::DumpText(FailSink &sink) {
+void Generator::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Transformable::DumpText(sink);
     Drawable::DumpText(sink);

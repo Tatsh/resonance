@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "app/linearramp.h"
+#include "app/linearanim.h"
 #include "os/hxstr.h"
 
 namespace Rnd {
@@ -162,7 +162,7 @@ private:
     float mSpinFrame;
     int mSpinning;
     float mOffsetX;
-    LinearRamp mDip;
+    LinearAnim mDip;
     float mCentreOffset; // +0x3c, set to 0.5 and never read by the recovered routines.
     float mSpinStart;    // 1e9 while no spin runs, -1e9 while a restart is pending.
 };

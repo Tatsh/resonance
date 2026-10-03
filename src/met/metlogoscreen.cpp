@@ -4,7 +4,7 @@
 
 #include "app/application.h"
 #include "app/playsound.h"
-#include "app/watchdog.h"
+#include "app/scheduler.h"
 #include "game/gamemanagerimpl.h"
 #include "game/inputpoller.h"
 #include "met/metfrontendstate.h"
@@ -101,7 +101,7 @@ inline T *FindObject(const HxStr &name) {
 
 // The watchdog time in nanoseconds.
 inline long long WatchdogNowNs() {
-    Watchdog *pWatchdog = Application::shared()->GetWatchdog();
+    Sch::Scheduler *pWatchdog = Application::shared()->GetWatchdog();
     return (GetElapsedMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
 }
 

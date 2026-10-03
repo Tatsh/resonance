@@ -7,9 +7,9 @@
 #include "rnd/drawable.h"
 #include "rnd/manager.h"
 
-class FailSink;
 class HxStr;
 namespace Rnd {
+class Dbg;
 class Light;
 class Object;
 class Stream;
@@ -108,7 +108,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00515ce0
      * @ghidraAddress PAL: 0x00556010
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write this environment's serialised form to stream.

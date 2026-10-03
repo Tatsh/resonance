@@ -13,7 +13,7 @@
 #include "script/cxx/object.h"
 #include "script/cxx/tuple.h"
 #include "script/cxx/typeerror.h"
-#include "script/scriptfunc.h"
+#include "script/registercfunction.h"
 
 namespace {
 
@@ -91,7 +91,7 @@ PyObject *PyInvokeSetGhostMode(PyObject *, PyObject *pArgs) {
 
 // The script interface this file exports, registered in static initialisation.
 // NTSC-U/C: 0x00160fb8, PAL: 0x00162f18
-const ScriptFunc kSetLoopModeFunc("set_loop_mode", PyInvokeSetLoopMode);
-const ScriptFunc kSetGhostModeFunc("set_ghost_mode", PyInvokeSetGhostMode);
+const RegisterCFunction kSetLoopModeFunc("set_loop_mode", PyInvokeSetLoopMode);
+const RegisterCFunction kSetGhostModeFunc("set_ghost_mode", PyInvokeSetGhostMode);
 
 } // namespace

@@ -4,7 +4,7 @@
 
 #include "rndartt/abitmap.h"
 #include "rndartt/arect.h"
-#include "rndartt/arlereader.h"
+#include "rndartt/arle8reader.h"
 
 class APalette;
 struct AClipSpan;
@@ -1127,7 +1127,7 @@ protected:
      *
      * Records the decoded columns that remain and the destination row the copy stops at, and
      * moves the destination position onto the clip rectangle. Rows above the clip rectangle are
-     * consumed through ARleReader::SkipRows(), so the reader then addresses the first row that
+     * consumed through ARle8Reader::SkipRows(), so the reader then addresses the first row that
      * remains. The row fields are not written when no column remains.
      *
      * The image has no caller. BlitRle8(), BlitRemapRle8(), and BlitBlendRle8() each compile
@@ -1144,7 +1144,7 @@ protected:
      * @ghidraAddress PAL: 0x0062d560
      */
     int ClipBlitSpan(
-        const ABitmap &source, int *pnX, int *pnY, ARleReader *pReader, AClipSpan *pSpan) const;
+        const ABitmap &source, int *pnX, int *pnY, ARle8Reader *pReader, AClipSpan *pSpan) const;
 
     /**
      * Clip a line against the clip rectangle, rewriting both endpoints in place.
@@ -1353,7 +1353,7 @@ protected:
      * Copy a run length encoded source through a remap table.
      *
      * The run length encoded arm of BlitRemapNoClip(), reached only for format code 5. It decodes
-     * each row into g_abCanvasRowScratch through ARleReader and stores it with RemapRowIndexed().
+     * each row into g_abCanvasRowScratch through ARle8Reader and stores it with RemapRowIndexed().
      *
      * The row loop advances nY rather than the span row, so its bound recedes with the row and a
      * source of one row or more never finishes. BlitRemapNoClip() has no caller in the image, so
@@ -1372,7 +1372,7 @@ protected:
      * Clip and copy a run length encoded source through a remap table.
      *
      * The clipped counterpart of BlitRemapRle8NoClip(), reached only from BlitRemap(). Rows above
-     * the clip rectangle are consumed through ARleReader::SkipRows() rather than decoded.
+     * the clip rectangle are consumed through ARle8Reader::SkipRows() rather than decoded.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -1577,7 +1577,7 @@ protected:
      * Stretch a run length encoded source into a destination rectangle.
      *
      * Decodes the first sampled row into g_abCanvasRowScratch, then decodes again only when the
-     * sampled row changes, consuming any rows between through ARleReader::SkipRows().
+     * sampled row changes, consuming any rows between through ARle8Reader::SkipRows().
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.

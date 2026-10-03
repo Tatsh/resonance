@@ -10,8 +10,8 @@
 #include "rnd/animatable.h"
 #include "rnd/manager.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Mesh;
 class Stream;
 } // namespace Rnd
@@ -116,7 +116,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00486c98
      * @ghidraAddress PAL: 0x004c4a68
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Serialise the animation.

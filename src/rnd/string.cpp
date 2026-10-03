@@ -9,7 +9,7 @@
 #include "math/transformops.h"
 #include "math/vector2.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/cam.h"
 #include "rnd/collideable.h"
@@ -78,7 +78,7 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-void PrintObjectName(FailSink &sink, const Object *pObject) {
+void PrintObjectName(Dbg &sink, const Object *pObject) {
     if (pObject != nullptr) {
         sink.Format(kQuotedTextFormat, NameText(pObject));
     } else {
@@ -86,7 +86,7 @@ void PrintObjectName(FailSink &sink, const Object *pObject) {
     }
 }
 
-void PrintFlag(FailSink &sink, int nFlag) {
+void PrintFlag(Dbg &sink, int nFlag) {
     sink.Print(nFlag != 0 ? "true" : "false");
 }
 
@@ -104,7 +104,7 @@ void WriteObjectName(Stream &stream, const Object *pObject) {
 // NTSC-U/C: 0x004be168, PAL: 0x004fc1c0
 // Writes the point count and then one line per point, its index, its position, and
 // its colour.
-FailSink &DumpPointVector(FailSink &sink, const std::vector<String::Point> &points) {
+Dbg &DumpPointVector(Dbg &sink, const std::vector<String::Point> &points) {
     sink.Print("(size:");
     sink.Format(kCountFormat, static_cast<unsigned>(points.size()));
     sink.Print(")");
@@ -645,7 +645,7 @@ void String::Collide(const Ray &ray, HitSink &sink) {
 }
 
 // NTSC-U/C: 0x004ba038, PAL: 0x004f7fb0
-void String::DumpText(FailSink &sink) {
+void String::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
     Collideable::DumpText(sink);

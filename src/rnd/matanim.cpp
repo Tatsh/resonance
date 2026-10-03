@@ -8,7 +8,7 @@
 #include "math/color.h"
 #include "math/transformops.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/keychannel.h"
@@ -44,7 +44,7 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-void PrintObjectRef(FailSink &sink, const Object *pObject) {
+void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print(kNoObject);
         return;
@@ -188,7 +188,7 @@ Stream &WriteTexKeys(Stream &stream, const std::list<MatAnim::StageAnim::TexKey>
 }
 
 // NTSC-U/C: 0x004daad0, PAL: 0x00518fe8
-FailSink &DumpTexKeys(FailSink &sink, const std::list<MatAnim::StageAnim::TexKey> &keys) {
+Dbg &DumpTexKeys(Dbg &sink, const std::list<MatAnim::StageAnim::TexKey> &keys) {
     sink.Print("(size:");
     sink.Format("%u", keys.size());
     sink.Print(")");
@@ -209,7 +209,7 @@ FailSink &DumpTexKeys(FailSink &sink, const std::list<MatAnim::StageAnim::TexKey
 }
 
 // NTSC-U/C: 0x004d8b78, PAL: 0x00517090
-FailSink &DumpStageAnims(FailSink &sink, std::vector<MatAnim::StageAnim> &stages) {
+Dbg &DumpStageAnims(Dbg &sink, std::vector<MatAnim::StageAnim> &stages) {
     sink.Print("(size:");
     sink.Format("%u", stages.size());
     sink.Print(")");
@@ -286,7 +286,7 @@ void MatAnim::StageAnim::Load(Stream &stream) {
 }
 
 // NTSC-U/C: 0x004d3f70, PAL: 0x00512460
-void MatAnim::StageAnim::Dump(FailSink &sink) {
+void MatAnim::StageAnim::Dump(Dbg &sink) {
     sink.Print(" transKeys:");
     DumpVector3Keys(sink, mTranslateKeys);
     sink.Print(" scaleKeys:");
@@ -372,7 +372,7 @@ void RegisterMatAnimClass() {
 }
 
 // NTSC-U/C: 0x004d33b8, PAL: 0x00511858
-void MatAnim::DumpText(FailSink &sink) {
+void MatAnim::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
     if (sink.mDumpLevel <= 0) {

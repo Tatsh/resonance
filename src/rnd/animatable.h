@@ -4,11 +4,11 @@
 
 #include "rnd/object.h"
 
-class FailSink;
 class MetRenderer;
 namespace Rnd {
+class Dbg;
 class Stream;
-}
+} // namespace Rnd
 
 namespace Rnd {
 
@@ -111,12 +111,12 @@ public:
         /**
          * Write this stage's parameters to sink.
          *
-         * Vtable slot 3. Pure. FailSink::Print() discards its text in the shipped build. No
+         * Vtable slot 3. Pure. Dbg::Print() discards its text in the shipped build. No
          * subclass produces output on this target.
          *
          * @param sink The diagnostic sink to write to.
          */
-        virtual void Dump(FailSink &sink) = 0;
+        virtual void Dump(Dbg &sink) = 0;
 
         /**
          * Write this stage's parameters to stream.
@@ -212,7 +212,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x00498f20
          * @ghidraAddress PAL: 0x004d6e80
          */
-        virtual void Dump(FailSink &sink);
+        virtual void Dump(Dbg &sink);
 
         /**
          * Write both parameters to stream.
@@ -306,7 +306,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x004990f0
          * @ghidraAddress PAL: 0x004d7050
          */
-        virtual void Dump(FailSink &sink);
+        virtual void Dump(Dbg &sink);
 
         /**
          * Write the two ends as floats and mLoop as a single byte.
@@ -408,7 +408,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x00499348
          * @ghidraAddress PAL: 0x004d72a8
          */
-        virtual void Dump(FailSink &sink);
+        virtual void Dump(Dbg &sink);
 
         /**
          * Write both parameters to stream.
@@ -503,7 +503,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x00499528
          * @ghidraAddress PAL: 0x004d7488
          */
-        virtual void Dump(FailSink &sink);
+        virtual void Dump(Dbg &sink);
 
         /**
          * Write both parameters to stream.
@@ -610,7 +610,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x00499700
          * @ghidraAddress PAL: 0x004d7660
          */
-        virtual void Dump(FailSink &sink);
+        virtual void Dump(Dbg &sink);
 
         /**
          * Write the three spring parameters to stream, the velocity excluded.
@@ -910,14 +910,14 @@ public:
      * Write a description of this object to sink.
      *
      * Writes mFilters and mAnims, and produces nothing at all when the dump level of sink is not
-     * positive. FailSink::Print() discards its text in the shipped build. The routine therefore
+     * positive. Dbg::Print() discards its text in the shipped build. The routine therefore
      * produces no output on this target in any case.
      *
      * @param sink The diagnostic sink to write to.
      * @ghidraAddress NTSC-U/C: 0x0049a640
      * @ghidraAddress PAL: 0x004d85a8
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write the revision, mFilters, and mAnims to stream.

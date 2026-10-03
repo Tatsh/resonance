@@ -11,7 +11,7 @@
 #include "game/player.h"
 #include "game/tnlarena.h"
 #include "gfx/gfxdevice.h"
-#include "gfx/vramtable.h"
+#include "gfx/vram.h"
 #include "msg/barstatusmsg.h"
 #include "msg/gamebeginmsg.h"
 #include "msg/pointamountmsg.h"

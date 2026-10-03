@@ -11,7 +11,7 @@ namespace Mid {
  * is a two-instruction `jr ra` default. An unoverridden slot does nothing.
  *
  * LevelConverter is the one subclass in the image, and it overrides slots 2 through 10.
- * Mid::FileReader is the one caller, and its call sites fix slots 2 through 11. Slots 3 through 7
+ * Mid::Reader is the one caller, and its call sites fix slots 2 through 11. Slots 3 through 7
  * each receive one channel event, and LevelConverter forwards each to LevelBuilder with a MIDI
  * status byte (0x90 note on, 0x80 note off, 0xb0 controller, 0xc0 program change, and 0xe0 pitch
  * bend, in slot order). The reader calls slot 8 for a tempo meta event, slot
@@ -118,7 +118,7 @@ public:
     /**
      * Receive a tempo meta event.
      *
-     * Slot 8. Mid::FileReader::ReadMeta() calls it only for meta type 0x51, with the event
+     * Slot 8. Mid::Reader::ReadMeta() calls it only for meta type 0x51, with the event
      * position and the event's 24-bit value. That value is the MIDI tempo in microseconds per
      * quarter note. LevelConverter's override passes both to LevelBuilder::SetTempo(). SetTempo()
      * builds its tempo map from the second.
@@ -157,7 +157,7 @@ public:
     /**
      * Report that the whole file has been delivered.
      *
-     * Slot 11. Mid::FileReader::EndOfFile() calls it with no argument once the chunk reader has
+     * Slot 11. Mid::Reader::EndOfFile() calls it with no argument once the chunk reader has
      * no chunk left. LevelConverter's table points at a two-instruction body of its own at
      * `0x001ea360`. That body is this default re-emitted rather than an override.
      *
@@ -169,7 +169,7 @@ public:
     /**
      * Do nothing.
      *
-     * Slot 12, an empty default with no override anywhere. Mid::FileReader never calls it.
+     * Slot 12, an empty default with no override anywhere. Mid::Reader never calls it.
      *
      * @ghidraAddress NTSC-U/C: 0x001ea2c8
      * @ghidraAddress PAL: 0x001f0538
@@ -179,7 +179,7 @@ public:
     /**
      * Do nothing.
      *
-     * Slot 13, an empty default with no override anywhere. Mid::FileReader never calls it.
+     * Slot 13, an empty default with no override anywhere. Mid::Reader never calls it.
      *
      * @ghidraAddress NTSC-U/C: 0x001ea2d0
      * @ghidraAddress PAL: 0x001f0540
@@ -189,7 +189,7 @@ public:
     /**
      * Do nothing.
      *
-     * Slot 14, an empty default with no override anywhere. Mid::FileReader never calls it.
+     * Slot 14, an empty default with no override anywhere. Mid::Reader never calls it.
      *
      * @ghidraAddress NTSC-U/C: 0x001ea2d8
      * @ghidraAddress PAL: 0x001f0548
@@ -199,7 +199,7 @@ public:
     /**
      * Do nothing.
      *
-     * Slot 15, an empty default with no override anywhere. Mid::FileReader never calls it.
+     * Slot 15, an empty default with no override anywhere. Mid::Reader never calls it.
      *
      * @ghidraAddress NTSC-U/C: 0x001ea2e0
      * @ghidraAddress PAL: 0x001f0550

@@ -7,8 +7,8 @@
 #include "rnd/drawable.h"
 #include "rnd/manager.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Mesh;
 class Stream;
 } // namespace Rnd
@@ -66,7 +66,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004e81a0
      * @ghidraAddress PAL: 0x00526ca8
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Serialise the multi-mesh.

@@ -1,14 +1,14 @@
 #include "stream/hxidatachunk.h"
 
-#include "stream/hxdatachunkid.h"
-#include "stream/hxdatachunkreader.h"
+#include "stream/hxchunkheader.h"
+#include "stream/hxilistchunk.h"
 
 // NTSC-U/C: 0x00145908, PAL: 0x00146420
-HxIDataChunk::HxIDataChunk(HxDataChunkReader *pReader)
+HxIDataChunk::HxIDataChunk(HxIListChunk *pReader)
     : mReader(pReader), mSource(pReader->mStream), mId(nullptr) {
     mFatalOnEnd = 1;
     mSwapBytes = mSource->mSwapBytes;
-    mId = new HxDataChunkId(*mReader->Current());
+    mId = new HxChunkHeader(*mReader->Current());
     mStart = mSource->Tell();
     mEnd = mStart + mId->mSize;
     mReader->Lock();
@@ -18,7 +18,7 @@ HxIDataChunk::HxIDataChunk(HxDataChunkReader *pReader)
 HxIDataChunk::HxIDataChunk(HxStream *pSource) : mReader(nullptr), mSource(pSource), mId(nullptr) {
     mFatalOnEnd = 1;
     mSwapBytes = pSource->mSwapBytes;
-    mId = new HxDataChunkId;
+    mId = new HxChunkHeader;
     mId->Read(*pSource);
     mStart = mSource->Tell();
     mEnd = mStart + mId->mSize;

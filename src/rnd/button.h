@@ -5,8 +5,8 @@
 #include "os/hxstr.h"
 #include "rnd/object.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Font;
 class Mat;
 class Mesh;
@@ -84,7 +84,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005304f0
      * @ghidraAddress PAL: 0x0056fc98
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write this button to stream at revision 0.

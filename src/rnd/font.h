@@ -6,8 +6,8 @@
 #include "os/hxstr.h"
 #include "rnd/object.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Mat;
 class Stream;
 } // namespace Rnd
@@ -29,7 +29,7 @@ enum FontType { kFontTypeDefault = 0, kFontTypeBuiltin = 1, kFontTypeMaterial = 
  * Stroke weight of a Builtin font.
  *
  * The three titles come from the table of pointers at `0x006fecc0`, which the printer at
- * `0x004d0858` indexes with mWeight and hands straight to FailSink::Print() with no bound check.
+ * `0x004d0858` indexes with mWeight and hands straight to Dbg::Print() with no bound check.
  * A fourth word follows the three and reads zero. The family table begins at the next quadword
  * boundary, so that word is as likely to be alignment padding as a null element, and the source
  * below writes three entries.
@@ -146,7 +146,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004ca470
      * @ghidraAddress PAL: 0x005086d8
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write this font to stream at revision 2.

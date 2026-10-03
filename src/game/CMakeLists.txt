@@ -53,13 +53,13 @@ set(RESONANCE_GAME_SRCS
     inputpollerps2.cpp
     jameffectsmgr.cpp
     jampowerupplacer.cpp
-    joypad.cpp
+    joypadps2.cpp
     jukeboxplaylist.cpp
     levelbuilder.cpp
     levelconverter.cpp
     leveldata.cpp
     levelstats.cpp
-    linearmap.cpp
+    lineartransform.cpp
     localjamenablemgr.cpp
     localplayer.cpp
     localplayercmd.cpp

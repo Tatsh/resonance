@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "app/linearramp.h"
+#include "app/linearanim.h"
 #include "math/vector3.h"
 #include "rnd/cam.h"
 
@@ -89,7 +89,7 @@ private:
     std::vector<Rnd::View *> mLocalViews; // "tnl local<n>.view", four slots.
     int mPlayerCount;
     State mState;
-    LinearRamp mRamp; // 0 at the intro pose and 1 at the playing pose.
+    LinearAnim mRamp; // 0 at the intro pose and 1 at the playing pose.
     float mIntroPitch;
     float mPlayPitch;
     Vector3 mIntroPos;

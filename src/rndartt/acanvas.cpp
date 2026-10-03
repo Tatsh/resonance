@@ -239,7 +239,7 @@ unsigned char ACanvas::ClipCodeForPoint(int nX, int nY) const {
 
 // NTSC-U/C: 0x005eb418, PAL: 0x0062d560
 int ACanvas::ClipBlitSpan(
-    const ABitmap &source, int *pnX, int *pnY, ARleReader *pReader, AClipSpan *pSpan) const {
+    const ABitmap &source, int *pnX, int *pnY, ARle8Reader *pReader, AClipSpan *pSpan) const {
     pSpan->mStopColumn = source.mWidth;
     if (mClip.mRight < *pnX + source.mWidth) {
         pSpan->mStopColumn = static_cast<short>(mClip.mRight - *pnX);
@@ -895,7 +895,7 @@ void ACanvas::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
                 0);
     row.mTransparentColor = source.mTransparentColor;
     row.mPalette = source.mPalette;
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
@@ -913,7 +913,7 @@ void ACanvas::BlitRle8(const ABitmap &source, int nX, int nY) {
         return;
     }
 
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
@@ -1385,7 +1385,7 @@ void ACanvas::BlitRemapRle8NoClip(const ABitmap &source,
             span.mPalette = g_pDefaultPalette;
         }
     }
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
@@ -1401,7 +1401,7 @@ void ACanvas::BlitRemapRle8NoClip(const ABitmap &source,
 // The clipping matches BlitRle8(), without its test for a source wholly inside the
 // clip rectangle.
 void ACanvas::BlitRemapRle8(const ABitmap &source, int nX, int nY, const unsigned char *pRemap) {
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
@@ -1490,7 +1490,7 @@ void ACanvas::BlitBlendRle8NoClip(const ABitmap &source,
             span.mPalette = g_pDefaultPalette;
         }
     }
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
@@ -1509,7 +1509,7 @@ void ACanvas::BlitBlendRle8(const ABitmap &source,
                             int nX,
                             int nY,
                             const unsigned char *const *ppBlend) {
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
@@ -1713,7 +1713,7 @@ void ACanvas::StretchBlitRle8(const ABitmap &source, const ARect &rect) {
     if (SetupStretchBlit(source, rect, &blit) == 0) {
         return;
     }
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
@@ -1786,7 +1786,7 @@ void ACanvas::StretchBlitRemapRle8(const ABitmap &source,
     if (SetupStretchBlit(source, rect, &blit) == 0) {
         return;
     }
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
@@ -1861,7 +1861,7 @@ void ACanvas::StretchBlitBlendRle8(const ABitmap &source,
     if (SetupStretchBlit(source, rect, &blit) == 0) {
         return;
     }
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;

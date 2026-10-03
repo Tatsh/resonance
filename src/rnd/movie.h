@@ -3,14 +3,14 @@
 #include <list>
 
 #include "os/hxstr.h"
+#include "rnd/amovieset.h"
 #include "rnd/animatable.h"
 #include "rnd/filepath.h"
 #include "rnd/manager.h"
-#include "rnd/moviestream.h"
 #include "rndartt/apalette.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Stream;
 class Tex;
 } // namespace Rnd
@@ -39,7 +39,7 @@ namespace Rnd {
  * the second table's terminator as a slot would have run it into the literal pool that follows it,
  * where the bytes decode as further plausible-looking entries.
  *
- * A movie plays its file through one Rnd::MovieStream, which it owns and deletes in
+ * A movie plays its file through one Rnd::AMovieSet, which it owns and deletes in
  * CloseMovieFile(). Each track of the file is attached to the texture mTrackTextures names for
  * it, and the stream passes that track's video chunks to OnChunk() as SetFrameSelf() advances it.
  */
@@ -104,7 +104,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005d21e0
      * @ghidraAddress PAL: 0x00614210
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Serialise the movie.
@@ -313,10 +313,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005cf4c0
      * @ghidraAddress PAL: 0x00611488
      */
-    void OnChunk(MovieStream::ChunkHeader *pHeader, void *pPayload);
+    void OnChunk(AMovieSet::ChunkHeader *pHeader, void *pPayload);
 
     /**
-     * The MovieStream handler AttachTrack() installs, which passes the chunk to pData's OnChunk().
+     * The AMovieSet handler AttachTrack() installs, which passes the chunk to pData's OnChunk().
      *
      * The routine was an orphan in the analysis, and its name is inferred.
      *
@@ -326,7 +326,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005d2530
      * @ghidraAddress PAL: 0x00614560
      */
-    static void ChunkHandler(MovieStream::ChunkHeader *pHeader, void *pPayload, void *pData);
+    static void ChunkHandler(AMovieSet::ChunkHeader *pHeader, void *pPayload, void *pData);
 
     /**
      * Read a track texture list from stream.
@@ -353,7 +353,7 @@ public:
     FilePath mFilename;
 
 private:
-    MovieStream *mStream; // +0x20 The open file, or null.
+    AMovieSet *mStream; // +0x20 The open file, or null.
     // +0x24 Set by a successful open. The next SetFrameSelf() starts the stream's loop ticks at
     // the current tick and clears it.
     int mStartPending;

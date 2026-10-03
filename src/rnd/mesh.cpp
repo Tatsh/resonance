@@ -13,7 +13,7 @@
 #include "math/vector2.h"
 #include "math/vector3.h"
 #include "netflow/netflow.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/cam.h"
 #include "rnd/manager.h"
@@ -248,7 +248,7 @@ void TrimKeys(std::list<Key> &keys, int nRemoved, const Value &fill) {
 }
 
 // NTSC-U/C: 0x00493f00, PAL: 0x004d1db0
-FailSink &PrintZMode(FailSink &sink, Mesh::ZMode nZMode) {
+Dbg &PrintZMode(Dbg &sink, Mesh::ZMode nZMode) {
     switch (nZMode) {
     case Mesh::kZModeDisable:
         sink.Print("Disable");
@@ -270,7 +270,7 @@ FailSink &PrintZMode(FailSink &sink, Mesh::ZMode nZMode) {
 }
 
 // NTSC-U/C: 0x00482f18, PAL: 0x004c0ce8
-FailSink &PrintZFunc(FailSink &sink, Mesh::ZFunc nZFunc) {
+Dbg &PrintZFunc(Dbg &sink, Mesh::ZFunc nZFunc) {
     switch (nZFunc) {
     case Mesh::kZFuncNever:
         sink.Print("Never");
@@ -306,7 +306,7 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-void PrintObjectRef(FailSink &sink, const Object *pObject) {
+void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print(kNoObject);
         return;
@@ -333,18 +333,18 @@ void ReadObjectRef(Stream &stream, T *&refOut) {
 }
 
 // Every labelled number in the dumps is a Print of the label and then a Format of the value alone.
-// The FailSink format buffer therefore ends with the bare number.
-void PrintFloatField(FailSink &sink, const char *pszLabel, float flValue) {
+// The Dbg format buffer therefore ends with the bare number.
+void PrintFloatField(Dbg &sink, const char *pszLabel, float flValue) {
     sink.Print(pszLabel);
     sink.Format("%.2f", flValue);
 }
 
-void PrintIndexField(FailSink &sink, const char *pszLabel, unsigned short nValue) {
+void PrintIndexField(Dbg &sink, const char *pszLabel, unsigned short nValue) {
     sink.Print(pszLabel);
     sink.Format("%hu", nValue);
 }
 
-void PrintVector3(FailSink &sink, const Vector3 &v) {
+void PrintVector3(Dbg &sink, const Vector3 &v) {
     PrintFloatField(sink, "(x:", v.x);
     PrintFloatField(sink, " y:", v.y);
     PrintFloatField(sink, " z:", v.z);
@@ -353,20 +353,20 @@ void PrintVector3(FailSink &sink, const Vector3 &v) {
 
 // Each vector dump opens with the element count and then writes the index of every element on its
 // own line.
-void PrintVectorHeader(FailSink &sink, unsigned nCount) {
+void PrintVectorHeader(Dbg &sink, unsigned nCount) {
     sink.Print("(size:");
     sink.Format("%u", nCount);
     sink.Print(")");
 }
 
-void PrintElementIndex(FailSink &sink, unsigned nIndex) {
+void PrintElementIndex(Dbg &sink, unsigned nIndex) {
     sink.Print("\n");
     sink.Format("%d", nIndex);
     sink.Print("\t");
 }
 
 // NTSC-U/C: 0x004809f0, PAL: 0x004be6e8
-FailSink &DumpVert(FailSink &sink, const MeshVert &vert) {
+Dbg &DumpVert(Dbg &sink, const MeshVert &vert) {
     sink.Print("\n\tp:");
     PrintVector3(sink, vert.mPoint);
     sink.Print("\n\tn:");
@@ -389,7 +389,7 @@ FailSink &DumpVert(FailSink &sink, const MeshVert &vert) {
 }
 
 // NTSC-U/C: 0x0048a5d8, PAL: 0x004c8460
-FailSink &DumpVertVector(FailSink &sink, const std::vector<MeshVert> &verts) {
+Dbg &DumpVertVector(Dbg &sink, const std::vector<MeshVert> &verts) {
     PrintVectorHeader(sink, verts.size());
     for (unsigned nIndex = 0; nIndex < verts.size(); ++nIndex) {
         PrintElementIndex(sink, nIndex);
@@ -399,7 +399,7 @@ FailSink &DumpVertVector(FailSink &sink, const std::vector<MeshVert> &verts) {
 }
 
 // NTSC-U/C: 0x0048a6c8, PAL: 0x004c8550
-FailSink &DumpFaceVector(FailSink &sink, const std::vector<MeshFace> &faces) {
+Dbg &DumpFaceVector(Dbg &sink, const std::vector<MeshFace> &faces) {
     PrintVectorHeader(sink, faces.size());
     for (unsigned nIndex = 0; nIndex < faces.size(); ++nIndex) {
         PrintElementIndex(sink, nIndex);
@@ -412,7 +412,7 @@ FailSink &DumpFaceVector(FailSink &sink, const std::vector<MeshFace> &faces) {
 }
 
 // NTSC-U/C: 0x0048a858, PAL: 0x004c86e0
-FailSink &DumpEdgeVector(FailSink &sink, const std::vector<MeshEdge> &edges) {
+Dbg &DumpEdgeVector(Dbg &sink, const std::vector<MeshEdge> &edges) {
     PrintVectorHeader(sink, edges.size());
     for (unsigned nIndex = 0; nIndex < edges.size(); ++nIndex) {
         PrintElementIndex(sink, nIndex);
@@ -694,7 +694,7 @@ Mesh::~Mesh() {
 }
 
 // NTSC-U/C: 0x00480d80, PAL: 0x004bea78
-void Mesh::DumpText(FailSink &sink) {
+void Mesh::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Transformable::DumpText(sink);
     Drawable::DumpText(sink);

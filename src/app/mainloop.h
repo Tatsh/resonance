@@ -4,7 +4,10 @@
 #include "os/hxstr.h"
 
 class GameManagerImpl;
-class Watchdog;
+
+namespace Sch {
+class Scheduler;
+} // namespace Sch
 
 /**
  * The game's frame loop.
@@ -38,7 +41,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ec998
      * @ghidraAddress PAL: 0x001f2c20
      */
-    MainLoop(int nInCharge, Watchdog *pWatchdog, GameManagerImpl *pGameManager);
+    MainLoop(int nInCharge, Sch::Scheduler *pWatchdog, GameManagerImpl *pGameManager);
 
     /**
      * Drop the instance pointer and remove the poll callback.
@@ -183,7 +186,7 @@ private:
     long long mNextDeadlineNs;     // +0x20
     int mFrameCount;               // +0x28
     int mFlushFrame;               // +0x2c
-    Watchdog *mWatchdog;           // +0x30
+    Sch::Scheduler *mWatchdog;     // +0x30
     GameManagerImpl *mGameManager; // +0x34
     // The virtual Attachment base closes the object at `+0x38`; the compiler constructs the base
     // with one reference and the base table. The constructor's flag-gated stores perform the

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rnd/tunnelmeshchain.h"
+#include "rnd/lodmesh.h"
 
 class HxStr;
 struct Color;
@@ -21,7 +21,7 @@ constexpr int kTunnelSeekNoSlice = -9999;
  *
  * The record is 0x20 bytes, the element size of the section vector of Rnd::TunnelSeekStrip. Its
  * destructor is the implicit one, emitted at 0x00478018, which deletes the meshes through
- * Rnd::TunnelMeshChain. Its copy constructor is the implicit one, emitted at 0x00471e28. It copies
+ * Rnd::LodMesh. Its copy constructor is the implicit one, emitted at 0x00471e28. It copies
  * the three leading words, mMeshes, and the two trailing words.
  *
  * mDirty defers the geometry copy. Set() only records the slice, and Update() copies the vertices
@@ -70,7 +70,7 @@ struct TunnelSeekSection {
      * @ghidraAddress NTSC-U/C: 0x0046ed78
      * @ghidraAddress PAL: 0x004ac978
      */
-    void Build(const HxStr &name, const TunnelMeshChain &templates);
+    void Build(const HxStr &name, const LodMesh &templates);
 
     /**
      * Copy the geometry of the tunnel cell the section is placed on and clear mDirty.
@@ -89,12 +89,12 @@ struct TunnelSeekSection {
      */
     void Update(Tunnel *pTunnel, const Color &color);
 
-    int mDirty;              /*!< Set until Update() has copied the geometry. +0x00 */
-    int mEndCap;             /*!< Set for the last section of the strip. +0x04 */
-    int mStartCap;           /*!< Set for the first section of the strip. +0x08 */
-    TunnelMeshChain mMeshes; /*!< The generated meshes, finest first. +0x0c */
-    int mRing;               /*!< The ring the section sits on. +0x18 */
-    int mSlice;              /*!< The slice, or kTunnelSeekNoSlice. +0x1c */
+    int mDirty;      /*!< Set until Update() has copied the geometry. +0x00 */
+    int mEndCap;     /*!< Set for the last section of the strip. +0x04 */
+    int mStartCap;   /*!< Set for the first section of the strip. +0x08 */
+    LodMesh mMeshes; /*!< The generated meshes, finest first. +0x0c */
+    int mRing;       /*!< The ring the section sits on. +0x18 */
+    int mSlice;      /*!< The slice, or kTunnelSeekNoSlice. +0x1c */
 };
 
 } // namespace Rnd

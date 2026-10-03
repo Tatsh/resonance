@@ -1,0 +1,75 @@
+#pragma once
+
+#include "app/linearanim.h"
+
+class HxStr;
+
+namespace Rnd {
+class Animatable;
+} // namespace Rnd
+
+/**
+ * Animation of the head-up display posed by a ramp.
+ *
+ * The class is not polymorphic and emits no RTTI. Its name comes from the debugging symbols of the
+ * North American demo release. The demo's Slide(), Snap(), and Execute() have the same instructions
+ * as SetTarget(), Jump(), and Update(), and the demo's constructor takes the same arguments. The
+ * head-up display panel embeds two, at `+0x58` over `<layout> assembly.view` and at `+0x74` over
+ * `HUD1 label swap.tnm`.
+ */
+class OvyAssembly {
+public:
+    /**
+     * Resolve the animation, rewind it to frame 0, and set the ramp's range.
+     *
+     * The panel inlines the body twice, and this copy has no caller.
+     *
+     * @param name The object name of the animation.
+     * @param flFrom The frame at raw ramp position 0.
+     * @param flTo The frame at raw ramp position 1.
+     * @param flDuration The time the ramp takes to cover the range.
+     * @ghidraAddress NTSC-U/C: 0x0042a888
+     * @ghidraAddress PAL: 0x00465bd8
+     */
+    OvyAssembly(const HxStr &name, float flFrom, float flTo, float flDuration);
+
+    /**
+     * Start the animation moving toward a raw ramp position.
+     *
+     * The out-of-line copy has no caller. The title is inferred.
+     *
+     * @param flTarget The raw target.
+     * @ghidraAddress NTSC-U/C: 0x0042a958
+     * @ghidraAddress PAL: 0x00465ca8
+     */
+    void SetTarget(float flTarget);
+
+    /**
+     * Move the animation to a raw ramp position at once.
+     *
+     * The out-of-line copy has no caller. The title is inferred.
+     *
+     * @param flTarget The raw target.
+     * @ghidraAddress NTSC-U/C: 0x0042a978
+     * @ghidraAddress PAL: 0x00465cc8
+     */
+    void Jump(float flTarget);
+
+    /**
+     * Advance the ramp and pose the animation on its value while it moves.
+     *
+     * The panel inlines the body, and this copy has no caller.
+     *
+     * @param flTime The time the ramp runs against.
+     * @ghidraAddress NTSC-U/C: 0x0042a998
+     * @ghidraAddress PAL: 0x00465ce8
+     */
+    void Update(float flTime);
+
+private:
+    Rnd::Animatable *mAnim;
+
+public:
+    // Public because the activator-label script command drives it with no accessor in the image.
+    LinearAnim mRamp;
+};

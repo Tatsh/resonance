@@ -10,7 +10,7 @@
 #include "math/transform.h"
 #include "math/transformops.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
@@ -168,7 +168,7 @@ Stream &ReadSeekerVector(Stream &stream, std::vector<TunnelSeeker> &seekers) {
 
 // The per-chain record SaveSectionMaterials() writes: the material by name and the colour of the
 // first vertex of the finest level.
-void SaveChainMaterial(Stream &stream, const TunnelMeshChain &chain) {
+void SaveChainMaterial(Stream &stream, const LodMesh &chain) {
     WriteObjectRef(stream, chain.front()->mMat);
     const Color &color = chain.front()->mVertsOwner->mVerts.front().mColor;
     stream.Write(&color.r, sizeof(color.r))
@@ -269,7 +269,7 @@ inline void FillColor(std::vector<MeshVert> &verts, int nFirst, int nCount, cons
 }
 
 // Read nCount records of SaveChainMaterial() and apply each one to the chain of the same index.
-void LoadChainMaterials(Stream &stream, std::vector<TunnelMeshChain> &chains, int nCount) {
+void LoadChainMaterials(Stream &stream, std::vector<LodMesh> &chains, int nCount) {
     const int nChainCount = chains.size();
     Mat *pMat = nullptr;
     for (int i = 0; i < nCount; ++i) {
@@ -290,7 +290,7 @@ void LoadChainMaterials(Stream &stream, std::vector<TunnelMeshChain> &chains, in
 
 // NTSC-U/C: 0x00476a10, PAL: 0x004b4688
 void Tunnel::Collide(const Ray &ray, HitSink &sink) {
-    for (TunnelMeshChain &chain : mCellChains) {
+    for (LodMesh &chain : mCellChains) {
         chain.Collide(ray, sink);
     }
 }
@@ -422,12 +422,12 @@ void Tunnel::Load(Stream &stream) {
 void Tunnel::SaveSectionMaterials(Stream &stream) {
     const int nCellCount = mCellChains.size();
     stream.Write(&nCellCount, sizeof(nCellCount));
-    for (const TunnelMeshChain &chain : mCellChains) {
+    for (const LodMesh &chain : mCellChains) {
         SaveChainMaterial(stream, chain);
     }
     const int nSliceCount = mSliceChains.size();
     stream.Write(&nSliceCount, sizeof(nSliceCount));
-    for (const TunnelMeshChain &chain : mSliceChains) {
+    for (const LodMesh &chain : mSliceChains) {
         SaveChainMaterial(stream, chain);
     }
 }
@@ -829,7 +829,7 @@ void Tunnel::BuildMesh() {
 
 // NTSC-U/C: 0x0046adc0, PAL: 0x004a88b8
 void Tunnel::BuildSliceMeshes() {
-    mSliceChains.resize(mSliceCount, TunnelMeshChain());
+    mSliceChains.resize(mSliceCount, LodMesh());
     if (mSliceChains.empty()) {
         return;
     }
@@ -841,7 +841,7 @@ void Tunnel::BuildSliceMeshes() {
     const Color white{1.0f, 1.0f, 1.0f, 1.0f};
     for (unsigned nSlice = 0; nSlice < mSliceChains.size(); ++nSlice) {
         RunLongOperationDrawProc();
-        TunnelMeshChain &chain = mSliceChains[nSlice];
+        LodMesh &chain = mSliceChains[nSlice];
         chain.Build(HxStr(FormatString(kSliceNameFormat, NameText(this), nSlice)), mLodCount, true);
         chain.SetVertexCount(nBlockVerts * mRingCount);
         Mesh *pMesh = chain.front();
@@ -858,7 +858,7 @@ void Tunnel::BuildSliceMeshes() {
     }
 
     // The triangles are built once, on the chain of the first slice.
-    TunnelMeshChain &first = mSliceChains.front();
+    LodMesh &first = mSliceChains.front();
     for (unsigned nLevel = 0; nLevel < first.size(); ++nLevel) {
         RunLongOperationDrawProc();
         const int nStep = 1 << nLevel;
@@ -893,7 +893,7 @@ void Tunnel::BuildSliceMeshes() {
 
 // NTSC-U/C: 0x0046b830, PAL: 0x004a9340
 void Tunnel::BuildLaneMeshes() {
-    mSliceChains.resize(mRingCount * mSliceCount, TunnelMeshChain());
+    mSliceChains.resize(mRingCount * mSliceCount, LodMesh());
     if (mSliceChains.empty()) {
         return;
     }
@@ -903,7 +903,7 @@ void Tunnel::BuildLaneMeshes() {
     const int nBlockVerts = nCapStart + 2 * kCapVerts;
     const Color white{1.0f, 1.0f, 1.0f, 1.0f};
     for (unsigned nLane = 0; nLane < mSliceChains.size(); ++nLane) {
-        TunnelMeshChain &chain = mSliceChains[nLane];
+        LodMesh &chain = mSliceChains[nLane];
         chain.Build(HxStr(FormatString(kSliceNameFormat, NameText(this), nLane)), mLodCount, true);
         chain.SetVertexCount(nBlockVerts);
         Mesh *pMesh = chain.front();
@@ -914,7 +914,7 @@ void Tunnel::BuildLaneMeshes() {
         pMesh->SetVertexColor(white);
     }
 
-    TunnelMeshChain &first = mSliceChains.front();
+    LodMesh &first = mSliceChains.front();
     for (unsigned nLevel = 0; nLevel < first.size(); ++nLevel) {
         const int nStep = 1 << nLevel;
         Mesh *pMesh = first[nLevel];
@@ -941,7 +941,7 @@ void Tunnel::BuildLaneMeshes() {
 
 // NTSC-U/C: 0x0046c0e8, PAL: 0x004a9c10
 void Tunnel::BuildCellMeshes() {
-    mCellChains.resize(mRingCount * mSliceCount, TunnelMeshChain());
+    mCellChains.resize(mRingCount * mSliceCount, LodMesh());
     if (mCellChains.empty()) {
         return;
     }
@@ -950,7 +950,7 @@ void Tunnel::BuildCellMeshes() {
     const Color white{1.0f, 1.0f, 1.0f, 1.0f};
     for (unsigned nCell = 0; nCell < mCellChains.size(); ++nCell) {
         RunLongOperationDrawProc();
-        TunnelMeshChain &chain = mCellChains[nCell];
+        LodMesh &chain = mCellChains[nCell];
         chain.Build(HxStr(FormatString(kCellNameFormat, NameText(this), nCell)), mLodCount, true);
         chain.SetVertexCount(kPanelRows * nColumns);
         Mesh *pMesh = chain.front();
@@ -959,7 +959,7 @@ void Tunnel::BuildCellMeshes() {
     }
 
     // The triangles are built once, on the chain of the first cell.
-    TunnelMeshChain &first = mCellChains.front();
+    LodMesh &first = mCellChains.front();
     for (unsigned nLevel = 0; nLevel < first.size(); ++nLevel) {
         RunLongOperationDrawProc();
         first[nLevel]->AddQuadStrip(0, nColumns, nColumns, 1 << nLevel);
@@ -1109,7 +1109,7 @@ const HxStr &Tunnel::ClassName() const {
 }
 
 // NTSC-U/C: 0x004768b8, PAL: 0x004b4530
-void Tunnel::DumpText(FailSink &sink) {
+void Tunnel::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
     Animatable::DumpText(sink);
@@ -1126,10 +1126,10 @@ void Tunnel::DumpText(FailSink &sink) {
 // NTSC-U/C: 0x0046d180, PAL: 0x004aacc0
 void Tunnel::ApplyMeshLodScreenSizes(const std::vector<float> &screenSizes) {
     mLodScreenSizes = screenSizes;
-    for (TunnelMeshChain &chain : mCellChains) {
+    for (LodMesh &chain : mCellChains) {
         chain.SetScreenSizes(mLodScreenSizes);
     }
-    for (TunnelMeshChain &chain : mSliceChains) {
+    for (LodMesh &chain : mSliceChains) {
         chain.SetScreenSizes(mLodScreenSizes);
     }
 }

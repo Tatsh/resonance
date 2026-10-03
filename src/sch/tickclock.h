@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/watchdogtimer.h"
+#include "app/timeclock.h"
 #include "mid/mbt.h"
 #include "sch/tick.h"
 
@@ -31,21 +31,13 @@ namespace Sch {
  * Pause(), and Now() exist as single bodies that both the Globals object and GrooveWorld's object
  * are passed to, and none of the four touches `+0x18`.
  *
- * **The base's title, and the title of the class the base refers to, are both disputed.** This
- * reconstruction derives from `WatchdogTimer` so that the tree continues to compile, and the
- * evidence against both titles is recorded in the Watchdog and WatchdogTimer class
- * documentation. In short, the 0x50-byte object those headers call `Watchdog` is the command
- * scheduler: its `+0x00` is a red-black tree of Sch::TimedCommand pointers ordered by due tick,
- * its `Service()` at `0x004aa848` pops every due wrapper and calls Sch::TimedCommand::Run() on it,
- * and its `+0x0c` selects between recording and playback of the queued stream.
- *
  * Every post below wraps the command in a Sch::TimedCommand, hands the wrapper to one of the
  * scheduler's two queueing paths, and then gives back its reference. The queue is then the only
  * owner. The member titles are inferred from those bodies. The script command `clock` at
  * `0x00150d88` supplies the words `tempo`, `tick`, and `song_bar`, the source of the name
  * SongTick(). The bare name `Tick` would hide the type `Sch::Tick` inside this class.
  */
-class TickClock : public WatchdogTimer {
+class TickClock : public TimeClock {
 public:
     /**
      * Start a clock against a scheduler, with a tempo map of its own or a shared one.
@@ -59,7 +51,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004a79f8
      * @ghidraAddress PAL: 0x004e5b08
      */
-    TickClock(Watchdog *pWatchdog, TempoMap *pTempoMap);
+    TickClock(Scheduler *pWatchdog, TempoMap *pTempoMap);
 
     /**
      * Give back the reference to the tempo map.

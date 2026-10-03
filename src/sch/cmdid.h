@@ -23,7 +23,7 @@ class OBStream;
  * fresh value from AllocateValue(), and copy the result into the wrapper they queue. Several
  * commands queued through the same handle therefore share one value. The cancellation path at
  * `0x004a79d0` withdraws only the first queued wrapper with a matching value, because
- * Watchdog::WithdrawByCmdID() stops at the first match.
+ * Sch::Scheduler::WithdrawByCmdID() stops at the first match.
  *
  * The one member is public, because the queueing paths assign it directly and the image exposes no
  * accessor.
@@ -79,9 +79,9 @@ public:
      * Reserve a handle value so that AllocateValue() does not hand it out.
      *
      * The value joins the reserved set, and the set's cursor returns to its first entry.
-     * WatchdogPlayback::Load() calls this for every wrapper it reads back, which keeps the handles
-     * of a replayed recording unique. The handle arrives by value, as a copy the caller builds.
-     * The title is inferred.
+     * Sch::Playbacker::Load() calls this for every wrapper it reads back. The handles of a
+     * replayed recording therefore remain unique. The handle arrives by value, as a copy the
+     * caller builds. The title is inferred.
      *
      * @param id The handle to reserve.
      * @ghidraAddress NTSC-U/C: 0x005e5908

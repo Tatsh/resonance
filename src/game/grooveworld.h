@@ -72,8 +72,8 @@ public:
      * Construct an empty world.
      *
      * It clears every member except the three load-buffer words, sets mContinueJukebox to 1, and
-     * creates the song clock on the application's Watchdog with no tempo map, the cheat detector
-     * over g_gameCheatSequences, and the force-feedback manager.
+     * creates the song clock on the application's Sch::Scheduler with no tempo map, the cheat
+     * detector over g_gameCheatSequences, and the force-feedback manager.
      *
      * @param pApp The application.
      * @param pStats The game manager's statistics.

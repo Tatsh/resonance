@@ -10,9 +10,9 @@
 #include "rnd/manager.h"
 #include "rnd/transformable.h"
 
-class FailSink;
 class HxStr;
 namespace Rnd {
+class Dbg;
 class Object;
 class Stream;
 class Tex;
@@ -318,7 +318,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004ad980
      * @ghidraAddress PAL: 0x004ebb40
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Repoint the render target when the object it addressed is replaced.

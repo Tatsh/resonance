@@ -4,7 +4,7 @@
 #include <list>
 
 #include "math/color.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/keychannel.h"
@@ -39,7 +39,7 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-void PrintObjectRef(FailSink &sink, const Object *pObject) {
+void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print(kNoObject);
         return;
@@ -95,7 +95,7 @@ const HxStr &ParticleSysAnim::ClassName() const {
 }
 
 // NTSC-U/C: 0x00526980, PAL: 0x00566f58
-void ParticleSysAnim::DumpText(FailSink &sink) {
+void ParticleSysAnim::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
     if (sink.mDumpLevel <= 0) {

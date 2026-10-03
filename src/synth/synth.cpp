@@ -1,8 +1,8 @@
 #include "synth/synth.h"
 
 #include "app/application.h"
+#include "app/timeclock.h"
 #include "app/timetask.h"
-#include "app/watchdogtimer.h"
 #include "msg/stdmidimsg.h"
 #include "sch/tickclock.h"
 #include "synth/source.h"

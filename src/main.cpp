@@ -6,13 +6,13 @@
 
 #include "app/application.h"
 #include "gfx/gfxdevice.h"
-#include "os/arkfile.h"
 #include "os/async.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hostmode.h"
 #include "os/hxstr.h"
 #include "os/iop.h"
 #include "os/log.h"
+#include "os/openarkobject.h"
 #include "os/zone.h"
 #include "rnd/asyncloader.h"
 #include "rnd/manager.h"
@@ -146,7 +146,7 @@ int main() {
     g_gfxDevice.Init(kDisplayWidth, kDisplayHeight, kDisplayBitDepth);
 
     if (UsingArkFiles() != 0) {
-        if (ArkFile::Open(kLoadingArkPath) == 0) {
+        if (OpenArkObject::Open(kLoadingArkPath) == 0) {
             Fatal("Can't open loading.ark arkfile!\n");
         }
     }
@@ -154,7 +154,7 @@ int main() {
     ShowLoadingScreen();
 
     if (UsingArkFiles() != 0) {
-        ArkFile::Close(kLoadingArkPath);
+        OpenArkObject::Close(kLoadingArkPath);
     }
 
     InitArk(); // Yes, the binary discards this call's result.

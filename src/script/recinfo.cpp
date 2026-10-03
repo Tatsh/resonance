@@ -5,7 +5,7 @@
 #include "script/cxx/object.h"
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
-#include "script/scriptfunc.h"
+#include "script/registercfunction.h"
 #include "stream/ibfilestream.h"
 
 namespace {
@@ -53,6 +53,6 @@ PyObject *PyInvokeRecInfo(PyObject *, PyObject *pArgs) {
 
 // The script interface this file exports, registered in static initialisation.
 // NTSC-U/C: 0x0010ed58, PAL: 0x0010f198
-const ScriptFunc kRecInfoFunc("rec_info", PyInvokeRecInfo);
+const RegisterCFunction kRecInfoFunc("rec_info", PyInvokeRecInfo);
 
 } // namespace

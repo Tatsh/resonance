@@ -44,6 +44,7 @@ set(RESONANCE_MSG_SRCS
     gameconnectsuccessmsg.cpp
     gamemanagerdoplaybackmsg.cpp
     gameovermsg.cpp
+    gem.cpp
     gemmsg.cpp
     gempacket.cpp
     invalidateseekermsg.cpp

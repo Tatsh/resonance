@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "rndartt/apoint.h"
-#include "rndartt/arlereader.h"
+#include "rndartt/arle8reader.h"
 #include "rndartt/arowspan.h"
 #include "rndartt/astretchspan.h"
 
@@ -154,7 +154,7 @@ void ACanvasLin8::Blit8NoClip(const ABitmap &source, int nX, int nY) {
 // The reader is built on the stack and the row decoder advances its cursor, so the
 // rows are consumed in order without this routine tracking the compressed stream.
 void ACanvasLin8::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = static_cast<const unsigned char *>(source.mPixels);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = source.mHasTransparentColor ?

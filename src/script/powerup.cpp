@@ -14,7 +14,7 @@
 #include "script/cxx/object.h"
 #include "script/cxx/tuple.h"
 #include "script/cxx/typeerror.h"
-#include "script/scriptfunc.h"
+#include "script/registercfunction.h"
 
 namespace {
 
@@ -64,6 +64,6 @@ PyObject *PyInvokeAddPowerup(PyObject *, PyObject *pArgs) {
 
 // The script interface this file exports, registered in static initialisation.
 // NTSC-U/C: 0x0015b850, PAL: 0x0015d5f0
-const ScriptFunc kAddPowerupFunc("add_powerup", PyInvokeAddPowerup);
+const RegisterCFunction kAddPowerupFunc("add_powerup", PyInvokeAddPowerup);
 
 } // namespace

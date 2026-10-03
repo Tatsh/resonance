@@ -8,9 +8,9 @@
 #include "rnd/drawable.h"
 #include "rnd/transformable.h"
 
-class FailSink;
 struct Vector3;
 namespace Rnd {
+class Dbg;
 class Font;
 class Mesh;
 class Object;
@@ -202,7 +202,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004c7fc0
      * @ghidraAddress PAL: 0x00506198
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write this text run to stream at revision 6.

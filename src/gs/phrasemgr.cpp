@@ -235,7 +235,7 @@ void PhraseMgr::PostGemMsg(Message *pMsg) {
         return;
     }
 
-    const GemPacket::Fields &gem = pPacket->mFields;
+    const Gem &gem = pPacket->mFields;
     const int nFirstStep = gem.mBar;
     int nStep = nFirstStep;
     do {
@@ -291,7 +291,7 @@ void PhraseMgr::AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner
     const int nReplaced = pPhrase->AddGem(nTick, nGem, nTrans);
 
     if (mNetSink != nullptr) {
-        GemPacket::Fields fields;
+        Gem fields;
         fields.mGem = nGem;
         // Yes, the binary leaves fields.mTrans unset.
         fields.mBar = nStep;

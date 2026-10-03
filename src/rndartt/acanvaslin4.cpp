@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "rndartt/arlereader.h"
+#include "rndartt/arle8reader.h"
 
 namespace {
 
@@ -100,7 +100,7 @@ void ACanvasLin4::Blit8NoClip(const ABitmap &source, int nX, int nY) {
 // Each row is decoded into the shared scratch row and written from there, so the
 // compressed stream is consumed in order without this routine tracking it.
 void ACanvasLin4::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
-    ARleReader reader;
+    ARle8Reader reader;
     reader.mSource = static_cast<const unsigned char *>(source.mPixels);
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = source.mHasTransparentColor ?

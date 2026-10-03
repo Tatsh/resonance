@@ -2,8 +2,8 @@
 
 #include "stream/hxstream.h"
 
-class HxDataChunkReader;
-struct HxDataChunkId;
+class HxIListChunk;
+struct HxChunkHeader;
 
 /**
  * Input stream over the payload of one RIFF or Standard MIDI File chunk.
@@ -27,7 +27,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00145908
      * @ghidraAddress PAL: 0x00146420
      */
-    explicit HxIDataChunk(HxDataChunkReader *pReader);
+    explicit HxIDataChunk(HxIListChunk *pReader);
 
     /**
      * Read a chunk header at a stream's read position and open that chunk.
@@ -102,9 +102,9 @@ public:
     HxStream *UnderlyingStream() override;
 
 private:
-    HxDataChunkReader *mReader; // Reader to unlock on destruction, or null.
-    HxStream *mSource;          // Stream the payload lies in.
-    HxDataChunkId *mId;         // Heap copy of the chunk header.
-    int mStart;                 // Source position of the first payload byte.
-    int mEnd;                   // Source position after the last payload byte.
+    HxIListChunk *mReader; // Reader to unlock on destruction, or null.
+    HxStream *mSource;     // Stream the payload lies in.
+    HxChunkHeader *mId;    // Heap copy of the chunk header.
+    int mStart;            // Source position of the first payload byte.
+    int mEnd;              // Source position after the last payload byte.
 };

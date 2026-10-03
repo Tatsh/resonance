@@ -15,8 +15,8 @@
 #include "rnd/meshvert.h"
 #include "rnd/transformable.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Mat;
 class MeshAnim;
 class Stream;
@@ -146,7 +146,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00480d80
      * @ghidraAddress PAL: 0x004bea78
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Serialise the mesh.
@@ -245,7 +245,7 @@ public:
      * Stores flMinScreen into mMinScreen, then swaps the reference on mNext the same way as
      * SetMaterial() and SetTransOwner(), storing pNext whether or not it is null. The pointer
      * arrives in $a1 and the float in $f12, so the order of the two parameters in the source
-     * cannot be recovered. Rnd::MultiMesh::DrawSelf() and Rnd::TunnelMeshChain inline it, and the
+     * cannot be recovered. Rnd::MultiMesh::DrawSelf() and Rnd::LodMesh inline it, and the
      * out-of-line copy has no caller. The title is inferred from the members it writes.
      *
      * @param pNext The next mesh in the chain, or null.
@@ -699,7 +699,7 @@ protected:
 public:
     /*!< Projected size below which this mesh yields to a coarser link of the mNext chain. Zero
          disables the substitution. SetNext() writes it. Public because Rnd::MultiMesh::DrawSelf()
-         at `0x004e83f4` and Rnd::TunnelMeshChain read it directly, and the image has no accessor
+         at `0x004e83f4` and Rnd::LodMesh read it directly, and the image has no accessor
          for it. +0x148 */
     float mMinScreen;
     /*!< Next coarser level of detail, or null at the end of the chain. Public on the same

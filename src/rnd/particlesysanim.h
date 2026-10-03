@@ -7,8 +7,8 @@
 #include "rnd/keychannel.h"
 #include "rnd/manager.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Object;
 class ParticleSys;
 class Stream;
@@ -85,7 +85,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00526980
      * @ghidraAddress PAL: 0x00566f58
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Serialise the animation.

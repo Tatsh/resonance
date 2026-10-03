@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <list>
 
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/object.h"
@@ -28,7 +28,7 @@ static const char *NameText(const Object *pObject) {
 }
 
 // NTSC-U/C: 0x00505c78, PAL: 0x00544b08
-static FailSink &operator<<(FailSink &sink, const std::list<Drawable *> &draws) {
+static Dbg &operator<<(Dbg &sink, const std::list<Drawable *> &draws) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, draws.size());
     sink.Print(")");
@@ -220,7 +220,7 @@ void Drawable::AcquireDrawsRefs() {
 }
 
 // NTSC-U/C: 0x005069a8, PAL: 0x00545870
-void Drawable::DumpText(FailSink &sink) {
+void Drawable::DumpText(Dbg &sink) {
     if (sink.mDumpLevel <= 0) {
         return;
     }

@@ -2,7 +2,9 @@
 
 #include "math/plane.h"
 
-class FailSink;
+namespace Rnd {
+class Dbg;
+} // namespace Rnd
 struct Sphere;
 
 /**
@@ -55,7 +57,7 @@ Frustum &BuildFrustum(Frustum &frustum, float flNear, float flFar, float flFov, 
  * @ghidraAddress NTSC-U/C: 0x0054f798
  * @ghidraAddress PAL: 0x0058fdd8
  */
-FailSink &operator<<(FailSink &sink, const Frustum &frustum);
+Rnd::Dbg &operator<<(Rnd::Dbg &sink, const Frustum &frustum);
 
 /** Bit of the VU0 status flag IsSphereOutsideFrustum() reports, the sticky sign flag. */
 constexpr int kVu0StatusStickySign = 0x80;

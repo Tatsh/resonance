@@ -24,7 +24,7 @@
 #include "script/cxx/object.h"
 #include "script/cxx/tuple.h"
 #include "script/cxx/typeerror.h"
-#include "script/scriptfunc.h"
+#include "script/registercfunction.h"
 #include "script/scripthost.h"
 
 namespace {
@@ -491,32 +491,35 @@ PyObject *PyInvokeEmptyAlbumCaches(PyObject *, PyObject *pArgs) {
 
 // The script interface this file exports, registered in static initialisation.
 // NTSC-U/C: 0x00147af8, PAL: 0x001486b0
-const ScriptFunc kSaveRndFunc("save_rnd", PyInvokeSaveRnd);
+const RegisterCFunction kSaveRndFunc("save_rnd", PyInvokeSaveRnd);
 // NTSC-U/C: 0x00148318, PAL: 0x00148f08
-const ScriptFunc kAddJuiceFunc("add_juice", PyInvokeAddJuice);
+const RegisterCFunction kAddJuiceFunc("add_juice", PyInvokeAddJuice);
 // NTSC-U/C: 0x00148a20, PAL: 0x00149630
-const ScriptFunc kAdvanceSectionFunc("advance_section", PyInvokeAdvanceSection);
+const RegisterCFunction kAdvanceSectionFunc("advance_section", PyInvokeAdvanceSection);
 // NTSC-U/C: 0x0014e5b8, PAL: 0x0014f280
-const ScriptFunc kActivateListenModeFunc("activate_listen_mode", PyInvokeActivateListenMode);
-const ScriptFunc kActivatePracticeModeFunc("activate_practice_mode", PyInvokeActivatePracticeMode);
-const ScriptFunc kActivateAllAccessModeFunc("activate_all_access_mode",
-                                            PyInvokeActivateAllAccessMode);
-const ScriptFunc kEnableTeamFreqsFunc("enable_team_freqs", PyInvokeEnableTeamFreqs);
-const ScriptFunc kEnablePowerupCheatsFunc("enable_powerup_cheats", PyInvokeEnablePowerupCheats);
-const ScriptFunc kDoPowerupCheatFunc("do_powerup_cheat", PyInvokeDoPowerupCheat);
-const ScriptFunc kDoBigGemModeCheatFunc("do_big_gem_mode_cheat", PyInvokeDoBigGemModeCheat);
-const ScriptFunc kDoNoLatticeModeCheatFunc("do_no_lattice_mode_cheat",
-                                           PyInvokeDoNoLatticeModeCheat);
-const ScriptFunc kDoWinWithPointsCheatFunc("do_win_with_points_cheat",
-                                           PyInvokeDoWinWithPointsCheat);
-const ScriptFunc kDoEnableAllTracksCheatFunc("do_enable_all_tracks_cheat",
-                                             PyInvokeDoEnableAllTracksCheat);
-const ScriptFunc kDoArenaStateCycleCheatFunc("do_arena_state_cycle_cheat",
-                                             PyInvokeDoArenaStateCycleCheat);
-const ScriptFunc kDoExpansionPackToggleCheatFunc("do_expansion_pack_toggle_cheat",
-                                                 PyInvokeDoExpansionPackToggleCheat);
-const ScriptFunc kDoWinSequenceCheatFunc("do_win_sequence_cheat", PyInvokeDoWinSequenceCheat);
+const RegisterCFunction kActivateListenModeFunc("activate_listen_mode", PyInvokeActivateListenMode);
+const RegisterCFunction kActivatePracticeModeFunc("activate_practice_mode",
+                                                  PyInvokeActivatePracticeMode);
+const RegisterCFunction kActivateAllAccessModeFunc("activate_all_access_mode",
+                                                   PyInvokeActivateAllAccessMode);
+const RegisterCFunction kEnableTeamFreqsFunc("enable_team_freqs", PyInvokeEnableTeamFreqs);
+const RegisterCFunction kEnablePowerupCheatsFunc("enable_powerup_cheats",
+                                                 PyInvokeEnablePowerupCheats);
+const RegisterCFunction kDoPowerupCheatFunc("do_powerup_cheat", PyInvokeDoPowerupCheat);
+const RegisterCFunction kDoBigGemModeCheatFunc("do_big_gem_mode_cheat", PyInvokeDoBigGemModeCheat);
+const RegisterCFunction kDoNoLatticeModeCheatFunc("do_no_lattice_mode_cheat",
+                                                  PyInvokeDoNoLatticeModeCheat);
+const RegisterCFunction kDoWinWithPointsCheatFunc("do_win_with_points_cheat",
+                                                  PyInvokeDoWinWithPointsCheat);
+const RegisterCFunction kDoEnableAllTracksCheatFunc("do_enable_all_tracks_cheat",
+                                                    PyInvokeDoEnableAllTracksCheat);
+const RegisterCFunction kDoArenaStateCycleCheatFunc("do_arena_state_cycle_cheat",
+                                                    PyInvokeDoArenaStateCycleCheat);
+const RegisterCFunction kDoExpansionPackToggleCheatFunc("do_expansion_pack_toggle_cheat",
+                                                        PyInvokeDoExpansionPackToggleCheat);
+const RegisterCFunction kDoWinSequenceCheatFunc("do_win_sequence_cheat",
+                                                PyInvokeDoWinSequenceCheat);
 // NTSC-U/C: 0x003f6760, PAL: 0x0042ef48
-const ScriptFunc kClearAlbumCacheFunc("clear_album_cache", PyInvokeEmptyAlbumCaches);
+const RegisterCFunction kClearAlbumCacheFunc("clear_album_cache", PyInvokeEmptyAlbumCaches);
 
 } // namespace

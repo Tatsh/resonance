@@ -53,8 +53,9 @@ struct Zone {
  *
  * Three of those sizes corroborate constants recovered elsewhere. `temp` at 128 KiB matches the
  * fallback ZoneGrabTemp() allocates when zones are switched off, `seccache` at 512 KiB divides by
- * the 64 KiB row size into exactly the eight rows ArkFile::Open() requests as its own fallback,
- * and `python` at 2400 KiB exceeds the 2 MiB fallback Py_Initialize() passes to ZoneGetAvail().
+ * the 64 KiB row size into exactly the eight rows OpenArkObject::Open() requests as its own
+ * fallback, and `python` at 2400 KiB exceeds the 2 MiB fallback Py_Initialize() passes to
+ * ZoneGetAvail().
  */
 struct ZoneConfig {
     const char *mName; /*!< The zone name, null on the terminating entry. +0x00 */

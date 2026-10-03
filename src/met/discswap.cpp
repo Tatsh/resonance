@@ -2,9 +2,9 @@
 
 #include <libcdvd.h>
 
-#include "os/arkfile.h"
 #include "os/async.h"
 #include "os/hostmode.h"
+#include "os/openarkobject.h"
 #include "script/configquery.h"
 #include "script/scripthost.h"
 

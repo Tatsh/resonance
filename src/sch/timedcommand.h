@@ -70,7 +70,7 @@ public:
     /**
      * Construct an empty wrapper for Load() to fill.
      *
-     * The image has no out-of-line copy. WatchdogPlayback::Load() expands it at `0x00594ad8`,
+     * The image has no out-of-line copy. Playbacker::Load() expands it at `0x00594ad8`,
      * zeroing both ticks and writing -1 to mCmdID. mCommand, mOrder, and mDelta are not written.
      */
     TimedCommand() : mDueTick{0}, mLocalTick{0}, mCmdID{-1} {
@@ -180,7 +180,7 @@ public:
 private:
     // Non-zero when the requested tick is a distance from now rather than an absolute scheduler
     // time. Print() writes " delta" for a non-zero value and " abs" for zero, and
-    // WatchdogTimer::Post() at 0x004a7924 branches on the same argument to choose between the two
+    // TimeClock::Post() at 0x004a7924 branches on the same argument to choose between the two
     // queueing paths. Save() writes only the low byte. No code outside this class reads it. +0x20
     int mDelta;
 

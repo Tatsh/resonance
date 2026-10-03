@@ -1,14 +1,12 @@
 set(RESONANCE_OS_SRCS
-    arkfile.cpp
+    acircbuff.cpp
     assert.cpp
     async.cpp
     asynccallback.cpp
-    bytepairstatic.cpp
-    circbuff.cpp
     cycles.cpp
     datetime.cpp
+    dbg.cpp
     devconsole.cpp
-    failsink.cpp
     filelog.cpp
     formatmessage.cpp
     formatstring.cpp
@@ -18,9 +16,11 @@ set(RESONANCE_OS_SRCS
     hxstr.cpp
     inflate.c
     iop.cpp
+    keyboardmgr.cpp
     loadfile.cpp
     log.cpp
     mem.cpp
+    openarkobject.cpp
     r250.cpp
     random.cpp
     seccache.cpp

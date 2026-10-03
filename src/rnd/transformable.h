@@ -122,14 +122,14 @@ public:
      * Write a description of this object to sink.
      *
      * Writes both transforms a row at a time, then mTransList, mBillboard, and mOrigin. Produces
-     * nothing at all when the dump level of sink is not positive. FailSink::Print() discards its
+     * nothing at all when the dump level of sink is not positive. Dbg::Print() discards its
      * text in the shipped build, so the routine produces no output on this target.
      *
      * @param sink The diagnostic sink to write to.
      * @ghidraAddress NTSC-U/C: 0x004f12e0
      * @ghidraAddress PAL: 0x0052fed0
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write the revision, both transforms, mTransList, mBillboard, and mOrigin to stream.

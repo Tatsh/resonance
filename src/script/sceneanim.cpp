@@ -12,7 +12,7 @@
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
 #include "script/cxx/typeerror.h"
-#include "script/scriptfunc.h"
+#include "script/registercfunction.h"
 
 namespace {
 
@@ -208,10 +208,10 @@ PyObject *PyInvokeTestArena(PyObject *, PyObject *pArgs) {
 
 // The script interface this file exports, registered in static initialisation.
 // NTSC-U/C: 0x0040bfe8, PAL: 0x00445a10
-const ScriptFunc kAnimFrameFunc("anim_frame", PyInvokeAnimFrame);
-const ScriptFunc kAnimSpeedFunc("anim_speed", PyInvokeAnimSpeed);
-const ScriptFunc kAnimOffsetFunc("anim_offset", PyInvokeAnimOffset);
-const ScriptFunc kAnimMinmaxFunc("anim_minmax", PyInvokeAnimMinmax);
-const ScriptFunc kTestArenaFunc("test_arena", PyInvokeTestArena);
+const RegisterCFunction kAnimFrameFunc("anim_frame", PyInvokeAnimFrame);
+const RegisterCFunction kAnimSpeedFunc("anim_speed", PyInvokeAnimSpeed);
+const RegisterCFunction kAnimOffsetFunc("anim_offset", PyInvokeAnimOffset);
+const RegisterCFunction kAnimMinmaxFunc("anim_minmax", PyInvokeAnimMinmax);
+const RegisterCFunction kTestArenaFunc("test_arena", PyInvokeTestArena);
 
 } // namespace

@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "os/async.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/genpath.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
@@ -146,7 +146,7 @@ Tex::~Tex() {
 }
 
 // NTSC-U/C: 0x004e4738, PAL: 0x00523010
-void Tex::DumpText(FailSink &sink) {
+void Tex::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     if (sink.mDumpLevel <= 0) {
         return;
@@ -694,7 +694,7 @@ const HxStr &FilePath::RelativeToRoot() const {
 }
 
 // NTSC-U/C: 0x004e7bc0, PAL: 0x00526680
-void FilePath::Print(FailSink &sink) const {
+void FilePath::Print(Dbg &sink) const {
     sink.Format("\"%s\"", TextOf(*this));
 }
 

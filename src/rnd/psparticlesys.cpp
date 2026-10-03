@@ -2,7 +2,7 @@
 
 #include "gfx/gfxdevice.h"
 #include "gfx/renderstats.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/drawverts.h"
 #include "rnd/particle.h"

@@ -4,7 +4,7 @@
 #include <list>
 
 #include "math/color.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
 #include "rnd/drawable.h"
@@ -39,7 +39,7 @@ const char *NameText(const Object *pObject) {
 }
 
 // DumpText() expands this for both colours, one Print and Format pair per component.
-inline void PrintColor(FailSink &sink, const Color &color) {
+inline void PrintColor(Dbg &sink, const Color &color) {
     sink.Print("(r:");
     sink.Format("%.2f", color.r);
     sink.Print(" g:");
@@ -83,7 +83,7 @@ const HxStr &Environ::ClassName() const {
 // NTSC-U/C: 0x00519470, PAL: 0x00559808
 //
 // A mode outside the enumeration produces no text at all rather than a fallback name.
-FailSink &operator<<(FailSink &sink, FogMode nMode) {
+Dbg &operator<<(Dbg &sink, FogMode nMode) {
     if (nMode == kFogModeNone) {
         sink.Print("None");
     } else if (nMode == kFogModeVertExp) {
@@ -103,7 +103,7 @@ FailSink &operator<<(FailSink &sink, FogMode nMode) {
 }
 
 // NTSC-U/C: 0x005185b0, PAL: 0x00558908
-FailSink &operator<<(FailSink &sink, const std::list<Light *> &lights) {
+Dbg &operator<<(Dbg &sink, const std::list<Light *> &lights) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, lights.size());
     sink.Print(")");
@@ -159,7 +159,7 @@ static Stream &operator>>(Stream &stream, std::list<Light *> &lights) {
 }
 
 // NTSC-U/C: 0x00515ce0, PAL: 0x00556010
-void Environ::DumpText(FailSink &sink) {
+void Environ::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
     if (sink.mDumpLevel <= 0) {

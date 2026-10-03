@@ -4,7 +4,7 @@
 #include <list>
 
 #include "math/transform.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/mesh.h"
@@ -24,7 +24,7 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-void PrintObjectRef(FailSink &sink, const Object *pObject) {
+void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print(kNoObject);
         return;
@@ -41,7 +41,7 @@ void WriteObjectRef(Stream &stream, const Object *pObject) {
     stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
 }
 
-void PrintRow(FailSink &sink, const Vector3 &row) {
+void PrintRow(Dbg &sink, const Vector3 &row) {
     sink.Print("\n\t");
     sink.Print("(x:");
     sink.Format("%.2f", row.x);
@@ -52,7 +52,7 @@ void PrintRow(FailSink &sink, const Vector3 &row) {
     sink.Print(")");
 }
 
-void PrintTransform(FailSink &sink, const Transform &xfm) {
+void PrintTransform(Dbg &sink, const Transform &xfm) {
     PrintRow(sink, xfm.mBasisX);
     PrintRow(sink, xfm.mBasisY);
     PrintRow(sink, xfm.mBasisZ);
@@ -60,7 +60,7 @@ void PrintTransform(FailSink &sink, const Transform &xfm) {
 }
 
 // NTSC-U/C: 0x004eae58, PAL: 0x005299b8
-FailSink &DumpTransformList(FailSink &sink, const std::list<Transform> &transforms) {
+Dbg &DumpTransformList(Dbg &sink, const std::list<Transform> &transforms) {
     sink.Print("(size:");
     sink.Format("%u", transforms.size());
     sink.Print(")");
@@ -190,7 +190,7 @@ MultiMesh::~MultiMesh() {
 }
 
 // NTSC-U/C: 0x004e81a0, PAL: 0x00526ca8
-void MultiMesh::DumpText(FailSink &sink) {
+void MultiMesh::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
     if (sink.mDumpLevel <= 0) {

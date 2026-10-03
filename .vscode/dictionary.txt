@@ -4,6 +4,7 @@ abmpfile
 acanvas
 acanvaslin
 acceler
+acircbuff
 activatelistenmode
 activatepracticemode
 adda
@@ -25,12 +26,13 @@ agiffile
 albumcache
 allnotesoffmsg
 almodule
+amovieset
 analogl
 analogr
 andi
 anim
 animatables
-animrange
+animhelper
 anims
 apalette
 apolygon
@@ -45,7 +47,7 @@ arect
 argn
 arkfile
 arkfiles
-arlereader
+arle
 arraymodule
 arrghghghgh
 asynccallback
@@ -108,7 +110,6 @@ bumpmsg
 bumppacket
 bumppowerup
 buttonpowmsg
-bytepairstatic
 cacceler
 calcsize
 callbackxferbdtoiop
@@ -288,7 +289,6 @@ ezmpeg
 fadegamemsg
 fadeuser
 faild
-failsink
 favorite
 fbmsk
 fbrst
@@ -422,7 +422,6 @@ hisquare
 hostmode
 hsyn
 hudanalogstick
-hudanimramp
 hudbadge
 hudcountdown
 hudeffects
@@ -449,12 +448,12 @@ hudutil
 hudwinmessage
 huft
 hufts
+hxchunkheader
 hxchunkname
 hxcommands
 hxcons
-hxdatachunkid
-hxdatachunkreader
 hxidatachunk
+hxilistchunk
 hxmemstream
 hxmodule
 hxstr
@@ -514,6 +513,7 @@ jampowerupplacer
 jbed
 jbep
 jinja
+joypadps
 jsonnet
 jsonschema
 juiceamountmsg
@@ -522,6 +522,7 @@ jukeboxmode
 jukeboxplaylist
 kapsz
 kasson
+keyboardmgr
 keychannel
 keyframed
 keypanel
@@ -566,8 +567,8 @@ libsonnet
 libvifpk
 libvu
 lightanim
-linearmap
-linearramp
+linearanim
+lineartransform
 linecache
 linkfile
 linkonce
@@ -591,6 +592,7 @@ lobbyconnectionlostmsg
 localjamenablemgr
 localplayer
 localplayercmd
+lodmesh
 logoback
 longobject
 longop
@@ -752,7 +754,6 @@ mfir
 mgen
 middisabler
 midichase
-midifilereader
 midionoffeffector
 minimumsavespacemct
 miniw
@@ -769,7 +770,6 @@ modname
 modsupport
 moduleobject
 mous
-moviestream
 movt
 mpfn
 mpfr
@@ -881,12 +881,14 @@ obstream
 ohgb
 oneline
 oobject
+openarkobject
 openreadop
 openwriteop
 ordblks
 orthonormalize
 outcnt
 overcutting
+ovyassembly
 pabe
 padc
 paddh
@@ -931,6 +933,8 @@ pitchingstg
 pitchmsg
 pitchpicker
 pitchriffmsg
+playbacker
+playbacker's
 playbackmodemsg
 playbacktogglemsg
 playerinfo
@@ -1021,6 +1025,7 @@ rdonly
 rdparty
 readbuf
 readop
+recalc
 recinfo
 recolor
 refe
@@ -1032,6 +1037,7 @@ regexmodule
 regexpr
 regi
 reginfo
+registercfunction
 releaseable
 relocs
 remixdata
@@ -1096,7 +1102,6 @@ screenanim
 screendump
 scriptcalltemplates
 scripteval
-scriptfunc
 scripthost
 scriptmsg
 scriptsink
@@ -1211,6 +1216,7 @@ synthsustainer
 sysclib
 sysconf
 sysmodule
+systemtime
 tadr
 tagfile
 tatsh
@@ -1234,6 +1240,7 @@ texturepairrecord
 thbase
 thid
 tickclock
+timeclock
 timedcommand
 timrman
 tkinter
@@ -1293,7 +1300,6 @@ trxpos
 trxreg
 tunnelcache
 tunnelevent
-tunnelmeshchain
 tunnelseeker
 tunnelseeksection
 tunnelseekstrip
@@ -1358,17 +1364,12 @@ voxing
 voxingstg
 voxstring
 vramk
-vramtable
 vron
 vrsqrt
 vtable
 vudata
 vutext
 waheffector
-watchdogclock
-watchdogplayback
-watchdogrecorder
-watchdogtimer
 wbdc
 wdelete
 werror

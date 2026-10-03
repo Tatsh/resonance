@@ -5,7 +5,9 @@
 #include "app/attachment.h"
 #include "sch/cmdid.h"
 
-class WatchdogTimer;
+namespace Sch {
+class TimeClock;
+} // namespace Sch
 
 /**
  * Task the scheduler runs again every fixed number of nanoseconds.
@@ -26,7 +28,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0013b100
      * @ghidraAddress PAL: 0x0013ba48
      */
-    TimeTask(WatchdogTimer *pClock, long long nPeriodNs);
+    TimeTask(Sch::TimeClock *pClock, long long nPeriodNs);
 
     /**
      * Withdraw the queued command.
@@ -94,9 +96,9 @@ public:
     static constexpr long long kNoEpochOffset = -1000000;
 
 private:
-    WatchdogTimer *mClock; // +0x08 the clock the task is posted against
-    CmdID mCommand;        // +0x0c the handle of the queued command, -2 while none is queued
-    long long mPeriodNs;   // +0x10
-    long long mNextNs;     // +0x18 the time the next run is due at
-    long long mEpochNs;    // +0x20 the time the elapsed count is measured from
+    Sch::TimeClock *mClock; // +0x08 the clock the task is posted against
+    CmdID mCommand;         // +0x0c the handle of the queued command, -2 while none is queued
+    long long mPeriodNs;    // +0x10
+    long long mNextNs;      // +0x18 the time the next run is due at
+    long long mEpochNs;     // +0x20 the time the elapsed count is measured from
 };

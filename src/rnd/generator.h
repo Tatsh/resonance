@@ -11,8 +11,8 @@
 
 namespace Rnd {
 class Cam;
-}
-class FailSink;
+class Dbg;
+} // namespace Rnd
 namespace Rnd {
 class Mesh;
 }
@@ -143,7 +143,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00459618
      * @ghidraAddress PAL: 0x00496ba0
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write revision 7 of the emitter to stream.

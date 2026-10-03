@@ -12,11 +12,11 @@
 #include "game/riff.h"
 #include "game/trackdata.h"
 #include "mid/mbt.h"
-#include "mid/midifilereader.h"
+#include "mid/reader.h"
 #include "msg/sustainnotemsg.h"
 #include "os/hostmode.h"
 #include "script/configquery.h"
-#include "stream/hxdatachunkreader.h"
+#include "stream/hxilistchunk.h"
 #include "stream/hxmemstream.h"
 
 namespace {
@@ -165,7 +165,7 @@ inline int StatusRank(unsigned char nStatus) {
 }
 
 // NTSC-U/C: 0x001e6450, PAL: 0x001ec620
-bool CompareEventStatus(const Mid::FileReader::Event &left, const Mid::FileReader::Event &right) {
+bool CompareEventStatus(const Mid::Reader::Event &left, const Mid::Reader::Event &right) {
     const int nLeft = StatusRank(left.mStatus);
     const int nRight = StatusRank(right.mStatus);
     if (nLeft == nRight) {
@@ -272,8 +272,8 @@ void LevelConverter::Convert(const char *pszPath,
 
     HxMemStream stream(pszPath, static_cast<char *>(pBuffer), nLength);
     stream.mSwapBytes = 1;
-    HxDataChunkReader chunks(&stream, false);
-    Mid::FileReader reader(&chunks, this);
+    HxIListChunk chunks(&stream, false);
+    Mid::Reader reader(&chunks, this);
     reader.mCompare = CompareEventStatus;
     reader.Read();
     mBuilder->PrepareTracks();

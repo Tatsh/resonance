@@ -10,8 +10,8 @@
 #include "app/longop.h"
 #include "gfx/gsdoublebuffer.h"
 #include "gfx/renderstats.h"
-#include "gfx/vramtable.h"
-#include "os/failsink.h"
+#include "gfx/vram.h"
+#include "os/dbg.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "profile/profiler.h"
@@ -392,7 +392,7 @@ void GfxDevice::Terminate() {
     Rnd::PsEnviron::Terminate();
     Rnd::RegisterParticleSysClass();
     Rnd::RegisterMultiMeshClass();
-    g_vramTable.~VramTable(); // Yes, the binary calls the destructor on the global directly.
+    g_vramTable.~VRAM(); // Yes, the binary calls the destructor on the global directly.
 }
 
 // NTSC-U/C: 0x0049fea0, PAL: 0x004ddf28

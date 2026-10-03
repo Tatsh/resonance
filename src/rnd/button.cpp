@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
 #include "rnd/font.h"
@@ -29,7 +29,7 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-void PrintObjectRef(FailSink &sink, const Object *pObject) {
+void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print(kNoObject);
         return;
@@ -53,7 +53,7 @@ void WriteObjectRef(Stream &stream, const Object *pObject) {
 
 // Dump a palette as its size and one indexed name per entry.
 template <class T>
-FailSink &operator<<(FailSink &sink, const std::vector<T *> &entries) {
+Dbg &operator<<(Dbg &sink, const std::vector<T *> &entries) {
     sink.Print("(size:");
     sink.Format("%u", entries.size());
     sink.Print(")");
@@ -95,10 +95,10 @@ Stream &operator>>(Stream &stream, std::vector<T *> &entries) {
 }
 
 // NTSC-U/C: 0x005336b0, PAL: 0x00572ed0
-template FailSink &operator<< <Mat>(FailSink &sink, const std::vector<Mat *> &entries);
+template Dbg &operator<< <Mat>(Dbg &sink, const std::vector<Mat *> &entries);
 
 // NTSC-U/C: 0x005337e8, PAL: 0x00573008
-template FailSink &operator<< <Font>(FailSink &sink, const std::vector<Font *> &entries);
+template Dbg &operator<< <Font>(Dbg &sink, const std::vector<Font *> &entries);
 
 // NTSC-U/C: 0x00533920, PAL: 0x00573140
 template Stream &operator<< <Mat>(Stream &stream, const std::vector<Mat *> &entries);
@@ -173,7 +173,7 @@ const HxStr &Button::ClassName() const {
 }
 
 // NTSC-U/C: 0x005304f0, PAL: 0x0056fc98
-void Button::DumpText(FailSink &sink) {
+void Button::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     if (sink.mDumpLevel <= 0) {
         return;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/linearramp.h"
+#include "app/linearanim.h"
 #include "app/tnlcatcher.h"
 #include "app/tnlpointer.h"
 #include "os/hxstr.h"
@@ -128,7 +128,7 @@ private:
     float mAngle;
     int mTrack;
     int mLevel;
-    LinearRamp mOffsetRamp; // Seeker offsets, 0 through -225 over 480.
+    LinearAnim mOffsetRamp; // Seeker offsets, 0 through -225 over 480.
     int mBlink;             // Non-zero dims the materials for frames 121 through 239 of every 240.
     float mTransOffset;
     int mGhost;

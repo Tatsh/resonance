@@ -3,16 +3,16 @@
 #include <list>
 #include <string.h>
 
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/genpath.h"
 #include "os/hxstr.h"
 #include "os/loadfile.h"
 #include "os/log.h"
 #include "os/mem.h"
 #include "os/zone.h"
+#include "rnd/amovieset.h"
 #include "rnd/filepath.h"
 #include "rnd/manager.h"
-#include "rnd/moviestream.h"
 #include "rnd/stream.h"
 #include "rnd/tex.h"
 #include "rndartt/acanvas.h"
@@ -65,8 +65,7 @@ int g_nMovieBeatCacheAge;
 
 // Reconfigure a texture whose size or depth differs from its track's frame, logging the change.
 // SetFrameSelf() and SetTrackTexture() both expand this with their own message.
-inline void
-MatchTextureToTrack(Tex *pTex, const MovieStream::Track &track, const char *pszMessage) {
+inline void MatchTextureToTrack(Tex *pTex, const AMovieSet::Track &track, const char *pszMessage) {
     if (track.mWidth == pTex->mWidth && track.mHeight == pTex->mHeight &&
         pTex->mBitsPerPixel == kMovieBitsPerPixel) {
         return;
@@ -79,12 +78,12 @@ MatchTextureToTrack(Tex *pTex, const MovieStream::Track &track, const char *pszM
 }
 
 // NTSC-U/C: 0x005d15e0, PAL: 0x006135d0
-FailSink &operator<<(FailSink &sink, const std::list<Movie::TrackTexture> &textures) {
+Dbg &operator<<(Dbg &sink, const std::list<Movie::TrackTexture> &textures) {
     sink.Print("(size:")->Format("%u", textures.size())->Print(")");
 
     int nIndex = 0;
     for (const auto &entry : textures) {
-        FailSink *pSink = sink.Print("\n")->Format("%d", nIndex)->Print("\t")->Print("(trackId:");
+        Dbg *pSink = sink.Print("\n")->Format("%d", nIndex)->Print("\t")->Print("(trackId:");
         pSink = pSink->Format("%d", entry.mTrackId)->Print(" tex:");
         if (entry.mTex != nullptr) {
             pSink->Format("\"%s\"", NameText(entry.mTex));
@@ -150,7 +149,7 @@ void Movie::OpenMovieFile() {
 
     mZone = ZoneGetCurrent();
     int nError;
-    mStream = new MovieStream(szPath, 0, &nError);
+    mStream = new AMovieSet(szPath, 0, &nError);
     if (nError != 0) {
         g_failSink.Report(
             "Couldn't load movie file %s: %s\n", szPath, g_apszMovieStreamErrors[-nError]);
@@ -291,7 +290,7 @@ void Movie::RemoveTrackTexture(int nTrackId) {
 }
 
 // NTSC-U/C: 0x005cf4c0, PAL: 0x00611488
-void Movie::OnChunk(MovieStream::ChunkHeader *pHeader, void *pPayload) {
+void Movie::OnChunk(AMovieSet::ChunkHeader *pHeader, void *pPayload) {
     Tex *pTex = nullptr;
     for (const auto &entry : mTrackTextures) {
         if (entry.mTrackId == pHeader->mTrackId) {
@@ -305,11 +304,11 @@ void Movie::OnChunk(MovieStream::ChunkHeader *pHeader, void *pPayload) {
 
     const unsigned int nTag = pHeader->mTag;
     if (nTag == g_nPallTag) {
-        const auto *pChunk = static_cast<MovieStream::PaletteChunk *>(pPayload);
+        const auto *pChunk = static_cast<AMovieSet::PaletteChunk *>(pPayload);
         mPalette.SetEntries(pChunk->mEntries, 0, pChunk->mCount);
         pTex->SetPalette(&mPalette, kSetPaletteReservedArg);
     } else if (nTag == g_nFramTag) {
-        auto *pChunk = static_cast<MovieStream::FrameChunk *>(pPayload);
+        auto *pChunk = static_cast<AMovieSet::FrameChunk *>(pPayload);
         pChunk->mBitmap.mPixels = pChunk + 1;
         ACanvas *pCanvas = pTex->LockMipBitmap(0, 0, 0);
         if (pCanvas == nullptr) {
@@ -323,7 +322,7 @@ void Movie::OnChunk(MovieStream::ChunkHeader *pHeader, void *pPayload) {
         if (pCanvas == nullptr) {
             return;
         }
-        pCanvas->SetColor32(static_cast<MovieStream::BlankChunk *>(pPayload)->mColor);
+        pCanvas->SetColor32(static_cast<AMovieSet::BlankChunk *>(pPayload)->mColor);
         const ARect rect = {0, 0, pCanvas->mBitmap.mWidth, pCanvas->mBitmap.mHeight};
         pCanvas->FillRect(rect);
         pTex->UnlockMipBitmap();
@@ -331,7 +330,7 @@ void Movie::OnChunk(MovieStream::ChunkHeader *pHeader, void *pPayload) {
 }
 
 // NTSC-U/C: 0x005d2530, PAL: 0x00614560
-void Movie::ChunkHandler(MovieStream::ChunkHeader *pHeader, void *pPayload, void *pData) {
+void Movie::ChunkHandler(AMovieSet::ChunkHeader *pHeader, void *pPayload, void *pData) {
     static_cast<Movie *>(pData)->OnChunk(pHeader, pPayload);
 }
 
@@ -357,7 +356,7 @@ void Movie::Reopen() {
 }
 
 // NTSC-U/C: 0x005d21e0, PAL: 0x00614210
-void Movie::DumpText(FailSink &sink) {
+void Movie::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
     if (sink.mDumpLevel <= 0) {

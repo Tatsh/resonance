@@ -7,7 +7,7 @@
 #include "math/color.h"
 #include "math/vector2.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/manager.h"
 #include "rnd/mesh.h"
@@ -27,7 +27,7 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-void PrintObjectRef(FailSink &sink, const Object *pObject) {
+void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print(kNoObject);
         return;
@@ -51,27 +51,27 @@ void ReadObjectRef(Stream &stream, T *&refOut) {
     refOut = dynamic_cast<T *>(g_manager.Find(name));
 }
 
-void PrintVectorHeader(FailSink &sink, unsigned nCount) {
+void PrintVectorHeader(Dbg &sink, unsigned nCount) {
     sink.Print("(size:");
     sink.Format("%u", nCount);
     sink.Print(")");
 }
 
-void PrintElementIndex(FailSink &sink, unsigned nIndex) {
+void PrintElementIndex(Dbg &sink, unsigned nIndex) {
     sink.Print("\n");
     sink.Format("%d", nIndex);
     sink.Print("\t");
 }
 
 // Every labelled number in the dumps is a Print of the label and then a Format of the value alone.
-// The FailSink format buffer therefore ends with the bare number.
-void PrintFloatField(FailSink &sink, const char *pszLabel, float flValue) {
+// The Dbg format buffer therefore ends with the bare number.
+void PrintFloatField(Dbg &sink, const char *pszLabel, float flValue) {
     sink.Print(pszLabel);
     sink.Format("%.2f", flValue);
 }
 
 // NTSC-U/C: 0x004906a8, PAL: 0x004ce530
-FailSink &DumpPointsVector(FailSink &sink, const std::vector<Vector3> &values) {
+Dbg &DumpPointsVector(Dbg &sink, const std::vector<Vector3> &values) {
     PrintVectorHeader(sink, values.size());
     for (unsigned nIndex = 0; nIndex < values.size(); ++nIndex) {
         PrintElementIndex(sink, nIndex);
@@ -84,7 +84,7 @@ FailSink &DumpPointsVector(FailSink &sink, const std::vector<Vector3> &values) {
 }
 
 // NTSC-U/C: 0x004909c0, PAL: 0x004ce848
-FailSink &DumpTexsVector(FailSink &sink, const std::vector<Vector2> &values) {
+Dbg &DumpTexsVector(Dbg &sink, const std::vector<Vector2> &values) {
     PrintVectorHeader(sink, values.size());
     for (unsigned nIndex = 0; nIndex < values.size(); ++nIndex) {
         PrintElementIndex(sink, nIndex);
@@ -96,7 +96,7 @@ FailSink &DumpTexsVector(FailSink &sink, const std::vector<Vector2> &values) {
 }
 
 // NTSC-U/C: 0x00490cb0, PAL: 0x004ceb38
-FailSink &DumpColorsVector(FailSink &sink, const std::vector<Color> &values) {
+Dbg &DumpColorsVector(Dbg &sink, const std::vector<Color> &values) {
     PrintVectorHeader(sink, values.size());
     for (unsigned nIndex = 0; nIndex < values.size(); ++nIndex) {
         PrintElementIndex(sink, nIndex);
@@ -113,7 +113,7 @@ FailSink &DumpColorsVector(FailSink &sink, const std::vector<Color> &values) {
 // its frame, and the whole value vector. The count comes from std::list::size(), which is a walk
 // on this library.
 // NTSC-U/C: 0x00490840, PAL: 0x004ce6c8
-FailSink &DumpPointsKeys(FailSink &sink, const std::list<MeshAnim::PointsKey> &keys) {
+Dbg &DumpPointsKeys(Dbg &sink, const std::list<MeshAnim::PointsKey> &keys) {
     PrintVectorHeader(sink, keys.size());
     unsigned nIndex = 0;
     for (const auto &key : keys) {
@@ -129,7 +129,7 @@ FailSink &DumpPointsKeys(FailSink &sink, const std::list<MeshAnim::PointsKey> &k
 }
 
 // NTSC-U/C: 0x00490b30, PAL: 0x004ce9b8
-FailSink &DumpTexsKeys(FailSink &sink, const std::list<MeshAnim::TexsKey> &keys) {
+Dbg &DumpTexsKeys(Dbg &sink, const std::list<MeshAnim::TexsKey> &keys) {
     PrintVectorHeader(sink, keys.size());
     unsigned nIndex = 0;
     for (const auto &key : keys) {
@@ -145,7 +145,7 @@ FailSink &DumpTexsKeys(FailSink &sink, const std::list<MeshAnim::TexsKey> &keys)
 }
 
 // NTSC-U/C: 0x00490e78, PAL: 0x004ced00
-FailSink &DumpColorsKeys(FailSink &sink, const std::list<MeshAnim::ColorsKey> &keys) {
+Dbg &DumpColorsKeys(Dbg &sink, const std::list<MeshAnim::ColorsKey> &keys) {
     PrintVectorHeader(sink, keys.size());
     unsigned nIndex = 0;
     for (const auto &key : keys) {
@@ -469,7 +469,7 @@ float MeshAnim::EndFrame() {
 }
 
 // NTSC-U/C: 0x00486c98, PAL: 0x004c4a68
-void MeshAnim::DumpText(FailSink &sink) {
+void MeshAnim::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
     if (sink.mDumpLevel <= 0) {

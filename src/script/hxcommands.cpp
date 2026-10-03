@@ -6,8 +6,8 @@
 #include "app/application.h"
 #include "app/attachment.h"
 #include "app/globals.h"
-#include "app/watchdog.h"
-#include "app/watchdogclock.h"
+#include "app/scheduler.h"
+#include "app/systemtime.h"
 #include "game/gamemanagerimpl.h"
 #include "game/gamer.h"
 #include "game/grooveworld.h"
@@ -16,7 +16,7 @@
 #include "game/powerupcollection.h"
 #include "game/scoretrackgraph.h"
 #include "game/trackdata.h"
-#include "gfx/vramtable.h"
+#include "gfx/vram.h"
 #include "mid/mbt.h"
 #include "os/filelog.h"
 #include "os/formatstring.h"
@@ -38,8 +38,8 @@
 #include "script/cxx/object.h"
 #include "script/cxx/string.h"
 #include "script/cxx/tuple.h"
+#include "script/registercfunction.h"
 #include "script/scriptcmd.h"
-#include "script/scriptfunc.h"
 #include "script/testregistry.h"
 #include "synth/midi_main.h"
 #include "synth/ps2hardsynth.h"
@@ -737,7 +737,7 @@ Py::Object ScriptClock(Py::Tuple args) {
     Py::Object element = args.getItem(0);
     Py::String text(element);
     HxStr command = text;
-    Watchdog *pWatchdog = Application::shared()->GetWatchdog();
+    Sch::Scheduler *pWatchdog = Application::shared()->GetWatchdog();
     if (command == "pause") {
         pWatchdog->mClock.Pause();
         return Py::Object();
@@ -891,51 +891,51 @@ PyObject *PyInvokeCheatWin(PyObject *, PyObject *pArgs) {
 
 // The script interface this file exports, registered in static initialisation.
 // NTSC-U/C: 0x00118960, PAL: 0x00118e78
-const ScriptFunc kKillschFunc("killsch", PyInvokeKillSch);
+const RegisterCFunction kKillschFunc("killsch", PyInvokeKillSch);
 // NTSC-U/C: 0x00150b80, PAL: 0x001518d0
-const ScriptFunc kCheatWinFunc("cheat_win", PyInvokeCheatWin);
+const RegisterCFunction kCheatWinFunc("cheat_win", PyInvokeCheatWin);
 // NTSC-U/C: 0x00153030, PAL: 0x00153e80
-const ScriptFunc kClockFunc("clock", PyInvokeClock);
+const RegisterCFunction kClockFunc("clock", PyInvokeClock);
 // NTSC-U/C: 0x001537d8, PAL: 0x00154668
-const ScriptFunc kDisplayTextFunc("display_text", PyInvokeDisplayText);
+const RegisterCFunction kDisplayTextFunc("display_text", PyInvokeDisplayText);
 // NTSC-U/C: 0x00154030, PAL: 0x00154ee0
-const ScriptFunc kEnableFreestyleFunc("enable_freestyle", PyInvokeEnableFreestyle);
+const RegisterCFunction kEnableFreestyleFunc("enable_freestyle", PyInvokeEnableFreestyle);
 // NTSC-U/C: 0x00154740, PAL: 0x00155610
-const ScriptFunc kFreezeJuiceFunc("freeze_juice", PyInvokeFreezeJuice);
+const RegisterCFunction kFreezeJuiceFunc("freeze_juice", PyInvokeFreezeJuice);
 // NTSC-U/C: 0x00157418, PAL: 0x00159048
-const ScriptFunc kMemlogTermFunc("memlog_term", PyInvokeMemlogTerm);
+const RegisterCFunction kMemlogTermFunc("memlog_term", PyInvokeMemlogTerm);
 #ifdef VIDEO_STANDARD_PAL
 // PAL: 0x00157740
-const ScriptFunc kSetLangFunc("set_lang", PyInvokeSetLang);
-const ScriptFunc kGetLanguageSuffixFunc("get_language_suffix", PyInvokeGetLanguageSuffix);
+const RegisterCFunction kSetLangFunc("set_lang", PyInvokeSetLang);
+const RegisterCFunction kGetLanguageSuffixFunc("get_language_suffix", PyInvokeGetLanguageSuffix);
 #endif
 // NTSC-U/C: 0x00159248, PAL: 0x0015af28
-const ScriptFunc kSetVolumeFunc("set_volume", PyInvokeSetVolume);
-const ScriptFunc kMidiFunc("midi", PyInvokeMidi);
-const ScriptFunc kStopAllMidiFunc("stop_all_midi", PyInvokeStopAllMidi);
+const RegisterCFunction kSetVolumeFunc("set_volume", PyInvokeSetVolume);
+const RegisterCFunction kMidiFunc("midi", PyInvokeMidi);
+const RegisterCFunction kStopAllMidiFunc("stop_all_midi", PyInvokeStopAllMidi);
 // NTSC-U/C: 0x0015a1c0, PAL: 0x0015bf00
-const ScriptFunc kPostScriptFunc("post_script", PyInvokePostScript);
-const ScriptFunc kCancelCmdFunc("cancel_cmd", PyInvokeCancelCmd);
+const RegisterCFunction kPostScriptFunc("post_script", PyInvokePostScript);
+const RegisterCFunction kCancelCmdFunc("cancel_cmd", PyInvokeCancelCmd);
 // NTSC-U/C: 0x0015c2c8, PAL: 0x0015e0a8
-const ScriptFunc kCaptureFunc("capture", PyInvokeCapture);
-const ScriptFunc kRecreateFunc("recreate", PyInvokeRecreate);
+const RegisterCFunction kCaptureFunc("capture", PyInvokeCapture);
+const RegisterCFunction kRecreateFunc("recreate", PyInvokeRecreate);
 // NTSC-U/C: 0x0015c838, PAL: 0x0015e618
-const ScriptFunc kScreenDumpFunc("screen_dump", PyInvokeScreenDump);
+const RegisterCFunction kScreenDumpFunc("screen_dump", PyInvokeScreenDump);
 // NTSC-U/C: 0x0015d6d8, PAL: 0x0015f4d8
-const ScriptFunc kSelectPowerupFunc("select_powerup", PyInvokeSelectPowerup);
+const RegisterCFunction kSelectPowerupFunc("select_powerup", PyInvokeSelectPowerup);
 // NTSC-U/C: 0x0015e3c8, PAL: 0x00160228
-const ScriptFunc kSpewFunc("spew", PyInvokeSpew);
+const RegisterCFunction kSpewFunc("spew", PyInvokeSpew);
 // NTSC-U/C: 0x0015e960, PAL: 0x001607e0
-const ScriptFunc kStopGameFunc("stop_game", PyInvokeStopGame);
+const RegisterCFunction kStopGameFunc("stop_game", PyInvokeStopGame);
 // NTSC-U/C: 0x0015f048, PAL: 0x00160ee8
-const ScriptFunc kSynthCmdFunc("synth_cmd", PyInvokeSynthCmd);
+const RegisterCFunction kSynthCmdFunc("synth_cmd", PyInvokeSynthCmd);
 // NTSC-U/C: 0x0015fc68, PAL: 0x00161b88
-const ScriptFunc kTestFunc("test", PyInvokeTest);
+const RegisterCFunction kTestFunc("test", PyInvokeTest);
 // NTSC-U/C: 0x00162a68, PAL: 0x00164aa8
-const ScriptFunc kTraceFunc("trace", PyInvokeTrace);
+const RegisterCFunction kTraceFunc("trace", PyInvokeTrace);
 // NTSC-U/C: 0x001638d0, PAL: 0x00165980
-const ScriptFunc kZoneDumpFunc("zone_dump", PyInvokeZoneDump);
+const RegisterCFunction kZoneDumpFunc("zone_dump", PyInvokeZoneDump);
 // NTSC-U/C: 0x0050cbc0, PAL: 0x0054c058
-const ScriptFunc kGetFreqRootFunc("get_freq_root", PyInvokeGetFreqRoot);
+const RegisterCFunction kGetFreqRootFunc("get_freq_root", PyInvokeGetFreqRoot);
 
 } // namespace

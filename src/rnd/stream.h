@@ -1,6 +1,6 @@
 #pragma once
 
-#include "os/failsink.h"
+#include "os/dbg.h"
 
 class HxStr;
 

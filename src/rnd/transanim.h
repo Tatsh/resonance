@@ -8,9 +8,9 @@
 // Included for kXfmRowFloatCount, which this header uses by value, rather than for Transformable.
 #include "rnd/transformable.h"
 
-class FailSink;
 struct Vector3;
 namespace Rnd {
+class Dbg;
 class Object;
 class Stream;
 } // namespace Rnd
@@ -284,7 +284,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004f2ab0
      * @ghidraAddress PAL: 0x005316a0
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write the revision, both bases, both target names, the three channels, and the flags.

@@ -1,8 +1,8 @@
 set(RESONANCE_STREAM_SRCS
+    hxchunkheader.cpp
     hxchunkname.cpp
-    hxdatachunkid.cpp
-    hxdatachunkreader.cpp
     hxidatachunk.cpp
+    hxilistchunk.cpp
     hxmemstream.cpp
     hxstream.cpp
     ibfilestream.cpp

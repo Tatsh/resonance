@@ -10,8 +10,8 @@
 #include "rnd/manager.h"
 #include "rnd/object.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Mesh;
 class Stream;
 class Tex;
@@ -125,7 +125,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x004d2270
          * @ghidraAddress PAL: 0x005106c0
          */
-        void Dump(FailSink &sink) const;
+        void Dump(Dbg &sink) const;
 
         /**
          * Serialise the stage.
@@ -248,7 +248,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004d0f78
      * @ghidraAddress PAL: 0x0050f3c8
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Serialise the material.

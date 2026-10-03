@@ -1,6 +1,6 @@
 #include "rnd/view.h"
 
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
 #include "rnd/animatable.h"
@@ -96,7 +96,7 @@ const HxStr &View::ClassName() const {
 }
 
 // NTSC-U/C: 0x004e3768, PAL: 0x00522020
-void View::DumpText(FailSink &sink) {
+void View::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
     Transformable::DumpText(sink);

@@ -4,10 +4,10 @@
 
 #include "rnd/object.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Stream;
-}
+} // namespace Rnd
 
 namespace Rnd {
 
@@ -180,7 +180,7 @@ public:
     /**
      * Report the showing flag.
      *
-     * The out-of-line copy has no callers. Rnd::TunnelMeshChain::Draw() inlines it.
+     * The out-of-line copy has no callers. Rnd::LodMesh::Draw() inlines it.
      *
      * @return Non-zero when this object draws at all.
      * @ghidraAddress NTSC-U/C: 0x00506520
@@ -218,14 +218,14 @@ public:
      * Write a description of this object to sink.
      *
      * Writes mShowing, mHighlight, and the mDraws list, and produces nothing at all when the dump
-     * level of sink is not positive. FailSink::Print() discards its text in the shipped build, so
-     * the routine produces no output on this target either way.
+     * level of sink is not positive. Dbg::Print() discards its text in the shipped build. The
+     * routine therefore produces no output on this target either way.
      *
      * @param sink The diagnostic sink to write to.
      * @ghidraAddress NTSC-U/C: 0x005069a8
      * @ghidraAddress PAL: 0x00545870
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     virtual void Save(Stream &stream);
     virtual void Replace(Object *pFrom, Object *pTo);

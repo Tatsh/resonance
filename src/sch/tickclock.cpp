@@ -1,7 +1,7 @@
 #include "sch/tickclock.h"
 
 #include "app/attachment.h"
-#include "app/watchdog.h"
+#include "app/scheduler.h"
 #include "sch/cmdid.h"
 #include "sch/tempomap.h"
 #include "sch/timedcommand.h"
@@ -30,7 +30,7 @@ inline long long SongTickToTime(const TempoMap *pTempoMap, long long nTick) {
 } // namespace
 
 // NTSC-U/C: 0x004a79f8, PAL: 0x004e5b08
-TickClock::TickClock(Watchdog *pWatchdog, TempoMap *pTempoMap) : WatchdogTimer(pWatchdog) {
+TickClock::TickClock(Scheduler *pWatchdog, TempoMap *pTempoMap) : TimeClock(pWatchdog) {
     // The store of pTempoMap sits in the branch delay slot of the null test and therefore runs
     // whether the test passes or not. The private-map branch then overwrites it.
     if (pTempoMap != nullptr) {

@@ -9,11 +9,11 @@ class MetaGameWorld;
 class PlayMap;
 class Ps2HardSynth;
 class ScriptSink;
-class Watchdog;
-class WatchdogTimer;
 
 namespace Sch {
+class Scheduler;
 class TickClock;
+class TimeClock;
 } // namespace Sch
 
 /** Size of the buffer that Globals opens its log stream over. */
@@ -139,18 +139,18 @@ public:
     Ps2HardSynth *GetSynth();
 
     /**
-     * @return The long-operation watchdog.
+     * @return The command scheduler.
      * @ghidraAddress NTSC-U/C: 0x00118eb0
      * @ghidraAddress PAL: 0x00119410
      */
-    Watchdog *GetWatchdog();
+    Sch::Scheduler *GetWatchdog();
 
     /**
-     * @return The watchdog's time base.
+     * @return The scheduler's time base.
      * @ghidraAddress NTSC-U/C: 0x00118e70
      * @ghidraAddress PAL: 0x001193d0
      */
-    WatchdogTimer *GetWatchdogTimer();
+    Sch::TimeClock *GetWatchdogTimer();
 
     /**
      * @return The sink that runs posted script text.
@@ -285,13 +285,13 @@ public:
     int GetTempo();
 
 private:
-    GameManagerImpl *mGameManager; // +0x00
-    MainLoop *mMainLoop;           // +0x04
-    Ps2HardSynth *mSynth;          // +0x08
-    Watchdog *mWatchdog;           // +0x0c
-    WatchdogTimer *mWatchdogTimer; // +0x10
-    ScriptSink *mScriptSink;       // +0x14
-    IOBPreallocMemStream *mLog;    // +0x18
+    GameManagerImpl *mGameManager;  // +0x00
+    MainLoop *mMainLoop;            // +0x04
+    Ps2HardSynth *mSynth;           // +0x08
+    Sch::Scheduler *mWatchdog;      // +0x0c
+    Sch::TimeClock *mWatchdogTimer; // +0x10
+    ScriptSink *mScriptSink;        // +0x14
+    IOBPreallocMemStream *mLog;     // +0x18
 };
 
 /**

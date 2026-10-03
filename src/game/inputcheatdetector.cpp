@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "app/application.h"
-#include "app/watchdog.h"
+#include "app/scheduler.h"
 #include "os/cycles.h"
 #include "os/hxstr.h"
 #include "script/scripthost.h"
@@ -199,7 +199,7 @@ void InputCheatDetector::OnControllerReading(int nType, int nSlot, int nButton, 
         return;
     }
 
-    Watchdog *pWatchdog = Application::shared()->GetWatchdog();
+    Sch::Scheduler *pWatchdog = Application::shared()->GetWatchdog();
     const long long llNowNs =
         (GetElapsedMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
 

@@ -5,12 +5,12 @@
 #include <string.h>
 #include <strings.h>
 
-#include "os/arkfile.h"
 #include "os/async.h"
 #include "os/hostmode.h"
 #include "os/inflate.h"
 #include "os/log.h"
 #include "os/mem.h"
+#include "os/openarkobject.h"
 #include "os/zone.h"
 
 namespace {

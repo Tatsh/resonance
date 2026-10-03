@@ -4,8 +4,8 @@
 #include "os/hxstr.h"
 #include "rnd/transformable.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Object;
 class Stream;
 } // namespace Rnd
@@ -186,7 +186,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00540420
      * @ghidraAddress PAL: 0x005800f8
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write the revision, the base, the three colours, the six scalars, and the type to stream.

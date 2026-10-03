@@ -134,7 +134,7 @@ public:
     virtual void Blit8NoClip(const ABitmap &source, int nX, int nY);
 
     /**
-     * Slot 57. Decodes through ARleReader, one row per call.
+     * Slot 57. Decodes through ARle8Reader, one row per call.
      *
      * @ghidraAddress NTSC-U/C: 0x00628a48
      * @ghidraAddress PAL: 0x006695d8

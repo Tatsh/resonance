@@ -199,7 +199,7 @@ public:
     /**
      * Words of video memory the display and depth buffers occupy.
      *
-     * VramTable::Init() divides the result by the words in a block to find where the palette
+     * Rnd::VRAM::Init() divides the result by the words in a block to find where the palette
      * region begins. The depth buffer page, at 2048 words a page, locates the end of both frame
      * buffers, and the display geometry at mnDepthBytes a pixel adds the depth buffer itself.
      *

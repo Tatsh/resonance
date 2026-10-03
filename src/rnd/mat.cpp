@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
 #include "rnd/manager.h"
@@ -21,7 +21,7 @@ constexpr char kMatTag[] = "Rnd::Mat";
 
 // NTSC-U/C: 0x004d2e68, PAL: 0x00511308
 // The same printer serves the material blend and the stage blend.
-FailSink &PrintBlendMode(FailSink &sink, Mat::BlendMode nBlend) {
+Dbg &PrintBlendMode(Dbg &sink, Mat::BlendMode nBlend) {
     switch (nBlend) {
     case Mat::kBlendModeDest:
         sink.Print("Dest");
@@ -67,7 +67,7 @@ FailSink &PrintBlendMode(FailSink &sink, Mat::BlendMode nBlend) {
 }
 
 // NTSC-U/C: 0x004dd0f0, PAL: 0x0051b690
-FailSink &PrintCullMode(FailSink &sink, Mat::CullMode nCull) {
+Dbg &PrintCullMode(Dbg &sink, Mat::CullMode nCull) {
     switch (nCull) {
     case Mat::kCullModeCw:
         sink.Print("CW");
@@ -83,7 +83,7 @@ FailSink &PrintCullMode(FailSink &sink, Mat::CullMode nCull) {
 }
 
 // NTSC-U/C: 0x004dd188, PAL: 0x0051b728
-FailSink &PrintGenMode(FailSink &sink, Mat::Stage::GenMode nGenMode) {
+Dbg &PrintGenMode(Dbg &sink, Mat::Stage::GenMode nGenMode) {
     switch (nGenMode) {
     case Mat::Stage::kGenModeFixed:
         sink.Print("Fixed");
@@ -105,7 +105,7 @@ FailSink &PrintGenMode(FailSink &sink, Mat::Stage::GenMode nGenMode) {
 }
 
 // NTSC-U/C: 0x004dd240, PAL: 0x0051b7e0
-FailSink &PrintWrapMode(FailSink &sink, Mat::Stage::WrapMode nWrap) {
+Dbg &PrintWrapMode(Dbg &sink, Mat::Stage::WrapMode nWrap) {
     switch (nWrap) {
     case Mat::Stage::kWrapModeClamp:
         sink.Print("Clamp");
@@ -124,7 +124,7 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-void PrintObjectRef(FailSink &sink, const Object *pObject) {
+void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print(kNoObject);
         return;
@@ -149,13 +149,13 @@ void ReadObjectRef(Stream &stream, T *&refOut) {
 }
 
 // Every labelled number in the dumps is a Print of the label and then a Format of the value alone.
-// The FailSink format buffer therefore ends with the bare number.
-void PrintFloatField(FailSink &sink, const char *pszLabel, float flValue) {
+// The Dbg format buffer therefore ends with the bare number.
+void PrintFloatField(Dbg &sink, const char *pszLabel, float flValue) {
     sink.Print(pszLabel);
     sink.Format("%.2f", flValue);
 }
 
-void PrintColor(FailSink &sink, const Color &color) {
+void PrintColor(Dbg &sink, const Color &color) {
     PrintFloatField(sink, "(r:", color.r);
     PrintFloatField(sink, " g:", color.g);
     PrintFloatField(sink, " b:", color.b);
@@ -163,7 +163,7 @@ void PrintColor(FailSink &sink, const Color &color) {
     sink.Print(")");
 }
 
-void PrintVector3(FailSink &sink, const Vector3 &v) {
+void PrintVector3(Dbg &sink, const Vector3 &v) {
     sink.Print("\n\t");
     PrintFloatField(sink, "(x:", v.x);
     PrintFloatField(sink, " y:", v.y);
@@ -171,7 +171,7 @@ void PrintVector3(FailSink &sink, const Vector3 &v) {
     sink.Print(")");
 }
 
-void PrintBool(FailSink &sink, int nValue) {
+void PrintBool(Dbg &sink, int nValue) {
     sink.Print(nValue != 0 ? "true" : "false");
 }
 
@@ -199,7 +199,7 @@ constexpr int kStageMatRefRevision = 0;
 // NTSC-U/C: 0x004d75c8, PAL: 0x00515ae0
 // The vector dump opens with the element count and then writes the index of every stage on its
 // own line, the same shape the mesh vector dumps use.
-FailSink &DumpStageVector(FailSink &sink, const std::vector<Mat::Stage> &stages) {
+Dbg &DumpStageVector(Dbg &sink, const std::vector<Mat::Stage> &stages) {
     sink.Print("(size:");
     sink.Format("%u", stages.size());
     sink.Print(")");
@@ -354,7 +354,7 @@ void Mat::Stage::InitDefaults() {
 }
 
 // NTSC-U/C: 0x004d2270, PAL: 0x005106c0
-void Mat::Stage::Dump(FailSink &sink) const {
+void Mat::Stage::Dump(Dbg &sink) const {
     sink.Print("\n\tblend:");
     PrintBlendMode(sink, mBlend);
     sink.Print(" coordIndex:");
@@ -500,7 +500,7 @@ Mat::~Mat() {
 }
 
 // NTSC-U/C: 0x004d0f78, PAL: 0x0050f3c8
-void Mat::DumpText(FailSink &sink) {
+void Mat::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     if (sink.mDumpLevel <= 0) {
         return;

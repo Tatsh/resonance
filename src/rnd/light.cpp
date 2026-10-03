@@ -1,7 +1,7 @@
 #include "rnd/light.h"
 
 #include "math/color.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
 #include "rnd/manager.h"
@@ -32,7 +32,7 @@ constexpr float kDefaultAmbientLevel = 0.1f;
 // src/rnd/mat.cpp declares a helper of the same title file-locally for the same reason. Every
 // component is a separate Print and Format pair, which is why the two literals "(r:" and "%.2f"
 // survive apart in the read-only data.
-void PrintColor(FailSink &sink, const Color &color) {
+void PrintColor(Dbg &sink, const Color &color) {
     sink.Print("(r:");
     sink.Format("%.2f", color.r);
     sink.Print(" g:");
@@ -45,7 +45,7 @@ void PrintColor(FailSink &sink, const Color &color) {
 }
 
 // NTSC-U/C: 0x005454a0, PAL: 0x00585218
-FailSink &PrintLightType(FailSink &sink, LightType type) {
+Dbg &PrintLightType(Dbg &sink, LightType type) {
     switch (type) {
     case kLightTypePoint:
         sink.Print("Point");
@@ -119,7 +119,7 @@ void Light::SyncLight() {
 }
 
 // NTSC-U/C: 0x00540420, PAL: 0x005800f8
-void Light::DumpText(FailSink &sink) {
+void Light::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Transformable::DumpText(sink);
     if (sink.mDumpLevel <= 0) {

@@ -6,7 +6,7 @@
 
 #include "math/color.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
@@ -75,7 +75,7 @@ const char *StringText(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
 }
 
-void PrintObjectRef(FailSink &sink, const Object *pObject) {
+void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print(kNoObject);
         return;
@@ -93,7 +93,7 @@ void WriteObjectRef(Stream &stream, const Object *pObject) {
 }
 
 // NTSC-U/C: 0x004d0450, PAL: 0x0050e888
-FailSink &PrintAlign(FailSink &sink, int nAlign) {
+Dbg &PrintAlign(Dbg &sink, int nAlign) {
     if ((nAlign & kTextAlignTop) != 0) {
         sink.Print("Top");
     } else if ((nAlign & kTextAlignMiddle) != 0) {
@@ -309,7 +309,7 @@ void Text::Collide(const Ray &ray, HitSink &sink) {
 }
 
 // NTSC-U/C: 0x004c7fc0, PAL: 0x00506198
-void Text::DumpText(FailSink &sink) {
+void Text::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
     Collideable::DumpText(sink);

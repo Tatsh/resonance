@@ -2,13 +2,13 @@
 
 #include <vector>
 
+#include "gfx/vram.h"
 #include "rnd/tex.h"
 #include "rndartt/apalette.h"
 
 class ACanvas;
 class HxStr;
 class VramPalEntry;
-class VramTableEntry;
 
 namespace Rnd {
 
@@ -266,7 +266,7 @@ private:
     // One mip level's residency, its video memory block and the canvas LockMipBitmap() hands out.
     // FreeGsSurfaces() deletes the canvas through its virtual destructor.
     struct GsMip {
-        VramTableEntry *mPage;
+        VRAM::Entry *mPage;
         ACanvas *mVramBitmap;
     };
 
@@ -329,7 +329,7 @@ private:
      * @ghidraAddress NTSC-U/C: 0x0059acc0
      * @ghidraAddress PAL: 0x005de140
      */
-    void UploadBitmapMipToSubImage(VramTableEntry *pPage, int nMip, int nBlockOffset);
+    void UploadBitmapMipToSubImage(VRAM::Entry *pPage, int nMip, int nBlockOffset);
 
     // Declared in recovered offset order. Every member is private, because no access from outside
     // this class is recovered.

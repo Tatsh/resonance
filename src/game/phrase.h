@@ -50,7 +50,7 @@ public:
      *
      * The record is twelve bytes. `PhraseMgr::PostGemMsg()` passes a GemPacket's `loc`, `gem`, and
      * `trans` values to AddGem() in member order, and the member names follow the labels
-     * GemPacket::Fields::Print() writes for them. The type name is inferred. The record has no
+     * ::Gem::Print() writes for them. The type name is inferred. The record has no
      * descriptor, allocation tag, or literal.
      *
      * On the wire the position travels as two bytes, mGem as one unsigned byte, and mTrans as one

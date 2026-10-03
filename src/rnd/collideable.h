@@ -4,10 +4,10 @@
 
 #include "rnd/object.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Stream;
-}
+} // namespace Rnd
 
 namespace Rnd {
 
@@ -166,14 +166,14 @@ public:
      * Write a description of this object to sink.
      *
      * Writes the mCollides list, and produces nothing at all when the dump level of sink is not
-     * positive. FailSink::Print() discards its text in the shipped build. The routine therefore
+     * positive. Dbg::Print() discards its text in the shipped build. The routine therefore
      * produces no output on this target in any case.
      *
      * @param sink The diagnostic sink to write to.
      * @ghidraAddress NTSC-U/C: 0x00502880
      * @ghidraAddress PAL: 0x00541690
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Write the revision and the mCollides list to stream.

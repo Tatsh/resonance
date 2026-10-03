@@ -14,8 +14,8 @@
 #include "rnd/particle.h"
 #include "rnd/transformable.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Mat;
 class Object;
 class Stream;
@@ -120,7 +120,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00521f40
      * @ghidraAddress PAL: 0x005624c8
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Serialise the system.

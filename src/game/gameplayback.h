@@ -17,7 +17,7 @@ public:
      *
      * Opens the recording as an IBFileStream on MakeFreqPath(file), reads three length-prefixed
      * strings from it and discards them, runs the manager's Load(), and hands the stream to
-     * Watchdog::StartPlayback().
+     * Sch::Scheduler::StartPlayback().
      *
      * @param file The recording.
      * @param pManager The manager that installs the playback.

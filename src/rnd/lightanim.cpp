@@ -4,7 +4,7 @@
 #include <list>
 
 #include "math/color.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/animatable.h"
 #include "rnd/keychannel.h"
@@ -27,7 +27,7 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-void PrintObjectRef(FailSink &sink, const Object *pObject) {
+void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print(kNoObject);
         return;
@@ -102,7 +102,7 @@ LightAnim *LightAnim::GetKeysOwner() {
 }
 
 // NTSC-U/C: 0x00541078, PAL: 0x00580d50
-void LightAnim::DumpText(FailSink &sink) {
+void LightAnim::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
     if (sink.mDumpLevel <= 0) {

@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/log.h"
 #include "os/mem.h"
 #include "rnd/stream.h"

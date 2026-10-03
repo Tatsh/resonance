@@ -2,8 +2,8 @@
 
 #include "os/hxstr.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Stream;
 } // namespace Rnd
 
@@ -90,7 +90,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004e7bc0
      * @ghidraAddress PAL: 0x00526680
      */
-    void Print(FailSink &sink) const;
+    void Print(Dbg &sink) const;
 
     /**
      * Write the path relative to sRoot, with its terminator, to stream.

@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
 #include "rnd/animatable.h"
@@ -60,7 +60,7 @@ const char *NameText(const Object *pObject) {
     return pObject->mName.mStr != nullptr ? pObject->mName.mStr : "";
 }
 
-void PrintObjectRef(FailSink &sink, const Object *pObject) {
+void PrintObjectRef(Dbg &sink, const Object *pObject) {
     if (pObject == nullptr) {
         sink.Print(kNoObject);
         return;
@@ -68,12 +68,12 @@ void PrintObjectRef(FailSink &sink, const Object *pObject) {
     sink.Format(kQuotedTextFormat, NameText(pObject));
 }
 
-void PrintBool(FailSink &sink, int nValue) {
+void PrintBool(Dbg &sink, int nValue) {
     sink.Print(nValue != 0 ? kTrueText : kFalseText);
 }
 
 // The padding word of the vector is not written.
-void PrintVector(FailSink &sink, const Vector3 &vec) {
+void PrintVector(Dbg &sink, const Vector3 &vec) {
     sink.Print("(x:");
     sink.Format(kFloatFormat, vec.x);
     sink.Print(" y:");
@@ -118,7 +118,7 @@ int g_nRndArenaLoadRevision;
 Arena *(*g_pfnNewArena)(const HxStr &name);
 
 // NTSC-U/C: 0x005b82b0, PAL: 0x005fa918
-static FailSink &operator<<(FailSink &sink, const Arena::Section &section) {
+static Dbg &operator<<(Dbg &sink, const Arena::Section &section) {
     sink.Print("\n\tview:");
     PrintObjectRef(sink, section.mView);
     sink.Print(" frame:");
@@ -136,7 +136,7 @@ static FailSink &operator<<(FailSink &sink, const Arena::Section &section) {
 }
 
 // NTSC-U/C: 0x005ba640, PAL: 0x005fccf8
-static FailSink &operator<<(FailSink &sink, const std::vector<Arena::Section> &sections) {
+static Dbg &operator<<(Dbg &sink, const std::vector<Arena::Section> &sections) {
     sink.Print("(size:");
     sink.Format(kCountFormat, sections.size());
     sink.Print(")");
@@ -225,7 +225,7 @@ Vector3 &Arena::LoopDist() {
 }
 
 // NTSC-U/C: 0x005b5f08, PAL: 0x005f8570
-void Arena::DumpText(FailSink &sink) {
+void Arena::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
     Transformable::DumpText(sink);

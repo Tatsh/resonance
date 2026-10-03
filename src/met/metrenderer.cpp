@@ -5,7 +5,7 @@
 
 #include "app/application.h"
 #include "app/playsound.h"
-#include "app/watchdog.h"
+#include "app/scheduler.h"
 #include "game/freqappearance.h"
 #include "game/gamemanagerimpl.h"
 #include "game/gameparams.h"
@@ -101,7 +101,7 @@ template bool ContainsRef<Rnd::Animatable>(const std::list<Rnd::Animatable *> &l
 
 // Reading of the frame clock in nanoseconds, measured from the origin the watchdog's clock
 // recorded when the run started. MainLoop has a copy of the same inline.
-inline long long FrameClockNs(Watchdog *pWatchdog) {
+inline long long FrameClockNs(Sch::Scheduler *pWatchdog) {
     return (GetElapsedMilliseconds() - pWatchdog->mClock.mOriginMs) * kNanosecondsPerMillisecond;
 }
 

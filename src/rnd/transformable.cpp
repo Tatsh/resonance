@@ -8,7 +8,7 @@
 #include "math/quaternion.h"
 #include "math/transformops.h"
 #include "math/vector3.h"
-#include "os/failsink.h"
+#include "os/dbg.h"
 #include "os/hxstr.h"
 #include "rnd/cam.h"
 #include "rnd/manager.h"
@@ -46,7 +46,7 @@ static const char *NameText(const Object *pObject) {
 }
 
 // NTSC-U/C: 0x004f8530, PAL: 0x005371d0
-static FailSink &operator<<(FailSink &sink, const std::list<Transformable *> &transList) {
+static Dbg &operator<<(Dbg &sink, const std::list<Transformable *> &transList) {
     sink.Print("(size:");
     sink.Format(kSizeFormat, transList.size());
     sink.Print(")");
@@ -70,7 +70,7 @@ static FailSink &operator<<(FailSink &sink, const std::list<Transformable *> &tr
 // NTSC-U/C: 0x004f26f0, PAL: 0x005312e0
 // Only Transformable::DumpText() invokes this. A mode outside the set below writes nothing rather
 // than a fallback title.
-static FailSink &operator<<(FailSink &sink, Transformable::Billboard nBillboard) {
+static Dbg &operator<<(Dbg &sink, Transformable::Billboard nBillboard) {
     switch (nBillboard) {
     case Transformable::kBillboardNone:
         sink.Print("None");
@@ -120,7 +120,7 @@ static FailSink &operator<<(FailSink &sink, Transformable::Billboard nBillboard)
 
 // De-inlined from the nine places DumpText() repeats it. The padding word of a row is not
 // written, and the origin uses the same shape with a different title in front of it.
-static inline FailSink &DumpXfmRow(FailSink &sink, const float *pRow) {
+static inline Dbg &DumpXfmRow(Dbg &sink, const float *pRow) {
     sink.Print("(x:");
     sink.Format(kFloatFormat, pRow[0]);
     sink.Print(" y:");
@@ -471,7 +471,7 @@ void Transformable::AcquireTransRefs() {
 }
 
 // NTSC-U/C: 0x004f12e0, PAL: 0x0052fed0
-void Transformable::DumpText(FailSink &sink) {
+void Transformable::DumpText(Dbg &sink) {
     if (sink.mDumpLevel <= 0) {
         return;
     }

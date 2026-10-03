@@ -6,8 +6,8 @@
 #include "rnd/animatable.h"
 #include "rnd/keychannel.h"
 
-class FailSink;
 namespace Rnd {
+class Dbg;
 class Light;
 class Object;
 class Stream;
@@ -117,7 +117,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00541078
      * @ghidraAddress PAL: 0x00580d50
      */
-    virtual void DumpText(FailSink &sink);
+    virtual void DumpText(Dbg &sink);
 
     /**
      * Serialise the animation.

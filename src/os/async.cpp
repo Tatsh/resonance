@@ -6,13 +6,13 @@
 #include <sifdev.h>
 #include <string.h>
 
-#include "os/arkfile.h"
 #include "os/asynccallback.h"
 #include "os/cycles.h"
 #include "os/hostmode.h"
 #include "os/loadfile.h"
 #include "os/log.h"
 #include "os/mem.h"
+#include "os/openarkobject.h"
 #include "os/seccache.h"
 #include "os/zone.h"
 

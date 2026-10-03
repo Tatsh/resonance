@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app/animrange.h"
+#include "app/animhelper.h"
 #include "app/tnlemitter.h"
 
 /**
@@ -51,7 +51,7 @@ public:
     void SetFrame(float flFrame);
 
 private:
-    AnimRange mRange;       // Run of "multfx.path".
+    AnimHelper mRange;      // Run of "multfx.path".
     TnlEmitter mEmitter;    // "multfx.ps".
     TnlEmitter mAltEmitter; // "multfxa.ps".
     int mReserved50;        // +0x50, never written or read by the recovered routines.
