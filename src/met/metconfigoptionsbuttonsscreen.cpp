@@ -169,7 +169,7 @@ void MetConfigOptionsButtonsScreen::OnRepeatingSoundFinished(Rnd::Button *pButto
     }
 }
 
-// 0x00208270
+// NTSC-U/C: 0x00208270, PAL: 0x00211398
 void MetConfigOptionsButtonsScreen::OnExitFinished() {
     if (mExitChoice == kExitCancelled) {
         if (MetFrontEndState::shared()->mReturnScreen == kPauseGameScreen) {
@@ -194,8 +194,14 @@ void MetConfigOptionsButtonsScreen::OnExitFinished() {
         ActivateNamedPanel(HxStr(kControllerScreen));
     } else if (name == kMemoryButton) {
         MetFrontEndState::shared()->mReturnScreen = HxStr(kThisScreen);
+#ifdef VIDEO_STANDARD_PAL
+        // Activating first ends with the focus on the warning EnterAndShow() opens.
+        ActivateNamedPanel(HxStr(kMemCardLoadScreen));
+        PushNamedScreen(HxStr(kMemCardLoadScreen));
+#else
         PushNamedScreen(HxStr(kMemCardLoadScreen));
         ActivateNamedPanel(HxStr(kMemCardLoadScreen));
+#endif
     } else if (name == kGameButton) {
         PushNamedScreen(HxStr(kGameOptionsScreen));
         ActivateNamedPanel(HxStr(kGameOptionsScreen));

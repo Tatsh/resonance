@@ -118,7 +118,8 @@ public:
      * mControllerIndex to MetConfigControllerScreen::mControllerIndex, and the memory button
      * records this screen in MetFrontEndState::mReturnScreen to return to.
      *
-     * @ghidraAddress 0x00208270
+     * @ghidraAddress NTSC-U/C: 0x00208270
+     * @ghidraAddress PAL: 0x00211398
      */
     virtual void OnExitFinished();
 
