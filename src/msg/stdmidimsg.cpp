@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "os/hxstr.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
@@ -75,7 +75,7 @@ void StdMidiMsg::PrintExtra(std::ostream &stream) const {
         break;
     }
 
-    Mid::MBT position;
+    Sch::Tick position;
     position.mTick = mTick;
     position.Print(stream);
     stream << ' ' << kind << ' ' << static_cast<int>(mData1) << ' ' << static_cast<int>(mData2)

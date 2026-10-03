@@ -69,9 +69,9 @@ constexpr int kFirstExportBar = 1;
 // A display-mode configuration flag. When it is set, every track gets a JamPowerbarMgr.
 constexpr int kDisplayModeQuery = 0x3a1;
 
-// The clamp the inline Mid::MBT arithmetic applies to a computed position.
+// The clamp the inline Sch::Tick arithmetic applies to a computed position.
 inline int ClampPosition(int nTick) {
-    return std::min(std::max(nTick, kMBTMinimum), kMBTMaximum);
+    return std::min(std::max(nTick, kTickMinimum), kTickMaximum);
 }
 
 /**
@@ -249,8 +249,8 @@ void PhraseMgr::PostGemMsg(Message *pMsg) {
 
         for (int nBar = mWindowStart; nBar < mWindowEnd; ++nBar) {
             if (mMap->MapBar(nBar) == nStep) {
-                const Mid::MBT start(ClampPosition(mBarTicks * nBar));
-                GemMsg msg(Mid::MBT(ClampPosition(gem.mLoc.mTick + start.mTick)),
+                const Sch::Tick start(ClampPosition(mBarTicks * nBar));
+                GemMsg msg(Sch::Tick(ClampPosition(gem.mLoc.mTick + start.mTick)),
                            mTrack,
                            gem.mGem,
                            gem.mPlayer);
@@ -305,8 +305,8 @@ void PhraseMgr::AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner
         const std::vector<int> &bars = mMap->FindBarsPlaying(nStep, nBar, mWindowEnd);
         for (std::vector<int>::const_iterator it = bars.begin(); it != bars.end(); ++it) {
             const int nWindowBar = *it;
-            const Mid::MBT start(ClampPosition(mBarTicks * nWindowBar));
-            const Mid::MBT position(ClampPosition(nTick + start.mTick));
+            const Sch::Tick start(ClampPosition(mBarTicks * nWindowBar));
+            const Sch::Tick position(ClampPosition(nTick + start.mTick));
             if (nReplaced != kNoReplacedGem) {
                 {
                     ClearGemMsg clear(position, mTrack, nReplaced);
@@ -319,9 +319,9 @@ void PhraseMgr::AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner
                          other != gems.end();
                          ++other) {
                         if (other->mPosition.mTick == nTick && other->mValue != nGem) {
-                            const Mid::MBT otherStart(ClampPosition(mBarTicks * nWindowBar));
+                            const Sch::Tick otherStart(ClampPosition(mBarTicks * nWindowBar));
                             GemMsg ghost(
-                                Mid::MBT(ClampPosition(other->mPosition.mTick + otherStart.mTick)),
+                                Sch::Tick(ClampPosition(other->mPosition.mTick + otherStart.mTick)),
                                 mTrack,
                                 other->mValue,
                                 pOwner,
@@ -432,8 +432,8 @@ int PhraseMgr::PhrasesMatch(int nFirstBar, int nSecondBar) {
 // NTSC-U/C: 0x001bb798, PAL: 0x001c1570
 void PhraseMgr::ReplayBar(int nBar, int nOffset) {
     const int nNow = mClock->SongTick();
-    const Mid::MBT start(ClampPosition(nBar * Mid::MBT(kBarTicks).mTick));
-    const Mid::MBT elapsed(ClampPosition(nNow - start.mTick));
+    const Sch::Tick start(ClampPosition(nBar * Sch::Tick(kBarTicks).mTick));
+    const Sch::Tick elapsed(ClampPosition(nNow - start.mTick));
     mPhrasePlayer->PlayBarAt(nBar, nOffset, elapsed.mTick);
 }
 
@@ -443,7 +443,7 @@ void PhraseMgr::OnCommand(int nBar) {
 
     const int nNextBar = nBar + 1;
     Cmd *pCommand = new Cmd(this, nNextBar);
-    const Mid::MBT when(ClampPosition(mBarTicks * nNextBar));
+    const Sch::Tick when(ClampPosition(mBarTicks * nNextBar));
     mClock->PostAtSongTick(pCommand, when.mTick, mCommand);
     if (pCommand != nullptr) {
         pCommand->Release();
@@ -460,8 +460,8 @@ void PhraseMgr::OnExportCommand(int nBar) {
 
     const int nNextBar = nBar + 1;
     ExportCmd *pCommand = new ExportCmd(this, nNextBar);
-    const Mid::MBT start(ClampPosition(mBarTicks * nNextBar));
-    const Mid::MBT when(ClampPosition(start.mTick + mExportLead.mTick));
+    const Sch::Tick start(ClampPosition(mBarTicks * nNextBar));
+    const Sch::Tick when(ClampPosition(start.mTick + mExportLead.mTick));
     mClock->PostAtSongTick(pCommand, when.mTick, mExportCommand);
     if (pCommand != nullptr) {
         pCommand->Release();
@@ -471,7 +471,7 @@ void PhraseMgr::OnExportCommand(int nBar) {
 // NTSC-U/C: 0x001bb9f8, PAL: 0x001c17d0
 void PhraseMgr::PostBarStatusMsg(int nBar) {
     const int nStep = mMap->MapBar(nBar);
-    (void)Mid::MBT(ClampPosition(mBarTicks * nBar)); // Yes, the binary discards this position.
+    (void)Sch::Tick(ClampPosition(mBarTicks * nBar)); // Yes, the binary discards this position.
     const int nEnabled = mTrackData->QueryBar(nBar);
     (void)mTrackData->GetQuant(nBar); // Yes, the binary discards this result.
     const int nPowerup = nEnabled != 0 ? mPowerbarMgr->GetPowerbar(nStep) : kNoPowerbar;
@@ -542,7 +542,8 @@ void PhraseMgr::PostDurGemMsg(int nBar) {
         const std::vector<Phrase::Gem>::iterator next = it + 1;
         int bJoinedToNext = 0;
         if (next != pPhrase->mGems.end()) {
-            const Mid::MBT joinEnd(ClampPosition(it->mPosition.mTick + Mid::MBT(kJoinTicks).mTick));
+            const Sch::Tick joinEnd(
+                ClampPosition(it->mPosition.mTick + Sch::Tick(kJoinTicks).mTick));
             if (next->mPosition.mTick < joinEnd.mTick) {
                 bJoinedToNext = next->mTrans * it->mTrans < 0;
             }
@@ -550,27 +551,28 @@ void PhraseMgr::PostDurGemMsg(int nBar) {
 
         const int nStartTick = it->mPosition.mTick;
         const float flEndBlend = AxeOldGemMaker::BlendForStep(it->mTrans);
-        int nEndTick = Mid::MBT(ClampPosition(nStartTick + Mid::MBT(kSingleGemTicks).mTick)).mTick;
+        int nEndTick =
+            Sch::Tick(ClampPosition(nStartTick + Sch::Tick(kSingleGemTicks).mTick)).mTick;
         const float flStartBlend = bJoinedToPrevious != 0 ? flPreviousBlend : kRunStartBlend;
         if (bJoinedToNext != 0) {
             nEndTick = next->mPosition.mTick;
             (void)AxeOldGemMaker::BlendForStep(it->mTrans); // Yes, the binary discards this result.
         }
 
-        const Mid::MBT barStart(ClampPosition(mBarTicks * nBar));
+        const Sch::Tick barStart(ClampPosition(mBarTicks * nBar));
         if (it->mTrans != 0) {
             DurGemMsg msg;
             msg.mLane = mTrack;
-            msg.mStartFrame = Mid::MBT(ClampPosition(barStart.mTick + nStartTick)).mTick;
+            msg.mStartFrame = Sch::Tick(ClampPosition(barStart.mTick + nStartTick)).mTick;
             msg.mStartBlend = flStartBlend;
-            msg.mEndFrame = Mid::MBT(ClampPosition(barStart.mTick + nEndTick)).mTick;
+            msg.mEndFrame = Sch::Tick(ClampPosition(barStart.mTick + nEndTick)).mTick;
             msg.mEndBlend = flEndBlend;
             msg.mLive = 0;
             msg.mPlayer = pPhrase->mPlayer;
             Send(&msg);
         }
         if (bJoinedToPrevious == 0) {
-            GemMsg msg(Mid::MBT(ClampPosition(barStart.mTick + nStartTick)),
+            GemMsg msg(Sch::Tick(ClampPosition(barStart.mTick + nStartTick)),
                        mTrack,
                        kRunHeadGem,
                        pPhrase->mPlayer);
@@ -592,8 +594,8 @@ void PhraseMgr::PostGemMsgSecond(int nBar) {
     for (std::vector<Phrase::Gem>::const_iterator gem = pPhrase->mGems.begin();
          gem != pPhrase->mGems.end();
          ++gem) {
-        const Mid::MBT start(ClampPosition(mBarTicks * nBar));
-        GemMsg msg(Mid::MBT(ClampPosition(start.mTick + gem->mPosition.mTick)),
+        const Sch::Tick start(ClampPosition(mBarTicks * nBar));
+        GemMsg msg(Sch::Tick(ClampPosition(start.mTick + gem->mPosition.mTick)),
                    mTrack,
                    gem->mGem,
                    pPhrase->mPlayer);
@@ -617,8 +619,8 @@ void PhraseMgr::PostGemMsgThird(int nBar, int bGhost) {
 
     const std::vector<TickObj<int> > &gems = *mTrackData->GetGems(nBar);
     for (std::vector<TickObj<int> >::const_iterator gem = gems.begin(); gem != gems.end(); ++gem) {
-        const Mid::MBT start(ClampPosition(mBarTicks * nBar));
-        GemMsg msg(Mid::MBT(ClampPosition(gem->mPosition.mTick + start.mTick)),
+        const Sch::Tick start(ClampPosition(mBarTicks * nBar));
+        GemMsg msg(Sch::Tick(ClampPosition(gem->mPosition.mTick + start.mTick)),
                    mTrack,
                    gem->mValue,
                    pPlayer,
@@ -644,15 +646,15 @@ void PhraseMgr::PostPhraseMsg(int nPhrase) {
 // NTSC-U/C: 0x001bc588, PAL: 0x001c2360
 void PhraseMgr::StartCommands() {
     Cmd *pCommand = new Cmd(this, kFirstBar);
-    const Mid::MBT when(ClampPosition(mBarTicks * kFirstBar));
+    const Sch::Tick when(ClampPosition(mBarTicks * kFirstBar));
     mClock->PostAtSongTick(pCommand, when.mTick, mCommand);
     if (pCommand != nullptr) {
         pCommand->Release();
     }
 
     ExportCmd *pExportCommand = new ExportCmd(this, kFirstExportBar);
-    const Mid::MBT start(ClampPosition(mBarTicks * kFirstExportBar));
-    const Mid::MBT exportWhen(ClampPosition(start.mTick + mExportLead.mTick));
+    const Sch::Tick start(ClampPosition(mBarTicks * kFirstExportBar));
+    const Sch::Tick exportWhen(ClampPosition(start.mTick + mExportLead.mTick));
     mClock->PostAtSongTick(pExportCommand, exportWhen.mTick, mExportCommand);
     if (pExportCommand != nullptr) {
         pExportCommand->Release();
@@ -680,13 +682,13 @@ void PhraseMgr::DispatchPriv(Message *pMsg) {
 // NTSC-U/C: 0x001bf6c0, PAL: 0x001c54e0
 int PhraseMgr::TickToBar(int nTick) {
     const int nBar = nTick / mBarTicks;
-    (void)Mid::MBT(ClampPosition(mBarTicks * nBar)); // Yes, the binary discards this position.
+    (void)Sch::Tick(ClampPosition(mBarTicks * nBar)); // Yes, the binary discards this position.
     return nBar;
 }
 
 // NTSC-U/C: 0x001bf738, PAL: 0x001c5558
 int PhraseMgr::BarToTick(int nBar) {
-    return Mid::MBT(ClampPosition(mBarTicks * nBar)).mTick;
+    return Sch::Tick(ClampPosition(mBarTicks * nBar)).mTick;
 }
 
 // NTSC-U/C: 0x001c0010, PAL: 0x001c5e40

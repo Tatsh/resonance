@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 /**
@@ -20,7 +20,7 @@
 class ClearGemMsg : public Message {
 public:
     /**
-     * Construct a message with the position at kMBTInfinity and the rest unset.
+     * Construct a message with the position at kTickInfinity and the rest unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.
@@ -32,13 +32,13 @@ public:
      * Clear one gem.
      *
      * Inline, with no address of its own. PhraseMgr::AddGem() expands it on its stack at
-     * `0x001bad0c` with an IsFiniteMBT-checked position and the manager's track.
+     * `0x001bad0c` with a Sch::Tick::IsInRange-checked position and the manager's track.
      *
      * @param position The song position of the gem.
      * @param nTrack The track.
      * @param nGem The gem.
      */
-    ClearGemMsg(Mid::MBT position, int nTrack, int nGem)
+    ClearGemMsg(Sch::Tick position, int nTrack, int nGem)
         : mPosition(position), mTrack(nTrack), mGem(nGem) {
     }
 
@@ -80,9 +80,9 @@ public:
      */
     virtual const char *GetName() const;
 
-    Mid::MBT mPosition; /*!< The song position of the gem to clear. +0x04 */
-    int mTrack;         /*!< The track. +0x08 */
-    int mGem;           /*!< The gem. +0x0c */
+    Sch::Tick mPosition; /*!< The song position of the gem to clear. +0x04 */
+    int mTrack;          /*!< The track. +0x08 */
+    int mGem;            /*!< The gem. +0x0c */
 };
 
 /**

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 /**
@@ -14,7 +14,7 @@
  * Overlay::OnAdvanceSectionToggle() at `0x0041f440` reads it directly with no accessor in the
  * image, showing `ADVANCE TO NEXT SECTION` when it is non-zero and `REPEAT SECTION` otherwise. The
  * position at `+0x08` is the section tick Gamer's build at `0x00111754` clamps and passes through
- * the Mid::MBT constructor.
+ * the Sch::Tick constructor.
  *
  * The destructor at `0x00115ee0` is compiler-generated and has no declaration here. The routine
  * at `0x00115f18` is a further emission of the type-information accessor.
@@ -36,9 +36,9 @@ public:
      * Inline, with no address of its own. Gamer's build at `0x00111754` expands it on its stack.
      *
      * @param nAdvance Non-zero to advance past the section, zero to repeat it.
-     * @param position The section's position, already clamped to Mid::MBT's bounds.
+     * @param position The section's position, already clamped to Sch::Tick's bounds.
      */
-    AdvanceSectionToggleMsg(int nAdvance, Mid::MBT position)
+    AdvanceSectionToggleMsg(int nAdvance, Sch::Tick position)
         : mAdvance(nAdvance), mPosition(position) {
     }
 
@@ -83,7 +83,7 @@ public:
     int mAdvance; /*!< Non-zero to advance past the section, zero to repeat it. +0x04 */
 
 private:
-    Mid::MBT mPosition; // +0x08
+    Sch::Tick mPosition; // +0x08
 };
 
 /**

@@ -23,14 +23,14 @@ constexpr int kNoTimeElapsed = 0;
 // MultiMuse::Add() tries appending before searching.
 constexpr int kCheckLast = 1;
 
-// A computed position, clamped to the finite range as the inline Mid::MBT arithmetic does.
-inline Mid::MBT MakePosition(int nTick) {
-    return Mid::MBT(std::min(std::max(nTick, kMBTMinimum), kMBTMaximum));
+// A computed position, clamped to the finite range as the inline Sch::Tick arithmetic does.
+inline Sch::Tick MakePosition(int nTick) {
+    return Sch::Tick(std::min(std::max(nTick, kTickMinimum), kTickMaximum));
 }
 
 // A position taken over from a caller's plain tick, without the finiteness check.
-inline Mid::MBT RawPosition(int nTick) {
-    Mid::MBT position;
+inline Sch::Tick RawPosition(int nTick) {
+    Sch::Tick position;
     position.mTick = nTick;
     return position;
 }
@@ -77,10 +77,10 @@ void PhrasePlayer::PlayBar(int nBar) {
         break;
     case kTrackModeRiff:
     case kTrackModeScratch:
-        PlayPhraseGems(pPhrase, nBar, Mid::MBT(kFromBarStart), Mid::MBT(kNoTimeElapsed));
+        PlayPhraseGems(pPhrase, nBar, Sch::Tick(kFromBarStart), Sch::Tick(kNoTimeElapsed));
         break;
     case kTrackModeCatch:
-        PlayBarGems(pPhrase, nBar, Mid::MBT(kFromBarStart), Mid::MBT(kNoTimeElapsed));
+        PlayBarGems(pPhrase, nBar, Sch::Tick(kFromBarStart), Sch::Tick(kNoTimeElapsed));
         break;
     default:
         break;
@@ -88,7 +88,7 @@ void PhrasePlayer::PlayBar(int nBar) {
 }
 
 // NTSC-U/C: 0x001c1978, PAL: 0x001c77c0
-void PhrasePlayer::PlayBarGems(Phrase *pPhrase, int nBar, Mid::MBT from, Mid::MBT elapsed) {
+void PhrasePlayer::PlayBarGems(Phrase *pPhrase, int nBar, Sch::Tick from, Sch::Tick elapsed) {
     if (pPhrase->mPlayer->IsNull()) {
         return;
     }
@@ -110,7 +110,7 @@ void PhrasePlayer::PlayBarGems(Phrase *pPhrase, int nBar, Mid::MBT from, Mid::MB
 }
 
 // NTSC-U/C: 0x001c1ba8, PAL: 0x001c79f0
-void PhrasePlayer::PlayPhraseGems(Phrase *pPhrase, int nBar, Mid::MBT from, Mid::MBT elapsed) {
+void PhrasePlayer::PlayPhraseGems(Phrase *pPhrase, int nBar, Sch::Tick from, Sch::Tick elapsed) {
     MultiMuse *pMuse = new MultiMuse;
     for (std::vector<Phrase::Gem>::iterator it = pPhrase->mGems.begin(); it != pPhrase->mGems.end();
          ++it) {
@@ -126,7 +126,7 @@ void PhrasePlayer::PlayPhraseGems(Phrase *pPhrase, int nBar, Mid::MBT from, Mid:
             return;
         }
 
-        const Mid::MBT position = MakePosition(it->mPosition.mTick - elapsed.mTick);
+        const Sch::Tick position = MakePosition(it->mPosition.mTick - elapsed.mTick);
         if (it->mTrans != 0) {
             MultiMuse *pTransposed = CloneAndTranspose(*pRiff, it->mTrans);
             {

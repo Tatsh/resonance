@@ -32,9 +32,9 @@ constexpr float kSustainBlend = 0.5f;
 // AxeNewGemMaker's live note gems receive 1.
 constexpr int kRecordedGem = 0;
 
-// Saturates a tick to the finite range, as the inline Mid::MBT arithmetic does.
+// Saturates a tick to the finite range, as the inline Sch::Tick arithmetic does.
 inline int ClampTick(int nTick) {
-    return std::min(std::max(nTick, kMBTMinimum), kMBTMaximum);
+    return std::min(std::max(nTick, kTickMinimum), kTickMaximum);
 }
 
 } // namespace
@@ -46,19 +46,19 @@ AxeOldGemMaker::AxeOldGemMaker(const TrackData *pTrackData)
 
 // NTSC-U/C: 0x001a32f0, PAL: 0x001a9058
 void AxeOldGemMaker::PostDurGemMsg(NoteMsg *pMsg) {
-    const Mid::MBT offset(mPosition.mTick % Mid::MBT(kBarTicks).mTick);
+    const Sch::Tick offset(mPosition.mTick % Sch::Tick(kBarTicks).mTick);
     const float flBlend = BlendForAxis(mPhrase->GetValue(offset.mTick));
 
-    Mid::MBT length(ClampTick(pMsg->mLength.mTick - Mid::MBT(kGemTrimTicks).mTick));
-    if (length.mTick < Mid::MBT(kGemTrimTicks).mTick) {
-        length = Mid::MBT(kGemTrimTicks);
+    Sch::Tick length(ClampTick(pMsg->mLength.mTick - Sch::Tick(kGemTrimTicks).mTick));
+    if (length.mTick < Sch::Tick(kGemTrimTicks).mTick) {
+        length = Sch::Tick(kGemTrimTicks);
     }
 
     DurGemMsg gem;
     gem.mLane = mTrack;
     gem.mStartFrame = mPosition.mTick;
     gem.mStartBlend = flBlend;
-    gem.mEndFrame = Mid::MBT(ClampTick(mPosition.mTick + length.mTick)).mTick;
+    gem.mEndFrame = Sch::Tick(ClampTick(mPosition.mTick + length.mTick)).mTick;
     gem.mEndBlend = flBlend;
     gem.mLive = kRecordedGem;
     gem.mPlayer = mPhrase->mPlayer;
@@ -72,10 +72,10 @@ void AxeOldGemMaker::OnStdMidi(StdMidiMsg *pMsg) {
         return;
     }
 
-    if (pMsg->mData2 == 0 && mSustainStart.mTick == Mid::MBT(0).mTick) {
+    if (pMsg->mData2 == 0 && mSustainStart.mTick == Sch::Tick(0).mTick) {
         mSustainStart = mPosition;
     }
-    if (pMsg->mData2 == 0 || mSustainStart.mTick == Mid::MBT(0).mTick) {
+    if (pMsg->mData2 == 0 || mSustainStart.mTick == Sch::Tick(0).mTick) {
         return;
     }
 
@@ -88,13 +88,13 @@ void AxeOldGemMaker::OnStdMidi(StdMidiMsg *pMsg) {
     gem.mLive = kRecordedGem;
     gem.mPlayer = mPhrase->mPlayer;
     Send(&gem);
-    mSustainStart = Mid::MBT(0);
+    mSustainStart = Sch::Tick(0);
 }
 
 // NTSC-U/C: 0x001a3600, PAL: 0x001a9368
 void AxeOldGemMaker::OnPhrase(PhraseMsg *pMsg) {
     mPhrase = pMsg->mPhrase;
-    mPosition = Mid::MBT(ClampTick(pMsg->mBar * Mid::MBT(kBarTicks).mTick));
+    mPosition = Sch::Tick(ClampTick(pMsg->mBar * Sch::Tick(kBarTicks).mTick));
 
     MultiMuse *pMuse = mPhrase->mMuse;
     if (pMuse != nullptr) {

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/stdmidimsg.h"
 #include "sch/command.h"
 
@@ -24,9 +24,9 @@ constexpr unsigned char kNoteOffStatus = 0x80;
 constexpr unsigned char kNoteOnStatus = 0x90;
 constexpr unsigned char kReleaseVelocity = 0;
 
-// The clamp the inline Mid::MBT arithmetic applies to a computed position.
+// The clamp the inline Sch::Tick arithmetic applies to a computed position.
 inline int ClampPosition(int nTick) {
-    return std::min(std::max(nTick, kMBTMinimum), kMBTMaximum);
+    return std::min(std::max(nTick, kTickMinimum), kTickMaximum);
 }
 
 /**
@@ -80,9 +80,9 @@ NotePlayer::NotePlayer(unsigned char nNote,
     : mNote(nNote), mVelocity(nVelocity), mChannel(nChannel & kChannelMask), mDuration(nDuration),
       mSink(nullptr), mParent(pParent), mClock(pClock) {
     mCommand.mValue = kUnallocatedCommand;
-    mDuration = ClampPosition(mDuration - Mid::MBT(kReleaseTicks).mTick);
-    if (mDuration < Mid::MBT(kMinimumDuration).mTick) {
-        mDuration = Mid::MBT(kMinimumDuration).mTick;
+    mDuration = ClampPosition(mDuration - Sch::Tick(kReleaseTicks).mTick);
+    if (mDuration < Sch::Tick(kMinimumDuration).mTick) {
+        mDuration = Sch::Tick(kMinimumDuration).mTick;
     }
 }
 
@@ -98,8 +98,8 @@ void NotePlayer::Start(MsgSink *pSink) {
     mParent->RetainOnly(this);
     NoteOn(nNow);
 
-    Cmd *pCommand = new Cmd(this, Mid::MBT(ClampPosition(nNow + mDuration)).mTick);
-    const Mid::MBT end(ClampPosition(nNow + mDuration));
+    Cmd *pCommand = new Cmd(this, Sch::Tick(ClampPosition(nNow + mDuration)).mTick);
+    const Sch::Tick end(ClampPosition(nNow + mDuration));
     mClock->PostAtSongTick(pCommand, end.mTick, mCommand);
     if (pCommand != nullptr) {
         pCommand->Release();

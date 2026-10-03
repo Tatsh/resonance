@@ -6,7 +6,7 @@
 #include "game/leveldata.h"
 #include "game/notefinder.h"
 #include "game/trackdata.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "mid/tickobj.h"
 #include "msg/musemsg.h"
 
@@ -47,8 +47,8 @@ int LocalJamEnableMgr::QueryBar(int nTrack, int nBar) {
 
     NoteFinder finder;
     if (nBar > 0) {
-        finder.Search(pTrack->GetMidi(nBar - 1), Mid::MBT(kTicksPerBar));
+        finder.Search(pTrack->GetMidi(nBar - 1), Sch::Tick(kTicksPerBar));
     }
-    finder.Search(pTrack->GetMidi(nBar), Mid::MBT(0));
+    finder.Search(pTrack->GetMidi(nBar), Sch::Tick(0));
     return finder.mFound;
 }

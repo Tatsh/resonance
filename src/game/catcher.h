@@ -5,14 +5,13 @@
 #include "game/quantizer.h"
 #include "game/trackdata.h"
 #include "gs/phrasemgr.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/autocatchmsg.h"
 #include "msg/invalidateseekermsg.h"
 #include "msg/message.h"
 #include "msg/pitchriffmsg.h"
 #include "msg/trackselectmsg.h"
 #include "sch/cmdid.h"
-#include "sch/tick.h"
 #include "sch/tickclock.h"
 
 /**
@@ -36,10 +35,6 @@
  * second marker records `PostGemCmd` in the same translation unit. Both are the commands Start()
  * schedules.
  *
- * The constructor stores only the low word of its Sch::Tick parameter, with `sw` rather than `sd`.
- * That is recorded here as measured rather than explained, and it belongs with the note in
- * `sch/tick.h` that two measurements of that type's member count disagree.
- *
  * DispatchPriv() dispatches a PitchRiffMsg to PostCatchMsg(), a TrackSelectMsg to
  * OnTrackSelect(), an AutoCatchMsg to OnAutoCatch(), and an InvalidateSeekerMsg to the inline
  * copy of OnInvalidateSeeker(). A CatchProgressPacket for this track stores its player, success
@@ -60,7 +55,7 @@ public:
      * @param pTrackData The track description.
      * @param pClock The clock the scheduled commands run on.
      * @param nSeekerBarCount The bars each seeker range spans. MultiCatcher passes 1.
-     * @param catchWindow The catch window. Only the low word is retained, as MIDI ticks.
+     * @param catchWindow The catch window, in MIDI ticks.
      * @ghidraAddress NTSC-U/C: 0x001aba30
      * @ghidraAddress PAL: 0x001b1798
      */
@@ -212,7 +207,7 @@ protected:
     // Sends a PhraseMuffedMsg for a bar once, recording the bar in mLastMuffedBar. The message
     // reports the phrase as tried when the bar is free and a gem of it was caught or missed.
     // NTSC-U/C: 0x001ad3b0, PAL: 0x001b3118
-    void PostPhraseMuffedMsg(int nBar, Mid::MBT position);
+    void PostPhraseMuffedMsg(int nBar, Sch::Tick position);
 
     // Scores a PitchRiffMsg for this track. A riff from another player queries that player's
     // slot 5 and plays SND_INACTIVE. A riff snapped into a bar that is not free plays SND_INACTIVE
@@ -296,30 +291,30 @@ protected:
     // NTSC-U/C: 0x001b1918, PAL: 0x001b76d8
     void SetPhraseOwners(int nFirstBar, int nEndBar, Player *pPlayer);
 
-    Quantizer *mQuantizer;        // +0x18
-    PhraseMgr *mPhraseMgr;        // +0x1c
-    const TrackData *mTrackData;  // +0x20
-    Player *mPlayer;              // +0x24, the file-scope NullPlayer until one is assigned
-    Sch::TickClock *mClock;       // +0x28
-    Sch::CmdID mPostGemCommand;   // +0x2c
-    Sch::CmdID mGemCommand;       // +0x30
-    Mid::MBT mTicksPerBar;        // +0x34, copied from the phrase manager and used as a divisor
-    int mSeekerBarCount;          // +0x38, the constructor's int parameter
-    int mCatchWindow;             // +0x3c, the low word of the constructor's Sch::Tick parameter
-    int mEnabled;                 // +0x40, always 1 and never read
-    Mid::MBT mLastCaughtPosition; // +0x44
-    Mid::MBT mLastMissedPosition; // +0x48
-    int mTrack;                   // +0x4c, copied from TrackData::mIndex
-    int mCaughtGems;              // +0x50, gems caught in the current bar
-    int mMissedGems;              // +0x54, gems missed in the current bar
-    int mMuffedGems;              // +0x58, gems passed without a riff in the current bar
-    int mLastEndedBar;            // +0x5c, the bar EndBar() closed last
-    int mPhraseRunBars;           // +0x60, the caught bars of the current run
-    int mLastMuffedBar;           // +0x64, the bar PostPhraseMuffedMsg() reported last, starts -1
-    int mSeekerFirstBar;          // +0x68
-    int mSeekerEndBar;            // +0x6c
-    int mSeekerEnabled;           // +0x70
-    Player *mRemotePlayer;        // +0x74, from a CatchProgressPacket
-    float mRemoteSuccess;         // +0x78, the packet's success rate
-    Mid::MBT mRemotePosition;     // +0x7c, the packet's position
+    Quantizer *mQuantizer;         // +0x18
+    PhraseMgr *mPhraseMgr;         // +0x1c
+    const TrackData *mTrackData;   // +0x20
+    Player *mPlayer;               // +0x24, the file-scope NullPlayer until one is assigned
+    Sch::TickClock *mClock;        // +0x28
+    Sch::CmdID mPostGemCommand;    // +0x2c
+    Sch::CmdID mGemCommand;        // +0x30
+    Sch::Tick mTicksPerBar;        // +0x34, copied from the phrase manager and used as a divisor
+    int mSeekerBarCount;           // +0x38, the constructor's int parameter
+    int mCatchWindow;              // +0x3c, the constructor's catch window
+    int mEnabled;                  // +0x40, always 1 and never read
+    Sch::Tick mLastCaughtPosition; // +0x44
+    Sch::Tick mLastMissedPosition; // +0x48
+    int mTrack;                    // +0x4c, copied from TrackData::mIndex
+    int mCaughtGems;               // +0x50, gems caught in the current bar
+    int mMissedGems;               // +0x54, gems missed in the current bar
+    int mMuffedGems;               // +0x58, gems passed without a riff in the current bar
+    int mLastEndedBar;             // +0x5c, the bar EndBar() closed last
+    int mPhraseRunBars;            // +0x60, the caught bars of the current run
+    int mLastMuffedBar;            // +0x64, the bar PostPhraseMuffedMsg() reported last, starts -1
+    int mSeekerFirstBar;           // +0x68
+    int mSeekerEndBar;             // +0x6c
+    int mSeekerEnabled;            // +0x70
+    Player *mRemotePlayer;         // +0x74, from a CatchProgressPacket
+    float mRemoteSuccess;          // +0x78, the packet's success rate
+    Sch::Tick mRemotePosition;     // +0x7c, the packet's position
 };

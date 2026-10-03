@@ -65,7 +65,7 @@ public:
      * Send the collected state to a sink.
      *
      * Sends a controller change for every collected controller in order, then the program change,
-     * then the pitch bend, each only when collected, all on the recorded channel at kMBTInfinity.
+     * then the pitch bend, each only when collected, all on the recorded channel at kTickInfinity.
      * The title is inferred.
      *
      * @param pSink The sink.

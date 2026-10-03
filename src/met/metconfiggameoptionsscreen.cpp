@@ -13,7 +13,7 @@
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
 #include "met/metstrings.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "os/hxstr.h"
 #include "rnd/button.h"
 #include "rnd/manager.h"
@@ -262,6 +262,6 @@ void MetConfigGameOptionsScreen::ApplyOptions() {
     GrooveWorld *pWorld = Application::shared()->GetWorld();
     if (pWorld != nullptr) {
         pWorld->mForceFeedback->SetEnabled(mOptions.mForceFeedback);
-        pWorld->mForceFeedback->StartMetronome(Mid::MBT(0));
+        pWorld->mForceFeedback->StartMetronome(Sch::Tick(0));
     }
 }

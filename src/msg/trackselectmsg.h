@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -17,7 +17,7 @@ class Player;
  * The payload layout comes from the run of field copies in Clone(). Every member is public, and
  * each member's documentation identifies the reader outside the class that accesses it directly.
  *
- * PrintExtra() hands mPosition to Mid::MBT::Print(), and New() initialises it to kMBTInfinity.
+ * PrintExtra() hands mPosition to Sch::Tick::Print(), and New() initialises it to kTickInfinity.
  *
  * The destructor at `0x003dc840` is compiler-generated and has no declaration here.
  */
@@ -95,7 +95,7 @@ public:
      * Catcher::OnTrackSelect() at `0x001ac550` reads it directly with no accessor in the image,
      * dividing its tick by the catcher's ticks per bar to find the selected bar.
      */
-    Mid::MBT mPosition;
+    Sch::Tick mPosition;
 
     /**
      * Player the message is addressed to.

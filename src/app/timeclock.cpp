@@ -62,7 +62,7 @@ void Sch::TimeClock::Resume() {
 
 // NTSC-U/C: 0x004a78b8, PAL: 0x004e59c8
 void Sch::TimeClock::Post(
-    Sch::Command *pCommand, Sch::Tick tick, CmdID &id, int bRecordable, int bDelta) {
+    Sch::Command *pCommand, Sch::Time tick, CmdID &id, int bRecordable, int bDelta) {
     Sch::TimedCommand *pTimed = new Sch::TimedCommand(pCommand, tick, bDelta);
     if (bDelta != 0) {
         mWatchdog->QueueDelta(pTimed, tick.mValue, id, bRecordable, kDefaultOrder);
@@ -74,14 +74,14 @@ void Sch::TimeClock::Post(
 }
 
 // NTSC-U/C: 0x004a60a0, PAL: 0x004e4140
-void Sch::TimeClock::PostIn(Sch::Command *pCommand, Sch::Tick tick, CmdID &id, int bRecordable) {
+void Sch::TimeClock::PostIn(Sch::Command *pCommand, Sch::Time tick, CmdID &id, int bRecordable) {
     Sch::TimedCommand *pTimed = new Sch::TimedCommand(pCommand, tick, kDeltaPost);
     mWatchdog->QueueDelta(pTimed, tick.mValue, id, bRecordable, kDefaultOrder);
     Attachment::ReleaseIfSet(pTimed);
 }
 
 // NTSC-U/C: 0x004a6178, PAL: 0x004e4218
-void Sch::TimeClock::PostIn(Sch::Command *pCommand, Sch::Tick tick) {
+void Sch::TimeClock::PostIn(Sch::Command *pCommand, Sch::Time tick) {
     CmdID id;
     id.mValue = kUnallocatedCommand;
     Sch::TimedCommand *pTimed = new Sch::TimedCommand(pCommand, tick, kDeltaPost);

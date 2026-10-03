@@ -4,7 +4,7 @@
 
 #include "game/axeoldgemmaker.h"
 #include "game/nullplayer.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/axisfxmsg.h"
 #include "msg/axisregistermsg.h"
 #include "msg/durgemmsg.h"
@@ -35,9 +35,9 @@ constexpr float kSustainBlend = 0.5f;
 constexpr int kStripOpen = 0;
 constexpr int kStripClose = 2;
 
-// Saturates a tick to the finite range, as the inline Mid::MBT arithmetic does.
+// Saturates a tick to the finite range, as the inline Sch::Tick arithmetic does.
 inline int ClampTick(int nTick) {
-    return std::min(std::max(nTick, kMBTMinimum), kMBTMaximum);
+    return std::min(std::max(nTick, kTickMinimum), kTickMaximum);
 }
 
 } // namespace
@@ -59,7 +59,7 @@ void AxeNewGemMaker::PostGemMessages(StdMidiMsg *pMsg) {
         gem.mLane = mTrack;
         gem.mStartFrame = nTick;
         gem.mStartBlend = flBlend;
-        gem.mEndFrame = Mid::MBT(ClampTick(nTick + Mid::MBT(kNoteGemTicks).mTick)).mTick;
+        gem.mEndFrame = Sch::Tick(ClampTick(nTick + Sch::Tick(kNoteGemTicks).mTick)).mTick;
         gem.mEndBlend = flBlend;
         gem.mLive = kLiveNoteGem;
         gem.mPlayer = mPlayer;

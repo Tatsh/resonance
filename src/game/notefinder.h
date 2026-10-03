@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "app/msgsink.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "mid/tickobj.h"
 #include "msg/musemsg.h"
 #include "msg/notemsg.h"
@@ -21,7 +21,7 @@ class Message;
  */
 class NoteFinder : public MsgSink {
 public:
-    /** Start with no note found and the position at kMBTInfinity. */
+    /** Start with no note found and the position at kTickInfinity. */
     NoteFinder() : mFound(0) {
     }
 
@@ -35,7 +35,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00105660
      * @ghidraAddress PAL: 0x00105660
      */
-    void Search(const std::vector<TickObj<MuseMsg *> > *pMidi, Mid::MBT tick) {
+    void Search(const std::vector<TickObj<MuseMsg *> > *pMidi, Sch::Tick tick) {
         mTick = tick;
         for (std::vector<TickObj<MuseMsg *> >::const_iterator it = pMidi->begin();
              it != pMidi->end();
@@ -77,8 +77,8 @@ private:
         if (mTick.mTick < pNote->mTick) {
             bSounding = true;
         } else {
-            const Mid::MBT end(
-                std::min(std::max(pNote->mTick + pNote->mLength.mTick, kMBTMinimum), kMBTMaximum));
+            const Sch::Tick end(std::min(
+                std::max(pNote->mTick + pNote->mLength.mTick, kTickMinimum), kTickMaximum));
             if (mTick.mTick < end.mTick) {
                 bSounding = true;
             }
@@ -88,5 +88,5 @@ private:
         }
     }
 
-    Mid::MBT mTick;
+    Sch::Tick mTick;
 };

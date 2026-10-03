@@ -3,7 +3,7 @@
 #include "game/inputcheatdetectormet.h"
 #include "met/metnullrenderer.h"
 #include "met/metrenderer.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/metcontrollerreading.h"
 #include "msg/rawcontrollermsg.h"
 #include "script/configquery.h"
@@ -39,7 +39,7 @@ void MetaGameWorld::OnControllerReading(int nTag, int nPadIndex, int nButton, fl
 
     RawControllerMsg message;
     message.mReading = reading;
-    message.mPosition = Mid::MBT(0);
+    message.mPosition = Sch::Tick(0);
     mRenderer->Dispatch(&message);
 }
 

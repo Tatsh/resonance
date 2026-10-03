@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 #include "msg/metcontrollerreading.h"
 
@@ -14,7 +14,7 @@
  *
  * The payload is one controller reading at `+0x04` and a song position at `+0x14`. Clone() copies
  * the reading as two eight-byte pairs and the position as one word, PrintExtra() hands the reading
- * to MetControllerReading::Print(), and New() initialises only the position, to kMBTInfinity.
+ * to MetControllerReading::Print(), and New() initialises only the position, to kTickInfinity.
  * MetaGameWorld builds the message on its stack from the four arguments of its RawController
  * slot, and MetRenderer reads the reading in place. Both are outside the hierarchy, and the image
  * exposes no accessor, so both members are public.
@@ -80,5 +80,5 @@ public:
     virtual void PrintExtra(std::ostream &stream) const;
 
     MetControllerReading mReading; /*!< The reading. +0x04 */
-    Mid::MBT mPosition;            /*!< Song position, kMBTInfinity until set. +0x14 */
+    Sch::Tick mPosition;           /*!< Song position, kTickInfinity until set. +0x14 */
 };

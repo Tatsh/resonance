@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "gs/pitcher.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class AxisRegisterMsg;
@@ -183,8 +183,8 @@ private:
     // Starts at NullPlayer::sInstance. Matched against a PitchRiffMsg's `+0x08`, which
     // msg/pitchriffmsg.h types as an int.
     Player *mPlayer; // +0x5c
-    // The position of the last scratch, kMBTInfinity at first.
-    Mid::MBT mLastScratchPosition; // +0x60
+    // The position of the last scratch, kTickInfinity at first.
+    Sch::Tick mLastScratchPosition; // +0x60
     // The player of the last scratch, NullPlayer::sInstance at first.
     Player *mLastScratchPlayer; // +0x64
     // The gem of the last PitchRiffMsg. PostNowBarMsg() replays it.
@@ -195,7 +195,7 @@ private:
     // through the float fill instantiation at 0x001d1f90. The fill converts each with cvt.s.w.
     std::vector<float> mReadings; // +0x74
     int mNewestReading;     // +0x80, the newest slot of mReadings, not written by the constructor
-    Mid::MBT mLastGemEnd;   // +0x84, where the last scratch gem ends
+    Sch::Tick mLastGemEnd;  // +0x84, where the last scratch gem ends
     float mLastGemEndBlend; // +0x88, the blend the last scratch gem ends at
     int mLastStep;          // +0x8c, the step of the last scratch
 };

@@ -50,7 +50,7 @@ public:
      * Start the stage.
      *
      * Slot 2. The routine starts the base and then posts the producer's tick task with the
-     * position kMBTInfinity.
+     * position kTickInfinity.
      *
      * @ghidraAddress NTSC-U/C: 0x001da7f8
      * @ghidraAddress PAL: 0x001e0768

@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "game/harmony.h"
-#include "mid/mbt.h"
 #include "mid/receiver.h"
+#include "mid/tick.h"
 #include "os/hxstr.h"
 
 class Application;
@@ -63,7 +63,7 @@ enum LevelConverterTrackType {
  * paths, check the channel through CheckChannel(), and then forward to one of two sinks. With
  * mRiffTrack clear the event goes to LevelBuilder::AddEvent(). With it set the event goes to
  * Riff::AddMidiMsg() on mRiff instead, with the position rebased against mRiffStart and saturated
- * to Mid::MBT's bounds.
+ * to Sch::Tick's bounds.
  *
  * Every method name below that is not a Mid::Receiver override is inferred from its body.
  */
@@ -93,9 +93,9 @@ public:
      * riff for each in turn.
      */
     struct Span {
-        Mid::MBT mStart;  /*!< The gem's song position. */
-        int mGem;         /*!< The gem, 0 through 2, from a C, an E, or a G. */
-        Mid::MBT mLength; /*!< The note's duration, which becomes the riff's length. */
+        Sch::Tick mStart;  /*!< The gem's song position. */
+        int mGem;          /*!< The gem, 0 through 2, from a C, an E, or a G. */
+        Sch::Tick mLength; /*!< The note's duration, which becomes the riff's length. */
     };
 
     /**
@@ -235,8 +235,8 @@ public:
      * Parse a track name, and ignore every other text event.
      *
      * A type other than 3 and a position other than 0 are both ignored, and 3 is the MIDI
-     * track-name meta type. The discarded IsFiniteMBT(0) ahead of the test is the shape of an
-     * assertion compiled without its report.
+     * track-name meta type. The discarded Sch::Tick::IsInRange(0) ahead of the test is the shape of
+     * an assertion compiled without its report.
      *
      * @param nTick The event position, in MIDI ticks.
      * @param pText The text.
@@ -464,8 +464,8 @@ private:
     Riff *mRiff;            // +0x54
     int mRiffIndex;         // +0x58, the current riff's index in its riff set
     // The position riff events are rebased against. -1 at the start of each track.
-    Mid::MBT mRiffStart;                // +0x5c
-    Mid::MBT mRiffSetStart;             // +0x60
+    Sch::Tick mRiffStart;               // +0x5c
+    Sch::Tick mRiffSetStart;            // +0x60
     unsigned char mProgram;             // +0x64, the withheld program number, 0xff at track start
     int mProgramSent;                   // +0x68
     int mRiffOpened;                    // +0x6c, set when a riff opens
@@ -474,7 +474,7 @@ private:
     // hands to LevelBuilder::AddHarmony() (0x001e6a60, 0x001e7b04). The constructor, NewTrack(),
     // and 0x001e7ac0 call its implicit default constructor, emitted at 0x001ea1e8.
     Harmony mHarmony;        // +0x7c
-    Mid::MBT mHarmonyStart;  // +0x88, the position mHarmony starts at, -1 before the first note
+    Sch::Tick mHarmonyStart; // +0x88, the position mHarmony starts at, -1 before the first note
     int mHasTempo;           // +0x8c, cleared by Convert and set to 1 by Tempo
     int mIgnoreQuantization; // +0x90
     // The gem difficulty, from configuration code 0x38a on a catch track.

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 /**
@@ -28,14 +28,14 @@
 class MuseMsg : public Message {
 public:
     /**
-     * Start the song position at kMBTInfinity.
+     * Start the song position at kTickInfinity.
      *
      * No address attaches to the constructor on its own. Every construction in the image expands
      * it in place, storing `0x2aaaaaab` at `+0x04`: the New() factories of StdMidiMsg at
      * `0x003d6d40`, NoteMsg at `0x003d6d80`, and SustainNoteMsg at `0x003d6e50`, and the
      * StdMidiMsg Mixer builds on its stack at `0x001a7340`.
      */
-    MuseMsg() : mTick(kMBTInfinity) {
+    MuseMsg() : mTick(kTickInfinity) {
     }
 
     /**

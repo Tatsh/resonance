@@ -222,13 +222,13 @@ void InputMap::OnControllerReading(RawControllerMsg *pMsg) {
 }
 
 // NTSC-U/C: 0x0011da68, PAL: 0x0011dff0
-void InputMap::SendStopRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff) {
+void InputMap::SendStopRiff(Sch::Tick position, Player *pPlayer, int nTrack, int nRiff) {
     StopRiffMsg msg(nRiff, pPlayer, position, nTrack);
     Send(&msg);
 }
 
 // NTSC-U/C: 0x0011d9b0, PAL: 0x0011df38
-void InputMap::SendPitchRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff) {
+void InputMap::SendPitchRiff(Sch::Tick position, Player *pPlayer, int nTrack, int nRiff) {
     pPlayer->GetInputSlot(); // Yes, the binary discards this call's result.
     PitchRiffMsg msg(nRiff, pPlayer, position, nTrack);
     Send(&msg);

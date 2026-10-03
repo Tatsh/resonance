@@ -59,9 +59,9 @@ constexpr int kPowerupDone = 0;
 // The instance the commands run against, set by the constructor.
 ForceFeedbackMgr *g_pForceFeedbackMgr;
 
-// The clamp the inline Mid::MBT arithmetic applies to a computed position.
-inline Mid::MBT MakePosition(int nTick) {
-    return Mid::MBT(std::min(std::max(nTick, kMBTMinimum), kMBTMaximum));
+// The clamp the inline Sch::Tick arithmetic applies to a computed position.
+inline Sch::Tick MakePosition(int nTick) {
+    return Sch::Tick(std::min(std::max(nTick, kTickMinimum), kTickMaximum));
 }
 
 inline Sch::TickClock *SongClock() {
@@ -318,7 +318,7 @@ void ForceFeedbackMgr::LoadConfig() {
         values[1] = values[2];
     }
     mPulseLength.mValue = static_cast<long long>(values[1]) * kNanosecondsPerMillisecond;
-    mBeatPeriod = Mid::MBT(kBarTicks / values[2]);
+    mBeatPeriod = Sch::Tick(kBarTicks / values[2]);
 
     const int aEffectQueries[] = {1204, 1205, 1202, 1203, 1206};
     mEffects.resize(kEffectCount, Effect());
@@ -328,7 +328,7 @@ void ForceFeedbackMgr::LoadConfig() {
         Effect effect;
         effect.mSmallMotor = values[0];
         effect.mBigMotor = values[1];
-        effect.mPeriod = Mid::MBT(values[2]);
+        effect.mPeriod = Sch::Tick(values[2]);
         effect.mPulseCount = values[3];
         mEffects[i] = effect;
     }
@@ -336,13 +336,13 @@ void ForceFeedbackMgr::LoadConfig() {
 }
 
 // NTSC-U/C: 0x0016e1b8, PAL: 0x00170ac8
-void ForceFeedbackMgr::StartMetronome(const Mid::MBT &delay) {
+void ForceFeedbackMgr::StartMetronome(const Sch::Tick &delay) {
     mFlags &= ~kFlagStopped;
     if (mFlags != 0 && mFlags != kFlagPaused) {
         return;
     }
     StartMetronomeFBCmd *pCommand = new StartMetronomeFBCmd;
-    const Mid::MBT when = MakePosition(SongClock()->SongTick() + delay.mTick);
+    const Sch::Tick when = MakePosition(SongClock()->SongTick() + delay.mTick);
     PostAt(SongClock(), pCommand, when.mTick);
 }
 
@@ -380,7 +380,7 @@ void ForceFeedbackMgr::PulseBeat() {
 
     SteadyFBCmd *pNext = new SteadyFBCmd;
     Sch::TickClock *pClock = SongClock();
-    const Mid::MBT when = MakePosition(SongClock()->SongTick() + mBeatPeriod.mTick);
+    const Sch::Tick when = MakePosition(SongClock()->SongTick() + mBeatPeriod.mTick);
     PostAt(pClock, pNext, when.mTick);
 }
 
@@ -388,21 +388,21 @@ void ForceFeedbackMgr::PulseBeat() {
 void ForceFeedbackMgr::SyncMetronome() {
     Sch::TempoMap *pTempo = SongClock()->mTempoMap;
     const int nNow = SongClock()->SongTick();
-    Mid::MBT toBeat(kBeatTicks - (nNow % kBeatTicks));
+    Sch::Tick toBeat(kBeatTicks - (nNow % kBeatTicks));
 
     const int nPulseMs =
         static_cast<int>((mPulseLength.mValue + kHalfMillisecondNs) / kNanosecondsPerMillisecond);
     const int nLeadNs = (nPulseMs / 2) + kMotorLeadNs;
-    const Mid::MBT lead(
+    const Sch::Tick lead(
         static_cast<int>((nLeadNs + pTempo->mCeilingBias) / pTempo->mNanosecondsPerTick));
     if (toBeat.mTick < lead.mTick) {
-        toBeat = MakePosition(toBeat.mTick + Mid::MBT(kBeatTicks).mTick);
+        toBeat = MakePosition(toBeat.mTick + Sch::Tick(kBeatTicks).mTick);
     }
 
     SteadyFBCmd *pCommand = new SteadyFBCmd;
     Sch::TickClock *pClock = SongClock();
-    const Mid::MBT beat = MakePosition(nNow + toBeat.mTick);
-    const Mid::MBT when = MakePosition(beat.mTick - lead.mTick);
+    const Sch::Tick beat = MakePosition(nNow + toBeat.mTick);
+    const Sch::Tick when = MakePosition(beat.mTick - lead.mTick);
     PostAt(pClock, pCommand, when.mTick);
 }
 
@@ -419,21 +419,21 @@ void ForceFeedbackMgr::PlayEffect(int nPlayerSlot, int nEffect) {
         SetBothMotorsCmd *pOn =
             new SetBothMotorsCmd(nPlayerSlot, effect.mSmallMotor, effect.mBigMotor);
         Sch::TickClock *pClock = SongClock();
-        const Mid::MBT spacing = MakePosition(effect.mPeriod.mTick * 2);
-        const Mid::MBT offset = MakePosition(spacing.mTick * i);
-        const Mid::MBT onWhen = MakePosition(nNow + offset.mTick);
+        const Sch::Tick spacing = MakePosition(effect.mPeriod.mTick * 2);
+        const Sch::Tick offset = MakePosition(spacing.mTick * i);
+        const Sch::Tick onWhen = MakePosition(nNow + offset.mTick);
         PostAt(pClock, pOn, onWhen.mTick);
 
         SetBothMotorsCmd *pOff = new SetBothMotorsCmd(nPlayerSlot, kMotorOff, kMotorOff);
         pClock = SongClock();
         // Every off command lands one period after the start. That is what the binary computes.
-        const Mid::MBT offWhen = MakePosition(nNow + mEffects[nEffect].mPeriod.mTick);
+        const Sch::Tick offWhen = MakePosition(nNow + mEffects[nEffect].mPeriod.mTick);
         PostAt(pClock, pOff, offWhen.mTick);
     }
 
     SetPowerupFBCmd *pDone = new SetPowerupFBCmd(nPlayerSlot, kPowerupDone);
     Sch::TickClock *pClock = SongClock();
-    const Mid::MBT doneWhen = MakePosition(nNow + mEffects[nEffect].mPeriod.mTick);
+    const Sch::Tick doneWhen = MakePosition(nNow + mEffects[nEffect].mPeriod.mTick);
     PostAt(pClock, pDone, doneWhen.mTick);
 }
 
@@ -501,7 +501,7 @@ void ForceFeedbackMgr::SetPowerup(unsigned int nPlayerSlot, int bPowerup) {
 }
 
 // NTSC-U/C: 0x001708d0, PAL: 0x001731e0
-void ForceFeedbackMgr::StopAll([[maybe_unused]] Mid::MBT when) {
+void ForceFeedbackMgr::StopAll([[maybe_unused]] Sch::Tick when) {
     for (unsigned int i = 0; i < mSlots.size(); ++i) {
         SetBothMotors(i, kMotorOff, kMotorOff);
     }

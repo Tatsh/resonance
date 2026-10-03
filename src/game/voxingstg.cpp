@@ -2,7 +2,7 @@
 
 #include "app/application.h"
 #include "game/gamemanagerimpl.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 
 // NTSC-U/C: 0x001da050, PAL: 0x001dffc0
 VoxingSTG::VoxingSTG(TrackData *pTrackData)
@@ -21,7 +21,7 @@ VoxingSTG::VoxingSTG(TrackData *pTrackData)
 // NTSC-U/C: 0x001da7f8, PAL: 0x001e0768
 void VoxingSTG::Start() {
     ScoreTrackGraph::Start();
-    mVoxer->Start(kMBTInfinity);
+    mVoxer->Start(kTickInfinity);
 }
 
 // NTSC-U/C: 0x001da830, PAL: 0x001e07a0

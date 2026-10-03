@@ -35,13 +35,13 @@ void CatchProgressPacket::PrintExtra(std::ostream &stream) const {
 }
 
 // NTSC-U/C: 0x003e7430, PAL: 0x0041f710
-// The stream Mid::MBT::Save() returns is not used.
+// The stream Sch::Tick::saveGuts() returns is not used.
 void CatchProgressPacket::saveGuts(OBStream &stream) const {
     Packet::saveGuts(stream);
 
     int id = mPlayer.mId;
     OBStream &rest = stream.WriteLE(&id, sizeof(id));
-    mPosition.Save(rest);
+    mPosition.saveGuts(rest);
 
     int track = mTrack;
     float succ = mSucc;
@@ -53,6 +53,6 @@ void CatchProgressPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
 
     IBStream &rest = stream.ReadLE(&mPlayer.mId, sizeof(mPlayer.mId));
-    mPosition.Load(rest);
+    mPosition.restoreGuts(rest);
     rest.ReadLE(&mTrack, sizeof(mTrack)).ReadLE(&mSucc, sizeof(mSucc));
 }

@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 /**
@@ -13,7 +13,7 @@
  * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). New() initialises `+0x04` to
- * kMBTInfinity, the one store it makes, which marks that word as a position. PrintExtra() writes
+ * kTickInfinity, the one store it makes, which marks that word as a position. PrintExtra() writes
  * only the word at `+0x0c`. Readers of the fields have not been traced, so they are private by
  * default.
  *
@@ -72,9 +72,9 @@ public:
 private:
     // The controller and value titles are inferred from the class name, a MIDI continuous
     // controller change, whose value is the word PrintExtra() writes.
-    Mid::MBT mPosition; // +0x04
-    int mController;    // +0x08
-    int mValue;         // +0x0c
+    Sch::Tick mPosition; // +0x04
+    int mController;     // +0x08
+    int mValue;          // +0x0c
 };
 
 /**

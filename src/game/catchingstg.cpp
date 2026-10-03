@@ -4,7 +4,7 @@
 #include "game/gamemanagerimpl.h"
 #include "game/multicatcher.h"
 #include "game/singlecatcher.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "sch/tempomap.h"
 #include "script/configquery.h"
 
@@ -28,25 +28,18 @@ CatchingSTG::CatchingSTG(TrackData *pTrackData)
     const long long nWindowNs =
         QueryConfigValue(kCatchWindowConfigCode) * kNanosecondsPerMillisecond;
     const Sch::TempoMap *pTempo = mApplication->GetSongClock()->mTempoMap;
-    const Mid::MBT window(
+    const Sch::Tick window(
         static_cast<int>((nWindowNs + pTempo->mCeilingBias) / pTempo->mNanosecondsPerTick));
 
-    // The window is in MIDI ticks, and the binary passes it sign-extended as the Sch::Tick count.
     if (mApplication->GetGameMode() == kGameModeSolo) {
-        mCatcher = new SingleCatcher(mPhraseMgr,
-                                     mQuantizer,
-                                     mTrackData,
-                                     mApplication->GetSongClock(),
-                                     Sch::Tick{window.mTick});
+        mCatcher = new SingleCatcher(
+            mPhraseMgr, mQuantizer, mTrackData, mApplication->GetSongClock(), window);
     } else {
-        mCatcher = new MultiCatcher(mPhraseMgr,
-                                    mQuantizer,
-                                    mTrackData,
-                                    mApplication->GetSongClock(),
-                                    Sch::Tick{window.mTick});
+        mCatcher = new MultiCatcher(
+            mPhraseMgr, mQuantizer, mTrackData, mApplication->GetSongClock(), window);
     }
 
-    mPhraseMgr->mExportLead = Mid::MBT((mTrack * kExportLeadStep) + kExportLeadStep);
+    mPhraseMgr->mExportLead = Sch::Tick((mTrack * kExportLeadStep) + kExportLeadStep);
 }
 
 // NTSC-U/C: 0x001a0450, PAL: 0x001a61b8

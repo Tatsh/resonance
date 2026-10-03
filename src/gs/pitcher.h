@@ -41,7 +41,7 @@ public:
      *
      * @param pClock The clock the task is posted against.
      */
-    explicit Pitcher(Sch::TickClock *pClock) : TickTask(pClock, Mid::MBT(kBarPeriod).mTick, 0) {
+    explicit Pitcher(Sch::TickClock *pClock) : TickTask(pClock, Sch::Tick(kBarPeriod).mTick, 0) {
     }
 
     /**

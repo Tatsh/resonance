@@ -6,7 +6,7 @@
 #include "game/localplayer.h"
 #include "game/playmap.h"
 #include "game/powerupcollectioni.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/displaypointermsg.h"
 
 namespace {
@@ -29,7 +29,7 @@ constexpr int kMaxCursorLead = 4;
 GamePowerupPlacer::GamePowerupPlacer(LocalPlayer *pOwner,
                                      Application *pApplication,
                                      PowerupCollectionI *pCollection)
-    : PowerupPlacer(), TickTask(pApplication->GetSongClock(), Mid::MBT(kTicksPerBeat).mTick, 0),
+    : PowerupPlacer(), TickTask(pApplication->GetSongClock(), Sch::Tick(kTicksPerBeat).mTick, 0),
       mOwner(pOwner), mApplication(pApplication), mCollection(pCollection), mCursorBar(kNoCursor) {
 }
 
@@ -45,7 +45,7 @@ void GamePowerupPlacer::MoveCursor(int nStep) {
         return;
     }
     const int nMove = -nStep;
-    const int nBar = mApplication->GetSongClock()->SongTick() / Mid::MBT(kTicksPerBar).mTick;
+    const int nBar = mApplication->GetSongClock()->SongTick() / Sch::Tick(kTicksPerBar).mTick;
     const int nPlayerValue = mOwner->GetTrack();
 
     if (mCursorBar == kNoCursor) {
@@ -104,9 +104,9 @@ void GamePowerupPlacer::DeployPowerup() {
 
 // NTSC-U/C: 0x001cd028, PAL: 0x001d2ee0
 int GamePowerupPlacer::Tick(int nElapsedTicks) {
-    const int nBeat = Mid::MBT(kTicksPerBeat).mTick;
-    const Mid::MBT tick(std::min(std::max(nElapsedTicks + nBeat, kMBTMinimum), kMBTMaximum));
-    const int nBar = tick.mTick / Mid::MBT(kTicksPerBar).mTick;
+    const int nBeat = Sch::Tick(kTicksPerBeat).mTick;
+    const Sch::Tick tick(std::min(std::max(nElapsedTicks + nBeat, kTickMinimum), kTickMaximum));
+    const int nBar = tick.mTick / Sch::Tick(kTicksPerBar).mTick;
     if (mCursorBar != -1 && mCursorBar < nBar) {
         mCursorBar = nBar;
         DisplayPointerMsg msg(mCursorBar, mOwner->GetTrack(), mOwner);
@@ -117,7 +117,7 @@ int GamePowerupPlacer::Tick(int nElapsedTicks) {
 
 // NTSC-U/C: 0x001cde18, PAL: 0x001d3cd0
 void GamePowerupPlacer::Activate() {
-    Start(kMBTInfinity);
+    Start(kTickInfinity);
 }
 
 // NTSC-U/C: 0x001cde40, PAL: 0x001d3cf8

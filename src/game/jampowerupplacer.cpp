@@ -2,7 +2,7 @@
 
 #include "app/application.h"
 #include "game/powerupcollectioni.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "sch/tickclock.h"
 
 namespace {
@@ -25,6 +25,6 @@ JamPowerupPlacer::~JamPowerupPlacer() {
 // NTSC-U/C: 0x001cdfe0, PAL: 0x001d3e98
 void JamPowerupPlacer::DeployPowerup() {
     const int nBar =
-        Application::shared()->GetSongClock()->SongTick() / Mid::MBT(kTicksPerBar).mTick;
+        Application::shared()->GetSongClock()->SongTick() / Sch::Tick(kTicksPerBar).mTick;
     mCollection->Deploy(mOwner->GetTrack(), nBar);
 }

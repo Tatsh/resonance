@@ -6,7 +6,7 @@
 
 #include "app/playsound.h"
 #include "game/nullplayer.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/allnotesoffmsg.h"
 #include "msg/axebuttonmsg.h"
 #include "msg/gameovermsg.h"
@@ -30,9 +30,9 @@ constexpr int kNotHeld = 0;
 constexpr int kPressed = 1;
 constexpr int kReleased = 0;
 
-// The clamp the inline Mid::MBT arithmetic applies to a computed position.
+// The clamp the inline Sch::Tick arithmetic applies to a computed position.
 inline int ClampPosition(int nTick) {
-    return std::min(std::max(nTick, kMBTMinimum), kMBTMaximum);
+    return std::min(std::max(nTick, kTickMinimum), kTickMaximum);
 }
 
 /**
@@ -97,7 +97,7 @@ void AutoRiffer::OnPitchRiff(PitchRiffMsg *pMsg) {
     const int nTick = pMsg->mPosition.mTick;
     const int nQuantized = mQuantizer->Quantize(nTick);
     if (mPhraseMaker != nullptr &&
-        mPhraseMaker->IsBarPlayable(nQuantized / Mid::MBT(kBarTicks).mTick) != 1) {
+        mPhraseMaker->IsBarPlayable(nQuantized / Sch::Tick(kBarTicks).mTick) != 1) {
         PlaySoundByName("SND_INACTIVE");
         return;
     }
@@ -159,7 +159,7 @@ void AutoRiffer::OnErase(EraseMsg *pMsg) {
     if (pMsg->mPlayer != mPlayer) {
         return;
     }
-    if (!mPhraseMaker->IsBarPlayable(pMsg->mPosition.mTick / Mid::MBT(kBarTicks).mTick)) {
+    if (!mPhraseMaker->IsBarPlayable(pMsg->mPosition.mTick / Sch::Tick(kBarTicks).mTick)) {
         return;
     }
 
@@ -187,7 +187,7 @@ void AutoRiffer::StopRiff(int nTick) {
 
 // NTSC-U/C: 0x00199688, PAL: 0x0019f3f0
 void AutoRiffer::OnCommand(int nTick) {
-    if (mPhraseMaker->IsBarPlayable(nTick / Mid::MBT(kBarTicks).mTick) == 1) {
+    if (mPhraseMaker->IsBarPlayable(nTick / Sch::Tick(kBarTicks).mTick) == 1) {
         PlayRiff(nTick);
         return;
     }
@@ -203,7 +203,7 @@ void AutoRiffer::PlayRiff(int nTick) {
     MultiMuseMsg riffMsg(mCurrentRiff);
     mSource.Send(&riffMsg);
 
-    (void)Mid::MBT(0); // Yes, the binary discards this position.
+    (void)Sch::Tick(0); // Yes, the binary discards this position.
     int nEnd = static_cast<int>(Quantizer::Round(nTick, mCurrentRiff->mLength.mTick));
     if (!(nTick < nEnd)) {
         // The sum is clamped without the finiteness check.
@@ -245,7 +245,7 @@ void AutoRiffer::DispatchPriv(Message *pMsg) {
         return;
     }
     if (nType == g_nGameOverMsgType) {
-        StopRiff(Mid::MBT(0).mTick);
+        StopRiff(Sch::Tick(0).mTick);
     }
 }
 
@@ -272,5 +272,5 @@ void AutoRiffer::OnTrackSelect(TrackSelectMsg *pMsg) {
 
 // NTSC-U/C: 0x0019a920, PAL: 0x001a0688
 void AutoRiffer::OnGameOver() {
-    StopRiff(Mid::MBT(0).mTick);
+    StopRiff(Sch::Tick(0).mTick);
 }

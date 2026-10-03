@@ -95,7 +95,7 @@ public:
     /**
      * Schedule the task on the clock, on the PowerupPlacer side.
      *
-     * The routine starts the TickTask subobject with the epoch offset kMBTInfinity.
+     * The routine starts the TickTask subobject with the epoch offset kTickInfinity.
      *
      * @ghidraAddress NTSC-U/C: 0x001cde18
      * @ghidraAddress PAL: 0x001d3cd0
@@ -116,7 +116,7 @@ public:
     /**
      * Advance the cursor to the current bar and announce it.
      *
-     * Slot 4 of the TickTask table. The elapsed count arrives already saturated against Mid::MBT's
+     * Slot 4 of the TickTask table. The elapsed count arrives already saturated against Sch::Tick's
      * bounds, and this body adds 480 and saturates again before dividing by 1920, so the bar it
      * computes is half a beat ahead of the run now due. A cursor of -1 or a cursor already at or
      * past the computed bar produces no message. The return value is 1 on every path, so the task

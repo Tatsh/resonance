@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -18,7 +18,7 @@ class Player;
  * recovered. NetPlayer builds the message field by field on the stack, and TrackSelector reads
  * the fields back, so all four are public.
  *
- * The layout matches TrackSelectMsg's. PrintExtra() hands `+0x0c` to Mid::MBT::Print() and writes
+ * The layout matches TrackSelectMsg's. PrintExtra() hands `+0x0c` to Sch::Tick::Print() and writes
  * the colour name of the player at `+0x10`, which types both.
  *
  * The destructor at `0x003dca18` is compiler-generated and has no declaration here.
@@ -91,7 +91,7 @@ public:
      * The song position of the selection. NetPlayer's packet handler at `0x00122f78` writes it,
      * and TrackSelector::DispatchPriv() reads it. +0x0c
      */
-    Mid::MBT mPosition;
+    Sch::Tick mPosition;
 
     /**
      * The player that selected. NetPlayer's packet handler at `0x00122f78` writes it, and

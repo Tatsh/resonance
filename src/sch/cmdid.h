@@ -29,7 +29,7 @@ namespace Sch {
  * The one member is public, because the queueing paths assign it directly and the image exposes no
  * accessor.
  *
- * `Sch::Tick` is streamed and printed through the same three-function shape, at `0x006100a8`,
+ * `Sch::Time` is streamed and printed through the same three-function shape, at `0x006100a8`,
  * `0x00610118`, and `0x00610050`. The two types are unrelated beyond that shape.
  */
 class CmdID {

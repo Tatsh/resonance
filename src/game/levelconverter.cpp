@@ -11,8 +11,8 @@
 #include "game/playmap.h"
 #include "game/riff.h"
 #include "game/trackdata.h"
-#include "mid/mbt.h"
 #include "mid/reader.h"
+#include "mid/tick.h"
 #include "msg/sustainnotemsg.h"
 #include "os/hostmode.h"
 #include "script/configquery.h"
@@ -182,8 +182,8 @@ char g_szErrorLogPath[64];
 
 FILE *g_pErrorLog;
 
-Mid::MBT ClampMBT(int nTick) {
-    return Mid::MBT(std::min(std::max(nTick, kMBTMinimum), kMBTMaximum));
+Sch::Tick ClampTick(int nTick) {
+    return Sch::Tick(std::min(std::max(nTick, kTickMinimum), kTickMaximum));
 }
 
 } // namespace
@@ -229,7 +229,7 @@ void LevelConverter::Tempo(int nTick, int nMicrosecondsPerQuarter) {
 
 // NTSC-U/C: 0x001ea5a0, PAL: 0x001f0810
 void LevelConverter::TextEvent(int nTick, const char *pText, unsigned char nType) {
-    if (nTick == Mid::MBT(0).mTick && nType == kTrackNameMetaType) {
+    if (nTick == Sch::Tick(0).mTick && nType == kTrackNameMetaType) {
         ParseTrackTypeString(pText);
     }
 }
@@ -292,12 +292,12 @@ void LevelConverter::NewTrack(unsigned char nTrack) {
     mChannel = kNoChannel;
     mRiff = nullptr;
     mRiffIndex = 0;
-    mRiffStart = Mid::MBT(kUnsetTick);
+    mRiffStart = Sch::Tick(kUnsetTick);
     mProgram = kNoProgram;
     mRiffOpened = 0;
     mHarmony = Harmony();
     mLastBankBar = kUnsetTick;
-    mHarmonyStart = Mid::MBT(kUnsetTick);
+    mHarmonyStart = Sch::Tick(kUnsetTick);
 }
 
 // NTSC-U/C: 0x001e6fc0, PAL: 0x001ed190
@@ -326,7 +326,7 @@ void LevelConverter::NoteOn(int nTick,
             return;
         }
         mRiff->AddMidiMsg(
-            ClampMBT(nTick - mRiffStart.mTick).mTick, kMidiNoteOn, nNote, nVelocity, nChannel);
+            ClampTick(nTick - mRiffStart.mTick).mTick, kMidiNoteOn, nNote, nVelocity, nChannel);
         return;
     }
     mBuilder->AddEvent(nTick, kMidiNoteOn, nNote, nVelocity, nChannel);
@@ -344,9 +344,9 @@ void LevelConverter::NoteOff(int nTick, unsigned char nNote, unsigned char nChan
             if (it->mNote != nNote) {
                 continue;
             }
-            const Mid::MBT start(it->mTick);
+            const Sch::Tick start(it->mTick);
             const unsigned char nVelocity = it->mVelocity;
-            const Mid::MBT duration = ClampMBT(nTick - Mid::MBT(it->mTick).mTick);
+            const Sch::Tick duration = ClampTick(nTick - Sch::Tick(it->mTick).mTick);
             AddNote(start.mTick, nNote, nVelocity, duration.mTick, nChannel);
             mPending.erase(it);
             bFound = 1;
@@ -364,7 +364,7 @@ void LevelConverter::NoteOff(int nTick, unsigned char nNote, unsigned char nChan
             return;
         }
         mRiff->AddMidiMsg(
-            ClampMBT(nTick - mRiffStart.mTick).mTick, kMidiNoteOff, nNote, 0, nChannel);
+            ClampTick(nTick - mRiffStart.mTick).mTick, kMidiNoteOff, nNote, 0, nChannel);
         return;
     }
     mBuilder->AddEvent(nTick, kMidiNoteOff, nNote, 0, nChannel);
@@ -426,11 +426,11 @@ void LevelConverter::Controller(int nTick,
 
     if (mRiffTrack) {
         SyncRiff(nTick);
-        if (mRiff == nullptr || ClampMBT(nTick - mRiffStart.mTick).mTick < 0) {
+        if (mRiff == nullptr || ClampTick(nTick - mRiffStart.mTick).mTick < 0) {
             ReportError(nTick, "No gem found for Control Change");
             return;
         }
-        mRiff->AddMidiMsg(ClampMBT(nTick - mRiffStart.mTick).mTick,
+        mRiff->AddMidiMsg(ClampTick(nTick - mRiffStart.mTick).mTick,
                           kMidiControlChange,
                           nController,
                           nValue,
@@ -471,7 +471,7 @@ void LevelConverter::PitchBend(int nTick,
             return;
         }
         mRiff->AddMidiMsg(
-            ClampMBT(nTick - mRiffStart.mTick).mTick, kMidiPitchBend, nLow, nHigh, nChannel);
+            ClampTick(nTick - mRiffStart.mTick).mTick, kMidiPitchBend, nLow, nHigh, nChannel);
         return;
     }
     mBuilder->AddEvent(nTick, kMidiPitchBend, nLow, nHigh, nChannel);
@@ -479,19 +479,19 @@ void LevelConverter::PitchBend(int nTick,
 
 // NTSC-U/C: 0x001e6a30, PAL: 0x001ecc00
 void LevelConverter::EndTrack() {
-    if (mHarmonyStart.mTick != Mid::MBT(kUnsetTick).mTick) {
+    if (mHarmonyStart.mTick != Sch::Tick(kUnsetTick).mTick) {
         mBuilder->AddHarmony(mHarmonyStart.mTick, mHarmony);
     }
     if (mRiffTrack && !mRiffOpened) {
-        mBuilder->SetActive(Mid::MBT(0).mTick, 0);
+        mBuilder->SetActive(Sch::Tick(0).mTick, 0);
     }
     if (mRiff != nullptr && mTrackType == kTrackTypeAxe &&
-        mRiff->mLength.mTick == Mid::MBT(0).mTick) {
-        ReportError(Mid::MBT(0).mTick, "Length must be set for axe riffs.");
+        mRiff->mLength.mTick == Sch::Tick(0).mTick) {
+        ReportError(Sch::Tick(0).mTick, "Length must be set for axe riffs.");
         return;
     }
     if (mPending.size() != 0) {
-        ReportError(Mid::MBT(0).mTick, "Some Note-Ons were not matched by Note-Offs");
+        ReportError(Sch::Tick(0).mTick, "Some Note-Ons were not matched by Note-Offs");
         return;
     }
     if (mRiffTrack) {
@@ -504,7 +504,7 @@ void LevelConverter::EndTrack() {
 // NTSC-U/C: 0x001e8318, PAL: 0x001ee4e8
 void LevelConverter::ParseTrackTypeString(const char *pText) {
     if (mTrackType != kTrackTypeUnknown) {
-        ReportError(Mid::MBT(0).mTick, "Track Type can only be set once");
+        ReportError(Sch::Tick(0).mTick, "Track Type can only be set once");
         return;
     }
     const unsigned char nTrackCount = mBuilder->TrackCount();
@@ -523,7 +523,7 @@ void LevelConverter::ParseTrackTypeString(const char *pText) {
     } else if (name[0] == kScoreTrackPrefix) {
         const int nScoreTrack = atoi(pText + 1);
         if (nScoreTrack <= 0 || nTrackCount < nScoreTrack) {
-            ReportError(Mid::MBT(0).mTick, "Track number invalid or out or range.");
+            ReportError(Sch::Tick(0).mTick, "Track number invalid or out or range.");
             return;
         }
         mScoreTrack = nScoreTrack - 1;
@@ -572,13 +572,13 @@ void LevelConverter::ParseTrackTypeString(const char *pText) {
                 break;
             default:
                 mTrackType = kTrackTypeUnknown;
-                ReportError(Mid::MBT(0).mTick, "Unrecognized instrument letter-code.");
+                ReportError(Sch::Tick(0).mTick, "Unrecognized instrument letter-code.");
                 break;
             }
         }
     } else {
         mTrackType = kTrackTypeUnknown;
-        ReportError(Mid::MBT(0).mTick, "Unrecognized Track Type");
+        ReportError(Sch::Tick(0).mTick, "Unrecognized Track Type");
     }
     ApplyTrackType();
 }
@@ -586,7 +586,7 @@ void LevelConverter::ParseTrackTypeString(const char *pText) {
 // NTSC-U/C: 0x001e7ac0, PAL: 0x001edc90
 void LevelConverter::AddHarmonyNote(int nTick, unsigned char nNote) {
     if (mHarmonyStart.mTick != nTick) {
-        if (mHarmonyStart.mTick != Mid::MBT(kUnsetTick).mTick) {
+        if (mHarmonyStart.mTick != Sch::Tick(kUnsetTick).mTick) {
             mBuilder->AddHarmony(mHarmonyStart.mTick, mHarmony);
         }
         mHarmony = Harmony();
@@ -619,7 +619,7 @@ void LevelConverter::FinishErrorLog() {
     mTrackName = kOverallFileName;
     mTrack = 0;
     if (!mHasTempo) {
-        ReportError(Mid::MBT(0).mTick, "Tempo Marker not found.");
+        ReportError(Sch::Tick(0).mTick, "Tempo Marker not found.");
         return;
     }
     const char *pszPath = mPath.mStr != nullptr ? mPath.mStr : g_szEmptyString;
@@ -691,7 +691,7 @@ void LevelConverter::ApplyTrackType() {
         mDifficulty = QueryConfigValue(kGemDifficultyQuery);
         if (static_cast<unsigned>(mDifficulty) >= static_cast<unsigned>(kDifficultyCount)) {
             // The report skips the span cursor below.
-            ReportError(Mid::MBT(0).mTick, "Gem difficulty must be in range [0,2]");
+            ReportError(Sch::Tick(0).mTick, "Gem difficulty must be in range [0,2]");
             return;
         }
         break;
@@ -756,26 +756,26 @@ void LevelConverter::AddNote(int nTick,
             ReportError(nTick, "No gem found for Midi Note");
             return;
         }
-        if (ClampMBT(nTick - mRiffStart.mTick).mTick < 0) {
+        if (ClampTick(nTick - mRiffStart.mTick).mTick < 0) {
             ReportError(nTick, "MidiNote duration extends into subsequent Riff");
             return;
         }
         EmitRiffProgram(nTick);
-        if (mTrackType == kTrackTypeAxe && nDuration >= Mid::MBT(kTicksPerBar).mTick) {
-            SustainNoteMsg sustain(Mid::MBT(0).mTick, nNote);
-            mRiff->Add(&sustain, Mid::MBT(0).mTick, 0);
-            const int nStart = Mid::MBT(0).mTick;
-            const int nLength = ClampMBT(nDuration + Mid::MBT(1).mTick).mTick;
+        if (mTrackType == kTrackTypeAxe && nDuration >= Sch::Tick(kTicksPerBar).mTick) {
+            SustainNoteMsg sustain(Sch::Tick(0).mTick, nNote);
+            mRiff->Add(&sustain, Sch::Tick(0).mTick, 0);
+            const int nStart = Sch::Tick(0).mTick;
+            const int nLength = ClampTick(nDuration + Sch::Tick(1).mTick).mTick;
             mRiff->AddNoteMsg(nStart, nNote, nVelocity, nLength, nChannel);
             return;
         }
         mRiff->AddNoteMsg(
-            ClampMBT(nTick - mRiffStart.mTick).mTick, nNote, nVelocity, nDuration, nChannel);
+            ClampTick(nTick - mRiffStart.mTick).mTick, nNote, nVelocity, nDuration, nChannel);
         return;
     }
     if (mBankSelect != 0) {
         PlayMap *pMap = mBuilder->GetPlayMap();
-        const int nBar = pMap->FindStepIndex(nTick / Mid::MBT(kTicksPerBar).mTick);
+        const int nBar = pMap->FindStepIndex(nTick / Sch::Tick(kTicksPerBar).mTick);
         if (nBar != mLastBankBar) {
             mLastBankBar = nBar;
             mBuilder->AddEvent(nTick, kMidiControlChange, kMidiBankSelectMsb, 0, mChannel);
@@ -827,11 +827,11 @@ int LevelConverter::CheckRiffPosition(int nTick) {
     if (mRiff == nullptr) {
         return kRiffPositionBefore;
     }
-    Mid::MBT next(-1); // Yes, the binary checks this placeholder and then overwrites it.
+    Sch::Tick next(-1); // Yes, the binary checks this placeholder and then overwrites it.
     if (mNextSpan != mSpans[mDifficulty].end()) {
         next = mNextSpan->mStart;
     } else {
-        next = Mid::MBT(kMBTMaximum);
+        next = Sch::Tick(kTickMaximum);
     }
     const int bBeforeNext = nTick < next.mTick;
     if (!bBeforeNext) {
@@ -850,7 +850,7 @@ void LevelConverter::NextRiff() {
     }
     mRiffStart = mNextSpan->mStart;
     const int nGem = mNextSpan->mGem;
-    const Mid::MBT length = mNextSpan->mLength;
+    const Sch::Tick length = mNextSpan->mLength;
     if (mTrackType == kTrackTypeAxe || mTrackType == kTrackTypePitch ||
         mTrackType == kTrackTypeScratch) {
         if (nGem != 0) {
@@ -888,20 +888,20 @@ void LevelConverter::EmitRiffProgram(int nTick) {
     mProgramSent = 1;
     if (mBankSelect != 0 && mTrackType != kTrackTypeAxe && mTrackType != kTrackTypeScratch) {
         PlayMap *pMap = mBuilder->GetPlayMap();
-        const int nBar = pMap->FindStepIndex(nTick / Mid::MBT(kTicksPerBar).mTick);
-        mRiff->AddMidiMsg(ClampMBT(nTick - mRiffStart.mTick).mTick,
+        const int nBar = pMap->FindStepIndex(nTick / Sch::Tick(kTicksPerBar).mTick);
+        mRiff->AddMidiMsg(ClampTick(nTick - mRiffStart.mTick).mTick,
                           kMidiControlChange,
                           kMidiBankSelectMsb,
                           0,
                           mChannel);
-        mRiff->AddMidiMsg(ClampMBT(nTick - mRiffStart.mTick).mTick,
+        mRiff->AddMidiMsg(ClampTick(nTick - mRiffStart.mTick).mTick,
                           kMidiControlChange,
                           kMidiBankSelectLsb,
                           nBar,
                           mChannel);
     }
     mRiff->AddMidiMsg(
-        ClampMBT(nTick - mRiffStart.mTick).mTick, kMidiProgramChange, mProgram, 0, mChannel);
+        ClampTick(nTick - mRiffStart.mTick).mTick, kMidiProgramChange, mProgram, 0, mChannel);
 }
 
 // NTSC-U/C: 0x001ea618, PAL: 0x001f0888

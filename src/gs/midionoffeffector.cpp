@@ -1,6 +1,6 @@
 #include "gs/midionoffeffector.h"
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/stdmidimsg.h"
 
 namespace {
@@ -34,7 +34,7 @@ void MidiOnOffEffector::SetEnabled(int bEnabled) {
     if (bEnabled == mEnabled) {
         return;
     }
-    StdMidiMsg msg(kMBTInfinity,
+    StdMidiMsg msg(kTickInfinity,
                    kStatusControlChange | mChannel,
                    mController,
                    bEnabled ? kControllerOn : kControllerOff);

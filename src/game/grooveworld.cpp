@@ -42,7 +42,7 @@
 #include "math/color.h"
 #include "met/metpersonadata.h"
 #include "met/metremixrecord.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/bumppacket.h"
 #include "msg/cripplepacket.h"
 #include "msg/endgamemsg.h"
@@ -63,8 +63,8 @@
 #include "os/zone.h"
 #include "sch/command.h"
 #include "sch/commandfactory.h"
-#include "sch/tick.h"
 #include "sch/tickclock.h"
+#include "sch/time.h"
 #include "script/configquery.h"
 #include "script/scripthost.h"
 #include "stream/ibstream.h"
@@ -332,9 +332,10 @@ void GrooveWorld::PrepareLevel() {
         HxStr path = QueryConfigString(kSoundBankMoviePathCode);
         StartSoundBankMovie(path.mStr != nullptr ? path.mStr : g_szEmptyString);
     }
-    const Mid::MBT offset(QueryConfigValue(kStartOffsetCode));
-    const Mid::MBT zero(0);
-    const Mid::MBT start(std::min(kMBTMaximum, std::max(kMBTMinimum, zero.mTick - offset.mTick)));
+    const Sch::Tick offset(QueryConfigValue(kStartOffsetCode));
+    const Sch::Tick zero(0);
+    const Sch::Tick start(
+        std::min(kTickMaximum, std::max(kTickMinimum, zero.mTick - offset.mTick)));
     mSongClock->SetSongTick(start);
     mIsTutorial = QueryConfigFlag(kTutorialConfigCode);
     mState = kStatePrepared;
@@ -354,15 +355,16 @@ void GrooveWorld::StartPlay() {
 
     if (mIsTutorial == 0) {
         FuncCmd *pEnable = new FuncCmd(this, &GrooveWorld::EnableInput);
-        const Mid::MBT zero(0);
-        const Mid::MBT lead(mLevel->GetTrack(kFirstTrack)->GetQuant(kFirstBar) / 2);
-        const Mid::MBT when(std::min(kMBTMaximum, std::max(kMBTMinimum, zero.mTick - lead.mTick)));
+        const Sch::Tick zero(0);
+        const Sch::Tick lead(mLevel->GetTrack(kFirstTrack)->GetQuant(kFirstBar) / 2);
+        const Sch::Tick when(
+            std::min(kTickMaximum, std::max(kTickMinimum, zero.mTick - lead.mTick)));
         mSongClock->PostAtSongTick(pEnable, when.mTick);
         Attachment::ReleaseIfSet(pEnable);
     }
 
     FuncCmd *pStart = new FuncCmd(this, &GrooveWorld::StartSequencers);
-    mSongClock->PostAtSongTick(pStart, Mid::MBT(0).mTick);
+    mSongClock->PostAtSongTick(pStart, Sch::Tick(0).mTick);
     Attachment::ReleaseIfSet(pStart);
 
     GameBeginMsg begin;
@@ -381,7 +383,7 @@ void GrooveWorld::StartPlay() {
     mForceFeedback->SetPlaybackMode(mIsPlayback);
     mForceFeedback->SetEnabled(GlobalSettings::shared()->mGameOptions.mForceFeedback);
     mForceFeedback->SetPlayerCount(mLocalPlayers.size());
-    mForceFeedback->StartMetronome(Mid::MBT(kMetronomeLeadTicks));
+    mForceFeedback->StartMetronome(Sch::Tick(kMetronomeLeadTicks));
 }
 
 // NTSC-U/C: 0x0018ed98, PAL: 0x001948e8
@@ -425,7 +427,7 @@ void GrooveWorld::OnControllerReading(int nTag, int nPadIndex, int nButton, floa
     ControllerCmd *pCommand = new ControllerCmd(reading);
     Sch::CmdID id;
     id.mValue = kUnallocatedCommand;
-    mApp->GetWatchdogTimer()->PostIn(pCommand, Sch::Tick{0}, id, kRecordable);
+    mApp->GetWatchdogTimer()->PostIn(pCommand, Sch::Time{0}, id, kRecordable);
     Attachment::ReleaseIfSet(pCommand);
 }
 
@@ -436,7 +438,7 @@ void GrooveWorld::ReplayControllerReading(const MetControllerReading *pReading) 
     }
     RawControllerMsg msg;
     msg.mReading = *pReading;
-    // Yes, the binary stores the tick without the finite check an Mid::MBT constructor runs.
+    // Yes, the binary stores the tick without the finite check a Sch::Tick constructor runs.
     msg.mPosition.mTick = mSongClock->SongTick();
     mInputMap->Dispatch(&msg);
 }
@@ -454,7 +456,7 @@ void GrooveWorld::PostExit(int nMode, int bContinueJukebox, int bRestart) {
     ExitCmd *pCommand = new ExitCmd(nMode, bContinueJukebox, bRestart);
     Sch::CmdID id;
     id.mValue = kUnallocatedCommand;
-    Application::shared()->GetWatchdogTimer()->PostIn(pCommand, Sch::Tick{0}, id, kRecordable);
+    Application::shared()->GetWatchdogTimer()->PostIn(pCommand, Sch::Time{0}, id, kRecordable);
     Attachment::ReleaseIfSet(pCommand);
 }
 
@@ -492,13 +494,13 @@ void GrooveWorld::Exit(int nMode, int bContinueJukebox, int bRestart) {
         Application::shared()->GetWatchdog()->Snapshot();
         mSongClock->Pause();
     }
-    mForceFeedback->StopAll(Mid::MBT(0));
+    mForceFeedback->StopAll(Sch::Tick(0));
 
     FuncCmd *pFinish = new FuncCmd(this, &GrooveWorld::FinishSong);
     [[maybe_unused]] Sch::CmdID id;
     id.mValue = kUnallocatedCommand; // Yes, the binary prepares this handle and never passes it.
     mApp->GetWatchdogTimer()->PostIn(
-        pFinish, Sch::Tick{static_cast<long long>(nFadeMs + kExitFinishDelayMs) * kNsPerMs});
+        pFinish, Sch::Time{static_cast<long long>(nFadeMs + kExitFinishDelayMs) * kNsPerMs});
     Attachment::ReleaseIfSet(pFinish);
 }
 
@@ -754,7 +756,7 @@ void GrooveWorld::CreateRenderer() {
         TrackSelectMsg select;
         select.mTrack = (*it)->GetTrack();
         select.mPlace = 0;
-        select.mPosition = Mid::MBT(0);
+        select.mPosition = Sch::Tick(0);
         select.mPlayer = *it;
         mRenderer->Dispatch(&select);
 
@@ -858,7 +860,7 @@ void GrooveWorld::FinishSong() {
 
     if (mExitMode == kExitModeQuit) {
         FuncCmd *pCommand = new FuncCmd(this, &GrooveWorld::EndLevel);
-        mApp->GetWatchdogTimer()->PostIn(pCommand, Sch::Tick{kEndLevelDelayNs});
+        mApp->GetWatchdogTimer()->PostIn(pCommand, Sch::Time{kEndLevelDelayNs});
         Attachment::ReleaseIfSet(pCommand);
     } else {
         EndLevel();
@@ -897,7 +899,7 @@ void GrooveWorld::StopLevel() {
     mRenderer = nullptr;
     DestroyGraphs();
     mSongClock->Pause();
-    mSongClock->SetSongTick(Mid::MBT(0));
+    mSongClock->SetSongTick(Sch::Tick(0));
     mState = kStateLoaded;
 }
 

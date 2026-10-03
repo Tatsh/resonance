@@ -9,7 +9,7 @@
 #include "os/hostmode.h"
 #include "os/hxstr.h"
 #include "sch/cmdid.h"
-#include "sch/tick.h"
+#include "sch/time.h"
 #include "stream/obfilestream.h"
 
 namespace {
@@ -93,7 +93,7 @@ void GameRecorder::ScheduleEnd() {
     EndRecordingCmd *pCommand = new EndRecordingCmd(this);
     Sch::CmdID id;
     id.mValue = kUnallocatedCommand;
-    const Sch::Tick now{0};
+    const Sch::Time now{0};
     Application::shared()->GetWatchdogTimer()->PostIn(pCommand, now, id, kRecordable);
     if (pCommand != nullptr) {
         pCommand->Release();

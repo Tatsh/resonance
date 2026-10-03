@@ -17,7 +17,7 @@ class TickClock;
  * The class title is therefore inferred from the file name rather than attested by a descriptor.
  *
  * The object is 0x14 bytes and AxingSTG builds one with the global `operator new(0x14)`. The
- * constructor writes kMBTInfinity to mOrigin, then overwrites it with the origin
+ * constructor writes kTickInfinity to mOrigin, then overwrites it with the origin
  * PhraseMaker::GetPeriodOrigin() reports. AxePhraseMaker reports the constant 6.
  *
  * Every song position the class computes is clamped to the finite range and passed through the

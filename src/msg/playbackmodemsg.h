@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -31,7 +31,7 @@ public:
     static int sID;
 
     /**
-     * Construct a message with the position at kMBTInfinity and the player unset.
+     * Construct a message with the position at kTickInfinity and the player unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.
@@ -48,7 +48,7 @@ public:
      * @param pPlayer The player the controller belongs to.
      * @param position The song position of the reading.
      */
-    PlaybackModeMsg(Player *pPlayer, Mid::MBT position) : mPlayer(pPlayer), mPosition(position) {
+    PlaybackModeMsg(Player *pPlayer, Sch::Tick position) : mPlayer(pPlayer), mPosition(position) {
     }
 
     /**
@@ -89,6 +89,6 @@ public:
      */
     virtual const char *GetName() const;
 
-    Player *mPlayer;    /*!< The player the controller belongs to. +0x04 */
-    Mid::MBT mPosition; /*!< The song position of the reading. +0x08 */
+    Player *mPlayer;     /*!< The player the controller belongs to. +0x04 */
+    Sch::Tick mPosition; /*!< The song position of the reading. +0x08 */
 };

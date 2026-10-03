@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -16,8 +16,8 @@ class Player;
  *
  * The payload layout comes from the run of field copies in Clone(). PrintExtra() labels `+0x04` as
  * a track number and `+0x10` as `tried`, dispatches Player::Print() through `+0x08`, and hands
- * `+0x0c` to Mid::MBT::Print(). New() initialises that position to kMBTInfinity. mPlayer is public
- * because Overlay::OnPhraseMuffed() at `0x0042b178` reads it directly, comparing it with
+ * `+0x0c` to Sch::Tick::Print(). New() initialises that position to kTickInfinity. mPlayer is
+ * public because Overlay::OnPhraseMuffed() at `0x0042b178` reads it directly, comparing it with
  * HudTrack::mPlayer. The other three are public because AppTunnel's muffed-phrase handler at
  * `0x00447ba8` reads them directly.
  *
@@ -31,7 +31,7 @@ class Player;
 class PhraseMuffedMsg : public Message {
 public:
     /**
-     * Construct a message with the position at kMBTInfinity and the rest unset.
+     * Construct a message with the position at kTickInfinity and the rest unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.
@@ -44,15 +44,15 @@ public:
      *
      * Inline, with no address of its own. Catcher::PostPhraseMuffedMsg() at `0x001ad470` expands
      * it on its stack with the catcher's track and player. The builder stores the position
-     * straight from its argument register with no IsFiniteMBT() call, so the position arrives
-     * already a Mid::MBT. The four arguments are the four members in declaration order.
+     * straight from its argument register with no Sch::Tick::IsInRange() call, so the position
+     * arrives already a Sch::Tick. The four arguments are the four members in declaration order.
      *
      * @param nTrack The track.
      * @param pPlayer The player who muffed the phrase.
      * @param position The song position of the miss.
      * @param nTried Non-zero when the player had attempted the phrase.
      */
-    PhraseMuffedMsg(int nTrack, Player *pPlayer, Mid::MBT position, int nTried)
+    PhraseMuffedMsg(int nTrack, Player *pPlayer, Sch::Tick position, int nTried)
         : mTrack(nTrack), mPlayer(pPlayer), mPosition(position), mTried(nTried) {
     }
 
@@ -105,10 +105,10 @@ public:
      */
     virtual void PrintExtra(std::ostream &stream) const;
 
-    int mTrack;         /*!< The track. +0x04 */
-    Player *mPlayer;    /*!< The player who muffed the phrase. +0x08 */
-    Mid::MBT mPosition; /*!< The song position of the miss. +0x0c */
-    int mTried;         /*!< Non-zero when the player had attempted the phrase. +0x10 */
+    int mTrack;          /*!< The track. +0x04 */
+    Player *mPlayer;     /*!< The player who muffed the phrase. +0x08 */
+    Sch::Tick mPosition; /*!< The song position of the miss. +0x0c */
+    int mTried;          /*!< Non-zero when the player had attempted the phrase. +0x10 */
 };
 
 /**

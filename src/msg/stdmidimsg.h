@@ -35,7 +35,7 @@ public:
     static unsigned int sID;
 
     /**
-     * Construct a message with the song position at kMBTInfinity and the three bytes unset.
+     * Construct a message with the song position at kTickInfinity and the three bytes unset.
      *
      * Inline. New() and the Mixer's stack builds expand it. A declaration is required because the
      * class declares a second constructor.

@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 
 class IBStream;
 class OBStream;
@@ -37,11 +37,11 @@ struct Gem {
     /**
      * Read the five values back from a stream.
      *
-     * Reads mGem, mTrans, and mBar, calls Mid::MBT::Load() for mLoc, and reads the identifier
-     * into a local IDablePtr<Player>. Resolving it differs from IDablePtr's own conversion in one
-     * respect. An identifier of -1 yields a null pointer here, while the conversion the packets'
-     * Print() bodies expand would index the table at -1. The other two cases agree:
-     * kIDableUnregistered yields NullPlayer::sInstance and any other value indexes the
+     * Reads mGem, mTrans, and mBar, calls Sch::Tick::restoreGuts() for mLoc, and reads the
+     * identifier into a local IDablePtr<Player>. Resolving it differs from IDablePtr's own
+     * conversion in one respect. An identifier of -1 yields a null pointer here, while the
+     * conversion the packets' Print() bodies expand would index the table at -1. The other two
+     * cases agree: kIDableUnregistered yields NullPlayer::sInstance and any other value indexes the
      * IDable<Player> table.
      *
      * @param stream The stream to read from.
@@ -62,6 +62,6 @@ struct Gem {
     int mGem;        /*!< Labelled `gem: `. +0x00 */
     int mTrans;      /*!< Labelled ` trans:`. +0x04 */
     int mBar;        /*!< Labelled ` bar:`. +0x08 */
-    Mid::MBT mLoc;   /*!< Labelled ` loc:`. +0x0c */
+    Sch::Tick mLoc;  /*!< Labelled ` loc:`. +0x0c */
     Player *mPlayer; /*!< Labelled ` pid:`, written as its identifier. +0x10 */
 };

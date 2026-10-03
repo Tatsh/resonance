@@ -13,7 +13,7 @@
 #include "met/albumcache.h"
 #include "met/gameoptions.h"
 #include "met/metrenderer.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "os/formatstring.h"
 #include "os/hostmode.h"
 #include "os/hxstr.h"
@@ -55,7 +55,7 @@ Py::Object ScriptAdvanceSection(const Py::Tuple &args) {
         throw Py::TypeError(HxStr("wrong # args for advance_section"));
     }
     const int nPosition = Py::Int(args.getItem(0));
-    Mid::MBT position(static_cast<int>(nPosition));
+    Sch::Tick position(static_cast<int>(nPosition));
     Application::shared()->GetWorld()->mGamer->AdvanceAt(position);
     return Py::Object();
 }

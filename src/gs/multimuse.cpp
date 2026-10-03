@@ -78,14 +78,14 @@ void MultiMuse::SaveFields(OBStream &stream) {
 
     std::vector<TickObj<MuseMsg *> >::iterator it = mEntries.begin();
     for (; it != mEntries.end(); ++it) {
-        Mid::MBT position = it->mPosition;
-        position.Save(stream);
+        Sch::Tick position = it->mPosition;
+        position.saveGuts(stream);
         stream << it->mValue;
     }
 }
 
 // NTSC-U/C: 0x001a97e8, PAL: 0x001af550
-std::ostream &PrintMuseMsgTickObj(std::ostream &stream, Mid::MBT position, MuseMsg *pMsg) {
+std::ostream &PrintMuseMsgTickObj(std::ostream &stream, Sch::Tick position, MuseMsg *pMsg) {
     std::ostream &open = stream << "[";
     position.Print(open);
     std::ostream &separated = open << ": ";
@@ -113,8 +113,8 @@ void MultiMuse::LoadFields(IBStream &stream) {
     stream.ReadLE(&nCount, sizeof(nCount));
     mEntries.reserve(nCount);
     for (int i = 0; i < nCount; ++i) {
-        Mid::MBT position;
-        position.Load(stream);
+        Sch::Tick position;
+        position.restoreGuts(stream);
         Message *pMsg;
         stream >> pMsg;
         TickObj<MuseMsg *> entry;

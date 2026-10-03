@@ -2,7 +2,7 @@
 
 #include "app/activefilter.h"
 #include "app/filterlover.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "sch/command.h"
 #include "sch/tickclock.h"
 
@@ -54,8 +54,8 @@ public:
 
 private:
     ActiveFilter *mOwner; // +0x0c
-    // Default-constructed to kMBTInfinity and never read.
-    Mid::MBT mUnused; // +0x10
+    // Default-constructed to kTickInfinity and never read.
+    Sch::Tick mUnused; // +0x10
 };
 
 int Cmd::sCmdID;

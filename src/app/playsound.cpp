@@ -5,7 +5,7 @@
 #include "app/application.h"
 #include "app/globals.h"
 #include "app/ticktask.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "os/hxstr.h"
 #include "sch/tickclock.h"
 #include "synth/ps2hardsynth.h"
@@ -116,11 +116,12 @@ public:
      */
     // NTSC-U/C: 0x0012f1e0, PAL: 0x0012f978
     explicit NoteDestroyer(Globals *pGlobals)
-        : TickTask(
-              pGlobals->GetSongClock(), Mid::MBT(kDestroyerPeriodTicks).mTick, kDestroyerUnaligned),
+        : TickTask(pGlobals->GetSongClock(),
+                   Sch::Tick(kDestroyerPeriodTicks).mTick,
+                   kDestroyerUnaligned),
           mGlobals(pGlobals), mSynth(pGlobals->GetSynth()) {
         for (int nIndex = 0; nIndex < kDestroyerCapacity; ++nIndex) {
-            mEntries[nIndex].mTick = kMBTInfinity;
+            mEntries[nIndex].mTick = kTickInfinity;
         }
         mCount = 0;
     }
@@ -202,8 +203,8 @@ void PlaySynthSound(int nNote, int nNote2, int nVelocity, int bAutoStop) {
         if (bAutoStop != 0) {
             NoteDestroyer *pDestroyer = g_pNoteDestroyer;
             const int nNow = Application::shared()->GetSongClock()->SongTick();
-            const Mid::MBT release(std::min(
-                std::max(nNow + Mid::MBT(kAutoStopTicks).mTick, kMBTMinimum), kMBTMaximum));
+            const Sch::Tick release(std::min(
+                std::max(nNow + Sch::Tick(kAutoStopTicks).mTick, kTickMinimum), kTickMaximum));
             pDestroyer->Add(nNote, release.mTick);
         }
     }
@@ -214,7 +215,7 @@ void PlaySynthSound(int nNote, int nNote2, int nVelocity, int bAutoStop) {
 
 // NTSC-U/C: 0x0012f3d8, PAL: 0x0012fb70
 void StartNoteDestroyer() {
-    g_pNoteDestroyer->Start(kMBTInfinity);
+    g_pNoteDestroyer->Start(kTickInfinity);
 }
 
 // NTSC-U/C: 0x0012f400, PAL: 0x0012fb98

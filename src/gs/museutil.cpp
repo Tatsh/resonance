@@ -2,7 +2,7 @@
 
 #include "app/msgsink.h"
 #include "gs/multimuse.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/musemsg.h"
 #include "msg/notemsg.h"
 #include "msg/stdmidimsg.h"
@@ -72,9 +72,9 @@ private:
         mResult->Add(&msg, mPosition.mTick, kAppendFirst);
     }
 
-    int mTrans;         // +0x04, read back as its low byte
-    MultiMuse *mResult; // +0x08
-    Mid::MBT mPosition; // +0x0c, the position of the entry being visited
+    int mTrans;          // +0x04, read back as its low byte
+    MultiMuse *mResult;  // +0x08
+    Sch::Tick mPosition; // +0x0c, the position of the entry being visited
 };
 
 } // namespace

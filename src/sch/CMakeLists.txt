@@ -4,8 +4,8 @@ set(RESONANCE_SCH_SRCS
     command.cpp
     sequencercmd.cpp
     tempomap.cpp
-    tick.cpp
     tickclock.cpp
+    time.cpp
     timedcommand.cpp)
 
 add_library(resonance_sch STATIC ${RESONANCE_SCH_SRCS})

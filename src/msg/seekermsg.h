@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -18,14 +18,14 @@ class Player;
  * of it. It writes the colour name of the player at `+0x04`, then either ` (off)` when the word at
  * `+0x14` is zero, or a range of bars from `+0x08` spanning `+0x0c` bars, the track at `+0x10`,
  * and the bar of the position at `+0x18`. New() sets the player to null and the position to
- * kMBTInfinity.
+ * kTickInfinity.
  *
  * The destructor at `0x003dcbf0` is compiler-generated and has no declaration here.
  */
 class SeekerMsg : public Message {
 public:
     /**
-     * Construct a message with the player unset and the position at kMBTInfinity.
+     * Construct a message with the player unset and the position at kTickInfinity.
      *
      * Inline. New() expands it. A declaration is required because the class declares further
      * constructors.
@@ -37,7 +37,7 @@ public:
      * Report that a player's seeker is off.
      *
      * Inline, with no address of its own. Catcher::PostSeekerMsg() at `0x001ad4e0` expands it on
-     * its stack, storing the player, a clear mEnabled, and kMBTInfinity. The bar range and the
+     * its stack, storing the player, a clear mEnabled, and kTickInfinity. The bar range and the
      * track are left unset.
      *
      * @param pPlayer The player whose seeker is off.
@@ -49,7 +49,7 @@ public:
      * Report a player's seeker over a range of bars on a track.
      *
      * Inline, with no address of its own. Catcher::PostSeekerRangeMsg() at `0x001ad560` expands it
-     * on its stack with an mEnabled of 1 and a position of Mid::MBT(0).
+     * on its stack with an mEnabled of 1 and a position of Sch::Tick(0).
      *
      * @param pPlayer The player the seeker belongs to.
      * @param nFirstBar The first bar of the range.
@@ -59,7 +59,7 @@ public:
      * @param when The position of the seeker.
      */
     SeekerMsg(
-        Player *pPlayer, int nFirstBar, int nBarCount, int nTrack, int nEnabled, Mid::MBT when)
+        Player *pPlayer, int nFirstBar, int nBarCount, int nTrack, int nEnabled, Sch::Tick when)
         : mPlayer(pPlayer), mFirstBar(nFirstBar), mBarCount(nBarCount), mTrack(nTrack),
           mEnabled(nEnabled), mWhen(when) {
     }
@@ -107,7 +107,7 @@ public:
      * the bar of the position to a diagnostic stream.
      *
      * The bar of the position is its tick divided by 1920, so an unset position prints the bar of
-     * kMBTInfinity.
+     * kTickInfinity.
      *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x003d81f0
@@ -124,7 +124,7 @@ public:
     int mEnabled;              /*!< Zero for a seeker that is off. +0x14 */
 
 private:
-    Mid::MBT mWhen; // +0x18, labelled `when:`
+    Sch::Tick mWhen; // +0x18, labelled `when:`
 };
 
 /**

@@ -2,7 +2,7 @@
 
 #include "app/application.h"
 #include "game/gamemanagerimpl.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "synth/ps2hardsynth.h"
 
 namespace {
@@ -38,7 +38,7 @@ AxingSTG::AxingSTG(TrackData *pTrackData) : ScoreTrackGraph(pTrackData) {
         new AxePhraseMaker(mPhraseMgr, mQuantizer, mTrackData, mApplication->GetSongClock());
     mAxeSynth = new MuseSynth(mApplication->GetSongClock());
     mPeriodical =
-        new GsPeriodical(mApplication->GetSongClock(), mPhraseMaker, Mid::MBT(kBarTicks).mTick);
+        new GsPeriodical(mApplication->GetSongClock(), mPhraseMaker, Sch::Tick(kBarTicks).mTick);
 }
 
 // NTSC-U/C: 0x0019de08, PAL: 0x001a3b70

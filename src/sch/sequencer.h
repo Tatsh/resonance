@@ -4,7 +4,7 @@
 #include <cstddef>
 
 #include "app/msgsink.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/musemsg.h"
 #include "os/mem.h"
 #include "sch/genericsequencer.h"
@@ -31,7 +31,7 @@ public:
     /**
      * Prepare a sequencer over a range, before any post.
      *
-     * Inline, and expanded into both allocations. The next tick starts at kMBTInfinity.
+     * Inline, and expanded into both allocations. The next tick starts at kTickInfinity.
      *
      * @param begin First object of the range.
      * @param finish One past the last object of the range.
@@ -121,8 +121,8 @@ public:
             return;
         }
 
-        const Mid::MBT at(ClampTick(mStartTick.mTick + mCursor->mPosition.mTick));
-        mNextTick = Mid::MBT(ClampTick(at.mTick - mOffset.mTick));
+        const Sch::Tick at(ClampTick(mStartTick.mTick + mCursor->mPosition.mTick));
+        mNextTick = Sch::Tick(ClampTick(at.mTick - mOffset.mTick));
         if (mNextTick.mTick == mStartTick.mTick) {
             Dispatch();
             return;
@@ -144,11 +144,11 @@ public:
 
 private:
     static int ClampTick(int nTick) {
-        return std::min(std::max(nTick, kMBTMinimum), kMBTMaximum);
+        return std::min(std::max(nTick, kTickMinimum), kTickMaximum);
     }
 
     // The tick of the message at the cursor.
-    Mid::MBT mNextTick;
+    Sch::Tick mNextTick;
 
 public:
     T mBegin;  /*!< First object of the range. */

@@ -1,7 +1,7 @@
 #include "game/quantizer.h"
 
 #include "game/trackdata.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 
 namespace {
 
@@ -24,11 +24,11 @@ int Quantizer::Quantize(int nTick) {
 
 // NTSC-U/C: 0x001ce6b0, PAL: 0x001d4568
 int Quantizer::GetQuantum(int nTick) {
-    return mTrackData->GetQuant(nTick / Mid::MBT(kBarLength).mTick);
+    return mTrackData->GetQuant(nTick / Sch::Tick(kBarLength).mTick);
 }
 
 // NTSC-U/C: 0x001ce710, PAL: 0x001d45c8
 unsigned Quantizer::Round(unsigned nTick, unsigned nQuantum) {
-    const Mid::MBT rounded(((nTick - kRoundingBias + (nQuantum / 2)) / nQuantum) * nQuantum);
+    const Sch::Tick rounded(((nTick - kRoundingBias + (nQuantum / 2)) / nQuantum) * nQuantum);
     return rounded.mTick;
 }

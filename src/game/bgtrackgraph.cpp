@@ -9,7 +9,7 @@
 #include "game/trackdata.h"
 #include "gs/mixer.h"
 #include "gs/musesynth.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/musemsg.h"
 #include "os/mem.h"
 #include "sch/barsequencer.h"
@@ -66,7 +66,7 @@ void BGTrackGraph::BuildSequencer() {
 
     mSequencer =
         new BarSequencer(Application::shared()->GetSongClock(), mTrackData, mDisabler, mUnmapped);
-    mSequencer->Start(Mid::MBT(0).mTick);
+    mSequencer->Start(Sch::Tick(0).mTick);
 }
 
 // NTSC-U/C: 0x001403e0, PAL: 0x00140dc0

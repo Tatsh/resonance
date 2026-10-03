@@ -23,7 +23,7 @@
 class AllNotesOffMsg : public MuseMsg {
 public:
     /**
-     * Construct a message with the song position at kMBTInfinity.
+     * Construct a message with the song position at kTickInfinity.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.

@@ -6,7 +6,7 @@
 
 #include "app/msgsink.h"
 #include "app/msgsource.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 
 class Globals;
 class Message;
@@ -204,11 +204,11 @@ private:
     void OnControllerReading(RawControllerMsg *pMsg);
 
     // NTSC-U/C: 0x0011da68, PAL: 0x0011dff0
-    void SendStopRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff);
+    void SendStopRiff(Sch::Tick position, Player *pPlayer, int nTrack, int nRiff);
 
     // NTSC-U/C: 0x0011d9b0, PAL: 0x0011df38
     // Sends a PitchRiffMsg after a Player::GetInputSlot() call whose result it discards.
-    void SendPitchRiff(Mid::MBT position, Player *pPlayer, int nTrack, int nRiff);
+    void SendPitchRiff(Sch::Tick position, Player *pPlayer, int nTrack, int nRiff);
 
     // NTSC-U/C: 0x00119f58, PAL: 0x0011a4b8
     // The binding equal to binding in slot, action, and argument, appended with a

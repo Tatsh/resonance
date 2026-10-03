@@ -125,7 +125,7 @@ void Sch::Scheduler::PostUnreferenced(Sch::Command *pCommand) {
     }
     const long long nNow = mClock.Now();
     const long long nDue = (mNowNs < nNow) ? nNow : mNowNs;
-    Sch::TimedCommand wrapper(pCommand, Sch::Tick{0}, 0);
+    Sch::TimedCommand wrapper(pCommand, Sch::Time{0}, 0);
     wrapper.mDueTick.mValue = nDue;
     CmdID id;
     id.mValue = CmdID::AllocateValue();

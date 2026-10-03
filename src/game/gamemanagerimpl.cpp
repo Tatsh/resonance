@@ -29,7 +29,7 @@
 #include "os/log.h"
 #include "os/r250.h"
 #include "sch/cmdid.h"
-#include "sch/tick.h"
+#include "sch/time.h"
 #include "script/configquery.h"
 #include "script/scripthost.h"
 #include "synth/ps2hardsynth.h"
@@ -492,7 +492,7 @@ void GameManagerImpl::OnBeginGameLocal(Message *) {
     DoGameSystemPlayCmd *pCommand = new DoGameSystemPlayCmd;
     Sch::CmdID id;
     id.mValue = kUnallocatedCommand;
-    const Sch::Tick now{0};
+    const Sch::Time now{0};
     Application::shared()->GetWatchdogTimer()->PostIn(pCommand, now, id, kRecordable);
     if (pCommand != nullptr) {
         pCommand->Release();

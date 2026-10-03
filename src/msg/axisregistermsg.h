@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -15,7 +15,7 @@ class Player;
  * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). PrintExtra() hands `+0x0c` to
- * Mid::MBT::Print() and writes the colour name of the player at `+0x04`, which types both. The
+ * Sch::Tick::Print() and writes the colour name of the player at `+0x04`, which types both. The
  * float at `+0x08` is printed without a label, and the word at `+0x10` is not printed.
  * InputMap::OnControllerReading(), the one builder, stores the reading's axis value at `+0x08` and
  * the track the player's slot 4 reports at `+0x10`.
@@ -25,7 +25,7 @@ class Player;
 class AxisRegisterMsg : public Message {
 public:
     /**
-     * Construct a message with the position at kMBTInfinity and the rest unset.
+     * Construct a message with the position at kTickInfinity and the rest unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.
@@ -44,7 +44,7 @@ public:
      * @param position The song position of the reading.
      * @param nTrack The player's track.
      */
-    AxisRegisterMsg(Player *pPlayer, float flValue, Mid::MBT position, int nTrack)
+    AxisRegisterMsg(Player *pPlayer, float flValue, Sch::Tick position, int nTrack)
         : mPlayer(pPlayer), mValue(flValue), mPosition(position), mTrack(nTrack) {
     }
 
@@ -108,7 +108,7 @@ public:
      * Public because AxisControl::OnAxisRegister() at `0x0019ea80` and Scratcher::PostNowBarMsg()
      * at `0x001cfd20` read it directly.
      */
-    Mid::MBT mPosition;
+    Sch::Tick mPosition;
 
     /**
      * The player's track. +0x10

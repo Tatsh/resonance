@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -15,7 +15,7 @@ class Player;
  * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). PrintExtra() hands `+0x0c` to
- * Mid::MBT::Print(), writes the colour name of the player at `+0x08`, and labels `+0x04` as `b#`.
+ * Sch::Tick::Print(), writes the colour name of the player at `+0x08`, and labels `+0x04` as `b#`.
  * The word at `+0x10` is not printed.
  *
  * Every member is public because the handlers AutoRiffer dispatches to at `0x001992e0` and Voxer's
@@ -35,7 +35,7 @@ public:
     static int sID;
 
     /**
-     * Construct a message with the position at kMBTInfinity and the rest unset.
+     * Construct a message with the position at kTickInfinity and the rest unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.
@@ -55,7 +55,7 @@ public:
      * @param position The song position of the stop.
      * @param nTrack The player's track.
      */
-    StopRiffMsg(int nButton, Player *pPlayer, Mid::MBT position, int nTrack)
+    StopRiffMsg(int nButton, Player *pPlayer, Sch::Tick position, int nTrack)
         : mButton(nButton), mPlayer(pPlayer), mPosition(position), mTrack(nTrack) {
     }
 
@@ -108,8 +108,8 @@ public:
      */
     virtual void PrintExtra(std::ostream &stream) const;
 
-    int mButton;        /*!< The button, labelled `b#` by PrintExtra(). +0x04 */
-    Player *mPlayer;    /*!< The player whose riff stops. +0x08 */
-    Mid::MBT mPosition; /*!< The song position of the stop. +0x0c */
-    int mTrack;         /*!< The player's track, from its slot 4. +0x10 */
+    int mButton;         /*!< The button, labelled `b#` by PrintExtra(). +0x04 */
+    Player *mPlayer;     /*!< The player whose riff stops. +0x08 */
+    Sch::Tick mPosition; /*!< The song position of the stop. +0x0c */
+    int mTrack;          /*!< The player's track, from its slot 4. +0x10 */
 };

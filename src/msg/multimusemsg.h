@@ -24,8 +24,8 @@
  * MultiMuse::SaveFields(), and restoreGuts() replaces it with a freshly allocated sequence.
  *
  * PrintExtra() also settles MuseMsg's own member. It copies that word into a temporary and writes
- * the temporary through Mid::MBT::Print(), so MuseMsg's payload is a song position. Both this
- * class and StdMidiMsg initialise it to `0x2aaaaaab`, which Mid::MBT documents as inside its
+ * the temporary through Sch::Tick::Print(), so MuseMsg's payload is a song position. Both this
+ * class and StdMidiMsg initialise it to `0x2aaaaaab`, which Sch::Tick documents as inside its
  * positive infinity range.
  */
 class MultiMuseMsg : public MuseMsg {

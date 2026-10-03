@@ -51,11 +51,11 @@ TickClock::~TickClock() {
 // NTSC-U/C: 0x004a7af8, PAL: 0x004e5c08
 int TickClock::SongTick() {
     const long long nTime = Now() + mTempoMap->mCeilingBias;
-    return Mid::MBT(static_cast<int>(nTime / mTempoMap->mNanosecondsPerTick)).mTick;
+    return Sch::Tick(static_cast<int>(nTime / mTempoMap->mNanosecondsPerTick)).mTick;
 }
 
 // NTSC-U/C: 0x004a7b60, PAL: 0x004e5c70
-void TickClock::SetSongTick(Mid::MBT tick) {
+void TickClock::SetSongTick(Sch::Tick tick) {
     const long long nTime = SongTickToTime(mTempoMap, tick.mTick);
     if (nTime != Now()) {
         mPausedNs = nTime; // Yes, the binary stores this even while the clock runs.
@@ -75,7 +75,7 @@ void TickClock::SetTempoMap(TempoMap *pTempoMap) {
 }
 
 // NTSC-U/C: 0x004a5fd0, PAL: 0x004e4070
-void TickClock::PostAt(Command *pCommand, Tick tick) {
+void TickClock::PostAt(Command *pCommand, Time tick) {
     CmdID id;
     id.mValue = kUnallocatedCommand;
     TimedCommand *pTimed = new TimedCommand(pCommand, tick, kAbsolutePost);
@@ -90,7 +90,7 @@ void TickClock::PostAtSongTick(Command *pCommand,
                                CmdID &id,
                                [[maybe_unused]] int nUnused) {
     const long long nTime = SongTickToTime(mTempoMap, nTick);
-    TimedCommand *pTimed = new TimedCommand(pCommand, Tick{nTime}, kAbsolutePost);
+    TimedCommand *pTimed = new TimedCommand(pCommand, Time{nTime}, kAbsolutePost);
     mWatchdog->QueueAbsolute(pTimed, nTime - mNegatedOrigin, id, kNotRecordable, kDefaultOrder);
     Attachment::ReleaseIfSet(pTimed);
 }
@@ -100,7 +100,7 @@ void TickClock::PostAtSongTick(Command *pCommand, long long nTick) {
     CmdID id;
     id.mValue = kUnallocatedCommand;
     const long long nTime = SongTickToTime(mTempoMap, nTick);
-    TimedCommand *pTimed = new TimedCommand(pCommand, Tick{nTime}, kAbsolutePost);
+    TimedCommand *pTimed = new TimedCommand(pCommand, Time{nTime}, kAbsolutePost);
     mWatchdog->QueueAbsolute(pTimed, nTime - mNegatedOrigin, id, kNotRecordable, kDefaultOrder);
     Attachment::ReleaseIfSet(pTimed);
 }

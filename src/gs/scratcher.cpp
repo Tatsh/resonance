@@ -86,9 +86,9 @@ constexpr int kMaxStep = 3;
 // The backward step is the scaled speed negated and less this, which is what the binary computes.
 constexpr int kBackwardStepBias = 4;
 
-// Saturates a tick to the finite range, as the inline Mid::MBT arithmetic does.
+// Saturates a tick to the finite range, as the inline Sch::Tick arithmetic does.
 inline int ClampTick(int nTick) {
-    return std::min(std::max(nTick, kMBTMinimum), kMBTMaximum);
+    return std::min(std::max(nTick, kTickMinimum), kTickMaximum);
 }
 
 constexpr char kEraseStepSound[] = "SND_ERASE_SECTION";
@@ -214,7 +214,7 @@ void Scratcher::OnTrackSelect(TrackSelectMsg *pMsg) {
 // NTSC-U/C: 0x001d0358, PAL: 0x001d6210
 void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
     const int nBar = nTick / mBarDivisor;
-    const int nLastBar = mLastScratchPosition.mTick / Mid::MBT(kBarTicks).mTick;
+    const int nLastBar = mLastScratchPosition.mTick / Sch::Tick(kBarTicks).mTick;
     if (QueryBar(nBar) == 0 || (nLastBar == nBar && mLastScratchPlayer != mPlayer)) {
         PlaySoundByName(kInactiveSound);
         return;
@@ -253,12 +253,12 @@ void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
         Send(&captured);
     }
 
-    const Mid::MBT offset(nTick % mBarDivisor);
+    const Sch::Tick offset(nTick % mBarDivisor);
     mPhraseMgr->AddGem(nGem, nStep, nBar, offset.mTick, mPlayer, 0);
 
     // A scratch against the last one's direction, less than half a beat after that gem ends,
     // draws its gem from where the last one ended.
-    const Mid::MBT limit(ClampTick(mLastGemEnd.mTick + Mid::MBT(kHalfBeatTicks).mTick));
+    const Sch::Tick limit(ClampTick(mLastGemEnd.mTick + Sch::Tick(kHalfBeatTicks).mTick));
     int bContinues = 0;
     if (nTick < limit.mTick) {
         bContinues = (nStep * mLastStep) < 0;
@@ -270,7 +270,7 @@ void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
         flStartBlend = mLastGemEndBlend;
     }
     mLastStep = nStep;
-    mLastGemEnd = Mid::MBT(ClampTick(nTick + Mid::MBT(kScratchGemTicks).mTick));
+    mLastGemEnd = Sch::Tick(ClampTick(nTick + Sch::Tick(kScratchGemTicks).mTick));
     mLastGemEndBlend = AxeOldGemMaker::BlendForStep(nStep);
 
     if (nStep != 0) {

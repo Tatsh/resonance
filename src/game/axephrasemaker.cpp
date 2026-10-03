@@ -7,7 +7,7 @@
 #include "app/attachment.h"
 #include "app/playsound.h"
 #include "game/nullplayer.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/axisregistermsg.h"
 #include "msg/barstatusmsg.h"
 #include "msg/beginphrasecatchmsg.h"
@@ -51,9 +51,9 @@ constexpr int kEraseEffectFlag = 1;
 constexpr char kEraseStepSound[] = "SND_ERASE_SECTION";
 constexpr char kEraseBarSound[] = "SND_ERASE";
 
-// A computed position, clamped to the finite range as the inline Mid::MBT arithmetic does.
-inline Mid::MBT MakePosition(int nTick) {
-    return Mid::MBT(std::min(std::max(nTick, kMBTMinimum), kMBTMaximum));
+// A computed position, clamped to the finite range as the inline Sch::Tick arithmetic does.
+inline Sch::Tick MakePosition(int nTick) {
+    return Sch::Tick(std::min(std::max(nTick, kTickMinimum), kTickMaximum));
 }
 
 } // namespace
@@ -84,12 +84,12 @@ void AxePhraseMaker::OnStdMidi(StdMidiMsg *pMsg) {
             if (it->mNote != nNote) {
                 continue;
             }
-            const Mid::MBT start(it->mTick);
+            const Sch::Tick start(it->mTick);
             NoteMsg note(start.mTick,
                          mChannel,
                          nNote,
                          it->mVelocity,
-                         MakePosition(nTick - Mid::MBT(it->mTick).mTick));
+                         MakePosition(nTick - Sch::Tick(it->mTick).mTick));
             RecordMuseMsg(&note);
             mHeldNotes.erase(it);
             return;
@@ -114,9 +114,9 @@ void AxePhraseMaker::OnStdMidi(StdMidiMsg *pMsg) {
 
 // NTSC-U/C: 0x0019bbd8, PAL: 0x001a1940
 void AxePhraseMaker::RecordMuseMsg(MuseMsg *pMsg) {
-    const Mid::MBT barStart = MakePosition(mBarTicks.mTick * mPhraseBar);
-    const Mid::MBT offset = MakePosition(pMsg->mTick - barStart.mTick);
-    (void)Mid::MBT(0); // Yes, the binary discards this position.
+    const Sch::Tick barStart = MakePosition(mBarTicks.mTick * mPhraseBar);
+    const Sch::Tick offset = MakePosition(pMsg->mTick - barStart.mTick);
+    (void)Sch::Tick(0); // Yes, the binary discards this position.
     mPhrase->AddMuseMsg(offset.mTick, pMsg);
     mPhrase->AddXLocal(offset.mTick, mValue);
 }
@@ -132,7 +132,7 @@ void AxePhraseMaker::StartPhrase(int nTick) {
     mPhraseBar = nBar;
     mPhrase = new Phrase();
     mPhrase->mPlayer = mPlayer;
-    mPhrase->AddXLocal(Mid::MBT(0).mTick, mValue);
+    mPhrase->AddXLocal(Sch::Tick(0).mTick, mValue);
 
     ClearGemsMsg clear;
     clear.mBar = nBar;
@@ -193,15 +193,15 @@ void AxePhraseMaker::FinishPhrase() {
         return;
     }
 
-    const Mid::MBT barEnd = MakePosition(mBarTicks.mTick * (mPhraseBar + 1));
-    const Mid::MBT end = MakePosition(barEnd.mTick + Mid::MBT(kHeldNoteOverhang).mTick);
+    const Sch::Tick barEnd = MakePosition(mBarTicks.mTick * (mPhraseBar + 1));
+    const Sch::Tick end = MakePosition(barEnd.mTick + Sch::Tick(kHeldNoteOverhang).mTick);
     for (const auto &held : mHeldNotes) {
-        const Mid::MBT start(held.mTick);
+        const Sch::Tick start(held.mTick);
         NoteMsg note(start.mTick,
                      mChannel,
                      held.mNote,
                      held.mVelocity,
-                     MakePosition(end.mTick - Mid::MBT(held.mTick).mTick));
+                     MakePosition(end.mTick - Sch::Tick(held.mTick).mTick));
         RecordMuseMsg(&note);
     }
     mHeldNotes.clear();
@@ -241,7 +241,7 @@ void AxePhraseMaker::DispatchPriv(Message *pMsg) {
 
 // NTSC-U/C: 0x0019d438, PAL: 0x001a31a0
 int AxePhraseMaker::GetPeriodOrigin() {
-    return Mid::MBT(kPeriodOrigin).mTick;
+    return Sch::Tick(kPeriodOrigin).mTick;
 }
 
 // NTSC-U/C: 0x0019d860, PAL: 0x001a35c8

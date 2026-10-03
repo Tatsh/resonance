@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -15,7 +15,7 @@ class Player;
  * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). PrintExtra() hands `+0x08` to
- * Mid::MBT::Print() and writes the colour name of the player at `+0x04`, which types both. The
+ * Sch::Tick::Print() and writes the colour name of the player at `+0x04`, which types both. The
  * word at `+0x0c` is not printed.
  *
  * The destructor at `0x003db4c8` is compiler-generated and has no declaration here.
@@ -72,9 +72,9 @@ public:
     virtual void PrintExtra(std::ostream &stream) const;
 
 private:
-    Player *mPlayer;    // +0x04
-    Mid::MBT mPosition; // +0x08
-    int mTrack;         // +0x0c, with a title after the track EraseMsg stores at the same offset
+    Player *mPlayer;     // +0x04
+    Sch::Tick mPosition; // +0x08
+    int mTrack;          // +0x0c, with a title after the track EraseMsg stores at the same offset
 };
 
 /**

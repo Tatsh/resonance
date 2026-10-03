@@ -4,7 +4,7 @@
 
 #include "app/attachment.h"
 #include "sch/cmdid.h"
-#include "sch/tick.h"
+#include "sch/time.h"
 
 namespace Sch {
 class Command;
@@ -65,7 +65,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005d32f8
      * @ghidraAddress PAL: 0x00615360
      */
-    TimedCommand(Command *pCommand, Tick tick, int bDelta);
+    TimedCommand(Command *pCommand, Time tick, int bDelta);
 
     /**
      * Construct an empty wrapper for Load() to fill.
@@ -162,7 +162,7 @@ public:
      *
      * +0x10
      */
-    Tick mDueTick;
+    Time mDueTick;
 
     /**
      * The tick the caller requested, in the caller's own clock frame.
@@ -175,7 +175,7 @@ public:
      *
      * +0x18
      */
-    Tick mLocalTick;
+    Time mLocalTick;
 
 private:
     // Non-zero when the requested tick is a distance from now rather than an absolute scheduler

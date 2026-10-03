@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "app/attachment.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "sch/cmdid.h"
 #include "sch/tickclock.h"
 
@@ -19,7 +19,7 @@
  * vptr at `+0x04`.
  *
  * Run() is what fixes the meaning of the members. It subtracts mEpoch from mNextTick, saturates the
- * difference against Mid::MBT's two infinity bounds, hands the result to Tick(), and returns
+ * difference against Sch::Tick's two infinity bounds, hands the result to Tick(), and returns
  * without rescheduling unless Tick() reports 1. Otherwise it advances mNextTick by mPeriod,
  * saturates again, and posts a fresh file-local Cmd against the clock under mCommand.
  *
@@ -64,7 +64,7 @@ public:
      * Table slot 4, and the one pure member of the class.
      *
      * @param nElapsedTicks Ticks between the epoch and the run now due, saturated against
-     *                      Mid::MBT's infinity bounds.
+     *                      Sch::Tick's infinity bounds.
      * @return 1 to be run again after mPeriod further ticks, anything else to stop.
      */
     virtual int Tick(int nElapsedTicks) = 0;
@@ -76,7 +76,7 @@ public:
      * clear then runs at once through Run(). An aligned task instead posts a command that runs it
      * at the next multiple of mPeriod. The title is inferred.
      *
-     * @param nEpochOffset Ticks the epoch lies before the current position, or Mid::MBT's
+     * @param nEpochOffset Ticks the epoch lies before the current position, or Sch::Tick's
      *                     infinity sentinel for an epoch at zero.
      * @ghidraAddress NTSC-U/C: 0x0013a860
      * @ghidraAddress PAL: 0x0013b1a8
@@ -108,7 +108,7 @@ private:
     Sch::TickClock *mClock; // +0x08 the clock the task is posted against
     Sch::CmdID mCommand;    // +0x0c the handle of the queued command, -2 while none is queued
     int mPeriod;            // +0x10 ticks between one run and the next
-    // Tick the next run is due at, both read and advanced by Run(). Defaults to Mid::MBT's
+    // Tick the next run is due at, both read and advanced by Run(). Defaults to Sch::Tick's
     // positive infinity sentinel.
     int mNextTick; // +0x14
     // Tick the elapsed count is measured from. Defaults to the same sentinel.

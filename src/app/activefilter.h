@@ -2,7 +2,7 @@
 
 #include "os/mem.h"
 #include "sch/cmdid.h"
-#include "sch/tick.h"
+#include "sch/time.h"
 
 class FilterLover;
 
@@ -102,5 +102,5 @@ public:
      * Public because AxeFX's constructor writes 100 milliseconds into it directly after
      * construction, and the image has no setter.
      */
-    Sch::Tick mInterval;
+    Sch::Time mInterval;
 };

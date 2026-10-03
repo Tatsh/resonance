@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -20,8 +20,8 @@ class Player;
  * when the press falls within 400,000,000 of the previous press time the player stores at `+0x40`,
  * and Scratcher widens the erased range to the whole section when it is set.
  *
- * PrintExtra() hands `+0x08` to Mid::MBT::Print() and writes the colour name of the player at
- * `+0x04`, which types both. New() initialises the position to kMBTInfinity.
+ * PrintExtra() hands `+0x08` to Sch::Tick::Print() and writes the colour name of the player at
+ * `+0x04`, which types both. New() initialises the position to kTickInfinity.
  *
  * The destructor at `0x003db2f0` is compiler-generated and has no declaration here.
  */
@@ -36,7 +36,7 @@ public:
     static int sID;
 
     /**
-     * Construct a message with the position at kMBTInfinity and the rest unset.
+     * Construct a message with the position at kTickInfinity and the rest unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.
@@ -55,7 +55,7 @@ public:
      * @param nTrack The player's track.
      * @param nDoubleTap Non-zero when the press follows the previous one closely.
      */
-    EraseMsg(Player *pPlayer, Mid::MBT position, int nTrack, int nDoubleTap)
+    EraseMsg(Player *pPlayer, Sch::Tick position, int nTrack, int nDoubleTap)
         : mPlayer(pPlayer), mPosition(position), mTrack(nTrack), mDoubleTap(nDoubleTap) {
     }
 
@@ -113,8 +113,8 @@ public:
     // NotePitcher::DispatchPriv() read the members below directly, through an EraseMsg pointer
     // from outside the hierarchy, and the image exposes no accessor. A friend declaration fits
     // equally well.
-    Player *mPlayer;    // +0x04
-    Mid::MBT mPosition; // +0x08
-    int mTrack;         // +0x0c
-    int mDoubleTap;     // +0x10
+    Player *mPlayer;     // +0x04
+    Sch::Tick mPosition; // +0x08
+    int mTrack;          // +0x0c
+    int mDoubleTap;      // +0x10
 };

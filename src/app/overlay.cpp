@@ -17,7 +17,7 @@
 #include "game/trackdata.h"
 #include "gfx/gfxdevice.h"
 #include "met/metstrings.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/advancesectiontogglemsg.h"
 #include "msg/beginphrasecatchmsg.h"
 #include "msg/catchmsg.h"
@@ -700,7 +700,7 @@ void Overlay::OnCatch(Message *pMsg) {
         return;
     }
 
-    const int nBar = pCatch->mTick / Mid::MBT(kTicksPerBarInt).mTick;
+    const int nBar = pCatch->mTick / Sch::Tick(kTicksPerBarInt).mTick;
     const Renderer::Cell *pCell = mRenderer->GetCell(pCatch->mTrack, nBar);
     if (pCatch->mHit != 0) {
         pTrack->mBlockedCatches = 0;

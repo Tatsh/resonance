@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/musemsg.h"
 
 class IBStream;
@@ -20,8 +20,8 @@ class OBStream;
  * builds one on its stack at `0x0019bad4` from its channel, a held note's number and velocity,
  * and the note's clamped length, which identifies the fields. PrintExtra() writes mChannel after
  * the label ` n`, the label StdMidiMsg::PrintExtra() places ahead of its channel. mLength at
- * `+0x0c` is a tick count, handed to Mid::MBT::Print() in place and initialised to kMBTInfinity by
- * New(). saveGuts() and restoreGuts() move only its low sixteen bits.
+ * `+0x0c` is a tick count, handed to Sch::Tick::Print() in place and initialised to kTickInfinity
+ * by New(). saveGuts() and restoreGuts() move only its low sixteen bits.
  *
  * The destructor at `0x003dc0e8` is compiler-generated and has no declaration here.
  */
@@ -36,7 +36,7 @@ public:
     static unsigned int sID;
 
     /**
-     * Construct a message with the position and the length at kMBTInfinity.
+     * Construct a message with the position and the length at kTickInfinity.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.
@@ -60,7 +60,7 @@ public:
             unsigned char nChannel,
             unsigned char nNote,
             unsigned char nVelocity,
-            Mid::MBT length)
+            Sch::Tick length)
         : MuseMsg(nTick), mChannel(nChannel), mNote(nNote), mVelocity(nVelocity), mLength(length) {
     }
 
@@ -165,5 +165,5 @@ public:
      * Public because NoteFinder::DispatchPriv() at `0x001023b0` reads it directly with no
      * accessor in the image, adding it to the inherited mTick to find where the note ends.
      */
-    Mid::MBT mLength;
+    Sch::Tick mLength;
 };

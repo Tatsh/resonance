@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "game/phrasemaker.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "sch/command.h"
 #include "sch/tickclock.h"
 
@@ -13,9 +13,9 @@ namespace {
 // The handle value of a command the clock has not queued yet.
 constexpr int kUnallocatedCommand = -2;
 
-// The clamp the inline Mid::MBT arithmetic applies to a computed position.
+// The clamp the inline Sch::Tick arithmetic applies to a computed position.
 inline int ClampPosition(int nTick) {
-    return std::min(std::max(nTick, kMBTMinimum), kMBTMaximum);
+    return std::min(std::max(nTick, kTickMinimum), kTickMaximum);
 }
 
 /**
@@ -62,7 +62,7 @@ int PeriodicalCmd::sCmdID;
 
 // NTSC-U/C: 0x001b4738, PAL: 0x001ba510
 GsPeriodical::GsPeriodical(Sch::TickClock *pClock, PhraseMaker *pPhraseMaker, int nPeriod)
-    : mOrigin(kMBTInfinity), mPeriod(nPeriod), mClock(pClock), mPhraseMaker(pPhraseMaker) {
+    : mOrigin(kTickInfinity), mPeriod(nPeriod), mClock(pClock), mPhraseMaker(pPhraseMaker) {
     mCommand.mValue = kUnallocatedCommand;
     mOrigin = pPhraseMaker->GetPeriodOrigin();
 }
@@ -78,16 +78,16 @@ void GsPeriodical::PostAt(int nTick) {
 
 // NTSC-U/C: 0x001b45d0, PAL: 0x001ba3a8
 void GsPeriodical::Run(int nTick) {
-    const Mid::MBT offset(ClampPosition(nTick - mOrigin));
+    const Sch::Tick offset(ClampPosition(nTick - mOrigin));
     mPhraseMaker->OnPeriod(offset.mTick / mPeriod);
 
-    const Mid::MBT next(ClampPosition(nTick + mPeriod));
+    const Sch::Tick next(ClampPosition(nTick + mPeriod));
     PostAt(next.mTick);
 }
 
 // NTSC-U/C: 0x001b4870, PAL: 0x001ba648
 void GsPeriodical::Post() {
-    const Mid::MBT first(ClampPosition(mOrigin + mPeriod));
+    const Sch::Tick first(ClampPosition(mOrigin + mPeriod));
     PostAt(first.mTick);
 }
 

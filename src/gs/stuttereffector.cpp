@@ -28,16 +28,16 @@ void StutterEffector::SetEnabled(int bEnabled) {
 
     if (bEnabled != 0) {
         Tick(Application::shared()->GetSongClock()->SongTick());
-        StdMidiMsg on(kMBTInfinity, kStatusControlChange | mChannel, kControllerSwitch, kSwitchOn);
+        StdMidiMsg on(kTickInfinity, kStatusControlChange | mChannel, kControllerSwitch, kSwitchOn);
         Send(&on);
-        Start(kMBTInfinity);
+        Start(kTickInfinity);
         return;
     }
 
     Stop();
-    StdMidiMsg level(kMBTInfinity, kStatusControlChange | mChannel, kControllerLevel, kFullLevel);
+    StdMidiMsg level(kTickInfinity, kStatusControlChange | mChannel, kControllerLevel, kFullLevel);
     Send(&level);
-    StdMidiMsg off(kMBTInfinity, kStatusControlChange | mChannel, kControllerSwitch, kSwitchOff);
+    StdMidiMsg off(kTickInfinity, kStatusControlChange | mChannel, kControllerSwitch, kSwitchOff);
     Send(&off);
 }
 
@@ -46,7 +46,7 @@ int StutterEffector::Tick(int nElapsedTicks) {
     float flValue;
     mOscillator->GetValue(static_cast<float>(nElapsedTicks), &flValue);
     const double dLevel = (flValue * kLevelScale) + ((1.0 - flValue) * mFloor);
-    StdMidiMsg msg(kMBTInfinity,
+    StdMidiMsg msg(kTickInfinity,
                    kStatusControlChange | mChannel,
                    kControllerLevel,
                    static_cast<unsigned char>(static_cast<unsigned int>(dLevel)));

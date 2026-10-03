@@ -10,7 +10,7 @@
 namespace Sch {
 
 // NTSC-U/C: 0x005d32f8, PAL: 0x00615360
-TimedCommand::TimedCommand(Command *pCommand, Tick tick, int bDelta)
+TimedCommand::TimedCommand(Command *pCommand, Time tick, int bDelta)
     : mCommand(pCommand), mOrder(-1), mDueTick{-1}, mLocalTick(tick), mDelta(bDelta), mCmdID{-1} {
     // The store of pCommand sits in the branch delay slot of the null test and therefore runs
     // whether the test passes or not. Only the reference count is conditional.

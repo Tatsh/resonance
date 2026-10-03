@@ -35,7 +35,7 @@ public:
     static unsigned int sID;
 
     /**
-     * Construct a message with the song position at kMBTInfinity and the byte unset.
+     * Construct a message with the song position at kTickInfinity and the byte unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.

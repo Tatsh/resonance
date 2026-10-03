@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 #include "msg/musemsg.h"
 #include "msg/stdmidimsg.h"
@@ -62,7 +62,7 @@ void MidiChase::HandleRange(const TickObj<MuseMsg *> *pBegin, const TickObj<Muse
 void MidiChase::Replay(MsgSink *pSink) {
     for (int i = 0; i < kControllerCount; ++i) {
         if (mControllers[i] != kUnset) {
-            StdMidiMsg message(kMBTInfinity,
+            StdMidiMsg message(kTickInfinity,
                                mChannel | kStatusControlChange,
                                static_cast<unsigned char>(i),
                                mControllers[i]);
@@ -71,12 +71,12 @@ void MidiChase::Replay(MsgSink *pSink) {
     }
 
     if (mProgram != kUnset) {
-        StdMidiMsg message(kMBTInfinity, mChannel | kStatusProgramChange, mProgram, 0);
+        StdMidiMsg message(kTickInfinity, mChannel | kStatusProgramChange, mProgram, 0);
         pSink->Dispatch(&message);
     }
 
     if (mBendLow != kUnset) {
-        StdMidiMsg message(kMBTInfinity, mChannel | kStatusPitchBend, mBendLow, mBendHigh);
+        StdMidiMsg message(kTickInfinity, mChannel | kStatusPitchBend, mBendLow, mBendHigh);
         pSink->Dispatch(&message);
     }
 }

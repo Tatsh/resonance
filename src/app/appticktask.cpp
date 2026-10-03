@@ -61,16 +61,16 @@ private:
 
 int Cmd::sCmdID;
 
-// Saturate a tick against Mid::MBT's infinity bounds.
+// Saturate a tick against Sch::Tick's infinity bounds.
 inline int ClampTick(int nTick) {
-    return std::min(std::max(nTick, kMBTMinimum), kMBTMaximum);
+    return std::min(std::max(nTick, kTickMinimum), kTickMaximum);
 }
 
 } // namespace
 
 // NTSC-U/C: 0x0013ad88, PAL: 0x0013b6d0
 TickTask::TickTask(Sch::TickClock *pClock, int nPeriod, int bAligned)
-    : mClock(pClock), mPeriod(nPeriod), mNextTick(kMBTInfinity), mEpoch(kMBTInfinity),
+    : mClock(pClock), mPeriod(nPeriod), mNextTick(kTickInfinity), mEpoch(kTickInfinity),
       mAligned(bAligned) {
     mCommand.mValue = kUnallocatedCommand;
 }
@@ -88,10 +88,10 @@ void TickTask::Print(std::ostream &stream) {
 // NTSC-U/C: 0x0013a860, PAL: 0x0013b1a8
 void TickTask::Start(int nEpochOffset) {
     mNextTick = mClock->SongTick();
-    if (nEpochOffset == kMBTInfinity) {
-        mEpoch = Mid::MBT(0).mTick;
+    if (nEpochOffset == kTickInfinity) {
+        mEpoch = Sch::Tick(0).mTick;
     } else {
-        mEpoch = Mid::MBT(ClampTick(mNextTick - nEpochOffset)).mTick;
+        mEpoch = Sch::Tick(ClampTick(mNextTick - nEpochOffset)).mTick;
     }
 
     if (mAligned == 0) {
@@ -99,8 +99,8 @@ void TickTask::Start(int nEpochOffset) {
         return;
     }
 
-    const int nNext = Mid::MBT(ClampTick(mNextTick + mPeriod)).mTick;
-    mNextTick = Mid::MBT(ClampTick((nNext / mPeriod) * mPeriod)).mTick;
+    const int nNext = Sch::Tick(ClampTick(mNextTick + mPeriod)).mTick;
+    mNextTick = Sch::Tick(ClampTick((nNext / mPeriod) * mPeriod)).mTick;
     Cmd *pCommand = new Cmd(this);
     mClock->PostAtSongTick(pCommand, mNextTick, mCommand);
     if (pCommand != nullptr) {
@@ -110,7 +110,7 @@ void TickTask::Start(int nEpochOffset) {
 
 // NTSC-U/C: 0x0013aa38, PAL: 0x0013b380
 void TickTask::Run() {
-    const int nElapsed = Mid::MBT(ClampTick(mNextTick - mEpoch)).mTick;
+    const int nElapsed = Sch::Tick(ClampTick(mNextTick - mEpoch)).mTick;
     if (Tick(nElapsed) != 1) {
         return;
     }

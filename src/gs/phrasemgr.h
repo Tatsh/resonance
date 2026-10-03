@@ -2,7 +2,7 @@
 
 #include "app/msgsink.h"
 #include "app/msgsource.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/invalidatetrackmsg.h"
 #include "msg/message.h"
 #include "msg/phrasepacket.h"
@@ -542,7 +542,7 @@ private:
     int mWindowStart;          // +0x3c, the first bar RefreshBar() posts
     int mWindowEnd;            // +0x40, the bar RefreshBar() stops before
     int mRefreshing;           // +0x44, set while RefreshAllBars() and OnExportCommand() post bars
-    Mid::MBT mExportLead;      // +0x48, from the start of a bar to its ExportCmd
+    Sch::Tick mExportLead;     // +0x48, from the start of a bar to its ExportCmd
     Sch::TickClock *mClock;    // +0x4c
     Sch::CmdID mCommand;       // +0x50, the handle of the file-local Cmd
     Sch::CmdID mExportCommand; // +0x54, the handle of the file-local ExportCmd

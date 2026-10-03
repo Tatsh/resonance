@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "mid/mbt.h"
-#include "sch/tick.h"
+#include "mid/tick.h"
+#include "sch/time.h"
 
 class Player;
 
@@ -37,10 +37,10 @@ public:
 
     /** One vibration effect, read from the configuration by LoadConfig(). */
     struct Effect {
-        int mSmallMotor;  /*!< The small motor's state while a pulse is on. */
-        int mBigMotor;    /*!< The big motor's level while a pulse is on. */
-        int mPulseCount;  /*!< The pulses the effect runs. */
-        Mid::MBT mPeriod; /*!< The length of one pulse, in MIDI ticks. */
+        int mSmallMotor;   /*!< The small motor's state while a pulse is on. */
+        int mBigMotor;     /*!< The big motor's level while a pulse is on. */
+        int mPulseCount;   /*!< The pulses the effect runs. */
+        Sch::Tick mPeriod; /*!< The length of one pulse, in MIDI ticks. */
     };
 
     /**
@@ -69,7 +69,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0016e1b8
      * @ghidraAddress PAL: 0x00170ac8
      */
-    void StartMetronome(const Mid::MBT &delay);
+    void StartMetronome(const Sch::Tick &delay);
 
     /**
      * Size mSlots to the players and suspend everything for three players or more.
@@ -187,7 +187,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001708d0
      * @ghidraAddress PAL: 0x001731e0
      */
-    void StopAll(Mid::MBT when);
+    void StopAll(Sch::Tick when);
 
     /**
      * @param nPlayerSlot The slot.
@@ -287,9 +287,9 @@ private:
     std::vector<Effect> mEffects; // +0x10
     int mReserved1c;              // +0x1c, never read or written
     int mReserved20;              // +0x20, never read or written
-    Mid::MBT mUnusedPosition;     // +0x24, constructed and never read
+    Sch::Tick mUnusedPosition;    // +0x24, constructed and never read
     long long mUnusedTime;        // +0x28, zero on construction and never read
     int mMetronomeFirstSetting;   // +0x30, the first metronome setting, never read
-    Sch::Tick mPulseLength;       // +0x38, in nanoseconds
-    Mid::MBT mBeatPeriod;         // +0x40, the bar divided by the third metronome setting
+    Sch::Time mPulseLength;       // +0x38, in nanoseconds
+    Sch::Tick mBeatPeriod;        // +0x40, the bar divided by the third metronome setting
 };

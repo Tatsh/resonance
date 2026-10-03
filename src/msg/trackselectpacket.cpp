@@ -37,10 +37,10 @@ void TrackSelectPacket::PrintExtra(std::ostream &stream) const {
 }
 
 // NTSC-U/C: 0x003e71f8, PAL: 0x0041f4d8
-// The stream Mid::MBT::Save() returns is not used.
+// The stream Sch::Tick::saveGuts() returns is not used.
 void TrackSelectPacket::saveGuts(OBStream &stream) const {
     Packet::saveGuts(stream);
-    mPosition.Save(stream);
+    mPosition.saveGuts(stream);
 
     int id = mPlayer.mId;
     int track = mTrack;
@@ -51,7 +51,7 @@ void TrackSelectPacket::saveGuts(OBStream &stream) const {
 // NTSC-U/C: 0x003e7330, PAL: 0x0041f610
 void TrackSelectPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
-    mPosition.Load(stream);
+    mPosition.restoreGuts(stream);
     stream.ReadLE(&mPlayer.mId, sizeof(mPlayer.mId))
         .ReadLE(&mTrack, sizeof(mTrack))
         .ReadLE(&mPlace, sizeof(mPlace));

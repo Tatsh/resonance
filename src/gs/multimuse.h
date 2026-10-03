@@ -21,8 +21,8 @@
  * The element type is attested. The one Sequencer instantiation in the image is
  * `Sequencer<TickObj<MuseMsg *> const *>` at `0x008eec48`, and MultiMusePlayer::Start() posts one
  * of those over this vector's start and finish. SaveFields() agrees with that shape independently:
- * it advances eight bytes per element and writes the first word through Mid::MBT::Save() and the
- * second through `operator<<(OBStream &, Message *)`.
+ * it advances eight bytes per element and writes the first word through Sch::Tick::saveGuts() and
+ * the second through `operator<<(OBStream &, Message *)`.
  *
  * MultiMuseMsg carries one of these and is how a sequence moves between a MsgSource and a
  * MsgSink, and MultiMusePlayer is what turns one into messages over time.
@@ -163,4 +163,4 @@ public:
  * @ghidraAddress NTSC-U/C: 0x001a97e8
  * @ghidraAddress PAL: 0x001af550
  */
-std::ostream &PrintMuseMsgTickObj(std::ostream &stream, Mid::MBT position, MuseMsg *pMsg);
+std::ostream &PrintMuseMsgTickObj(std::ostream &stream, Sch::Tick position, MuseMsg *pMsg);

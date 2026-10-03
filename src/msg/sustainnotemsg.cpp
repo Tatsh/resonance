@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
@@ -30,7 +30,7 @@ const char *SustainNoteMsg::GetName() const {
 
 // NTSC-U/C: 0x003e3a18, PAL: 0x0041bdb8
 void SustainNoteMsg::PrintExtra(std::ostream &stream) const {
-    Mid::MBT position;
+    Sch::Tick position;
     position.mTick = mTick;
     position.Print(stream);
     stream << ' ';

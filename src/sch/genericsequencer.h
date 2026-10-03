@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "sch/cmdid.h"
 #include "sch/tickclock.h"
 
@@ -28,7 +28,7 @@ public:
      * Prepare a sequencer before any post.
      *
      * Inline, and expanded into both allocations. The handle starts unallocated, the command
-     * absent, the start tick at kMBTInfinity, and the offset at zero.
+     * absent, the start tick at kTickInfinity, and the offset at zero.
      */
     GenericSequencer() : mCommand(nullptr), mOffset(0) {
         mCmdId.mValue = kUnallocatedCommand;
@@ -74,10 +74,10 @@ protected:
     // The clock Post() queues against.
     Sch::TickClock *mClock;
     // The clock's song position when Post() ran.
-    Mid::MBT mStartTick;
+    Sch::Tick mStartTick;
     // Subtracted from every message's position. The constructor builds it from zero through the
-    // checking MBT constructor.
-    Mid::MBT mOffset;
+    // checking Sch::Tick constructor.
+    Sch::Tick mOffset;
     // The sink every dispatched message goes to.
     MsgSink *mSink;
 };

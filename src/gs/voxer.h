@@ -65,7 +65,7 @@ public:
     /**
      * Close the previous bar and keep the sustain in step with the song.
      *
-     * At bar zero the sustain controller is released at position kMBTInfinity. The routine
+     * At bar zero the sustain controller is released at position kTickInfinity. The routine
      * finishes the phrase of the previous bar and turns the seeker off. At a bar
      * TrackData::QueryBar() rejects while sustaining, it clears the held levels, records and
      * sends the sustain release in a new phrase, and releases the button with an AxeButtonMsg. In
@@ -122,7 +122,7 @@ protected:
      *
      * The bar, or with bWholeStep set every bar of its step, is cleared wherever mPlayer is its
      * owner, and clearing nBar itself also releases the sustain controller at position
-     * kMBTInfinity. When anything was cleared, bAnnounce plays `SND_ERASE_SECTION` or `SND_ERASE`
+     * kTickInfinity. When anything was cleared, bAnnounce plays `SND_ERASE_SECTION` or `SND_ERASE`
      * and sends a ShowEraseEffectMsg. The seeker is turned off in both cases.
      *
      * @param nBar The bar.

@@ -50,7 +50,7 @@ public:
      *
      * The body forwards all four arguments unchanged to slot 2 of the cheat detector. It then
      * builds a RawControllerMsg on the stack whose reading is the four arguments in parameter
-     * order and whose position is Mid::MBT(0), and hands it to the renderer's Dispatch().
+     * order and whose position is Sch::Tick(0), and hands it to the renderer's Dispatch().
      *
      * @param nTag The device tag, a four-character code.
      * @param nPadIndex The controller that produced the reading, from 1.

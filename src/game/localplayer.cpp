@@ -175,7 +175,7 @@ void LocalPlayer::AnnounceState() {
     LoopToggleMsg loop(mLooping, this);
     Send(&loop);
 
-    const int nFirstBarEnd = Mid::MBT(kTicksPerBar).mTick;
+    const int nFirstBarEnd = Sch::Tick(kTicksPerBar).mTick;
     LocalPlayerCmd *pCommand = new LocalPlayerCmd(this, nFirstBarEnd);
     mClock->PostAtSongTick(pCommand, nFirstBarEnd, mCommand);
     if (pCommand != nullptr) {
@@ -189,13 +189,13 @@ void LocalPlayer::DeactivatePlacer() {
 }
 
 // NTSC-U/C: 0x0011e810, PAL: 0x0011edd0
-void LocalPlayer::SetLooping(int bLooping, const Mid::MBT &position) {
+void LocalPlayer::SetLooping(int bLooping, const Sch::Tick &position) {
     if (mPlayMode != kPlayModeJam) {
         return;
     }
 
     mLooping = bLooping;
-    InvalidateSeekerMsg invalidateSeeker(position.mTick / Mid::MBT(kTicksPerBar).mTick, mTrack);
+    InvalidateSeekerMsg invalidateSeeker(position.mTick / Sch::Tick(kTicksPerBar).mTick, mTrack);
     Send(&invalidateSeeker);
     LoopToggleMsg loop(mLooping, this);
     Send(&loop);
@@ -280,7 +280,7 @@ inline void LocalPlayer::OnAxisYPow(AxisYPowMsg *pMsg) {
 // NTSC-U/C: 0x00122ae0, PAL: 0x001230f8
 inline void LocalPlayer::OnLoopTool(LoopToolMsg *pMsg) {
     if (pMsg->mPlayer == this) {
-        const Mid::MBT position = pMsg->mPosition;
+        const Sch::Tick position = pMsg->mPosition;
         ToggleLoop(position);
     }
 }
@@ -318,7 +318,7 @@ inline void LocalPlayer::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
         return;
     }
 
-    const int nBar = pMsg->mPosition.mTick / Mid::MBT(kTicksPerBar).mTick;
+    const int nBar = pMsg->mPosition.mTick / Sch::Tick(kTicksPerBar).mTick;
     if (mLastMuffedBar != nBar) {
         mLastMuffedBar = nBar;
         ++mMisses;
@@ -397,7 +397,7 @@ void LocalPlayer::RemoveSink(MsgSink *pSink) {
 
 // NTSC-U/C: 0x0011ec00, PAL: 0x0011f1c0
 void LocalPlayer::OnBarTick(int nTick) {
-    const int nBar = nTick / Mid::MBT(kTicksPerBar).mTick;
+    const int nBar = nTick / Sch::Tick(kTicksPerBar).mTick;
     bool bChanged = false;
     if (mBonus > 0 && nBar >= mBonusEndBar) {
         mBonus = 0;
@@ -412,8 +412,8 @@ void LocalPlayer::OnBarTick(int nTick) {
         Send(&state);
     }
 
-    const Mid::MBT next(
-        std::min(std::max(nTick + Mid::MBT(kTicksPerBar).mTick, kMBTMinimum), kMBTMaximum));
+    const Sch::Tick next(
+        std::min(std::max(nTick + Sch::Tick(kTicksPerBar).mTick, kTickMinimum), kTickMaximum));
     LocalPlayerCmd *pCommand = new LocalPlayerCmd(this, next.mTick);
     mClock->PostAtSongTick(pCommand, next.mTick, mCommand);
     if (pCommand != nullptr) {
@@ -422,13 +422,13 @@ void LocalPlayer::OnBarTick(int nTick) {
 }
 
 // NTSC-U/C: 0x0011e700, PAL: 0x0011ecc0
-void LocalPlayer::ToggleLoop(const Mid::MBT &position) {
+void LocalPlayer::ToggleLoop(const Sch::Tick &position) {
     if (mPlayMode != kPlayModeJam) {
         return;
     }
 
     mLooping ^= 1;
-    InvalidateSeekerMsg invalidateSeeker(position.mTick / Mid::MBT(kTicksPerBar).mTick, mTrack);
+    InvalidateSeekerMsg invalidateSeeker(position.mTick / Sch::Tick(kTicksPerBar).mTick, mTrack);
     Send(&invalidateSeeker);
     LoopToggleMsg loop(mLooping, this);
     Send(&loop);

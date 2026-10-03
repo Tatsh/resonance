@@ -4,7 +4,7 @@
 #include "game/localplayer.h"
 #include "game/playmap.h"
 #include "game/powerupcollectioni.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "sch/tickclock.h"
 
 namespace {
@@ -27,7 +27,7 @@ SimplifiedGamePowerupPlacer::~SimplifiedGamePowerupPlacer() {
 // NTSC-U/C: 0x001cdeb8, PAL: 0x001d3d70
 void SimplifiedGamePowerupPlacer::DeployPowerup() {
     const int nTick = Application::shared()->GetSongClock()->SongTick();
-    const int nBar = nTick / Mid::MBT(kTicksPerBar).mTick;
+    const int nBar = nTick / Sch::Tick(kTicksPerBar).mTick;
     if (nBar < Application::shared()->GetPlayMap()->GetEndBar()) {
         mCollection->Deploy(mOwner->GetTrack(), nBar);
     }

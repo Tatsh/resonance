@@ -47,9 +47,9 @@ constexpr char kInactiveSound[] = "SND_INACTIVE";
 constexpr char kEraseStepSound[] = "SND_ERASE_SECTION";
 constexpr char kEraseBarSound[] = "SND_ERASE";
 
-// A computed position, clamped to the finite range as the inline Mid::MBT arithmetic does.
-inline Mid::MBT MakePosition(int nTick) {
-    return Mid::MBT(std::min(std::max(nTick, kMBTMinimum), kMBTMaximum));
+// A computed position, clamped to the finite range as the inline Sch::Tick arithmetic does.
+inline Sch::Tick MakePosition(int nTick) {
+    return Sch::Tick(std::min(std::max(nTick, kTickMinimum), kTickMaximum));
 }
 
 } // namespace
@@ -106,7 +106,7 @@ void Voxer::UpdateSustain(int nTick) {
                        bHeld != 0 ? kSustainHeld : kSustainReleased);
     mSustaining = bHeld;
     StartPhrase(nTick);
-    mPhrase->AddMuseMsg(Mid::MBT(nTick % mBarTicks).mTick, &sustain);
+    mPhrase->AddMuseMsg(Sch::Tick(nTick % mBarTicks).mTick, &sustain);
     Send(&sustain);
 }
 
@@ -131,7 +131,7 @@ void Voxer::OnErase(int nBar, int bWholeStep, int bAnnounce) {
         mPhraseMgr->ClearPhrase(nClear, 0);
         if (nClear == nBar) {
             StdMidiMsg release(
-                kMBTInfinity, kControlChange | mChannel, kSustainController, kSustainReleased);
+                kTickInfinity, kControlChange | mChannel, kSustainController, kSustainReleased);
             Send(&release);
         }
     }
@@ -201,9 +201,9 @@ void Voxer::FinishPhrase(int nBar) {
     }
 
     if (mSustaining != 0) {
-        const Mid::MBT lastTick = MakePosition(mBarTicks - Mid::MBT(1).mTick);
-        const Mid::MBT barStart = MakePosition(mBarTicks * nBar);
-        const Mid::MBT when = MakePosition(lastTick.mTick + barStart.mTick);
+        const Sch::Tick lastTick = MakePosition(mBarTicks - Sch::Tick(1).mTick);
+        const Sch::Tick barStart = MakePosition(mBarTicks * nBar);
+        const Sch::Tick when = MakePosition(lastTick.mTick + barStart.mTick);
         StdMidiMsg release(
             when.mTick, kControlChange | mChannel, kSustainController, kSustainReleased);
         mPhrase->AddMuseMsg(lastTick.mTick, &release);
@@ -215,10 +215,10 @@ void Voxer::FinishPhrase(int nBar) {
     mPhrase = nullptr;
 
     if (mSustaining != 0) {
-        const Mid::MBT nextBar = MakePosition(mBarTicks * (nBar + 1));
+        const Sch::Tick nextBar = MakePosition(mBarTicks * (nBar + 1));
         StartPhrase(nextBar.mTick);
         StdMidiMsg hold(nextBar.mTick, kControlChange | mChannel, kSustainController, kSustainHeld);
-        mPhrase->AddMuseMsg(Mid::MBT(0).mTick, &hold);
+        mPhrase->AddMuseMsg(Sch::Tick(0).mTick, &hold);
         Send(&hold);
     }
 }
@@ -228,7 +228,7 @@ int Voxer::Tick(int nElapsedTicks) {
     const int nBar = nElapsedTicks / mBarTicks;
     if (nBar == 0) {
         StdMidiMsg release(
-            kMBTInfinity, kControlChange | mChannel, kSustainController, kSustainReleased);
+            kTickInfinity, kControlChange | mChannel, kSustainController, kSustainReleased);
         Send(&release);
     }
     FinishPhrase(nBar - 1);
@@ -240,7 +240,7 @@ int Voxer::Tick(int nElapsedTicks) {
         mHeldLevels.reset();
         mSustaining = 0;
         StartPhrase(nElapsedTicks);
-        mPhrase->AddMuseMsg(Mid::MBT(nElapsedTicks % mBarTicks).mTick, &release);
+        mPhrase->AddMuseMsg(Sch::Tick(nElapsedTicks % mBarTicks).mTick, &release);
         Send(&release);
 #ifdef VIDEO_STANDARD_PAL
         if (mPlayer->IsNull() == 0) {

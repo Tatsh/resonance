@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -24,7 +24,7 @@ class Player;
 class LoopToolMsg : public Message {
 public:
     /**
-     * Construct a message with the position at kMBTInfinity and the rest unset.
+     * Construct a message with the position at kTickInfinity and the rest unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.
@@ -42,7 +42,7 @@ public:
      * @param position The song position of the reading.
      * @param nTrack The player's track.
      */
-    LoopToolMsg(Player *pPlayer, Mid::MBT position, int nTrack)
+    LoopToolMsg(Player *pPlayer, Sch::Tick position, int nTrack)
         : mPlayer(pPlayer), mPosition(position), mTrack(nTrack) {
     }
 
@@ -86,8 +86,8 @@ public:
 
     // Public because LocalPlayer::DispatchPriv() reads both directly at `0x0011ee48` and
     // `0x0011ee54`, and the image has no accessor.
-    Player *mPlayer;    /*!< The player the controller belongs to. +0x04 */
-    Mid::MBT mPosition; /*!< The song position of the reading. +0x08 */
+    Player *mPlayer;     /*!< The player the controller belongs to. +0x04 */
+    Sch::Tick mPosition; /*!< The song position of the reading. +0x08 */
 
 private:
     int mTrack; // +0x0c

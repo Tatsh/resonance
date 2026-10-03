@@ -47,9 +47,9 @@ constexpr char kInactiveSound[] = "SND_INACTIVE";
 constexpr char kEraseStepSound[] = "SND_ERASE_SECTION";
 constexpr char kEraseBarSound[] = "SND_ERASE";
 
-// A computed position, clamped to the finite range as the inline Mid::MBT arithmetic does.
-inline Mid::MBT MakePosition(int nTick) {
-    return Mid::MBT(std::min(std::max(nTick, kMBTMinimum), kMBTMaximum));
+// A computed position, clamped to the finite range as the inline Sch::Tick arithmetic does.
+inline Sch::Tick MakePosition(int nTick) {
+    return Sch::Tick(std::min(std::max(nTick, kTickMinimum), kTickMaximum));
 }
 
 } // namespace
@@ -63,7 +63,7 @@ NotePitcher::NotePitcher(PhraseMgr *pPhraseMgr,
                          int bAllowOwnedBars,
                          int nUnreadOption)
     : Pitcher(pClock), mPhraseMgr(pPhraseMgr), mQuantizer(pQuantizer), mTrack(pTrackData->mIndex),
-      mPlayer(&NullPlayer::sInstance), mLastErasePosition(kNoValue), mBarDivisor(kMBTInfinity),
+      mPlayer(&NullPlayer::sInstance), mLastErasePosition(kNoValue), mBarDivisor(kTickInfinity),
       mCapturedBar(kNoValue), mPlayModeOne(bPlayModeOne), mStepBars(kInitialStepBars),
       mAllowOwnedBars(bAllowOwnedBars), mUnreadOption(nUnreadOption), mTrackData(pTrackData),
       mClock(pClock) {
@@ -181,7 +181,7 @@ void NotePitcher::PostPhraseCapturedMsg(int nGem, int nTick) {
         Send(&captured);
     }
 
-    const Mid::MBT offset(nTick % mBarDivisor);
+    const Sch::Tick offset(nTick % mBarDivisor);
     if (mPlayer->IsLooping() == 0) {
         (void)CanPlayBar(nBar, mCapturedBar); // Yes, the binary discards this call's result.
         mPhraseMgr->AddGem(nGem, kGemTrans, mCapturedBar, offset.mTick, mPlayer, kGemFlag);
@@ -200,7 +200,7 @@ void NotePitcher::PostPhraseCapturedMsg(int nGem, int nTick) {
         }
     }
 
-    mPhraseMgr->ReplayBar(mCapturedBar, MakePosition(offset.mTick + Mid::MBT(1).mTick).mTick);
+    mPhraseMgr->ReplayBar(mCapturedBar, MakePosition(offset.mTick + Sch::Tick(1).mTick).mTick);
 }
 
 // NTSC-U/C: 0x001b2710, PAL: 0x001b84e8
@@ -232,7 +232,7 @@ void NotePitcher::PostSeekerMsgSecond(int nBar, int bForce) {
                          nStepBars,
                          mTrack,
                          kSeekerOn,
-                         Mid::MBT(0));
+                         Sch::Tick(0));
             Send(&on);
             return;
         }

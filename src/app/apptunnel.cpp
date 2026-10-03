@@ -34,7 +34,7 @@
 #include "math/color.h"
 #include "math/transform.h"
 #include "math/vector3.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/advancesectiontogglemsg.h"
 #include "msg/axebuttonmsg.h"
 #include "msg/catchmsg.h"
@@ -747,7 +747,7 @@ void AppTunnel::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
         return;
     }
     const int nTrack = pMsg->mTrack;
-    const int nBar = pMsg->mPosition.mTick / Mid::MBT(kFramesPerBar).mTick;
+    const int nBar = pMsg->mPosition.mTick / Sch::Tick(kFramesPerBar).mTick;
     if (mRenderer->GetCell(nTrack, nBar)->mPowerup == -1) {
         return;
     }

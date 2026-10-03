@@ -5,7 +5,7 @@
 #include "app/msgsink.h"
 #include "app/msgsource.h"
 #include "game/trackdata.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 #include "msg/multimusemsg.h"
 #include "msg/stdmidimsg.h"
@@ -105,7 +105,7 @@ private:
     int mReserved;                          // +0x20, never read or written
     std::vector<NoteMapping> mHeldNotes;    // +0x24
     std::vector<NoteMapping> mSustainNotes; // +0x30
-    Mid::MBT mSustainTick;                  // +0x3c
+    Sch::Tick mSustainTick;                 // +0x3c
     int mRiffLow;                           // +0x40
     int mRiffHigh;                          // +0x44
     int mTrack;                             // +0x48, copied from TrackData::mIndex

@@ -4,7 +4,7 @@
 #include "game/quantizer.h"
 #include "game/trackdata.h"
 #include "gs/phrasemgr.h"
-#include "sch/tick.h"
+#include "mid/tick.h"
 #include "sch/tickclock.h"
 
 /**
@@ -30,7 +30,7 @@ public:
      * @param pQuantizer The quantiser for the track.
      * @param pTrackData The track description.
      * @param pClock The clock the scheduled commands run on.
-     * @param tick The scheduler time the base retains.
+     * @param tick The catch window, in MIDI ticks.
      * @ghidraAddress NTSC-U/C: 0x001b1a60
      * @ghidraAddress PAL: 0x001b7820
      */

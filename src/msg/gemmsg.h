@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -15,7 +15,7 @@ class Player;
  * routine in the image refers to this type by anything but its vtable.
  *
  * The payload layout comes from the run of field copies in Clone(). PrintExtra() hands `+0x04` to
- * Mid::MBT::Print() and writes the colour name of the player at `+0x10`. The track at `+0x08` and
+ * Sch::Tick::Print() and writes the colour name of the player at `+0x10`. The track at `+0x08` and
  * the gem at `+0x0c` are printed without labels, and the word at `+0x14` is not printed. The two
  * names come from Catcher::SimulateRemoteGem() at `0x001ace78`, which stores the catcher's track
  * and the gem TrackData::FindGemAtOrAfter() reports.
@@ -29,7 +29,7 @@ class Player;
 class GemMsg : public Message {
 public:
     /**
-     * Construct a message with only the position set, to kMBTInfinity.
+     * Construct a message with only the position set, to kTickInfinity.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.
@@ -51,7 +51,7 @@ public:
      * @param pPlayer The player who played it.
      * @param nGhost Non-zero for a ghost gem.
      */
-    GemMsg(Mid::MBT position, int nTrack, int nGem, Player *pPlayer, int nGhost = 0)
+    GemMsg(Sch::Tick position, int nTrack, int nGem, Player *pPlayer, int nGhost = 0)
         : mPosition(position), mTrack(nTrack), mGem(nGem), mPlayer(pPlayer), mGhost(nGhost) {
     }
 
@@ -104,11 +104,11 @@ public:
      */
     virtual void PrintExtra(std::ostream &stream) const;
 
-    Mid::MBT mPosition; /*!< The song position of the gem. +0x04 */
-    int mTrack;         /*!< The track the gem lies on. +0x08 */
-    int mGem;           /*!< The gem, which AppTunnel uses as the lane. +0x0c */
-    Player *mPlayer;    /*!< The player who played it. +0x10 */
-    int mGhost;         /*!< Non-zero for a ghost gem. +0x14 */
+    Sch::Tick mPosition; /*!< The song position of the gem. +0x04 */
+    int mTrack;          /*!< The track the gem lies on. +0x08 */
+    int mGem;            /*!< The gem, which AppTunnel uses as the lane. +0x0c */
+    Player *mPlayer;     /*!< The player who played it. +0x10 */
+    int mGhost;          /*!< Non-zero for a ghost gem. +0x14 */
 };
 
 /**

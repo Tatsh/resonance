@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "gs/multimuse.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 
 /**
  * One riff of a track at one difficulty level, as a sequence of MIDI messages.
@@ -111,5 +111,5 @@ private:
     friend class LevelConverter;
 
     // The length the riff repeats over. Zero on construction.
-    Mid::MBT mLength; // +0x18
+    Sch::Tick mLength; // +0x18
 };

@@ -5,7 +5,7 @@
 #include "game/player.h"
 #include "game/powerupcollectioni.h"
 #include "game/powerupplacer.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "sch/cmdid.h"
 
 class AxisYPowMsg;
@@ -213,7 +213,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0011e810
      * @ghidraAddress PAL: 0x0011edd0
      */
-    virtual void SetLooping(int bLooping, const Mid::MBT &position);
+    virtual void SetLooping(int bLooping, const Sch::Tick &position);
 
     /**
      * Show or hide the player's ghost.
@@ -276,7 +276,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0011e700
      * @ghidraAddress PAL: 0x0011ecc0
      */
-    void ToggleLoop(const Mid::MBT &position);
+    void ToggleLoop(const Sch::Tick &position);
 
 private:
     // NTSC-U/C: 0x0011e980, PAL: 0x0011ef40

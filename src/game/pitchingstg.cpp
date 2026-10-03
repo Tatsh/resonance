@@ -2,7 +2,7 @@
 
 #include "app/application.h"
 #include "game/gamemanagerimpl.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 
 // NTSC-U/C: 0x001c45b0, PAL: 0x001ca3f8
 PitchingSTG::PitchingSTG(TrackData *pTrackData)
@@ -29,7 +29,7 @@ PitchingSTG::PitchingSTG(TrackData *pTrackData)
 // NTSC-U/C: 0x001c4cf0, PAL: 0x001cab38
 void PitchingSTG::Start() {
     ScoreTrackGraph::Start();
-    mPitcher->Start(kMBTInfinity); // Unguarded, as in the binary, for a track of any other kind.
+    mPitcher->Start(kTickInfinity); // Unguarded, as in the binary, for a track of any other kind.
 }
 
 // NTSC-U/C: 0x001c4d28, PAL: 0x001cab70

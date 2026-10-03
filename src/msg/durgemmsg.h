@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -57,11 +57,11 @@ public:
      */
     virtual const char *GetName() const;
 
-    int mLane;                      /*!< The lane. +0x04 */
-    int mStartFrame = kMBTInfinity; /*!< The frame the gem starts at. +0x08 */
-    float mStartBlend;              /*!< The blend at the start. +0x0c */
-    int mEndFrame = kMBTInfinity;   /*!< The frame the gem ends at. +0x10 */
-    float mEndBlend;                /*!< The blend at the end. +0x14 */
+    int mLane;                       /*!< The lane. +0x04 */
+    int mStartFrame = kTickInfinity; /*!< The frame the gem starts at. +0x08 */
+    float mStartBlend;               /*!< The blend at the start. +0x0c */
+    int mEndFrame = kTickInfinity;   /*!< The frame the gem ends at. +0x10 */
+    float mEndBlend;                 /*!< The blend at the end. +0x14 */
 
     /**
      * Non-zero for a gem a player is playing live. +0x18

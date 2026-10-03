@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gs/pitcher.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class EraseMsg;
@@ -187,11 +187,11 @@ private:
     Quantizer *mQuantizer; // +0x3c
     // Copied from the track description's `+0x04`. Matched against an InvalidateSeekerMsg's
     // `+0x08`, so it identifies the track this pitcher serves.
-    int mTrack;                  // +0x40
-    Player *mPlayer;             // +0x44, starts at NullPlayer::sInstance
-    Mid::MBT mLastErasePosition; // +0x48, MBT(-1), stored and then tested at 0x001b1e60
-    Mid::MBT mLastPitchPosition; // +0x4c, starts at kMBTInfinity
-    // Copied from the phrase manager's `+0x34` after an initial kMBTInfinity. Turns an elapsed
+    int mTrack;                   // +0x40
+    Player *mPlayer;              // +0x44, starts at NullPlayer::sInstance
+    Sch::Tick mLastErasePosition; // +0x48, Sch::Tick(-1), stored and then tested at 0x001b1e60
+    Sch::Tick mLastPitchPosition; // +0x4c, starts at kTickInfinity
+    // Copied from the phrase manager's `+0x34` after an initial kTickInfinity. Turns an elapsed
     // tick count into a bar index.
     int mBarDivisor;             // +0x50
     int mCapturedBar;            // +0x54, the bar last announced as captured, -1 at first

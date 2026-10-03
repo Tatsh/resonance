@@ -20,7 +20,7 @@ void WahEffector::SetEnabled(int bEnabled) {
     mEnabled = bEnabled;
     mPending = 1;
 
-    StdMidiMsg msg(kMBTInfinity,
+    StdMidiMsg msg(kTickInfinity,
                    kStatusControlChange | mChannel,
                    kControllerSwitch,
                    bEnabled != 0 ? kSwitchOn : kSwitchOff);
@@ -32,7 +32,7 @@ int WahEffector::Tick(int nElapsedTicks) {
     float flValue;
     mOscillator->GetValue(static_cast<float>(nElapsedTicks), &flValue);
     const int nLevel = static_cast<int>(static_cast<float>(mDepth) * flValue);
-    StdMidiMsg msg(kMBTInfinity,
+    StdMidiMsg msg(kTickInfinity,
                    kStatusControlChange | mChannel,
                    kControllerSweep,
                    static_cast<unsigned char>(nLevel));

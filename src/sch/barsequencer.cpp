@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "game/trackdata.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 
 namespace {
 
@@ -20,7 +20,7 @@ constexpr int kKeepRunning = 1;
 
 // NTSC-U/C: 0x00100c70, PAL: 0x00100c70
 BarSequencer::BarSequencer(Sch::TickClock *pClock, TrackData *pTrack, MsgSink *pSink, int nUnmapped)
-    : TickTask(pClock, Mid::MBT(kTicksPerBar).mTick, kTickTaskUnaligned), mTrack(pTrack),
+    : TickTask(pClock, Sch::Tick(kTicksPerBar).mTick, kTickTaskUnaligned), mTrack(pTrack),
       mSink(pSink), mClock(pClock), mUnmapped(nUnmapped), mSequencer(nullptr) {
 }
 
@@ -46,7 +46,7 @@ void BarSequencer::Print(std::ostream &stream) {
 
 // NTSC-U/C: 0x00100370, PAL: 0x00100370
 int BarSequencer::Tick(int nTick) {
-    const int nBar = nTick / Mid::MBT(kTicksPerBar).mTick;
+    const int nBar = nTick / Sch::Tick(kTicksPerBar).mTick;
     const std::vector<TickObj<MuseMsg *> > *pMidi =
         mUnmapped != 0 ? mTrack->GetMidiInBar(nBar) : mTrack->GetMidi(nBar);
     delete mSequencer;

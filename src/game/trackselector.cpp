@@ -5,7 +5,7 @@
 
 #include "app/hudutil.h"
 #include "game/localplayer.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/deployedpowerupmsg.h"
 #include "msg/phrasemuffedmsg.h"
 #include "msg/remotetrackselectmsg.h"
@@ -89,7 +89,7 @@ void TrackSelector::RemoveLightFromColumn(Player *pPlayer, int nChannel, int nPa
             TrackSelectMsg message;
             message.mTrack = nChannel;
             message.mPlace = nSlot;
-            message.mPosition = Mid::MBT(nPayload);
+            message.mPosition = Sch::Tick(nPayload);
             message.mPlayer = pNext;
             Send(&message);
             mGrid[nChannel][nSlot] = pNext;
@@ -105,7 +105,7 @@ void TrackSelector::InsertLightForDrawable(Player *pPlayer, int nChannel, int nP
             TrackSelectMsg message;
             message.mTrack = nChannel;
             message.mPlace = nSlot;
-            message.mPosition = Mid::MBT(nPayload);
+            message.mPosition = Sch::Tick(nPayload);
             message.mPlayer = pPlayer;
             Send(&message);
             return;
@@ -117,8 +117,8 @@ void TrackSelector::InsertLightForDrawable(Player *pPlayer, int nChannel, int nP
 int TrackSelector::RebuildChannelGrid(BumpPacket *pPacket) {
     const int nChannel = pPacket->mTrack;
     Player *pPlayer = pPacket->mPlayer;
-    const Mid::MBT position(
-        std::min(std::max(pPacket->mBar * Mid::MBT(kTicksPerBar).mTick, kMBTMinimum), kMBTMaximum));
+    const Sch::Tick position(std::min(
+        std::max(pPacket->mBar * Sch::Tick(kTicksPerBar).mTick, kTickMinimum), kTickMaximum));
     if (pPlayer->GetPlace() == 0) {
         return 0;
     }
@@ -206,15 +206,17 @@ int TrackSelector::SelfTest() {
         ProbePlayer(players[nIndex]);
     }
 
-    selector.MovePlayer(
-        players[kTestFourthPlayer], kTestFourthPlayer, kTestHomeChannel, Mid::MBT(kTestTick).mTick);
+    selector.MovePlayer(players[kTestFourthPlayer],
+                        kTestFourthPlayer,
+                        kTestHomeChannel,
+                        Sch::Tick(kTestTick).mTick);
     // Yes, the binary keeps an empty loop here.
     for (int nSlot = kTrackSelectorSlotCount - 1; nSlot >= 0; --nSlot) {
     }
     ProbePlayer(players[kTestFourthPlayer]);
 
     selector.MovePlayer(
-        players[kTestThirdPlayer], kTestThirdPlayer, kTestHomeChannel, Mid::MBT(kTestTick).mTick);
+        players[kTestThirdPlayer], kTestThirdPlayer, kTestHomeChannel, Sch::Tick(kTestTick).mTick);
     // Yes, the binary keeps an empty loop here.
     for (int nSlot = kTrackSelectorSlotCount - 1; nSlot >= 0; --nSlot) {
     }
@@ -223,19 +225,19 @@ int TrackSelector::SelfTest() {
     ProbePlayer(players[kTestThirdPlayer]);
 
     selector.MovePlayerToBack(
-        players[kTestThirdPlayer], kTestHomeChannel, Mid::MBT(kTestTick).mTick);
+        players[kTestThirdPlayer], kTestHomeChannel, Sch::Tick(kTestTick).mTick);
     ProbePlayer(players[kTestFirstPlayer]);
     ProbePlayer(players[kTestFourthPlayer]);
     ProbePlayer(players[kTestThirdPlayer]);
 
     selector.MovePlayerToBack(
-        players[kTestFourthPlayer], kTestHomeChannel, Mid::MBT(kTestTick).mTick);
+        players[kTestFourthPlayer], kTestHomeChannel, Sch::Tick(kTestTick).mTick);
     ProbePlayer(players[kTestFirstPlayer]);
     ProbePlayer(players[kTestThirdPlayer]);
     ProbePlayer(players[kTestFourthPlayer]);
 
     selector.MovePlayerToBack(
-        players[kTestFirstPlayer], kTestHomeChannel, Mid::MBT(kTestTick).mTick);
+        players[kTestFirstPlayer], kTestHomeChannel, Sch::Tick(kTestTick).mTick);
     ProbePlayer(players[kTestThirdPlayer]);
     ProbePlayer(players[kTestFourthPlayer]);
     ProbePlayer(players[kTestFirstPlayer]);

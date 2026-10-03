@@ -17,7 +17,7 @@
 #include "game/scoretrackgraph.h"
 #include "game/trackdata.h"
 #include "gfx/vram.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "os/filelog.h"
 #include "os/formatstring.h"
 #include "os/heap.h"
@@ -467,7 +467,7 @@ Py::Object ScriptPostScript(const Py::Tuple &args) {
     Py::Object element = args.getItem(1);
     Py::String text(element);
     HxStr script = text;
-    IsFiniteMBT(static_cast<int>(nTick));
+    Sch::Tick::IsInRange(static_cast<int>(nTick));
     Sch::Command *pCommand = NewScriptCmd(script);
     Sch::CmdID id;
     Application::shared()->GetSongClock()->PostAtSongTick(pCommand, nTick, id);

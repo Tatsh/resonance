@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sch/tick.h"
+#include "sch/time.h"
 
 namespace Sch {
 
@@ -96,7 +96,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004a78b8
      * @ghidraAddress PAL: 0x004e59c8
      */
-    void Post(Sch::Command *pCommand, Sch::Tick tick, CmdID &id, int bRecordable, int bDelta);
+    void Post(Sch::Command *pCommand, Sch::Time tick, CmdID &id, int bRecordable, int bDelta);
 
     /**
      * Withdraw the first wrapper queued under a handle.
@@ -124,7 +124,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004a60a0
      * @ghidraAddress PAL: 0x004e4140
      */
-    void PostIn(Sch::Command *pCommand, Sch::Tick tick, CmdID &id, int bRecordable);
+    void PostIn(Sch::Command *pCommand, Sch::Time tick, CmdID &id, int bRecordable);
 
     /**
      * Queue a command a distance from now, discarding the handle.
@@ -136,7 +136,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004a6178
      * @ghidraAddress PAL: 0x004e4218
      */
-    void PostIn(Sch::Command *pCommand, Sch::Tick tick);
+    void PostIn(Sch::Command *pCommand, Sch::Time tick);
 
     /**
      * The origin, negated, in nanoseconds.

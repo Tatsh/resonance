@@ -4,7 +4,7 @@
 
 #include "app/msgsink.h"
 #include "app/msgsource.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "sch/cmdid.h"
 
 class AdvanceSectionMsg;
@@ -248,7 +248,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00116a30
      * @ghidraAddress PAL: 0x00116ee8
      */
-    void AdvanceAt(Mid::MBT position);
+    void AdvanceAt(Sch::Tick position);
 
 private:
     // NTSC-U/C: 0x00116920, PAL: 0x00116dd8
@@ -350,7 +350,7 @@ private:
     int mSectionRepeats;                      // +0x50
     Globals *mGlobals;                        // +0x54
     GameStats *mStats;                        // +0x58
-    Mid::MBT mBarLength;                      // +0x5c
+    Sch::Tick mBarLength;                     // +0x5c
     std::vector<Player *> mPlayers;           // +0x60
     Sch::CmdID mCommand;                      // +0x6c
     std::vector<BGTrackGraph *> *mBackGraphs; // +0x70

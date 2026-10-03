@@ -1,8 +1,8 @@
 #pragma once
 
 #include "app/timeclock.h"
-#include "mid/mbt.h"
-#include "sch/tick.h"
+#include "mid/tick.h"
+#include "sch/time.h"
 
 namespace Sch {
 class CmdID;
@@ -79,8 +79,8 @@ public:
      *
      * The body divides the current time, biased by TempoMap::mCeilingBias, by
      * TempoMap::mNanosecondsPerTick, which rounds up to the next whole MIDI tick. The result is
-     * then wrapped in a Mid::MBT, whose constructor runs the discarded IsFiniteMBT() check at
-     * `0x00100ab8`.
+     * then wrapped in a Sch::Tick, whose constructor runs the discarded Sch::Tick::IsInRange()
+     * check at `0x00100ab8`.
      *
      * @return The song position, in MIDI ticks at 480 per quarter note.
      * @ghidraAddress NTSC-U/C: 0x004a7af8
@@ -95,15 +95,15 @@ public:
      * paused reading, but only when it differs from the current reading. The store happens even
      * while the clock runs, when Now() does not report the paused reading.
      *
-     * The position is a Mid::MBT passed by value in one register. Both callers, GrooveWorld's
+     * The position is a Sch::Tick passed by value in one register. Both callers, GrooveWorld's
      * PrepareLevel() at `0x0018ddd8` and StopLevel() at `0x0018ed6c`, construct it through
-     * Mid::MBT(int) immediately before the call.
+     * Sch::Tick(int) immediately before the call.
      *
      * @param tick The song position.
      * @ghidraAddress NTSC-U/C: 0x004a7b60
      * @ghidraAddress PAL: 0x004e5c70
      */
-    void SetSongTick(Mid::MBT tick);
+    void SetSongTick(Sch::Tick tick);
 
     /**
      * Queue a command at an absolute scheduler time, discarding the handle.
@@ -113,7 +113,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004a5fd0
      * @ghidraAddress PAL: 0x004e4070
      */
-    void PostAt(Command *pCommand, Tick tick);
+    void PostAt(Command *pCommand, Time tick);
 
     /**
      * Queue a command at a song position, under a handle the caller retains.

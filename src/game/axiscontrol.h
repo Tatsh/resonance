@@ -3,7 +3,7 @@
 #include "app/msgsink.h"
 #include "app/msgsource.h"
 #include "game/trackdata.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/axisregistermsg.h"
 #include "msg/message.h"
 #include "msg/trackselectmsg.h"
@@ -80,12 +80,12 @@ private:
     // NTSC-U/C: 0x0019fb40, PAL: 0x001a58a8
     void OnAllNotesOff(AllNotesOffMsg *pMsg);
 
-    int mTrack;            // +0x18
-    int mChannel;          // +0x1c, the track's channel byte widened to a word
-    int mLane;             // +0x20, the coarse stick position, 64 at first
-    int mAxis;             // +0x24, the stick position times 1024, -1 at first
-    int mBending;          // +0x28
-    int mBendOrigin;       // +0x2c, the stick position the bend started from
-    Mid::MBT mSustainTick; // +0x30
-    Player *mPlayer;       // +0x34, NullPlayer::sInstance until a TrackSelectMsg
+    int mTrack;             // +0x18
+    int mChannel;           // +0x1c, the track's channel byte widened to a word
+    int mLane;              // +0x20, the coarse stick position, 64 at first
+    int mAxis;              // +0x24, the stick position times 1024, -1 at first
+    int mBending;           // +0x28
+    int mBendOrigin;        // +0x2c, the stick position the bend started from
+    Sch::Tick mSustainTick; // +0x30
+    Player *mPlayer;        // +0x34, NullPlayer::sInstance until a TrackSelectMsg
 };

@@ -29,7 +29,7 @@ const char *NoteMsg::GetName() const {
 
 // NTSC-U/C: 0x003e3760, PAL: 0x0041bb00
 void NoteMsg::PrintExtra(std::ostream &stream) const {
-    Mid::MBT position;
+    Sch::Tick position;
     position.mTick = mTick;
     position.Print(stream);
 
@@ -58,5 +58,5 @@ void NoteMsg::restoreGuts(IBStream &stream) {
         .Read(&mNote, sizeof(mNote))
         .Read(&mVelocity, sizeof(mVelocity))
         .ReadLE(&length, sizeof(length));
-    mLength = Mid::MBT(length);
+    mLength = Sch::Tick(length);
 }

@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/notemsg.h"
 #include "msg/stdmidimsg.h"
 #include "os/mem.h"
@@ -24,12 +24,12 @@ constexpr int kCheckLast = 1;
 
 // The position both adders schedule at, after the adjustment above.
 inline int AdjustRiffTick(int nTick) {
-    if (nTick <= Mid::MBT(kSnapToStartTicks).mTick) {
-        return Mid::MBT(kRiffStartTick).mTick;
+    if (nTick <= Sch::Tick(kSnapToStartTicks).mTick) {
+        return Sch::Tick(kRiffStartTick).mTick;
     }
-    if (Mid::MBT(kLateTicks).mTick < nTick) {
-        const int nShifted = nTick + Mid::MBT(kLateShiftTicks).mTick;
-        return std::min(kMBTMaximum, std::max(kMBTMinimum, nShifted));
+    if (Sch::Tick(kLateTicks).mTick < nTick) {
+        const int nShifted = nTick + Sch::Tick(kLateShiftTicks).mTick;
+        return std::min(kTickMaximum, std::max(kTickMinimum, nShifted));
     }
     return nTick;
 }
@@ -61,10 +61,10 @@ void Riff::Print(std::ostream &stream) {
 void Riff::AddNoteMsg(
     int nTick, unsigned char nNote, unsigned char nVelocity, int nLength, unsigned char nChannel) {
     const int nAdjusted = AdjustRiffTick(nTick);
-    // The length is stored without the finite check Mid::MBT(int) makes.
-    Mid::MBT length;
+    // The length is stored without the finite check Sch::Tick(int) makes.
+    Sch::Tick length;
     length.mTick = nLength;
-    NoteMsg msg(kMBTInfinity, nChannel, nNote, nVelocity, length);
+    NoteMsg msg(kTickInfinity, nChannel, nNote, nVelocity, length);
     Add(&msg, nAdjusted, kCheckLast);
 }
 
@@ -75,6 +75,6 @@ void Riff::AddMidiMsg(int nTick,
                       unsigned char nData2,
                       unsigned char nChannel) {
     const int nAdjusted = AdjustRiffTick(nTick);
-    StdMidiMsg msg(kMBTInfinity, nStatus | nChannel, nData1, nData2);
+    StdMidiMsg msg(kTickInfinity, nStatus | nChannel, nData1, nData2);
     Add(&msg, nAdjusted, kCheckLast);
 }

@@ -5,7 +5,7 @@
 #include "app/msgsource.h"
 #include "game/midichase.h"
 #include "game/playmap.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "sch/barsequencer.h"
 #include "script/configquery.h"
 
@@ -29,7 +29,7 @@ ScoreTrackGraph::ScoreTrackGraph(TrackData *pTrackData)
       mApplication(Application::shared()), mSequencer(nullptr) {
     mQuantizer = new Quantizer(mTrackData);
     mPhraseMgr = new PhraseMgr(mApplication->GetSongClock(),
-                               Mid::MBT(kBarTicks).mTick,
+                               Sch::Tick(kBarTicks).mTick,
                                mApplication->GetPlayMap(),
                                QueryConfigValue(kPhraseMgrConfigCode),
                                mTrackData);
@@ -60,7 +60,7 @@ void ScoreTrackGraph::Start() {
     chase.Replay(mMuseSynth);
 
     mSequencer = new BarSequencer(mApplication->GetSongClock(), mTrackData, mMuseSynth, kMapped);
-    mSequencer->Start(Mid::MBT(0).mTick);
+    mSequencer->Start(Sch::Tick(0).mTick);
 }
 
 // NTSC-U/C: 0x001cf918, PAL: 0x001d57d0

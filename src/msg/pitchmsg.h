@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -66,7 +66,7 @@ public:
      *
      * Public because NotePitcher::PostPitchMsg() at `0x001b1f10` writes it directly.
      */
-    int mTick = kMBTInfinity;
+    int mTick = kTickInfinity;
 
     int mTrack;      /*!< The track. AppTunnel looks up the tunnel ring for it. +0x08 */
     int mGem;        /*!< The gem. AppTunnel converts it to a lane blend and flashes it. +0x0c */

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "mid/tickobj.h"
 #include "os/hxstr.h"
 #include "os/mem.h"
@@ -270,7 +270,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001d4b40
      * @ghidraAddress PAL: 0x001daa20
      */
-    void Locate(int nTick, Bar *&pBar, Mid::MBT &offset);
+    void Locate(int nTick, Bar *&pBar, Sch::Tick &offset);
 
     /**
      * Split a song position into its bar, mapped through PlayMap::MapBar(), and the offset.
@@ -281,7 +281,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001d4c58
      * @ghidraAddress PAL: 0x001dab38
      */
-    void LocateMapped(int nTick, const Bar *&pBar, Mid::MBT &offset) const;
+    void LocateMapped(int nTick, const Bar *&pBar, Sch::Tick &offset) const;
 
     /**
      * Add every gem of every phrase of a database, one phrase per step, and score each bar.

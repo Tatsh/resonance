@@ -106,7 +106,7 @@ void Mid::Reader::ReadTrack(HxStream &stream) {
     mTrackDone = 0;
     mRunningStatus = 0;
     mTick = 0;
-    mPendingTick = MBT(-1);
+    mPendingTick = Sch::Tick(-1);
     while (mTrackDone == 0) {
         ReadEvent(stream);
     }
@@ -118,7 +118,7 @@ void Mid::Reader::ReadEvent(HxStream &stream) {
     HxVarLenNumber delta;
     delta.Read(stream);
     mTick += delta;
-    MBT tick(mTick * mTargetDivision / mDivision);
+    Sch::Tick tick(mTick * mTargetDivision / mDivision);
 
     unsigned char nData1;
     stream.ReadNum(&nData1, sizeof(nData1));
@@ -185,7 +185,7 @@ void Mid::Reader::ReadMeta(unsigned char nType, HxStream &stream) {
     HxVarLenNumber length;
     length.Read(stream);
     int nStart = stream.GetMarker();
-    MBT tick(mTick * mTargetDivision / mDivision);
+    Sch::Tick tick(mTick * mTargetDivision / mDivision);
 
     switch (nType) {
     case kMetaSequenceNumber:
@@ -194,7 +194,7 @@ void Mid::Reader::ReadMeta(unsigned char nType, HxStream &stream) {
     case kMetaEndOfTrack:
         if (mCompare != nullptr) {
             Flush();
-            mPendingTick = MBT(-1);
+            mPendingTick = Sch::Tick(-1);
         }
         mTrackDone = 1;
         mReceiver->EndTrack();
@@ -224,7 +224,7 @@ void Mid::Reader::ReadMeta(unsigned char nType, HxStream &stream) {
 }
 
 // NTSC-U/C: 0x003d5260, PAL: 0x0040d150
-void Mid::Reader::SendChannelMsg(MBT tick,
+void Mid::Reader::SendChannelMsg(Sch::Tick tick,
                                  unsigned char nStatus,
                                  unsigned char nData1,
                                  unsigned char nData2) {
@@ -249,7 +249,7 @@ void Mid::Reader::SendChannelMsg(MBT tick,
 }
 
 // NTSC-U/C: 0x003d66a8, PAL: 0x0040e598
-void Mid::Reader::QueueEvent(MBT tick,
+void Mid::Reader::QueueEvent(Sch::Tick tick,
                              unsigned char nStatus,
                              unsigned char nData1,
                              unsigned char nData2) {

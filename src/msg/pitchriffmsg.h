@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -18,8 +18,8 @@ class Player;
  * recovered but the purpose of each field is not. Readers of the fields have not been traced, so
  * they are private by default.
  *
- * PrintExtra() hands `+0x0c` to Mid::MBT::Print(), writes the colour name of the player at `+0x08`,
- * and labels `+0x04` as `b#`. New() initialises the position to kMBTInfinity.
+ * PrintExtra() hands `+0x0c` to Sch::Tick::Print(), writes the colour name of the player at
+ * `+0x08`, and labels `+0x04` as `b#`. New() initialises the position to kTickInfinity.
  *
  * The destructor at `0x003da530` is compiler-generated and has no declaration here.
  */
@@ -34,7 +34,7 @@ public:
     static int sID;
 
     /**
-     * Construct a message with the position at kMBTInfinity and the rest unset.
+     * Construct a message with the position at kTickInfinity and the rest unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.
@@ -55,7 +55,7 @@ public:
      * @param position The song position of the start.
      * @param nTrack The player's track.
      */
-    PitchRiffMsg(int nButton, Player *pPlayer, Mid::MBT position, int nTrack)
+    PitchRiffMsg(int nButton, Player *pPlayer, Sch::Tick position, int nTrack)
         : mButton(nButton), mPlayer(pPlayer), mPosition(position), mTrack(nTrack) {
     }
 
@@ -112,8 +112,8 @@ public:
     // Public because Scratcher::DispatchPriv() reads these directly, through a PitchRiffMsg
     // pointer from outside the hierarchy, and the image exposes no accessor. A friend declaration
     // fits equally well.
-    int mButton;        // +0x04, labelled `b#` by PrintExtra()
-    Player *mPlayer;    // +0x08
-    Mid::MBT mPosition; // +0x0c
-    int mTrack;         // +0x10
+    int mButton;         // +0x04, labelled `b#` by PrintExtra()
+    Player *mPlayer;     // +0x08
+    Sch::Tick mPosition; // +0x0c
+    int mTrack;          // +0x10
 };

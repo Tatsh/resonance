@@ -2,7 +2,7 @@
 
 #include "app/ticktask.h"
 #include "gs/effector.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "synth/source.h"
 
 namespace Sch {
@@ -39,7 +39,7 @@ public:
      * @ghidraAddress PAL: 0x001a7f30
      */
     StutterEffector(Sch::TickClock *pClock, unsigned char nChannel, int nPeriod, int nFloor)
-        : TickTask(pClock, Mid::MBT(nPeriod / 2).mTick, 1), mEnabled(0), mPending(0),
+        : TickTask(pClock, Sch::Tick(nPeriod / 2).mTick, 1), mEnabled(0), mPending(0),
           mChannel(nChannel), mFloor(nFloor),
           mOscillator(Source::AllocateSquareSource(static_cast<float>(nPeriod))) {
     }

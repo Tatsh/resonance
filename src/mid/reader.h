@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 
 class HxIListChunk;
 class HxStream;
@@ -27,7 +27,7 @@ class Receiver;
  *
  * The destructor at `0x003d6450` is compiler-generated and destroys mPending. The uncalled routines
  * at `0x003d6798` and `0x003d67f0` in the same unit are the constructor and Print() of the unused
- * class that the image's `Mid::MBT` descriptor identifies, recorded on Mid::MBT in `mid/mbt.h`.
+ * class that the image's `Mid::MBT` descriptor identifies, recorded on Sch::Tick in `mid/tick.h`.
  *
  * Every member is public, because LevelConverter stores mCompare directly and the image exposes no
  * accessor.
@@ -159,8 +159,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d5260
      * @ghidraAddress PAL: 0x0040d150
      */
-    void
-    SendChannelMsg(MBT tick, unsigned char nStatus, unsigned char nData1, unsigned char nData2);
+    void SendChannelMsg(Sch::Tick tick,
+                        unsigned char nStatus,
+                        unsigned char nData1,
+                        unsigned char nData2);
 
     /**
      * Deliver a channel event, or collect it in mPending when mCompare is set.
@@ -174,7 +176,8 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d66a8
      * @ghidraAddress PAL: 0x0040e598
      */
-    void QueueEvent(MBT tick, unsigned char nStatus, unsigned char nData1, unsigned char nData2);
+    void
+    QueueEvent(Sch::Tick tick, unsigned char nStatus, unsigned char nData1, unsigned char nData2);
 
     /**
      * Sort mPending with mCompare, deliver every event at mPendingTick, and empty it.
@@ -195,7 +198,7 @@ public:
     int mTrackDone;               /*!< Non-zero once the end-of-track event is read. */
     HxIListChunk *mReader;        /*!< The chunk reader over the file. */
     std::vector<Midi> mPending;   /*!< Events collected at mPendingTick. */
-    MBT mPendingTick;             /*!< Position of every event in mPending. */
+    Sch::Tick mPendingTick;       /*!< Position of every event in mPending. */
     EventCompare mCompare;        /*!< Ordering for mPending, or null to deliver directly. */
 };
 

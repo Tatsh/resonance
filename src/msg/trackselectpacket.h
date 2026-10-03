@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "game/idableptr.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/toallothergamesystemspacket.h"
 
 class IBStream;
@@ -18,8 +18,8 @@ class Player;
  * constructor at `0x003f3868`. Clone() delegates to it. The four words Packet provides are
  * declared there rather than here.
  *
- * The member at `+0x14` is a Mid::MBT. PrintExtra() hands it to Mid::MBT::Print(), and New()
- * initialises it to kMBTInfinity. The transfer through the emission at `0x004acf28` alone could
+ * The member at `+0x14` is a Sch::Tick. PrintExtra() hands it to Sch::Tick::Print(), and New()
+ * initialises it to kTickInfinity. The transfer through the emission at `0x004acf28` alone could
  * not distinguish it from a CmdID. PrintExtra() writes the player at `+0x18` through
  * Player::Print() and labels `+0x20` as `track` and `+0x24` as `place`.
  *
@@ -28,7 +28,7 @@ class Player;
 class TrackSelectPacket : public ToAllOtherGameSystemsPacket {
 public:
     /**
-     * Construct a packet with the position at kMBTInfinity and no player.
+     * Construct a packet with the position at kTickInfinity and no player.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.
@@ -47,7 +47,7 @@ public:
      * @param nTrack The selected track.
      * @param nPlace The player's place on the track.
      */
-    TrackSelectPacket(Mid::MBT position, Player *pPlayer, int nTrack, int nPlace)
+    TrackSelectPacket(Sch::Tick position, Player *pPlayer, int nTrack, int nPlace)
         : mPosition(position), mPlayer(pPlayer), mTrack(nTrack), mPlace(nPlace) {
     }
 
@@ -121,7 +121,7 @@ public:
 
 public:
     /** The song position of the selection. NetPlayer's handler at `0x00122f78` reads it. +0x14 */
-    Mid::MBT mPosition;
+    Sch::Tick mPosition;
 
     /** The player that selected. NetPlayer's handler at `0x00122f78` resolves it. +0x18 */
     IDablePtr<Player> mPlayer;

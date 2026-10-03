@@ -1,6 +1,6 @@
 #include "gs/volumeeffector.h"
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/stdmidimsg.h"
 
 namespace {
@@ -37,6 +37,6 @@ void VolumeEffector::SetEnabled(int bEnabled) {
     mEnabled = bEnabled;
     const unsigned char nValue =
         bEnabled ? static_cast<unsigned char>(mAppliedLevel) : kControllerFull;
-    StdMidiMsg msg(kMBTInfinity, kStatusControlChange | mChannel, kVolumeController, nValue);
+    StdMidiMsg msg(kTickInfinity, kStatusControlChange | mChannel, kVolumeController, nValue);
     Send(&msg);
 }

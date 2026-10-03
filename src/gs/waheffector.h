@@ -2,7 +2,7 @@
 
 #include "app/ticktask.h"
 #include "gs/effector.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "synth/source.h"
 
 namespace Sch {
@@ -37,7 +37,7 @@ public:
      * @ghidraAddress PAL: 0x001a7c40
      */
     WahEffector(Sch::TickClock *pClock, unsigned char nChannel, int nDepth, int nPeriod)
-        : TickTask(pClock, Mid::MBT(kPeriodTicks).mTick, 0), mChannel(nChannel), mDepth(nDepth),
+        : TickTask(pClock, Sch::Tick(kPeriodTicks).mTick, 0), mChannel(nChannel), mDepth(nDepth),
           mOscillator(Source::AllocateTriSource(static_cast<float>(nPeriod), kStartPhase)),
           mEnabled(0), mPending(0) {
     }

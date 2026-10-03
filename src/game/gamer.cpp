@@ -257,7 +257,7 @@ void Gamer::OnPlaybackMode(PlaybackModeMsg *pMsg) {
 
     ForceFeedbackMgr *pForceFeedback = mGlobals->GetWorld()->mForceFeedback;
     pForceFeedback->SetJukeboxMode(mPlaybackOn);
-    pForceFeedback->StartMetronome(Mid::MBT(0));
+    pForceFeedback->StartMetronome(Sch::Tick(0));
 
     PlaybackToggleMsg toggle(mPlaybackOn);
     Send(&toggle);
@@ -347,8 +347,8 @@ TrackData *Gamer::GetTrack(int nTrack) const {
 
 // NTSC-U/C: 0x001116c8, PAL: 0x00111b28
 void Gamer::AdvanceTo(int nBar, int nAdvance) {
-    const Mid::MBT position(
-        std::min(std::max(nBar * Mid::MBT(kTicksPerBar).mTick, kMBTMinimum), kMBTMaximum));
+    const Sch::Tick position(
+        std::min(std::max(nBar * Sch::Tick(kTicksPerBar).mTick, kTickMinimum), kTickMaximum));
     AdvanceSectionToggleMsg toggle(nAdvance, position);
     Send(&toggle);
 
@@ -365,7 +365,7 @@ void Gamer::AdvanceTo(int nBar, int nAdvance) {
 }
 
 // NTSC-U/C: 0x00116a30, PAL: 0x00116ee8
-void Gamer::AdvanceAt(Mid::MBT position) {
+void Gamer::AdvanceAt(Sch::Tick position) {
     const int nBar = position.mTick / mBarLength.mTick;
     AdvanceTo(nBar, mPlayMap->ToggleLoop(nBar));
 }
@@ -599,9 +599,10 @@ void Gamer::EndWithScore(int nScore) {
 
 // NTSC-U/C: 0x00112838, PAL: 0x00112c98
 void Gamer::ScheduleBar(int nBar) {
-    Mid::MBT when(std::min(std::max(mBarLength.mTick * nBar, kMBTMinimum), kMBTMaximum));
-    if (when.mTick != Mid::MBT(0).mTick) {
-        when.mTick = std::min(std::max(when.mTick - Mid::MBT(1).mTick, kMBTMinimum), kMBTMaximum);
+    Sch::Tick when(std::min(std::max(mBarLength.mTick * nBar, kTickMinimum), kTickMaximum));
+    if (when.mTick != Sch::Tick(0).mTick) {
+        when.mTick =
+            std::min(std::max(when.mTick - Sch::Tick(1).mTick, kTickMinimum), kTickMaximum);
     }
 
     GamerCmd *pCommand = new GamerCmd(this, nBar);

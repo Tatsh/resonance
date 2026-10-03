@@ -11,8 +11,8 @@ namespace Sch {
  * Scheduler time, as a signed 64-bit count.
  *
  * The type has no RTTI descriptor, because it is not polymorphic. Its name comes from the
- * constructor signature of `Catcher` the image records. That signature passes a `Sch::Tick` by
- * value.
+ * debugging symbols of the North American demo release. The demo's Print(), Save(), and Load()
+ * have the same instructions as this type's.
  *
  * The width is fixed by the code that moves one around. `Sch::TimedCommand` stores two of them,
  * and its constructor at `0x005d32f8` writes both with `sd`, while the scheduler run loop at
@@ -32,11 +32,10 @@ namespace Sch {
  * readings by `1.0e9 / 1000.0` at `0x005124c8` to produce one. The run loop at `0x004aa8a4` treats
  * a gap of 6000000000 as six seconds of arrears.
  *
- * A song position is a separate quantity and is not one of these. Sch::TickClock::SongTick()
- * reports a song position as a plain `int` in MIDI ticks at 480 per quarter note, and
+ * A song position is the separate type Sch::Tick, in MIDI ticks at 480 per quarter note, and
  * Sch::TempoMap converts between the two.
  */
-struct Tick {
+struct Time {
     /**
      * Write the count.
      *

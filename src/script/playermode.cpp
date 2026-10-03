@@ -4,7 +4,7 @@
 #include "app/globals.h"
 #include "game/grooveworld.h"
 #include "game/localplayer.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "sch/tickclock.h"
@@ -32,7 +32,7 @@ Py::Object ScriptSetLoopMode(const Py::Tuple &args) {
     if (pWorld != nullptr) {
         LocalPlayer *pPlayer = dynamic_cast<LocalPlayer *>(pWorld->mLocalPlayers[0]);
         if (pPlayer != nullptr) {
-            const Mid::MBT position(Application::shared()->GetSongClock()->SongTick());
+            const Sch::Tick position(Application::shared()->GetSongClock()->SongTick());
             pPlayer->SetLooping(nLooping != 0 ? 1 : 0, position);
         }
     }

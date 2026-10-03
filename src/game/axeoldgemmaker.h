@@ -3,7 +3,7 @@
 #include "app/msgsink.h"
 #include "app/msgsource.h"
 #include "game/trackdata.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class NoteMsg;
@@ -98,10 +98,10 @@ private:
     // NTSC-U/C: 0x001a3600, PAL: 0x001a9368
     void OnPhrase(PhraseMsg *pMsg);
 
-    int mTrack;             // +0x18, copied from TrackData::mIndex
-    Mid::MBT mPosition;     // +0x1c, the position of the entry being replayed
-    Phrase *mPhrase;        // +0x20, the phrase being replayed, or null
-    Mid::MBT mSustainStart; // +0x24, zero while the pedal is not held
+    int mTrack;              // +0x18, copied from TrackData::mIndex
+    Sch::Tick mPosition;     // +0x1c, the position of the entry being replayed
+    Phrase *mPhrase;         // +0x20, the phrase being replayed, or null
+    Sch::Tick mSustainStart; // +0x24, zero while the pedal is not held
 };
 
 /**

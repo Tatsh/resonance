@@ -3,7 +3,7 @@
 #include "app/timeclock.h"
 #include "app/timetask.h"
 #include "sch/command.h"
-#include "sch/tick.h"
+#include "sch/time.h"
 
 namespace {
 
@@ -97,7 +97,7 @@ void TimeTask::Run() {
 
     mNextNs += mPeriodNs;
     Cmd *pCommand = new Cmd(this);
-    const Sch::Tick due{mNextNs};
+    const Sch::Time due{mNextNs};
     mClock->Post(pCommand, due, mCommand, kNotRecordable, kAbsolute);
     if (pCommand != nullptr) {
         pCommand->Release();

@@ -8,7 +8,7 @@
 #include "game/quantizer.h"
 #include "game/trackdata.h"
 #include "gs/phrasemgr.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/invalidateseekermsg.h"
 #include "msg/message.h"
 #include "msg/musemsg.h"
@@ -176,7 +176,7 @@ private:
     int mPhraseBar;                   // +0x2c, the bar mPhrase records, -1 at first
     Player *mPlayer;                  // +0x30, NullPlayer::sInstance until a TrackSelectMsg
     std::vector<HeldNote> mHeldNotes; // +0x34
-    Mid::MBT mBarTicks;               // +0x40
+    Sch::Tick mBarTicks;              // +0x40
     const TrackData *mTrackData;      // +0x44
     int mSwitchBanks;                 // +0x48, from configuration codes 0x3a4 and 0x3a1
     float mValue;                     // +0x4c, the axis value recorded with every message

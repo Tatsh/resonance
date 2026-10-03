@@ -8,14 +8,14 @@
 #include "stream/obstream.h"
 
 // NTSC-U/C: 0x001a2560, PAL: 0x001a82c8
-// The stream Mid::MBT::Save() returns is not used.
+// The stream Sch::Tick::saveGuts() returns is not used.
 void Gem::saveGuts(OBStream &stream) const {
     int gem = mGem;
     int trans = mTrans;
     int bar = mBar;
     OBStream &rest =
         stream.WriteLE(&gem, sizeof(gem)).WriteLE(&trans, sizeof(trans)).WriteLE(&bar, sizeof(bar));
-    mLoc.Save(rest);
+    mLoc.saveGuts(rest);
 
     int id = mPlayer->mPlayerId;
     rest.WriteLE(&id, sizeof(id));
@@ -28,7 +28,7 @@ void Gem::restoreGuts(IBStream &stream) {
     IBStream &rest = stream.ReadLE(&mGem, sizeof(mGem))
                          .ReadLE(&mTrans, sizeof(mTrans))
                          .ReadLE(&mBar, sizeof(mBar));
-    mLoc.Load(rest);
+    mLoc.restoreGuts(rest);
 
     IDablePtr<Player> player;
     rest.ReadLE(&player.mId, sizeof(player.mId));

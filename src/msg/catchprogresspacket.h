@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "game/idableptr.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/toallothergamesystemspacket.h"
 
 class IBStream;
@@ -18,8 +18,8 @@ class Player;
  * constructor at `0x003f38d0`. Clone() delegates to it. The four words Packet provides are
  * declared there rather than here.
  *
- * The member at `+0x1c` is a Mid::MBT. PrintExtra() hands it to Mid::MBT::Print() after the label
- * ` @`, and New() initialises it to kMBTInfinity. The transfer through the emission at
+ * The member at `+0x1c` is a Sch::Tick. PrintExtra() hands it to Sch::Tick::Print() after the label
+ * ` @`, and New() initialises it to kTickInfinity. The transfer through the emission at
  * `0x004acf28` alone could not distinguish it from a CmdID. PrintExtra() labels `+0x20` as `track`
  * and `+0x24` as `succ`. The player reference at `+0x14` is transferred but not printed.
  *
@@ -99,7 +99,7 @@ public:
     virtual void restoreGuts(IBStream &stream);
 
     IDablePtr<Player> mPlayer; /*!< The catching player. +0x14 */
-    Mid::MBT mPosition;        /*!< The song position, printed after ` @`. +0x1c */
+    Sch::Tick mPosition;       /*!< The song position, printed after ` @`. +0x1c */
     int mTrack;                /*!< Labelled `track` by PrintExtra(). +0x20 */
     float mSucc;               /*!< Labelled `succ` by PrintExtra(). +0x24 */
 };

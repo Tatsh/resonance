@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 
 // NTSC-U/C: 0x003d6e08, PAL: 0x0040ecf8
 Message *MultiMuseMsg::New() {
@@ -47,9 +47,9 @@ MultiMuseMsg::~MultiMuseMsg() {
 
 // NTSC-U/C: 0x003e3990, PAL: 0x0041bd30
 void MultiMuseMsg::PrintExtra(std::ostream &stream) const {
-    // MuseMsg's member is a Mid::MBT rather than a plain int, which this body proves by handing
-    // it to Mid::MBT::Print(). Its header still types it as an int.
-    Mid::MBT position;
+    // MuseMsg's member is a Sch::Tick rather than a plain int, which this body proves by handing
+    // it to Sch::Tick::Print(). Its header still types it as an int.
+    Sch::Tick position;
     position.mTick = mTick;
     position.Print(stream);
     mMuse->Print(stream << " ");

@@ -14,7 +14,7 @@
 #include "game/riffset.h"
 #include "game/tickobjvector.h"
 #include "gs/multimuse.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/musemsg.h"
 #include "msg/notemsg.h"
 #include "msg/stdmidimsg.h"
@@ -75,9 +75,9 @@ std::vector<int> g_scoreThresholds;
 // NTSC-U/C: 0x0068ff34, PAL: 0x006d11b4
 int g_bScoreTablesLoaded;
 
-// A computed position, clamped to the finite range as the inline Mid::MBT arithmetic does.
-inline Mid::MBT MakePosition(int nTick) {
-    return Mid::MBT(std::min(std::max(nTick, kMBTMinimum), kMBTMaximum));
+// A computed position, clamped to the finite range as the inline Sch::Tick arithmetic does.
+inline Sch::Tick MakePosition(int nTick) {
+    return Sch::Tick(std::min(std::max(nTick, kTickMinimum), kTickMaximum));
 }
 
 // NTSC-U/C: 0x001d75a0, PAL: 0x001dd480
@@ -161,10 +161,10 @@ void TrackData::Bar::Print(std::ostream &stream) {
 // NTSC-U/C: 0x001d35a8, PAL: 0x001d9460
 TrackData::TrackData(int nIndex, PlayMap *pMap)
     : mIndex(nIndex), mKind(kTrackModeRiff), mMap(pMap), mBars(pMap->mSteps.back()) {
-    mBarLength = Mid::MBT(kBarLength).mTick;
+    mBarLength = Sch::Tick(kBarLength).mTick;
     mGemSearchBars = kGemSearchBars;
     mCurrentRiffSet = nullptr;
-    mCurrentRiffTick = Mid::MBT(kNoRiffTick).mTick;
+    mCurrentRiffTick = Sch::Tick(kNoRiffTick).mTick;
 }
 
 // NTSC-U/C: 0x001d3900, PAL: 0x001d97d0
@@ -175,14 +175,14 @@ TrackData::~TrackData() {
 
 // NTSC-U/C: 0x001d3b18, PAL: 0x001d99f8
 void TrackData::AddRiff(int nTick, Riff *pRiff) {
-    const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
+    const Sch::Tick length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
     if (!(nTick < length.mTick)) {
         return;
     }
 
     if (mCurrentRiffTick != nTick) {
         Bar *pBar;
-        Mid::MBT offset;
+        Sch::Tick offset;
         Locate(nTick, pBar, offset);
 
         mCurrentRiffSet = new RiffSet;
@@ -191,7 +191,7 @@ void TrackData::AddRiff(int nTick, Riff *pRiff) {
         SetAtTick(pBar->mRiffSets, mCurrentRiffSet, offset.mTick);
 
         for (auto it = mBars.begin() + (pBar - mBars.data()) + 1; it != mBars.end(); ++it) {
-            SetAtTick(it->mRiffSets, mCurrentRiffSet, Mid::MBT(0).mTick);
+            SetAtTick(it->mRiffSets, mCurrentRiffSet, Sch::Tick(0).mTick);
         }
     }
     mCurrentRiffSet->mRiffs[pRiff->mId] = pRiff;
@@ -199,13 +199,13 @@ void TrackData::AddRiff(int nTick, Riff *pRiff) {
 
 // NTSC-U/C: 0x001d3d10, PAL: 0x001d9bf0
 void TrackData::AddHarmony(int nTick, const Harmony &harmony) {
-    const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
+    const Sch::Tick length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
     if (!(nTick < length.mTick)) {
         return;
     }
 
     Bar *pBar;
-    Mid::MBT offset;
+    Sch::Tick offset;
     Locate(nTick, pBar, offset);
 
     Harmony *pHarmony = new Harmony(harmony);
@@ -213,19 +213,19 @@ void TrackData::AddHarmony(int nTick, const Harmony &harmony) {
     SetAtTick(pBar->mHarmonies, pHarmony, offset.mTick);
 
     for (auto it = mBars.begin() + (pBar - mBars.data()) + 1; it != mBars.end(); ++it) {
-        SetAtTick(it->mHarmonies, pHarmony, Mid::MBT(0).mTick);
+        SetAtTick(it->mHarmonies, pHarmony, Sch::Tick(0).mTick);
     }
 }
 
 // NTSC-U/C: 0x001d3ee0, PAL: 0x001d9dc0
 void TrackData::AddGem(int nTick, int nGem, Riff *pRiff) {
-    const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
+    const Sch::Tick length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
     if (!(nTick < length.mTick)) {
         return;
     }
 
     Bar *pBar;
-    Mid::MBT offset;
+    Sch::Tick offset;
     Locate(nTick, pBar, offset);
     InsertAtTick(pBar->mGems, nGem, offset.mTick);
 
@@ -242,13 +242,13 @@ void TrackData::AddMidiMsg(int nTick,
                            unsigned char nStatus,
                            unsigned char nData1,
                            unsigned char nData2) {
-    const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
+    const Sch::Tick length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
     if (!(nTick < length.mTick)) {
         return;
     }
 
     Bar *pBar;
-    Mid::MBT offset;
+    Sch::Tick offset;
     Locate(nTick, pBar, offset);
     MuseMsg *pMsg = new StdMidiMsg(offset.mTick, nStatus, nData1, nData2);
     InsertAtTick(pBar->mMidi, pMsg, offset.mTick);
@@ -257,15 +257,15 @@ void TrackData::AddMidiMsg(int nTick,
 // NTSC-U/C: 0x001d41c0, PAL: 0x001da0a0
 void TrackData::AddNoteMsg(
     int nTick, unsigned char nNote, unsigned char nVelocity, int nLength, unsigned char nChannel) {
-    const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
+    const Sch::Tick length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
     if (!(nTick < length.mTick)) {
         return;
     }
 
     Bar *pBar;
-    Mid::MBT offset;
+    Sch::Tick offset;
     Locate(nTick, pBar, offset);
-    Mid::MBT noteLength; // The length is stored without the finiteness check.
+    Sch::Tick noteLength; // The length is stored without the finiteness check.
     noteLength.mTick = nLength;
     MuseMsg *pMsg = new NoteMsg(offset.mTick, nChannel, nNote, nVelocity, noteLength);
     InsertAtTick(pBar->mMidi, pMsg, offset.mTick);
@@ -294,7 +294,7 @@ void TrackData::ScoreBars() {
 // NTSC-U/C: 0x001d4428, PAL: 0x001da308
 int TrackData::FindGemAtOrBefore(int nTick, int *pTick, int *pGem) const {
     const Bar *pBar;
-    Mid::MBT offset;
+    Sch::Tick offset;
     LocateMapped(nTick, pBar, offset);
 
     auto it = FindAtOrBefore(pBar->mGems, offset.mTick);
@@ -303,8 +303,8 @@ int TrackData::FindGemAtOrBefore(int nTick, int *pTick, int *pGem) const {
             return 0;
         }
 
-        const Mid::MBT start = MakePosition(mBarLength * (nTick / mBarLength));
-        nTick = MakePosition(start.mTick - Mid::MBT(1).mTick).mTick;
+        const Sch::Tick start = MakePosition(mBarLength * (nTick / mBarLength));
+        nTick = MakePosition(start.mTick - Sch::Tick(1).mTick).mTick;
 
         LocateMapped(nTick, pBar, offset);
         it = FindAtOrBefore(pBar->mGems, offset.mTick);
@@ -313,7 +313,7 @@ int TrackData::FindGemAtOrBefore(int nTick, int *pTick, int *pGem) const {
         }
     }
 
-    const Mid::MBT start = MakePosition(mBarLength * (nTick / mBarLength));
+    const Sch::Tick start = MakePosition(mBarLength * (nTick / mBarLength));
     *pTick = MakePosition(it->mPosition.mTick + start.mTick).mTick;
     *pGem = it->mValue;
     return 1;
@@ -322,13 +322,13 @@ int TrackData::FindGemAtOrBefore(int nTick, int *pTick, int *pGem) const {
 // NTSC-U/C: 0x001d46f0, PAL: 0x001da5d0
 int TrackData::FindGemAtOrAfter(int nTick, int *pTick, int *pGem) const {
     const Bar *pBar;
-    Mid::MBT offset;
+    Sch::Tick offset;
     for (int nBarsSearched = 0; nBarsSearched < mGemSearchBars;) {
         LocateMapped(nTick, pBar, offset);
         if (pBar->mGems.size() != 0) {
             const auto it = FindAtOrAfter(pBar->mGems, offset.mTick);
             if (it != pBar->mGems.end()) {
-                const Mid::MBT start = MakePosition(mBarLength * (nTick / mBarLength));
+                const Sch::Tick start = MakePosition(mBarLength * (nTick / mBarLength));
                 *pTick = MakePosition(it->mPosition.mTick + start.mTick).mTick;
                 *pGem = it->mValue;
                 return 1;
@@ -336,7 +336,7 @@ int TrackData::FindGemAtOrAfter(int nTick, int *pTick, int *pGem) const {
         }
 
         ++nBarsSearched;
-        const Mid::MBT start = MakePosition(mBarLength * (nTick / mBarLength));
+        const Sch::Tick start = MakePosition(mBarLength * (nTick / mBarLength));
         nTick = MakePosition(start.mTick + mBarLength).mTick;
     }
     return 0;
@@ -371,18 +371,18 @@ void TrackData::Print(std::ostream &stream) {
 }
 
 // NTSC-U/C: 0x001d4b40, PAL: 0x001daa20
-void TrackData::Locate(int nTick, Bar *&pBar, Mid::MBT &offset) {
+void TrackData::Locate(int nTick, Bar *&pBar, Sch::Tick &offset) {
     const int nBar = nTick / mBarLength;
-    const Mid::MBT start = MakePosition(mBarLength * nBar);
+    const Sch::Tick start = MakePosition(mBarLength * nBar);
     offset = MakePosition(nTick - start.mTick);
     pBar = &mBars[nBar];
 }
 
 // NTSC-U/C: 0x001d4c58, PAL: 0x001dab38
-void TrackData::LocateMapped(int nTick, const Bar *&pBar, Mid::MBT &offset) const {
+void TrackData::LocateMapped(int nTick, const Bar *&pBar, Sch::Tick &offset) const {
     const int nBar = nTick / mBarLength;
     const int nMappedBar = mMap->MapBar(nBar);
-    const Mid::MBT start = MakePosition(mBarLength * nBar);
+    const Sch::Tick start = MakePosition(mBarLength * nBar);
     offset = MakePosition(nTick - start.mTick);
     pBar = &mBars[nMappedBar];
 }
@@ -399,7 +399,7 @@ void TrackData::AddPhrases(PhraseDatabase *pDatabase) {
         }
 
         for (const auto &gem : pPhrase->mGems) {
-            const Mid::MBT start = MakePosition(i * Mid::MBT(kBarLength).mTick);
+            const Sch::Tick start = MakePosition(i * Sch::Tick(kBarLength).mTick);
             AddGem(MakePosition(gem.mPosition.mTick + start.mTick).mTick, gem.mGem, nullptr);
         }
 
@@ -410,7 +410,7 @@ void TrackData::AddPhrases(PhraseDatabase *pDatabase) {
 
 // NTSC-U/C: 0x001d7688, PAL: 0x001dd568
 void TrackData::SetQuant(int nTick, int nQuant) {
-    const Mid::MBT length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
+    const Sch::Tick length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
     if (!(nTick < length.mTick)) {
         return;
     }
@@ -432,7 +432,7 @@ void TrackData::SetOwner(Player *pPlayer, int nBar) const {
 // NTSC-U/C: 0x001d7788, PAL: 0x001dd668
 Harmony *TrackData::GetHarmony(int nTick) const {
     const Bar *pBar;
-    Mid::MBT offset;
+    Sch::Tick offset;
     LocateMapped(nTick, pBar, offset);
 
     const auto it = FindAtOrBefore(pBar->mHarmonies, offset.mTick);
@@ -445,7 +445,7 @@ Harmony *TrackData::GetHarmony(int nTick) const {
 // NTSC-U/C: 0x001d77e0, PAL: 0x001dd6c0
 Riff *TrackData::GetRiff(int nTick, int nLevel) const {
     const Bar *pBar;
-    Mid::MBT offset;
+    Sch::Tick offset;
     LocateMapped(nTick, pBar, offset);
 
     const auto it = FindAtOrBefore(pBar->mRiffSets, offset.mTick);
@@ -480,7 +480,7 @@ Riff *TrackData::GetRiffInBar(int nBar, int nOffset, int nLevel) const {
 // NTSC-U/C: 0x001d7948, PAL: 0x001dd828
 int TrackData::GetGemAt(int nTick) const {
     const Bar *pBar;
-    Mid::MBT offset;
+    Sch::Tick offset;
     LocateMapped(nTick, pBar, offset);
 
     const auto it = FindAtOrBefore(pBar->mGems, offset.mTick);
@@ -562,13 +562,13 @@ const std::vector<TickObj<int> > *TrackData::GetGems(int nBar) const {
 
 // NTSC-U/C: 0x001d7b48, PAL: 0x001dda28
 void TrackData::Locate(int nTick, Bar *&pBar) {
-    Mid::MBT offset;
+    Sch::Tick offset;
     Locate(nTick, pBar, offset);
 }
 
 // NTSC-U/C: 0x001d7b70, PAL: 0x001dda50
 void TrackData::LocateMapped(int nTick, const Bar *&pBar) const {
-    Mid::MBT offset;
+    Sch::Tick offset;
     LocateMapped(nTick, pBar, offset);
 }
 

@@ -10,7 +10,7 @@
 #include "game/player.h"
 #include "game/tickobjvector.h"
 #include "gs/multimuse.h"
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "mid/tickobj.h"
 #include "msg/musemsg.h"
 #include "os/log.h"
@@ -224,7 +224,7 @@ void Phrase::LoadValues(IBStream &stream) {
         const float flValue = cValue / kValueScaleDouble;
 
         TickObj<float> value;
-        value.mPosition = Mid::MBT(nTick);
+        value.mPosition = Sch::Tick(nTick);
         value.mValue = flValue;
         mValues.push_back(value);
     }
@@ -266,7 +266,7 @@ IBStream &operator>>(IBStream &stream, Phrase::Gem &gem) {
     stream.Read(&cGem, sizeof(cGem));
     stream.Read(&cTrans, sizeof(cTrans));
 
-    gem.mPosition = Mid::MBT(nTick);
+    gem.mPosition = Sch::Tick(nTick);
     gem.mGem = cGem;
     gem.mTrans = cTrans;
     return stream;

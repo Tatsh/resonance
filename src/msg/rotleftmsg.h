@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mid/mbt.h"
+#include "mid/tick.h"
 #include "msg/message.h"
 
 class Player;
@@ -23,7 +23,7 @@ class Player;
 class RotLeftMsg : public Message {
 public:
     /**
-     * Construct a message with the position at kMBTInfinity and the player unset.
+     * Construct a message with the position at kTickInfinity and the player unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
      * constructor.
@@ -40,7 +40,7 @@ public:
      * @param pPlayer The player the controller belongs to.
      * @param position The song position of the reading.
      */
-    RotLeftMsg(Player *pPlayer, Mid::MBT position) : mPlayer(pPlayer), mPosition(position) {
+    RotLeftMsg(Player *pPlayer, Sch::Tick position) : mPlayer(pPlayer), mPosition(position) {
     }
 
     /**
@@ -89,7 +89,7 @@ public:
      * The song position of the rotation. TrackSelector::DispatchPriv() reads it as the payload
      * of the rebind. +0x08
      */
-    Mid::MBT mPosition;
+    Sch::Tick mPosition;
 };
 
 /**

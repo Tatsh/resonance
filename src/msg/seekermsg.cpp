@@ -35,13 +35,13 @@ const char *SeekerMsg::GetName() const {
 
 // NTSC-U/C: 0x003d81f0, PAL: 0x00410568
 // The colour name is copied into a temporary before it is written, and the discarded
-// IsFiniteMBT() call is the shape of an assertion compiled without its report.
+// Sch::Tick::IsInRange() call is the shape of an assertion compiled without its report.
 void SeekerMsg::PrintExtra(std::ostream &stream) const {
     stream << HxStr(mPlayer->mColorName);
     if (mEnabled != 0) {
         std::ostream &rest = stream << " bars[" << mFirstBar << " - " << mFirstBar + mBarCount
                                     << "]" << " tr#" << mTrack << " when: ";
-        IsFiniteMBT(kTicksPerBar);
+        Sch::Tick::IsInRange(kTicksPerBar);
         rest << mWhen.mTick / kTicksPerBar;
     } else {
         stream << " (off)";
