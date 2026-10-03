@@ -179,10 +179,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001273c0
      * @ghidraAddress PAL: 0x00127ae0
      */
-    virtual int GetExtent();
+    virtual int GetLength() const;
 
     /**
-     * Slot 9. Forwards to GetExtent() through the table rather than calling it directly.
+     * Slot 9. Forwards to GetLength() through the table rather than calling it directly.
      *
      * Callers read the result as the last bar of the level.
      *
@@ -197,7 +197,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00127440
      * @ghidraAddress PAL: 0x00127b60
      */
-    virtual int GetSectionCount();
+    virtual int GetNumSections() const;
 
     /**
      * Slot 11. Returns its argument unchanged.
@@ -371,7 +371,7 @@ public:
     /**
      * Ascending sequence of positions.
      *
-     * GetExtent(), GetSectionCount(), GetPatternIndex(), and GetAbsoluteSectionIndex() read the
+     * GetLength(), GetNumSections(), GetPatternIndex(), and GetAbsoluteSectionIndex() read the
      * last element, the count, and an upper bound over this vector, and AddStep() appends to it.
      * The element type is int, from the four-byte stride of every access. Public because the
      * PhraseDatabase constructor at `0x001b72d8` reads its last element and its count directly and

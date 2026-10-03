@@ -107,7 +107,7 @@ void View::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x004e37d0, PAL: 0x00522088
 void View::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
     Animatable::Save(stream);
     Transformable::Save(stream);
     Drawable::Save(stream);
@@ -152,9 +152,9 @@ void View::Load(Stream &stream) {
     }
 
     int nVersion = 0;
-    stream.Read(&nVersion, sizeof(nVersion));
+    stream.ReadLE(&nVersion, sizeof(nVersion));
     if (nVersion > kSerialVersion) {
-        g_failSink.Report("Can't load new View\n");
+        Rnd::TheDbg.Notify("Can't load new View\n");
         return;
     }
 
@@ -165,7 +165,7 @@ void View::Load(Stream &stream) {
     if (nVersion < kCameraRefRevision) {
         HxStr name(nullptr);
         stream.ReadString(name);
-        (void)dynamic_cast<Cam *>(g_manager.Find(name)); // Yes, the binary discards the camera.
+        (void)dynamic_cast<Cam *>(TheManager.Find(name)); // Yes, the binary discards the camera.
     }
 }
 
@@ -182,11 +182,11 @@ View *View::NewView(const HxStr &name) {
 
 // NTSC-U/C: 0x004dff48, PAL: 0x0051e720
 void View::Init() {
-    g_manager.RegisterClass(g_viewClassName, NewViewObject);
-    g_manager.RegisterClass(HxStr("Animatable"), NewAnimatableView);
-    g_manager.RegisterClass(HxStr("Collideable"), NewCollideableView);
-    g_manager.RegisterClass(HxStr("Drawable"), NewDrawableView);
-    g_manager.RegisterClass(HxStr("Transformable"), NewTransformableView);
+    TheManager.RegisterClass(g_viewClassName, NewViewObject);
+    TheManager.RegisterClass(HxStr("Animatable"), NewAnimatableView);
+    TheManager.RegisterClass(HxStr("Collideable"), NewCollideableView);
+    TheManager.RegisterClass(HxStr("Drawable"), NewDrawableView);
+    TheManager.RegisterClass(HxStr("Transformable"), NewTransformableView);
 }
 
 } // namespace Rnd

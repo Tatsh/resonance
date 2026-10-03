@@ -29,7 +29,7 @@ constexpr int kLevelScriptTemplate = 1019;
 SoloScreenAnim::SoloScreenAnim(const std::vector<TnlArena::ScreenMesh> *pScreens,
                                Rnd::Mat *pPlayerMat)
     : mPeriod(kBlinkPeriod), mPhase(kNoPhase), mLevel(kLevelOwn), mPlayerMat(pPlayerMat),
-      mNoiseMat(dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("noise.mat")))),
+      mNoiseMat(dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("noise.mat")))),
       mScreens(pScreens) {
 }
 

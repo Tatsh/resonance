@@ -118,7 +118,7 @@ public:
      * @param nData1 The first data byte.
      * @param nData2 The second data byte.
      */
-    virtual void SendMidi(unsigned char nStatus, unsigned char nData1, unsigned char nData2) = 0;
+    virtual void PlayMidi(unsigned char nStatus, unsigned char nData1, unsigned char nData2) = 0;
 
     /**
      * Respond to the start of play.
@@ -245,18 +245,18 @@ public:
 
 protected:
     // NTSC-U/C: 0x0013a360, PAL: 0x0013aca8
-    // Inline, and HandleMessage() expands it. Sends the message's three bytes through SendMidi().
+    // Inline, and DispatchPriv() expands it. Sends the message's three bytes through PlayMidi().
     void OnStdMidi(StdMidiMsg *pMsg);
 
     /**
      * Act on a message.
      *
-     * Table slot 3. Accepts StdMidiMsg alone and hands its three payload bytes to SendMidi().
+     * Table slot 3. Accepts StdMidiMsg alone and hands its three payload bytes to PlayMidi().
      * Neither implementation overrides it.
      *
      * @param pMsg The message.
      * @ghidraAddress NTSC-U/C: 0x0013a570
      * @ghidraAddress PAL: 0x0013aeb8
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 };

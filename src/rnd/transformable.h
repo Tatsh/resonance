@@ -116,7 +116,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004f0a80
      * @ghidraAddress PAL: 0x0052f670
      */
-    void ClearTransList();
+    void RemoveAllTranses();
 
     /**
      * Write a description of this object to sink.
@@ -240,7 +240,7 @@ public:
      * Build the transform this object draws with and return it.
      *
      * With mBillboard clear, or with no current camera, the four mWorldXfm rows are copied out
-     * unchanged. Otherwise the basis rows are rebuilt to face g_pCurrentCam about the axes the mode
+     * unchanged. Otherwise the basis rows are rebuilt to face Cam::sCurrent about the axes the mode
      * selects, and kBillboardSimpleXYZ takes the camera's basis outright. A scaling mode divides
      * the world scale out first and multiplies it back afterwards. The translation then moves by
      * mOrigin, negated and transformed by the new basis. Modes outside the six named axis sets,
@@ -301,7 +301,7 @@ public:
     /**
      * Composed world transform.
      *
-     * Public rather than protected because `Rnd::Mesh::Collide` reads it through a
+     * Public rather than protected because `Rnd::Mesh::FindCollisions` reads it through a
      * `Transformable *` that need not be a mesh, and protected access cannot reach a member
      * through a pointer to the base type. The image exposes no accessor for it.
      *

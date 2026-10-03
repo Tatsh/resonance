@@ -84,7 +84,7 @@ public:
      */
     virtual const char *GetName() const;
 
-    // Public because LocalPlayer::HandleMessage() reads both directly at `0x0011ee48` and
+    // Public because LocalPlayer::DispatchPriv() reads both directly at `0x0011ee48` and
     // `0x0011ee54`, and the image has no accessor.
     Player *mPlayer;    /*!< The player the controller belongs to. +0x04 */
     Mid::MBT mPosition; /*!< The song position of the reading. +0x08 */

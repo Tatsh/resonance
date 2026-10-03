@@ -16,7 +16,7 @@ public:
     /**
      * Construct a rename.
      *
-     * @param pHandler The receiver Complete() reports to.
+     * @param pHandler The receiver NotifyDone() reports to.
      * @param nPortSlot The packed port and slot.
      * @param oldPath The existing name.
      * @param newPath The replacement name.
@@ -40,13 +40,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055f108
      * @ghidraAddress PAL: 0x005a03e8
      */
-    virtual void Issue();
+    virtual void Execute();
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0055e1a0
      * @ghidraAddress PAL: 0x0059f470
      */
-    virtual void Complete();
+    virtual void NotifyDone();
 
     /**
      * Map `sceMcResNoFormat` to kMemcardStatusNotFormatted, `sceMcResFullDevice` to

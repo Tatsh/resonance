@@ -12,9 +12,9 @@ class Animatable;
  * Animation of the head-up display posed by a ramp.
  *
  * The class is not polymorphic and emits no RTTI. Its name comes from the debugging symbols of the
- * North American demo release. The demo's Slide(), Snap(), and Execute() have the same instructions
- * as SetTarget(), Jump(), and Update(), and the demo's constructor takes the same arguments. The
- * head-up display panel embeds two, at `+0x58` over `<layout> assembly.view` and at `+0x74` over
+ * North American demo release. The demo's Slide() and Snap() have the same instructions as
+ * SetTarget() and Jump(), and the demo's constructor takes the same arguments. The head-up display
+ * panel embeds two, at `+0x58` over `<layout> assembly.view` and at `+0x74` over
  * `HUD1 label swap.tnm`.
  */
 class OvyAssembly {
@@ -64,7 +64,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0042a998
      * @ghidraAddress PAL: 0x00465ce8
      */
-    void Update(float flTime);
+    void Execute(float flTime);
 
 private:
     Rnd::Animatable *mAnim;

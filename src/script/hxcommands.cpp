@@ -108,8 +108,8 @@ Py::Object ScriptMemlogTerm([[maybe_unused]] Py::Tuple args) {
     LogPrintf("Shutting down memory/heap/fileio loggers...\n");
     MemLogCloseAndContinue();
     FileLogStop();
-    g_pPythonHeap->DumpStats();
-    g_pPythonHeap->DumpToFile("heapdump.txt");
+    gpPythonHeap->DumpStats();
+    gpPythonHeap->DumpToFile("heapdump.txt");
     return Py::Object();
 }
 
@@ -369,7 +369,7 @@ Py::Object ScriptRecreate(const Py::Tuple &args) {
     Py::Object element = args.getItem(0);
     Py::String text(element);
     HxStr filename = text;
-    Application::shared()->GetGameManager()->StartPlayback(filename, args.length() == 2);
+    Application::shared()->GetGameManager()->Recreate(filename, args.length() == 2);
     return Py::Object();
 }
 
@@ -493,7 +493,7 @@ PyObject *PyInvokePostScript(PyObject *, PyObject *pArgs) {
 // Write the display buffer to a scrndump file.
 // NTSC-U/C: 0x0015c580, PAL: 0x0015e360
 Py::Object ScriptScreenDump([[maybe_unused]] Py::Tuple args) {
-    g_vramTable.Screendump("scrndump");
+    Rnd::TheVRAM.Screendump("scrndump");
     return Py::Object();
 }
 
@@ -557,7 +557,7 @@ Py::Object ScriptSetVolume(const Py::Tuple &args) {
     if (name == "score" || name == "bg") {
         GrooveWorld *pWorld = Application::shared()->GetWorld();
         const int nChannel = pWorld->mTrackGraphs[nTrack]->mTrackData->mChannel;
-        Application::shared()->GetSynth()->SendMidi(nChannel | 0xB0, 7, nVolume & 0xFF);
+        Application::shared()->GetSynth()->PlayMidi(nChannel | 0xB0, 7, nVolume & 0xFF);
     }
     return Py::Object();
 }
@@ -608,15 +608,15 @@ Py::Object ScriptMidi(const Py::Tuple &args) {
     if (nD == 1) {
         for (int nCh = 0; nCh < 15; ++nCh) {
             const int nStatus = (nCh - 0x50) & 0xFF;
-            Application::shared()->GetSynth()->SendMidi(nStatus, 0, 0);
-            Application::shared()->GetSynth()->SendMidi(nStatus, 0x20, nC & 0xFF);
+            Application::shared()->GetSynth()->PlayMidi(nStatus, 0, 0);
+            Application::shared()->GetSynth()->PlayMidi(nStatus, 0x20, nC & 0xFF);
         }
     }
     if (command == "play") {
-        Application::shared()->GetSynth()->SendMidi(nChannel | 0x90, nA & 0xFF, nB & 0xFF);
+        Application::shared()->GetSynth()->PlayMidi(nChannel | 0x90, nA & 0xFF, nB & 0xFF);
     }
     if (command == "stop") {
-        Application::shared()->GetSynth()->SendMidi(nChannel | 0x80, nA & 0xFF, 0);
+        Application::shared()->GetSynth()->PlayMidi(nChannel | 0x80, nA & 0xFF, 0);
     }
     if (command == "bank_swap") {
         SetSynthStreamBar(static_cast<int>(nA));

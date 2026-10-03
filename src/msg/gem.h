@@ -41,8 +41,8 @@ struct Gem {
      * into a local IDablePtr<Player>. Resolving it differs from IDablePtr's own conversion in one
      * respect. An identifier of -1 yields a null pointer here, while the conversion the packets'
      * Print() bodies expand would index the table at -1. The other two cases agree:
-     * kIDableUnregistered yields g_nullPlayer and any other value indexes the IDable<Player>
-     * table.
+     * kIDableUnregistered yields NullPlayer::sInstance and any other value indexes the
+     * IDable<Player> table.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x001a2630

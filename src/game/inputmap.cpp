@@ -80,8 +80,8 @@ InputMap::~InputMap() {
 }
 
 // NTSC-U/C: 0x0011dc20, PAL: 0x0011e1a8
-void InputMap::HandleMessage(Message *pMsg) {
-    if (pMsg->Type() == g_nRawControllerMsgType) {
+void InputMap::DispatchPriv(Message *pMsg) {
+    if (pMsg->Type() == RawControllerMsg::sID) {
         OnControllerReading(static_cast<RawControllerMsg *>(pMsg));
     }
 }

@@ -34,9 +34,9 @@ constexpr int kBlinkShown = 120;
 
 // NTSC-U/C: 0x00416428, PAL: 0x0044ffd0
 HudEnergy::HudEnergy([[maybe_unused]] int nIndex) {
-    Rnd::Mesh *pFrame = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD1 energy.mesh")));
-    mBar = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD1 energy bar.mesh")));
-    mAnim = dynamic_cast<Rnd::Animatable *>(Rnd::g_manager.Find(HxStr("HUD1 energy bar.msnm")));
+    Rnd::Mesh *pFrame = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr("HUD1 energy.mesh")));
+    mBar = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr("HUD1 energy bar.mesh")));
+    mAnim = dynamic_cast<Rnd::Animatable *>(Rnd::TheManager.Find(HxStr("HUD1 energy bar.msnm")));
 
     bool bShowFrame = false;
     if (Application::shared()->GetPlayMode() == kPlayModeGame) {

@@ -59,7 +59,7 @@ void MetPauseSoloGameScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     for (int i = 1; i <= kOptionCount; ++i) {
         Rnd::Text *pOption = dynamic_cast<Rnd::Text *>(
-            Rnd::g_manager.Find(HxStr(FormatString(kOptionTextFormat, i))));
+            Rnd::TheManager.Find(HxStr(FormatString(kOptionTextFormat, i))));
         mOptionTexts.push_back(pOption);
     }
 }
@@ -93,7 +93,7 @@ void MetPauseSoloGameScreen::HandleCommand(const MetScreenCommand *pCommand) {
 // NTSC-U/C: 0x00320230, PAL: 0x00346cc0
 void MetPauseSoloGameScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
-    Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kPausedText)));
+    Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kPausedText)));
 
     HxStr heading = params.mPlayMode == kPlayModeJam ?
                         MetConfigText(kMetStrPauseRemix, kPromptConfigCode, kRemixHeadingKey) :

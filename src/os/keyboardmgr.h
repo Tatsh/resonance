@@ -30,13 +30,12 @@ struct KeyboardMgr {
     /**
      * Set both bytes to 0xff, the second byte first.
      *
-     * The constructor is the one caller. The routine writes no return value. The title is
-     * inferred.
+     * The constructor is the one caller. The routine writes no return value.
      *
      * @ghidraAddress NTSC-U/C: 0x00558d90
      * @ghidraAddress PAL: 0x00599ee8
      */
-    void Reset();
+    void InitPortMap();
 
     /**
      * Do nothing.

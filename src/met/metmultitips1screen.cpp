@@ -39,7 +39,7 @@ static const TipText kTexts[] = {
 
 // Yes, the binary does not test the text for null.
 inline void FillText(const TipText &entry) {
-    Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(entry.pszObject)));
+    Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(entry.pszObject)));
     HxStr text = MetConfigText(entry.nId, kPromptConfigCode, entry.pszKey);
     pText->SetText(text);
 }

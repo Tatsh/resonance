@@ -23,7 +23,7 @@
  * `0x007e0c10` with four. Two classes derive from it, MultiCatcher and SingleCatcher, and both
  * retain eleven entries. Neither introduces a virtual.
  *
- * The class supplies MsgSink::HandleMessage() and GenericCatcher's Start(), Stop(), and
+ * The class supplies MsgSink::DispatchPriv() and GenericCatcher's Start(), Stop(), and
  * IsPhraseRunEmpty(), and it introduces four virtuals at slots 7 through 10.
  * CapturePhrase() and ReportCaughtPowerbar(), slots 9 and 10, address the shared pure-virtual stub
  * at `0x005381a8`. This class is therefore abstract, and the two subclasses exist to supply them.
@@ -40,7 +40,7 @@
  * That is recorded here as measured rather than explained, and it belongs with the note in
  * `sch/tick.h` that two measurements of that type's member count disagree.
  *
- * HandleMessage() dispatches a PitchRiffMsg to PostCatchMsg(), a TrackSelectMsg to
+ * DispatchPriv() dispatches a PitchRiffMsg to PostCatchMsg(), a TrackSelectMsg to
  * OnTrackSelect(), an AutoCatchMsg to OnAutoCatch(), and an InvalidateSeekerMsg to the inline
  * copy of OnInvalidateSeeker(). A CatchProgressPacket for this track stores its player, success
  * rate, and position in mRemotePlayer, mRemoteSuccess, and mRemotePosition.
@@ -89,7 +89,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001adb78
      * @ghidraAddress PAL: 0x001b38e0
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Schedule the catcher's two commands on the clock.
@@ -288,7 +288,7 @@ protected:
     // NTSC-U/C: 0x001b1488, PAL: 0x001b7248
     int IsBarFree(int nBar);
 
-    // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
+    // The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
     // NTSC-U/C: 0x001b1578, PAL: 0x001b7338
     void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
 

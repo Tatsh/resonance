@@ -27,7 +27,7 @@ void ScriptSink::RunMessageScript(Message *pMsg) {
 }
 
 // NTSC-U/C: 0x00118b50, PAL: 0x00119088
-void ScriptSink::HandleMessage(Message *pMsg) {
+void ScriptSink::DispatchPriv(Message *pMsg) {
     if (pMsg->Type() != g_nScriptMsgType) {
         return;
     }

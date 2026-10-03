@@ -60,7 +60,7 @@ void AxingSTG::Start() {
     if (mApplication->GetGameManager()->GetPlayMode() == kPlayModeAnnouncing) {
         const unsigned char nStatus =
             static_cast<unsigned char>(kMidiControlChange | mTrackData->mChannel);
-        mApplication->GetSynth()->SendMidi(nStatus, kStageActiveController, kControllerOn);
+        mApplication->GetSynth()->PlayMidi(nStatus, kStageActiveController, kControllerOn);
     }
     ScoreTrackGraph::Start();
     mPeriodical->Post();
@@ -71,14 +71,14 @@ void AxingSTG::Stop() {
     if (mApplication->GetGameManager()->GetPlayMode() == kPlayModeAnnouncing) {
         const unsigned char nStatus =
             static_cast<unsigned char>(kMidiControlChange | mTrackData->mChannel);
-        mApplication->GetSynth()->SendMidi(nStatus, kStageActiveController, kControllerOff);
+        mApplication->GetSynth()->PlayMidi(nStatus, kStageActiveController, kControllerOff);
     }
     mPeriodical->Withdraw();
     ScoreTrackGraph::Stop();
 }
 
 // NTSC-U/C: 0x0019df58, PAL: 0x001a3cc0
-void AxingSTG::ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
+void AxingSTG::ConnectInputs(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
     pPrimary->AddSink(mMixer);
     pPrimary->AddSink(mPhraseMaker);
     pPrimary->AddSink(mNewGemMaker);
@@ -122,7 +122,7 @@ void AxingSTG::SetMixerOutput(MsgSink *pOutput) {
 }
 
 // NTSC-U/C: 0x0019e850, PAL: 0x001a45b8
-void AxingSTG::AddSinkToSources(MsgSink *pSink) {
+void AxingSTG::ConnectToTunnel(MsgSink *pSink) {
     mPhraseMgr->AddSink(pSink);
     mPhraseMaker->AddSink(pSink);
     mOldGemMaker->AddSink(pSink);

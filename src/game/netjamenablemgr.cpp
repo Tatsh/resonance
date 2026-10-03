@@ -46,7 +46,7 @@ int NetJamEnableMgr::FindSection(int nBar) {
 }
 
 // NTSC-U/C: 0x00105a98, PAL: 0x00105a98
-int NetJamEnableMgr::IsTrackAvailable(int nTrack, int nSection) {
+int NetJamEnableMgr::IsSongSectionEnabled(int nTrack, int nSection) const {
     const std::vector<int> &owners = mOwners[nSection];
     const int nOwner = owners[nTrack];
     if (nOwner == mLocalId) {
@@ -74,12 +74,12 @@ void NetJamEnableMgr::SetBarOwner(int nTrack, int nBar, Player *) {
 
     int available[kMaxTrackCount];
     for (int i = 0; i < mTrackCount; ++i) {
-        available[i] = IsTrackAvailable(i, nSection);
+        available[i] = IsSongSectionEnabled(i, nSection);
     }
     owner = nNewOwner;
 
     for (int i = 0; i < mTrackCount; ++i) {
-        if (available[i] == IsTrackAvailable(i, nSection)) {
+        if (available[i] == IsSongSectionEnabled(i, nSection)) {
             continue;
         }
 
@@ -93,5 +93,5 @@ int NetJamEnableMgr::QueryBar(int nTrack, int nBar) {
     if (mOpenTracks.size() < static_cast<unsigned>(mTrackCount)) {
         return std::find(mOpenTracks.begin(), mOpenTracks.end(), nTrack) != mOpenTracks.end();
     }
-    return IsTrackAvailable(nTrack, FindSection(mPlayMap->MapBar(nBar)));
+    return IsSongSectionEnabled(nTrack, FindSection(mPlayMap->MapBar(nBar)));
 }

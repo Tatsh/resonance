@@ -35,8 +35,8 @@ constexpr double kLaneToOffset = -0.5;
 
 // NTSC-U/C: 0x00455508, PAL: 0x00492a38
 void TnlPointer::MeshPair::Init(const HxStr &iconName, const HxStr &baseName) {
-    mIcon = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(iconName));
-    mBase = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(baseName));
+    mIcon = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(iconName));
+    mBase = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(baseName));
 }
 
 // NTSC-U/C: 0x004555e0, PAL: 0x00492b10
@@ -55,13 +55,13 @@ TnlPointer::TnlPointer(const HxStr &colorName)
     : mLastTime(0.0f), mSpinFrame(0.0f), mSpinning(0), mOffsetX(kCentreOffset),
       mCentreOffset(kCentreOffset), mSpinStart(kUnsetTime) {
     const HxStr prefix = HxStr("ptr_") + colorName[0];
-    mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(prefix));
-    mSpinView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(prefix + "_spin.view"));
+    mView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(prefix));
+    mSpinView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(prefix + "_spin.view"));
     mPairs.resize(kPairCount);
     mPairs[kPairAxe].Init(prefix + "_axe.mesh", prefix + "_plate.mesh");
     mPairs[kPairScratch].Init(prefix + "_scratch.mesh", prefix + "_plate.mesh");
     mPairs[kPairVoice].Init(prefix + "_vox.mesh", prefix + "_tgt.mesh");
-    mDip.SetRange(kRestHeight, kDippedHeight, kDipDuration);
+    mDip.SetParams(kRestHeight, kDippedHeight, kDipDuration);
     Reset();
 }
 
@@ -125,14 +125,14 @@ void TnlPointer::AttachTo(Rnd::View *pParent) {
 
 // NTSC-U/C: 0x00455860, PAL: 0x00492d90
 void TnlPointer::Update(float flTime) {
-    mDip.Update(flTime);
+    mDip.Execute(flTime);
     if (mSpinStart == kRestartPending) {
         mSpinStart = flTime;
     }
     if (kSpinDuration < flTime - mSpinStart) {
         Reset();
     }
-    const Vector3 position{mOffsetX, 0.0f, mDip.Value(), 1.0f};
+    const Vector3 position{mOffsetX, 0.0f, mDip.Val(), 1.0f};
     Rnd::Transformable &trans = *mSpinView;
     std::memcpy(trans.mLocalXfm[kTranslationRow], &position, sizeof(position));
     trans.mDirty = 1;

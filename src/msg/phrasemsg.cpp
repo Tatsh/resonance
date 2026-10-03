@@ -16,7 +16,7 @@ Message *PhraseMsg::Clone() {
 
 // NTSC-U/C: 0x003e1240, PAL: 0x00419698
 int PhraseMsg::Type() {
-    return g_nPhraseMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x003e1250, PAL: 0x004196a8

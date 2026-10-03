@@ -69,7 +69,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 }
 
 inline Rnd::Text *FindText(const char *pszName) {
-    return dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 // Yes, the binary does not test the text for null.
@@ -107,11 +107,11 @@ void MetMultiStatsScreen::ResolveContainerViews() {
         pName->SetText(HxStr(kNoText));
 
         Rnd::Mat *pMaterial = dynamic_cast<Rnd::Mat *>(
-            Rnd::g_manager.Find(HxStr(FormatString(kPictureMaterialFormat, nRow + 1))));
+            Rnd::TheManager.Find(HxStr(FormatString(kPictureMaterialFormat, nRow + 1))));
         mPictureMaterials.push_back(pMaterial);
 
         Rnd::Mesh *pMesh = dynamic_cast<Rnd::Mesh *>(
-            Rnd::g_manager.Find(HxStr(FormatString(kMeshFormat, nRow + 1))));
+            Rnd::TheManager.Find(HxStr(FormatString(kMeshFormat, nRow + 1))));
         mPlayerMeshes.push_back(pMesh);
     }
 
@@ -139,7 +139,7 @@ void MetMultiStatsScreen::EnterAndShow() {
         HxStr text = QueryConfigString(kSongNameConfigCode, TextOrEmpty(params.mLevelName));
         songName = text;
         const float flWrapWidth = mSongText->mWrapWidth;
-        if (flWrapWidth < mSongText->MeasureText(TextOrEmpty(songName), songName.mLen)) {
+        if (flWrapWidth < mSongText->GetFontWidth(TextOrEmpty(songName), songName.mLen)) {
             HxStr shorter =
                 QueryConfigString(kShortSongNameConfigCode, TextOrEmpty(params.mLevelName));
             songName = shorter;

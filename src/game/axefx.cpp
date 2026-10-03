@@ -70,7 +70,7 @@ void AxeFX::OnFilterValue(float flValue) {
 }
 
 // NTSC-U/C: 0x0019b538, PAL: 0x001a12a0
-void AxeFX::HandleMessage(Message *pMsg) {
+void AxeFX::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nAxisFXMsgType) {
         OnAxisFX(static_cast<AxisFXMsg *>(pMsg));

@@ -46,7 +46,7 @@ PitchingSTG::~PitchingSTG() {
 }
 
 // NTSC-U/C: 0x001c4798, PAL: 0x001ca5e0
-void PitchingSTG::ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
+void PitchingSTG::ConnectInputs(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
     pPrimary->AddSink(mMixer);
     pPrimary->AddSink(mPitcher);
     pPrimary->AddSink(mPhraseMgr);
@@ -75,7 +75,7 @@ void PitchingSTG::SetMixerOutput(MsgSink *pOutput) {
 }
 
 // NTSC-U/C: 0x001c4da0, PAL: 0x001cabe8
-void PitchingSTG::AddSinkToSources(MsgSink *pSink) {
+void PitchingSTG::ConnectToTunnel(MsgSink *pSink) {
     mPhraseMgr->AddSink(pSink);
     mPitcher->AddSink(pSink);
     if (mJamEffects != nullptr) {

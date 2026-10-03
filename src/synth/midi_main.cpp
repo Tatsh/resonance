@@ -94,7 +94,7 @@ constexpr int kSynthStreamReadSize = 0x4000;
 
 // The SIF records here start on cache lines, as the image places them.
 // NTSC-U/C: 0x008e5bc0, PAL: 0x0092abc0
-alignas(64) sceSifClientData g_soundDriverClient;
+alignas(64) sceSifClientData gCd;
 
 // Set while a request sent without waiting is still running on the driver.
 // NTSC-U/C: 0x00780878, PAL: 0x007c4590
@@ -106,7 +106,7 @@ alignas(64) unsigned int g_anSoundDriverReply[kSoundDriverReplyWords] = {};
 
 // The descriptor XferToIop() hands to the SIF DMA.
 // NTSC-U/C: 0x008e5be8, PAL: 0x0092abe8
-alignas(16) sceSifDmaData g_xferToIopDma;
+alignas(16) sceSifDmaData transData;
 
 // Set once InitSynthDriver() has brought the driver up.
 // NTSC-U/C: 0x006e9b88, PAL: 0x0072d54c
@@ -684,17 +684,17 @@ constexpr int kMidiData1Shift = 8;
 constexpr int kMidiData2Shift = 16;
 
 // NTSC-U/C: 0x00894760, PAL: 0x008d9780
-alignas(64) sceCslCtx g_midiInputContext;
+alignas(64) sceCslCtx msinCtx;
 
 // NTSC-U/C: 0x00894778, PAL: 0x008d9798
-sceCslBuffGrp g_aMidiInputGroups[kMidiInputGroupCount];
+sceCslBuffGrp msinBfGrp[kMidiInputGroupCount];
 
 // NTSC-U/C: 0x00894788, PAL: 0x008d97a8
-sceCslBuffCtx g_midiInputBuffer;
+sceCslBuffCtx msinBfCtx;
 
 // SIF DMA sends the buffer from its start. The original placed the buffer on a cache line.
 // NTSC-U/C: 0x008947c0, PAL: 0x008d97c0
-alignas(64) MidiStreamBuffer g_midiStreamBuffer;
+alignas(64) MidiStreamBuffer msinBf;
 
 // The program each channel last received.
 // NTSC-U/C: 0x006e9bd8, PAL: 0x0072d598
@@ -708,24 +708,24 @@ int g_anChannelBank[kMidiChannelCount] = {
 
 // NTSC-U/C: 0x00462290, PAL: 0x0049fb28
 void InitSynthStreamInput() {
-    g_midiStreamBuffer.mBufferSize = kMidiStreamBufferSize;
-    g_midiInputContext.buffGrpNum = kMidiInputGroupCount;
-    g_aMidiInputGroups[kMidiInputGroupUnused].buffNum = 0;
-    g_aMidiInputGroups[kMidiInputGroupStream].buffNum = 1;
-    g_aMidiInputGroups[kMidiInputGroupStream].buffCtx = &g_midiInputBuffer;
-    g_midiInputBuffer.sema = 0;
-    g_midiInputBuffer.buff = &g_midiStreamBuffer;
-    g_midiStreamBuffer.mValidSize = 0;
-    g_midiInputContext.extmod = nullptr;
-    g_midiInputContext.callBack = nullptr;
-    g_midiInputContext.conf = nullptr;
-    g_midiInputContext.buffGrp = g_aMidiInputGroups;
-    g_aMidiInputGroups[kMidiInputGroupUnused].buffCtx = nullptr;
-    if (sceMSIn_Init(&g_midiInputContext) != 0) {
+    msinBf.mBufferSize = kMidiStreamBufferSize;
+    msinCtx.buffGrpNum = kMidiInputGroupCount;
+    msinBfGrp[kMidiInputGroupUnused].buffNum = 0;
+    msinBfGrp[kMidiInputGroupStream].buffNum = 1;
+    msinBfGrp[kMidiInputGroupStream].buffCtx = &msinBfCtx;
+    msinBfCtx.sema = 0;
+    msinBfCtx.buff = &msinBf;
+    msinBf.mValidSize = 0;
+    msinCtx.extmod = nullptr;
+    msinCtx.callBack = nullptr;
+    msinCtx.conf = nullptr;
+    msinCtx.buffGrp = msinBfGrp;
+    msinBfGrp[kMidiInputGroupUnused].buffCtx = nullptr;
+    if (sceMSIn_Init(&msinCtx) != 0) {
         LogPrintf("sceMSIn_Init Error\n");
         return;
     }
-    sceMSIn_PutMsg(&g_midiInputContext, kMidiInputPort, kMidiProgramChange);
+    sceMSIn_PutMsg(&msinCtx, kMidiInputPort, kMidiProgramChange);
 }
 
 // NTSC-U/C: 0x00464928, PAL: 0x004a22e8
@@ -744,7 +744,7 @@ void SendMidiToDriver(unsigned char nStatus, unsigned char nData1, unsigned char
         }
         nBank = nData2;
     }
-    sceMSIn_PutMsg(&g_midiInputContext,
+    sceMSIn_PutMsg(&msinCtx,
                    kMidiInputPort,
                    nStatus | (nData1 << kMidiData1Shift) | (nData2 << kMidiData2Shift));
 }
@@ -775,13 +775,13 @@ void SubmitDriverSetPaused(int bPaused) {
 
 // NTSC-U/C: 0x004648c8, PAL: 0x0049fa38
 void PollSynthEvents() {
-    if (g_midiStreamBuffer.mValidSize != 0) {
+    if (msinBf.mValidSize != 0) {
         const int nBuffer = g_nMidiEventBufferIndex;
         g_nMidiEventBufferIndex = (nBuffer + 1) & (kMidiEventBufferCount - 1);
         XferToIop(g_nMidiEventIopAddress + nBuffer * kMidiEventBufferSize,
-                  &g_midiStreamBuffer,
-                  g_midiStreamBuffer.mValidSize + kMidiStreamHeaderSize);
-        g_midiStreamBuffer.mValidSize = 0;
+                  &msinBf,
+                  msinBf.mValidSize + kMidiStreamHeaderSize);
+        msinBf.mValidSize = 0;
     }
 #ifdef VIDEO_STANDARD_PAL
     if ((g_nSynthEventPollCount & kHardSynthErrorLogPollMask) == 0) {
@@ -939,7 +939,7 @@ void StartSoundBankMovie(const char *pszPath) {
     if (nError != 0) {
         LogPrintf("Problem starting sndbank movie: %s (errcode: %d)\n", pszPath, nError);
     }
-    g_pSynthStream->SetTrackHandler(kSoundBankMovieTrack, OnSoundBankMovieChunk, nullptr);
+    g_pSynthStream->AssignHandler(kSoundBankMovieTrack, OnSoundBankMovieChunk, nullptr);
     const int nTick = Application::shared()->GetSongClock()->SongTick();
     g_nSoundBankMovieTick = nTick;
     g_pSynthStream->mLoopTicks = nTick;
@@ -949,7 +949,7 @@ void StartSoundBankMovie(const char *pszPath) {
 int BindSoundDriverRpc() {
     sceSifInitRpc(0);
     do {
-        if (sceSifBindRpc(&g_soundDriverClient, kSoundDriverRpcServer, 0) < 0) {
+        if (sceSifBindRpc(&gCd, kSoundDriverRpcServer, 0) < 0) {
             LogPrintf("error: sceSifBindRpc \n");
             while (true) {
             }
@@ -957,14 +957,14 @@ int BindSoundDriverRpc() {
         int nSpin = kSoundDriverBindSpin;
         while (nSpin-- != 0) {
         }
-    } while (g_soundDriverClient.serve == nullptr);
+    } while (gCd.serve == nullptr);
     return 1;
 }
 
 // NTSC-U/C: 0x005f96c8, PAL: 0x0063a3d8
 int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
     if (g_bSoundRequestPending != 0) {
-        while (sceSifCheckStatRpc(&g_soundDriverClient.rpcd) == kSifRpcStillRunning) {
+        while (sceSifCheckStatRpc(&gCd.rpcd) == kSifRpcStillRunning) {
         }
         g_bSoundRequestPending = 0;
     }
@@ -980,7 +980,7 @@ int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
     }
 
     if ((nSelector & kSoundSelectorCommandBlock) != 0) {
-        sceSifCallRpc(&g_soundDriverClient,
+        sceSifCallRpc(&gCd,
                       nSelector,
                       nMode,
                       reinterpret_cast<void *>(nArgument),
@@ -991,7 +991,7 @@ int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
                       nullptr);
     } else {
         g_anSoundDriverReply[0] = static_cast<unsigned int>(nArgument);
-        sceSifCallRpc(&g_soundDriverClient,
+        sceSifCallRpc(&gCd,
                       nSelector,
                       nMode,
                       g_anSoundDriverReply,
@@ -1006,12 +1006,12 @@ int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
 
 // NTSC-U/C: 0x005f97d0, PAL: 0x0063a4e0
 int XferToIop(int nIopAddress, const void *pSource, int nLength) {
-    g_xferToIopDma.data = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(pSource));
-    g_xferToIopDma.addr = static_cast<unsigned int>(nIopAddress);
-    g_xferToIopDma.size = static_cast<unsigned int>(nLength);
-    g_xferToIopDma.mode = 0;
+    transData.data = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(pSource));
+    transData.addr = static_cast<unsigned int>(nIopAddress);
+    transData.size = static_cast<unsigned int>(nLength);
+    transData.mode = 0;
     FlushCache(WRITEBACK_DCACHE);
-    const unsigned int nTransfer = sceSifSetDma(&g_xferToIopDma, 1);
+    const unsigned int nTransfer = sceSifSetDma(&transData, 1);
     while (sceSifDmaStat(nTransfer) >= 0) {
     }
     return (nTransfer != 0) ? 0 : -1;

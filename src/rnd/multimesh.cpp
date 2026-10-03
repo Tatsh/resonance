@@ -35,10 +35,10 @@ void PrintObjectRef(Dbg &sink, const Object *pObject) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 void PrintRow(Dbg &sink, const Vector3 &row) {
@@ -78,15 +78,15 @@ Dbg &DumpTransformList(Dbg &sink, const std::list<Transform> &transforms) {
 
 // A transform row writes only its first three floats, so the padding word never arrives at a file.
 void WriteRow(Stream &stream, const Vector3 &row) {
-    stream.Write(&row.x, sizeof(float));
-    stream.Write(&row.y, sizeof(float));
-    stream.Write(&row.z, sizeof(float));
+    stream.WriteLE(&row.x, sizeof(float));
+    stream.WriteLE(&row.y, sizeof(float));
+    stream.WriteLE(&row.z, sizeof(float));
 }
 
 // NTSC-U/C: 0x004eb240, PAL: 0x00529da0
 Stream &WriteTransformList(Stream &stream, const std::list<Transform> &transforms) {
     const int nCount = static_cast<int>(transforms.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &xfm : transforms) {
         WriteRow(stream, xfm.mBasisX);
         WriteRow(stream, xfm.mBasisY);
@@ -97,16 +97,16 @@ Stream &WriteTransformList(Stream &stream, const std::list<Transform> &transform
 }
 
 void ReadRow(Stream &stream, Vector3 &row) {
-    stream.Read(&row.x, sizeof(float));
-    stream.Read(&row.y, sizeof(float));
-    stream.Read(&row.z, sizeof(float));
+    stream.ReadLE(&row.x, sizeof(float));
+    stream.ReadLE(&row.y, sizeof(float));
+    stream.ReadLE(&row.z, sizeof(float));
 }
 
 // NTSC-U/C: 0x004eb6a0, PAL: 0x0052a200
 // Load() is its only caller and every transfer goes through the read slot of the stream.
 Stream &ReadTransformList(Stream &stream, std::list<Transform> &transforms) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
 
     // Every new element starts from a prototype whose four padding words are 1.0, which the reader
     // then does not overwrite.
@@ -208,7 +208,7 @@ void MultiMesh::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x004ebd10, PAL: 0x0052a880
 void MultiMesh::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
 
     Drawable::Save(stream);
     WriteObjectRef(stream, mMesh);
@@ -248,9 +248,9 @@ void MultiMesh::Copy(const Object *pSource, unsigned nFlags) {
 
 // NTSC-U/C: 0x004e8288, PAL: 0x00526d90
 void MultiMesh::Load(Stream &stream) {
-    stream.Read(&g_nRndMultiMeshLoadVersion, sizeof(g_nRndMultiMeshLoadVersion));
+    stream.ReadLE(&g_nRndMultiMeshLoadVersion, sizeof(g_nRndMultiMeshLoadVersion));
     if (g_nRndMultiMeshLoadVersion > kSerialVersion) {
-        g_failSink.Report("Can't load new MultiMesh\n");
+        Rnd::TheDbg.Notify("Can't load new MultiMesh\n");
         return;
     }
 
@@ -259,7 +259,7 @@ void MultiMesh::Load(Stream &stream) {
 
     HxStr name(nullptr);
     stream.ReadString(name);
-    mMesh = dynamic_cast<Mesh *>(g_manager.Find(name));
+    mMesh = dynamic_cast<Mesh *>(TheManager.Find(name));
 
     ReadTransformList(stream, mTransforms);
     AcquireMeshRef();
@@ -308,7 +308,7 @@ void MultiMesh::SetMesh(Mesh *pMesh) {
 }
 
 // NTSC-U/C: 0x004e83d0, PAL: 0x00526f08
-int MultiMesh::DrawSelf() {
+int MultiMesh::DrawShowing() {
     if (mMesh == nullptr) {
         return 1;
     }

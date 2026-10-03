@@ -2,18 +2,18 @@
 
 namespace {
 
-// The value Reset() stores into every byte.
+// The value InitPortMap() stores into every byte.
 constexpr unsigned char kUnsetByte = 0xff;
 
 } // namespace
 
 // NTSC-U/C: 0x00558d68, PAL: 0x00599ec0
 KeyboardMgr::KeyboardMgr() {
-    Reset();
+    InitPortMap();
 }
 
 // NTSC-U/C: 0x00558d90, PAL: 0x00599ee8
-void KeyboardMgr::Reset() {
+void KeyboardMgr::InitPortMap() {
     for (int i = 1; i >= 0; --i) {
         mBytes[i] = kUnsetByte;
     }

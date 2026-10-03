@@ -136,8 +136,8 @@ void FreqAppearance::AttachToBurnSlot(int nSlot) {
     g_apBurnSlotDetails[nSlot] = mDetail;
 
     Rnd::View *pHangpoint = g_hangpoints[nSlot];
-    pHangpoint->ClearDraws();
-    pHangpoint->ClearTransList();
+    pHangpoint->RemoveAllDraws();
+    pHangpoint->RemoveAllTranses();
 
     Rnd::View *pView = mDetail->mView;
     pHangpoint->AddDraw(pView, nullptr);
@@ -159,11 +159,11 @@ void FreqAppearance::InitBurnSlots() {
     g_hangpoints.resize(kBurnSlotCount);
     for (int i = 0; i < kBurnSlotCount; ++i) {
         g_burnCams[i] = dynamic_cast<Rnd::Cam *>(
-            Rnd::g_manager.Find(HxStr(FormatString(kBurnCamFormat, i + 1))));
+            Rnd::TheManager.Find(HxStr(FormatString(kBurnCamFormat, i + 1))));
         g_burnCams[i]->SetShowing(0);
 
         g_hangpoints[i] = dynamic_cast<Rnd::View *>(
-            Rnd::g_manager.Find(HxStr(FormatString(kHangpointFormat, i))));
+            Rnd::TheManager.Find(HxStr(FormatString(kHangpointFormat, i))));
         g_hangpoints[i]->SetShowing(1);
     }
     g_nBurnSlotsReady = 1;
@@ -208,7 +208,7 @@ void FreqAppearance::RenderBurnTextures() {
 // NTSC-U/C: 0x001712c0, PAL: 0x00173bf8
 Rnd::Tex *FreqAppearance::FindPersonaBurnTexture(int nIndex) {
     return dynamic_cast<Rnd::Tex *>(
-        Rnd::g_manager.Find(HxStr(FormatString(kBurnTextureFormat, nIndex + 1))));
+        Rnd::TheManager.Find(HxStr(FormatString(kBurnTextureFormat, nIndex + 1))));
 }
 
 // NTSC-U/C: 0x00174458, PAL: 0x00176e30

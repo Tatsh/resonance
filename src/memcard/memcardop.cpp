@@ -13,11 +13,11 @@ MemcardOp::~MemcardOp() {
 }
 
 // NTSC-U/C: 0x0055f310, PAL: 0x005a05f0
-void MemcardOp::Issue() {
+void MemcardOp::Execute() {
 }
 
 // NTSC-U/C: 0x0055f318, PAL: 0x005a05f8
-void MemcardOp::Complete() {
+void MemcardOp::NotifyDone() {
 }
 
 // NTSC-U/C: 0x0055f320, PAL: 0x005a0600

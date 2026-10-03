@@ -259,7 +259,7 @@ inline const char *TextOf(const HxStr &text) {
 // Resolves a registry key to an object of type T, or null.
 template <typename T>
 T *FindObject(const HxStr &name) {
-    Rnd::Object *pObject = Rnd::g_manager.Find(name);
+    Rnd::Object *pObject = Rnd::TheManager.Find(name);
     return pObject != nullptr ? dynamic_cast<T *>(pObject) : nullptr;
 }
 
@@ -466,8 +466,8 @@ void MetSoloStagesScreen::BuildButtons() {
         mIndicatorWires.push_back(pWire);
         pWire->SetShowing(0);
     }
-    mIndicatorList->ButtonAt(kFirstSecretIndicator)->SetState(kButtonStateDisabled);
-    mIndicatorList->ButtonAt(kSecondSecretIndicator)->SetState(kButtonStateDisabled);
+    mIndicatorList->GetButton(kFirstSecretIndicator)->SetState(kButtonStateDisabled);
+    mIndicatorList->GetButton(kSecondSecretIndicator)->SetState(kButtonStateDisabled);
 
     AppendStateMats(mOpenMats, kOpenLiveMat, kOpenSelectedMat);
     AppendStateMats(mWonMats, kWonLiveMat, kWonSelectedMat);
@@ -519,12 +519,12 @@ void MetSoloStagesScreen::UpdateSecretLevels(int bUnlockAll) {
             return;
         }
         mSecretUnlocked = 1;
-        mIndicatorList->ButtonAt(kFirstSecretIndicator)->SetState(kButtonStateNormal);
-        mIndicatorList->ButtonAt(kFirstSecretIndicator)->SetShowing(0);
+        mIndicatorList->GetButton(kFirstSecretIndicator)->SetState(kButtonStateNormal);
+        mIndicatorList->GetButton(kFirstSecretIndicator)->SetShowing(0);
         if (secretLevels.size() >= kSecondSecretLevelCount) {
             mSuperSecretUnlocked = 1;
-            mIndicatorList->ButtonAt(kSecondSecretIndicator)->SetState(kButtonStateNormal);
-            mIndicatorList->ButtonAt(kSecondSecretIndicator)->SetShowing(0);
+            mIndicatorList->GetButton(kSecondSecretIndicator)->SetState(kButtonStateNormal);
+            mIndicatorList->GetButton(kSecondSecretIndicator)->SetShowing(0);
         }
     } else if (Application::shared()->GetGameMode() == kGameModeSolo) {
         CampaignStats &stats = FirstPersonaStats();
@@ -685,7 +685,7 @@ void MetSoloStagesScreen::SetUpStages(int bUnlockAll) {
 // NTSC-U/C: 0x003a26c0, PAL: 0x003d5690
 void MetSoloStagesScreen::ApplyStageStyles() {
     for (int i = 0; i < static_cast<int>(mStageList->mButtons.size()); ++i) {
-        Rnd::Button *pButton = mStageList->ButtonAt(i);
+        Rnd::Button *pButton = mStageList->GetButton(i);
         const std::vector<ButtonStyle> &styles =
             (mStageLocked[i] != 0) ? mClosedStyles : mOpenStyles;
         for (unsigned j = 0; j < styles.size(); ++j) {
@@ -815,7 +815,7 @@ void MetSoloStagesScreen::RefreshIndicators(int bStageLocked) {
     const int nDifficulty = params.mDifficulty;
 
     for (unsigned i = 0; i < mCurrentLevels->size(); ++i) {
-        Rnd::Button *pButton = mIndicatorList->ButtonAt(i);
+        Rnd::Button *pButton = mIndicatorList->GetButton(i);
         pButton->SetShowing(1);
         const HxStr name((*mCurrentLevels)[i].mName);
         const int nLocked = IsLevelLocked(i);
@@ -832,8 +832,8 @@ void MetSoloStagesScreen::RefreshIndicators(int bStageLocked) {
 
     for (int i = mCurrentLevels->size(); i < static_cast<int>(mIndicatorList->mButtons.size());
          ++i) {
-        mIndicatorList->ButtonAt(i)->SetState(kButtonStateDisabled);
-        mIndicatorList->ButtonAt(i)->SetShowing(0);
+        mIndicatorList->GetButton(i)->SetState(kButtonStateDisabled);
+        mIndicatorList->GetButton(i)->SetShowing(0);
     }
 #ifdef VIDEO_STANDARD_PAL
     // Yes, the European release does not change the secret indicators on the first stage.
@@ -841,20 +841,20 @@ void MetSoloStagesScreen::RefreshIndicators(int bStageLocked) {
         return;
     }
 #endif
-    mIndicatorList->ButtonAt(kFirstSecretIndicator)->SetShowing(0);
-    mIndicatorList->ButtonAt(kSecondSecretIndicator)->SetShowing(0);
+    mIndicatorList->GetButton(kFirstSecretIndicator)->SetShowing(0);
+    mIndicatorList->GetButton(kSecondSecretIndicator)->SetShowing(0);
     if (mSecretUnlocked == 0) {
-        mIndicatorList->ButtonAt(kFirstSecretIndicator)->SetState(kButtonStateDisabled);
+        mIndicatorList->GetButton(kFirstSecretIndicator)->SetState(kButtonStateDisabled);
     }
     if (mSuperSecretUnlocked == 0) {
-        mIndicatorList->ButtonAt(kSecondSecretIndicator)->SetState(kButtonStateDisabled);
+        mIndicatorList->GetButton(kSecondSecretIndicator)->SetState(kButtonStateDisabled);
     }
 }
 
 // NTSC-U/C: 0x003aec70, PAL: 0x003e2c40
 void MetSoloStagesScreen::ShowIndicators(int nShowing) {
     for (int i = 0; i < static_cast<int>(mIndicatorList->mButtons.size()); ++i) {
-        mIndicatorList->ButtonAt(i)->SetShowing(nShowing);
+        mIndicatorList->GetButton(i)->SetShowing(nShowing);
     }
 }
 
@@ -1150,16 +1150,16 @@ void MetSoloStagesScreen::EnterAndShow() {
     mLabelPair.invalidate();
     mLogoPair.invalidate();
 
-    mStageButtonsView->ReleaseAnimsRefs();
-    mStageButtonsView->ClearDraws();
-    mStageButtonsView->ClearTransList();
+    mStageButtonsView->RemoveAllAnims();
+    mStageButtonsView->RemoveAllDraws();
+    mStageButtonsView->RemoveAllTranses();
     Rnd::View *pButtons;
     if (params.mPlayMode == kPlayModeGame) {
         pButtons = FindObject<Rnd::View>(kSixButtonView);
-        mStageList->ButtonAt(kCustomStageIndex)->SetState(kButtonStateNormal);
+        mStageList->GetButton(kCustomStageIndex)->SetState(kButtonStateNormal);
     } else {
         pButtons = FindObject<Rnd::View>(kFiveButtonView);
-        mStageList->ButtonAt(kCustomStageIndex)->SetState(kButtonStateDisabled);
+        mStageList->GetButton(kCustomStageIndex)->SetState(kButtonStateDisabled);
     }
     mStageButtonsView->AddAnim(pButtons);
     mStageButtonsView->AddTrans(pButtons);

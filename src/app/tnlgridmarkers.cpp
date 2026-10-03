@@ -73,13 +73,13 @@ void TnlGridMarkers::Marker::Place(int nTrack, int nFrame) {
 // NTSC-U/C: 0x00439150, PAL: 0x00474fa0
 TnlGridMarkers::TnlGridMarkers(AppTunnel *pTunnel, int nPlayerNum) : mTrack(0), mTunnel(pTunnel) {
     Rnd::View *pView = dynamic_cast<Rnd::View *>(
-        Rnd::g_manager.Find(HxStr(FormatString("grid%d.view", nPlayerNum))));
+        Rnd::TheManager.Find(HxStr(FormatString("grid%d.view", nPlayerNum))));
     if (!pView) {
         return;
     }
-    Rnd::Mesh *pBeatMesh = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("grid4")));
-    Rnd::Mesh *pOffBeatMesh = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("grid8")));
-    pView->ClearDraws();
+    Rnd::Mesh *pBeatMesh = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr("grid4")));
+    Rnd::Mesh *pOffBeatMesh = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr("grid8")));
+    pView->RemoveAllDraws();
     mMarkers.resize(kMarkerCount);
     float flFrame = 0.0f;
     for (auto it = mMarkers.begin(); it != mMarkers.end(); ++it) {

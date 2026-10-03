@@ -13,22 +13,22 @@ constexpr int kDefaultHighNote = 120;
 } // namespace
 
 // NTSC-U/C: 0x001a4db0, PAL: 0x001aab18
-void Harmony::AddNote(unsigned char nNote) {
+void Harmony::AddPitch(unsigned char nNote) {
     mNotes.insert(std::upper_bound(mNotes.begin(), mNotes.end(), nNote), nNote);
 }
 
 // NTSC-U/C: 0x001a4e28, PAL: 0x001aab90
-unsigned char Harmony::Snap(unsigned char nNote) {
+unsigned char Harmony::SnapToHarmony(unsigned char nNote) const {
     if (mNotes.empty()) {
         return nNote;
     }
 
-    std::vector<unsigned char>::iterator high =
+    std::vector<unsigned char>::const_iterator high =
         std::lower_bound(mNotes.begin(), mNotes.end(), nNote);
     if (high == mNotes.end()) {
         --high;
     }
-    std::vector<unsigned char>::iterator low = high;
+    std::vector<unsigned char>::const_iterator low = high;
     if (low != mNotes.begin()) {
         --low;
     }

@@ -91,9 +91,9 @@ void LodMesh::Sync() {
 }
 
 // NTSC-U/C: 0x00476ec0, PAL: 0x004b4b38
-void LodMesh::Collide(const Ray &ray, Collideable::HitSink &sink) {
+void LodMesh::FindCollisions(const Ray &ray, Collideable::HitSink &sink) {
     for (Mesh *pMesh : *this) {
-        pMesh->Collide(ray, sink);
+        pMesh->FindCollisions(ray, sink);
     }
 }
 

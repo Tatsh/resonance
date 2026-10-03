@@ -24,8 +24,8 @@ void AnimHelper::SetAnim(Rnd::Animatable *pAnim) {
 
 // NTSC-U/C: 0x00411a58, PAL: 0x0044b520
 void AnimHelper::Play(float flFrom, float flTo) {
-    mFrom = mAnim->InverseFilters(flFrom);
-    mTo = mAnim->InverseFilters(flTo);
+    mFrom = mAnim->UnfilterFrame(flFrom);
+    mTo = mAnim->UnfilterFrame(flTo);
     mStart = kNotStarted;
 }
 

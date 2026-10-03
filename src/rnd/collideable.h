@@ -54,9 +54,9 @@ public:
     /**
      * One recorded intersection.
      *
-     * The title is inferred. Only the two fields `Rnd::Mesh::Collide` fills are recovered, from
-     * the record it builds at `0x0047fd74` after a successful face test. It is nested because it
-     * refers back to the enclosing class, the way `Rnd::Animatable::Filter` is nested.
+     * The title is inferred. Only the two fields `Rnd::Mesh::FindCollisions` fills are recovered,
+     * from the record it builds at `0x0047fd74` after a successful face test. It is nested because
+     * it refers back to the enclosing class, the way `Rnd::Animatable::Filter` is nested.
      */
     struct Hit {
         Collideable *mObject; /*!< The collideable that was struck. +0x00 */
@@ -67,7 +67,7 @@ public:
      * Collector a collision query appends its intersections to.
      *
      * The title is inferred. The only recovered field is the list at `+0x00`, which
-     * `Rnd::Mesh::Collide` appends to through the generic `stl_list` allocation tag. Nothing
+     * `Rnd::Mesh::FindCollisions` appends to through the generic `stl_list` allocation tag. Nothing
      * identifies the type. Whether the collector has further fields is not recovered.
      */
     struct HitSink {
@@ -135,20 +135,20 @@ public:
      * Test a ray against this object and append what it strikes to sink.
      *
      * Vtable slot 1. The base implementation tests nothing of its own and forwards the pair to
-     * every mCollides entry. `Rnd::Mesh::Collide` at `0x0047f950` ends by chaining here so that its
-     * children are tested after its own faces.
+     * every mCollides entry. `Rnd::Mesh::FindCollisions` at `0x0047f950` ends by chaining here so
+     * that its children are tested after its own faces.
      *
      * @param ray The segment to test along.
      * @param sink The collector to append intersections to.
      * @ghidraAddress NTSC-U/C: 0x00502a28
      * @ghidraAddress PAL: 0x00541838
      */
-    virtual void Collide(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Ray &ray, HitSink &sink);
 
     /**
      * Second collision query, a screen-space pick.
      *
-     * Vtable slot 2. It has the same signature as Collide() and the same forwarding base
+     * Vtable slot 2. It has the same signature as FindCollisions() and the same forwarding base
      * implementation. Only the overrides can distinguish the two. Slot 1 is overridden by
      * `Rnd::Mesh`, `Rnd::Tunnel`, and `Rnd::Arena`. Every derived table examined so far stores this
      * base implementation in slot 2, with one exception. Rnd::Cam overrides it at `0x004ad820`
@@ -211,7 +211,7 @@ public:
      * Replace the child list from stream.
      *
      * A revision above the one this build writes produces the report "Can't load new Collideable"
-     * followed by the abort handler of g_failSink.
+     * followed by the abort handler of Rnd::TheDbg.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x005005f0

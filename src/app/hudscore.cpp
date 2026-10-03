@@ -33,18 +33,18 @@ HudScore::HudScore(Player *pPlayer, int nIndex) : mText(nullptr) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mMesh = dynamic_cast<Rnd::Mesh *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s score%d.mesh", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s score%d.mesh", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mText = dynamic_cast<Rnd::Text *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s score%d.txt", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s score%d.txt", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     Rnd::Font *pFont = dynamic_cast<Rnd::Font *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s score%d.font", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s score%d.font", pszLayout, nIndex))));
 
     Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(
-        Rnd::g_manager.Find(HxStr("HUD score font ") + HxStr(pPlayer->mColorName) + ".mat"));
+        Rnd::TheManager.Find(HxStr("HUD score font ") + HxStr(pPlayer->mColorName) + ".mat"));
     pFont->SetMat(pMat);
 
     mMesh->SetShowing(Application::shared()->GetPlayMode() == kPlayModeGame);

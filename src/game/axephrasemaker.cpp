@@ -64,8 +64,9 @@ AxePhraseMaker::AxePhraseMaker(PhraseMgr *pPhraseMgr,
                                const TrackData *pTrackData,
                                Sch::TickClock *)
     : mPhraseMgr(pPhraseMgr), mQuantizer(pQuantizer), mTrack(pTrackData->mIndex),
-      mChannel(pTrackData->mChannel), mPhrase(nullptr), mPhraseBar(kNoBar), mPlayer(&g_nullPlayer),
-      mBarTicks(kBarTicks), mTrackData(pTrackData), mValue(kAxisCenter) {
+      mChannel(pTrackData->mChannel), mPhrase(nullptr), mPhraseBar(kNoBar),
+      mPlayer(&NullPlayer::sInstance), mBarTicks(kBarTicks), mTrackData(pTrackData),
+      mValue(kAxisCenter) {
     mSwitchBanks = 0;
     if (QueryConfigFlag(kBankSwitchConfigCode) != 0) {
         mSwitchBanks = QueryConfigFlag(kBankSwitchOverrideConfigCode) == 0;
@@ -117,7 +118,7 @@ void AxePhraseMaker::RecordMuseMsg(MuseMsg *pMsg) {
     const Mid::MBT offset = MakePosition(pMsg->mTick - barStart.mTick);
     (void)Mid::MBT(0); // Yes, the binary discards this position.
     mPhrase->AddMuseMsg(offset.mTick, pMsg);
-    mPhrase->AddValue(offset.mTick, mValue);
+    mPhrase->AddXLocal(offset.mTick, mValue);
 }
 
 // NTSC-U/C: 0x0019bce0, PAL: 0x001a1a48
@@ -131,7 +132,7 @@ void AxePhraseMaker::StartPhrase(int nTick) {
     mPhraseBar = nBar;
     mPhrase = new Phrase();
     mPhrase->mPlayer = mPlayer;
-    mPhrase->AddValue(Mid::MBT(0).mTick, mValue);
+    mPhrase->AddXLocal(Mid::MBT(0).mTick, mValue);
 
     ClearGemsMsg clear;
     clear.mBar = nBar;
@@ -169,7 +170,7 @@ void AxePhraseMaker::Erase(Player *pPlayer, int nTick, int bWholeStep) {
     }
 
     for (int nClear = nFirstBar; nClear < nEndBar; ++nClear) {
-        if (mPhraseMgr->GetPhraseOwner(nClear) == pPlayer) {
+        if (mPhraseMgr->GetOwner(nClear) == pPlayer) {
             bErased = 1;
             mPhraseMgr->ClearPhrase(nClear, 0);
         }
@@ -211,7 +212,7 @@ void AxePhraseMaker::FinishPhrase() {
 }
 
 // NTSC-U/C: 0x0019c368, PAL: 0x001a20d0
-void AxePhraseMaker::PostSeekerMsg(int) {
+void AxePhraseMaker::SendSeekerMsg(int) {
     if (mPlayer->IsNull()) {
         return;
     }
@@ -220,20 +221,20 @@ void AxePhraseMaker::PostSeekerMsg(int) {
 }
 
 // NTSC-U/C: 0x0019c408, PAL: 0x001a2170
-void AxePhraseMaker::HandleMessage(Message *pMsg) {
+void AxePhraseMaker::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nAxisRegisterMsgType) {
         AxisRegisterMsg *pAxis = static_cast<AxisRegisterMsg *>(pMsg);
         if (pAxis->mTrack == mTrack && pAxis->mPlayer == mPlayer) {
             mValue = pAxis->mValue;
         }
-    } else if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
+    } else if (nType == static_cast<int>(StdMidiMsg::sID)) {
         OnStdMidi(static_cast<StdMidiMsg *>(pMsg));
-    } else if (nType == static_cast<int>(g_dwSustainNoteMsgType)) {
+    } else if (nType == static_cast<int>(SustainNoteMsg::sID)) {
         OnSustainNote(static_cast<SustainNoteMsg *>(pMsg));
     } else if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
         OnTrackSelect(static_cast<TrackSelectMsg *>(pMsg));
-    } else if (nType == g_nInvalidateSeekerMsgType) {
+    } else if (nType == InvalidateSeekerMsg::sID) {
         OnMsg(*static_cast<InvalidateSeekerMsg *>(pMsg));
     }
 }
@@ -252,13 +253,13 @@ void AxePhraseMaker::OnTrackSelect(TrackSelectMsg *pMsg) {
     if (mPlayer->IsNull()) {
         return;
     }
-    PostSeekerMsg(pMsg->mPosition.mTick / mBarTicks.mTick);
+    SendSeekerMsg(pMsg->mPosition.mTick / mBarTicks.mTick);
 }
 
 // NTSC-U/C: 0x0019d8f0, PAL: 0x001a3658
 void AxePhraseMaker::OnMsg(const InvalidateSeekerMsg &msg) {
     if (msg.mTrack == mTrack) {
-        PostSeekerMsg(msg.mBar);
+        SendSeekerMsg(msg.mBar);
     }
 }
 
@@ -273,7 +274,7 @@ void AxePhraseMaker::OnPeriod(int nBar) {
     if ((nBar - 1) == mPhraseBar) {
         FinishPhrase();
     }
-    PostSeekerMsg(nBar);
+    SendSeekerMsg(nBar);
     if (mSwitchBanks == 0) {
         return;
     }

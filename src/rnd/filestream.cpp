@@ -27,13 +27,13 @@ FileStream::~FileStream() {
 }
 
 // NTSC-U/C: 0x0050ff60, PAL: 0x0054f548
-Stream &FileStream::ReadBytes(void *pDest, int nSize) {
+Stream &FileStream::Read(void *pDest, int nSize) {
     fread(pDest, nSize, 1, mFile);
     return *this;
 }
 
 // NTSC-U/C: 0x0050ff98, PAL: 0x0054f580
-Stream &FileStream::WriteBytes(const void *pSrc, int nSize) {
+Stream &FileStream::Write(const void *pSrc, int nSize) {
     fwrite(pSrc, nSize, 1, mFile);
     return *this;
 }

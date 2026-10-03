@@ -245,7 +245,7 @@ public:
     /**
      * Create a mesh under one name as a copy of the template mesh, in the default colour.
      *
-     * Runs PollLoad() first and discards its result, creates the mesh through Rnd::g_pfnNewMesh,
+     * Runs PollLoad() first and discards its result, creates the mesh through Rnd::Mesh::sNew,
      * copies mMeshTemplate into it with no flags, and applies g_freqMakerDefaultColor. The title
      * is inferred.
      *
@@ -283,7 +283,7 @@ public:
     /**
      * Report the colour at one position of the spectrum palette.
      *
-     * The palette texture, g_spectrumTextureName, is resolved out of Rnd::g_manager on first use
+     * The palette texture, g_spectrumTextureName, is resolved out of Rnd::TheManager on first use
      * and kept in mPaletteTex. The title is inferred.
      *
      * @param position The palette position, each coordinate from 0 to 1.

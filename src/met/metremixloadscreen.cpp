@@ -151,8 +151,8 @@ void MetRemixLoadScreen::ResolveContainerViews() {
         HxStr label = MetConfigText(kMetStrRlFactory, kPromptConfigCode, kFactoryLabelKey);
         mButtons->Add(HxStr(kFactoryButton), label);
     }
-    mThisDiscFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kMatchingFont)));
-    mOtherFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kOtherFont)));
+    mThisDiscFont = dynamic_cast<Rnd::Font *>(Rnd::TheManager.Find(HxStr(kMatchingFont)));
+    mOtherFont = dynamic_cast<Rnd::Font *>(Rnd::TheManager.Find(HxStr(kOtherFont)));
 }
 
 // NTSC-U/C: 0x0034a2a8, PAL: 0x00375c68
@@ -245,8 +245,8 @@ void MetRemixLoadScreen::EnterAndShow() {
     mHelpKeys.push_back(params.mPlayMode == kPlayModeJam ?
                             MetText(kMetStrHMemLoadRemix, kCardRemixTitleKey) :
                             MetText(kMetStrHMemLoadCustom, kCardCustomTitleKey));
-    mButtons->ButtonAt(kSavedButtonIndex)->SetShowing(1);
-    mButtons->ButtonAt(kFactoryButtonIndex)->SetShowing(1);
+    mButtons->GetButton(kSavedButtonIndex)->SetShowing(1);
+    mButtons->GetButton(kFactoryButtonIndex)->SetShowing(1);
 
     if (MetFrontEndState::shared()->mUsingMemcard != 0) {
         mRemixes = Catalogue(kCardRemixKey);
@@ -265,12 +265,12 @@ void MetRemixLoadScreen::EnterAndShow() {
     }
 
     if (mList == nullptr) {
-        Rnd::View *pLine = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kLineView)));
+        Rnd::View *pLine = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kLineView)));
         Rnd::Mesh *pHighlight =
-            dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kHighlightMesh)));
-        Rnd::Mesh *pUpArrow = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kUpArrowMesh)));
+            dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(kHighlightMesh)));
+        Rnd::Mesh *pUpArrow = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(kUpArrowMesh)));
         Rnd::Mesh *pDownArrow =
-            dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kDownArrowMesh)));
+            dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(kDownArrowMesh)));
         mList = new ScrollingList(
             this, kRowPitch, kRowCount, pLine, pHighlight, pUpArrow, pDownArrow, kListContext);
     } else {
@@ -284,8 +284,8 @@ void MetRemixLoadScreen::EnterAndShow() {
 
 // NTSC-U/C: 0x0034cbd0, PAL: 0x00378920
 void MetRemixLoadScreen::OnExitFinished() {
-    mButtons->ButtonAt(kSavedButtonIndex)->SetShowing(0);
-    mButtons->ButtonAt(kFactoryButtonIndex)->SetShowing(0);
+    mButtons->GetButton(kSavedButtonIndex)->SetShowing(0);
+    mButtons->GetButton(kFactoryButtonIndex)->SetShowing(0);
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
 
     if (mExitChoice == kExitBack) {

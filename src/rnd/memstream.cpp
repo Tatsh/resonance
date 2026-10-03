@@ -17,7 +17,7 @@ MemStream::~MemStream() {
 }
 
 // NTSC-U/C: 0x005100c0, PAL: 0x0054f6a8
-Stream &MemStream::ReadBytes(void *pDest, int nSize) {
+Stream &MemStream::Read(void *pDest, int nSize) {
     const int nAvailable = mBuffer.size();
     if (static_cast<unsigned>(nAvailable) < static_cast<unsigned>(mPos + nSize)) {
         mEof = 1;
@@ -31,7 +31,7 @@ Stream &MemStream::ReadBytes(void *pDest, int nSize) {
 }
 
 // NTSC-U/C: 0x0050f448, PAL: 0x0054ea30
-Stream &MemStream::WriteBytes(const void *pSrc, int nSize) {
+Stream &MemStream::Write(const void *pSrc, int nSize) {
     const unsigned nEnd = static_cast<unsigned>(mPos + nSize);
     if (mBuffer.capacity() < nEnd) {
         mBuffer.reserve(mBuffer.capacity() + kMemStreamReserve);
@@ -89,7 +89,7 @@ int MemStream::Fail() {
 }
 
 // NTSC-U/C: 0x005101c8, PAL: 0x0054f7b0
-void MemStream::DiscardReadBytes() {
+void MemStream::Compact() {
     mBuffer.erase(mBuffer.begin(), mBuffer.begin() + mPos);
     mPos = 0;
 }

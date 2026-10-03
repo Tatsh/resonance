@@ -485,12 +485,12 @@ constexpr float kInitialRepeatScale = 1.0f;
 constexpr int kInitialPlaysCommandSounds = 0;
 
 inline Rnd::Text *FindText(const char *pszName) {
-    Rnd::Object *pObject = Rnd::g_manager.Find(HxStr(pszName));
+    Rnd::Object *pObject = Rnd::TheManager.Find(HxStr(pszName));
     return pObject != nullptr ? dynamic_cast<Rnd::Text *>(pObject) : nullptr;
 }
 
 inline Rnd::View *FindView(const char *pszName) {
-    Rnd::Object *pObject = Rnd::g_manager.Find(HxStr(pszName));
+    Rnd::Object *pObject = Rnd::TheManager.Find(HxStr(pszName));
     return pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
 }
 
@@ -757,7 +757,7 @@ void MetKeyboardScreen::ResetKeyStates() {
     for (int i = 0; i < kDefaultMacroCount; ++i) {
         HxStr key(g_macroKeys[i]);
         path = HxStr(kKeyButtonPrefix) + key + kKeyButtonSuffix;
-        dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(path))->SetState(kButtonStateDisabled);
+        dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(path))->SetState(kButtonStateDisabled);
     }
 }
 
@@ -775,7 +775,7 @@ inline Rnd::Button *MetKeyboardScreen::FindKeyButton(const HxStr &key) {
     } else {
         path = HxStr(kKeyButtonPrefix) + key + kKeyButtonSuffix;
     }
-    return dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(path));
+    return dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(path));
 }
 
 // NTSC-U/C: 0x0028c870, PAL: 0x002a8570
@@ -963,7 +963,7 @@ void MetKeyboardScreen::ShowMacro(const HxStr &key) {
 
         const HxStr &macro = (*mMacros)[i];
         const int nEnd = TextEndX();
-        const float flWidth = mpTextEntryWindow->MeasureText(TextOf(macro), macro.mLen);
+        const float flWidth = mpTextEntryWindow->GetFontWidth(TextOf(macro), macro.mLen);
         // Yes, the binary reports an overflow only while the length still fits.
         if (static_cast<float>(g_nKeyboardMaxWidth) <= static_cast<float>(nEnd) + flWidth &&
             mText.mLen + macro.mLen < static_cast<unsigned>(g_nKeyboardMaxLength)) {
@@ -993,7 +993,7 @@ void MetKeyboardScreen::InsertMacro(int nIndex) {
 
     const HxStr &macro = (*mMacros)[nIndex];
     const int nEnd = TextEndX();
-    const float flWidth = mpTextEntryWindow->MeasureText(TextOf(macro), macro.mLen);
+    const float flWidth = mpTextEntryWindow->GetFontWidth(TextOf(macro), macro.mLen);
     // Yes, the binary rejects the macro only while the length still fits.
     if (static_cast<float>(g_nKeyboardMaxWidth) <= static_cast<float>(nEnd) + flWidth &&
         mText.mLen + macro.mLen < static_cast<unsigned>(g_nKeyboardMaxLength)) {
@@ -1124,7 +1124,7 @@ void MetKeyboardScreen::OnTab() {
     }
 
     const int nEnd = TextEndX();
-    if (static_cast<float>(nEnd) + mpTextEntryWindow->MeasureText(TextOf(spaces), kTabWidth) <
+    if (static_cast<float>(nEnd) + mpTextEntryWindow->GetFontWidth(TextOf(spaces), kTabWidth) <
             static_cast<float>(g_nKeyboardMaxWidth) &&
         mText.mLen + kTabLengthMargin < static_cast<unsigned>(g_nKeyboardMaxLength)) {
         InsertText(spaces, mCaret);
@@ -1142,7 +1142,7 @@ void MetKeyboardScreen::OnTab() {
 // NTSC-U/C: 0x00286850, PAL: 0x002a1ef8
 void MetKeyboardScreen::OnSpace() {
     const int nEnd = TextEndX();
-    if (static_cast<float>(nEnd) + mpTextEntryWindow->MeasureText(" ", 1) <
+    if (static_cast<float>(nEnd) + mpTextEntryWindow->GetFontWidth(" ", 1) <
             static_cast<float>(g_nKeyboardMaxWidth) &&
         mText.mLen < static_cast<unsigned>(g_nKeyboardMaxLength)) {
         mText.Insert(mCaret, 1, ' ');
@@ -1174,7 +1174,7 @@ void MetKeyboardScreen::OnDelete() {
 void MetKeyboardScreen::OnCharacter(const HxStr &key) {
     char ch = key[0];
     const int nEnd = TextEndX();
-    if (static_cast<float>(nEnd) + mpTextEntryWindow->MeasureText(&ch, 1) <
+    if (static_cast<float>(nEnd) + mpTextEntryWindow->GetFontWidth(&ch, 1) <
             static_cast<float>(g_nKeyboardMaxWidth) &&
         mText.mLen < static_cast<unsigned>(g_nKeyboardMaxLength)) {
         mText.Insert(mCaret, 1, ch);

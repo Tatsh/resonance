@@ -44,7 +44,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001050d0
      * @ghidraAddress PAL: 0x001050d0
      */
-    virtual void SetFreeUntil(int nTrack, int nBar, int nUntilBar);
+    virtual void ForceEnabled(int nTrack, int nBar, int nUntilBar);
 
     /**
      * Stop one track from ever being enabled.
@@ -56,7 +56,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001050d8
      * @ghidraAddress PAL: 0x001050d8
      */
-    virtual void DisableTrack(int nTrack);
+    virtual void ForceDisable(int nTrack);
 
     /**
      * Report whether one bar of one track may be caught.

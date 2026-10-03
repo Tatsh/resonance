@@ -138,7 +138,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004b65e8
      * @ghidraAddress PAL: 0x004f48f8
      */
-    int IsActive();
+    int InProgress();
 
     /**
      * Read how far the task has progressed.
@@ -156,7 +156,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004b6638
      * @ghidraAddress PAL: 0x004f4948
      */
-    HxStr GetName();
+    HxStr GetStatus();
 
     /**
      * Test whether the task suppresses its progress report.

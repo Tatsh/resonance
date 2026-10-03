@@ -70,7 +70,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f66d8
      * @ghidraAddress PAL: 0x0042eec0
      */
-    virtual void SendMidi(unsigned char nStatus, unsigned char nData1, unsigned char nData2);
+    virtual void PlayMidi(unsigned char nStatus, unsigned char nData1, unsigned char nData2);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x003f65c8

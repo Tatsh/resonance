@@ -11,7 +11,7 @@
  * offset 4. Its primary table is at `0x007e0c98` with seven entries and its MsgSource subobject
  * table at `0x007e1098` with four and a `-4` adjustment on every entry.
  *
- * The class is abstract twice over. Slot 3, MsgSink::HandleMessage(), still addresses the shared
+ * The class is abstract twice over. Slot 3, MsgSink::DispatchPriv(), still addresses the shared
  * pure-virtual stub at `0x005381a8`, and so does slot 6, the first virtual this class introduces
  * that it does not default. Catcher supplies both.
  *

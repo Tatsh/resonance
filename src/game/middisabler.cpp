@@ -23,11 +23,11 @@ MidiDisabler::~MidiDisabler() {
 }
 
 // NTSC-U/C: 0x001a6f08, PAL: 0x001acc70
-void MidiDisabler::HandleMessage(Message *pMsg) {
+void MidiDisabler::DispatchPriv(Message *pMsg) {
     const unsigned int dwType = pMsg->Type();
-    if (dwType == g_dwStdMidiMsgType) {
+    if (dwType == StdMidiMsg::sID) {
         OnMsg(*static_cast<StdMidiMsg *>(pMsg));
-    } else if (dwType == g_dwNoteMsgType) {
+    } else if (dwType == NoteMsg::sID) {
         OnMsg(*static_cast<NoteMsg *>(pMsg));
     } else {
         Send(pMsg);

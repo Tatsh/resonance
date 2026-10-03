@@ -24,9 +24,8 @@
  * value it had before the call.
  *
  * The four declared virtuals are the destructor at `0x001fca30`, the two navigation routines at
- * `0x001fcc40` and `0x001fcd10`, and the selection-change notification at `0x001feed8`. None of
- * the four has a recovered name, and the titles of the three after the destructor are inferred
- * from what the bodies do.
+ * `0x001fcc40` and `0x001fcd10`, and the selection-change notification at `0x001feed8`. The
+ * titles of the two navigation routines are inferred from what the bodies do.
  *
  * The constructor at `0x001fc9f8` is inline. It writes the vptr, zeroes the first word and the
  * vector, and sets mSelected to -1, which is the sentinel for no selection that the
@@ -108,7 +107,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001feed8
      * @ghidraAddress PAL: 0x002063a8
      */
-    virtual void OnSelectionChanged(int nPreviousIndex, int nIndex);
+    virtual void ChangeButtonSelected(int nPreviousIndex, int nIndex);
 
     /**
      * Release every button reference and empty mButtons.
@@ -124,7 +123,7 @@ public:
     /**
      * Resolve one button by object name and append it.
      *
-     * The object is resolved through Rnd::Manager::Find() on Rnd::g_manager and cast to
+     * The object is resolved through Rnd::Manager::Find() on Rnd::TheManager and cast to
      * Rnd::Button. A name that resolves to nothing reports through `0x0053dde0` and the null is
      * appended regardless, which is why every reader tests an entry before using it. A label of
      * length zero is not applied, and every MetLoadFreqBaseScreen call site passes the empty
@@ -181,7 +180,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001fef40
      * @ghidraAddress PAL: 0x00206410
      */
-    Rnd::Button *ButtonAt(int nIndex) const;
+    Rnd::Button *GetButton(int nIndex) const;
 
     /**
      * The button SetSelected() last stored.

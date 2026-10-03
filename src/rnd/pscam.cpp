@@ -136,8 +136,8 @@ constexpr float kAlphaScale = 128.0f;
 constexpr float kColorByteScale = 255.0f;
 
 inline GifQuadword *TakeQuadword() {
-    GifQuadword *pQuad = g_gfxDevice.mpWrite;
-    g_gfxDevice.mpWrite = pQuad + 1;
+    GifQuadword *pQuad = Rnd::ThePs.mpWrite;
+    Rnd::ThePs.mpWrite = pQuad + 1;
     return pQuad;
 }
 
@@ -241,7 +241,7 @@ inline void BuildSphereMapBasis(const float *pXfm,
                                 float aflRotation[kSphereMapRows][kXfmRowFloatCount]) {
     Vector3 negated;
     negated.w = 1.0f;
-    NegateVec3(g_pCurrentCam->mWorldXfm[kCamViewAxisRow], &negated.x);
+    NegateVec3(Cam::sCurrent->mWorldXfm[kCamViewAxisRow], &negated.x);
     view = negated;
     memcpy(aflRotation, pXfm, sizeof(float) * kSphereMapRows * kXfmRowFloatCount);
     const Transform *pStageXfm = g_pSelectedStageXfm;
@@ -385,7 +385,7 @@ inline void PushUvXfm() {
 
 // The material's vertex colour flags, emissive first.
 inline void PushMaterialVertexFlags() {
-    const Mat *pMat = g_pSelectedMat;
+    const Mat *pMat = PsMat::sCurrent;
     PushWords(static_cast<unsigned>(pMat->mVertEmissive),
               static_cast<unsigned>(pMat->mVertAmbient),
               static_cast<unsigned>(pMat->mVertDiffuse),
@@ -437,15 +437,15 @@ int EmitFaceVu1Setup(const float *pXfm, const Sphere &sphere) {
                bTextured ? kFanTagRegsTextured : kFanTagRegsUntextured);
 
     if (g_nLightingEnabled == 0) {
-        g_gfxDevice.mpWrite += kLightBlockQuadwords;
+        Rnd::ThePs.mpWrite += kLightBlockQuadwords;
         return kVu1EntryUnlit;
     }
     GifQuadword *pLight = TakeQuadword();
-    PushQuadword(&g_pSelectedMat->mEmissive);
-    GifQuadword *pAmbient = g_gfxDevice.mpWrite;
-    PushQuadword(&g_pSelectedMat->mAmbient);
-    GifQuadword *pDiffuse = g_gfxDevice.mpWrite;
-    PushQuadword(&g_pSelectedMat->mDiffuse);
+    PushQuadword(&PsMat::sCurrent->mEmissive);
+    GifQuadword *pAmbient = Rnd::ThePs.mpWrite;
+    PushQuadword(&PsMat::sCurrent->mAmbient);
+    GifQuadword *pDiffuse = Rnd::ThePs.mpWrite;
+    PushQuadword(&PsMat::sCurrent->mDiffuse);
     const int nEntry = SelectLightForVertex(pLight, pAmbient, pDiffuse, pXfm, &sphere);
     PushMaterialVertexFlags();
     return nEntry;
@@ -474,13 +474,13 @@ int PsMesh::EmitMultiMeshFaceRun() {
 
     int nEntry;
     if (g_nLightingEnabled != 0) {
-        PushQuadword(&g_pSelectedMat->mEmissive);
-        PushQuadword(&g_pSelectedMat->mAmbient);
-        PushQuadword(&g_pSelectedMat->mDiffuse);
+        PushQuadword(&PsMat::sCurrent->mEmissive);
+        PushQuadword(&PsMat::sCurrent->mAmbient);
+        PushQuadword(&PsMat::sCurrent->mDiffuse);
         PushMaterialVertexFlags();
         nEntry = kVu1EntryNoLight;
     } else {
-        g_gfxDevice.mpWrite += kMultiMeshLightBlockQuadwords;
+        Rnd::ThePs.mpWrite += kMultiMeshLightBlockQuadwords;
         nEntry = kVu1EntryUnlit;
     }
 
@@ -492,8 +492,8 @@ int PsMesh::EmitMultiMeshFaceRun() {
 
     const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
     for (unsigned short nIndex : run.mVertIndices) {
-        memcpy(g_gfxDevice.mpWrite, &verts[nIndex], sizeof(MeshVert));
-        g_gfxDevice.mpWrite += kVu1VertQuadwords;
+        memcpy(Rnd::ThePs.mpWrite, &verts[nIndex], sizeof(MeshVert));
+        Rnd::ThePs.mpWrite += kVu1VertQuadwords;
     }
 
     const int nIndexEnd = nIndexAddr + nPrimCount;
@@ -573,17 +573,17 @@ void TransformAndLightMeshVerts(DrawVert *pOutVerts,
     Color diffuse = {};
     Color environAmbient = {};
     if (bLighting != 0) {
-        bVertAlpha = g_pSelectedMat->mVertAlpha;
-        bVertEmissive = g_pSelectedMat->mVertEmissive;
-        bVertAmbient = g_pSelectedMat->mVertAmbient;
-        bVertDiffuse = g_pSelectedMat->mVertDiffuse;
+        bVertAlpha = PsMat::sCurrent->mVertAlpha;
+        bVertEmissive = PsMat::sCurrent->mVertEmissive;
+        bVertAmbient = PsMat::sCurrent->mVertAmbient;
+        bVertDiffuse = PsMat::sCurrent->mVertDiffuse;
         nLights = TransformLightRecords(
             pDirectionalBegin, pDirectionalEnd, pPointBegin, pPointEnd, pXfm, &sphere);
         g_renderStats.mnLitVerts += nCount * nLights;
-        emissive = g_pSelectedMat->mEmissive;
-        ambient = g_pSelectedMat->mAmbient;
-        diffuse = g_pSelectedMat->mDiffuse;
-        environAmbient = g_pCurrentEnviron->mAmbient;
+        emissive = PsMat::sCurrent->mEmissive;
+        ambient = PsMat::sCurrent->mAmbient;
+        diffuse = PsMat::sCurrent->mDiffuse;
+        environAmbient = Environ::sCurrent->mAmbient;
     }
 
     Vector3 view;
@@ -1122,7 +1122,7 @@ void EmitParticleVu1Setup() {
 }
 
 // NTSC-U/C: 0x00768410, PAL: 0x007ac160
-PsCam *g_pDefaultCam;
+PsCam *PsCam::sDefault;
 
 // NTSC-U/C: 0x00768420, PAL: 0x007ac170
 Frustum g_drawFrustum;
@@ -1178,7 +1178,7 @@ PsCam::~PsCam() {
 }
 
 // NTSC-U/C: 0x00582830, PAL: 0x005c5a28
-int PsCam::DrawSelf() {
+int PsCam::DrawShowing() {
     int nTargetWidth;
     int nTargetHeight;
     if (mpTargetTex != nullptr) {
@@ -1186,11 +1186,11 @@ int PsCam::DrawSelf() {
         nTargetWidth = mpTargetTex->mWidth;
         nTargetHeight = mpTargetTex->mHeight;
     } else {
-        if (g_pCurrentCam != nullptr && g_pCurrentCam->mpTargetTex != nullptr) {
-            g_gfxDevice.RestoreFrameBufferTarget();
+        if (Cam::sCurrent != nullptr && Cam::sCurrent->mpTargetTex != nullptr) {
+            Rnd::ThePs.RestoreFrameBufferTarget();
         }
-        nTargetWidth = g_gfxDevice.mnDisplayWidth;
-        nTargetHeight = g_gfxDevice.mnDisplayHeight;
+        nTargetWidth = Rnd::ThePs.mnDisplayWidth;
+        nTargetHeight = Rnd::ThePs.mnDisplayHeight;
     }
 
     Vector2 centre;
@@ -1250,7 +1250,7 @@ int PsCam::DrawSelf() {
 
     const float flHalfWidth = flWidth * mScreenRect.w * 0.5f;
     const float flHalfHeight = flHeight * mScreenRect.h * 0.5f;
-    const int nMaxDepth = (1 << (g_gfxDevice.mnDepthBytes * kBitsPerByte)) - 1;
+    const int nMaxDepth = (1 << (Rnd::ThePs.mnDepthBytes * kBitsPerByte)) - 1;
     const float flHalfDepth = static_cast<float>(nMaxDepth) * 0.5f;
     g_viewportXfm.mBasisX.x = flHalfWidth;
     g_viewportXfm.mBasisY.y = flHalfHeight;
@@ -1310,18 +1310,18 @@ int PsCam::DrawSelf() {
     g_nScissorY1 = static_cast<int>(flBottom * flHeight) - 1;
     g_nScissorX0 = static_cast<int>(flLeft * flWidth);
     g_nScissorY0 = static_cast<int>(flTop * flHeight);
-    g_gfxDevice.SetGsReg(kGsRegScissor1,
-                         static_cast<unsigned long long>(g_nScissorX0) |
-                             (static_cast<unsigned long long>(g_nScissorX1) << kScissorX1Shift) |
-                             (static_cast<unsigned long long>(g_nScissorY0) << kScissorY0Shift) |
-                             (static_cast<unsigned long long>(g_nScissorY1) << kScissorY1Shift),
-                         kGsRegAllBits);
+    Rnd::ThePs.SetGsReg(kGsRegScissor1,
+                        static_cast<unsigned long long>(g_nScissorX0) |
+                            (static_cast<unsigned long long>(g_nScissorX1) << kScissorX1Shift) |
+                            (static_cast<unsigned long long>(g_nScissorY0) << kScissorY0Shift) |
+                            (static_cast<unsigned long long>(g_nScissorY1) << kScissorY1Shift),
+                        kGsRegAllBits);
 
-    g_pCurrentCam = this;
+    Cam::sCurrent = this;
     const int nOriginY =
-        kGsCoordinateCentreInt - static_cast<int>(g_gfxDevice.mnDisplayHeight * 0.5f);
+        kGsCoordinateCentreInt - static_cast<int>(Rnd::ThePs.mnDisplayHeight * 0.5f);
     const int nOriginX =
-        kGsCoordinateCentreInt - static_cast<int>(g_gfxDevice.mnDisplayWidth * 0.5f);
+        kGsCoordinateCentreInt - static_cast<int>(Rnd::ThePs.mnDisplayWidth * 0.5f);
     g_nScissorY1 = (nOriginY + g_nScissorY1) << kGsSubpixelShift;
     g_nScissorY0 = (nOriginY + g_nScissorY0) << kGsSubpixelShift;
     g_nScissorX1 = (nOriginX + g_nScissorX1) << kGsSubpixelShift;
@@ -1338,8 +1338,8 @@ Vector2 PsCam::ScreenToPixels(const Vector2 &ptScreen) {
         ptPixels.x *= static_cast<float>(mpTargetTex->mWidth);
         ptPixels.y *= static_cast<float>(mpTargetTex->mHeight);
     } else {
-        ptPixels.y *= static_cast<float>(g_gfxDevice.mnDisplayHeight);
-        ptPixels.x *= static_cast<float>(g_gfxDevice.mnDisplayWidth);
+        ptPixels.y *= static_cast<float>(Rnd::ThePs.mnDisplayHeight);
+        ptPixels.x *= static_cast<float>(Rnd::ThePs.mnDisplayWidth);
     }
     return ptPixels;
 }
@@ -1368,17 +1368,17 @@ Cam *PsCam::NewCam(const HxStr &name) {
 
 // NTSC-U/C: 0x00582430, PAL: 0x005c5608
 void PsCam::Init() {
-    g_pfnNewCam = NewCam;
-    g_pDefaultCam = new PsCam(HxStr("[default cam]"));
-    g_pDefaultCam->mInternal = 1;
+    Cam::sNew = NewCam;
+    PsCam::sDefault = new PsCam(HxStr("[default cam]"));
+    PsCam::sDefault->mInternal = 1;
 
     // The binary assembles the row in a temporary and stores it as one quadword.
-    float *pTranslation = g_pDefaultCam->mLocalXfm[kXfmRowTranslation];
+    float *pTranslation = PsCam::sDefault->mLocalXfm[kXfmRowTranslation];
     pTranslation[0] = 0.0f;
     pTranslation[1] = kDefaultCamDistance;
     pTranslation[2] = 0.0f;
     pTranslation[3] = 1.0f;
-    g_pDefaultCam->mDirty = 1;
+    PsCam::sDefault->mDirty = 1;
 }
 
 } // namespace Rnd

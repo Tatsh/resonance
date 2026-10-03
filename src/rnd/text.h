@@ -73,6 +73,14 @@ enum TextAlign {
 class Text : public Drawable, public Collideable, public Transformable {
 public:
     /**
+     * Creator the registered "Text" class builds through.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006feca8
+     * @ghidraAddress PAL: 0x007426a8
+     */
+    static Text *(*sNew)(const HxStr &name);
+
+    /**
      * Allocate a text run under the tag "Rnd::Text".
      *
      * @param nSize The object size the compiler supplies.
@@ -150,7 +158,7 @@ public:
     /**
      * Replace the font.
      *
-     * Rnd::Drawable vtable slot 7. A null argument is stored, unlike Rnd::Mesh::SetMaterial(),
+     * Rnd::Drawable vtable slot 7. A null argument is stored, unlike Rnd::Mesh::SetMat(),
      * which drops the previous material without storing the null.
      *
      * @param pFont The font, or null for none.
@@ -255,7 +263,7 @@ public:
      * Read this text run from stream.
      *
      * A revision above 6 produces the report "Can't load new Text" followed by the abort handler of
-     * g_failSink. The older revisions differ in five ways. Below revision 3 the alignment arrives
+     * Rnd::TheDbg. The older revisions differ in five ways. Below revision 3 the alignment arrives
      * as an index into a table of six words rather than as the bit set. Below revision 2 the
      * transform is absent and a plain x and y pair stands in for it, becoming the translation row
      * of the local transform with the y component negated and scaled by three quarters. Below
@@ -281,7 +289,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004c7ef8
      * @ghidraAddress PAL: 0x005060d0
      */
-    virtual void Collide(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Ray &ray, HitSink &sink);
 
     /**
      * Set the billboard mode of this object and of its glyph mesh.
@@ -359,12 +367,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004d02f8
      * @ghidraAddress PAL: 0x0050e730
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
     /**
      * Report the total advance of the first nCount characters of pText in this text's font.
      *
-     * Unlike the measurement FindLineBreak() inlines, the sum is not truncated. A text with no
+     * Unlike the measurement HowManyFit() inlines, the sum is not truncated. A text with no
      * font measures nothing. The jukebox screens lay their lists out with it. The name is
      * inferred.
      *
@@ -374,7 +382,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004d0010
      * @ghidraAddress PAL: 0x0050e428
      */
-    float MeasureText(const char *pText, int nCount);
+    float GetFontWidth(const char *pText, int nCount);
 
     /**
      * Report where one glyph of the laid-out text sits.
@@ -455,7 +463,7 @@ private:
      *
      * The text is copied into a stack buffer, broken line by line, and returned. A text whose first
      * line already fits is returned unchanged, and a text whose very first character is a newline
-     * is returned with no wrapping applied at all, because FindLineBreak() reports nothing for such
+     * is returned with no wrapping applied at all, because HowManyFit() reports nothing for such
      * a line and the routine treats that as having nothing to do.
      *
      * @param text The text to wrap.
@@ -478,10 +486,10 @@ private:
      * @ghidraAddress NTSC-U/C: 0x004c9278
      * @ghidraAddress PAL: 0x00507490
      */
-    int FindLineBreak(const char *pText);
+    int HowManyFit(const char *pText);
 
     // Total advance of the first nCount characters of pText, truncated to a whole number. The
-    // compiler inlined this at all five measurement sites of FindLineBreak(), which is its only
+    // compiler inlined this at all five measurement sites of HowManyFit(), which is its only
     // caller. A text run with no font measures nothing.
     float MeasureRun(const char *pText, int nCount);
 
@@ -491,7 +499,7 @@ private:
 
     // Take a reference on the font and rebuild. Copy() and Load() inline the same body.
     // NTSC-U/C: 0x004cf9b8, PAL: 0x0050dd30
-    void AddObjectRefs();
+    void AddRefObjects();
 
     // Declared in recovered offset order. Every member but mWrapWidth and mPreWrapText is private:
     // each one that the engine changes has a setter, and no call from outside this class arrives at
@@ -509,7 +517,7 @@ public:
      * Load() clamps a value read from a file below revision 5 into 0 through 1000, and nothing
      * clamps a value SetWrapWidth() receives. Public because MetSaveRemixScreen and the
      * ShowRemixDetails() of MetJukeboxBaseScreen and MetJukeboxEditPlaylistScreen compare it
-     * against MeasureText() through a plain load, and the image has no accessor. +0xec
+     * against GetFontWidth() through a plain load, and the image has no accessor. +0xec
      */
     float mWrapWidth;
 
@@ -555,14 +563,6 @@ private:
 Text *NewText(const HxStr &name);
 
 /**
- * Creator the registered "Text" class builds through.
- *
- * @ghidraAddress NTSC-U/C: 0x006feca8
- * @ghidraAddress PAL: 0x007426a8
- */
-extern Text *(*g_pfnNewText)(const HxStr &name);
-
-/**
  * Build a text run through the creator hook.
  *
  * The one recovered reference to this routine is the data word at `0x00869c28`, and nothing in the
@@ -579,7 +579,7 @@ Text *NewTextThroughHook(const HxStr &name);
 /**
  * Build a text run for the registered "Text" class.
  *
- * Calls through g_pfnNewText and narrows the result to its Rnd::Object subobject, which is why the
+ * Calls through Text::sNew and narrows the result to its Rnd::Object subobject, which is why the
  * routine exists at all rather than the hook being registered directly.
  *
  * @param name The object name.
@@ -590,7 +590,7 @@ Text *NewTextThroughHook(const HxStr &name);
 Object *CreateRegisteredText(const HxStr &name);
 
 /**
- * Point g_pfnNewText at NewText() and register the "Text" class with Rnd::Manager.
+ * Point Text::sNew at NewText() and register the "Text" class with Rnd::Manager.
  *
  * Rnd::Manager::Init() also expands this inline.
  *

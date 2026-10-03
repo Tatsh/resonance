@@ -45,12 +45,12 @@ typedef void (ACanvas::*ABitmapCopyMember)(const ABitmap &, int, int);
 typedef void (ACanvas::*ABitmapStretchMember)(const ABitmap &, const ARect &);
 
 // NTSC-U/C: 0x0077dc98, PAL: 0x007c1a88
-const ABitmapCopyMember kCopyNoClipForFormat[kABitmapFormatCount] = {&ACanvas::DrawBitmapLin4U,
-                                                                     &ACanvas::DrawBitmapLin8U,
-                                                                     &ACanvas::DrawBitmapLin15U,
-                                                                     &ACanvas::DrawBitmapLin24U,
-                                                                     &ACanvas::DrawBitmapLin32U,
-                                                                     &ACanvas::DrawBitmapRle8U};
+const ABitmapCopyMember pfDrawBitmapU[kABitmapFormatCount] = {&ACanvas::DrawBitmapLin4U,
+                                                              &ACanvas::DrawBitmapLin8U,
+                                                              &ACanvas::DrawBitmapLin15U,
+                                                              &ACanvas::DrawBitmapLin24U,
+                                                              &ACanvas::DrawBitmapLin32U,
+                                                              &ACanvas::DrawBitmapRle8U};
 
 // NTSC-U/C: 0x0077dcc8, PAL: 0x007c1ab8
 const ABitmapCopyMember kCopyForFormat[kABitmapFormatCount] = {&ACanvas::DrawBitmapLin4,
@@ -98,7 +98,7 @@ inline int AdvanceStretchRow(ACanvas::AScaledRowInfo *pBlit) {
 } // namespace
 
 // NTSC-U/C: 0x0086f6f0, PAL: 0x008b3dd0
-APalette *g_pDefaultPalette = nullptr;
+APalette *ACanvas::palDefault = nullptr;
 
 // NTSC-U/C: 0x00557af8, PAL: 0x00598c50
 void ACanvas::QuantizeToRamps(ACanvas &dest, const std::vector<const Color *> &colors) const {
@@ -161,7 +161,7 @@ ACanvas *ACanvas::NewCompatibleCanvas(const ABitmap &bitmap, bool bAllocatePixel
             copy.mBytesPerRow = static_cast<short>((copy.mWidth + 2) / 2);
         } else {
             copy.mBytesPerRow =
-                static_cast<short>(copy.mWidth * g_abBitmapBytesPerPixel[copy.mFormat]);
+                static_cast<short>(copy.mWidth * ABitmap::bmPixelSize[copy.mFormat]);
         }
         copy.mPixels = MemAllocTagged(
             static_cast<long long>(copy.mHeight) * copy.mBytesPerRow, __FILE__, __LINE__);
@@ -330,7 +330,7 @@ int ACanvas::ClipBitmap(ABitmap *pBitmap, int *pnX, int *pnY) const {
                 pPixels += *pnX / 2;
             }
         } else {
-            pPixels += (mClip.mLeft - *pnX) * g_abBitmapBytesPerPixel[pBitmap->mFormat];
+            pPixels += (mClip.mLeft - *pnX) * ABitmap::bmPixelSize[pBitmap->mFormat];
         }
         pBitmap->mPixels = pPixels;
         pBitmap->mWidth = static_cast<short>(pBitmap->mWidth - (mClip.mLeft - *pnX));
@@ -626,7 +626,7 @@ void ACanvas::DrawTmappedConvexPolygon(const APolygon &polygon) {
 
 // NTSC-U/C: 0x005ec130, PAL: 0x0062e278
 void ACanvas::DrawBitmapU(const ABitmap &source, int nX, int nY) {
-    (this->*kCopyNoClipForFormat[source.mFormat])(source, nX, nY);
+    (this->*pfDrawBitmapU[source.mFormat])(source, nX, nY);
 }
 
 // NTSC-U/C: 0x005ec1d8, PAL: 0x0062e320
@@ -884,7 +884,7 @@ void ACanvas::DrawBitmapLin32(const ABitmap &source, int nX, int nY) {
 
 // NTSC-U/C: 0x005ecb68, PAL: 0x0062ecb0
 void ACanvas::DrawBitmapRle8U(const ABitmap &source, int nX, int nY) {
-    ABitmap row(g_abCanvasRowScratch,
+    ABitmap row(ACanvas::tempBuff,
                 kABitmapFormatLinear8,
                 source.mHasTransparentColor != 0,
                 source.mWidth,
@@ -897,7 +897,7 @@ void ACanvas::DrawBitmapRle8U(const ABitmap &source, int nX, int nY) {
     reader.mWidth = source.mWidth;
     reader.mTransparentValue = kARleReaderNoTransparentValue;
     for (int y = nY; y < nY + source.mHeight; ++y) {
-        reader.UnpackRow(g_abCanvasRowScratch);
+        reader.UnpackRow(ACanvas::tempBuff);
         DrawBitmapLin8U(row, nX, y);
     }
 }
@@ -919,18 +919,18 @@ void ACanvas::DrawBitmapRle8(const ABitmap &source, int nX, int nY) {
         return;
     }
 
-    ABitmap row(g_abCanvasRowScratch,
+    ABitmap row(ACanvas::tempBuff,
                 kABitmapFormatLinear8,
                 source.mHasTransparentColor != 0,
                 source.mWidth,
                 1,
                 0);
-    row.mPixels = g_abCanvasRowScratch + clip.mSkipLeft;
+    row.mPixels = ACanvas::tempBuff + clip.mSkipLeft;
     row.mWidth = static_cast<short>(clip.mStopColumn - clip.mSkipLeft);
     row.mTransparentColor = source.mTransparentColor;
     row.mPalette = source.mPalette;
     for (int y = nY; y < clip.mStopRow; ++y) {
-        reader.UnpackRow(g_abCanvasRowScratch);
+        reader.UnpackRow(ACanvas::tempBuff);
         DrawBitmapLin8U(row, nX, y);
     }
 }
@@ -1047,7 +1047,7 @@ void ACanvas::GetBitmapLin32U(const ABitmap &dest, int nX, int nY) {
 // NTSC-U/C: 0x005e9ee8, PAL: 0x0062c030
 void ACanvas::DrawCharU(int nCharCode, const AFont *pFont, int nX, int nY) {
     const ABitmap *pGlyph = GlyphForCode(pFont, nCharCode);
-    (this->*kCopyNoClipForFormat[pGlyph->mFormat])(*pGlyph, nX, nY - pFont->mBaseline);
+    (this->*pfDrawBitmapU[pGlyph->mFormat])(*pGlyph, nX, nY - pFont->mBaseline);
 }
 
 // NTSC-U/C: 0x005e9fc8, PAL: 0x0062c110
@@ -1057,7 +1057,7 @@ void ACanvas::DrawChar(int nCharCode, const AFont *pFont, int nX, int nY) {
     ABitmap clipped = *pGlyph;
     nY -= pFont->mBaseline;
     if (ClipBitmap(&clipped, &nX, &nY) != 0) {
-        (this->*kCopyNoClipForFormat[clipped.mFormat])(clipped, nX, nY);
+        (this->*pfDrawBitmapU[clipped.mFormat])(clipped, nX, nY);
     }
 }
 
@@ -1112,17 +1112,17 @@ void ACanvas::DrawClutBitmapLin4U(const ABitmap &source,
     span.mRight = static_cast<short>(source.mWidth + nX);
     span.mHasTransparentColor = source.mHasTransparentColor != 0;
     span.mTransparentColor = source.mTransparentColor;
-    span.mSource = g_abCanvasRowScratch;
+    span.mSource = ACanvas::tempBuff;
     span.mPalette = source.mPalette;
     if (span.mPalette == nullptr) {
         span.mPalette = mBitmap.mPalette;
         if (span.mPalette == nullptr) {
-            span.mPalette = g_pDefaultPalette;
+            span.mPalette = ACanvas::palDefault;
         }
     }
     const unsigned char *pRow = SourceRow(source);
     for (span.mY = static_cast<short>(nY); span.mY < nY + source.mHeight; ++span.mY) {
-        Unpack4(pRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
+        Unpack4(pRow, ACanvas::tempBuff, source.mWidth, source.mOddNibbleStart);
         DrawClutBitmapRowLin8U(span, pRemap);
         pRow += source.mBytesPerRow;
     }
@@ -1143,7 +1143,7 @@ void ACanvas::DrawClutBitmapLin8U(const ABitmap &source,
     if (span.mPalette == nullptr) {
         span.mPalette = mBitmap.mPalette;
         if (span.mPalette == nullptr) {
-            span.mPalette = g_pDefaultPalette;
+            span.mPalette = ACanvas::palDefault;
         }
     }
     for (span.mY = static_cast<short>(nY); span.mY < nY + source.mHeight; ++span.mY) {
@@ -1173,17 +1173,17 @@ void ACanvas::DrawBlendBitmapLin4U(const ABitmap &source,
     span.mRight = static_cast<short>(source.mWidth + nX);
     span.mHasTransparentColor = source.mHasTransparentColor != 0;
     span.mTransparentColor = source.mTransparentColor;
-    span.mSource = g_abCanvasRowScratch;
+    span.mSource = ACanvas::tempBuff;
     span.mPalette = source.mPalette;
     if (span.mPalette == nullptr) {
         span.mPalette = mBitmap.mPalette;
         if (span.mPalette == nullptr) {
-            span.mPalette = g_pDefaultPalette;
+            span.mPalette = ACanvas::palDefault;
         }
     }
     const unsigned char *pRow = SourceRow(source);
     for (span.mY = static_cast<short>(nY); span.mY < nY + source.mHeight; ++span.mY) {
-        Unpack4(pRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
+        Unpack4(pRow, ACanvas::tempBuff, source.mWidth, source.mOddNibbleStart);
         DrawBlendBitmapRowLin8U(span, ppBlend);
         pRow += source.mBytesPerRow;
     }
@@ -1204,7 +1204,7 @@ void ACanvas::DrawBlendBitmapLin8U(const ABitmap &source,
     if (span.mPalette == nullptr) {
         span.mPalette = mBitmap.mPalette;
         if (span.mPalette == nullptr) {
-            span.mPalette = g_pDefaultPalette;
+            span.mPalette = ACanvas::palDefault;
         }
     }
     for (span.mY = static_cast<short>(nY); span.mY < nY + source.mHeight; ++span.mY) {
@@ -1382,12 +1382,12 @@ void ACanvas::DrawClutBitmapRle8U(const ABitmap &source,
     span.mRight = static_cast<short>(source.mWidth + nX);
     span.mHasTransparentColor = source.mHasTransparentColor != 0;
     span.mTransparentColor = source.mTransparentColor;
-    span.mSource = g_abCanvasRowScratch;
+    span.mSource = ACanvas::tempBuff;
     span.mPalette = source.mPalette;
     if (span.mPalette == nullptr) {
         span.mPalette = mBitmap.mPalette;
         if (span.mPalette == nullptr) {
-            span.mPalette = g_pDefaultPalette;
+            span.mPalette = ACanvas::palDefault;
         }
     }
     ARle8Reader reader;
@@ -1397,7 +1397,7 @@ void ACanvas::DrawClutBitmapRle8U(const ABitmap &source,
     // Yes, the binary advances nY rather than span.mY, so the bound recedes with the row and a
     // source with any rows never ends. DrawClutBitmapU() has no caller, so the loop never runs.
     for (span.mY = static_cast<short>(nY); span.mY < nY + source.mHeight; ++nY) {
-        reader.UnpackRow(g_abCanvasRowScratch);
+        reader.UnpackRow(ACanvas::tempBuff);
         DrawClutBitmapRowLin8U(span, pRemap);
     }
 }
@@ -1423,16 +1423,16 @@ void ACanvas::DrawClutBitmapRle8(const ABitmap &source,
     span.mRight = static_cast<short>(nX + (clip.mStopColumn - clip.mSkipLeft));
     span.mHasTransparentColor = source.mHasTransparentColor != 0;
     span.mTransparentColor = source.mTransparentColor;
-    span.mSource = g_abCanvasRowScratch + clip.mSkipLeft;
+    span.mSource = ACanvas::tempBuff + clip.mSkipLeft;
     span.mPalette = source.mPalette;
     if (span.mPalette == nullptr) {
         span.mPalette = mBitmap.mPalette;
         if (span.mPalette == nullptr) {
-            span.mPalette = g_pDefaultPalette;
+            span.mPalette = ACanvas::palDefault;
         }
     }
     for (span.mY = static_cast<short>(nY); span.mY < clip.mStopRow; ++span.mY) {
-        reader.UnpackRow(g_abCanvasRowScratch);
+        reader.UnpackRow(ACanvas::tempBuff);
         DrawClutBitmapRowLin8U(span, pRemap);
     }
 }
@@ -1490,12 +1490,12 @@ void ACanvas::DrawBlendBitmapRle8U(const ABitmap &source,
     span.mRight = static_cast<short>(source.mWidth + nX);
     span.mHasTransparentColor = source.mHasTransparentColor != 0;
     span.mTransparentColor = source.mTransparentColor;
-    span.mSource = g_abCanvasRowScratch;
+    span.mSource = ACanvas::tempBuff;
     span.mPalette = source.mPalette;
     if (span.mPalette == nullptr) {
         span.mPalette = mBitmap.mPalette;
         if (span.mPalette == nullptr) {
-            span.mPalette = g_pDefaultPalette;
+            span.mPalette = ACanvas::palDefault;
         }
     }
     ARle8Reader reader;
@@ -1505,7 +1505,7 @@ void ACanvas::DrawBlendBitmapRle8U(const ABitmap &source,
     // Yes, the binary advances nY rather than span.mY here as well, and DrawBlendBitmapU() has no
     // caller either.
     for (span.mY = static_cast<short>(nY); span.mY < nY + source.mHeight; ++nY) {
-        reader.UnpackRow(g_abCanvasRowScratch);
+        reader.UnpackRow(ACanvas::tempBuff);
         DrawBlendBitmapRowLin8U(span, ppBlend);
     }
 }
@@ -1531,16 +1531,16 @@ void ACanvas::DrawBlendBitmapRle8(const ABitmap &source,
     span.mRight = static_cast<short>(nX + (clip.mStopColumn - clip.mSkipLeft));
     span.mHasTransparentColor = source.mHasTransparentColor != 0;
     span.mTransparentColor = source.mTransparentColor;
-    span.mSource = g_abCanvasRowScratch + clip.mSkipLeft;
+    span.mSource = ACanvas::tempBuff + clip.mSkipLeft;
     span.mPalette = source.mPalette;
     if (span.mPalette == nullptr) {
         span.mPalette = mBitmap.mPalette;
         if (span.mPalette == nullptr) {
-            span.mPalette = g_pDefaultPalette;
+            span.mPalette = ACanvas::palDefault;
         }
     }
     for (span.mY = static_cast<short>(nY); span.mY < clip.mStopRow; ++span.mY) {
-        reader.UnpackRow(g_abCanvasRowScratch);
+        reader.UnpackRow(ACanvas::tempBuff);
         DrawBlendBitmapRowLin8U(span, ppBlend);
     }
 }
@@ -1616,7 +1616,7 @@ int ACanvas::ClipAndSetupScaledBitmap(const ABitmap &source,
     if (pBlit->mPalette == nullptr) {
         pBlit->mPalette = mBitmap.mPalette;
         if (pBlit->mPalette == nullptr) {
-            pBlit->mPalette = g_pDefaultPalette;
+            pBlit->mPalette = ACanvas::palDefault;
         }
     }
     pBlit->mHasTransparentColor = source.mHasTransparentColor;
@@ -1643,14 +1643,14 @@ void ACanvas::DrawScaledBitmapLin4(const ABitmap &source, const ARect &rect) {
     if (ClipAndSetupScaledBitmap(source, rect, &blit) == 0) {
         return;
     }
-    blit.mSource = g_abCanvasRowScratch;
+    blit.mSource = ACanvas::tempBuff;
     // Yes, the walk starts at the first source row rather than at the row
     // ClipAndSetupScaledBitmap() selected. A rectangle clipped at the top samples from too high in
     // the source.
     const unsigned char *pRow = SourceRow(source);
     int nRow = blit.mSourcePositionY >> kACanvasFractionBits;
     for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
-        Unpack4(pRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
+        Unpack4(pRow, ACanvas::tempBuff, source.mWidth, source.mOddNibbleStart);
         DrawScaledBitmapRowLin8U(blit);
         const int nNextRow = AdvanceStretchRow(&blit);
         pRow += (nNextRow - nRow) * source.mBytesPerRow;
@@ -1732,8 +1732,8 @@ void ACanvas::DrawScaledBitmapRle8(const ABitmap &source, const ARect &rect) {
     if (nRow != 0) {
         reader.SkipRow(nRow);
     }
-    reader.UnpackRow(g_abCanvasRowScratch);
-    blit.mSource = g_abCanvasRowScratch;
+    reader.UnpackRow(ACanvas::tempBuff);
+    blit.mSource = ACanvas::tempBuff;
     for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
         DrawScaledBitmapRowLin8U(blit);
         const int nNextRow = AdvanceStretchRow(&blit);
@@ -1741,7 +1741,7 @@ void ACanvas::DrawScaledBitmapRle8(const ABitmap &source, const ARect &rect) {
             if (nNextRow - nRow != 1) {
                 reader.SkipRow(nNextRow - nRow - 1);
             }
-            reader.UnpackRow(g_abCanvasRowScratch);
+            reader.UnpackRow(ACanvas::tempBuff);
         }
         nRow = nNextRow;
     }
@@ -1805,8 +1805,8 @@ void ACanvas::DrawScaledClutBitmapRle8(const ABitmap &source,
     if (nRow != 0) {
         reader.SkipRow(nRow);
     }
-    reader.UnpackRow(g_abCanvasRowScratch);
-    blit.mSource = g_abCanvasRowScratch;
+    reader.UnpackRow(ACanvas::tempBuff);
+    blit.mSource = ACanvas::tempBuff;
     for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
         DrawScaledClutBitmapRowLin8U(blit, pRemap);
         const int nNextRow = AdvanceStretchRow(&blit);
@@ -1814,7 +1814,7 @@ void ACanvas::DrawScaledClutBitmapRle8(const ABitmap &source,
             if (nNextRow - nRow != 1) {
                 reader.SkipRow(nNextRow - nRow - 1);
             }
-            reader.UnpackRow(g_abCanvasRowScratch);
+            reader.UnpackRow(ACanvas::tempBuff);
         }
         nRow = nNextRow;
     }
@@ -1879,8 +1879,8 @@ void ACanvas::DrawScaledBlendBitmapRle8(const ABitmap &source,
     if (nRow != 0) {
         reader.SkipRow(nRow);
     }
-    reader.UnpackRow(g_abCanvasRowScratch);
-    blit.mSource = g_abCanvasRowScratch;
+    reader.UnpackRow(ACanvas::tempBuff);
+    blit.mSource = ACanvas::tempBuff;
     for (blit.mY = blit.mTop; blit.mY < blit.mBottom; ++blit.mY) {
         DrawScaledBlendBitmapRowLin8U(blit, ppBlend);
         const int nNextRow = AdvanceStretchRow(&blit);
@@ -1888,7 +1888,7 @@ void ACanvas::DrawScaledBlendBitmapRle8(const ABitmap &source,
             if (nNextRow - nRow != 1) {
                 reader.SkipRow(nNextRow - nRow - 1);
             }
-            reader.UnpackRow(g_abCanvasRowScratch);
+            reader.UnpackRow(ACanvas::tempBuff);
         }
         nRow = nNextRow;
     }
@@ -1896,4 +1896,4 @@ void ACanvas::DrawScaledBlendBitmapRle8(const ABitmap &source,
 
 // One row of unpacked pixels. The bound is the address-space limit the header records, not a
 // recovered size: the nearest referenced address sits just above 0x400 bytes past the buffer.
-unsigned char g_abCanvasRowScratch[0x400];
+unsigned char ACanvas::tempBuff[0x400];

@@ -19,7 +19,7 @@ Message *EraseMsg::Clone() {
 
 // NTSC-U/C: 0x003db440, PAL: 0x00413878
 int EraseMsg::Type() {
-    return g_nEraseMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x003db450, PAL: 0x00413888

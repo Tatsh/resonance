@@ -37,15 +37,15 @@ HudCountdown::HudCountdown(int nIndex, int nTargetBar)
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mAnim = dynamic_cast<Rnd::TransAnim *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s countdown%d.tnm", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s countdown%d.tnm", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mText = dynamic_cast<Rnd::Text *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s countdown%d.txt", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s countdown%d.txt", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mBlur = dynamic_cast<Rnd::Blur *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s countdown%d.blur", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s countdown%d.blur", pszLayout, nIndex))));
 
     mBlur->SetShowing(0);
 

@@ -76,7 +76,7 @@ inline const char *TextOf(const HxStr &text) {
 // Resolves a registry key to an object of type T, or null.
 template <typename T>
 T *FindObject(const char *pszName) {
-    Rnd::Object *pObject = Rnd::g_manager.Find(HxStr(pszName));
+    Rnd::Object *pObject = Rnd::TheManager.Find(HxStr(pszName));
     return pObject != nullptr ? dynamic_cast<T *>(pObject) : nullptr;
 }
 

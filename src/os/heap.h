@@ -230,4 +230,4 @@ private:
  * @ghidraAddress NTSC-U/C: 0x00723998
  * @ghidraAddress PAL: 0x00767588
  */
-extern Heap *g_pPythonHeap;
+extern Heap *gpPythonHeap;

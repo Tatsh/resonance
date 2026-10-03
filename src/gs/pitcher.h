@@ -14,7 +14,7 @@
  * `+0x38`.
  *
  * Its three tables are at `0x007e1520`, `0x007e14f8`, and `0x007e14c8`. Two slots address the
- * shared pure-virtual stub: MsgSink::HandleMessage() in the primary table and TickTask::Tick() in
+ * shared pure-virtual stub: MsgSink::DispatchPriv() in the primary table and TickTask::Tick() in
  * the TickTask table. It therefore declares no virtual of its own and leaves two of its bases'
  * pure, which is what makes it abstract.
  *

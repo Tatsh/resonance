@@ -39,7 +39,7 @@ ACanvas32::ACanvas32(const ABitmap &bitmap) : ACanvas(bitmap), mColor(0) {
 void ACanvas32::SetColor8(int nIndex) {
     APalette *pPalette = mBitmap.mPalette;
     if (pPalette == nullptr) {
-        pPalette = g_pDefaultPalette;
+        pPalette = ACanvas::palDefault;
         if (pPalette == nullptr) {
             return;
         }
@@ -72,7 +72,7 @@ void ACanvas32::SetColorNative(unsigned int nColor) {
 int ACanvas32::GetColor8() {
     APalette *pPalette = mBitmap.mPalette;
     if (pPalette == nullptr) {
-        pPalette = g_pDefaultPalette;
+        pPalette = ACanvas::palDefault;
         if (pPalette == nullptr) {
             return 0;
         }
@@ -80,9 +80,9 @@ int ACanvas32::GetColor8() {
     if (pPalette->mpRgb15ToIndex != nullptr) {
         return pPalette->mpRgb15ToIndex[Rgb15Index(mColor)] & kChannelMask;
     }
-    return pPalette->FindNearestEntry((mColor & kACanvas32ChannelsMask) | kACanvas32AlphaOpaque,
-                                      kPaletteFirstIndex,
-                                      kPaletteLastIndex) &
+    return pPalette->FindClosest((mColor & kACanvas32ChannelsMask) | kACanvas32AlphaOpaque,
+                                 kPaletteFirstIndex,
+                                 kPaletteLastIndex) &
            kChannelMask;
 }
 
@@ -112,7 +112,7 @@ unsigned int ACanvas32::GetColorNative() {
 void ACanvas32::DrawPixel8U(int nX, int nY, int nIndex) {
     APalette *pPalette = mBitmap.mPalette;
     if (pPalette == nullptr) {
-        pPalette = g_pDefaultPalette;
+        pPalette = ACanvas::palDefault;
         if (pPalette == nullptr) {
             return;
         }
@@ -147,7 +147,7 @@ void ACanvas32::DrawPixelNativeU(int nX, int nY, unsigned int nColor) {
 int ACanvas32::GetPixel8U(int nX, int nY) {
     APalette *pPalette = mBitmap.mPalette;
     if (pPalette == nullptr) {
-        pPalette = g_pDefaultPalette;
+        pPalette = ACanvas::palDefault;
         if (pPalette == nullptr) {
             return 0;
         }
@@ -156,7 +156,7 @@ int ACanvas32::GetPixel8U(int nX, int nY) {
     if (pPalette->mpRgb15ToIndex != nullptr) {
         return pPalette->mpRgb15ToIndex[Rgb15Index(nColor)] & kChannelMask;
     }
-    return pPalette->FindNearestEntry(nColor, kPaletteFirstIndex, kPaletteLastIndex) & kChannelMask;
+    return pPalette->FindClosest(nColor, kPaletteFirstIndex, kPaletteLastIndex) & kChannelMask;
 }
 
 // NTSC-U/C: 0x0062faa0, PAL: 0x00670630

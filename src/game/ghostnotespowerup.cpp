@@ -19,7 +19,7 @@ int GhostNotesPowerup::Deploy(int, int, Player *pPlayer, int) {
     ToggleGhostMsg msg;
     msg.mPlayer = pPlayer;
     msg.mOn = kGhostOn;
-    pPlayer->Handle(&msg);
+    pPlayer->Dispatch(&msg);
     return kDeployed;
 }
 

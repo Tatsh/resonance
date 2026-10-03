@@ -17,7 +17,7 @@
  *
  * It is both a player and a MuseSynth. Start() posts a scheduler command over its sequence, and
  * each message that command dispatches arrives back through the MuseSynth half, which creates a
- * player for it. That is why the class inherits MuseSynth::HandleMessage() unchanged rather than
+ * player for it. That is why the class inherits MuseSynth::DispatchPriv() unchanged rather than
  * overriding it.
  *
  * Both MuseParent overrides forward once up the chain. RetainOnly() reports the request to its own

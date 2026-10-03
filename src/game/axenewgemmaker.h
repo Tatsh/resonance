@@ -42,7 +42,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001a46e0
      * @ghidraAddress PAL: 0x001aa448
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 private:
     // A note-on sends a DurGemMsg for mPlayer from the note to 80 ticks after it, blended by
@@ -56,5 +56,5 @@ private:
     const TrackData *mTrackData; // +0x1c, not read by any recovered routine
     int mStripId;                // +0x20, the open sustain strip, or zero
     float mValue;                // +0x24, the axis value, 0.5 at first
-    Player *mPlayer;             // +0x28, g_nullPlayer until a TrackSelectMsg
+    Player *mPlayer;             // +0x28, NullPlayer::sInstance until a TrackSelectMsg
 };

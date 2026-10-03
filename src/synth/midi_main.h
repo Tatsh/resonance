@@ -54,10 +54,10 @@ void SynthCommand(int nCommand);
  * @ghidraAddress NTSC-U/C: 0x008e5bc0
  * @ghidraAddress PAL: 0x0092abc0
  */
-extern sceSifClientData g_soundDriverClient;
+extern sceSifClientData gCd;
 
 /**
- * Bind g_soundDriverClient to the sound driver's RPC server.
+ * Bind gCd to the sound driver's RPC server.
  *
  * Initialises the SIF RPC layer, then binds server 0x12346 until the server reports ready, spinning
  * 9999 iterations between attempts. A failed bind reports `error: sceSifBindRpc` and hangs. The

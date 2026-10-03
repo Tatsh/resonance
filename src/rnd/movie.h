@@ -33,11 +33,11 @@ namespace Rnd {
  *
  * Two vtables belong to the class. The eight-entry table at `0x00835d60` is addressed by the
  * Rnd::Object subobject vptr and overrides seven of the eight Rnd::Object slots. The five-entry
- * table at `0x00835da8` is addressed by the Animatable vptr at `+0x14`; it inherits EndFrame() and
- * StartAnim() from Rnd::Animatable, overrides SetFrameSelf(), and adds the one virtual this class
- * declares. Both tables end in an all-zero entry, which is a terminator rather than a slot. Reading
- * the second table's terminator as a slot would have run it into the literal pool that follows it,
- * where the bytes decode as further plausible-looking entries.
+ * table at `0x00835da8` is addressed by the Animatable vptr at `+0x14`; it inherits
+ * FilteredFrameEnd() and StartAnim() from Rnd::Animatable, overrides SetFrameSelf(), and adds the
+ * one virtual this class declares. Both tables end in an all-zero terminator entry rather than a
+ * slot. Reading the second table's terminator as a slot would have run it into the literal pool
+ * that follows it, where the bytes decode as further plausible-looking entries.
  *
  * A movie plays its file through one Rnd::AMovieSet, which it owns and deletes in
  * CloseMovieFile(). Each track of the file is attached to the texture mTrackTextures names for
@@ -259,7 +259,8 @@ public:
     /**
      * Route one track's chunks to this movie.
      *
-     * Installs ChunkHandler() with this movie as its data. Does nothing when no file is open.
+     * Installs MasterTrackCallback() with this movie as its data. Does nothing when no file is
+     * open.
      *
      * @param nTrackId The track.
      * @ghidraAddress NTSC-U/C: 0x005d24d8
@@ -326,14 +327,14 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005d2530
      * @ghidraAddress PAL: 0x00614560
      */
-    static void ChunkHandler(AMovieSet::ChunkHeader *pHeader, void *pPayload, void *pData);
+    static void MasterTrackCallback(AMovieSet::ChunkHeader *pHeader, void *pPayload, void *pData);
 
     /**
      * Read a track texture list from stream.
      *
      * The first word is the entry count, and the list is resized to it before the entries are
      * read. Each entry is a track id and the object name of its texture, and the name is resolved
-     * through Rnd::g_manager and narrowed to Rnd::Tex. A name that resolves to nothing, or to an
+     * through Rnd::TheManager and narrowed to Rnd::Tex. A name that resolves to nothing, or to an
      * object that is not a texture, stores a null texture rather than failing the record.
      *
      * The routine takes no movie. It is placed here because Movie::TrackTexture is the only type it
@@ -427,7 +428,7 @@ extern HxStr g_movieClassName;
  * @ghidraAddress PAL: 0x00613f28
  */
 inline void RegisterMovieClass() {
-    g_manager.RegisterClass(g_movieClassName, CreateRegisteredMovie);
+    TheManager.RegisterClass(g_movieClassName, CreateRegisteredMovie);
 }
 
 } // namespace Rnd

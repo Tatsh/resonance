@@ -69,7 +69,7 @@ public:
     /**
      * Undo what Init() installs.
      *
-     * The unit's static initialiser runs Terminate() on g_gfxDevice and then destroys
+     * The unit's static initialiser runs Terminate() on Rnd::ThePs and then destroys
      * mSavedPacket, which identifies the destructor as inline around the call.
      */
     ~GfxDevice() {
@@ -82,7 +82,7 @@ public:
      * Every hook Init() pointed at a PlayStation 2 factory is pointed back at its base factory and
      * the base class is registered again under the same key. Rnd::PsCam's teardown also destroys
      * the default camera, and Rnd::PsEnviron's is called rather than inlined. The routine ends by
-     * calling g_vramTable's destructor explicitly. The name is inferred.
+     * calling Rnd::TheVRAM's destructor explicitly. The name is inferred.
      *
      * @ghidraAddress NTSC-U/C: 0x0049afe0
      * @ghidraAddress PAL: 0x004d8ff8
@@ -121,7 +121,7 @@ public:
     void RestorePacket();
 
     /**
-     * Count one vertical blank in g_nVblankCounter.
+     * Count one vertical blank in gVCount.
      *
      * InitDisplayMode() installs it through sceGsSyncVCallback(). The body increments the counter,
      * runs the kernel's ExitHandler() sequence (`sync`, `ei`), and returns 0. ExitHandler() is MIPS
@@ -145,7 +145,7 @@ public:
      * NTSC output for 448 and 224 and PAL output otherwise, and takes two bytes a pixel for a depth
      * under 32 bits and four otherwise. It then installs the
      * PlayStation 2 creators for meshes, cameras, materials, textures, environments, particle
-     * systems, and multi-meshes, and initialises g_vramTable.
+     * systems, and multi-meshes, and initialises Rnd::TheVRAM.
      *
      * @param nWidth The display width in pixels.
      * @param nHeight The display height in pixels.
@@ -158,7 +158,7 @@ public:
     /**
      * Start a frame.
      *
-     * Runs SwapBuffers(), clears g_renderStats, draws Rnd::g_pDefaultCam, selects the default
+     * Runs SwapBuffers(), clears g_renderStats, draws Rnd::PsCam::sDefault, selects the default
      * material, and starts the video memory frame. The timers of the frame just ended are copied
      * into g_lastFrameProfileTimers, and every record of g_profileTimers then has its cycles and
      * depth cleared.
@@ -342,7 +342,7 @@ public:
     /**
      * Point FRAME_1 and XYOFFSET_1 back at the display buffer being drawn.
      *
-     * Rnd::PsCam::DrawSelf() calls it when the previous camera drew into a texture. Both values
+     * Rnd::PsCam::DrawShowing() calls it when the previous camera drew into a texture. Both values
      * come from the draw environment of the half mnDrawBuffer selects, and the binary open-codes
      * the body of SetGsReg() for each.
      *
@@ -430,7 +430,7 @@ public:
     /**
      * Depth buffer bytes per sample, which InitDisplayMode() derives from mnPixelBytes.
      *
-     * Rnd::PsCam::DrawSelf() reads it to find the largest depth value. +0x2c
+     * Rnd::PsCam::DrawShowing() reads it to find the largest depth value. +0x2c
      */
     int mnDepthBytes;
     /** A+D GIFtag SetGsReg() opens when the open tag is not already an A+D tag. +0x30 */
@@ -487,11 +487,11 @@ private:
     // primitive pixels. Letters of either case share one glyph, and '.' through '9' follow them.
     // Any other character draws nothing and advances the pen two cells, and a glyph advances it
     // one and a half. The caller opens a REGLIST tag of PRIM, RGBAQ, and six XYZ2 first. The
-    // routine writes through g_gfxDevice rather than a receiver. 0x0049bc20.
+    // routine writes through Rnd::ThePs rather than a receiver. 0x0049bc20.
     static void DrawDebugText(const char *pszText, const Rect &rect, const Color &color);
 
     // Draw one flat sprite over rect, in GS primitive pixels. The caller opens a REGLIST tag of
-    // PRIM, RGBAQ, and two XYZ2 first. The routine writes through g_gfxDevice rather than a
+    // PRIM, RGBAQ, and two XYZ2 first. The routine writes through Rnd::ThePs rather than a
     // receiver. 0x0049c630.
     static void DrawTimingBar(const Rect &rect, const Color &color);
 
@@ -540,13 +540,17 @@ private:
     Color mClearColor; // +0x490
 };
 
+namespace Rnd {
+
 /**
  * The display device.
  *
  * @ghidraAddress NTSC-U/C: 0x006f2a80
  * @ghidraAddress PAL: 0x007364c0
  */
-extern GfxDevice g_gfxDevice;
+extern GfxDevice ThePs;
+
+} // namespace Rnd
 
 /**
  * Vertical blanks counted since start-up.
@@ -557,7 +561,7 @@ extern GfxDevice g_gfxDevice;
  * @ghidraAddress NTSC-U/C: 0x006f2f20
  * @ghidraAddress PAL: 0x00736970
  */
-extern volatile int g_nVblankCounter;
+extern volatile int gVCount;
 
 extern "C" {
 

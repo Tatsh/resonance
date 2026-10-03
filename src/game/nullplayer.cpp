@@ -17,8 +17,8 @@ int NullPlayer::IsNull() {
 }
 
 // NTSC-U/C: 0x00133528, PAL: 0x00133d90
-void NullPlayer::HandleMessage(Message *) {
+void NullPlayer::DispatchPriv(Message *) {
 }
 
 // NTSC-U/C: 0x0066f930, PAL: 0x006b0520
-NullPlayer g_nullPlayer;
+NullPlayer NullPlayer::sInstance;

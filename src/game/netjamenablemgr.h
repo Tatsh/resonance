@@ -13,7 +13,7 @@ class Player;
  *
  * Its RTTI descriptor is at `0x00901ff0`. It derives publicly from EnableMgr at offset 0. Its type
  * function is at `0x001058e0` and its table at `0x007ccb28`. The object is 0x34 bytes. It inherits
- * SetFreeUntil() and DisableTrack(), and the destructor at `0x00104e70` is implicitly declared.
+ * ForceEnabled() and ForceDisable(), and the destructor at `0x00104e70` is implicitly declared.
  *
  * The policy records the owner of every track in every play-map section. The local player may
  * take a free track while it owns fewer than mMaxOwned tracks in the section, and always keeps the
@@ -84,7 +84,7 @@ private:
 
     // NTSC-U/C: 0x00105a98, PAL: 0x00105a98
     // Reports whether the local player may catch nTrack in nSection.
-    int IsTrackAvailable(int nTrack, int nSection);
+    int IsSongSectionEnabled(int nTrack, int nSection) const;
 
     // NTSC-U/C: 0x00105b08, PAL: 0x00105b08
     // Reports the play-map section a bar lies in.

@@ -25,5 +25,5 @@ GamePlayback::GamePlayback(const HxStr &file, GameManagerImpl *pManager, int) : 
 
 // NTSC-U/C: 0x0010f0d8, PAL: 0x0010f538
 GamePlayback::~GamePlayback() {
-    Application::shared()->GetWatchdog()->Close();
+    Application::shared()->GetWatchdog()->StopRecOrPlayback();
 }

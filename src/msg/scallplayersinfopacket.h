@@ -27,7 +27,7 @@ public:
     /**
      * One player's entry, from the 0x14-byte stride the copy constructor divides by.
      *
-     * Public because AppendEntry() takes one. The copy constructor at `0x0010a2e0` is the
+     * Public because AddPlayerInfo() takes one. The copy constructor at `0x0010a2e0` is the
      * compiler-generated one.
      */
     struct PlayerEntry {
@@ -113,14 +113,13 @@ public:
     /**
      * Append a copy of one entry.
      *
-     * The image lists no caller for the out-of-line body, and the verb is inferred from the body
-     * alone.
+     * The image lists no caller for the out-of-line body.
      *
      * @param entry The entry to append.
      * @ghidraAddress NTSC-U/C: 0x003f23a8
      * @ghidraAddress PAL: 0x0042a8f0
      */
-    void AppendEntry(const PlayerEntry &entry);
+    void AddPlayerInfo(const PlayerEntry &entry);
 
 private:
     std::vector<PlayerEntry> mPlayers; // +0x14

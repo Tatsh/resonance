@@ -59,7 +59,7 @@ constexpr unsigned long long kTestZtstMask = 3ULL << 17;
 constexpr unsigned long long kTex0TfxMask = 3;
 constexpr int kTex0TfxShift = 35;
 
-// The TEX1 fields StaticInit() programs, MXL bit 2 through MMIN, and the value it writes.
+// The TEX1 fields Init() programs, MXL bit 2 through MMIN, and the value it writes.
 constexpr unsigned long long kTex1DefaultFilter = 0x30;
 constexpr unsigned long long kTex1FilterMask = 0x1f0;
 
@@ -380,19 +380,19 @@ void PsTex::RestoreSurfaces() {
             if (pBitmap->mWidth < kMinMipSide || pBitmap->mHeight < kMinMipSide) {
                 pszWhy = "less than 8";
             }
-            g_failSink.Report("bad: %s (mipmap %d) dimensions are %s (%d x %d)\n",
-                              pszName,
-                              nMip,
-                              pszWhy,
-                              pBitmap->mWidth,
-                              pBitmap->mHeight);
+            Rnd::TheDbg.Notify("bad: %s (mipmap %d) dimensions are %s (%d x %d)\n",
+                               pszName,
+                               nMip,
+                               pszWhy,
+                               pBitmap->mWidth,
+                               pBitmap->mHeight);
             ClearBitmapPixels(pBitmap);
             bValid = false;
         }
 
         const char *pszPath = mBitmapPath.mStr != nullptr ? mBitmapPath.mStr : g_szEmptyString;
         if (nMip != 0 && bValid && mLoadedBitmaps[0]->mFormat != pBitmap->mFormat) {
-            g_failSink.Report(
+            Rnd::TheDbg.Notify(
                 "%s (file: %s, mipmap %d) doesn't have same bitmap format as original\n",
                 pszName,
                 pszPath,
@@ -402,10 +402,10 @@ void PsTex::RestoreSurfaces() {
         }
         if (nMip != 0 && bValid &&
             !CheckPalEqual(mLoadedBitmaps[0]->mPalette, pBitmap->mPalette, pszName, nMip)) {
-            g_failSink.Report("%s (file: %s, mipmap %d) doesn't have same pal as original\n",
-                              pszName,
-                              pszPath,
-                              nMip);
+            Rnd::TheDbg.Notify("%s (file: %s, mipmap %d) doesn't have same pal as original\n",
+                               pszName,
+                               pszPath,
+                               nMip);
             ClearBitmapPixels(pBitmap);
         }
 
@@ -444,7 +444,7 @@ void PsTex::RestoreSurfaces() {
         mip.mVramBitmap = ACanvas::NewCompatibleCanvas(*pBitmap, false);
         mip.mVramBitmap->mBitmap.mPixels = pBitmap->mPixels;
         mip.mVramBitmap->mBitmap.mPalette = pBitmap->mPalette;
-        mip.mPage = g_vramTable.AllocEntry();
+        mip.mPage = Rnd::TheVRAM.GetAvailEntry();
         mip.mPage->SetupSurface(
             pBitmap->mWidth, pBitmap->mHeight, mBitsPerPixel, mGsPsm, kVramBlockKindTexture);
     }
@@ -624,18 +624,18 @@ bool PsTex::BindToGsSlot(unsigned nTexFunc) {
                 (static_cast<unsigned long long>(UploadBitmapMipToGs(0)) & kGsTbpMask);
     }
 
-    g_gfxDevice.SetGsReg(kGsRegTex0, mTex0, kGsRegAllBits);
-    g_gfxDevice.SetGsReg(kGsRegTex1, mTex1, kGsRegAllBits);
+    Rnd::ThePs.SetGsReg(kGsRegTex0, mTex0, kGsRegAllBits);
+    Rnd::ThePs.SetGsReg(kGsRegTex1, mTex1, kGsRegAllBits);
 
     const int nMips = static_cast<int>(mLoadedBitmaps.size());
     for (int nMip = 1; nMip < nMips; ++nMip) {
         UploadMipAndBuildMipTbp(nMip, true);
     }
     if (nMips > kMipTbpLevel1) {
-        g_gfxDevice.SetGsReg(kGsRegMipTbp1, mMipTbp1, kGsRegAllBits);
+        Rnd::ThePs.SetGsReg(kGsRegMipTbp1, mMipTbp1, kGsRegAllBits);
     }
     if (nMips > kMipTbpLevel4) {
-        g_gfxDevice.SetGsReg(kGsRegMipTbp2, mMipTbp2, kGsRegAllBits);
+        Rnd::ThePs.SetGsReg(kGsRegMipTbp2, mMipTbp2, kGsRegAllBits);
     }
     return true;
 }
@@ -648,7 +648,7 @@ void PsTex::BindAsRenderTarget() {
 
     if (mip.mPage->mKind != kVramBlockKindRenderTarget) {
         mip.mPage->FreeSelf();
-        mip.mPage = g_vramTable.AllocEntry();
+        mip.mPage = Rnd::TheVRAM.GetAvailEntry();
         mip.mPage->SetupSurface(
             pBitmap->mWidth, pBitmap->mHeight, mBitsPerPixel, mGsPsm, kVramBlockKindRenderTarget);
     }
@@ -671,11 +671,11 @@ void PsTex::BindAsRenderTarget() {
         static_cast<unsigned long long>((kGsCoordinateCentre - (pBitmap->mHeight >> 1))
                                         << kGsSubpixelShift) &
         kGsSubpixelCoordMask;
-    g_gfxDevice.SetGsReg(kGsRegFrame1, qwFrame, kFrameFields);
-    g_gfxDevice.SetGsReg(
+    Rnd::ThePs.SetGsReg(kGsRegFrame1, qwFrame, kFrameFields);
+    Rnd::ThePs.SetGsReg(
         kGsRegXyOffset1, qwOffsetX | (qwOffsetY << kXyOffsetYShift), kXyOffsetFields);
-    g_gfxDevice.SetGsReg(kGsRegZbuf1, kZbufZmsk, kZbufZmsk);
-    g_gfxDevice.SetGsReg(kGsRegTest1, kTestZtstAlways, kTestZtstMask);
+    Rnd::ThePs.SetGsReg(kGsRegZbuf1, kZbufZmsk, kZbufZmsk);
+    Rnd::ThePs.SetGsReg(kGsRegTest1, kTestZtstAlways, kTestZtstMask);
 }
 
 // NTSC-U/C: 0x005982a0, PAL: 0x005db6a8
@@ -758,9 +758,9 @@ Tex *NewPsTex(const HxStr &name) {
 }
 
 // NTSC-U/C: 0x0059a888, PAL: 0x005ddd08
-void PsTex::StaticInit() {
-    g_pfnNewTex = NewPsTex;
-    g_gfxDevice.SetGsReg(kGsRegTex1, kTex1DefaultFilter, kTex1FilterMask);
+void PsTex::Init() {
+    Tex::sNew = NewPsTex;
+    Rnd::ThePs.SetGsReg(kGsRegTex1, kTex1DefaultFilter, kTex1FilterMask);
 }
 
 // NTSC-U/C: 0x0059aa48, PAL: 0x005ddec8
@@ -773,8 +773,8 @@ ACanvas *PsTex::LockMipBitmap(int nMip, [[maybe_unused]] int nReserved, int nFla
     if ((nFlags & kLockReadBack) != 0) {
         const int nBlockAddr = mGsMips[nMip].mPage->GetBlockAddr();
         if (nBlockAddr != 0) {
-            g_vramTable.ReadBackBitmap(mLoadedBitmaps[nMip],
-                                       static_cast<unsigned short>(nBlockAddr));
+            Rnd::TheVRAM.ReadBackBitmap(mLoadedBitmaps[nMip],
+                                        static_cast<unsigned short>(nBlockAddr));
         }
     }
     mLockedMip = nMip;
@@ -813,7 +813,7 @@ void PsTex::AllocPaletteVram() {
     if (mLoadedBitmaps.empty() || mLoadedBitmaps[0] == nullptr) {
         return;
     }
-    mPaletteVram = g_vramTable.AllocPalEntry();
+    mPaletteVram = Rnd::TheVRAM.AllocPalEntry();
     if (mPaletteVram != nullptr) {
         mPaletteVram->ClearLockMask();
     } else {

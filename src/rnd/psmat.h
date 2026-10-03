@@ -16,7 +16,7 @@ namespace Rnd {
  * at `0x00822dd8` in six slots, the destructor at slot 1 and the five colour setters at slots 9
  * through 13.
  *
- * Every override below performs the base assignment and then clears Rnd::g_pSelectedMat, which
+ * Every override below performs the base assignment and then clears sCurrent, which
  * forces the next draw to re-emit the material registers.
  *
  * The constructor body is empty and the destructor body is one statement. The factory at
@@ -28,7 +28,7 @@ namespace Rnd {
  *
  * Which class declares that path is ambiguous. Every call site passes a plain `Rnd::Mat *`,
  * `Rnd::Mesh::DrawInstanced` at `0x005b2f84`, `Rnd::PsParticleSys::Draw` at `0x005fcbcc` and
- * `0x005fcc20`, and `Rnd::PsMesh::DrawSelf` at `0x0060239c` and `0x00602518`, and an upcast to a
+ * `0x005fcc20`, and `Rnd::PsMesh::DrawShowing` at `0x0060239c` and `0x00602518`, and an upcast to a
  * base at offset 0 emits no instruction, so the image cannot separate a platform-implemented
  * `Rnd::Mat` member from a `Rnd::PsMat` member the caller narrowed to. The declarations are here
  * because the rest of this tree places a platform surface on the `Ps` subclass, as `Rnd::PsTex`
@@ -36,6 +36,20 @@ namespace Rnd {
  */
 class PsMat : public Mat {
 public:
+    /**
+     * Material that Rnd::Mat::SelectMaterial() last applied, or null when the applied state is
+     * stale.
+     *
+     * Selecting a material stores it here, and the PlayStation 2 entry point compares against it
+     * to skip work that is already done. Every property setter writes null to make the next
+     * selection apply the change, and Rnd::PsMat's destructor clears it when the material being
+     * destroyed is the selected one.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0076d658
+     * @ghidraAddress PAL: 0x007b13b0
+     */
+    static Mat *sCurrent;
+
     /**
      * Construct a material with the default surface.
      *
@@ -120,7 +134,7 @@ public:
      * Force ALPHA_1 to the standard source-alpha equation whatever the material blend is.
      *
      * The override is recorded, so the next Select() on the same material restores the material
-     * blend. The edge pass of Rnd::PsMesh::DrawSelf() is the only call site.
+     * blend. The edge pass of Rnd::PsMesh::DrawShowing() is the only call site.
      *
      * @ghidraAddress NTSC-U/C: 0x00591170
      * @ghidraAddress PAL: 0x005d44f0

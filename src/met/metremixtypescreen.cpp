@@ -202,7 +202,7 @@ void MetRemixTypeScreen::EnterAndShow() {
         }
         mThreeButtonView->SetShowing(1);
         mTwoButtonView->SetShowing(0);
-        mEnterAnim->ReleaseAnimsRefs();
+        mEnterAnim->RemoveAllAnims();
         mEnterAnim->AddAnim(mThreeButtonAnim);
         mEnterAnim->SetFrame(mAnimEndFrame);
         mButtons->Clear();
@@ -228,7 +228,7 @@ void MetRemixTypeScreen::EnterAndShow() {
         }
         mTwoButtonView->SetShowing(1);
         mThreeButtonView->SetShowing(0);
-        mEnterAnim->ReleaseAnimsRefs();
+        mEnterAnim->RemoveAllAnims();
         mEnterAnim->AddAnim(mTwoButtonAnim);
         mEnterAnim->SetFrame(mAnimEndFrame);
         mButtons->Clear();
@@ -398,10 +398,11 @@ void MetRemixTypeScreen::OnExitFinished() {
 // NTSC-U/C: 0x00362098, PAL: 0x0038f648
 void MetRemixTypeScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    mTwoButtonView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kTwoButtonView)));
-    mThreeButtonView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kThreeButtonView)));
-    mTwoButtonAnim = dynamic_cast<Rnd::TransAnim *>(Rnd::g_manager.Find(HxStr(kTwoButtonAnim)));
-    mThreeButtonAnim = dynamic_cast<Rnd::TransAnim *>(Rnd::g_manager.Find(HxStr(kThreeButtonAnim)));
+    mTwoButtonView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kTwoButtonView)));
+    mThreeButtonView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kThreeButtonView)));
+    mTwoButtonAnim = dynamic_cast<Rnd::TransAnim *>(Rnd::TheManager.Find(HxStr(kTwoButtonAnim)));
+    mThreeButtonAnim =
+        dynamic_cast<Rnd::TransAnim *>(Rnd::TheManager.Find(HxStr(kThreeButtonAnim)));
 }
 
 // NTSC-U/C: 0x00363148, PAL: 0x00390a48

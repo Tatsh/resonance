@@ -16,7 +16,7 @@ namespace Rnd {
  * Which lighting model a light applies.
  *
  * The three names come from the routine at `0x005454a0`, which writes "Point", "Directional", and
- * "Spot" for the values below. Rnd::PsEnviron::DrawSelf() handles the first two and skips a spot
+ * "Spot" for the values below. Rnd::PsEnviron::DrawShowing() handles the first two and skips a spot
  * light entirely.
  */
 enum LightType { kLightTypePoint = 0, kLightTypeDirectional = 1, kLightTypeSpot = 2 };
@@ -242,7 +242,7 @@ public:
     virtual void Load(Stream &stream);
 
     // Declared in recovered offset order, with the access specifiers interleaved. Each member that
-    // remains public is read directly by Rnd::PsEnviron::DrawSelf() while it builds the light
+    // remains public is read directly by Rnd::PsEnviron::DrawShowing() while it builds the light
     // records, and the image exposes no accessor for it.
 
     /** Light a vertex receives in proportion to its normal. +0xb0 */

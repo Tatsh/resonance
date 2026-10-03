@@ -123,9 +123,9 @@ typedef struct {
 } __attribute__((aligned(64))) PadRpcBuffer;
 
 // NTSC-U/C: 0x00770298, PAL: 0x007a46a0
-static int g_nPadInitialized = 0;
+static int isInit = 0;
 // NTSC-U/C: 0x0077029c, PAL: 0x007a46a4
-static int g_nPadVerbose = 1;
+static int isWarning = 1;
 
 // NTSC-U/C: 0x007702a0, PAL: 0x007a46a8
 static const char *const g_apszPadStateNames[] = {
@@ -172,7 +172,7 @@ static void _send_to_iop(int nPort, int nSlot) {
     unsigned int nDmaId;
 
     if (sceSifDmaStat(pState->nDmaId) >= 0) {
-        if (g_nPadVerbose) {
+        if (isWarning) {
             LogPrintf("libpad: tPadDma Structure Invalid\n");
         }
         return;
@@ -184,7 +184,7 @@ static void _send_to_iop(int nPort, int nSlot) {
     dma.size = sizeof(PadDirectPacket);
     dma.mode = 0;
     nDmaId = sceSifSetDma(&dma, 1);
-    if (nDmaId == 0 && g_nPadVerbose) {
+    if (nDmaId == 0 && isWarning) {
         LogPrintf("libpad: tPadDma Structure Invalid\n");
     }
     pState->nDmaId = nDmaId;
@@ -196,7 +196,7 @@ int scePadInit(int nMode) {
     int i;
     int k;
 
-    g_nPadInitialized = 1;
+    isInit = 1;
     for (k = 0; k < kPadClientCount; ++k) {
         for (;;) {
             sceSifBindRpc(&g_aPadClients[k], kPadServerId + k, 0);
@@ -211,7 +211,7 @@ int scePadInit(int nMode) {
 
     nVersion = scePadGetModVersion();
     if ((nVersion >> kPadVersionShift) != kPadModVersionMajor) {
-        if (g_nPadVerbose) {
+        if (isWarning) {
             LogPrintf("libpad: Module version mismatch ");
             LogPrintf("[libpad.a = %d.%d, padman.irx = %d.%d]\n",
                    kPadModVersionMajor,
@@ -252,7 +252,7 @@ int scePadEnd(void) {
         return 0;
     }
     if (g_padRpc.status.nResult == kPadEndStopped) {
-        g_nPadInitialized = 0;
+        isInit = 0;
     }
     return g_padRpc.status.nResult;
 }
@@ -263,7 +263,7 @@ int scePadPortOpen(int nPort, int nSlot, scePadDmaFrame *pFrames) {
     int i;
 
     if (((uintptr_t)pFrames & kPadFrameAlignMask) != 0) {
-        if (g_nPadVerbose) {
+        if (isWarning) {
             LogPrintf("libpad: buffer addr is not 64 byte align. %08x\n",
                    (unsigned int)(uintptr_t)pFrames);
         }
@@ -271,7 +271,7 @@ int scePadPortOpen(int nPort, int nSlot, scePadDmaFrame *pFrames) {
     }
     pState = &g_aaPadPorts[nPort][nSlot];
     if (pState->nOpen == 1) {
-        if (g_nPadVerbose) {
+        if (isWarning) {
             LogPrintf("libpad: pad port is already open [%d][%d]\n", nPort, nSlot);
         }
         return 0;

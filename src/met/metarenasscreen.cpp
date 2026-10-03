@@ -211,11 +211,11 @@ void MetArenasScreen::UpdateScreenshot() {
 void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
     mArenaButtons->SetSelected(kNoSelection);
     const int nArenaCount = GetArenaList()->size();
-    mButtonView->ClearDraws();
-    mButtonView->ClearTransList();
+    mButtonView->RemoveAllDraws();
+    mButtonView->RemoveAllTranses();
 
     const HxStr viewName(FormatString(kButtonViewFormat, nArenaCount));
-    Rnd::View *pView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(viewName));
+    Rnd::View *pView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(viewName));
     mButtonView->AddDraw(pView, nullptr);
     mButtonView->AddTrans(pView);
 
@@ -229,7 +229,7 @@ void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
 
     for (int i = 0; i < nButtonCount; ++i) {
         HxStr label;
-        Rnd::Button *pButton = mArenaButtons->ButtonAt(i);
+        Rnd::Button *pButton = mArenaButtons->GetButton(i);
         const bool bArena = i < nArenaCount;
         if (bArena) {
             const HxStr &arena = (*GetArenaList())[i].mName;
@@ -251,7 +251,7 @@ void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
         pButton->SetState(bArena ? kButtonStateNormal : kButtonStateDisabled);
     }
 
-    Rnd::Button *pNone = mArenaButtons->ButtonAt(mNoArenaIndex);
+    Rnd::Button *pNone = mArenaButtons->GetButton(mNoArenaIndex);
     pNone->SetState(kButtonStateNormal);
     {
         HxStr text = MetConfigText(kMetStrArenaNone, kArenaNoneQuery, kArenaNoneKey);
@@ -265,7 +265,7 @@ void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
     }
     UpdateScreenshot();
 
-    Rnd::Mesh *pPanel = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kArenaPanelMesh)));
+    Rnd::Mesh *pPanel = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(kArenaPanelMesh)));
     pPanel->SetShowing(kHidden);
 }
 
@@ -325,7 +325,7 @@ void MetArenasScreen::PlayCycleRightSound(int) {
 // NTSC-U/C: 0x001f8af0, PAL: 0x001ffe58
 void MetArenasScreen::UpdateIdle(float) {
     mScreenshots->Advance(); // Yes, the binary discards whether the pair advanced.
-    Rnd::Mesh *pPanel = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kArenaPanelMesh)));
+    Rnd::Mesh *pPanel = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(kArenaPanelMesh)));
     pPanel->SetShowing(kHidden);
     if (mScreenshots->Current() == nullptr) {
         return;
@@ -387,12 +387,12 @@ void MetArenasScreen::ResolveContainerViews() {
     mLockedFonts.erase(mLockedFonts.begin(), mLockedFonts.end());
 
     Rnd::Button *pUnlocked =
-        dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(kUnlockedButton)));
+        dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(HxStr(kUnlockedButton)));
     for (int i = 0; i < kPaletteSize; ++i) {
         mUnlockedMats.push_back(pUnlocked->mMats[i]);
         mUnlockedFonts.push_back(pUnlocked->mFonts[i]);
     }
-    Rnd::Button *pLocked = dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(kLockedButton)));
+    Rnd::Button *pLocked = dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(HxStr(kLockedButton)));
     for (int i = 0; i < kPaletteSize; ++i) {
         mLockedMats.push_back(pLocked->mMats[i]);
         mLockedFonts.push_back(pLocked->mFonts[i]);
@@ -402,7 +402,7 @@ void MetArenasScreen::ResolveContainerViews() {
         mArenaButtons->Add(HxStr(FormatString(kButtonFormat, i)), HxStr(kNoName));
     }
 
-    mScreenshotMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr(kScreenshotMaterial)));
-    mButtonView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kButtonView)));
+    mScreenshotMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr(kScreenshotMaterial)));
+    mButtonView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kButtonView)));
     mScreenshots = new TexturePairRecord(HxStr(kFirstScreenshot), HxStr(kSecondScreenshot));
 }

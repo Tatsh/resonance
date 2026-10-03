@@ -14,7 +14,7 @@ public:
     /**
      * Construct a directory creation.
      *
-     * @param pHandler The receiver Complete() reports to.
+     * @param pHandler The receiver NotifyDone() reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The directory to create.
      * @param nCookie The tag Memcard::Cancel() matches on.
@@ -33,13 +33,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055e6b8
      * @ghidraAddress PAL: 0x0059f988
      */
-    virtual void Issue();
+    virtual void Execute();
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0055d7a0
      * @ghidraAddress PAL: 0x0059ea08
      */
-    virtual void Complete();
+    virtual void NotifyDone();
 
     /**
      * Map `sceMcResNoFormat` to kMemcardStatusNotFormatted, `sceMcResFullDevice` to

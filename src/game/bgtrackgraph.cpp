@@ -48,7 +48,7 @@ BGTrackGraph::BGTrackGraph(int nTrack, int nUnmapped)
 
 // NTSC-U/C: 0x00140338, PAL: 0x00140d18
 BGTrackGraph::~BGTrackGraph() {
-    DeleteSequencer();
+    Stop();
     delete mDisabler;
     delete mMuseSynth;
     delete mMixer;
@@ -92,7 +92,7 @@ void BGTrackGraph::AddSynthSink(MsgSink *pSink) {
 }
 
 // NTSC-U/C: 0x001404f8, PAL: 0x00140ed8
-void BGTrackGraph::DeleteSequencer() {
+void BGTrackGraph::Stop() {
     delete mSequencer;
     mSequencer = nullptr;
 }

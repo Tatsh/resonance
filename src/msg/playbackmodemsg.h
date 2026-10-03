@@ -23,6 +23,14 @@ class Player;
 class PlaybackModeMsg : public Message {
 public:
     /**
+     * Identity that Type() reports, 105.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d0144
+     * @ghidraAddress PAL: 0x007138dc
+     */
+    static int sID;
+
+    /**
      * Construct a message with the position at kMBTInfinity and the player unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
@@ -66,7 +74,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nPlaybackModeMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x0011d5c8
      * @ghidraAddress PAL: 0x0011db50
      */
@@ -84,15 +92,3 @@ public:
     Player *mPlayer;    /*!< The player the controller belongs to. +0x04 */
     Mid::MBT mPosition; /*!< The song position of the reading. +0x08 */
 };
-
-/**
- * Identity that PlaybackModeMsg::Type() reports.
- *
- * This word belongs to PlaybackModeMsg because PlaybackModeMsg::Type() at `0x0011d5c8` returns it,
- * and the registration at `0x003d9818` passes the same value, 105, as the identity of this class's
- * factory.
- *
- * @ghidraAddress NTSC-U/C: 0x006d0144
- * @ghidraAddress PAL: 0x007138dc
- */
-extern int g_nPlaybackModeMsgType;

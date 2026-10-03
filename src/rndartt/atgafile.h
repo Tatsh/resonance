@@ -48,7 +48,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00620508
      * @ghidraAddress PAL: 0x00661098
      */
-    virtual int ReadImage(ABitmap *pImage, int *pbEnd);
+    virtual int ReadFrame(ABitmap *pImage, int *pbEnd);
 
     /**
      * Slot 5. Writing is not implemented.

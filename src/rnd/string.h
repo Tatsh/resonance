@@ -37,15 +37,15 @@ namespace Rnd {
  *
  * Four vtables belong to the class, each ending in an all-zero terminator entry. The four-entry
  * table at `0x00821618` is addressed by the `Rnd::Drawable` vptr at `+0x10` and overrides
- * SetHighlight() and DrawSelf(). The four-entry table at `0x008215f8` is addressed by the
+ * SetHighlight() and DrawShowing(). The four-entry table at `0x008215f8` is addressed by the
  * `Rnd::Transformable` vptr at `+0xc8` and overrides nothing. The three-entry table at
- * `0x008215d8` is addressed by the `Rnd::Collideable` vptr at `+0xd8` and overrides Collide(). The
- * nine-entry table at `0x00821640` is addressed by the Object subobject vptr and stores the eight
- * `Rnd::Object` slots with a `-0x110` adjustment on each.
+ * `0x008215d8` is addressed by the `Rnd::Collideable` vptr at `+0xd8` and overrides
+ * FindCollisions(). The nine-entry table at `0x00821640` is addressed by the Object subobject vptr
+ * and stores the eight `Rnd::Object` slots with a `-0x110` adjustment on each.
  *
  * The geometry is not drawn directly. Every string owns one Rnd::Mesh that CreateMesh() builds
  * under the name `[<object name>_mesh]`, and that mesh is what the renderer submits. Each point
- * governs two mesh vertices, or four where a cap meets it, and DrawSelf() rewrites the vertex
+ * governs two mesh vertices, or four where a cap meets it, and DrawShowing() rewrites the vertex
  * positions every frame from the projected screen positions.
  *
  * The member titles come from the text DumpText() writes, "[String]", "points:", "width:",
@@ -61,7 +61,7 @@ public:
      * One point of the ribbon.
      *
      * The first two members serialise and dump, under the labels "v" and "c". Everything after
-     * them is frame scratch that DrawSelf() rewrites. The default constructor accordingly writes
+     * them is frame scratch that DrawShowing() rewrites. The default constructor accordingly writes
      * none of it.
      *
      * The type is public because the three vector helpers of the Rnd::String translation unit
@@ -80,8 +80,8 @@ public:
 
         Vector3 mPos;    /*!< Position in the object's own space. +0x00 */
         Color mColor;    /*!< Colour of both mesh vertices this point governs. +0x10 */
-        Vector3 mCamPos; /*!< Camera-space position, rewritten by DrawSelf(). +0x20 */
-        Vector2 mScreen; /*!< Projected position, rewritten by DrawSelf(). +0x30 */
+        Vector3 mCamPos; /*!< Camera-space position, rewritten by DrawShowing(). +0x20 */
+        Vector2 mScreen; /*!< Projected position, rewritten by DrawShowing(). +0x30 */
         Vector2 mDir;    /*!< Unit screen direction towards the next point. +0x38 */
         Vector2 mNormal; /*!< Perpendicular of mDir, (-mDir.y, mDir.x). +0x40 */
         int mClipped;    /*!< Set while the point sits behind the near plane. +0x48 */
@@ -134,12 +134,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004bf3c0
      * @ghidraAddress PAL: 0x004fd448
      */
-    int GetNumPoints() const;
+    int NumPoints() const;
 
     /**
      * Move one point.
      *
-     * Nothing is rebuilt. DrawSelf() transforms every position each frame, and a moved point
+     * Nothing is rebuilt. DrawShowing() transforms every position each frame, and a moved point
      * therefore arrives in the mesh at the next draw. The copy moves one quadword. The argument is
      * accordingly a whole padded vector rather than three floats.
      *
@@ -187,7 +187,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004bf418
      * @ghidraAddress PAL: 0x004fd4a0
      */
-    Color *GetPointColor(int nIndex);
+    Color *PointColor(int nIndex);
 
     /**
      * Set the material the ribbon draws with.
@@ -310,14 +310,15 @@ public:
      *
      * Rnd::Collideable vtable slot 1. Tests nothing while Rnd::Drawable::mShowing is clear. Every
      * intersection the mesh appends is rewritten to address this string. A caller therefore never
-     * receives the owned mesh. Ends by chaining to Rnd::Collideable::Collide() for the children.
+     * receives the owned mesh. Ends by chaining to Rnd::Collideable::FindCollisions() for the
+     * children.
      *
      * @param ray The segment to test along.
      * @param sink The collector to append intersections to.
      * @ghidraAddress NTSC-U/C: 0x004bf570
      * @ghidraAddress PAL: 0x004fd5f8
      */
-    virtual void Collide(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Ray &ray, HitSink &sink);
 
     /**
      * Write a description of this ribbon to sink.
@@ -383,7 +384,7 @@ public:
      *
      * A version of 3 or above is rejected with "Can't load new String". The fold angle and the cap
      * flag are present from version 1 and the line-pair flag from version 2. The material is
-     * resolved by name through Rnd::g_manager.
+     * resolved by name through Rnd::TheManager.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x004ba678
@@ -399,10 +400,23 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004bedc8
      * @ghidraAddress PAL: 0x004fce50
      */
-    static String *NewString(const HxStr &name);
+    static String *New(const HxStr &name);
 
     /**
-     * Register the class key with Rnd::g_manager.
+     * Build a ribbon for the class registry. The registry stores this creator.
+     *
+     * New() is inlined into it, and the null test the compiler emits there is the conversion of a
+     * Rnd::String pointer to its Rnd::Object virtual base rather than a check the source requests.
+     *
+     * @param name The registry key for the new ribbon.
+     * @return The new ribbon.
+     * @ghidraAddress NTSC-U/C: 0x004bf440
+     * @ghidraAddress PAL: 0x004fd4c8
+     */
+    static Object *NewObject(const HxStr &name);
+
+    /**
+     * Register the class key with Rnd::TheManager.
      *
      * Unlike Rnd::Blur, the class installs no creator hook of its own. No call site remains in the
      * shipped program, because `Rnd::Manager::Init` performs the same registration inline at
@@ -434,14 +448,14 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x004b95f8
      * @ghidraAddress PAL: 0x004f7570
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
 private:
     /**
      * Which mesh vertices one point governs.
      *
      * The title is inferred. Only ResolvePointVertexSlot() fills the record, and only
-     * SetNumPoints(), SetPointColor(), and DrawSelf() read it.
+     * SetNumPoints(), SetPointColor(), and DrawShowing() read it.
      */
     struct VertexSlot {
         int mMode;        // +0x00 One of the kVertexSlot values below.
@@ -472,7 +486,7 @@ private:
     // range, widens each by mWidth, and folds the ribbon wherever the turn between two segments
     // passes mFoldCos. A corner sharper than a near-straight turn is mitred at the crossing of the
     // two edge lines. The vertices are camera-space positions displaced by the screen-space
-    // normals. DrawSelf() is the only caller.
+    // normals. DrawShowing() is the only caller.
     void EmitRibbonVerts(Point *pFirst, Point *pLast);
 
     // Declared in recovered offset order. Every member is private, because the image supplies an

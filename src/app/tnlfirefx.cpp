@@ -54,20 +54,20 @@ inline void SetSystemBasis(Rnd::ParticleSys *pSys, const Vector3 *pBasis, std::s
 TnlFireFX::TnlFireFX(const HxStr &name, int nIndex)
     : mPathStartFrame(0.0f), mPathEndFrame(kUnset), mReferenceFrame(kNoFrame), mActive(0),
       mIndex(nIndex) {
-    mPath = dynamic_cast<Rnd::TransAnim *>(Rnd::g_manager.Find(HxStr("fx.path")));
+    mPath = dynamic_cast<Rnd::TransAnim *>(Rnd::TheManager.Find(HxStr("fx.path")));
 
     HxStr viewName(name);
     viewName += ".view";
-    mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(viewName));
+    mView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(viewName));
 
     HxStr sysName(name);
     sysName += ".ps";
-    mEmitter.Attach(dynamic_cast<Rnd::ParticleSys *>(Rnd::g_manager.Find(sysName)));
+    mEmitter.Attach(dynamic_cast<Rnd::ParticleSys *>(Rnd::TheManager.Find(sysName)));
 
     if (nIndex == kIndexWithAltEmitter) {
         HxStr altName(name);
         altName += "a.ps";
-        mAltEmitter.Attach(dynamic_cast<Rnd::ParticleSys *>(Rnd::g_manager.Find(altName)));
+        mAltEmitter.Attach(dynamic_cast<Rnd::ParticleSys *>(Rnd::TheManager.Find(altName)));
     }
 }
 

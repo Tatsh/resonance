@@ -157,7 +157,7 @@ void Light::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x005408b8, PAL: 0x00580590
 void Light::Save(Stream &stream) {
     const int nRevision = kLightRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
 
     Transformable::Save(stream);
 
@@ -165,83 +165,83 @@ void Light::Save(Stream &stream) {
     // places a copy on the stack ahead of each write. Rnd::TransAnim serialises its keys the same
     // way.
     float flValue = mDiffuse.r;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mDiffuse.g;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mDiffuse.b;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mDiffuse.a;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
 
     flValue = mAmbient.r;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mAmbient.g;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mAmbient.b;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mAmbient.a;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
 
     flValue = mSpecular.r;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mSpecular.g;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mSpecular.b;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mSpecular.a;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
 
     flValue = mInnerAngle;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mOuterAngle;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mRange;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mConstantAtten;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mLinearAtten;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
     flValue = mQuadraticAtten;
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
 
     const int nType = mType;
-    stream.Write(&nType, sizeof(nType));
+    stream.WriteLE(&nType, sizeof(nType));
 }
 
 // NTSC-U/C: 0x00540be8, PAL: 0x005808c0
 void Light::Load(Stream &stream) {
     int nRevision = 0;
-    stream.Read(&nRevision, sizeof(nRevision));
+    stream.ReadLE(&nRevision, sizeof(nRevision));
     if (nRevision > kLightRevision) {
-        g_failSink.Report("Can't load new Light\n");
+        Rnd::TheDbg.Notify("Can't load new Light\n");
         return;
     }
 
     Transformable::Load(stream);
 
-    stream.Read(&mDiffuse.r, sizeof(float));
-    stream.Read(&mDiffuse.g, sizeof(float));
-    stream.Read(&mDiffuse.b, sizeof(float));
-    stream.Read(&mDiffuse.a, sizeof(float));
-    stream.Read(&mAmbient.r, sizeof(float));
-    stream.Read(&mAmbient.g, sizeof(float));
-    stream.Read(&mAmbient.b, sizeof(float));
-    stream.Read(&mAmbient.a, sizeof(float));
-    stream.Read(&mSpecular.r, sizeof(float));
-    stream.Read(&mSpecular.g, sizeof(float));
-    stream.Read(&mSpecular.b, sizeof(float));
-    stream.Read(&mSpecular.a, sizeof(float));
+    stream.ReadLE(&mDiffuse.r, sizeof(float));
+    stream.ReadLE(&mDiffuse.g, sizeof(float));
+    stream.ReadLE(&mDiffuse.b, sizeof(float));
+    stream.ReadLE(&mDiffuse.a, sizeof(float));
+    stream.ReadLE(&mAmbient.r, sizeof(float));
+    stream.ReadLE(&mAmbient.g, sizeof(float));
+    stream.ReadLE(&mAmbient.b, sizeof(float));
+    stream.ReadLE(&mAmbient.a, sizeof(float));
+    stream.ReadLE(&mSpecular.r, sizeof(float));
+    stream.ReadLE(&mSpecular.g, sizeof(float));
+    stream.ReadLE(&mSpecular.b, sizeof(float));
+    stream.ReadLE(&mSpecular.a, sizeof(float));
 
-    stream.Read(&mInnerAngle, sizeof(mInnerAngle));
-    stream.Read(&mOuterAngle, sizeof(mOuterAngle));
-    stream.Read(&mRange, sizeof(mRange));
-    stream.Read(&mConstantAtten, sizeof(mConstantAtten));
-    stream.Read(&mLinearAtten, sizeof(mLinearAtten));
-    stream.Read(&mQuadraticAtten, sizeof(mQuadraticAtten));
+    stream.ReadLE(&mInnerAngle, sizeof(mInnerAngle));
+    stream.ReadLE(&mOuterAngle, sizeof(mOuterAngle));
+    stream.ReadLE(&mRange, sizeof(mRange));
+    stream.ReadLE(&mConstantAtten, sizeof(mConstantAtten));
+    stream.ReadLE(&mLinearAtten, sizeof(mLinearAtten));
+    stream.ReadLE(&mQuadraticAtten, sizeof(mQuadraticAtten));
 
     if (nRevision >= kLightTypeRevision) {
         int nType = 0;
-        stream.Read(&nType, sizeof(nType));
+        stream.ReadLE(&nType, sizeof(nType));
         mType = static_cast<LightType>(nType);
     }
 
@@ -312,7 +312,7 @@ Object *CreateRegisteredLight(const HxStr &name) {
 // NTSC-U/C: 0x00544450, PAL: 0x005841c8
 void RegisterLightClass() {
     g_pfnNewLight = NewLight;
-    g_manager.RegisterClass(g_lightClassName, CreateRegisteredLight);
+    TheManager.RegisterClass(g_lightClassName, CreateRegisteredLight);
 }
 
 } // namespace Rnd

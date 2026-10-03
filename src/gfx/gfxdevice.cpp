@@ -365,10 +365,10 @@ GsDoubleBuffer g_displayBuffers;
 } // namespace
 
 // NTSC-U/C: 0x006f2a80, PAL: 0x007364c0
-GfxDevice g_gfxDevice;
+GfxDevice Rnd::ThePs;
 
 // NTSC-U/C: 0x006f2f20, PAL: 0x00736970
-volatile int g_nVblankCounter;
+volatile int gVCount;
 
 // NTSC-U/C: 0x0049ac50, PAL: 0x004d8bd0
 GfxDevice::GfxDevice()
@@ -392,19 +392,19 @@ void GfxDevice::Terminate() {
     Rnd::PsEnviron::Terminate();
     Rnd::RegisterParticleSysClass();
     Rnd::RegisterMultiMeshClass();
-    g_vramTable.~VRAM(); // Yes, the binary calls the destructor on the global directly.
+    Rnd::TheVRAM.~VRAM(); // Yes, the binary calls the destructor on the global directly.
 }
 
 // NTSC-U/C: 0x0049fea0, PAL: 0x004ddf28
 int GfxDevice::VblankHandler([[maybe_unused]] int nCause) {
-    ++g_nVblankCounter;
+    ++gVCount;
     ExitHandler();
     return 0;
 }
 
 // NTSC-U/C: 0x0049fef0, PAL: 0x004ddf78
 void GfxDevice::ResetVramAndSavePacket() {
-    g_vramTable.Clear(1);
+    Rnd::TheVRAM.Clear(1);
     SavePacket();
 }
 
@@ -474,14 +474,14 @@ void GfxDevice::Init(int nWidth, int nHeight, int nBitDepth) {
     mpBuffer = mpWrite;
     InitDisplayMode();
 
-    Rnd::g_pfnNewMesh = Rnd::NewPsMesh;
+    Rnd::Mesh::sNew = Rnd::NewPsMesh;
     Rnd::PsCam::Init();
     Rnd::PsMat::InstallCreator();
-    Rnd::PsTex::StaticInit();
+    Rnd::PsTex::Init();
     Rnd::PsEnviron::Init();
     Rnd::g_pfnNewParticleSys = Rnd::NewPsParticleSys;
     Rnd::g_pfnNewMultiMesh = Rnd::NewPsMultiMesh;
-    g_vramTable.Init();
+    Rnd::TheVRAM.Init();
 }
 
 // NTSC-U/C: 0x0049b138, PAL: 0x004d9150
@@ -515,7 +515,7 @@ void GfxDevice::InitDisplayMode() {
         mnDepthBytes = kZBufferBytes24;
         break;
     default:
-        g_failSink.Format("Unsupported video mode\n");
+        Rnd::TheDbg.Format("Unsupported video mode\n");
         mnDepthBytes = kZBufferBytes24;
         mnPixelBytes = kFallbackPixelBytes;
         break;
@@ -530,7 +530,7 @@ void GfxDevice::InitDisplayMode() {
                                   nZPsm,
                                   kClearOnSwap);
     SetClearColor(mClearColor);
-    mnSwapVblank = g_nVblankCounter + 1;
+    mnSwapVblank = gVCount + 1;
     sceGsSyncVCallback(VblankHandler); // The previous handler it returns is discarded.
     FlipFrameBuffer();
     RestorePacket();
@@ -552,9 +552,9 @@ void GfxDevice::InitDisplayMode() {
 void GfxDevice::BeginFrame() {
     SwapBuffers();
     std::memset(&g_renderStats, 0, sizeof(g_renderStats));
-    Rnd::g_pDefaultCam->Draw();
+    Rnd::PsCam::sDefault->Draw();
     Rnd::PsMat::SelectDefault();
-    g_vramTable.BeginFrame();
+    Rnd::TheVRAM.BeginFrame();
     g_lastFrameProfileTimers = g_profileTimers;
     for (auto &timer : g_profileTimers) {
         timer.mCycles = 0;
@@ -565,9 +565,9 @@ void GfxDevice::BeginFrame() {
 // NTSC-U/C: 0x004a0238, PAL: 0x004de2c0
 inline void GfxDevice::SwapBuffers() {
     sceGsSyncPath(0, 0);
-    while (g_nVblankCounter < mnSwapVblank) {
+    while (gVCount < mnSwapVblank) {
     }
-    mnSwapVblank = g_nVblankCounter + 1;
+    mnSwapVblank = gVCount + 1;
     mpDisplayBuffers->PutDispEnv(mnDrawBuffer, 1);
     sceGsSyncPath(0, 0);
     mnDrawBuffer = mnDrawBuffer == 0;
@@ -594,7 +594,7 @@ void GfxDevice::PresentFrame(int nSwapBuffers) {
         SetupGsDrawContext();
     }
     FlushGifPacket(0, 0);
-    g_vramTable.EndFrame();
+    Rnd::TheVRAM.EndFrame();
     if (nSwapBuffers != 0) {
         SwapBuffers();
         mnDrawBuffer = mnDrawBuffer == 0; // Yes, the binary inverts it a second time here.
@@ -618,7 +618,7 @@ int GfxDevice::FlushGifPacket(int bRetainOpenTag, int bOnlyWhenFull) {
     CloseGifTag(1);
 
     SendPacket();
-    g_vramTable.AdvanceLockCycle();
+    Rnd::TheVRAM.AdvanceLockCycle();
 
     if (reinterpret_cast<std::uintptr_t>(mpBuffer) != kGifBufferHalf0) {
         mpBuffer = reinterpret_cast<GifQuadword *>(kGifBufferHalf0);
@@ -879,15 +879,15 @@ void GfxDevice::DrawDebugText(const char *pszText, const Rect &rect, const Color
             continue;
         }
 
-        GifQuadword *pHeader = g_gfxDevice.mpWrite;
+        GifQuadword *pHeader = Rnd::ThePs.mpWrite;
         *pHeader = primAndColor;
-        g_gfxDevice.mpWrite = pHeader + 1;
+        Rnd::ThePs.mpWrite = pHeader + 1;
         const float flCellWidth = static_cast<float>(nCellWidth);
         const float flCellHeight = static_cast<float>(nCellHeight);
         const float *pflStroke = g_aafDebugGlyphStrokes[nGlyph];
         for (int i = 0; i < kDebugGlyphSegments; ++i) {
-            GifQuadword *pPoints = g_gfxDevice.mpWrite;
-            g_gfxDevice.mpWrite = pPoints + 1;
+            GifQuadword *pPoints = Rnd::ThePs.mpWrite;
+            Rnd::ThePs.mpWrite = pPoints + 1;
             pPoints->mLo = PackCoordinates(nPenX + static_cast<int>(pflStroke[0] * flCellWidth),
                                            nPenY + static_cast<int>(pflStroke[1] * flCellHeight)) |
                            kDebugZ;
@@ -897,26 +897,26 @@ void GfxDevice::DrawDebugText(const char *pszText, const Rect &rect, const Color
             pflStroke += kFloatsPerSegment;
         }
         nPenX += static_cast<int>(nCellWidth * kGlyphAdvanceCells);
-        g_gfxDevice.FlushGifPacket(1, 1);
+        Rnd::ThePs.FlushGifPacket(1, 1);
     }
 }
 
 // NTSC-U/C: 0x0049c630, PAL: 0x004da650
 void GfxDevice::DrawTimingBar(const Rect &rect, const Color &color) {
-    GifQuadword *pHeader = g_gfxDevice.mpWrite;
-    g_gfxDevice.mpWrite = pHeader + 1;
+    GifQuadword *pHeader = Rnd::ThePs.mpWrite;
+    Rnd::ThePs.mpWrite = pHeader + 1;
     pHeader->mLo = kGsPrimSpriteValue;
     pHeader->mHi = PackRgbaq(color);
 
-    GifQuadword *pCorners = g_gfxDevice.mpWrite;
-    g_gfxDevice.mpWrite = pCorners + 1;
+    GifQuadword *pCorners = Rnd::ThePs.mpWrite;
+    Rnd::ThePs.mpWrite = pCorners + 1;
     pCorners->mLo = PackCoordinates(static_cast<int>(rect.x * kSubpixelsPerPixel),
                                     static_cast<int>(rect.y * kSubpixelsPerPixel)) |
                     kDebugZ;
     pCorners->mHi = PackCoordinates(static_cast<int>((rect.x + rect.w) * kSubpixelsPerPixel),
                                     static_cast<int>((rect.y + rect.h) * kSubpixelsPerPixel)) |
                     kDebugZ;
-    g_gfxDevice.FlushGifPacket(1, 1);
+    Rnd::ThePs.FlushGifPacket(1, 1);
 }
 
 // NTSC-U/C: 0x0049bec8, PAL: 0x004d9ee8
@@ -970,7 +970,7 @@ void GfxDevice::DrawRenderStatsOverlay() {
     int nLoads;
     int nBlocks;
     rect.y += kOverlayLineSpacing;
-    g_vramTable.GetLastFrameLoads(&nLoads, &nBlocks);
+    Rnd::TheVRAM.GetLastFrameLoads(&nLoads, &nBlocks);
     DrawDebugText(FormatString("vramk %d", nBlocks >> 2), rect, white);
 }
 

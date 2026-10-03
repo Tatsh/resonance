@@ -15,16 +15,16 @@ constexpr float kRampDuration = 480.0f;
 
 // NTSC-U/C: 0x0041b3b0, PAL: 0x00455d08
 HudLetterbox::HudLetterbox() {
-    mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("HUD letterbox.view")));
+    mView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("HUD letterbox.view")));
     mView->SetShowing(0);
-    mRamp.SetRange(kRestFrame, kFullFrame, kRampDuration);
+    mRamp.SetParams(kRestFrame, kFullFrame, kRampDuration);
 }
 
 // NTSC-U/C: 0x0042a608, PAL: 0x00465958
 void HudLetterbox::SetFrame(float flTime) {
-    mRamp.Update(flTime); // Yes, the binary discards this result.
-    mView->SetFrame(mRamp.Value());
-    mView->SetShowing(mRamp.Value() != kRestFrame);
+    mRamp.Execute(flTime); // Yes, the binary discards this result.
+    mView->SetFrame(mRamp.Val());
+    mView->SetShowing(mRamp.Val() != kRestFrame);
 }
 
 // NTSC-U/C: 0x0042a698, PAL: 0x004659e8

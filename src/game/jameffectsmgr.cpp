@@ -54,11 +54,11 @@ JamEffectsMgr::~JamEffectsMgr() {
 }
 
 // NTSC-U/C: 0x001a56d8, PAL: 0x001ab440
-void JamEffectsMgr::ApplyStepMask(long long nMask) {
+void JamEffectsMgr::Enable(long long nMask) {
     std::bitset<kStepMaskBits> mask(nMask);
     for (std::vector<Effector *>::iterator it = mEffectors.begin(); it != mEffectors.end(); ++it) {
         Effector *pEffector = *it;
-        pEffector->Enable(mask[pEffector->Type()]);
+        pEffector->SetEnabled(mask[pEffector->Type()]);
     }
 }
 
@@ -71,15 +71,15 @@ void JamEffectsMgr::PostRemixFxMsg(JamEffectMsg *pMsg) {
     const int nEffect = pMsg->mEffect;
     const int nBar = pMsg->mBar;
     // The binary does not test the effector for null.
-    Effector *pEffector = FindEffector(nEffect);
+    Effector *pEffector = GetEffector(nEffect);
     long long *pStep = mPhraseMgr->GetStepValue(nBar);
     // The image flips and tests the bit through a std::bitset reference on the step word.
     const long long nBit = 1LL << (nEffect & (kStepMaskBits - 1));
     *pStep ^= nBit;
-    pEffector->Enable((*pStep & nBit) != 0);
+    pEffector->SetEnabled((*pStep & nBit) != 0);
 
     InvalidateTrackMsg invalidate(kSongFirstBar, kSongEndBar, mTrack);
-    mPhraseMgr->Handle(&invalidate);
+    mPhraseMgr->Dispatch(&invalidate);
 
     RemixFXMsg remix(mTrack, nBar, nEffect, (*pStep & nBit) != 0, pMsg->mPlayer);
     Send(&remix);
@@ -90,8 +90,9 @@ void JamEffectsMgr::PostRemixFxMsg(JamEffectMsg *pMsg) {
 }
 
 // NTSC-U/C: 0x001a62d8, PAL: 0x001ac040
-Effector *JamEffectsMgr::FindEffector(int nType) {
-    for (std::vector<Effector *>::iterator it = mEffectors.begin(); it != mEffectors.end(); ++it) {
+Effector *JamEffectsMgr::GetEffector(int nType) const {
+    for (std::vector<Effector *>::const_iterator it = mEffectors.begin(); it != mEffectors.end();
+         ++it) {
         if ((*it)->Type() == nType) {
             return *it;
         }
@@ -102,13 +103,13 @@ Effector *JamEffectsMgr::FindEffector(int nType) {
 // NTSC-U/C: 0x001a6350, PAL: 0x001ac0b8
 void JamEffectsMgr::EnableAll(int bEnabled) {
     for (std::vector<Effector *>::iterator it = mEffectors.begin(); it != mEffectors.end(); ++it) {
-        (*it)->Enable(bEnabled);
+        (*it)->SetEnabled(bEnabled);
     }
 }
 
 // NTSC-U/C: 0x001a63d0, PAL: 0x001ac138
-void JamEffectsMgr::HandleMessage(Message *pMsg) {
-    if (pMsg->Type() == g_nJamEffectMsgType) {
+void JamEffectsMgr::DispatchPriv(Message *pMsg) {
+    if (pMsg->Type() == JamEffectMsg::sID) {
         PostRemixFxMsg(static_cast<JamEffectMsg *>(pMsg));
     }
 }

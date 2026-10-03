@@ -77,7 +77,7 @@ typedef struct {
 static const char g_abLoadFileLibraryVersion[kVersionSize] = {'2', '3', '0', '0'};
 
 // NTSC-U/C: 0x00780dc8, PAL: 0x007c4ae0, negative until the client is bound.
-static int g_nLoadFileBound = -1;
+static int _bind_check = -1;
 
 // NTSC-U/C: 0x00780dcc, PAL: 0x007c4ae4, a second server version the library accepts.
 static const char *g_pszLoadFileAltVersion = "....";
@@ -89,7 +89,7 @@ static LoadFileArgs g_loadFileArgs __attribute__((aligned(64)));
 static sceSifClientData g_loadFileClient __attribute__((aligned(64)));
 
 // NTSC-U/C: 0x008e5ea8, PAL: 0x0092aea8, the version the server reported when the client bound it.
-static char g_abLoadFileServerVersion[kVersionSize];
+static char _lfversion[kVersionSize];
 
 // Copy the module arguments into the block, at most kLoadArgSize bytes of them, and return the
 // count copied.
@@ -106,7 +106,7 @@ static inline int copyModuleArgs(char *pDest, int nArgs, const char *pArgs) {
 static int _lf_bind(void) {
     int nDelay;
 
-    if (g_nLoadFileBound >= 0) {
+    if (_bind_check >= 0) {
         return 0;
     }
     for (;;) {
@@ -120,7 +120,7 @@ static int _lf_bind(void) {
             __asm__ volatile("nop");
         }
     }
-    g_nLoadFileBound = 0;
+    _bind_check = 0;
     if (sceSifCallRpc(&g_loadFileClient,
                       kLoadFileFunctionVersion,
                       0,
@@ -132,7 +132,7 @@ static int _lf_bind(void) {
                       NULL) < 0) {
         return kLoadFileErrorRpc;
     }
-    memcpy(g_abLoadFileServerVersion, &g_loadFileArgs, kVersionSize);
+    memcpy(_lfversion, &g_loadFileArgs, kVersionSize);
     return 0;
 }
 
@@ -140,10 +140,10 @@ static int _lf_bind(void) {
 // Reports a mismatch only when the server matches neither accepted version and the two accepted
 // versions also differ from each other.
 static int loadFileVersionMismatch(void) {
-    if (memcmp(g_abLoadFileServerVersion, g_abLoadFileLibraryVersion, kVersionSize) == 0) {
+    if (memcmp(_lfversion, g_abLoadFileLibraryVersion, kVersionSize) == 0) {
         return 0;
     }
-    if (memcmp(g_abLoadFileServerVersion, g_pszLoadFileAltVersion, kVersionSize) == 0) {
+    if (memcmp(_lfversion, g_pszLoadFileAltVersion, kVersionSize) == 0) {
         return 0;
     }
     return memcmp(g_abLoadFileLibraryVersion, g_pszLoadFileAltVersion, kVersionSize) != 0;
@@ -151,8 +151,8 @@ static int loadFileVersionMismatch(void) {
 
 // NTSC-U/C: 0x005fb3c8, PAL: 0x0063c0d8
 int sceSifLoadFileReset(void) {
-    g_nLoadFileBound = -1;
-    memset(g_abLoadFileServerVersion, 0, kVersionSize);
+    _bind_check = -1;
+    memset(_lfversion, 0, kVersionSize);
     return 0;
 }
 

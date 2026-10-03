@@ -41,7 +41,7 @@ struct MetKeyboardRequest {
     MetKBUser *mUser;    /*!< The receiver of the committed text. +0x18 */
     int mUnusedFlag;     /*!< Starts at 1. MetKeyboardScreen::Open() does not read it. +0x1c */
     /**
-     * The widest the entered text may measure, compared against Rnd::Text::MeasureText(). Starts
+     * The widest the entered text may measure, compared against Rnd::Text::GetFontWidth(). Starts
      * at 500. The name is inferred. +0x20
      */
     int mMaxWidth;

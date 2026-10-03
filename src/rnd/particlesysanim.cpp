@@ -27,7 +27,7 @@ template <class T>
 void ReadTargetName(Stream &stream, T *&refOut) {
     HxStr name(nullptr);
     stream.ReadString(name);
-    refOut = dynamic_cast<T *>(g_manager.Find(name));
+    refOut = dynamic_cast<T *>(TheManager.Find(name));
 }
 
 // The text dump writes an absent object reference as this literal, and a present one as its
@@ -50,10 +50,10 @@ void PrintObjectRef(Dbg &sink, const Object *pObject) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 // Move the low end of a spawn colour range to the interpolated colour of a channel, and shift the
@@ -122,7 +122,7 @@ void ParticleSysAnim::DumpText(Dbg &sink) {
 }
 
 // NTSC-U/C: 0x00527128, PAL: 0x00567750
-float ParticleSysAnim::EndFrame() {
+float ParticleSysAnim::FilteredFrameEnd() {
     const float flStartColor = ChannelEndFrame(mFramesOwner->mStartColorKeys);
     const float flEndColor = ChannelEndFrame(mFramesOwner->mEndColorKeys);
     const float flEmitRate = ChannelEndFrame(mFramesOwner->mEmitRateKeys);
@@ -165,7 +165,7 @@ void ParticleSysAnim::SetFrameSelf(float flFrame) {
 // NTSC-U/C: 0x00526b68, PAL: 0x00567140
 void ParticleSysAnim::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
 
     Animatable::Save(stream);
 
@@ -174,7 +174,7 @@ void ParticleSysAnim::Save(Stream &stream) {
     WriteColorKeys(stream, mEndColorKeys);
     WriteFloatKeys(stream, mEmitRateKeys);
     WriteObjectRef(stream, mFramesOwner);
-    stream.Write(&mEmitRateRatio, sizeof(mEmitRateRatio));
+    stream.WriteLE(&mEmitRateRatio, sizeof(mEmitRateRatio));
 }
 
 // NTSC-U/C: 0x00526fc8, PAL: 0x005675f0
@@ -268,9 +268,9 @@ void ParticleSysAnim::Replace(Object *pFrom, Object *pTo) {
 // NTSC-U/C: 0x00526ce8, PAL: 0x005672c0
 void ParticleSysAnim::Load(Stream &stream) {
     int nRevision = 0;
-    stream.Read(&nRevision, sizeof(nRevision));
+    stream.ReadLE(&nRevision, sizeof(nRevision));
     if (nRevision > kSerialVersion) {
-        g_failSink.Report("Can't load new ParticleSysAnim\n");
+        Rnd::TheDbg.Notify("Can't load new ParticleSysAnim\n");
         return;
     }
 
@@ -281,7 +281,7 @@ void ParticleSysAnim::Load(Stream &stream) {
                   mEmitRateKeys);
     ReadTargetName(stream, mFramesOwner);
     if (nRevision >= kFirstRevisionWithEmitRateRatio) {
-        stream.Read(&mEmitRateRatio, sizeof(mEmitRateRatio));
+        stream.ReadLE(&mEmitRateRatio, sizeof(mEmitRateRatio));
     }
     if (nRevision < kFirstRevisionKeepingBorrowedKeys) {
         ClearKeys(); // Yes, every revision Load() accepts passes this test.

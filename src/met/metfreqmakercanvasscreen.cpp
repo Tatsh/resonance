@@ -64,7 +64,7 @@ inline HxStr DefaultFreqName() {
 
 // Resolve the view the avatar view hangs from.
 inline Rnd::View *FindCanvasView() {
-    return dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kCanvasView)));
+    return dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kCanvasView)));
 }
 
 } // namespace
@@ -128,7 +128,7 @@ void MetFreqMakerCanvasScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     Rnd::View *pView = FindCanvasView();
 #ifdef VIDEO_STANDARD_PAL
-    Rnd::Text *pTitle = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kTitleText)));
+    Rnd::Text *pTitle = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kTitleText)));
     pTitle->SetText(GetMetString(kMetStrFmCanvas));
 #endif
     mAppearance.detachFrom(pView);
@@ -164,7 +164,7 @@ void MetFreqMakerCanvasScreen::CommitPersona() {
 // NTSC-U/C: 0x0025ec80, PAL: 0x002753a0
 void MetFreqMakerCanvasScreen::SetFreqName(const HxStr &name) {
     mFreqName = name;
-    Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kNameText)));
+    Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kNameText)));
     pText->SetText(mFreqName);
     mModified = 1;
 }

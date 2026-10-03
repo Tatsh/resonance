@@ -19,7 +19,7 @@ Message *NoteMsg::Clone() {
 
 // NTSC-U/C: 0x003dc280, PAL: 0x004146b8
 int NoteMsg::Type() {
-    return g_dwNoteMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x003dc290, PAL: 0x004146c8

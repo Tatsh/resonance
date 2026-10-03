@@ -40,7 +40,7 @@ public:
      * plain allocator and receives the open file.
      *
      * An unrecognised extension retains the null result and then writes mDuration through it,
-     * dereferencing null. The open file is not closed. WriteBitmap() is the one caller.
+     * dereferencing null. The open file is not closed. Write() is the one caller.
      *
      * @param pszPath The file to open.
      * @param pnError Receives kAGfxFileOk, or kAGfxFileOpenFailed when the file cannot be opened.
@@ -62,7 +62,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005f9d18
      * @ghidraAddress PAL: 0x0063aa28
      */
-    static int WriteBitmap(const char *pszPath, const ABitmap &bitmap);
+    static int Write(const char *pszPath, const ABitmap &bitmap);
 
     /**
      * Return the first three characters after the last full stop of a path, packed into a word.
@@ -116,7 +116,7 @@ public:
      * @param pbEnd Set to one when the file holds no further image.
      * @return An AGfxFileResult code.
      */
-    virtual int ReadImage(ABitmap *pImage, int *pbEnd) = 0;
+    virtual int ReadFrame(ABitmap *pImage, int *pbEnd) = 0;
 
     /**
      * Close the file.

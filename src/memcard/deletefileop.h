@@ -14,7 +14,7 @@ public:
     /**
      * Construct a deletion.
      *
-     * @param pHandler The receiver Complete() reports to.
+     * @param pHandler The receiver NotifyDone() reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The file or directory to delete.
      * @param nCookie The tag Memcard::Cancel() matches on.
@@ -33,13 +33,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055ef68
      * @ghidraAddress PAL: 0x005a0238
      */
-    virtual void Issue();
+    virtual void Execute();
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0055e060
      * @ghidraAddress PAL: 0x0059f308
      */
-    virtual void Complete();
+    virtual void NotifyDone();
 
     /**
      * Map the result through a jump table.

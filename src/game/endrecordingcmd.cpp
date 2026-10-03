@@ -31,7 +31,7 @@ int EndRecordingCmd::CmdID() {
 
 // NTSC-U/C: 0x0010efa8, PAL: 0x0010f408
 void EndRecordingCmd::Execute() {
-    mRecorder->EndRecording();
+    mRecorder->FinishUp();
 }
 
 // NTSC-U/C: 0x0010efe8, PAL: 0x0010f448

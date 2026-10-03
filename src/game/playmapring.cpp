@@ -6,7 +6,7 @@
 
 namespace {
 
-// The configuration code for the number of turns GetExtent() scales one turn by.
+// The configuration code for the number of turns GetLength() scales one turn by.
 constexpr int kRepeatCountConfigCode = 0x385;
 
 } // namespace
@@ -28,6 +28,6 @@ std::vector<int> &PlayMapRing::FindBarsPlaying(int nStart, int nMin, int nEnd) {
 }
 
 // NTSC-U/C: 0x0012e430, PAL: 0x0012eba8
-int PlayMapRing::GetExtent() {
+int PlayMapRing::GetLength() const {
     return mSteps.back() * QueryConfigValue(kRepeatCountConfigCode);
 }

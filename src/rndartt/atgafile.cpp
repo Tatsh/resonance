@@ -28,10 +28,6 @@ constexpr unsigned char kAlphaOpaque = 0xff;
 constexpr unsigned char kPacketRunFlag = 0x80;
 constexpr unsigned char kPacketCountMask = 0x7f;
 
-// The one pixel a run length encoded packet is read into.
-// NTSC-U/C: 0x007a8100, PAL: 0x007ebe00
-unsigned char s_abPixel[kRGBAByteCount] = {0, 0, 0, 0xff};
-
 } // namespace
 
 // NTSC-U/C: 0x0061fff8, PAL: 0x00660b88
@@ -61,7 +57,7 @@ int ATgaFile::StartRead() {
 }
 
 // NTSC-U/C: 0x00620508, PAL: 0x00661098
-int ATgaFile::ReadImage(ABitmap *pImage, int *pbEnd) {
+int ATgaFile::ReadFrame(ABitmap *pImage, int *pbEnd) {
     if (mImageRead != 0) {
         *pbEnd = 1;
         return kAGfxFileOk;
@@ -87,6 +83,9 @@ int ATgaFile::Write([[maybe_unused]] const ABitmap &bitmap) {
 
 // NTSC-U/C: 0x00620128, PAL: 0x00660cb8
 int ATgaFile::ReadPixels(ABitmap *pImage) {
+    // The one pixel a run-length encoded packet is read into.
+    // NTSC-U/C: 0x007a8100, PAL: 0x007ebe00
+    static unsigned char bgra[kRGBAByteCount] = {0, 0, 0, 0xff};
     unsigned char *pPixels = static_cast<unsigned char *>(pImage->mPixels);
     for (int y = 0; y < pImage->mHeight; ++y) {
         const int nRow = mTopDown != 0 ? y : pImage->mHeight - (y + 1);
@@ -99,24 +98,24 @@ int ATgaFile::ReadPixels(ABitmap *pImage) {
                 unsigned short nCount = (nPacket & kPacketCountMask) + 1;
                 x += nCount;
                 if ((nPacket & kPacketRunFlag) != 0) {
-                    fread(s_abPixel, 1, nPixelBytes, mFile);
-                    const unsigned char nFirst = s_abPixel[0];
-                    s_abPixel[0] = s_abPixel[2];
-                    s_abPixel[2] = nFirst;
+                    fread(bgra, 1, nPixelBytes, mFile);
+                    const unsigned char nFirst = bgra[0];
+                    bgra[0] = bgra[2];
+                    bgra[2] = nFirst;
                     while (nCount-- != 0) {
-                        pDest[0] = s_abPixel[0];
-                        pDest[1] = s_abPixel[1];
-                        pDest[2] = s_abPixel[2];
-                        pDest[3] = s_abPixel[3];
+                        pDest[0] = bgra[0];
+                        pDest[1] = bgra[1];
+                        pDest[2] = bgra[2];
+                        pDest[3] = bgra[3];
                         pDest += kRGBAByteCount;
                     }
                 } else {
                     while (nCount-- != 0) {
-                        fread(s_abPixel, 1, nPixelBytes, mFile);
-                        pDest[0] = s_abPixel[2];
-                        pDest[1] = s_abPixel[1];
-                        pDest[2] = s_abPixel[0];
-                        pDest[3] = s_abPixel[3];
+                        fread(bgra, 1, nPixelBytes, mFile);
+                        pDest[0] = bgra[2];
+                        pDest[1] = bgra[1];
+                        pDest[2] = bgra[0];
+                        pDest[3] = bgra[3];
                         pDest += kRGBAByteCount;
                     }
                 }

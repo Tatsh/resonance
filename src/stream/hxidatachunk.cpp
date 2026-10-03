@@ -8,8 +8,8 @@ HxIDataChunk::HxIDataChunk(HxIListChunk *pReader)
     : mReader(pReader), mSource(pReader->mStream), mId(nullptr) {
     mFatalOnEnd = 1;
     mSwapBytes = mSource->mSwapBytes;
-    mId = new HxChunkHeader(*mReader->Current());
-    mStart = mSource->Tell();
+    mId = new HxChunkHeader(*mReader->CurSubChunkHeader());
+    mStart = mSource->GetMarker();
     mEnd = mStart + mId->mSize;
     mReader->Lock();
 }
@@ -20,7 +20,7 @@ HxIDataChunk::HxIDataChunk(HxStream *pSource) : mReader(nullptr), mSource(pSourc
     mSwapBytes = pSource->mSwapBytes;
     mId = new HxChunkHeader;
     mId->Read(*pSource);
-    mStart = mSource->Tell();
+    mStart = mSource->GetMarker();
     mEnd = mStart + mId->mSize;
 }
 
@@ -33,37 +33,37 @@ HxIDataChunk::~HxIDataChunk() {
 }
 
 // NTSC-U/C: 0x00145b20, PAL: 0x00146638
-void HxIDataChunk::Seek(int nOffset, int nWhence) {
-    if ((mStatus & kStatusRange) != 0 || (mStatus & kStatusFailed) != 0) {
+void HxIDataChunk::SetMarker(int nOffset, int nWhence) {
+    if ((mStatus & failbit) != 0 || (mStatus & badbit) != 0) {
         return;
     }
 
     switch (nWhence) {
     case kHxSeekSet:
         if (mId->mSize < nOffset) {
-            mStatus = kStatusRange;
+            mStatus = failbit;
         }
-        mSource->Seek(nOffset + mStart, kHxSeekSet);
+        mSource->SetMarker(nOffset + mStart, kHxSeekSet);
         break;
     case kHxSeekCur:
-        mSource->Seek(nOffset, kHxSeekCur);
+        mSource->SetMarker(nOffset, kHxSeekCur);
         break;
     case kHxSeekEnd:
         if (nOffset < -mId->mSize) {
-            mStatus = kStatusRange;
+            mStatus = failbit;
         }
-        mSource->Seek(nOffset + mEnd, kHxSeekSet);
+        mSource->SetMarker(nOffset + mEnd, kHxSeekSet);
         break;
     }
-    mStatus = kStatusOk; // Yes, the binary overwrites the range status set above.
+    mStatus = goodbit; // Yes, the binary overwrites the range status set above.
 }
 
 // NTSC-U/C: 0x001460f0, PAL: 0x00146c08
-int HxIDataChunk::Tell() {
-    if ((mStatus & kStatusRange) != 0 || (mStatus & kStatusFailed) != 0) {
+int HxIDataChunk::GetMarker() {
+    if ((mStatus & failbit) != 0 || (mStatus & badbit) != 0) {
         return -1;
     }
-    return mSource->Tell() - mStart;
+    return mSource->GetMarker() - mStart;
 }
 
 // NTSC-U/C: 0x00145fc0, PAL: 0x00146ad8
@@ -72,17 +72,17 @@ int HxIDataChunk::Size() {
 }
 
 // NTSC-U/C: 0x00146160, PAL: 0x00146c78
-HxStream &HxIDataChunk::Read(void *pDest, int nSize) {
-    if (mStatus != kStatusOk) {
+HxStream &HxIDataChunk::ReadData(void *pDest, int nSize) {
+    if (mStatus != goodbit) {
         return *this;
     }
 
-    int nLeft = mEnd - mSource->Tell();
+    int nLeft = mEnd - mSource->GetMarker();
     if (nLeft < nSize) {
-        mSource->Read(pDest, nLeft);
+        mSource->ReadData(pDest, nLeft);
         mStatus = kStatusEnd;
     } else {
-        mSource->Read(pDest, nSize);
+        mSource->ReadData(pDest, nSize);
     }
     return *this;
 }

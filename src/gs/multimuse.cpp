@@ -89,7 +89,7 @@ std::ostream &PrintMuseEntry(std::ostream &stream, Mid::MBT position, MuseMsg *p
     std::ostream &open = stream << "[";
     position.Print(open);
     std::ostream &separated = open << ": ";
-    pMsg->PrintBraced(separated); // Yes, the binary discards the result.
+    pMsg->Print(separated); // Yes, the binary discards the result.
     return separated << "]";
 }
 

@@ -16,7 +16,7 @@ class Message;
  * vtables belong to the class. The table at `0x00829b18` is addressed by the MsgSource subobject
  * and inherits both of that base's virtuals unchanged; the table at `0x00829af0` is addressed by
  * the MsgSink subobject, adjusts `this` by `-0x14` on every entry it overrides, and inherits
- * MsgSink::Handle() with no adjustment at all.
+ * MsgSink::Dispatch() with no adjustment at all.
  *
  * Deriving from both mix-ins is the whole design. A message arrives through the MsgSink side,
  * which stores a copy, and arrives at its readers through the inherited MsgSource sink list.
@@ -52,7 +52,7 @@ public:
     /**
      * Store a copy of a message without reading its identity first.
      *
-     * The body is HandleMessage() with the Message::Type() call omitted.
+     * The body is DispatchPriv() with the Message::Type() call omitted.
      *
      * @param pMsg The message to copy and store.
      * @ghidraAddress NTSC-U/C: 0x0054b220
@@ -84,7 +84,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x0054b290
      * @ghidraAddress PAL: 0x0058b7c0
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 private:
     std::vector<Message *> mFirst;

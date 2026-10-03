@@ -8,7 +8,7 @@
  * Its RTTI descriptor is at `0x008ee7c8`. It has single inheritance from `MemcardOp` at offset 0.
  * An instance is 0x2c bytes and the vtable is at `0x0082bd60`.
  *
- * Issue() addresses the descriptor rather than the card. MemcardOp::mPortSlot is therefore
+ * Execute() addresses the descriptor rather than the card. MemcardOp::mPortSlot is therefore
  * recorded and never read.
  */
 class ReadOp : public MemcardOp {
@@ -16,8 +16,8 @@ public:
     /**
      * Construct a read against an open descriptor.
      *
-     * @param pHandler The receiver Complete() reports to.
-     * @param nPortSlot The packed port and slot, which Issue() does not use.
+     * @param pHandler The receiver NotifyDone() reports to.
+     * @param nPortSlot The packed port and slot, which Execute() does not use.
      * @param nFile The descriptor OpenReadOp delivered.
      * @param pBuffer The destination.
      * @param nLength The number of bytes to read.
@@ -42,13 +42,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055e910
      * @ghidraAddress PAL: 0x0059fbe0
      */
-    virtual void Issue();
+    virtual void Execute();
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0055d9e8
      * @ghidraAddress PAL: 0x0059ec60
      */
-    virtual void Complete();
+    virtual void NotifyDone();
 
     /**
      * Record the transferred byte count, or map the failure.

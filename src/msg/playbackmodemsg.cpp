@@ -14,7 +14,7 @@ Message *PlaybackModeMsg::Clone() {
 
 // NTSC-U/C: 0x0011d5c8, PAL: 0x0011db50
 int PlaybackModeMsg::Type() {
-    return g_nPlaybackModeMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x0011d5d8, PAL: 0x0011db60

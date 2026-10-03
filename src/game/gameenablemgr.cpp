@@ -17,10 +17,10 @@ constexpr int kMaxTrackCount = 12;
 // The free-until bar each track starts at.
 constexpr int kNoFreeBar = -1;
 
-// The first bar SetFreeUntil() invalidates.
+// The first bar ForceEnabled() invalidates.
 constexpr int kFirstBar = 0;
 
-// The arguments SetBarOwner() passes to SetFreeUntil() to release a track for good.
+// The arguments SetBarOwner() passes to ForceEnabled() to release a track for good.
 constexpr int kReleaseBar = 0;
 constexpr int kReleaseUntilBar = -1;
 
@@ -78,7 +78,7 @@ void GameEnableMgr::Init(int nConfigCode) {
 }
 
 // NTSC-U/C: 0x00105498, PAL: 0x00105498
-void GameEnableMgr::FindOwnedTracks(int *pOwned, int nBar) {
+void GameEnableMgr::QueryOwnershipAtSongBar(int *pOwned, int nBar) const {
     for (int i = 0; i < mOwnedTrackCount; ++i) {
         pOwned[i] = mGamer->GetPhraseDatabase(i)->GetOwner(nBar)->IsNull() ^ 1;
     }
@@ -99,7 +99,7 @@ int GameEnableMgr::IsTrackEnabled(int nTrack, const int *pOwned) {
 // NTSC-U/C: 0x00101d70, PAL: 0x00101d70
 void GameEnableMgr::SetBarOwner(int nTrack, int nBar, Player *pPlayer) {
     int owned[kOwnedTrackCount];
-    FindOwnedTracks(owned, nBar);
+    QueryOwnershipAtSongBar(owned, nBar);
 
     int enabled[kMaxTrackCount];
     for (int i = 0; i < mTrackCount; ++i) {
@@ -113,7 +113,7 @@ void GameEnableMgr::SetBarOwner(int nTrack, int nBar, Player *pPlayer) {
         }
 
         if (mReleaseWhenMet != 0) {
-            SetFreeUntil(i, kReleaseBar, kReleaseUntilBar);
+            ForceEnabled(i, kReleaseBar, kReleaseUntilBar);
         } else {
             InvalidateTrackMsg msg(nBar, nBar + 1, i);
             mGamer->mTrackSources[i].Send(&msg);
@@ -122,7 +122,7 @@ void GameEnableMgr::SetBarOwner(int nTrack, int nBar, Player *pPlayer) {
 }
 
 // NTSC-U/C: 0x00101c68, PAL: 0x00101c68
-void GameEnableMgr::SetFreeUntil(int nTrack, int nBar, int nUntilBar) {
+void GameEnableMgr::ForceEnabled(int nTrack, int nBar, int nUntilBar) {
     if (nUntilBar < nBar) {
         mRequirements[nTrack].clear();
     } else {
@@ -134,7 +134,7 @@ void GameEnableMgr::SetFreeUntil(int nTrack, int nBar, int nUntilBar) {
 }
 
 // NTSC-U/C: 0x00101bb0, PAL: 0x00101bb0
-void GameEnableMgr::DisableTrack(int nTrack) {
+void GameEnableMgr::ForceDisable(int nTrack) {
     mRequirements[nTrack].clear();
     mRequirements[nTrack].push_back(kNeverEnabled);
 }
@@ -146,6 +146,6 @@ int GameEnableMgr::QueryBar(int nTrack, int nBar) {
     }
 
     int owned[kOwnedTrackCount];
-    FindOwnedTracks(owned, mPlayMap->MapBar(nBar));
+    QueryOwnershipAtSongBar(owned, mPlayMap->MapBar(nBar));
     return IsTrackEnabled(nTrack, owned);
 }

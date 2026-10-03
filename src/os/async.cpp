@@ -88,10 +88,10 @@ struct AsyncOp {
 
 // The element is the 48-byte request inline, not a pointer to one.
 // NTSC-U/C: 0x006e9128, PAL: 0x0072cac0
-std::list<AsyncRequest> g_asyncPendingJobs;
+std::list<AsyncRequest> pendingJobList;
 
 // NTSC-U/C: 0x006e9130, PAL: 0x0072cac8
-std::list<AsyncRequest> g_asyncCompletedJobs;
+std::list<AsyncRequest> completedJobList;
 
 // NTSC-U/C: 0x006e9134, PAL: 0x0072cacc
 int g_nAsyncNextJobId = 1;
@@ -126,7 +126,7 @@ long long g_llAsyncOpDeadline;
 long long g_llAsyncOpStartTime;
 
 // NTSC-U/C: 0x006e91d0, PAL: 0x0072cb68
-AsyncJob *g_pAsyncFreeJobs = nullptr;
+AsyncJob *pHeadJobInfo = nullptr;
 
 // NTSC-U/C: 0x006e91d4, PAL: 0x0072cb6c
 int g_nAsyncCallbackThread = 0;
@@ -153,8 +153,8 @@ alignas(64) char g_abAsyncCallbackStack[kAsyncCallbackStackSize] = {};
 // NTSC-U/C: 0x0045f000, PAL: 0x0049c6c0
 void InitAsync() {
     g_nAsyncHostMedia = (UsingCdMedia() == 0);
-    g_asyncPendingJobs.clear();
-    g_asyncCompletedJobs.clear();
+    pendingJobList.clear();
+    completedJobList.clear();
     g_nAsyncNextJobId = 1;
 
     g_asyncCurrentOp.mId = -1;
@@ -165,10 +165,10 @@ void InitAsync() {
     g_asyncCurrentOp.mStatus = kAsyncOpIdle;
     g_asyncCurrentOp.mRetry = 0;
 
-    g_pAsyncFreeJobs = static_cast<AsyncJob *>(
+    pHeadJobInfo = static_cast<AsyncJob *>(
         MemAllocTagged(kAsyncJobCount * sizeof(AsyncJob), __FILE__, __LINE__));
 
-    AsyncJob *pJob = g_pAsyncFreeJobs;
+    AsyncJob *pJob = pHeadJobInfo;
     for (int i = 0; i < kAsyncJobCount; ++i) {
         pJob->mPrev = (i != 0) ? pJob - 1 : nullptr;
         pJob->mNext = (i != kAsyncJobCount - 1) ? pJob + 1 : nullptr;
@@ -267,7 +267,7 @@ void AsyncQueueRequest(AsyncRequest request) {
         return;
     }
 
-    g_asyncPendingJobs.push_back(request);
+    pendingJobList.push_back(request);
 }
 
 // NTSC-U/C: 0x00460b20, PAL: 0x0049e1e0
@@ -290,7 +290,7 @@ void AsyncMediaEventCallback(int nFunction) {
 // NTSC-U/C: 0x00460b98, PAL: 0x0049e258
 void ShutdownAsync() {
     if (g_bAsyncInitialised != 0) {
-        MemFreeTagged(g_pAsyncFreeJobs, __FILE__, __LINE__);
+        MemFreeTagged(pHeadJobInfo, __FILE__, __LINE__);
     }
 }
 
@@ -334,11 +334,11 @@ int AsyncSubmitRequest(int nFile,
 
 // NTSC-U/C: 0x00460d90, PAL: 0x0049e450
 AsyncJob *AsyncGetFreeJobChain() {
-    AsyncJob *pJob = g_pAsyncFreeJobs;
+    AsyncJob *pJob = pHeadJobInfo;
     AsyncJob *pNext = pJob->mNext;
     // The head is advanced before the check, so an exhausted list leaves a null
     // head behind.
-    g_pAsyncFreeJobs = pNext;
+    pHeadJobInfo = pNext;
     if (pNext == nullptr || pJob == nullptr) {
         Fatal("ASYNC_GET_FREE_JOB_CHAIN FAILURE!\n");
     }
@@ -355,8 +355,8 @@ void AsyncReleaseJobChain(AsyncJob *pChain) {
     while (pTail->mNext != nullptr) {
         pTail = pTail->mNext;
     }
-    pTail->mNext = g_pAsyncFreeJobs;
-    g_pAsyncFreeJobs = pChain;
+    pTail->mNext = pHeadJobInfo;
+    pHeadJobInfo = pChain;
 }
 
 namespace {
@@ -524,8 +524,8 @@ inline void UnlinkAsyncJob(AsyncRequest *pRequest, AsyncJob *pJob) {
     pJob->mPrev = nullptr;
     pJob->mNext = nullptr;
     if (pJob != nullptr) { // The test cannot fire from either caller. The binary performs it.
-        pJob->mNext = g_pAsyncFreeJobs;
-        g_pAsyncFreeJobs = pJob;
+        pJob->mNext = pHeadJobInfo;
+        pHeadJobInfo = pJob;
     }
 }
 
@@ -553,7 +553,7 @@ void DeliverAsyncJobData(AsyncRequest *pRequest, AsyncJob *pJob) {
 // caller to queue.
 int PickNextAsyncFetch(AsyncRequest *pRequest) {
     int nSector = kAsyncNoSectorPending;
-    for (auto it = g_asyncPendingJobs.begin(); it != g_asyncPendingJobs.end(); ++it) {
+    for (auto it = pendingJobList.begin(); it != pendingJobList.end(); ++it) {
         if ((it->mFile & kFileHandleArkStream) == 0) {
             DeliverAsyncJobData(&*it, it->mJobs);
             break;
@@ -573,7 +573,7 @@ int PickNextAsyncFetch(AsyncRequest *pRequest) {
 // A request whose last job is satisfied here completes immediately. The data a caller asked for is
 // therefore in place before the caller is told about it.
 void DistributeAsyncSectorData(int nFile, int nSector, const void *pSectorData) {
-    for (auto it = g_asyncPendingJobs.begin(); it != g_asyncPendingJobs.end();) {
+    for (auto it = pendingJobList.begin(); it != pendingJobList.end();) {
         if (it->mStreamFile != nFile) {
             ++it;
             continue;
@@ -597,7 +597,7 @@ void DistributeAsyncSectorData(int nFile, int nSector, const void *pSectorData) 
         }
 
         AsyncJobComplete(&*it, kAsyncStatusOk);
-        it = g_asyncPendingJobs.erase(it);
+        it = pendingJobList.erase(it);
     }
 }
 
@@ -649,7 +649,7 @@ void AsyncPumpCompletedRequests() {
     }
 
     // A request without a callback stays queued until AsyncPollComplete() collects it by handle.
-    for (auto it = g_asyncCompletedJobs.begin(); it != g_asyncCompletedJobs.end();) {
+    for (auto it = completedJobList.begin(); it != completedJobList.end();) {
         if (it->mCallback == nullptr) {
             ++it;
             continue;
@@ -658,7 +658,7 @@ void AsyncPumpCompletedRequests() {
         if (it->mJobs != nullptr) {
             AsyncReleaseJobChain(it->mJobs);
         }
-        it = g_asyncCompletedJobs.erase(it);
+        it = completedJobList.erase(it);
     }
 }
 
@@ -694,12 +694,12 @@ void AsyncJobComplete(AsyncRequest *pRequest, int nStatus) {
         FileClose(pRequest->mFile);
     }
     pRequest->mStatus = nStatus;
-    g_asyncCompletedJobs.push_back(*pRequest);
+    completedJobList.push_back(*pRequest);
 }
 
 // NTSC-U/C: 0x0045f658, PAL: 0x0049cd18
 int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength) {
-    for (auto it = g_asyncCompletedJobs.begin(); it != g_asyncCompletedJobs.end(); ++it) {
+    for (auto it = completedJobList.begin(); it != completedJobList.end(); ++it) {
         if (it->mId != nHandle) {
             continue;
         }
@@ -714,7 +714,7 @@ int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength) {
         if (it->mJobs != nullptr) {
             AsyncReleaseJobChain(it->mJobs);
         }
-        g_asyncCompletedJobs.erase(it);
+        completedJobList.erase(it);
         return nStatus;
     }
 
@@ -723,7 +723,7 @@ int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength) {
 
 // NTSC-U/C: 0x0045f738, PAL: 0x0049cdf8
 void AsyncCancelRequest(int nHandle) {
-    for (auto it = g_asyncPendingJobs.begin(); it != g_asyncPendingJobs.end(); ++it) {
+    for (auto it = pendingJobList.begin(); it != pendingJobList.end(); ++it) {
         if (it->mId != nHandle) {
             continue;
         }
@@ -737,11 +737,11 @@ void AsyncCancelRequest(int nHandle) {
         if (it->mJobs != nullptr) {
             AsyncReleaseJobChain(it->mJobs);
         }
-        g_asyncPendingJobs.erase(it);
+        pendingJobList.erase(it);
         return;
     }
 
-    for (auto it = g_asyncCompletedJobs.begin(); it != g_asyncCompletedJobs.end(); ++it) {
+    for (auto it = completedJobList.begin(); it != completedJobList.end(); ++it) {
         if (it->mId != nHandle) {
             continue;
         }
@@ -754,7 +754,7 @@ void AsyncCancelRequest(int nHandle) {
         if (it->mJobs != nullptr) {
             AsyncReleaseJobChain(it->mJobs);
         }
-        g_asyncCompletedJobs.erase(it);
+        completedJobList.erase(it);
         return;
     }
 }
@@ -770,18 +770,18 @@ void AsyncDump() {
               g_asyncCurrentOp.mRetry,
               g_asyncCurrentOp.mRetryCount);
 
-    LogPrintf("num Pending Jobs: %d\n", static_cast<int>(g_asyncPendingJobs.size()));
-    for (auto it = g_asyncPendingJobs.begin(); it != g_asyncPendingJobs.end(); ++it) {
+    LogPrintf("num Pending Jobs: %d\n", static_cast<int>(pendingJobList.size()));
+    for (auto it = pendingJobList.begin(); it != pendingJobList.end(); ++it) {
         LogPrintf("   h: %d\n", it->mId);
     }
 
-    LogPrintf("num Completed Jobs: %d\n", static_cast<int>(g_asyncCompletedJobs.size()));
-    for (auto it = g_asyncCompletedJobs.begin(); it != g_asyncCompletedJobs.end(); ++it) {
+    LogPrintf("num Completed Jobs: %d\n", static_cast<int>(completedJobList.size()));
+    for (auto it = completedJobList.begin(); it != completedJobList.end(); ++it) {
         LogPrintf("   h: %d\n", it->mId);
     }
 
     int nFreeJobs = 0;
-    for (const AsyncJob *pJob = g_pAsyncFreeJobs; pJob != nullptr; pJob = pJob->mNext) {
+    for (const AsyncJob *pJob = pHeadJobInfo; pJob != nullptr; pJob = pJob->mNext) {
         ++nFreeJobs;
     }
     LogPrintf("num Free Job Chains: %d\n", nFreeJobs);
@@ -910,11 +910,11 @@ int AsyncLoadFileByPath(const char *pszPath,
 
 // NTSC-U/C: 0x0045fa38, PAL: 0x0049d0f8
 void CountAsyncQueues(int *pnPending, int *pnCompleted, int *pnFreeJobs) {
-    *pnPending = static_cast<int>(g_asyncPendingJobs.size());
-    *pnCompleted = static_cast<int>(g_asyncCompletedJobs.size());
+    *pnPending = static_cast<int>(pendingJobList.size());
+    *pnCompleted = static_cast<int>(completedJobList.size());
 
     *pnFreeJobs = 0;
-    for (const AsyncJob *pJob = g_pAsyncFreeJobs; pJob != nullptr; pJob = pJob->mNext) {
+    for (const AsyncJob *pJob = pHeadJobInfo; pJob != nullptr; pJob = pJob->mNext) {
         ++*pnFreeJobs;
     }
 }

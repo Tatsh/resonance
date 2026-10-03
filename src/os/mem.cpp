@@ -108,21 +108,21 @@ constexpr int kHeapLogPathSize = 0x40;
 void *g_apProbeBlocks[kProbeBlockLimit] = {};
 
 // NTSC-U/C: 0x006f57d0, PAL: 0x00739220
-int g_bMemLogging = 0;
+int bEnabled = 0;
 
 // The rewind to kStlUnknownTag compiles to one doubleword store. The array bound comes from the
 // distance to the next global rather than from any single access.
 // NTSC-U/C: 0x006f57d8, PAL: 0x00739228
-char g_szStlAllocTag[kMemStlTagSize] = "stl_unk";
+char stlName[kMemStlTagSize] = "stl_unk";
 
 // NTSC-U/C: 0x006f5858, PAL: 0x007392a8
-int g_bMemAccounting = 0;
+int bMemCountEnabled = 0;
 
 // NTSC-U/C: 0x006f585c, PAL: 0x007392ac
-int g_nMemTotalBytes = 0;
+int memCountAlloced = 0;
 
 // NTSC-U/C: 0x006f5860, PAL: 0x007392b0
-MemTagTotal g_aMemTagTotals[kMemTagCount];
+MemTagTotal memCountSource[kMemTagCount];
 
 // NTSC-U/C: 0x006f6460, PAL: 0x00739eb0
 MemLogSource g_aMemLogSources[kMemLogSourceCount];
@@ -140,7 +140,7 @@ int g_bMemStackPainted = 0;
 int g_nMemLogReopenCount = 0;
 
 // NTSC-U/C: 0x00894d70, PAL: 0x008d9d80
-FILE *g_pMemLogFile = nullptr;
+FILE *fpLog = nullptr;
 
 // Path of the report being written.
 // NTSC-U/C: 0x00894db8, PAL: 0x008d9dc8
@@ -166,9 +166,9 @@ inline const char *TagBasename(const char *pszTag) {
 // full table charges the overflow record.
 inline void ChargeTagTotal(const char *pszTag, size_t nSize) {
     (void)strlen(pszTag); // Yes, the binary discards this call's result.
-    g_nMemTotalBytes += nSize;
+    memCountAlloced += nSize;
     for (int i = 1; i < kMemTagCount; ++i) {
-        MemTagTotal *pRecord = &g_aMemTagTotals[i];
+        MemTagTotal *pRecord = &memCountSource[i];
         if (pRecord->mName[0] == '\0') {
             strcpy(pRecord->mName, pszTag);
         }
@@ -177,7 +177,7 @@ inline void ChargeTagTotal(const char *pszTag, size_t nSize) {
             return;
         }
     }
-    g_aMemTagTotals[0].mBytes += nSize;
+    memCountSource[0].mBytes += nSize;
 }
 
 // The value of a linker-script symbol, which carries its meaning in its address.
@@ -289,11 +289,11 @@ void *operator new[](size_t nSize) {
     size_t nRequest = (nSize != 0) ? nSize : 1;
     void *pBlock = HeapAlloc(nRequest);
 
-    if (g_bMemAccounting != 0) {
+    if (bMemCountEnabled != 0) {
         ChargeTagTotal(kUntaggedTag, nRequest);
     }
-    if (g_bMemLogging != 0) {
-        fprintf(g_pMemLogFile, "new(UNK[],%d,%p)\n", nRequest, pBlock);
+    if (bEnabled != 0) {
+        fprintf(fpLog, "new(UNK[],%d,%p)\n", nRequest, pBlock);
     }
     if (pBlock == nullptr) {
         Fatal("NEW[] ALLOCATION FAILURE, size: %d\n", nRequest);
@@ -305,13 +305,12 @@ void *operator new[](size_t nSize) {
 void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine) {
     void *pBlock = HeapAlloc(nSize);
 
-    if (g_bMemAccounting != 0) {
+    if (bMemCountEnabled != 0) {
         ChargeTagTotal(pszTag, nSize);
     }
-    if (g_bMemLogging != 0) {
-        fprintf(
-            g_pMemLogFile, "malloc(%s_%d,%d,0x%p)\n", TagBasename(pszTag), nLine, nSize, pBlock);
-        strcpy(g_szStlAllocTag, kStlUnknownTag);
+    if (bEnabled != 0) {
+        fprintf(fpLog, "malloc(%s_%d,%d,0x%p)\n", TagBasename(pszTag), nLine, nSize, pBlock);
+        strcpy(stlName, kStlUnknownTag);
     }
     if (pBlock == nullptr) {
         Fatal("MEMORY ALLOCATION FAILURE, file: %s, line: %d, size: %d\n", pszTag, nLine, nSize);
@@ -324,11 +323,11 @@ void *operator new(size_t nSize) {
     size_t nRequest = (nSize != 0) ? nSize : 1;
     void *pBlock = HeapAlloc(nRequest);
 
-    if (g_bMemAccounting != 0) {
+    if (bMemCountEnabled != 0) {
         ChargeTagTotal(kScalarTag, nRequest);
     }
-    if (g_bMemLogging != 0) {
-        fprintf(g_pMemLogFile, "new(UNK,%d,%p)\n", nRequest, pBlock);
+    if (bEnabled != 0) {
+        fprintf(fpLog, "new(UNK,%d,%p)\n", nRequest, pBlock);
     }
     if (pBlock == nullptr) {
         Fatal("NEW ALLOCATION FAILURE, size: %d\n", nRequest);
@@ -341,11 +340,11 @@ void *AllocateTaggedMemory(size_t nSize, const char *pszClass) {
     size_t nRequest = (nSize != 0) ? nSize : 1;
     void *pBlock = HeapAlloc(nRequest);
 
-    if (g_bMemAccounting != 0) {
+    if (bMemCountEnabled != 0) {
         ChargeTagTotal(pszClass, nRequest);
     }
-    if (g_bMemLogging != 0) {
-        fprintf(g_pMemLogFile, "new(%s,%d,%p)\n", pszClass, nRequest, pBlock);
+    if (bEnabled != 0) {
+        fprintf(fpLog, "new(%s,%d,%p)\n", pszClass, nRequest, pBlock);
     }
     if (pBlock == nullptr) {
         Fatal("NEW ALLOCATION FAILURE, class: %s, size: %d\n", pszClass, nRequest);
@@ -356,8 +355,8 @@ void *AllocateTaggedMemory(size_t nSize, const char *pszClass) {
 // NTSC-U/C: 0x004a92c8, PAL: 0x004e73d8
 // The image, built as C++98, has no sized overload to pair with this one.
 void operator delete[](void *pBlock) noexcept {
-    if (g_bMemLogging != 0) {
-        fprintf(g_pMemLogFile, "del(UNK[],%p)\n", pBlock);
+    if (bEnabled != 0) {
+        fprintf(fpLog, "del(UNK[],%p)\n", pBlock);
     }
     HeapFree(pBlock);
 }
@@ -365,16 +364,16 @@ void operator delete[](void *pBlock) noexcept {
 // NTSC-U/C: 0x004a9230, PAL: 0x004e7340
 // The image, built as C++98, has no sized overload to pair with this one.
 void operator delete(void *pBlock) noexcept {
-    if (g_bMemLogging != 0) {
-        fprintf(g_pMemLogFile, "del(UNK,%p)\n", pBlock);
+    if (bEnabled != 0) {
+        fprintf(fpLog, "del(UNK,%p)\n", pBlock);
     }
     HeapFree(pBlock);
 }
 
 // NTSC-U/C: 0x004a91e0, PAL: 0x004e72f0
 void FreeTaggedMemory(void *pBlock, const char *pszClass) {
-    if (g_bMemLogging != 0) {
-        fprintf(g_pMemLogFile, "del(%s,%p)\n", pszClass, pBlock);
+    if (bEnabled != 0) {
+        fprintf(fpLog, "del(%s,%p)\n", pszClass, pBlock);
     }
     HeapFree(pBlock);
 }
@@ -386,8 +385,8 @@ void MemFreeTagged(void *pBlock, const char *pszTag, int nLine) {
         Fatal("ZONE FREE ERROR: ptr %p in zone %d, can't free()\n", pBlock, nZone);
     }
 
-    if (g_bMemLogging != 0) {
-        fprintf(g_pMemLogFile, "free(%s_%d,0x%p)\n", TagBasename(pszTag), nLine, pBlock);
+    if (bEnabled != 0) {
+        fprintf(fpLog, "free(%s_%d,0x%p)\n", TagBasename(pszTag), nLine, pBlock);
     }
     HeapFree(pBlock);
 }
@@ -400,11 +399,11 @@ void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine
     }
 
     void *pNew = HeapRealloc(pBlock, nSize);
-    if (g_bMemLogging != 0) {
+    if (bEnabled != 0) {
         // The log prints the released block's address and never dereferences it.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuse-after-free"
-        fprintf(g_pMemLogFile,
+        fprintf(fpLog,
                 "realloc(%s_%d,%d,0x%p,0x%p)\n",
                 TagBasename(pszTag),
                 nLine,
@@ -412,7 +411,7 @@ void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine
                 pBlock,
                 pNew);
 #pragma GCC diagnostic pop
-        strcpy(g_szStlAllocTag, kStlUnknownTag);
+        strcpy(stlName, kStlUnknownTag);
     }
     if (pNew == nullptr) {
         Fatal("MEMORY RE-ALLOCATION FAILURE, file: %s, line: %d, size: %d\n", pszTag, nLine, nSize);
@@ -422,18 +421,18 @@ void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine
 
 // NTSC-U/C: 0x004a9090, PAL: 0x004e71a0
 char *MemGetCurrentTag() {
-    return g_szStlAllocTag;
+    return stlName;
 }
 
 // NTSC-U/C: 0x004a9048, PAL: 0x004e7158
 void MemSetStlTag(const char *pszKind, int nElemSize) {
-    sprintf(g_szStlAllocTag, "%s.%d", pszKind, nElemSize);
+    sprintf(stlName, "%s.%d", pszKind, nElemSize);
 }
 
 // NTSC-U/C: 0x004a8e18, PAL: 0x004e6f28
 void MemLogWrite(const char *pszText) {
-    if (g_bMemLogging != 0) {
-        fprintf(g_pMemLogFile, "MARKER: %s\n", pszText);
+    if (bEnabled != 0) {
+        fprintf(fpLog, "MARKER: %s\n", pszText);
     }
 }
 
@@ -550,24 +549,24 @@ void MemLogSourceReport(const char *pszTitle, FILE *pFile) {
 
 // NTSC-U/C: 0x004a8e50, PAL: 0x004e6f60
 void MemLogPrint(const char *pszText) {
-    if (g_bMemLogging != 0) {
-        fprintf(g_pMemLogFile, "%s", pszText);
+    if (bEnabled != 0) {
+        fprintf(fpLog, "%s", pszText);
     }
 }
 
 // NTSC-U/C: 0x004a8e88, PAL: 0x004e6f98
 void MemBeginAccounting() {
-    g_nMemTotalBytes = 0;
-    memset(g_aMemTagTotals, 0, sizeof(g_aMemTagTotals));
-    strcpy(g_aMemTagTotals[0].mName, "Other_Sources");
-    g_bMemAccounting = 1;
+    memCountAlloced = 0;
+    memset(memCountSource, 0, sizeof(memCountSource));
+    strcpy(memCountSource[0].mName, "Other_Sources");
+    bMemCountEnabled = 1;
 }
 
 // NTSC-U/C: 0x004a8ef8, PAL: 0x004e7008
 int MemEndAccounting(char *pszReport, int nReportSize) {
-    sprintf(pszReport, "Memory Allocated: %d\n", g_nMemTotalBytes);
+    sprintf(pszReport, "Memory Allocated: %d\n", memCountAlloced);
     for (int i = 0; i < kMemTagCount; ++i) {
-        const MemTagTotal &record = g_aMemTagTotals[i];
+        const MemTagTotal &record = memCountSource[i];
         if (record.mName[0] == '\0') {
             continue;
         }
@@ -587,8 +586,8 @@ int MemEndAccounting(char *pszReport, int nReportSize) {
         }
         strcat(pszReport, szLine);
     }
-    g_bMemAccounting = 0;
-    return g_nMemTotalBytes;
+    bMemCountEnabled = 0;
+    return memCountAlloced;
 }
 
 // NTSC-U/C: 0x004a7c40, PAL: 0x004e5d50
@@ -597,9 +596,9 @@ void MemOpenLog(const char *pszPath) {
         strcpy(g_szMemLogPath, pszPath);
         strcpy(g_szMemLogBaseName, pszPath);
         g_nMemLogReopenCount = 0;
-        g_pMemLogFile = fopen(g_szMemLogPath, "w");
-        if (g_pMemLogFile != nullptr) {
-            g_bMemLogging = 1;
+        fpLog = fopen(g_szMemLogPath, "w");
+        if (fpLog != nullptr) {
+            bEnabled = 1;
         }
     }
     LogPrintf("_stack = $%x\n", LinkerAddress(_stack));
@@ -614,10 +613,10 @@ void MemOpenLog(const char *pszPath) {
 
 // NTSC-U/C: 0x004a7d30, PAL: 0x004e5e40
 void MemCloseLogAndReport() {
-    if (g_pMemLogFile != nullptr) {
-        fclose(g_pMemLogFile);
-        g_pMemLogFile = nullptr;
-        g_bMemLogging = 0;
+    if (fpLog != nullptr) {
+        fclose(fpLog);
+        fpLog = nullptr;
+        bEnabled = 0;
     }
     const struct mallinfo info = ReadMallinfo();
     LogPrintf("system heap info (mallinfo):\n");
@@ -628,9 +627,9 @@ void MemCloseLogAndReport() {
 
 // NTSC-U/C: 0x004a7ef8, PAL: 0x004e6008
 void MemLogCloseAndContinue() {
-    LogPrintf("MemLogCloseAndContinue:, fpLog: %p\n", g_pMemLogFile);
-    if (g_pMemLogFile != nullptr) {
-        fclose(g_pMemLogFile);
+    LogPrintf("MemLogCloseAndContinue:, fpLog: %p\n", fpLog);
+    if (fpLog != nullptr) {
+        fclose(fpLog);
         FILE *pOld = fopen(g_szMemLogPath, "r");
         ++g_nMemLogReopenCount;
         strcpy(g_szMemLogPath, g_szMemLogBaseName);
@@ -641,11 +640,11 @@ void MemLogCloseAndContinue() {
         char szExtension[kMemLogExtensionSize];
         strcpy(szExtension, pszExtension);
         sprintf(pszExtension, "_%d%s", g_nMemLogReopenCount, szExtension);
-        g_pMemLogFile = fopen(g_szMemLogPath, "w");
-        LogPrintf("reopened %s at %p\n", g_szMemLogPath, g_pMemLogFile);
+        fpLog = fopen(g_szMemLogPath, "w");
+        LogPrintf("reopened %s at %p\n", g_szMemLogPath, fpLog);
         char szLine[kMemLogLineSize];
         while (fgets(szLine, kMemLogLineSize, pOld) != nullptr) {
-            fputs(szLine, g_pMemLogFile);
+            fputs(szLine, fpLog);
         }
         fclose(pOld);
     }

@@ -112,16 +112,16 @@ static SyscallEntry g_syscallPatchTable[kSyscallTableSize] = {
 static int g_libcSemaphores[2];
 
 // NTSC-U/C: 0x0077f988, PAL: 0x007c3778
-static int g_nHelperThreadId;
+static int topId;
 
 // NTSC-U/C: 0x008e5350, PAL: 0x0092a350
 static unsigned char g_helperStack[kHelperStackSize] __attribute__((aligned(16)));
 
 // NTSC-U/C: 0x008e5750, PAL: 0x0092a750
-static int g_nThreadRequestSema;
+static int topSema;
 
 // NTSC-U/C: 0x008e5758, PAL: 0x0092a758
-static ThreadRequestQueue g_threadRequests;
+static ThreadRequestQueue topArg;
 
 // NTSC-U/C: 0x008e6950, PAL: 0x0092b950
 static unsigned char g_deci2WorkArea[kDeci2WorkAreaSize] __attribute__((aligned(16)));
@@ -287,7 +287,7 @@ static void topThread(void *arg) {
         int nIndex;
         const ThreadRequest *pRequest;
 
-        WaitSema(g_nThreadRequestSema);
+        WaitSema(topSema);
         nIndex = pQueue->nHead & kThreadRequestIndexMask;
         pQueue->nHead = nIndex + 1;
         pRequest = &pQueue->mRequests[nIndex];
@@ -313,13 +313,13 @@ int InitThread(void) {
     struct ThreadParam thread;
     struct SemaParam sema;
 
-    if (g_nHelperThreadId > 0) {
+    if (topId > 0) {
         return -1;
     }
     sema.initCount = 0;
     sema.maxCount = kThreadRequestSemaMax;
-    g_nThreadRequestSema = CreateSema(&sema);
-    if (g_nThreadRequestSema < 0) {
+    topSema = CreateSema(&sema);
+    if (topSema < 0) {
         return -1;
     }
     thread.entry = topThread;
@@ -327,16 +327,16 @@ int InitThread(void) {
     thread.stackSize = kHelperStackSize;
     thread.gpReg = _gp;
     thread.initPriority = kHelperPriority;
-    g_nHelperThreadId = CreateThread(&thread);
-    if (g_nHelperThreadId < 0) {
-        DeleteSema(g_nThreadRequestSema);
+    topId = CreateThread(&thread);
+    if (topId < 0) {
+        DeleteSema(topSema);
         return -1;
     }
-    g_threadRequests.nHead = 0;
-    g_threadRequests.nTail = 0;
-    StartThread(g_nHelperThreadId, &g_threadRequests);
+    topArg.nHead = 0;
+    topArg.nTail = 0;
+    StartThread(topId, &topArg);
     ChangeThreadPriority(GetThreadId(), kCallerPriority);
-    return g_nHelperThreadId;
+    return topId;
 }
 
 // NTSC-U/C: 0x005f2160, PAL: 0x006342a8
@@ -348,14 +348,14 @@ int iWakeupThread(int thid) {
     if (nSelf != thid) {
         return _iWakeupThread(thid);
     }
-    if ((unsigned int)nSelf >= kThreadIdLimit || g_nHelperThreadId == 0) {
+    if ((unsigned int)nSelf >= kThreadIdLimit || topId == 0) {
         return -1;
     }
-    nIndex = g_threadRequests.nTail & kThreadRequestIndexMask;
-    g_threadRequests.nTail = nIndex + 1;
-    g_threadRequests.mRequests[nIndex].nType = kThreadRequestWakeup;
-    g_threadRequests.mRequests[nIndex].nId = (unsigned char)nSelf;
-    iSignalSema(g_nThreadRequestSema);
+    nIndex = topArg.nTail & kThreadRequestIndexMask;
+    topArg.nTail = nIndex + 1;
+    topArg.mRequests[nIndex].nType = kThreadRequestWakeup;
+    topArg.mRequests[nIndex].nId = (unsigned char)nSelf;
+    iSignalSema(topSema);
     return nSelf;
 }
 
@@ -463,10 +463,10 @@ int kputs(char *s) {
 }
 
 // NTSC-U/C: 0x008e5bf8, PAL: 0x0092abf8
-static char g_szConsoleLine[kConsoleLineSize];
+static char linebuf[kConsoleLineSize];
 
 // NTSC-U/C: 0x00780dc0, PAL: 0x007c4ad8
-static int g_nConsoleLineLength;
+static int count;
 
 // NTSC-U/C: 0x005fa8c0, PAL: 0x0063b5d0
 int kputchar(int c) {
@@ -481,21 +481,21 @@ int kputchar(int c) {
 static void PutConsoleLineChar(int c) {
     int nLength;
 
-    if (g_nConsoleLineLength >= kConsoleLineFlush) {
-        g_nConsoleLineLength = 0;
-        g_szConsoleLine[kConsoleLineSize - 1] = '\0';
-        kputs(g_szConsoleLine);
+    if (count >= kConsoleLineFlush) {
+        count = 0;
+        linebuf[kConsoleLineSize - 1] = '\0';
+        kputs(linebuf);
     }
-    nLength = g_nConsoleLineLength;
+    nLength = count;
     if (c == '\n') {
-        g_nConsoleLineLength = 0;
-        g_szConsoleLine[nLength] = (char)c;
-        g_szConsoleLine[nLength + 1] = '\0';
-        kputs(g_szConsoleLine);
+        count = 0;
+        linebuf[nLength] = (char)c;
+        linebuf[nLength + 1] = '\0';
+        kputs(linebuf);
         return;
     }
-    g_nConsoleLineLength = nLength + 1;
-    g_szConsoleLine[nLength] = (char)c;
+    count = nLength + 1;
+    linebuf[nLength] = (char)c;
 }
 
 // NTSC-U/C: 0x005fa9a8, PAL: 0x0063b6b8
@@ -509,7 +509,7 @@ static void serialPutchar(int c) {
 }
 
 // NTSC-U/C: 0x00780dc4, PAL: 0x007c4adc
-static PutCharFunction g_pfnPutChar = serialPutchar;
+static PutCharFunction _putchar = serialPutchar;
 
 // NTSC-U/C: 0x005fa9e0, PAL: 0x0063b6f0
 // Converts the bits of a double to an integer. A fraction of three quarters or more rounds up, and
@@ -547,7 +547,7 @@ static void printfloat(double value) {
 
     if (value < 0.0) {
         value = 0.0 - value;
-        g_pfnPutChar('-');
+        _putchar('-');
     }
     if (value < 0.1) {
         while (value < 0.1) {
@@ -572,7 +572,7 @@ static void printfloat(double value) {
 
 static void PutString(const char *psz) {
     while (*psz != '\0') {
-        g_pfnPutChar((signed char)*psz++);
+        _putchar((signed char)*psz++);
     }
 }
 
@@ -597,7 +597,7 @@ static void _printf(const char *pszFormat, va_list args) {
         char *pOut;
 
         if (*p != '%') {
-            g_pfnPutChar((signed char)*p++);
+            _putchar((signed char)*p++);
             continue;
         }
         ++p;
@@ -682,7 +682,7 @@ static void _printf(const char *pszFormat, va_list args) {
                 // The sign goes out before the padding.
                 if (nSigned < 0) {
                     nSigned = -nSigned;
-                    g_pfnPutChar('-');
+                    _putchar('-');
                 }
                 do {
                     *--pOut = (char)('0' + nSigned % kDecimalBase);
@@ -700,7 +700,7 @@ static void _printf(const char *pszFormat, va_list args) {
             const float flReal = (float)va_arg(args, double);
 
             if (flReal == 0.0f) {
-                g_pfnPutChar('0');
+                _putchar('0');
             } else {
                 printfloat(flReal);
             }
@@ -716,7 +716,7 @@ static void _printf(const char *pszFormat, va_list args) {
             break;
         }
         case 'c':
-            g_pfnPutChar((signed char)va_arg(args, int));
+            _putchar((signed char)va_arg(args, int));
             ++p;
             break;
         default:
@@ -738,12 +738,12 @@ void kprintf(const char *format, ...) {
 
 // NTSC-U/C: 0x005fb1d8, PAL: 0x0063bee8
 void scePrintf(const char *format, ...) {
-    PutCharFunction pfnSaved = g_pfnPutChar;
+    PutCharFunction pfnSaved = _putchar;
     va_list args;
 
-    g_pfnPutChar = PutConsoleLineChar;
+    _putchar = PutConsoleLineChar;
     va_start(args, format);
     _printf(format, args);
     va_end(args);
-    g_pfnPutChar = pfnSaved;
+    _putchar = pfnSaved;
 }

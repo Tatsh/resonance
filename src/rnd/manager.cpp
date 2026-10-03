@@ -76,23 +76,23 @@ inline const char *NameText(const HxStr &name) {
 // Consumes bytes through the end of the next record end marker.
 inline void SkipPastRecordMarker(Stream &stream) {
     unsigned char ch;
-    stream.ReadBytes(&ch, sizeof(ch));
+    stream.Read(&ch, sizeof(ch));
     for (;;) {
         if (ch == kMarkerLowByte) {
-            stream.ReadBytes(&ch, sizeof(ch));
+            stream.Read(&ch, sizeof(ch));
             if (ch != kMarkerHighByte) {
                 continue;
             }
-            stream.ReadBytes(&ch, sizeof(ch));
+            stream.Read(&ch, sizeof(ch));
             if (ch == kMarkerLowByte) {
-                stream.ReadBytes(&ch, sizeof(ch));
+                stream.Read(&ch, sizeof(ch));
                 if (ch == kMarkerHighByte) {
                     return;
                 }
                 continue;
             }
         }
-        stream.ReadBytes(&ch, sizeof(ch));
+        stream.Read(&ch, sizeof(ch));
     }
 }
 
@@ -147,7 +147,7 @@ constexpr unsigned kRecordEndMarker = 0xdeaddead;
 // A name written with its terminator. An empty HxStr stores a null buffer, and the binary writes
 // the program-wide empty string in its place.
 inline Stream &WriteTerminatedName(Stream &stream, const HxStr &name) {
-    return stream.WriteBytes(name.mStr != nullptr ? name.mStr : g_szEmptyString, name.mLen + 1);
+    return stream.Write(name.mStr != nullptr ? name.mStr : g_szEmptyString, name.mLen + 1);
 }
 
 } // namespace
@@ -209,7 +209,7 @@ Object *Manager::Create(const HxStr &className, const HxStr &objectName) {
     if (it != mClasses.end()) {
         return it->second(objectName);
     }
-    g_failSink.Report("Class %s is unregistered\n", NameText(className));
+    Rnd::TheDbg.Notify("Class %s is unregistered\n", NameText(className));
     return nullptr;
 }
 
@@ -245,14 +245,14 @@ void Manager::RemapLegacyClassName(HxStr &name) {
 
 // NTSC-U/C: 0x0051b450, PAL: 0x0055b888
 void Manager::Read(Stream &stream) {
-    stream.Read(&g_nRndManagerFileVersion, sizeof(g_nRndManagerFileVersion));
+    stream.ReadLE(&g_nRndManagerFileVersion, sizeof(g_nRndManagerFileVersion));
     if (g_nRndManagerFileVersion > kManagerFileVersion) {
-        g_failSink.Report("Can't load new Manager\n");
+        Rnd::TheDbg.Notify("Can't load new Manager\n");
         return;
     }
 
     int nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     mLoaded.clear();
     mMergeObjects.clear();
 
@@ -274,7 +274,7 @@ void Manager::Read(Stream &stream) {
         int bMerge = 1;
         if (g_nRndManagerFileVersion >= kMergeFlagVersion) {
             unsigned char chMerge;
-            stream.ReadBytes(&chMerge, sizeof(chMerge));
+            stream.Read(&chMerge, sizeof(chMerge));
             bMerge = chMerge != 0;
         }
 
@@ -283,11 +283,11 @@ void Manager::Read(Stream &stream) {
         if (pObject == nullptr) {
             pObject = Create(className, objectName);
             if (pObject == nullptr) {
-                g_failSink.Report("Failed to create object %s of class %s\n",
-                                  NameText(objectName),
-                                  NameText(className));
-                if (g_failSink.mAbortProc != nullptr) {
-                    g_failSink.mAbortProc();
+                Rnd::TheDbg.Notify("Failed to create object %s of class %s\n",
+                                   NameText(objectName),
+                                   NameText(className));
+                if (Rnd::TheDbg.mAbortProc != nullptr) {
+                    Rnd::TheDbg.mAbortProc();
                 } else {
                     throw; // With no handler the binary rethrows the exception in flight.
                 }
@@ -309,7 +309,7 @@ void Manager::Read(Stream &stream) {
                 }
             }
             if (!bAccepted) {
-                g_failSink.Report("Can't merge object %s\n", NameText(pObject->mName));
+                Rnd::TheDbg.Notify("Can't merge object %s\n", NameText(pObject->mName));
                 return;
             }
             if (pObject->mMerge != 0) {
@@ -348,7 +348,7 @@ void Manager::Read(Stream &stream) {
 void Manager::LoadFile(const HxStr &path) {
     FileStream stream(path, kOpenForReading);
     if (stream.Fail()) {
-        g_failSink.Report("Could not open file: %s\n", NameText(path));
+        Rnd::TheDbg.Notify("Could not open file: %s\n", NameText(path));
         mLoaded.clear();
         mMergeObjects.clear();
         return;
@@ -375,16 +375,16 @@ void Manager::Write(Stream &stream) {
 
     const int nVersion = kManagerFileVersion;
     const int nCount = static_cast<int>(objects.size());
-    stream.Write(&nVersion, sizeof(nVersion)).Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nVersion, sizeof(nVersion)).WriteLE(&nCount, sizeof(nCount));
     for (Object *pObject : objects) {
         const char chMerge = static_cast<char>(pObject->mMerge);
         WriteTerminatedName(WriteTerminatedName(stream, pObject->ClassName()), pObject->mName)
-            .WriteBytes(&chMerge, sizeof(chMerge));
+            .Write(&chMerge, sizeof(chMerge));
     }
     for (Object *pObject : objects) {
         pObject->Save(stream);
         const unsigned nMarker = kRecordEndMarker;
-        stream.Write(&nMarker, sizeof(nMarker));
+        stream.WriteLE(&nMarker, sizeof(nMarker));
     }
 }
 
@@ -402,8 +402,8 @@ bool Manager::Contains(const Object *pObject) {
 void Manager::SaveFile(const HxStr &path) {
     FileStream stream(path, kOpenForWriting);
     if (stream.Fail()) {
-        g_failSink.Report("Could not open file: %s\n",
-                          path.mStr != nullptr ? path.mStr : g_szEmptyString);
+        Rnd::TheDbg.Notify("Could not open file: %s\n",
+                           path.mStr != nullptr ? path.mStr : g_szEmptyString);
         return;
     }
     Write(stream);
@@ -470,7 +470,7 @@ Object *Manager::ResolveAndLinkObject(
 
         std::list<Object *> clones;
         for (std::list<Object *>::iterator it = sources.begin(); it != sources.end(); ++it) {
-            clones.push_back(g_manager.ResolveAndLinkObject(*it, prefix, nFlags, 0, 0));
+            clones.push_back(TheManager.ResolveAndLinkObject(*it, prefix, nFlags, 0, 0));
         }
         sources.push_back(pSource);
         clones.push_back(pClone);
@@ -536,6 +536,6 @@ void Manager::DeleteLoadedObjects() {
     }
 }
 
-Manager g_manager;
+Manager TheManager;
 
 } // namespace Rnd

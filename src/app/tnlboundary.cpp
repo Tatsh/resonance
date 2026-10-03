@@ -24,9 +24,9 @@ constexpr float kPassedFrames = 480.0f;
 
 // NTSC-U/C: 0x0043fa18, PAL: 0x0047c3f8
 TnlBoundary::TnlBoundary(PlayMap *pPlayMap)
-    : mPlayMap(pPlayMap), mView(nullptr), mStep(0), mStepCount(pPlayMap->GetSectionCount()) {
-    mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("boundary.view")));
-    mText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr("boundary msg")));
+    : mPlayMap(pPlayMap), mView(nullptr), mStep(0), mStepCount(pPlayMap->GetNumSections()) {
+    mView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("boundary.view")));
+    mText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr("boundary msg")));
     PlaceOnPath(*mView, static_cast<float>(mStep * kFramesPerBar));
     mText->SetShowing(Application::shared()->GetPlayMode() == kPlayModeGame ? 1 : 0);
     UpdateText();

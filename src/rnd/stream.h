@@ -22,9 +22,9 @@ enum SeekOrigin { kSeekSet = 0, kSeekCur = 1, kSeekEnd = 2 };
  * entries, and the declaration order below reproduces that order, so the recovery is complete
  * rather than partial.
  *
- * ReadBytes() through Fail() are pure, since all four subclasses supply a distinct body for each.
- * Read() and Write() are the exception: one shared base body appears at slot 8 and slot 9 of all
- * four tables and does nothing beyond forwarding to ReadBytes() and WriteBytes(). Both pairs are
+ * Read() through Fail() are pure, since all four subclasses supply a distinct body for each.
+ * ReadLE() and WriteLE() are the exception: one shared base body appears at slot 8 and slot 9 of
+ * all four tables and does nothing beyond forwarding to Read() and Write(). Both pairs are
  * therefore interchangeable on this target, and a caller that wants byte-order correction for a
  * multi-byte scalar still uses the second pair because the file format is big-endian like the EE.
  */
@@ -39,7 +39,7 @@ public:
      * @param nSize The number of bytes to move.
      * @return This stream.
      */
-    virtual Stream &ReadBytes(void *pDest, int nSize) = 0;
+    virtual Stream &Read(void *pDest, int nSize) = 0;
 
     /**
      * Move nSize bytes out of pSrc with no conversion.
@@ -50,13 +50,13 @@ public:
      * @param nSize The number of bytes to move.
      * @return This stream.
      */
-    virtual Stream &WriteBytes(const void *pSrc, int nSize) = 0;
+    virtual Stream &Write(const void *pSrc, int nSize) = 0;
 
     /**
      * Service the underlying transport.
      *
      * Vtable slot 3. `Rnd::FileStream` passes the request to its `FILE`, `Rnd::MemStream` and
-     * `Rnd::BufStream` do nothing, and `Rnd::ToolStream::ReadBytes()` invokes this whenever it has
+     * `Rnd::BufStream` do nothing, and `Rnd::ToolStream::Read()` invokes this whenever it has
      * drained its buffer, which makes it the refill point for a streamed source.
      *
      * @return This stream.
@@ -104,7 +104,7 @@ public:
     /**
      * Move nSize bytes into pDest, correcting the byte order for the host.
      *
-     * Vtable slot 8. The one shared implementation forwards to ReadBytes(), and no subclass
+     * Vtable slot 8. The one shared implementation forwards to Read(), and no subclass
      * overrides it.
      *
      * @param pDest The destination buffer.
@@ -113,12 +113,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0050fb60
      * @ghidraAddress PAL: 0x0054f148
      */
-    virtual Stream &Read(void *pDest, int nSize);
+    virtual Stream &ReadLE(void *pDest, int nSize);
 
     /**
      * Move nSize bytes out of pSrc, correcting the byte order for the file.
      *
-     * Vtable slot 9. The one shared implementation forwards to WriteBytes(), and no subclass
+     * Vtable slot 9. The one shared implementation forwards to Write(), and no subclass
      * overrides it.
      *
      * @param pSrc The source buffer.
@@ -127,7 +127,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0050fb88
      * @ghidraAddress PAL: 0x0054f170
      */
-    virtual Stream &Write(const void *pSrc, int nSize);
+    virtual Stream &WriteLE(const void *pSrc, int nSize);
 
     /**
      * Close the stream.
@@ -141,7 +141,7 @@ public:
     /**
      * Read a NUL-terminated name and append it to a string.
      *
-     * The name arrives one byte at a time through ReadBytes() into a 256-byte static buffer at
+     * The name arrives one byte at a time through Read() into a 256-byte static buffer at
      * `0x008952e0`. The string is emptied through HxStr::Clear() first, so the argument need not
      * start empty. A name of 256
      * characters or more fills the buffer with no terminator before the flush, and the flush then

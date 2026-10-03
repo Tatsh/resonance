@@ -90,25 +90,25 @@ const char *NameText(const Object *pObject) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 template <class T>
 void ReadObjectRef(Stream &stream, T *&refOut) {
     HxStr name(nullptr);
     stream.ReadString(name);
-    refOut = dynamic_cast<T *>(g_manager.Find(name));
+    refOut = dynamic_cast<T *>(TheManager.Find(name));
 }
 
 // NTSC-U/C: 0x00478570, PAL: 0x004b6200
 Stream &WriteFloatVector(Stream &stream, const std::vector<float> &values) {
     const int nCount = values.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const float flValue : values) {
-        stream.Write(&flValue, sizeof(flValue));
+        stream.WriteLE(&flValue, sizeof(flValue));
     }
     return stream;
 }
@@ -116,10 +116,10 @@ Stream &WriteFloatVector(Stream &stream, const std::vector<float> &values) {
 // NTSC-U/C: 0x00472dd8, PAL: 0x004b0a40
 Stream &ReadFloatVector(Stream &stream, std::vector<float> &values) {
     int nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     values.resize(nCount, 0.0f);
     for (float &flValue : values) {
-        stream.Read(&flValue, sizeof(flValue));
+        stream.ReadLE(&flValue, sizeof(flValue));
     }
     return stream;
 }
@@ -127,7 +127,7 @@ Stream &ReadFloatVector(Stream &stream, std::vector<float> &values) {
 // NTSC-U/C: 0x00472d20, PAL: 0x004b0988
 Stream &WriteEventList(Stream &stream, const std::list<TunnelEvent> &events) {
     const int nCount = events.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const TunnelEvent &event : events) {
         event.Save(stream);
     }
@@ -137,7 +137,7 @@ Stream &WriteEventList(Stream &stream, const std::list<TunnelEvent> &events) {
 // NTSC-U/C: 0x004786b8, PAL: 0x004b6348
 Stream &ReadEventList(Stream &stream, std::list<TunnelEvent> &events) {
     int nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     events.resize(nCount);
     for (TunnelEvent &event : events) {
         event.Load(stream);
@@ -148,7 +148,7 @@ Stream &ReadEventList(Stream &stream, std::list<TunnelEvent> &events) {
 // NTSC-U/C: 0x00478620, PAL: 0x004b62b0
 Stream &WriteSeekerVector(Stream &stream, const std::vector<TunnelSeeker> &seekers) {
     const int nCount = seekers.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const TunnelSeeker &seeker : seekers) {
         seeker.Save(stream);
     }
@@ -158,7 +158,7 @@ Stream &WriteSeekerVector(Stream &stream, const std::vector<TunnelSeeker> &seeke
 // NTSC-U/C: 0x004730b0, PAL: 0x004b0d18
 Stream &ReadSeekerVector(Stream &stream, std::vector<TunnelSeeker> &seekers) {
     int nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     seekers.resize(nCount, TunnelSeeker());
     for (TunnelSeeker &seeker : seekers) {
         seeker.Load(stream);
@@ -171,10 +171,10 @@ Stream &ReadSeekerVector(Stream &stream, std::vector<TunnelSeeker> &seekers) {
 void SaveChainMaterial(Stream &stream, const LodMesh &chain) {
     WriteObjectRef(stream, chain.front()->mMat);
     const Color &color = chain.front()->mVertsOwner->mVerts.front().mColor;
-    stream.Write(&color.r, sizeof(color.r))
-        .Write(&color.g, sizeof(color.g))
-        .Write(&color.b, sizeof(color.b))
-        .Write(&color.a, sizeof(color.a));
+    stream.WriteLE(&color.r, sizeof(color.r))
+        .WriteLE(&color.g, sizeof(color.g))
+        .WriteLE(&color.b, sizeof(color.b))
+        .WriteLE(&color.a, sizeof(color.a));
 }
 
 // out.xyz = a.xyz * flA + b.xyz * flB, with out.w taken from a. A VU0 multiply and accumulate in
@@ -275,10 +275,10 @@ void LoadChainMaterials(Stream &stream, std::vector<LodMesh> &chains, int nCount
     for (int i = 0; i < nCount; ++i) {
         ReadObjectRef(stream, pMat);
         Color color;
-        stream.Read(&color.r, sizeof(color.r))
-            .Read(&color.g, sizeof(color.g))
-            .Read(&color.b, sizeof(color.b))
-            .Read(&color.a, sizeof(color.a));
+        stream.ReadLE(&color.r, sizeof(color.r))
+            .ReadLE(&color.g, sizeof(color.g))
+            .ReadLE(&color.b, sizeof(color.b))
+            .ReadLE(&color.a, sizeof(color.a));
         if (i < nChainCount) {
             chains[i].front()->SetMaterialChain(pMat);
             chains[i].front()->SetVertexColor(color);
@@ -289,9 +289,9 @@ void LoadChainMaterials(Stream &stream, std::vector<LodMesh> &chains, int nCount
 } // namespace
 
 // NTSC-U/C: 0x00476a10, PAL: 0x004b4688
-void Tunnel::Collide(const Ray &ray, HitSink &sink) {
+void Tunnel::FindCollisions(const Ray &ray, HitSink &sink) {
     for (LodMesh &chain : mCellChains) {
-        chain.Collide(ray, sink);
+        chain.FindCollisions(ray, sink);
     }
 }
 
@@ -358,61 +358,61 @@ void Tunnel::Replace(Object *pFrom, Object *pTo) {
 // NTSC-U/C: 0x004682a8, PAL: 0x004a5cd8
 void Tunnel::Save(Stream &stream) {
     const int nRevision = kTunnelRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
     Drawable::Save(stream);
     Animatable::Save(stream);
-    stream.Write(&mRingRadius, sizeof(mRingRadius));
-    stream.Write(&mRingCount, sizeof(mRingCount));
-    stream.Write(&mSliceCount, sizeof(mSliceCount));
-    stream.Write(&mLodCount, sizeof(mLodCount));
-    stream.Write(&mFloorPull, sizeof(mFloorPull));
-    stream.Write(&mLaneEdgeGap, sizeof(mLaneEdgeGap));
-    stream.Write(&mFloorEdgeWeight, sizeof(mFloorEdgeWeight));
-    stream.Write(&mCellEdgeBlendPerStep, sizeof(mCellEdgeBlendPerStep));
+    stream.WriteLE(&mRingRadius, sizeof(mRingRadius));
+    stream.WriteLE(&mRingCount, sizeof(mRingCount));
+    stream.WriteLE(&mSliceCount, sizeof(mSliceCount));
+    stream.WriteLE(&mLodCount, sizeof(mLodCount));
+    stream.WriteLE(&mFloorPull, sizeof(mFloorPull));
+    stream.WriteLE(&mLaneEdgeGap, sizeof(mLaneEdgeGap));
+    stream.WriteLE(&mFloorEdgeWeight, sizeof(mFloorEdgeWeight));
+    stream.WriteLE(&mCellEdgeBlendPerStep, sizeof(mCellEdgeBlendPerStep));
     WriteObjectRef(stream, mPath);
-    stream.Write(&mLaneChangeFrames, sizeof(mLaneChangeFrames));
+    stream.WriteLE(&mLaneChangeFrames, sizeof(mLaneChangeFrames));
     WriteFloatVector(stream, mLodScreenSizes);
     WriteEventList(stream, mEvents);
     WriteSeekerVector(stream, mSeekers);
-    stream.Write(&mWindowStartSlice, sizeof(mWindowStartSlice));
-    stream.Write(&mCulledFarSlices, sizeof(mCulledFarSlices));
+    stream.WriteLE(&mWindowStartSlice, sizeof(mWindowStartSlice));
+    stream.WriteLE(&mCulledFarSlices, sizeof(mCulledFarSlices));
     SaveSectionMaterials(stream);
 }
 
 // NTSC-U/C: 0x00468538, PAL: 0x004a5f68
 void Tunnel::Load(Stream &stream) {
-    stream.Read(&g_nTunnelLoadVersion, sizeof(g_nTunnelLoadVersion));
+    stream.ReadLE(&g_nTunnelLoadVersion, sizeof(g_nTunnelLoadVersion));
     if (g_nTunnelLoadVersion >= kTunnelRejectedRevision) {
-        g_failSink.Report("Can't load new Tunnel\n");
+        Rnd::TheDbg.Notify("Can't load new Tunnel\n");
         return;
     }
     if (g_nTunnelLoadVersion < kTunnelOldestRevision) {
-        g_failSink.Report("Can't load old Tunnel\n");
+        Rnd::TheDbg.Notify("Can't load old Tunnel\n");
         return;
     }
     Drawable::Load(stream);
     Animatable::Load(stream);
     ReleaseRefs();
-    stream.Read(&mRingRadius, sizeof(mRingRadius));
-    stream.Read(&mRingCount, sizeof(mRingCount));
-    stream.Read(&mSliceCount, sizeof(mSliceCount));
-    stream.Read(&mLodCount, sizeof(mLodCount));
-    stream.Read(&mFloorPull, sizeof(mFloorPull));
-    stream.Read(&mLaneEdgeGap, sizeof(mLaneEdgeGap));
-    stream.Read(&mFloorEdgeWeight, sizeof(mFloorEdgeWeight));
-    stream.Read(&mCellEdgeBlendPerStep, sizeof(mCellEdgeBlendPerStep));
+    stream.ReadLE(&mRingRadius, sizeof(mRingRadius));
+    stream.ReadLE(&mRingCount, sizeof(mRingCount));
+    stream.ReadLE(&mSliceCount, sizeof(mSliceCount));
+    stream.ReadLE(&mLodCount, sizeof(mLodCount));
+    stream.ReadLE(&mFloorPull, sizeof(mFloorPull));
+    stream.ReadLE(&mLaneEdgeGap, sizeof(mLaneEdgeGap));
+    stream.ReadLE(&mFloorEdgeWeight, sizeof(mFloorEdgeWeight));
+    stream.ReadLE(&mCellEdgeBlendPerStep, sizeof(mCellEdgeBlendPerStep));
     ReadObjectRef(stream, mPath);
     if (g_nTunnelLoadVersion < kPathWordDroppedRevision) {
         int nDiscarded;
-        stream.Read(&nDiscarded, sizeof(nDiscarded));
+        stream.ReadLE(&nDiscarded, sizeof(nDiscarded));
     }
-    stream.Read(&mLaneChangeFrames, sizeof(mLaneChangeFrames));
+    stream.ReadLE(&mLaneChangeFrames, sizeof(mLaneChangeFrames));
     ReadFloatVector(stream, mLodScreenSizes);
     ReadEventList(stream, mEvents);
     ReadSeekerVector(stream, mSeekers);
-    stream.Read(&mWindowStartSlice, sizeof(mWindowStartSlice));
+    stream.ReadLE(&mWindowStartSlice, sizeof(mWindowStartSlice));
     if (g_nTunnelLoadVersion >= kCulledFarSlicesRevision) {
-        stream.Read(&mCulledFarSlices, sizeof(mCulledFarSlices));
+        stream.ReadLE(&mCulledFarSlices, sizeof(mCulledFarSlices));
     }
     Update();
     LoadSectionMaterials(stream);
@@ -421,12 +421,12 @@ void Tunnel::Load(Stream &stream) {
 // NTSC-U/C: 0x00468a78, PAL: 0x004a64d8
 void Tunnel::SaveSectionMaterials(Stream &stream) {
     const int nCellCount = mCellChains.size();
-    stream.Write(&nCellCount, sizeof(nCellCount));
+    stream.WriteLE(&nCellCount, sizeof(nCellCount));
     for (const LodMesh &chain : mCellChains) {
         SaveChainMaterial(stream, chain);
     }
     const int nSliceCount = mSliceChains.size();
-    stream.Write(&nSliceCount, sizeof(nSliceCount));
+    stream.WriteLE(&nSliceCount, sizeof(nSliceCount));
     for (const LodMesh &chain : mSliceChains) {
         SaveChainMaterial(stream, chain);
     }
@@ -437,11 +437,11 @@ void Tunnel::LoadSectionMaterials(Stream &stream) {
     int nCellCount = mCellChains.size();
     int nSliceCount = mSliceChains.size();
     if (g_nTunnelLoadVersion >= kCellCountRevision) {
-        stream.Read(&nCellCount, sizeof(nCellCount));
+        stream.ReadLE(&nCellCount, sizeof(nCellCount));
     }
     LoadChainMaterials(stream, mCellChains, nCellCount);
     if (g_nTunnelLoadVersion >= kSliceCountRevision) {
-        stream.Read(&nSliceCount, sizeof(nSliceCount));
+        stream.ReadLE(&nSliceCount, sizeof(nSliceCount));
     }
     LoadChainMaterials(stream, mSliceChains, nSliceCount);
 }
@@ -481,7 +481,7 @@ void Tunnel::SetPath(TransAnim *pPath) {
         pPath->AddRef(this);
     }
     if (mPath != nullptr) {
-        (void)mPath->EndFrame(); // Yes, the binary discards the result.
+        (void)mPath->FilteredFrameEnd(); // Yes, the binary discards the result.
     }
     std::fill(mPlacedSlices.begin(), mPlacedSlices.end(), kNoSlice);
 }
@@ -619,7 +619,7 @@ void Tunnel::GetRingXfm(int nRing, Transform *pOut, float flFrame, float flBlend
 }
 
 // NTSC-U/C: 0x00468850, PAL: 0x004a62b0
-int Tunnel::DrawSelf() {
+int Tunnel::DrawShowing() {
     const int nEnd = mWindowStartSlice + mSliceCount - mCulledFarSlices;
     if (mDrawLattice != 0) {
         for (int nSlice = nEnd - 1; nSlice >= mWindowStartSlice; --nSlice) {

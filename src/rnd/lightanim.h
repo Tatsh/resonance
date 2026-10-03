@@ -27,9 +27,9 @@ namespace Rnd {
  *
  * Two vtables belong to the class, each with the accessor at `0x00544940` in slot 0. The Object
  * subobject table at `0x00829448` stores the seven Object overrides and the destructor, and the
- * Animatable table at `0x00829490` stores EndFrame() at slot 1 and SetFrameSelf() at slot 3. Slot
- * 2 still addresses the base StartAnim() at `0x0049a3b8`. Restarting an animation therefore does
- * nothing of its own here.
+ * Animatable table at `0x00829490` stores FilteredFrameEnd() at slot 1 and SetFrameSelf() at slot
+ * 3. Slot 2 still addresses the base StartAnim() at `0x0049a3b8`. Restarting an animation
+ * therefore does nothing of its own here.
  *
  * Three channels drive the light, and the text dump labels them "ambientKeys:", "diffuseKeys:",
  * and "specularKeys:". SetFrameSelf() hands the three interpolated results to
@@ -38,8 +38,8 @@ namespace Rnd {
  * Rnd::ParticleSysAnim use, and the shared channel dump at `0x004d8de8` serves all three classes.
  *
  * Keys are shared rather than copied, the same arrangement Rnd::MeshAnim uses with mKeysOwner.
- * Both EndFrame() and SetFrameSelf() read the channels of mKeysOwner rather than their own. An
- * animation whose keys belong to another animation therefore reads that object's keys.
+ * Both FilteredFrameEnd() and SetFrameSelf() read the channels of mKeysOwner rather than their
+ * own. An animation whose keys belong to another animation therefore reads that object's keys.
  */
 class LightAnim : public Animatable {
 public:
@@ -189,7 +189,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00541790
      * @ghidraAddress PAL: 0x005814b8
      */
-    virtual float EndFrame();
+    virtual float FilteredFrameEnd();
 
 protected:
     /**

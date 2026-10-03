@@ -71,7 +71,7 @@ void MetJukeboxEditPlaylistScreenLowerLeft::ResolveContainerViews() {
 #ifdef VIDEO_STANDARD_PAL
     // The binary expands this loop into one call per text, and it does not test a text for null.
     for (const auto &entry : kInstructionTexts) {
-        Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(entry.pszObject)));
+        Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(entry.pszObject)));
         pText->SetText(GetMetString(entry.nId));
     }
 #endif

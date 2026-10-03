@@ -12,5 +12,5 @@ int GhostNotesEffector::Type() {
 }
 
 // NTSC-U/C: 0x001a1e38, PAL: 0x001a7ba0
-void GhostNotesEffector::Enable([[maybe_unused]] int bEnabled) {
+void GhostNotesEffector::SetEnabled([[maybe_unused]] int bEnabled) {
 }

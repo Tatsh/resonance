@@ -40,7 +40,7 @@ public:
     /**
      * Slot 3. Read blocks up to and including the next image.
      *
-     * Extension blocks are consumed through ReadExtensionBlock(). An image produces an eight bit
+     * Extension blocks are consumed through ReadExtension(). An image produces an eight bit
      * bitmap the size of its descriptor, with a new palette copied from the static palette, and
      * sets mBounds to the image rectangle. A transparent colour from the last graphic control
      * block is applied to the bitmap.
@@ -54,7 +54,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0062aaf8
      * @ghidraAddress PAL: 0x0066b688
      */
-    virtual int ReadImage(ABitmap *pImage, int *pbEnd);
+    virtual int ReadFrame(ABitmap *pImage, int *pbEnd);
 
     /**
      * Slot 5. Writing is not implemented.
@@ -78,7 +78,7 @@ private:
      * @ghidraAddress NTSC-U/C: 0x0062ae10
      * @ghidraAddress PAL: 0x0066b9a0
      */
-    void ReadExtensionBlock();
+    void ReadExtension();
 
     /**
      * Decode the LZW data of one image into a pixel rectangle.

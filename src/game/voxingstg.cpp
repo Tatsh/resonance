@@ -40,7 +40,7 @@ VoxingSTG::~VoxingSTG() {
 }
 
 // NTSC-U/C: 0x001da230, PAL: 0x001e01a0
-void VoxingSTG::ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
+void VoxingSTG::ConnectInputs(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
     pPrimary->AddSink(mNewGemMaker);
     pPrimary->AddSink(mMixer);
     pPrimary->AddSink(mVoxer);
@@ -72,7 +72,7 @@ void VoxingSTG::SetMixerOutput(MsgSink *pOutput) {
 }
 
 // NTSC-U/C: 0x001da8a8, PAL: 0x001e0818
-void VoxingSTG::AddSinkToSources(MsgSink *pSink) {
+void VoxingSTG::ConnectToTunnel(MsgSink *pSink) {
     mPhraseMgr->AddSink(pSink);
     mVoxer->AddSink(pSink);
     if (mJamEffects != nullptr) {

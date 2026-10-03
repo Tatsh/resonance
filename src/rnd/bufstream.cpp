@@ -12,7 +12,7 @@ BufStream::BufStream(char *pBuffer, int nSize)
 }
 
 // NTSC-U/C: 0x005104e0, PAL: 0x0054fac8
-Stream &BufStream::ReadBytes(void *pDest, int nSize) {
+Stream &BufStream::Read(void *pDest, int nSize) {
     if (mSize < mPos + nSize) {
         mFail = 1;
         nSize = mSize - mPos;
@@ -24,7 +24,7 @@ Stream &BufStream::ReadBytes(void *pDest, int nSize) {
 }
 
 // NTSC-U/C: 0x00510558, PAL: 0x0054fb40
-Stream &BufStream::WriteBytes(const void *pSrc, int nSize) {
+Stream &BufStream::Write(const void *pSrc, int nSize) {
     if (mSize < mPos + nSize) {
         mFail = 1;
         nSize = mSize - mPos;

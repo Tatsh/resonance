@@ -223,7 +223,7 @@ LevelConverter::~LevelConverter() {
 
 // NTSC-U/C: 0x001ea570, PAL: 0x001f07e0
 void LevelConverter::Tempo(int nTick, int nMicrosecondsPerQuarter) {
-    mBuilder->SetTempo(nTick, nMicrosecondsPerQuarter);
+    mBuilder->AddTempo(nTick, nMicrosecondsPerQuarter);
     mHasTempo = 1;
 }
 
@@ -275,8 +275,8 @@ void LevelConverter::Convert(const char *pszPath,
     HxIListChunk chunks(&stream, false);
     Mid::Reader reader(&chunks, this);
     reader.mCompare = CompareEventStatus;
-    reader.Read();
-    mBuilder->PrepareTracks();
+    reader.ReadAllTracks();
+    mBuilder->DoneLoading();
     FinishErrorLog();
 }
 
@@ -592,7 +592,7 @@ void LevelConverter::AddHarmonyNote(int nTick, unsigned char nNote) {
         mHarmony = Harmony();
         mHarmonyStart.mTick = nTick;
     }
-    mHarmony.AddNote(nNote);
+    mHarmony.AddPitch(nNote);
 }
 
 // NTSC-U/C: 0x001e8120, PAL: 0x001ee2f0

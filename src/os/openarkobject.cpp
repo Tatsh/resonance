@@ -38,10 +38,10 @@ constexpr int kOpenReadOnly = 1;
 // place.
 inline ArkStream *FindStreamRecord(int nHandle) {
     nHandle &= ~kFileHandleArkStream;
-    const int nStreams = g_aArkStreams.size();
+    const int nStreams = gOpenArkFileTable.size();
     for (int i = 0; i < nStreams; ++i) {
-        if (g_aArkStreams[i].mHandle == nHandle) {
-            return &g_aArkStreams[i];
+        if (gOpenArkFileTable[i].mHandle == nHandle) {
+            return &gOpenArkFileTable[i];
         }
     }
     return nullptr;
@@ -223,9 +223,9 @@ int OpenArkObject::Close(const char *pszPath) {
 
     // A stream still open on the archive's file blocks the unmount. The offending record is erased
     // before the refusal, which is what allows a later attempt to succeed.
-    for (unsigned i = 0; i < g_aArkStreams.size(); ++i) {
-        if (g_aArkStreams[i].mFile == g_apMountedArks[nArk]->mFile) {
-            EraseArkStream(g_aArkStreams[i].mHandle);
+    for (unsigned i = 0; i < gOpenArkFileTable.size(); ++i) {
+        if (gOpenArkFileTable[i].mFile == g_apMountedArks[nArk]->mFile) {
+            EraseArkStream(gOpenArkFileTable[i].mHandle);
             return 0;
         }
     }
@@ -239,9 +239,9 @@ int OpenArkObject::Close(const char *pszPath) {
 
 // NTSC-U/C: 0x0055a1a0, PAL: 0x0059b3c0
 int EraseArkStream(int nHandle) {
-    for (unsigned i = 0; i < g_aArkStreams.size(); ++i) {
-        if (g_aArkStreams[i].mHandle == nHandle) {
-            g_aArkStreams.erase(g_aArkStreams.begin() + i);
+    for (unsigned i = 0; i < gOpenArkFileTable.size(); ++i) {
+        if (gOpenArkFileTable[i].mHandle == nHandle) {
+            gOpenArkFileTable.erase(gOpenArkFileTable.begin() + i);
             return 0;
         }
     }
@@ -249,7 +249,7 @@ int EraseArkStream(int nHandle) {
 }
 
 // NTSC-U/C: 0x00725e88, PAL: 0x00769b28
-int g_nNextArkStreamHandle = 1;
+int gOpenFileIndex = 1;
 
 // NTSC-U/C: 0x0055c158, PAL: 0x0059d378
 ArkStream *FindOpenArkStream(int nHandle) {
@@ -519,9 +519,9 @@ int OpenArkObject::OpenStream(ArkFileEntry *pEntry) {
     stream.mArkPosition = pEntry->mSector * mSectorSize + pEntry->mSectorOffset;
     stream.mPosition = 0;
     stream.mFile = mFile;
-    stream.mHandle = g_nNextArkStreamHandle++;
+    stream.mHandle = gOpenFileIndex++;
     stream.mEntry = pEntry;
-    g_aArkStreams.push_back(stream);
+    gOpenArkFileTable.push_back(stream);
     return stream.mHandle;
 }
 
@@ -608,7 +608,7 @@ int ReadArkStreamThroughCache(int nHandle, void *pBuffer, unsigned nBytes) {
 }
 
 // NTSC-U/C: 0x0055aa38, PAL: 0x0059bc58
-void OpenArkObject::DumpHeader() const {
+void OpenArkObject::PrintHeader() const {
     std::cout << "================== OpenArkObject Header ===================" << std::endl
               << " sig             " << mSig << std::endl
               << " version         " << mVersion << std::endl
@@ -626,7 +626,7 @@ void OpenArkObject::DumpHeader() const {
 }
 
 // NTSC-U/C: 0x0055ac30, PAL: 0x0059be50
-void OpenArkObject::DumpRelativePaths() const {
+void OpenArkObject::PrintRelPaths() const {
     std::cout << "============== OpenArkObject Relative Paths ===============" << std::endl;
     for (int i = 0; i < mNumPaths; ++i) {
         std::cout << "{ pathHash       " << mRelPaths[i].mPathHash << std::endl
@@ -637,7 +637,7 @@ void OpenArkObject::DumpRelativePaths() const {
 }
 
 // NTSC-U/C: 0x0055ada0, PAL: 0x0059bfc0
-void OpenArkObject::DumpFiles() const {
+void OpenArkObject::PrintFiles() const {
     std::cout << "================== OpenArkObject Files ====================" << std::endl;
     for (int i = 0; i < mNumFiles; ++i) {
         std::cout << "{ nameHash        " << mFiles[i].mNameHash << std::endl
@@ -666,10 +666,10 @@ void OpenArkObject::DumpStrings() const {
 }
 
 // NTSC-U/C: 0x0055c3a0, PAL: 0x0059d5c0
-void OpenArkObject::Dump() const {
-    DumpHeader();
-    DumpFiles();
-    DumpRelativePaths();
+void OpenArkObject::PrintAll() const {
+    PrintHeader();
+    PrintFiles();
+    PrintRelPaths();
     DumpStrings();
 }
 
@@ -720,4 +720,4 @@ int CloseArk() {
 }
 
 std::vector<OpenArkObject *> g_apMountedArks;
-std::vector<ArkStream> g_aArkStreams;
+std::vector<ArkStream> gOpenArkFileTable;

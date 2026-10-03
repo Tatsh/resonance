@@ -49,7 +49,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001c3130
      * @ghidraAddress PAL: 0x001c8f78
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * A note number paired with the pitch it was played as.
@@ -89,7 +89,7 @@ private:
     unsigned char GetSustainPitch(int nTick, unsigned char nNote);
 
     // Routes a note-off to PostNoteOff() and a note-on to PostNoteOn(), and sends every other
-    // channel message on unchanged. The out-of-line copy of the branch HandleMessage() expands
+    // channel message on unchanged. The out-of-line copy of the branch DispatchPriv() expands
     // inline.
     // NTSC-U/C: 0x001c43b0, PAL: 0x001ca1f8
     void OnStdMidi(StdMidiMsg *pMsg);
@@ -109,5 +109,5 @@ private:
     int mRiffLow;                           // +0x40
     int mRiffHigh;                          // +0x44
     int mTrack;                             // +0x48, copied from TrackData::mIndex
-    Player *mPlayer;                        // +0x4c, g_nullPlayer until a TrackSelectMsg
+    Player *mPlayer;                        // +0x4c, NullPlayer::sInstance until a TrackSelectMsg
 };

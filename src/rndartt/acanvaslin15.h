@@ -27,7 +27,7 @@
  *
  * Every override that reads a palette converts the entry to 1555 through APackRgb1555From8888().
  * The block copies and the textured row resolve the palette from the source, then the canvas, then
- * g_pDefaultPalette, and the span overrides read ARowInfo::mPalette or AScaledRowInfo::mPalette.
+ * ACanvas::palDefault, and the span overrides read ARowInfo::mPalette or AScaledRowInfo::mPalette.
  * Each returns without drawing when the palette is null.
  */
 class ACanvasLin15 : public ACanvas15 {

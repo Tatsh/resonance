@@ -48,7 +48,7 @@ char TnlGemManager::AddMeshKind(const char *pszName, float flLodOffset, float fl
     TnlGemMeshKind *pPrevious = nullptr;
     for (int i = 0;; ++i) {
         auto *pMesh = dynamic_cast<Rnd::MultiMesh *>(
-            Rnd::g_manager.Find(HxStr(FormatString("%s%d.mm", pszName, i))));
+            Rnd::TheManager.Find(HxStr(FormatString("%s%d.mm", pszName, i))));
         if (!pMesh) {
             break;
         }

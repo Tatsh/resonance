@@ -79,7 +79,7 @@ constexpr float kReleasedValue = 0.0f;
 constexpr double kAxisOffset = 128.0;
 constexpr double kAxisRange = 255.01;
 
-// JoypadPS2::Read() results.
+// JoypadPS2::Poll() results.
 constexpr int kReadNoPad = 0;
 constexpr int kReadBusy = 1;
 constexpr int kReadReady = 2;
@@ -229,7 +229,7 @@ void InputPoller::Shutdown() {
         return;
     }
     for (auto it = mJoypads.begin(); it != mJoypads.end(); ++it) {
-        (*it)->Close();
+        (*it)->DeInitPadData();
         delete *it;
     }
     mJoypads.clear();
@@ -321,7 +321,7 @@ void InputPoller::ReadControllers() {
     for (auto it = mJoypads.begin(); it != mJoypads.end(); ++it, ++nIndex) {
         unsigned int dwButtons;
         unsigned char axes[kAxisCount];
-        const int nResult = (*it)->Read(&dwButtons, &axes[0], &axes[1], &axes[2], &axes[3]);
+        const int nResult = (*it)->Poll(&dwButtons, &axes[0], &axes[1], &axes[2], &axes[3]);
         const int nId = (*it)->mId;
 
         if (nResult == kReadNoPad) {

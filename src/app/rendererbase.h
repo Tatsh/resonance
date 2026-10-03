@@ -14,8 +14,8 @@ class Message;
  *
  * The table at `0x007d2d20` runs eleven entries against MsgSink's four, so slots 4 through 10 are
  * the seven virtuals this class introduces. Slots 3, 7, and 8 address the pure-virtual stub at
- * `0x005381a8`, and the class is therefore abstract. Slot 3 is MsgSink::HandleMessage(), which this
- * class leaves pure. Slot 2 overrides MsgSink::Handle().
+ * `0x005381a8`, and the class is therefore abstract. Slot 3 is MsgSink::DispatchPriv(), which this
+ * class leaves pure. Slot 2 overrides MsgSink::Dispatch().
  *
  * Each of the seven takes its name from the overrides and from the callers. MetaGameWorld runs
  * slots 4 and 5 to start and stop the front end, GameManagerImpl::DrawFrame() runs slots 6, 7, and
@@ -33,7 +33,7 @@ public:
      * offset 0. The object is eight bytes: the four-byte MsgSink subobject, whose table pointer
      * sits at offset 0, followed by the target at `+0x04`.
      *
-     * 172 tables in the image place the shared MsgSink::Handle() body at slot 2. This class and
+     * 172 tables in the image place the shared MsgSink::Dispatch() body at slot 2. This class and
      * RendererBase are the two that override it, and the tables of RendererBase's subclasses
      * inherit RendererBase's override.
      *
@@ -49,18 +49,18 @@ public:
          * target's own table slot 3, and dispatches with the adjusted receiver. The message itself
          * is never touched: it stays in the argument register the caller placed it in and passes
          * through to the target unchanged. Dispatching slot 3 rather than slot 2 means the target's
-         * HandleMessage() runs directly, so a chain of routers cannot form.
+         * DispatchPriv() runs directly, so a chain of routers cannot form.
          *
          * @param pMsg The message to forward.
          * @ghidraAddress NTSC-U/C: 0x00139f50
          * @ghidraAddress PAL: 0x0013a898
          */
-        virtual void Handle(Message *pMsg);
+        virtual void Dispatch(Message *pMsg);
 
         /**
          * Receive a message directly, which this class ignores.
          *
-         * The body is empty. The class exists to forward through Handle(), so the slot that would
+         * The body is empty. The class exists to forward through Dispatch(), so the slot that would
          * consume a message has nothing to do. MsgSink declares it pure, so an override has to
          * exist for the class to be concrete.
          *
@@ -68,7 +68,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x00139f48
          * @ghidraAddress PAL: 0x0013a890
          */
-        virtual void HandleMessage(Message *pMsg);
+        virtual void DispatchPriv(Message *pMsg);
 
         /**
          * The sink every message is handed to. +0x04
@@ -83,7 +83,7 @@ public:
      * Start the queue with the router as its one sink.
      *
      * The router's target is this object, so every message the queue delivers arrives at this
-     * object's HandleMessage().
+     * object's DispatchPriv().
      *
      * @ghidraAddress NTSC-U/C: 0x00139c10
      * @ghidraAddress PAL: 0x0013a558
@@ -106,14 +106,14 @@ public:
     /**
      * Accept a message into the queue.
      *
-     * Slot 2. The message is stored rather than acted on, and reaches HandleMessage() only when
+     * Slot 2. The message is stored rather than acted on, and reaches DispatchPriv() only when
      * PollMessages() drains the queue. MetRenderer and Renderer both inherit this body.
      *
      * @param pMsg The message to store.
      * @ghidraAddress NTSC-U/C: 0x00139f80
      * @ghidraAddress PAL: 0x0013a8c8
      */
-    virtual void Handle(Message *pMsg);
+    virtual void Dispatch(Message *pMsg);
 
     /**
      * Start the renderer running. Slot 4, with an empty body in this class.

@@ -123,7 +123,7 @@ constexpr int kPlainPausePhase = 5;
 // The frame rate the constructor starts mFrameRate at, in frames per second.
 constexpr float kFrameRate = 500.0f;
 
-// The highest pad index HandleMessage() accepts. The constructor records it in mMaxPadIndex.
+// The highest pad index DispatchPriv() accepts. The constructor records it in mMaxPadIndex.
 constexpr int kHighestPadIndex = 4;
 
 // Configuration codes of the two debug overlays the constructor reads.
@@ -245,7 +245,7 @@ MetRenderer::MetRenderer()
     mShowTimingGraph = QueryConfigFlag(kTimingGraphConfigCode);
     mShowRenderStats = QueryConfigFlag(kRenderStatsConfigCode);
     const Color black{0.0f, 0.0f, 0.0f, kOpaque};
-    g_gfxDevice.SetClearColor(black);
+    Rnd::ThePs.SetClearColor(black);
     SetDoWinSequence(0);
 }
 
@@ -404,16 +404,16 @@ void MetRenderer::RemoveScreenView(Rnd::View *pView) {
 
 // NTSC-U/C: 0x003719a0, PAL: 0x003a0498
 void MetRenderer::ClearScreenScene() {
-    mScreenScene->ReleaseAnimsRefs();
-    mScreenScene->ClearDraws();
-    mScreenScene->ClearTransList();
+    mScreenScene->RemoveAllAnims();
+    mScreenScene->RemoveAllDraws();
+    mScreenScene->RemoveAllTranses();
 }
 
 // NTSC-U/C: 0x00371960, PAL: 0x003a0458
 void MetRenderer::ClearBackgroundScene() {
-    mBackgroundScene->ReleaseAnimsRefs();
-    mBackgroundScene->ClearDraws();
-    mBackgroundScene->ClearTransList();
+    mBackgroundScene->RemoveAllAnims();
+    mBackgroundScene->RemoveAllDraws();
+    mBackgroundScene->RemoveAllTranses();
 }
 
 // NTSC-U/C: 0x003714f8, PAL: 0x0039fff0
@@ -443,7 +443,7 @@ void MetRenderer::MoveScreenViewToFront(Rnd::View *pView) {
 void MetRenderer::UnlockAllStages() {
     if (mActivePanel != nullptr) {
         MetUnlockStagesMsg msg;
-        mActivePanel->Handle(&msg);
+        mActivePanel->Dispatch(&msg);
     }
 }
 
@@ -455,13 +455,13 @@ int MetRenderer::IsLogoScreenActive() {
 // NTSC-U/C: 0x00371cb0, PAL: 0x003a07a8
 void MetRenderer::ForwardToPanel(Message *pMsg) {
     if (mActivePanel != nullptr) {
-        mActivePanel->Handle(pMsg);
+        mActivePanel->Dispatch(pMsg);
     }
 }
 
 // NTSC-U/C: 0x00371cf0, PAL: 0x003a07e8
 void MetRenderer::ForwardToPanelUnchecked(Message *pMsg) {
-    mActivePanel->Handle(pMsg);
+    mActivePanel->Dispatch(pMsg);
 }
 
 // NTSC-U/C: 0x00371ba8, PAL: 0x003a06a0
@@ -621,7 +621,7 @@ void MetRenderer::ResolveArenaView(int nSkipResolve) {
     if (nSkipResolve == 0) {
         float flProgress;
         sArenaLoader->Poll(&flProgress); // Yes, the binary discards the result.
-        pView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kArenaView)));
+        pView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kArenaView)));
     }
     if (pView != nullptr) {
         AddBackgroundView(pView);
@@ -639,10 +639,10 @@ void MetRenderer::Draw() {
         (*it)->OnDrawPass();
     }
     if (mShowTimingGraph != 0) {
-        g_gfxDevice.DrawSubsystemTimingGraph(kTimingGraphFullScaleMs);
+        Rnd::ThePs.DrawSubsystemTimingGraph(kTimingGraphFullScaleMs);
     }
     if (mShowRenderStats != 0) {
-        g_gfxDevice.DrawRenderStatsOverlay();
+        Rnd::ThePs.DrawRenderStatsOverlay();
     }
 }
 
@@ -653,17 +653,17 @@ void MetRenderer::DrawSimple() {
     }
     mTopView->Rnd::Drawable::Draw();
     if (mShowTimingGraph != 0) {
-        g_gfxDevice.DrawSubsystemTimingGraph(kTimingGraphFullScaleMs);
+        Rnd::ThePs.DrawSubsystemTimingGraph(kTimingGraphFullScaleMs);
     }
     if (mShowRenderStats != 0) {
-        g_gfxDevice.DrawRenderStatsOverlay();
+        Rnd::ThePs.DrawRenderStatsOverlay();
     }
 }
 
 // NTSC-U/C: 0x0036c5d8, PAL: 0x0039afd8
-void MetRenderer::HandleMessage(Message *pMsg) {
+void MetRenderer::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
-    if (nType == g_nRawControllerMsgType) {
+    if (nType == RawControllerMsg::sID) {
         OnRawController(static_cast<RawControllerMsg *>(pMsg));
     } else if (nType == g_nMetStartNetLaunchMsgType) {
         ForwardToPanel(pMsg);
@@ -710,7 +710,7 @@ void MetRenderer::OnFreqEnded(Message *pMsg) {
 
     if (params.mJukeboxMode == 1 && pEnded->mStopJukebox == 0) {
         const Color black{0.0f, 0.0f, 0.0f, kOpaque};
-        g_gfxDevice.SetClearColor(black);
+        Rnd::ThePs.SetClearColor(black);
         Start();
         AddScreen(MetScreen::FindScreenByName(HxStr("MetRemixManager")));
         MetRemixManager::shared()->PlayCurrentTrack();
@@ -718,7 +718,7 @@ void MetRenderer::OnFreqEnded(Message *pMsg) {
     }
 
     const Color blue{0.0f, 0.0f, kClearBlue, kOpaque};
-    g_gfxDevice.SetClearColor(blue);
+    Rnd::ThePs.SetClearColor(blue);
     mDiscProblemPending = 1;
     mPendingPanel = nullptr;
 
@@ -794,9 +794,9 @@ void MetRenderer::ResolveSceneViews() {
     sMetagameLoader->Poll(&flProgress);
     sFontsLoader->Poll(&flProgress);
     sSharedTexLoader->Poll(&flProgress);
-    mTopView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kTopView)));
-    mBackgroundScene = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kBackgroundView)));
-    mScreenScene = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kScreensView)));
+    mTopView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kTopView)));
+    mBackgroundScene = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kBackgroundView)));
+    mScreenScene = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kScreensView)));
     MetScreen::CreateStartupScreens(this);
     mFade = new MetFade(this);
 }
@@ -815,7 +815,7 @@ void MetRenderer::Update() {
             CreateArenaLoader();
             ActivatePanel(MetScreen::FindScreenByName(HxStr(kStartupScreen)));
             const Color black{0.0f, 0.0f, 0.0f, kOpaque};
-            g_gfxDevice.SetClearColor(black);
+            Rnd::ThePs.SetClearColor(black);
         }
     }
 
@@ -827,7 +827,7 @@ void MetRenderer::Update() {
             mDiscProblemPending = 0;
             PlaySoundByName(kFrontEndMusic);
             const Color blue{0.0f, 0.0f, kClearBlue, kOpaque};
-            g_gfxDevice.SetClearColor(blue);
+            Rnd::ThePs.SetClearColor(blue);
             if (mFading == 0) {
                 ActivatePanel(mPendingPanel);
             }
@@ -837,12 +837,12 @@ void MetRenderer::Update() {
     if (mBootLoadPending == 0) {
         if (IsMediaReady() == 0) {
             Rnd::Drawable *pProblem =
-                dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kDiscProblemView)));
+                dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kDiscProblemView)));
             pProblem->SetShowing(1);
             return;
         }
         Rnd::Drawable *pProblem =
-            dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kDiscProblemView)));
+            dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kDiscProblemView)));
         pProblem->SetShowing(0);
     }
 

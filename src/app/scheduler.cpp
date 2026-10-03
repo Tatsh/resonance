@@ -62,7 +62,7 @@ void Sch::Scheduler::BeginRecording(OBStream &stream) {
 }
 
 // NTSC-U/C: 0x004ac9e8, PAL: 0x004eab88
-void Sch::Scheduler::Close() {
+void Sch::Scheduler::StopRecOrPlayback() {
     delete mRecorder;
     mRecorder = nullptr;
     if (mPlayback != nullptr) {
@@ -217,7 +217,7 @@ void Sch::Scheduler::Service() {
 }
 
 // NTSC-U/C: 0x004aca30, PAL: 0x004eabd0
-void Sch::Scheduler::RestartClock() {
+void Sch::Scheduler::ResetTimes() {
     mClock.Mark(0);
     mNowNs = 0;
 }
@@ -233,5 +233,5 @@ void Sch::Scheduler::StartPlayback(IBStream &stream) {
     mPlayback = new Sch::Playbacker(this);
     mPlayback->Load(stream);
     mStreamMode = kStreamModePlayback;
-    mPlayback->Start();
+    mPlayback->Play();
 }

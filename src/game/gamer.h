@@ -32,7 +32,7 @@ class TrackData;
  * table at `0x007ce7f8` with delta -4.
  *
  * Both are four entries, so the class **adds no virtual of its own**. It overrides only
- * `HandleMessage`, inheriting `MsgSink::Handle` and both `MsgSource` virtuals unchanged.
+ * `DispatchPriv`, inheriting `MsgSink::Dispatch` and both `MsgSource` virtuals unchanged.
  *
  * The base subobjects account for `+0x00` through `+0x17`. The destructor at `0x00110930` restores
  * the primary table at `+0x00` and the `MsgSource` one at `+0x14`, which is where `MsgSource`
@@ -90,7 +90,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00112978
      * @ghidraAddress PAL: 0x00112dd8
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Record the track graphs and build the enable policy for the session mode.
@@ -143,7 +143,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00116888
      * @ghidraAddress PAL: 0x00116d40
      */
-    bool IsNonCatchTrack(int nTrack);
+    bool IsFreestyleTrack(int nTrack);
 
     /**
      * Report the phrase database of one track's graph.

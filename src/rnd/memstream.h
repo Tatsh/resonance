@@ -36,13 +36,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005100c0
      * @ghidraAddress PAL: 0x0054f6a8
      */
-    virtual Stream &ReadBytes(void *pDest, int nSize);
+    virtual Stream &Read(void *pDest, int nSize);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0050f448
      * @ghidraAddress PAL: 0x0054ea30
      */
-    virtual Stream &WriteBytes(const void *pSrc, int nSize);
+    virtual Stream &Write(const void *pSrc, int nSize);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0050fd48
@@ -78,13 +78,12 @@ public:
      * Drop the bytes already read from the front of the buffer and rewind the cursor.
      *
      * The unread tail moves to the start of the buffer, and the buffer shrinks by the old cursor
-     * position. No call site survives in the shipped program. The name follows the
-     * IOBMemStream counterpart.
+     * position. No call site survives in the shipped program.
      *
      * @ghidraAddress NTSC-U/C: 0x005101c8
      * @ghidraAddress PAL: 0x0054f7b0
      */
-    void DiscardReadBytes();
+    void Compact();
 
 private:
     int mEof;                  // +0x04

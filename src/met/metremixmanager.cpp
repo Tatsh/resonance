@@ -509,7 +509,7 @@ void MetRemixManager::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
             mRenderer->Stop();
             MetFreqEndedMsg msg;
             msg.mStopJukebox = params.mJukeboxMode;
-            mRenderer->Handle(&msg);
+            mRenderer->Dispatch(&msg);
         } else {
             PushRestoreScreens();
         }
@@ -831,7 +831,7 @@ void MetRemixManager::Done(int nHandle,
     }
 
     IOBMemStream stream;
-    stream.Load(pBuffer, nLength);
+    stream.Fill(pBuffer, nLength);
     RemixIndex index;
     index.ReadFromStream(stream);
     for (std::vector<RemixIndexElement>::iterator it = index.elements.begin();

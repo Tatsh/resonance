@@ -162,7 +162,7 @@ PlayMap *LevelBuilder::GetPlayMap() {
 
 // NTSC-U/C: 0x001ec738, PAL: 0x001f29c0
 int LevelBuilder::GetEndBar() {
-    return mPlayMap->GetExtent();
+    return mPlayMap->GetLength();
 }
 
 // NTSC-U/C: 0x001eb200, PAL: 0x001f1488
@@ -258,14 +258,14 @@ void LevelBuilder::AddGem(int nTick, int nGem, Riff *pRiff) {
 }
 
 // NTSC-U/C: 0x001ec680, PAL: 0x001f2908
-void LevelBuilder::PrepareTracks() {
+void LevelBuilder::DoneLoading() {
     for (auto it = mTracks.begin(); it != mTracks.end(); ++it) {
         (*it)->ScoreBars();
     }
 }
 
 // NTSC-U/C: 0x001ec5f8, PAL: 0x001f2880
-void LevelBuilder::SetTempo([[maybe_unused]] int nTick, int nMicrosecondsPerQuarter) {
+void LevelBuilder::AddTempo([[maybe_unused]] int nTick, int nMicrosecondsPerQuarter) {
     if (mTempoMap != nullptr) {
         mTempoMap->Release();
     }

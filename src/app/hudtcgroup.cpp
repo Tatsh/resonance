@@ -8,9 +8,9 @@
 
 // NTSC-U/C: 0x00417a60, PAL: 0x004518a8
 HudTcGroup::HudTcGroup() {
-    mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("tc_hi_group.view")));
+    mView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("tc_hi_group.view")));
 #ifdef VIDEO_STANDARD_PAL
-    Rnd::Text *pPanText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr("tc_pan.txt")));
+    Rnd::Text *pPanText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr("tc_pan.txt")));
     pPanText->SetText(GetMetString(kMetStrIngCtrlPan));
 #endif
     SetShowing(0);

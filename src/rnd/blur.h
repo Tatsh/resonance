@@ -26,7 +26,7 @@ namespace Rnd {
  * proves by writing that address into the virtual-base pointer at `+0x00`.
  *
  * Two vtables belong to the class. The four-entry table at `0x00821ae8` is addressed by the
- * `Rnd::Drawable` vptr at `+0x10` and overrides only DrawSelf(), and the eight-entry table at
+ * `Rnd::Drawable` vptr at `+0x10` and overrides only DrawShowing(), and the eight-entry table at
  * `0x00821aa0` is addressed by the `Rnd::Object` subobject vptr with a `-0x30` adjustment on every
  * entry. Both tables end in an all-zero entry, which is the terminator rather than a null slot.
  *
@@ -84,7 +84,7 @@ public:
     /**
      * Set the text the trail is drawn from and discard the recorded transforms.
      *
-     * A text subject takes precedence over a mesh subject in DrawSelf().
+     * A text subject takes precedence over a mesh subject in DrawShowing().
      *
      * @param pText The text to trail, or null for none.
      * @ghidraAddress NTSC-U/C: 0x004c37b8
@@ -278,7 +278,7 @@ public:
     static Blur *Find(const HxStr &name);
 
     /**
-     * Install the trail factory and register the class key with Rnd::g_manager.
+     * Install the trail factory and register the class key with Rnd::TheManager.
      *
      * Rnd::Manager::Init() also expands this inline.
      *
@@ -306,7 +306,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x004c0638
      * @ghidraAddress PAL: 0x004fe728
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
 private:
     // NTSC-U/C: 0x004c36b0, PAL: 0x005017d8
@@ -347,7 +347,7 @@ public:
     std::list<Xfm> mXfms;
 
 private:
-    // Frames still to pass before the next transform is recorded. DrawSelf() counts it down and
+    // Frames still to pass before the next transform is recorded. DrawShowing() counts it down and
     // reloads it from mRate.
     int mCountdown; // +0x2c
 };

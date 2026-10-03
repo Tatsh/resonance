@@ -16,11 +16,11 @@ constexpr double kJumpShortfall = 1.0e-6;
 
 // NTSC-U/C: 0x00411878, PAL: 0x0044b340
 LinearAnim::LinearAnim() : mLastTime(kNoTime), mTarget(0.0f), mCurrent(0.0f) {
-    SetRange(mTarget, kDefaultTo, kDefaultDuration);
+    SetParams(mTarget, kDefaultTo, kDefaultDuration);
 }
 
 // NTSC-U/C: 0x004118d0, PAL: 0x0044b398
-void LinearAnim::SetRange(float flFrom, float flTo, float flDuration) {
+void LinearAnim::SetParams(float flFrom, float flTo, float flDuration) {
     mScale = flTo - flFrom;
     mRate = 1.0f / flDuration;
     mOffset = flFrom - mScale * 0.0f; // Yes, the binary multiplies by zero here.
@@ -38,12 +38,12 @@ void LinearAnim::Jump(float flTarget) {
 }
 
 // NTSC-U/C: 0x00411958, PAL: 0x0044b420
-float LinearAnim::Value() {
+float LinearAnim::Val() const {
     return mCurrent * mScale + mOffset;
 }
 
 // NTSC-U/C: 0x00411970, PAL: 0x0044b438
-int LinearAnim::Update(float flTime) {
+int LinearAnim::Execute(float flTime) {
     if (mCurrent == mTarget) {
         mLastTime = flTime;
         return 0;

@@ -101,10 +101,10 @@ inline Vector3 UnitToFarNdc(float flX, float flY) {
 
 } // namespace
 
-Cam *g_pCurrentCam;
+Cam *Cam::sCurrent;
 
 // NTSC-U/C: 0x006f958c, PAL: 0x0073cfdc
-Cam *(*g_pfnNewCam)(const HxStr &name) = Cam::NewCam;
+Cam *(*Cam::sNew)(const HxStr &name) = Cam::NewCam;
 
 // NTSC-U/C: 0x004b1e90, PAL: 0x004f00b8
 void *Cam::operator new(size_t nSize) {
@@ -119,7 +119,7 @@ void Cam::operator delete(void *pBlock) {
 // NTSC-U/C: 0x004b1f20, PAL: 0x004f0148
 Cam *NewCamThroughHook(const HxStr &name) {
     try {
-        return g_pfnNewCam(name);
+        return Cam::sNew(name);
     } catch (...) {
         return nullptr; // The binary's handler returns null.
     }
@@ -128,7 +128,7 @@ Cam *NewCamThroughHook(const HxStr &name) {
 // NTSC-U/C: 0x004b23e0, PAL: 0x004f0608
 Object *CreateRegisteredCam(const HxStr &name) {
     try {
-        return g_pfnNewCam(name);
+        return Cam::sNew(name);
     } catch (...) {
         return nullptr;
     }
@@ -149,8 +149,8 @@ Cam::Cam(const HxStr &name)
 
 // NTSC-U/C: 0x004af668, PAL: 0x004ed858
 Cam::~Cam() {
-    if (g_pCurrentCam == this) {
-        g_pCurrentCam = nullptr;
+    if (Cam::sCurrent == this) {
+        Cam::sCurrent = nullptr;
     }
     ReleaseTargetTex();
     ReleaseAllRefs();
@@ -274,7 +274,7 @@ void Cam::UpdateTargetAspect() {
 
 // NTSC-U/C: 0x004b23d0, PAL: 0x004f05f8
 const HxStr &Cam::ClassName() const {
-    return g_camClassName;
+    return Cam::sClassName;
 }
 
 // NTSC-U/C: 0x004b2470, PAL: 0x004f0698
@@ -303,8 +303,8 @@ void Cam::Replace(Object *pFrom, Object *pTo) {
 }
 
 // NTSC-U/C: 0x004b1fe0, PAL: 0x004f0208
-int Cam::DrawSelf() {
-    g_pCurrentCam = this;
+int Cam::DrawShowing() {
+    Cam::sCurrent = this;
     return 1;
 }
 
@@ -335,39 +335,39 @@ int Cam::UpdateWorldXfm(Transformable *pParent, int nForce) {
 // NTSC-U/C: 0x004ae630, PAL: 0x004ec7f0
 void Cam::Save(Stream &stream) {
     const int nRevision = kCamRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
 
     Transformable::Save(stream);
     Drawable::Save(stream);
     Collideable::Save(stream);
 
-    stream.Write(&mNearPlane, sizeof(mNearPlane));
-    stream.Write(&mFarPlane, sizeof(mFarPlane));
-    stream.Write(&mFov, sizeof(mFov));
+    stream.WriteLE(&mNearPlane, sizeof(mNearPlane));
+    stream.WriteLE(&mFarPlane, sizeof(mFarPlane));
+    stream.WriteLE(&mFov, sizeof(mFov));
 
-    stream.Write(&mScreenRect.x, sizeof(mScreenRect.x));
-    stream.Write(&mScreenRect.y, sizeof(mScreenRect.y));
-    stream.Write(&mScreenRect.w, sizeof(mScreenRect.w));
-    stream.Write(&mScreenRect.h, sizeof(mScreenRect.h));
+    stream.WriteLE(&mScreenRect.x, sizeof(mScreenRect.x));
+    stream.WriteLE(&mScreenRect.y, sizeof(mScreenRect.y));
+    stream.WriteLE(&mScreenRect.w, sizeof(mScreenRect.w));
+    stream.WriteLE(&mScreenRect.h, sizeof(mScreenRect.h));
 
-    stream.Write(&mZRange.x, sizeof(mZRange.x));
-    stream.Write(&mZRange.y, sizeof(mZRange.y));
+    stream.WriteLE(&mZRange.x, sizeof(mZRange.x));
+    stream.WriteLE(&mZRange.y, sizeof(mZRange.y));
 
     const Object *pTargetObject = mpTargetTex;
     if (pTargetObject != nullptr) {
-        stream.WriteBytes(NameText(pTargetObject), pTargetObject->mName.mLen + 1);
+        stream.Write(NameText(pTargetObject), pTargetObject->mName.mLen + 1);
     } else {
         const char cEmpty = 0;
-        stream.WriteBytes(&cEmpty, sizeof(cEmpty));
+        stream.Write(&cEmpty, sizeof(cEmpty));
     }
 }
 
 // NTSC-U/C: 0x004ae870, PAL: 0x004eca30
 void Cam::Load(Stream &stream) {
     int nRevision = 0;
-    stream.Read(&nRevision, sizeof(nRevision));
+    stream.ReadLE(&nRevision, sizeof(nRevision));
     if (nRevision > kCamRevision) {
-        g_failSink.Report("Can't load new Cam\n");
+        Rnd::TheDbg.Notify("Can't load new Cam\n");
         return;
     }
 
@@ -379,38 +379,38 @@ void Cam::Load(Stream &stream) {
 
     ReleaseTargetTex();
 
-    stream.Read(&mNearPlane, sizeof(mNearPlane));
-    stream.Read(&mFarPlane, sizeof(mFarPlane));
-    stream.Read(&mFov, sizeof(mFov));
+    stream.ReadLE(&mNearPlane, sizeof(mNearPlane));
+    stream.ReadLE(&mFarPlane, sizeof(mFarPlane));
+    stream.ReadLE(&mFov, sizeof(mFov));
 
     // Three dropped fields the reader still steps over. Each value is discarded.
     float flDropped = 0.0f;
     if (nRevision < 2) {
-        stream.Read(&flDropped, sizeof(flDropped));
+        stream.ReadLE(&flDropped, sizeof(flDropped));
     }
 
-    stream.Read(&mScreenRect.x, sizeof(mScreenRect.x));
-    stream.Read(&mScreenRect.y, sizeof(mScreenRect.y));
-    stream.Read(&mScreenRect.w, sizeof(mScreenRect.w));
-    stream.Read(&mScreenRect.h, sizeof(mScreenRect.h));
+    stream.ReadLE(&mScreenRect.x, sizeof(mScreenRect.x));
+    stream.ReadLE(&mScreenRect.y, sizeof(mScreenRect.y));
+    stream.ReadLE(&mScreenRect.w, sizeof(mScreenRect.w));
+    stream.ReadLE(&mScreenRect.h, sizeof(mScreenRect.h));
 
     if (nRevision == 1 || nRevision == 2) {
-        stream.Read(&flDropped, sizeof(flDropped));
+        stream.ReadLE(&flDropped, sizeof(flDropped));
     }
 
     if (nRevision >= kCamZRangeRevision) {
-        stream.Read(&mZRange.x, sizeof(mZRange.x));
-        stream.Read(&mZRange.y, sizeof(mZRange.y));
+        stream.ReadLE(&mZRange.x, sizeof(mZRange.x));
+        stream.ReadLE(&mZRange.y, sizeof(mZRange.y));
     }
 
     if (nRevision >= kCamTargetTexRevision) {
         HxStr targetName(nullptr);
         stream.ReadString(targetName);
-        mpTargetTex = dynamic_cast<Tex *>(g_manager.Find(targetName));
+        mpTargetTex = dynamic_cast<Tex *>(TheManager.Find(targetName));
     }
 
     if (nRevision == 6) {
-        stream.Read(&flDropped, sizeof(flDropped));
+        stream.ReadLE(&flDropped, sizeof(flDropped));
     }
 
     AcquireTargetTex();
@@ -439,7 +439,7 @@ void Cam::Copy(const Object *pSource, unsigned nFlags) {
 // NTSC-U/C: 0x004afac0, PAL: 0x004edcb0
 void Cam::UpdateProjection() {
     const float flAspect = (mYRatio * mScreenRect.h) / mScreenRect.w;
-    BuildFrustum(mLocalFrustum, mNearPlane, mFarPlane, mFov, flAspect);
+    mLocalFrustum.Set(mNearPlane, mFarPlane, mFov, flAspect);
     for (int nRow = 0; nRow < kXfmRowCount; ++nRow) {
         mLocalProject[nRow] = kEmptyProjectRow;
     }
@@ -542,6 +542,6 @@ void Cam::SetFrustum(float flNear, float flFar, float flFov) {
     UpdateProjection();
 }
 
-HxStr g_camClassName("Cam");
+HxStr Cam::sClassName("Cam");
 
 } // namespace Rnd

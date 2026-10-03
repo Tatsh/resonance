@@ -10,13 +10,13 @@ constexpr int kNameBufferSize = 0x100;
 static char g_szNameBuffer[kNameBufferSize];
 
 // NTSC-U/C: 0x0050fb60, PAL: 0x0054f148
-Stream &Stream::Read(void *pDest, int nSize) {
-    return ReadBytes(pDest, nSize);
+Stream &Stream::ReadLE(void *pDest, int nSize) {
+    return Read(pDest, nSize);
 }
 
 // NTSC-U/C: 0x0050fb88, PAL: 0x0054f170
-Stream &Stream::Write(const void *pSrc, int nSize) {
-    return WriteBytes(pSrc, nSize);
+Stream &Stream::WriteLE(const void *pSrc, int nSize) {
+    return Write(pSrc, nSize);
 }
 
 // The image emits no out-of-line copy for the base destructor.
@@ -30,7 +30,7 @@ Stream &Stream::ReadString(HxStr &name) {
 
     char *pCursor = g_szNameBuffer;
     for (;;) {
-        ReadBytes(pCursor, 1);
+        Read(pCursor, 1);
         if (*pCursor == 0) {
             name += HxStr(g_szNameBuffer);
             return *this;

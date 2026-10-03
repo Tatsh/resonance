@@ -123,10 +123,10 @@ int TransformLightRecords(DirectionalLightRecord *&pDirectionalBegin,
                           const float *pXfm,
                           const Sphere *pSphere) {
     int nActive = 0;
-    pDirectionalBegin = g_directionalLightRecords.data();
-    pDirectionalEnd = g_directionalLightRecords.data() + g_directionalLightRecords.size();
-    pPointBegin = g_pointLightRecords.data();
-    pPointEnd = g_pointLightRecords.data() + g_pointLightRecords.size();
+    pDirectionalBegin = PsEnviron::sDirLights.data();
+    pDirectionalEnd = PsEnviron::sDirLights.data() + PsEnviron::sDirLights.size();
+    pPointBegin = PsEnviron::sPointLights.data();
+    pPointEnd = PsEnviron::sPointLights.data() + PsEnviron::sPointLights.size();
 
     float aflInverse[kXfmRowCount][kXfmRowFloatCount];
     InvertWithUnitW(pXfm, aflInverse);
@@ -154,25 +154,25 @@ int SelectLightForVertex(GifQuadword *pLight,
     }
 
     float aflInverse[kXfmRowCount][kXfmRowFloatCount];
-    if (!g_directionalLightRecords.empty()) {
-        const DirectionalLightRecord &light = g_directionalLightRecords.front();
+    if (!PsEnviron::sDirLights.empty()) {
+        const DirectionalLightRecord &light = PsEnviron::sDirLights.front();
         InvertWithUnitW(pXfm, aflInverse);
         const Vector3 direction = RotateByRows(aflInverse, light.mDirection);
         memcpy(pLight, &direction, sizeof(direction));
-        ApplyLightColor(pAmbient, light.mAmbient, g_pSelectedMat->mVertAmbient);
-        ApplyLightColor(pDiffuse, light.mDiffuse, g_pSelectedMat->mVertDiffuse);
+        ApplyLightColor(pAmbient, light.mAmbient, PsMat::sCurrent->mVertAmbient);
+        ApplyLightColor(pDiffuse, light.mDiffuse, PsMat::sCurrent->mVertDiffuse);
         return kVu1EntryDirectional;
     }
 
-    if (g_pointLightRecords.empty()) {
+    if (PsEnviron::sPointLights.empty()) {
         return kVu1EntryNoLight;
     }
     InvertWithUnitW(pXfm, aflInverse);
-    for (PointLightRecord &light : g_pointLightRecords) {
+    for (PointLightRecord &light : PsEnviron::sPointLights) {
         light.mTransformedPosition = TransformByRows(aflInverse, light.mPosition);
         if (LightReachesSphere(light, pSphere)) {
-            ApplyLightColor(pAmbient, light.mAmbient, g_pSelectedMat->mVertAmbient);
-            ApplyLightColor(pDiffuse, light.mDiffuse, g_pSelectedMat->mVertDiffuse);
+            ApplyLightColor(pAmbient, light.mAmbient, PsMat::sCurrent->mVertAmbient);
+            ApplyLightColor(pDiffuse, light.mDiffuse, PsMat::sCurrent->mVertDiffuse);
             memcpy(pLight, &light.mTransformedPosition, sizeof(light.mTransformedPosition));
             return kVu1EntryPoint;
         }
@@ -184,10 +184,10 @@ int SelectLightForVertex(GifQuadword *pLight,
 int g_nFogEnabled;
 
 // NTSC-U/C: 0x00776120, PAL: 0x007b9ff8
-std::vector<DirectionalLightRecord> g_directionalLightRecords;
+std::vector<DirectionalLightRecord> PsEnviron::sDirLights;
 
 // NTSC-U/C: 0x00776130, PAL: 0x007ba008
-std::vector<PointLightRecord> g_pointLightRecords;
+std::vector<PointLightRecord> PsEnviron::sPointLights;
 
 // NTSC-U/C: 0x0077613c, PAL: 0x007ba014
 PsEnviron *g_pDefaultEnviron;
@@ -216,7 +216,7 @@ void PsEnviron::Init() {
     g_pfnNewEnviron = NewEnviron;
     g_pDefaultEnviron = new PsEnviron(HxStr("[default environ]"));
     g_pDefaultEnviron->mInternal = 1;
-    g_pDefaultCam->AddDraw(g_pDefaultEnviron, nullptr);
+    PsCam::sDefault->AddDraw(g_pDefaultEnviron, nullptr);
 
     {
         const HxStr lightName("[default light]");
@@ -229,7 +229,7 @@ void PsEnviron::Init() {
     }
     g_pDefaultLight->mInternal = 1;
     g_pDefaultEnviron->AddLight(g_pDefaultLight);
-    g_pDefaultCam->AddTrans(g_pDefaultLight);
+    PsCam::sDefault->AddTrans(g_pDefaultLight);
 }
 
 // NTSC-U/C: 0x005b2888, PAL: 0x005f4e58
@@ -240,7 +240,7 @@ void PsEnviron::Terminate() {
 }
 
 // NTSC-U/C: 0x005aecb8, PAL: 0x005f1260
-int PsEnviron::DrawSelf() {
+int PsEnviron::DrawShowing() {
     g_nFogEnabled = mFogMode != kFogModeNone;
     if (g_nFogEnabled != 0) {
         g_flFogScale = kFogByteRange / (mFogStart - mFogEnd);
@@ -253,18 +253,18 @@ int PsEnviron::DrawSelf() {
     const unsigned long long qwRed = static_cast<int>(mFogColor.r * kFogByteRange);
     const unsigned long long qwGreen = static_cast<int>(mFogColor.g * kFogByteRange);
     const unsigned long long qwBlue = static_cast<int>(mFogColor.b * kFogByteRange);
-    g_gfxDevice.SetGsReg(kGsRegFogCol,
-                         qwRed | (qwGreen << kFogColGreenShift) | (qwBlue << kFogColBlueShift),
-                         kFogColMask);
+    Rnd::ThePs.SetGsReg(kGsRegFogCol,
+                        qwRed | (qwGreen << kFogColGreenShift) | (qwBlue << kFogColBlueShift),
+                        kFogColMask);
 
     // The binary resizes both vectors from a temporary record whose padding words are 1.0.
-    g_directionalLightRecords.resize(0);
-    g_pointLightRecords.resize(0);
+    PsEnviron::sDirLights.resize(0);
+    PsEnviron::sPointLights.resize(0);
 
     for (Light *pLight : mLights) {
         if (pLight->mType == kLightTypeDirectional) {
-            g_directionalLightRecords.resize(g_directionalLightRecords.size() + 1);
-            DirectionalLightRecord &record = g_directionalLightRecords.back();
+            PsEnviron::sDirLights.resize(PsEnviron::sDirLights.size() + 1);
+            DirectionalLightRecord &record = PsEnviron::sDirLights.back();
             Vector3 direction;
             direction.w = 1.0f;
             NegateVec3(pLight->mWorldXfm[kXfmRowLightAxis], &direction.x);
@@ -272,8 +272,8 @@ int PsEnviron::DrawSelf() {
             record.mAmbient = pLight->mAmbient;
             record.mDiffuse = pLight->mDiffuse;
         } else if (pLight->mType == kLightTypePoint) {
-            g_pointLightRecords.resize(g_pointLightRecords.size() + 1);
-            PointLightRecord &record = g_pointLightRecords.back();
+            PsEnviron::sPointLights.resize(PsEnviron::sPointLights.size() + 1);
+            PointLightRecord &record = PsEnviron::sPointLights.back();
             const float *pTranslation = pLight->mWorldXfm[kXfmRowTranslation];
             record.mPosition.x = pTranslation[0];
             record.mPosition.y = pTranslation[1];
@@ -284,7 +284,7 @@ int PsEnviron::DrawSelf() {
         }
     }
 
-    g_pCurrentEnviron = this;
+    Environ::sCurrent = this;
     return 1;
 }
 

@@ -61,5 +61,5 @@ private:
     Rnd::View *mView; // "boundary.view".
     Rnd::Text *mText; // "boundary msg".
     int mStep;        // Bar the marker stands at.
-    int mStepCount;   // PlayMap::GetSectionCount() at construction.
+    int mStepCount;   // PlayMap::GetNumSections() at construction.
 };

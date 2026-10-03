@@ -17,7 +17,7 @@ public:
     /**
      * Construct a seek against an open descriptor.
      *
-     * @param pHandler The receiver Complete() reports to.
+     * @param pHandler The receiver NotifyDone() reports to.
      * @param nFile The descriptor to move.
      * @param nOffset The offset to move by.
      * @param nOrigin The libmc origin, which uses the same three values as `lseek()`.
@@ -37,13 +37,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055ead8
      * @ghidraAddress PAL: 0x0059fda8
      */
-    virtual void Issue();
+    virtual void Execute();
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0055dbd8
      * @ghidraAddress PAL: 0x0059ee50
      */
-    virtual void Complete();
+    virtual void NotifyDone();
 
     /**
      * Record the resulting position, or map the failure.

@@ -18,7 +18,7 @@ namespace Rnd {
  *
  * Rnd::Manager::Init() pairs one of these with each type name a `.rnd` file may write. Each
  * factory allocates its class and forwards the name to the constructor, which registers the new
- * object in Rnd::g_manager.
+ * object in Rnd::TheManager.
  *
  * @param name The object name for the new instance.
  * @return The new object.
@@ -361,7 +361,7 @@ private:
  * @ghidraAddress NTSC-U/C: 0x00719868
  * @ghidraAddress PAL: 0x0075d768
  */
-extern Manager g_manager;
+extern Manager TheManager;
 
 /**
  * Version word of the `.rnd` file Manager::Read() is loading.

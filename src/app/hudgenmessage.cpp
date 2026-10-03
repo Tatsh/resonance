@@ -6,7 +6,7 @@
 
 // NTSC-U/C: 0x0042a6d8, PAL: 0x00465a28
 HudGenMessage::HudGenMessage(const HxStr &name) : mText(nullptr) {
-    mText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(name));
+    mText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(name));
     mText->SetShowing(0);
 }
 

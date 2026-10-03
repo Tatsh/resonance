@@ -27,8 +27,8 @@ void PhraseEraser::EraseBar(int) {
 }
 
 // NTSC-U/C: 0x001b9ad0, PAL: 0x001bf8a8
-void PhraseEraser::HandleMessage(Message *pMsg) {
-    if (pMsg->Type() != g_nEraseMsgType) {
+void PhraseEraser::DispatchPriv(Message *pMsg) {
+    if (pMsg->Type() != EraseMsg::sID) {
         return;
     }
     EraseMsg *pErase = static_cast<EraseMsg *>(pMsg);

@@ -3,21 +3,22 @@
 /**
  * Directory the platform-converted copy of a file sits in, relative to the original: "gen/".
  *
- * BuildBitmapCacheFileName() inserts it in front of a file name. The name is inferred.
+ * BuildBitmapCacheFileName() inserts it in front of a file name. External linkage makes every use
+ * load the pointer, as the image does.
  *
  * @ghidraAddress NTSC-U/C: 0x00725840
  * @ghidraAddress PAL: 0x007694e0
  */
-extern const char *g_szGenDirectory;
+extern const char *dirpath;
 
 /**
  * Turn a path into the path of its platform-converted copy.
  *
- * g_szGenDirectory is inserted in front of the file name, after the last slash or backslash. The
- * last full stop then becomes an underscore, and pszExtension is appended. "dir/name.bmp" with
- * ".abm" becomes "dir/gen/name_bmp.abm". Uppercase letters after the full stop are lowered, but
- * the lowering starts as many characters past the full stop as g_szGenDirectory is long. A
- * three-letter extension is therefore never lowered. The name is inferred.
+ * dirpath is inserted in front of the file name, after the last slash or backslash. The last full
+ * stop then becomes an underscore, and pszExtension is appended. "dir/name.bmp" with ".abm" becomes
+ * "dir/gen/name_bmp.abm". Uppercase letters after the full stop are lowered, but the lowering
+ * starts as many characters past the full stop as dirpath is long. A three-letter extension is
+ * therefore never lowered. The name is inferred.
  *
  * @param pszPath The path, rewritten in place. The buffer must take the longer result.
  * @param pszExtension The extension to append.

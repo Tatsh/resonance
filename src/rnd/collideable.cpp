@@ -50,19 +50,19 @@ static Dbg &operator<<(Dbg &sink, const std::list<Collideable *> &collides) {
 // NTSC-U/C: 0x00501db0, PAL: 0x00540b88
 //
 // Each entry is written as the referenced object's name including its terminator. A reader has to
-// resolve the names through Rnd::g_manager. An empty entry writes one zero byte.
+// resolve the names through Rnd::TheManager. An empty entry writes one zero byte.
 static Stream &operator<<(Stream &stream, const std::list<Collideable *> &collides) {
     int nCount = collides.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
 
     for (std::list<Collideable *>::const_iterator it = collides.begin(); it != collides.end();
          ++it) {
         const Object *pObject = *it;
         if (pObject != nullptr) {
-            stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+            stream.Write(NameText(pObject), pObject->mName.mLen + 1);
         } else {
             const char cEmpty = 0;
-            stream.WriteBytes(&cEmpty, sizeof(cEmpty));
+            stream.Write(&cEmpty, sizeof(cEmpty));
         }
     }
     return stream;
@@ -71,13 +71,13 @@ static Stream &operator<<(Stream &stream, const std::list<Collideable *> &collid
 // NTSC-U/C: 0x00502088, PAL: 0x00540e60
 static Stream &operator>>(Stream &stream, std::list<Collideable *> &collides) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     collides.resize(nCount, nullptr);
 
     for (std::list<Collideable *>::iterator it = collides.begin(); it != collides.end(); ++it) {
         HxStr name(nullptr);
         stream.ReadString(name);
-        Object *pObject = g_manager.Find(name);
+        Object *pObject = TheManager.Find(name);
         *it = dynamic_cast<Collideable *>(pObject);
     }
     return stream;
@@ -110,7 +110,7 @@ Collideable *Collideable::Parent() {
 // NTSC-U/C: 0x00500858, PAL: 0x0053f608
 void Collideable::AddCollide(Collideable *pCollide) {
     if (std::find(mCollides.begin(), mCollides.end(), pCollide) != mCollides.end()) {
-        g_failSink.Report(kAlreadyInFormat, NameText(pCollide), NameText(this));
+        Rnd::TheDbg.Notify(kAlreadyInFormat, NameText(pCollide), NameText(this));
         return;
     }
 
@@ -133,9 +133,9 @@ void Collideable::RemoveCollide(Collideable *pCollide) {
 }
 
 // NTSC-U/C: 0x00502a28, PAL: 0x00541838
-void Collideable::Collide(const Ray &ray, HitSink &sink) {
+void Collideable::FindCollisions(const Ray &ray, HitSink &sink) {
     for (std::list<Collideable *>::iterator it = mCollides.begin(); it != mCollides.end(); ++it) {
-        (*it)->Collide(ray, sink);
+        (*it)->FindCollisions(ray, sink);
     }
 }
 
@@ -178,7 +178,7 @@ void Collideable::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x005028f0, PAL: 0x00541700
 void Collideable::Save(Stream &stream) {
     int nRevision = kCollideableRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
 
     stream << mCollides;
 }
@@ -186,11 +186,11 @@ void Collideable::Save(Stream &stream) {
 // NTSC-U/C: 0x005005f0, PAL: 0x0053f3a0
 void Collideable::Load(Stream &stream) {
     int nRevision = 0;
-    stream.Read(&nRevision, sizeof(nRevision));
+    stream.ReadLE(&nRevision, sizeof(nRevision));
     if (nRevision > kCollideableRevision) {
-        g_failSink.Report("Can't load new Collideable\n");
-        if (g_failSink.mAbortProc != nullptr) {
-            g_failSink.mAbortProc();
+        Rnd::TheDbg.Notify("Can't load new Collideable\n");
+        if (Rnd::TheDbg.mAbortProc != nullptr) {
+            Rnd::TheDbg.mAbortProc();
         } else {
             throw; // With no handler the binary rethrows the exception in flight.
         }
@@ -217,7 +217,7 @@ void Collideable::Copy(const Object *pSource, unsigned nFlags) {
 void Collideable::Replace(Object *pFrom, Object *pTo) {
     for (std::list<Collideable *>::iterator it = mCollides.begin(); it != mCollides.end();) {
         if (*it == pTo) {
-            g_failSink.Report(kAlreadyInFormat, NameText(pTo), NameText(this));
+            Rnd::TheDbg.Notify(kAlreadyInFormat, NameText(pTo), NameText(this));
         }
 
         if (*it == pFrom) {

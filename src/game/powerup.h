@@ -79,7 +79,7 @@ public:
      * Report which of the thirteen kinds this powerup is.
      *
      * Slot 3, and pure. Every implementation is a two-instruction body that returns a constant,
-     * and the constant is the index the factory accepts, which PowerupCollection::AddPowerup()
+     * and the constant is the index the factory accepts, which PowerupCollection::Add()
      * confirms by matching an incoming kind against it.
      *
      * @return The kind.

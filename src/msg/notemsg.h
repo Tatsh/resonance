@@ -28,6 +28,14 @@ class OBStream;
 class NoteMsg : public MuseMsg {
 public:
     /**
+     * Identity that Type() reports.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d01cc
+     * @ghidraAddress PAL: 0x00713964
+     */
+    static unsigned int sID;
+
+    /**
      * Construct a message with the position and the length at kMBTInfinity.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
@@ -79,7 +87,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_dwNoteMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x003dc280
      * @ghidraAddress PAL: 0x004146b8
      */
@@ -139,7 +147,7 @@ public:
     /**
      * The note number. +0x09
      *
-     * Public because RiffRangeFinder::HandleMessage() at `0x001c4574` reads it directly with `lbu`,
+     * Public because RiffRangeFinder::DispatchPriv() at `0x001c4574` reads it directly with `lbu`,
      * with no accessor in the image, widening its range of notes to include it.
      */
     unsigned char mNote;
@@ -154,20 +162,8 @@ public:
     /**
      * The length of the note, in MIDI ticks. +0x0c
      *
-     * Public because NoteFinder::HandleMessage() at `0x001023b0` reads it directly with no
+     * Public because NoteFinder::DispatchPriv() at `0x001023b0` reads it directly with no
      * accessor in the image, adding it to the inherited mTick to find where the note ends.
      */
     Mid::MBT mLength;
 };
-
-/**
- * Identity that NoteMsg::Type() reports.
- *
- * This word belongs to NoteMsg because NoteMsg::Type() at `0x003dc280` returns it. Several
- * handlers elsewhere read the same word to compare against it, which is the expected shape for a
- * registered identity and does not make the word theirs.
- *
- * @ghidraAddress NTSC-U/C: 0x006d01cc
- * @ghidraAddress PAL: 0x00713964
- */
-extern unsigned int g_dwNoteMsgType;

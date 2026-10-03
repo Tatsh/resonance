@@ -3,7 +3,7 @@
 #include <fstream>
 
 /**
- * Bytes of g_szFileLogPath.
+ * Bytes of logfilename.
  *
  * The next initialised data begins 0x40 bytes after the buffer, which bounds it. No routine in the
  * image tests the length of a path it copies in.
@@ -15,36 +15,36 @@ constexpr int kFileLogPathSize = 0x40;
  *
  * The file layer's translation unit constructs it in its static initialiser at `0x0047dc18`. The
  * ios virtual base sits at `+0x70`. FileOpen() at `0x0047c9c0` writes a line to the output side
- * for every file it opens while the log is open. The title is inferred from that role, and it is
- * distinct from the allocation log behind `g_szMemLogPath`.
+ * for every file it opens while the log is open. It is distinct from the allocation log behind
+ * `g_szMemLogPath`.
  *
  * @ghidraAddress NTSC-U/C: 0x006ee280
  * @ghidraAddress PAL: 0x00731ca0
  */
-extern std::fstream g_fileLog;
+extern std::fstream gFileIOLog;
 
 /**
- * Non-zero while g_fileLog is open.
+ * Non-zero while gFileIOLog is open.
  *
  * @ghidraAddress NTSC-U/C: 0x006ee320
  * @ghidraAddress PAL: 0x00731d40
  */
-extern int g_bFileLogOpen;
+extern int bFileLogging;
 
 /**
- * The path g_fileLog was opened on.
+ * The path gFileIOLog was opened on.
  *
  * FileOpen() compares every path it opens against this one and does not log the log file itself.
  *
  * @ghidraAddress NTSC-U/C: 0x006ee378
  * @ghidraAddress PAL: 0x00731d98
  */
-extern char g_szFileLogPath[kFileLogPathSize];
+extern char logfilename[kFileLogPathSize];
 
 /**
  * Open the file log.
  *
- * The path is recorded in g_szFileLogPath and the file is opened for output. No call site exists.
+ * The path is recorded in logfilename and the file is opened for output. No call site exists.
  * The title is inferred.
  *
  * @param pszPath The path of the log file.

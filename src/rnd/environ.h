@@ -23,7 +23,7 @@ namespace Rnd {
  * The seven names come from the routine at `0x00519470`, which writes one of "None", "VertExp",
  * "VertExp2", "VertLinear", "PixelExp", "PixelExp2", and "PixelLinear" for the values below and
  * nothing at all for any other. The PlayStation 2 renderer distinguishes none of the six
- * enabled modes. Rnd::PsEnviron::DrawSelf() tests only whether the mode is None.
+ * enabled modes. Rnd::PsEnviron::DrawShowing() tests only whether the mode is None.
  */
 enum FogMode {
     kFogModeNone = 0,
@@ -68,6 +68,25 @@ enum FogMode {
  */
 class Environ : public Drawable {
 public:
+    /**
+     * Registered class name of Rnd::Environ, the string "Environ".
+     *
+     * @ghidraAddress NTSC-U/C: 0x00718d18
+     * @ghidraAddress PAL: 0x0075cc08
+     */
+    static HxStr sClassName;
+
+    /**
+     * Environment the subtree being drawn is under.
+     *
+     * Rnd::Environ::DrawShowing() stores itself here, and Rnd::PsEnviron::DrawShowing() stores its
+     * own environment the same way.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00718d20
+     * @ghidraAddress PAL: 0x0075cc10
+     */
+    static Environ *sCurrent;
+
     /**
      * Construct an environment with no lights and no fog.
      *
@@ -197,7 +216,7 @@ public:
     /**
      * Append a light to mLights.
      *
-     * A light already in the list is reported to g_failSink as "<light> already in <environment>"
+     * A light already in the list is reported to Rnd::TheDbg as "<light> already in <environment>"
      * and is not added again. Otherwise this environment registers as a referrer of the light,
      * when it is not null, and the light is appended.
      *
@@ -228,10 +247,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00519568
      * @ghidraAddress PAL: 0x00559900
      */
-    void ClearLights();
+    void RemoveAllLights();
 
     // Declared in recovered offset order. Every member is public because
-    // Rnd::PsEnviron::DrawSelf() reads mLights, mFogMode, the two fog distances, and mFogColor
+    // Rnd::PsEnviron::DrawShowing() reads mLights, mFogMode, the two fog distances, and mFogColor
     // directly, and the image exposes no accessor for any of them.
 
     /** Lights this environment applies to the subtree below it. +0x14 */
@@ -283,7 +302,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x00518e60
      * @ghidraAddress PAL: 0x005591f8
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
 private:
     // Registers this environment as a referrer of every mLights entry. Inlined in Load(), Copy(),
@@ -335,14 +354,6 @@ Object *CreateRegisteredEnviron(const HxStr &name);
 Environ *NewEnvironThroughHook(const HxStr &name);
 
 /**
- * Registered class name of Rnd::Environ, the string "Environ".
- *
- * @ghidraAddress NTSC-U/C: 0x00718d18
- * @ghidraAddress PAL: 0x0075cc08
- */
-extern HxStr g_environClassName;
-
-/**
  * Point g_pfnNewEnviron at Environ::NewEnviron() and register the "Environ" class with
  * Rnd::Manager.
  *
@@ -356,18 +367,7 @@ extern HxStr g_environClassName;
  */
 inline void RegisterEnvironClass() {
     g_pfnNewEnviron = Environ::NewEnviron;
-    g_manager.RegisterClass(g_environClassName, CreateRegisteredEnviron);
+    TheManager.RegisterClass(Environ::sClassName, CreateRegisteredEnviron);
 }
-
-/**
- * Environment the subtree being drawn is under.
- *
- * Rnd::Environ::DrawSelf() stores itself here, and Rnd::PsEnviron::DrawSelf() stores its own
- * environment the same way.
- *
- * @ghidraAddress NTSC-U/C: 0x00718d20
- * @ghidraAddress PAL: 0x0075cc10
- */
-extern Environ *g_pCurrentEnviron;
 
 } // namespace Rnd

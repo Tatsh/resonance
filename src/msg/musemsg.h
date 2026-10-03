@@ -65,7 +65,7 @@ public:
     /**
      * The song position, in MIDI ticks. +0x04
      *
-     * Public because NoteFinder::HandleMessage() at `0x001023b0` reads it directly from a NoteMsg
+     * Public because NoteFinder::DispatchPriv() at `0x001023b0` reads it directly from a NoteMsg
      * with no accessor in the image.
      */
     int mTick;

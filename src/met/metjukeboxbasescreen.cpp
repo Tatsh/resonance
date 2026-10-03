@@ -96,8 +96,8 @@ MetJukeboxBaseScreen::~MetJukeboxBaseScreen() {
 // NTSC-U/C: 0x0021e0f0, PAL: 0x00230ce0
 void MetJukeboxBaseScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    mAvailableFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kSelectedFont)));
-    mUnavailableFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(kUnselectedFont)));
+    mAvailableFont = dynamic_cast<Rnd::Font *>(Rnd::TheManager.Find(HxStr(kSelectedFont)));
+    mUnavailableFont = dynamic_cast<Rnd::Font *>(Rnd::TheManager.Find(HxStr(kUnselectedFont)));
 }
 
 // NTSC-U/C: 0x0021e268, PAL: 0x00230ea0
@@ -244,7 +244,7 @@ void MetJukeboxBaseScreen::ShowRemixDetails() {
     if (!bOtherAlbum) {
         HxStr third = QueryConfigString(kDetailConfigCode3, TextOrEmpty(record.levelName));
         const float flWrapWidth = mSongTitleText->mWrapWidth;
-        if (flWrapWidth < mSongTitleText->MeasureText(TextOrEmpty(third), third.mLen)) {
+        if (flWrapWidth < mSongTitleText->GetFontWidth(TextOrEmpty(third), third.mLen)) {
             HxStr shorter =
                 QueryConfigString(kDetailConfigCode3Short, TextOrEmpty(record.levelName));
             third = shorter;

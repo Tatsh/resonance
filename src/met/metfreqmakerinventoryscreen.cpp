@@ -213,7 +213,7 @@ inline int PageRowCount(int nParts) {
 // Resolve one named object of the renderer as T.
 template <class T>
 inline T *FindObject(const char *pszName) {
-    return dynamic_cast<T *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<T *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 // Hang pChild from pParent in front of every drawable already hung there.
@@ -391,7 +391,7 @@ void MetFreqMakerInventoryScreen::ResolveContainerViews() {
         name = pTemplate->mName + kMeshSuffix;
         Rnd::Mesh *pMesh = MetFreqMakerAssetManager::shared()->CloneMesh(name);
         mPartMeshes.push_back(pMesh);
-        pMesh->SetMaterial(pTemplate->mMaterial);
+        pMesh->SetMat(pTemplate->mMaterial);
         float flScaleX;
         float flScaleZ;
         MetFreqMakerAssetManager::shared()->ApplyPartScale(
@@ -1067,27 +1067,27 @@ void MetFreqMakerInventoryScreen::SetHighlight(int nHighlight) {
     switch (nHighlight) {
     case kHighlightCanvas:
         canvasMaterialName = kCanvasHighlightMaterial;
-        pCanvasMaterial = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(canvasMaterialName));
+        pCanvasMaterial = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(canvasMaterialName));
         inventoryMaterialName = kInventoryMaterial;
-        pInventoryMaterial = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(inventoryMaterialName));
+        pInventoryMaterial = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(inventoryMaterialName));
         break;
     case kHighlightInventory:
         canvasMaterialName = kCanvasLiveMaterial;
-        pCanvasMaterial = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(canvasMaterialName));
+        pCanvasMaterial = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(canvasMaterialName));
         inventoryMaterialName = kInventoryHighlightMaterial;
-        pInventoryMaterial = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(inventoryMaterialName));
+        pInventoryMaterial = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(inventoryMaterialName));
         break;
     case kHighlightNone:
         canvasMaterialName = kCanvasLiveMaterial;
-        pCanvasMaterial = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(canvasMaterialName));
+        pCanvasMaterial = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(canvasMaterialName));
         inventoryMaterialName = kInventoryMaterial;
-        pInventoryMaterial = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(inventoryMaterialName));
+        pInventoryMaterial = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(inventoryMaterialName));
         break;
     default:
         break;
     }
-    pCanvasMesh->SetMaterial(pCanvasMaterial);
-    pInventoryMesh->SetMaterial(pInventoryMaterial);
+    pCanvasMesh->SetMat(pCanvasMaterial);
+    pInventoryMesh->SetMat(pInventoryMaterial);
 }
 
 // NTSC-U/C: 0x00272868, PAL: 0x0028ad18

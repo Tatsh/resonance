@@ -61,7 +61,7 @@ Voxer::Voxer(PhraseMgr *pPhraseMgr,
              const TrackData *pTrackData)
     : Pitcher(pClock), mPhraseMgr(pPhraseMgr), mQuantizer(pQuantizer), mTrackData(pTrackData),
       mTrack(pTrackData->mIndex), mBarTicks(pPhraseMgr->mBarTicks), mChannel(pTrackData->mChannel),
-      mPlayer(&g_nullPlayer), mSustaining(0), mPhrase(nullptr), mPhraseBar(kNoValue),
+      mPlayer(&NullPlayer::sInstance), mSustaining(0), mPhrase(nullptr), mPhraseBar(kNoValue),
       mUnreadSentinel(kNoValue) {
 }
 
@@ -124,7 +124,7 @@ void Voxer::OnErase(int nBar, int bWholeStep, int bAnnounce) {
     }
 
     for (int nClear = nFirstBar; nClear < nEndBar; ++nClear) {
-        if (mPhraseMgr->GetPhraseOwner(nClear) != mPlayer) {
+        if (mPhraseMgr->GetOwner(nClear) != mPlayer) {
             continue;
         }
         bErased = 1;
@@ -265,17 +265,17 @@ void Voxer::OnInvalidateSeeker(int) {
 }
 
 // NTSC-U/C: 0x001d9050, PAL: 0x001defc0
-void Voxer::HandleMessage(Message *pMsg) {
+void Voxer::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
-    if (nType == static_cast<int>(g_nPitchRiffMsgType)) {
+    if (nType == static_cast<int>(PitchRiffMsg::sID)) {
         OnPitchRiff(static_cast<PitchRiffMsg *>(pMsg));
         return;
     }
-    if (nType == static_cast<int>(g_nStopRiffMsgType)) {
+    if (nType == static_cast<int>(StopRiffMsg::sID)) {
         OnStopRiff(static_cast<StopRiffMsg *>(pMsg));
         return;
     }
-    if (nType == static_cast<int>(g_nEraseMsgType)) {
+    if (nType == static_cast<int>(EraseMsg::sID)) {
         EraseMsg *pErase = static_cast<EraseMsg *>(pMsg);
         if (pErase->mTrack != mTrack) {
             return;
@@ -290,7 +290,7 @@ void Voxer::HandleMessage(Message *pMsg) {
         OnTrackSelect(static_cast<TrackSelectMsg *>(pMsg));
         return;
     }
-    if (nType == static_cast<int>(g_nInvalidateSeekerMsgType)) {
+    if (nType == static_cast<int>(InvalidateSeekerMsg::sID)) {
         InvalidateSeekerMsg *pInvalidate = static_cast<InvalidateSeekerMsg *>(pMsg);
         if (pInvalidate->mTrack == mTrack) {
             OnInvalidateSeeker(pInvalidate->mBar);

@@ -48,7 +48,7 @@ void Phrase::operator delete(void *pBlock) {
 }
 
 // NTSC-U/C: 0x001b4940, PAL: 0x001ba718
-Phrase::Phrase() : mPlayer(&g_nullPlayer), mMuse(nullptr), mScore(0) {
+Phrase::Phrase() : mPlayer(&NullPlayer::sInstance), mMuse(nullptr), mScore(0) {
 }
 
 // NTSC-U/C: 0x001b4998, PAL: 0x001ba770
@@ -176,7 +176,7 @@ void Phrase::Load(IBStream &stream) {
         if (nPlayer == kNoPlayer) {
             pPlayer = nullptr;
         } else if (nPlayer == kIDableUnregistered) {
-            pPlayer = &g_nullPlayer;
+            pPlayer = &NullPlayer::sInstance;
         } else {
             pPlayer = IDable<Player>::sObjects[nPlayer];
         }
@@ -231,7 +231,7 @@ void Phrase::LoadValues(IBStream &stream) {
 }
 
 // NTSC-U/C: 0x001b6d88, PAL: 0x001bcb60
-void Phrase::AddValue(int nTick, float flValue) {
+void Phrase::AddXLocal(int nTick, float flValue) {
     TickObj<float> value;
     value.mPosition.mTick = nTick;
     value.mValue = flValue;

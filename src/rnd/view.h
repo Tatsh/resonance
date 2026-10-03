@@ -30,7 +30,7 @@ namespace Rnd {
  * vptr addresses. They are `0x00823628` (Animatable), `0x00823600` (Drawable), `0x008235e0`
  * (Transformable), `0x008235c0` (Collideable), and `0x00823650` (Object). Every entry of the last
  * four adjusts `this` back to the start of the View. The Drawable table repeats the base
- * implementations of SetShowing, SetHighlight, and DrawSelf, so View overrides none of the three
+ * implementations of SetShowing, SetHighlight, and DrawShowing, so View overrides none of the three
  * and draws nothing of its own.
  *
  * A `.rnd` file exposes its scene root under the name "view", which start-up resolves through
@@ -130,7 +130,7 @@ public:
     static View *NewView(const HxStr &name);
 
     /**
-     * Register the five class keys this class answers to with Rnd::g_manager.
+     * Register the five class keys this class answers to with Rnd::TheManager.
      *
      * The four mix-in keys are registered from temporary strings the routine builds from literals,
      * and only the "View" key uses a string global.

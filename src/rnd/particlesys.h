@@ -38,7 +38,7 @@ namespace Rnd {
  *
  * The class overrides seven of the eight Object virtuals and two of the three Animatable ones. It
  * overrides nothing of Drawable or Transformable, so its Drawable table still addresses the base
- * DrawSelf() at `0x005066f0`, which draws nothing. Drawing belongs to Rnd::PsParticleSys.
+ * DrawShowing() at `0x005066f0`, which draws nothing. Drawing belongs to Rnd::PsParticleSys.
  *
  * Particles live in two places at once. The pool is a vector of 0x80-byte records that the
  * constructor sizes to ten. The live set is a doubly linked list threaded through Particle::mNext
@@ -285,7 +285,7 @@ public:
      * Report the head of the live list.
      *
      * The out-of-line copy has no callers. Rnd::Generator::SetFrameSelf() and
-     * Rnd::Generator::DrawSelf() inline it.
+     * Rnd::Generator::DrawShowing() inline it.
      *
      * @return The first live particle, or null.
      * @ghidraAddress NTSC-U/C: 0x0052b4b8
@@ -373,7 +373,7 @@ private:
     // Data members follow the recovered offset order.
 
 protected:
-    // The first three are protected rather than private because Rnd::PsParticleSys::DrawSelf()
+    // The first three are protected rather than private because Rnd::PsParticleSys::DrawShowing()
     // reads all three directly, the owner and its pool for the overflow guard and the live list
     // both to test for emptiness and to walk.
 
@@ -382,14 +382,14 @@ protected:
 
 public:
     /*!< Pool the live list draws from, which the constructor sizes to ten records of 0x80 bytes.
-         Public rather than protected because Rnd::PsParticleSys::DrawSelf() measures it through
+         Public rather than protected because Rnd::PsParticleSys::DrawShowing() measures it through
          mParticlesOwner, which is a `Rnd::ParticleSys *` and need not be a PsParticleSys, and
          protected access cannot reach a member through a pointer to the base type. The image
          exposes no accessor for it. +0xe8 */
     std::vector<Particle> mParticles;
 
 protected:
-    // Head of the live list, threaded through Particle::mNext. Rnd::PsParticleSys::DrawSelf()
+    // Head of the live list, threaded through Particle::mNext. Rnd::PsParticleSys::DrawShowing()
     // treats a null head as nothing to draw.
     Particle *mLiveParticles;
 
@@ -451,8 +451,8 @@ private:
 
 public:
     /*!< Material every particle draws with, or null for the default surface. Public because
-         Rnd::PsParticleSys::DrawSelf() selects it through a `Rnd::Mat *` and the image exposes no
-         accessor. +0x1e0 */
+         Rnd::PsParticleSys::DrawShowing() selects it through a `Rnd::Mat *` and the image exposes
+         no accessor. +0x1e0 */
     Mat *mMat;
     /*!< Primitive each particle draws as. Public on the same evidence as mMat, the draw path
          switching on it directly. +0x1e4 */
@@ -542,7 +542,7 @@ extern HxStr g_particleSysClassName;
  */
 inline void RegisterParticleSysClass() {
     g_pfnNewParticleSys = NewParticleSys;
-    g_manager.RegisterClass(g_particleSysClassName, CreateRegisteredParticleSys);
+    TheManager.RegisterClass(g_particleSysClassName, CreateRegisteredParticleSys);
 }
 
 } // namespace Rnd

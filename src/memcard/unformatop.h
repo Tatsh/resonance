@@ -16,7 +16,7 @@ public:
     /**
      * Construct an unformat against one slot.
      *
-     * @param pHandler The receiver Complete() reports to.
+     * @param pHandler The receiver NotifyDone() reports to.
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag Memcard::Cancel() matches on.
      * @ghidraAddress NTSC-U/C: 0x0055e5a8
@@ -34,13 +34,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055e5d0
      * @ghidraAddress PAL: 0x0059f8a0
      */
-    virtual void Issue();
+    virtual void Execute();
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0055d670
      * @ghidraAddress PAL: 0x0059e8c8
      */
-    virtual void Complete();
+    virtual void NotifyDone();
 
     /**
      * Report kMemcardStatusOk for zero and kMemcardStatusUnknown for every other result.

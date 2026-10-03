@@ -15,13 +15,13 @@ ReadOp::~ReadOp() {
 }
 
 // NTSC-U/C: 0x0055e910, PAL: 0x0059fbe0
-void ReadOp::Issue() {
+void ReadOp::Execute() {
     sceMcRead(mFile, mBuffer, mLength);
     mIssued = kMemcardOpInFlight;
 }
 
 // NTSC-U/C: 0x0055d9e8, PAL: 0x0059ec60
-void ReadOp::Complete() {
+void ReadOp::NotifyDone() {
     InterpretResult();
     mHandler->OnRead(this);
 }

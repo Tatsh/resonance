@@ -11,7 +11,7 @@
  * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). Every member is public because
- * AppTunnel::HandleMessage() at `0x00449790` reads them directly with no accessor in the image. It
+ * AppTunnel::DispatchPriv() at `0x00449790` reads them directly with no accessor in the image. It
  * converts mPosition's tick and mGem to floats and loads mTrack with `lb`, which reads only the low
  * byte of the word.
  *

@@ -55,17 +55,17 @@ void PrintObjectRef(Dbg &sink, const Object *pObject) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 template <class T>
 void ReadObjectRef(Stream &stream, T *&refOut) {
     HxStr name(nullptr);
     stream.ReadString(name);
-    refOut = dynamic_cast<T *>(g_manager.Find(name));
+    refOut = dynamic_cast<T *>(TheManager.Find(name));
 }
 
 // Move one reference of owner from pFrom to pTo, narrowing pTo to the type of the reference.
@@ -149,14 +149,14 @@ void InterpolateTex(Tex *pFrom,
 // NTSC-U/C: 0x004db6b0, PAL: 0x00519bf8
 Stream &ReadTexKey(Stream &stream, MatAnim::StageAnim::TexKey &key) {
     ReadObjectRef(stream, key.mValue);
-    stream.Read(&key.mFrame, sizeof(key.mFrame));
+    stream.ReadLE(&key.mFrame, sizeof(key.mFrame));
     return stream;
 }
 
 // NTSC-U/C: 0x004dda98, PAL: 0x0051c050
 Stream &ReadTexKeys(Stream &stream, std::list<MatAnim::StageAnim::TexKey> &keys) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     keys.resize(nCount);
     for (auto &key : keys) {
         ReadTexKey(stream, key);
@@ -168,7 +168,7 @@ Stream &ReadTexKeys(Stream &stream, std::list<MatAnim::StageAnim::TexKey> &keys)
 // NTSC-U/C: 0x004db0c0, PAL: 0x005195d8
 Stream &ReadTexList(Stream &stream, std::list<Tex *> &textures) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     textures.resize(nCount);
     for (auto &pTex : textures) {
         ReadObjectRef(stream, pTex);
@@ -179,10 +179,10 @@ Stream &ReadTexList(Stream &stream, std::list<Tex *> &textures) {
 // NTSC-U/C: 0x004dadc8, PAL: 0x005192e0
 Stream &WriteTexKeys(Stream &stream, const std::list<MatAnim::StageAnim::TexKey> &keys) {
     const int nCount = keys.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &key : keys) {
         WriteObjectRef(stream, key.mValue);
-        stream.Write(&key.mFrame, sizeof(key.mFrame));
+        stream.WriteLE(&key.mFrame, sizeof(key.mFrame));
     }
     return stream;
 }
@@ -228,7 +228,7 @@ Dbg &DumpStageAnims(Dbg &sink, std::vector<MatAnim::StageAnim> &stages) {
 // NTSC-U/C: 0x004d9338, PAL: 0x00517850
 Stream &ReadStageAnims(Stream &stream, std::vector<MatAnim::StageAnim> &stages) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     stages.resize(nCount);
     for (auto &stage : stages) {
         stage.Load(stream);
@@ -239,7 +239,7 @@ Stream &ReadStageAnims(Stream &stream, std::vector<MatAnim::StageAnim> &stages) 
 // NTSC-U/C: 0x004dd908, PAL: 0x0051bec0
 Stream &WriteStageAnims(Stream &stream, std::vector<MatAnim::StageAnim> &stages) {
     const int nCount = stages.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (auto &stage : stages) {
         stage.Save(stream);
     }
@@ -249,13 +249,13 @@ Stream &WriteStageAnims(Stream &stream, std::vector<MatAnim::StageAnim> &stages)
 } // namespace
 
 // NTSC-U/C: 0x00700428, PAL: 0x00743e50
-HxStr g_matAnimClassName("MatAnim");
+HxStr MatAnim::sClassName("MatAnim");
 
 // NTSC-U/C: 0x004dd500, PAL: 0x0051baa0
 void MatAnim::StageAnim::Save(Stream &stream) {
-    WriteVector3Keys(stream, mTranslateKeys);
-    WriteVector3Keys(stream, mScaleKeys);
-    WriteVector3Keys(stream, mRotateKeys);
+    stream << mTranslateKeys;
+    stream << mScaleKeys;
+    stream << mRotateKeys;
     WriteTexKeys(stream, mTexKeys);
 }
 
@@ -345,7 +345,7 @@ MatAnim::~MatAnim() {
 
 // NTSC-U/C: 0x004dc4e0, PAL: 0x0051aa80
 const HxStr &MatAnim::ClassName() const {
-    return g_matAnimClassName;
+    return MatAnim::sClassName;
 }
 
 // NTSC-U/C: 0x004dcb00, PAL: 0x0051b0a0
@@ -368,7 +368,7 @@ MatAnim *NewMatAnim(const HxStr &name) {
 
 // NTSC-U/C: 0x004dbf80, PAL: 0x0051a520
 void RegisterMatAnimClass() {
-    g_manager.RegisterClass(g_matAnimClassName, CreateRegisteredMatAnim);
+    TheManager.RegisterClass(MatAnim::sClassName, CreateRegisteredMatAnim);
 }
 
 // NTSC-U/C: 0x004d33b8, PAL: 0x00511858
@@ -434,9 +434,9 @@ void MatAnim::Replace(Object *pFrom, Object *pTo) {
 // NTSC-U/C: 0x004d38e8, PAL: 0x00511d88
 void MatAnim::Load(Stream &stream) {
     // Yes, the binary reads the revision into the material's global rather than one of its own.
-    stream.Read(&g_nRndMatLoadVersion, sizeof(g_nRndMatLoadVersion));
+    stream.ReadLE(&g_nRndMatLoadVersion, sizeof(g_nRndMatLoadVersion));
     if (g_nRndMatLoadVersion > kSerialVersion) {
-        g_failSink.Report("Can't load new MatAnim\n");
+        Rnd::TheDbg.Notify("Can't load new MatAnim\n");
         return;
     }
 
@@ -461,7 +461,7 @@ void MatAnim::Load(Stream &stream) {
 }
 
 // NTSC-U/C: 0x004d42f0, PAL: 0x005127e0
-float MatAnim::EndFrame() {
+float MatAnim::FilteredFrameEnd() {
     float flEnd = 0.0f;
     for (const auto &stage : mKeysOwner->mStages) {
         const float flTranslate = ChannelEndFrame(stage.mTranslateKeys);
@@ -543,7 +543,7 @@ void MatAnim::SetFrameSelf(float flFrame) {
 // NTSC-U/C: 0x004d35d0, PAL: 0x00511a70
 void MatAnim::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
 
     Animatable::Save(stream);
 

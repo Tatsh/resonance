@@ -116,7 +116,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001404f8
      * @ghidraAddress PAL: 0x00140ed8
      */
-    void DeleteSequencer();
+    void Stop();
 
     /**
      * Let the track's notes reach the synthesiser.
@@ -152,7 +152,7 @@ public:
     int CallBuildSequencer();
 
     /**
-     * Run DeleteSequencer() and report zero.
+     * Run Stop() and report zero.
      *
      * Inline. GrooveWorld::StartSequencers() and FinishSong() reach it through a pointer to member,
      * and the address is its uncalled out-of-line copy in the GrooveWorld unit.
@@ -198,7 +198,7 @@ inline int BGTrackGraph::CallBuildSequencer() {
 // NTSC-U/C: 0x00194018, PAL: 0x00199c50
 // The out-of-line copy.
 inline int BGTrackGraph::CallDeleteSequencer() {
-    DeleteSequencer();
+    Stop();
     return 0;
 }
 

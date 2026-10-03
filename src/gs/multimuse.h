@@ -154,7 +154,7 @@ public:
  *
  * The position arrives by value in a1 and the message in a2, which is how TrackData's bar printer
  * at `0x001d31d8` passes the two halves of one entry. The message is printed through
- * Message::PrintBraced(), whose result is discarded.
+ * Message::Print(), whose result is discarded.
  *
  * @param stream The stream to write to.
  * @param position The song position.

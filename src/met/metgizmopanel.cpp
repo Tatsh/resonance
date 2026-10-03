@@ -36,6 +36,6 @@ void MetGizmoPanel::ResolveContainerViews() {
     int nCount = mViewNames.size();
     mViews.resize(nCount);
     for (int i = 0; i < nCount; ++i) {
-        mViews[i] = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(mViewNames[i]));
+        mViews[i] = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(mViewNames[i]));
     }
 }

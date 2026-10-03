@@ -24,7 +24,7 @@ class WriteOp;
  * The interface declares one method per MemcardOp subclass, in the order the operations appear
  * below, and every body is a single `jr ra`. An implementation therefore overrides only the
  * handful of operations it issues. That one-to-one arrangement is what pins each method to its
- * operation. The operation's Complete() body reads the vtable slot directly, and every override
+ * operation. The operation's NotifyDone() body reads the vtable slot directly, and every override
  * in the image reads a member that belongs to the matching operation.
  *
  * Every method title is inferred. No string in the image identifies any of them.

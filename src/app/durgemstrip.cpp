@@ -36,7 +36,7 @@ inline void SetPaddingWords(Transform &xfm) {
 
 // NTSC-U/C: 0x004329e8, PAL: 0x0046e6f8
 DurGemStrip::DurGemStrip(Rnd::View *pView) : mId(kFreeId) {
-    mString = Rnd::String::NewString(DurGemTrails::NewStringName());
+    mString = Rnd::String::New(DurGemTrails::NewStringName());
     mString->SetLinePairs(0);
     mString->SetNumPoints(kPointCount);
     mString->SetShowing(0);

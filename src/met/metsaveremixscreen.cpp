@@ -129,7 +129,7 @@ constexpr int kTwoButtons = 2;
 constexpr int kFirstButtonIndex = 0;
 
 inline Rnd::Text *FindText(const char *pszName) {
-    return dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 inline const char *TextOrEmpty(const HxStr &text) {
@@ -405,10 +405,10 @@ void MetSaveRemixScreen::EnterAndShow() {
         name = ConfigText(kDefaultNameConfigCode, TextOrEmpty(params.mLevelName));
         numbered = FormatString(kNumberedNameFormat, TextOrEmpty(name));
         const float flWrapWidth = mRemixNameText->mWrapWidth;
-        if (flWrapWidth < mRemixNameText->MeasureText(TextOrEmpty(numbered), numbered.mLen)) {
+        if (flWrapWidth < mRemixNameText->GetFontWidth(TextOrEmpty(numbered), numbered.mLen)) {
             name = ConfigText(kShortNameConfigCode, TextOrEmpty(params.mLevelName));
             numbered = FormatString(kNumberedNameFormat, TextOrEmpty(name));
-            if (flWrapWidth < mRemixNameText->MeasureText(TextOrEmpty(numbered), numbered.mLen)) {
+            if (flWrapWidth < mRemixNameText->GetFontWidth(TextOrEmpty(numbered), numbered.mLen)) {
                 Fatal(kNameTooLongFormat, TextOrEmpty(numbered));
             }
         }

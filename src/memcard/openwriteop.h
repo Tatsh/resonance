@@ -9,15 +9,15 @@
  * Its RTTI descriptor is at `0x008efb30`. It has single inheritance from `MemcardOp` at offset 0.
  * An instance is 0x28 bytes and the vtable is at `0x0082bcd0`.
  *
- * Issue() passes `sceMcFileCreateFile | sceMcFileAttrWriteable` as the open mode, which is the one
- * difference from OpenReadOp.
+ * Execute() passes `sceMcFileCreateFile | sceMcFileAttrWriteable` as the open mode, which is the
+ * one difference from OpenReadOp.
  */
 class OpenWriteOp : public MemcardOp {
 public:
     /**
      * Construct an open for writing.
      *
-     * @param pHandler The receiver Complete() reports to.
+     * @param pHandler The receiver NotifyDone() reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The file to open.
      * @param nCookie The tag Memcard::Cancel() matches on.
@@ -36,13 +36,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055ebe8
      * @ghidraAddress PAL: 0x0059feb8
      */
-    virtual void Issue();
+    virtual void Execute();
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0055dd08
      * @ghidraAddress PAL: 0x0059ef90
      */
-    virtual void Complete();
+    virtual void NotifyDone();
 
     /**
      * Record the descriptor, or map the failure through a jump table.

@@ -9,7 +9,7 @@
  * vtables are at `0x007d24e0`, `0x007d24b8`, and `0x007d2490`, each walked to its terminator.
  *
  * The primary table has 21 entries, the same as the base, so this class adds no virtual. It
- * replaces one primary slot, IsNull at index 3, and `HandleMessage` in its `MsgSink` table, which
+ * replaces one primary slot, IsNull at index 3, and `DispatchPriv` in its `MsgSink` table, which
  * it empties so that the stand-in ignores every message. It inherits
  * everything else. Two members against the base's nineteen is what makes this the null-object
  * member of the family, and the base being an interface with inert defaults is what lets it be
@@ -51,15 +51,18 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00133528
      * @ghidraAddress PAL: 0x00133d90
      */
-    virtual void HandleMessage(Message *message);
-};
+    virtual void DispatchPriv(Message *message);
 
-/**
- * Stand-in every unoccupied player reference stores.
- *
- * The object is at `0x0066f930` and the Player translation unit's static initialiser at
- * `0x00132618` builds it, alongside the `IDable<Player>` table at `0x0066f920`. Its 27 readers
- * across the image include TrackSelector, Catcher, PhraseMgr, PitchPicker, Phrase, and
- * AxeNewGemMaker, none of which is in the unit that builds it.
- */
-extern NullPlayer g_nullPlayer;
+    /**
+     * Stand-in every unoccupied player reference stores.
+     *
+     * The Player translation unit's static initialiser at `0x00132618` builds it, alongside the
+     * `IDable<Player>` table at `0x0066f920`. Its 27 readers across the image include
+     * TrackSelector, Catcher, PhraseMgr, PitchPicker, Phrase, and AxeNewGemMaker, none of which is
+     * in the unit that builds it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0066f930
+     * @ghidraAddress PAL: 0x006b0520
+     */
+    static NullPlayer sInstance;
+};

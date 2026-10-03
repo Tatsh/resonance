@@ -147,7 +147,7 @@ public:
     virtual int Tick(int nTick) {
         for (int nIndex = 0; nIndex < mCount;) {
             if (!(nTick < mEntries[nIndex].mTick)) {
-                mSynth->SendMidi(kNoteOffLastChannel, mEntries[nIndex].mNote, kReleaseVelocity);
+                mSynth->PlayMidi(kNoteOffLastChannel, mEntries[nIndex].mNote, kReleaseVelocity);
                 --mCount;
                 mEntries[nIndex] = mEntries[mCount];
             } else {
@@ -198,7 +198,7 @@ void PlaySynthSound(int nNote, int nNote2, int nVelocity, int bAutoStop) {
     Ps2HardSynth *pSynth = Application::shared()->GetSynth();
     // Yes, the binary tests the first note against 1 rather than -1.
     if (nNote != kSkippedFirstNote) {
-        pSynth->SendMidi(kNoteOnLastChannel, nNote, nVelocity);
+        pSynth->PlayMidi(kNoteOnLastChannel, nNote, nVelocity);
         if (bAutoStop != 0) {
             NoteDestroyer *pDestroyer = g_pNoteDestroyer;
             const int nNow = Application::shared()->GetSongClock()->SongTick();
@@ -208,7 +208,7 @@ void PlaySynthSound(int nNote, int nNote2, int nVelocity, int bAutoStop) {
         }
     }
     if (nNote2 != kNoNote) {
-        pSynth->SendMidi(kNoteOnLastChannel, nNote2, nVelocity);
+        pSynth->PlayMidi(kNoteOnLastChannel, nNote2, nVelocity);
     }
 }
 
@@ -369,10 +369,10 @@ void StopSoundByName(const char *pszName) {
     Ps2HardSynth *pSynth = Application::shared()->GetSynth();
     // Yes, the binary tests the first note against 1 rather than -1.
     if (nNote != kSkippedFirstNote) {
-        pSynth->SendMidi(kNoteOffLastChannel, nNote, kReleaseVelocity);
+        pSynth->PlayMidi(kNoteOffLastChannel, nNote, kReleaseVelocity);
     }
     if (nNote2 != kNoNote) {
-        pSynth->SendMidi(kNoteOffLastChannel, nNote2, kReleaseVelocity);
+        pSynth->PlayMidi(kNoteOffLastChannel, nNote2, kReleaseVelocity);
     }
 }
 

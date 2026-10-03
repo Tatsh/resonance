@@ -54,21 +54,21 @@ TnlCameraRig::TnlCameraRig(int nPlayerCount, int nSkipIntro)
     : mPlayerCount(nPlayerCount), mState(kStateSettled) {
     mIntroPos.w = 1.0f;
     mPlayPos.w = 1.0f;
-    mRamp.SetRange(0.0f, 1.0f, kRampFrames);
+    mRamp.SetParams(0.0f, 1.0f, kRampFrames);
 
-    mMainCams[kMainCamNormal] = dynamic_cast<Rnd::Cam *>(Rnd::g_manager.Find(HxStr("tnl cam1")));
-    mMainCams[kMainCamZoom] = dynamic_cast<Rnd::Cam *>(Rnd::g_manager.Find(HxStr("tnl cam1z")));
+    mMainCams[kMainCamNormal] = dynamic_cast<Rnd::Cam *>(Rnd::TheManager.Find(HxStr("tnl cam1")));
+    mMainCams[kMainCamZoom] = dynamic_cast<Rnd::Cam *>(Rnd::TheManager.Find(HxStr("tnl cam1z")));
     mOuterCams.resize(kSlotCount, nullptr);
     mLocalViews.resize(kSlotCount, nullptr);
     for (int i = 0; i < nPlayerCount; ++i) {
         mOuterCams[i] = dynamic_cast<Rnd::Cam *>(
-            Rnd::g_manager.Find(HxStr(FormatString("outer cam%d", i + 1))));
+            Rnd::TheManager.Find(HxStr(FormatString("outer cam%d", i + 1))));
         mLocalViews[i] = dynamic_cast<Rnd::View *>(
-            Rnd::g_manager.Find(HxStr(FormatString("tnl local%d.view", i + 1))));
+            Rnd::TheManager.Find(HxStr(FormatString("tnl local%d.view", i + 1))));
     }
 
     Rnd::TransAnim *pIntro = dynamic_cast<Rnd::TransAnim *>(
-        Rnd::g_manager.Find(HxStr(FormatString("tnl cam intro%d.tnm", mPlayerCount))));
+        Rnd::TheManager.Find(HxStr(FormatString("tnl cam intro%d.tnm", mPlayerCount))));
     Transform xfm;
     Vector3 angles;
     Vector3 scale;
@@ -112,7 +112,7 @@ void TnlCameraRig::ZoomOut() {
 
 // NTSC-U/C: 0x00441558, PAL: 0x0047e270
 void TnlCameraRig::SetFrame(float flTime) {
-    if (mRamp.Update(flTime) == 0) {
+    if (mRamp.Execute(flTime) == 0) {
         if (mState == kStateSettled) {
             return;
         }
@@ -123,16 +123,16 @@ void TnlCameraRig::SetFrame(float flTime) {
         return;
     }
 
-    const float flPitch = (mPlayPitch - mIntroPitch) * mRamp.Value() + mIntroPitch;
-    const float flWeight = mRamp.Value();
+    const float flPitch = (mPlayPitch - mIntroPitch) * mRamp.Val() + mIntroPitch;
+    const float flWeight = mRamp.Val();
     Vector3 pos;
     pos.x = mPlayPos.x * flWeight + mIntroPos.x * (1.0f - flWeight);
     pos.y = mPlayPos.y * flWeight + mIntroPos.y * (1.0f - flWeight);
     pos.z = mPlayPos.z * flWeight + mIntroPos.z * (1.0f - flWeight);
     pos.w = mPlayPos.w;
     Rnd::Cam::Rect rect;
-    InterpolateFourFloats(&mIntroRect.x, &mPlayRect.x, &rect.x, mRamp.Value());
-    const float flFov = (mPlayFov - mIntroFov) * mRamp.Value() + mIntroFov;
+    InterpolateFourFloats(&mIntroRect.x, &mPlayRect.x, &rect.x, mRamp.Val());
+    const float flFov = (mPlayFov - mIntroFov) * mRamp.Val() + mIntroFov;
 
     const Vector3 pitchAngles{flPitch, 0.0f, 0.0f, 1.0f};
     Vector3 basis[3];

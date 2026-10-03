@@ -12,7 +12,7 @@ class TrackSelectPacket;
  *
  * The primary table has 21 entries, the same as the base, so this class adds no virtual and only
  * replaces. It replaces exactly two of the base's slots, 4 and 5, where the base returns -1 and 0,
- * and it replaces `HandleMessage` in its `MsgSink` table. It inherits both `MsgSource` virtuals
+ * and it replaces `DispatchPriv` in its `MsgSink` table. It inherits both `MsgSource` virtuals
  * and every other primary slot, which makes it a thin specialisation rather than a parallel
  * implementation.
  *
@@ -73,7 +73,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00125f70
      * @ghidraAddress PAL: 0x00126608
      */
-    virtual void HandleMessage(Message *message);
+    virtual void DispatchPriv(Message *message);
 
 private:
     // NTSC-U/C: 0x00122f78, PAL: 0x001235a8
@@ -81,7 +81,7 @@ private:
     void OnTrackSelectPacket(TrackSelectPacket *pPacket);
 
     // The track and place of a TrackSelectMsg addressed to this player, copied from the message's
-    // +0x04 and +0x08 by HandleMessage.
+    // +0x04 and +0x08 by DispatchPriv.
     int mTrack; // +0x48
     int mPlace; // +0x4c
 };

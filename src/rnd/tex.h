@@ -43,6 +43,25 @@ namespace Rnd {
 class Tex : public Object {
 public:
     /**
+     * Creator the registered "Tex" class builds through.
+     *
+     * The default creator allocates 0x58 bytes and constructs a Rnd::Tex. GfxDevice::Init() and
+     * the PlayStation 2 texture layer both overwrite the hook with the Rnd::PsTex creator.
+     *
+     * @ghidraAddress NTSC-U/C: 0x007033a8
+     * @ghidraAddress PAL: 0x00746e58
+     */
+    static Tex *(*sNew)(const HxStr &name);
+
+    /**
+     * Registered class name of Rnd::Tex, the string "Tex".
+     *
+     * @ghidraAddress NTSC-U/C: 0x007033b0
+     * @ghidraAddress PAL: 0x00746e60
+     */
+    static HxStr sClassName;
+
+    /**
      * Construct a texture with no bitmap.
      *
      * The mip selector starts at -0x80 and mZone at -1, which selects the tagged heap.
@@ -152,7 +171,7 @@ public:
     /**
      * Report the registered class name, "Tex".
      *
-     * @return g_texClassName.
+     * @return Tex::sClassName.
      * @ghidraAddress NTSC-U/C: 0x004e7618
      * @ghidraAddress PAL: 0x005260b8
      */
@@ -381,7 +400,7 @@ protected:
      * then swapped unless g_nSkipColorSwap is set. Flag 0x10 of mFlags runs
      * ABitmap::SetPaletteAlphaFromLowByte(0), or else flag 0x20 runs it with 1, and
      * ABitmap::ApplyColorKey() receives mFlags whole. A level whose width or height is not a
-     * power of two is reported to g_failSink. A level above zero whose size is not mWidth and
+     * power of two is reported to Rnd::TheDbg. A level above zero whose size is not mWidth and
      * mHeight shifted right by nMip is reported as well. Neither report stops the load. Rnd::PsTex
      * runs this body first and then uploads the level to GS memory. The name is inferred from the
      * position of the call inside PollAsyncMips().
@@ -445,25 +464,6 @@ protected:
 };
 
 /**
- * Creator the registered "Tex" class builds through.
- *
- * The default creator allocates 0x58 bytes and constructs a Rnd::Tex. GfxDevice::Init() and the
- * PlayStation 2 texture layer both overwrite the hook with the Rnd::PsTex creator.
- *
- * @ghidraAddress NTSC-U/C: 0x007033a8
- * @ghidraAddress PAL: 0x00746e58
- */
-extern Tex *(*g_pfnNewTex)(const HxStr &name);
-
-/**
- * Registered class name of Rnd::Tex, the string "Tex".
- *
- * @ghidraAddress NTSC-U/C: 0x007033b0
- * @ghidraAddress PAL: 0x00746e60
- */
-extern HxStr g_texClassName;
-
-/**
  * Allocate and construct a texture, the base creator of the "Tex" class.
  *
  * @param name The object name.
@@ -487,7 +487,7 @@ Tex *NewTex(const HxStr &name);
 Tex *NewTexThroughHook(const HxStr &name);
 
 /**
- * Build a texture for the registered "Tex" class by calling through g_pfnNewTex.
+ * Build a texture for the registered "Tex" class by calling through Tex::sNew.
  *
  * @param name The object name.
  * @return The new texture, as its Rnd::Object subobject.
@@ -497,7 +497,7 @@ Tex *NewTexThroughHook(const HxStr &name);
 Object *CreateRegisteredTex(const HxStr &name);
 
 /**
- * Point g_pfnNewTex at NewTex() and register the "Tex" class with Rnd::Manager.
+ * Point Tex::sNew at NewTex() and register the "Tex" class with Rnd::Manager.
  *
  * Neither out-of-line copy has a caller. The second, at `0x0059a518`, lies in the Rnd::PsTex unit,
  * and GfxDevice::Terminate() expands the body.
@@ -508,8 +508,8 @@ Object *CreateRegisteredTex(const HxStr &name);
  * @ghidraAddress PAL: 0x00525ea8
  */
 inline void RegisterTexClass() {
-    g_pfnNewTex = NewTex;
-    g_manager.RegisterClass(g_texClassName, CreateRegisteredTex);
+    Tex::sNew = NewTex;
+    TheManager.RegisterClass(Tex::sClassName, CreateRegisteredTex);
 }
 
 } // namespace Rnd

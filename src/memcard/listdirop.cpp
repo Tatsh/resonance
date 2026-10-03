@@ -19,7 +19,7 @@ ListDirOp::~ListDirOp() {
 }
 
 // NTSC-U/C: 0x0055e818, PAL: 0x0059fae8
-void ListDirOp::Issue() {
+void ListDirOp::Execute() {
     sceMcGetDir(mPortSlot >> kMemcardPortShift,
                 mPortSlot & kMemcardSlotMask,
                 mPath.mStr != nullptr ? mPath.mStr : g_szEmptyString,
@@ -30,7 +30,7 @@ void ListDirOp::Issue() {
 }
 
 // NTSC-U/C: 0x0055d8d0, PAL: 0x0059eb48
-void ListDirOp::Complete() {
+void ListDirOp::NotifyDone() {
     InterpretResult();
     mHandler->OnListDir(this);
 }

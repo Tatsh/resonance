@@ -118,7 +118,7 @@ public:
     /**
      * Fill part of one row by sampling an indexed source bitmap along a fixed step.
      *
-     * Resolves the palette from the source, then the canvas, then g_pDefaultPalette, and returns
+     * Resolves the palette from the source, then the canvas, then ACanvas::palDefault, and returns
      * when none is available. Unlike the base implementation it applies no transparency test.
      *
      * @param nY The destination row.
@@ -140,7 +140,7 @@ public:
     /**
      * Copy a four bit source bitmap, with no clip test.
      *
-     * Unpacks one row into g_abCanvasRowScratch and stores one palette entry
+     * Unpacks one row into ACanvas::tempBuff and stores one palette entry
      * per pixel. A skipped pixel still advances the destination.
      *
      * @param source The source bitmap.

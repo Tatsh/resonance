@@ -14,14 +14,14 @@ CheckInfoOp::~CheckInfoOp() {
 }
 
 // NTSC-U/C: 0x0055e390, PAL: 0x0059f660
-void CheckInfoOp::Issue() {
+void CheckInfoOp::Execute() {
     sceMcGetInfo(
         mPortSlot >> kMemcardPortShift, mPortSlot & kMemcardSlotMask, &mType, &mFree, &mFormatted);
     mIssued = kMemcardOpInFlight;
 }
 
 // NTSC-U/C: 0x0055d350, PAL: 0x0059e598
-void CheckInfoOp::Complete() {
+void CheckInfoOp::NotifyDone() {
     InterpretResult();
     mHandler->OnCheckInfo(this);
 }

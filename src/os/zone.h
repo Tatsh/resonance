@@ -267,7 +267,7 @@ void ZoneDump();
  * @ghidraAddress NTSC-U/C: 0x008945a0
  * @ghidraAddress PAL: 0x008d8ca0
  */
-extern Zone g_adZones[kZoneCount];
+extern Zone zoneDescs[kZoneCount];
 
 /**
  * The start-up zone list, terminated by an entry with a null name.

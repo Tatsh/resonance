@@ -14,7 +14,7 @@ void MemcardTask::UnusedHook() {
 #endif
 
 // NTSC-U/C: 0x00185998, PAL: 0x0018b3c0
-void MemcardTask::AbortOnError() {
+void MemcardTask::HandleError() {
     if (mStatus != kMemcardStatusOk) {
         mCard->Cancel(mCookie);
         Finish();

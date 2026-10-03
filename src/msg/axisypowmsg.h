@@ -95,7 +95,7 @@ public:
      */
     virtual void PrintExtra(std::ostream &stream) const;
 
-    // Public because LocalPlayer::HandleMessage() reads both directly at `0x0011ee04` and
+    // Public because LocalPlayer::DispatchPriv() reads both directly at `0x0011ee04` and
     // `0x0011ee20`, and the image has no accessor.
     Player *mPlayer; /*!< The player the controller belongs to. +0x04 */
     int mValue;      /*!< The axis step. +0x08 */

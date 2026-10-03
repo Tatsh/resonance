@@ -22,7 +22,7 @@ constexpr char kViewName[] = "met_fade.view";
 int g_nFadeRunning = 0;
 
 Rnd::View *FindFadeView() {
-    return dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kViewName)));
+    return dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kViewName)));
 }
 #endif
 
@@ -33,7 +33,7 @@ MetFade::MetFade(MetRenderer *pRenderer) : renderer_(pRenderer) {
     state_ = kStateIdle;
     inStart_ = kIdleFrame;
     outStart_ = kIdleFrame;
-    rect_ = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kRectName)));
+    rect_ = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(kRectName)));
     rect_->SetShowing(0);
 }
 
@@ -80,7 +80,7 @@ void MetFade::FadeOut(float duration, float start, FadeUser *pUser, int nRetainV
     outEnd_ = end;
     rate_ = 1.0f / (end - start);
     offset_ = 0.0f - rate_ * start;
-    renderer_->AddScreenView(dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kViewName))));
+    renderer_->AddScreenView(dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kViewName))));
 }
 
 // NTSC-U/C: 0x0016d750
@@ -93,7 +93,7 @@ void MetFade::FadeIn(float duration, float start, FadeUser *pUser, int nRetainVi
     inEnd_ = end;
     rate_ = 1.0f / (end - start);
     offset_ = 0.0f - rate_ * start;
-    renderer_->AddScreenView(dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kViewName))));
+    renderer_->AddScreenView(dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kViewName))));
 }
 #endif
 
@@ -184,7 +184,7 @@ void MetFade::UpdateOut(float frame) {
         frame = outEnd_;
         outStart_ = kIdleFrame;
         renderer_->RemoveScreenView(
-            dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kViewName))));
+            dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kViewName))));
         rect_->SetShowing(0);
         if (user_ != nullptr) {
             user_->OnFadeOutDone();
@@ -204,7 +204,7 @@ void MetFade::UpdateIn(float frame) {
         state_ = kStateIdle;
         if (retainView_ == 0) {
             renderer_->RemoveScreenView(
-                dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kViewName))));
+                dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kViewName))));
             rect_->SetShowing(0);
         }
         if (user_ != nullptr) {

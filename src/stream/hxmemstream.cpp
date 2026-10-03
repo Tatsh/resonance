@@ -25,7 +25,7 @@ HxMemStream::~HxMemStream() {
 }
 
 // NTSC-U/C: 0x00405e00, PAL: 0x0043f700
-void HxMemStream::Seek(int nOffset, int nWhence) {
+void HxMemStream::SetMarker(int nOffset, int nWhence) {
     char *pTarget = nullptr;
     switch (nWhence) {
     case kHxSeekCur:
@@ -51,7 +51,7 @@ void HxMemStream::Seek(int nOffset, int nWhence) {
 }
 
 // NTSC-U/C: 0x00405e80, PAL: 0x0043f780
-int HxMemStream::Tell() {
+int HxMemStream::GetMarker() {
     return mCur - mStart;
 }
 
@@ -67,7 +67,7 @@ HxStream &HxMemStream::Write([[maybe_unused]] const void *pSrc, [[maybe_unused]]
 }
 
 // NTSC-U/C: 0x00405ed0, PAL: 0x0043f7d0
-HxStream &HxMemStream::Read(void *pDest, int nSize) {
+HxStream &HxMemStream::ReadData(void *pDest, int nSize) {
     if (nSize > 0) {
         int nCount = mEnd - mCur;
         if (nCount >= nSize) {

@@ -40,10 +40,10 @@ void PrintObjectRef(Dbg &sink, const Object *pObject) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 // The three operators below are instantiated twice each, once for the material palette and once
@@ -71,7 +71,7 @@ Dbg &operator<<(Dbg &sink, const std::vector<T *> &entries) {
 template <class T>
 Stream &operator<<(Stream &stream, const std::vector<T *> &entries) {
     const int nCount = entries.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
 
     for (unsigned i = 0; i < entries.size(); ++i) {
         WriteObjectRef(stream, entries[i]);
@@ -79,17 +79,17 @@ Stream &operator<<(Stream &stream, const std::vector<T *> &entries) {
     return stream;
 }
 
-// Read a palette written by the writer above, resolving each name through Rnd::g_manager.
+// Read a palette written by the writer above, resolving each name through Rnd::TheManager.
 template <class T>
 Stream &operator>>(Stream &stream, std::vector<T *> &entries) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     entries.resize(nCount, static_cast<T *>(nullptr));
 
     for (unsigned i = 0; i < entries.size(); ++i) {
         HxStr name(nullptr);
         stream.ReadString(name);
-        entries[i] = dynamic_cast<T *>(g_manager.Find(name));
+        entries[i] = dynamic_cast<T *>(TheManager.Find(name));
     }
     return stream;
 }
@@ -198,8 +198,8 @@ void Button::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x00530690, PAL: 0x0056fe38
 void Button::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
-    stream.Write(&mState, sizeof(mState));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&mState, sizeof(mState));
     WriteObjectRef(stream, mMesh);
     WriteObjectRef(stream, mText);
     stream << mMats;
@@ -282,25 +282,25 @@ void Button::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
 
 // NTSC-U/C: 0x005307f8, PAL: 0x0056ffa0
 void Button::Load(Stream &stream) {
-    stream.Read(&g_nRndButtonLoadVersion, sizeof(g_nRndButtonLoadVersion));
+    stream.ReadLE(&g_nRndButtonLoadVersion, sizeof(g_nRndButtonLoadVersion));
     if (g_nRndButtonLoadVersion > kSerialVersion) {
-        g_failSink.Report("Can't load new Button\n");
+        Rnd::TheDbg.Notify("Can't load new Button\n");
         return;
     }
 
     RemoveObjectRefs();
 
     int nState = 0;
-    stream.Read(&nState, sizeof(nState));
+    stream.ReadLE(&nState, sizeof(nState));
     mState = nState;
 
     HxStr meshName(nullptr);
     stream.ReadString(meshName);
-    mMesh = dynamic_cast<Mesh *>(g_manager.Find(meshName));
+    mMesh = dynamic_cast<Mesh *>(TheManager.Find(meshName));
 
     HxStr textName(nullptr);
     stream.ReadString(textName);
-    mText = dynamic_cast<Text *>(g_manager.Find(textName));
+    mText = dynamic_cast<Text *>(TheManager.Find(textName));
 
     stream >> mMats;
     stream >> mFonts;
@@ -335,7 +335,7 @@ void Button::SetState(int nState) {
     }
     mState = nState;
     if (mMesh != nullptr) {
-        mMesh->SetMaterial(mMats[nState]);
+        mMesh->SetMat(mMats[nState]);
     }
     if (mText != nullptr) {
         mText->SetFont(mFonts[nState]);
@@ -352,7 +352,7 @@ void Button::SetMesh(Mesh *pMesh) {
         pMesh->AddRef(this);
     }
     if (pMesh != nullptr) {
-        pMesh->SetMaterial(mMats[mState]);
+        pMesh->SetMat(mMats[mState]);
     }
 }
 
@@ -380,7 +380,7 @@ void Button::SetMat(int nState, Mat *pMat) {
         mMats[nState]->AddRef(this);
     }
     if (mMesh != nullptr && mState == nState) {
-        mMesh->SetMaterial(pMat);
+        mMesh->SetMat(pMat);
     }
 }
 
@@ -427,7 +427,7 @@ Object *CreateRegisteredButton(const HxStr &name) {
 // NTSC-U/C: 0x005344f8, PAL: 0x00573d78
 void RegisterButtonClass() {
     g_pfnNewButton = NewButton;
-    g_manager.RegisterClass(g_buttonClassName, CreateRegisteredButton);
+    TheManager.RegisterClass(g_buttonClassName, CreateRegisteredButton);
 }
 
 // NTSC-U/C: 0x0071d8f8, PAL: 0x00761368

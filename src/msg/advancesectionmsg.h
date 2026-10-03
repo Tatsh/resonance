@@ -15,7 +15,7 @@ class Player;
  * The payload layout comes from the run of field copies in Clone(). The types come from
  * InputMap::OnControllerReading(), the one builder, which stores the resolved player, the
  * controller reading's position, and the track the player's slot 4 reports. mPlayer and mPosition
- * are public because Gamer's HandleMessage() at `0x001129e8` reads them directly with no accessor
+ * are public because Gamer's DispatchPriv() at `0x001129e8` reads them directly with no accessor
  * in the image.
  *
  * The destructor at `0x0011d5e8` is compiler-generated and has no declaration here. The routine
@@ -23,6 +23,14 @@ class Player;
  */
 class AdvanceSectionMsg : public Message {
 public:
+    /**
+     * Identity that Type() reports, 113.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d0184
+     * @ghidraAddress PAL: 0x0071391c
+     */
+    static int sID;
+
     /**
      * Construct a message with the position at kMBTInfinity and the rest unset.
      *
@@ -69,7 +77,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nAdvanceSectionMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x0011d6f0
      * @ghidraAddress PAL: 0x0011dc78
      */
@@ -90,15 +98,3 @@ public:
 private:
     int mTrack; // +0x0c
 };
-
-/**
- * Identity that AdvanceSectionMsg::Type() reports.
- *
- * This word belongs to AdvanceSectionMsg because AdvanceSectionMsg::Type() at `0x0011d6f0` returns
- * it, and the registration at `0x003d9818` passes the same value, 113, as the identity of this
- * class's factory.
- *
- * @ghidraAddress NTSC-U/C: 0x006d0184
- * @ghidraAddress PAL: 0x0071391c
- */
-extern int g_nAdvanceSectionMsgType;

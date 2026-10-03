@@ -5,7 +5,7 @@
 #include "memcard/memcardop.h"
 #include "os/hxstr.h"
 
-/** Entries one listing delivers, which is the `maxent` argument Issue() passes to libmc. */
+/** Entries one listing delivers, which is the `maxent` argument Execute() passes to libmc. */
 constexpr int kListDirMaxEntries = 20;
 
 /**
@@ -22,7 +22,7 @@ public:
     /**
      * Construct a listing.
      *
-     * @param pHandler The receiver Complete() reports to.
+     * @param pHandler The receiver NotifyDone() reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The directory to list.
      * @param nCookie The tag Memcard::Cancel() matches on.
@@ -44,13 +44,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055e818
      * @ghidraAddress PAL: 0x0059fae8
      */
-    virtual void Issue();
+    virtual void Execute();
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0055d8d0
      * @ghidraAddress PAL: 0x0059eb48
      */
-    virtual void Complete();
+    virtual void NotifyDone();
 
     /**
      * Record the entry count and publish the shared table, or map the failure.

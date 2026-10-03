@@ -26,8 +26,8 @@ namespace Rnd {
  * Rnd::Object subobject sits at `+0x2c`. The Object sub-vtable at `0x0081e2c0` pins the offset
  * from outside by recording a `this` adjustment of -0x2c in every entry, and the creator at
  * `0x00493a00` allocates 0x48 bytes for the whole object. The primary vtable is at `0x0081e308`
- * and has four entries, GetTypeInfo, EndFrame(), the inherited Rnd::Animatable::StartAnim(), and
- * SetFrameSelf(), followed by an all-zero terminator.
+ * and has four entries, GetTypeInfo, FilteredFrameEnd(), the inherited
+ * Rnd::Animatable::StartAnim(), and SetFrameSelf(), followed by an all-zero terminator.
  *
  * Three channels animate the mesh, one for the vertex positions, one for the first texture
  * coordinate, and one for the vertex colours. The text dump labels them "vertPointsKeys:",
@@ -104,7 +104,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004873b0
      * @ghidraAddress PAL: 0x004c51d0
      */
-    virtual float EndFrame();
+    virtual float FilteredFrameEnd();
 
     /**
      * Write the animation to the engine text sink.
@@ -171,7 +171,7 @@ public:
      * Load the animation.
      *
      * Reports "Can't load new MeshAnim" through the failure sink when the file version exceeds
-     * kSerialVersion. Object references arrive as names and resolve through Rnd::g_manager with a
+     * kSerialVersion. Object references arrive as names and resolve through Rnd::TheManager with a
      * checked cast.
      *
      * @param stream The stream to read from.
@@ -330,7 +330,7 @@ extern HxStr g_meshAnimClassName;
  * @ghidraAddress PAL: 0x004d0ff0
  */
 inline void RegisterMeshAnimClass() {
-    g_manager.RegisterClass(g_meshAnimClassName, CreateRegisteredMeshAnim);
+    TheManager.RegisterClass(g_meshAnimClassName, CreateRegisteredMeshAnim);
 }
 
 } // namespace Rnd

@@ -135,17 +135,17 @@ void PrintObjectRef(Dbg &sink, const Object *pObject) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 template <class T>
 void ReadObjectRef(Stream &stream, T *&refOut) {
     HxStr name(nullptr);
     stream.ReadString(name);
-    refOut = dynamic_cast<T *>(g_manager.Find(name));
+    refOut = dynamic_cast<T *>(TheManager.Find(name));
 }
 
 // Every labelled number in the dumps is a Print of the label and then a Format of the value alone.
@@ -215,7 +215,7 @@ Dbg &DumpStageVector(Dbg &sink, const std::vector<Mat::Stage> &stages) {
 // NTSC-U/C: 0x004dd860, PAL: 0x0051be18
 Stream &WriteStageVector(Stream &stream, const std::vector<Mat::Stage> &stages) {
     const int nCount = static_cast<int>(stages.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &stage : stages) {
         stage.Save(stream);
     }
@@ -226,9 +226,8 @@ Stream &WriteStageVector(Stream &stream, const std::vector<Mat::Stage> &stages) 
 // Every new stage is a copy of one default stage, and each stage then reads itself.
 Stream &ReadStageVector(Stream &stream, std::vector<Mat::Stage> &stages) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     Mat::Stage defaultStage;
-    defaultStage.InitDefaults();
     stages.resize(nCount, defaultStage);
     for (auto &stage : stages) {
         stage.Load(stream);
@@ -278,7 +277,7 @@ Mat::BlendMode MapLegacyBlendFactors(Mat::BlendMode current, int nSrc, int nDst)
 } // namespace
 
 // NTSC-U/C: 0x00700420, PAL: 0x00743e48
-HxStr g_matClassName("Mat");
+HxStr Mat::sClassName("Mat");
 
 // NTSC-U/C: 0x00894e2c, PAL: 0x008d9e3c
 int g_nRndMatLoadVersion;
@@ -327,7 +326,7 @@ void Mat::Stage::SetTex(Tex *pTex) {
 }
 
 // NTSC-U/C: 0x004dd020, PAL: 0x0051b5c0
-void Mat::Stage::InitDefaults() {
+Mat::Stage::Stage() {
     mBlend = kBlendModeMultiply;
     mCoordIndex = 0;
     mGenMode = kGenModeFixed;
@@ -381,36 +380,36 @@ void Mat::Stage::Dump(Dbg &sink) const {
 
 // NTSC-U/C: 0x004d26f8, PAL: 0x00510b48
 void Mat::Stage::Save(Stream &stream) const {
-    stream.Write(&mBlend, sizeof(mBlend));
-    stream.Write(&mCoordIndex, sizeof(mCoordIndex));
-    stream.Write(&mGenMode, sizeof(mGenMode));
-    stream.Write(&mXfm.mBasisX.x, sizeof(float));
-    stream.Write(&mXfm.mBasisX.y, sizeof(float));
-    stream.Write(&mXfm.mBasisX.z, sizeof(float));
-    stream.Write(&mXfm.mBasisY.x, sizeof(float));
-    stream.Write(&mXfm.mBasisY.y, sizeof(float));
-    stream.Write(&mXfm.mBasisY.z, sizeof(float));
-    stream.Write(&mXfm.mBasisZ.x, sizeof(float));
-    stream.Write(&mXfm.mBasisZ.y, sizeof(float));
-    stream.Write(&mXfm.mBasisZ.z, sizeof(float));
-    stream.Write(&mXfm.mTranslation.x, sizeof(float));
-    stream.Write(&mXfm.mTranslation.y, sizeof(float));
-    stream.Write(&mXfm.mTranslation.z, sizeof(float));
+    stream.WriteLE(&mBlend, sizeof(mBlend));
+    stream.WriteLE(&mCoordIndex, sizeof(mCoordIndex));
+    stream.WriteLE(&mGenMode, sizeof(mGenMode));
+    stream.WriteLE(&mXfm.mBasisX.x, sizeof(float));
+    stream.WriteLE(&mXfm.mBasisX.y, sizeof(float));
+    stream.WriteLE(&mXfm.mBasisX.z, sizeof(float));
+    stream.WriteLE(&mXfm.mBasisY.x, sizeof(float));
+    stream.WriteLE(&mXfm.mBasisY.y, sizeof(float));
+    stream.WriteLE(&mXfm.mBasisY.z, sizeof(float));
+    stream.WriteLE(&mXfm.mBasisZ.x, sizeof(float));
+    stream.WriteLE(&mXfm.mBasisZ.y, sizeof(float));
+    stream.WriteLE(&mXfm.mBasisZ.z, sizeof(float));
+    stream.WriteLE(&mXfm.mTranslation.x, sizeof(float));
+    stream.WriteLE(&mXfm.mTranslation.y, sizeof(float));
+    stream.WriteLE(&mXfm.mTranslation.z, sizeof(float));
     const char chUseXfm = static_cast<char>(mUseXfm);
-    stream.WriteBytes(&chUseXfm, sizeof(chUseXfm));
-    stream.Write(&mWrap, sizeof(mWrap));
+    stream.Write(&chUseXfm, sizeof(chUseXfm));
+    stream.WriteLE(&mWrap, sizeof(mWrap));
     WriteObjectRef(stream, mTex);
 }
 
 // NTSC-U/C: 0x004d2a20, PAL: 0x00510e70
 void Mat::Stage::Load(Stream &stream) {
     if (g_nRndMatLoadVersion >= kStageBlendModeRevision) {
-        stream.Read(&mBlend, sizeof(mBlend));
+        stream.ReadLE(&mBlend, sizeof(mBlend));
     } else {
         int nLegacyBlend = 0;
         int nUnused = 0;
-        stream.Read(&nLegacyBlend, sizeof(nLegacyBlend));
-        stream.Read(&nUnused, sizeof(nUnused)); // Yes, the binary discards the second word.
+        stream.ReadLE(&nLegacyBlend, sizeof(nLegacyBlend));
+        stream.ReadLE(&nUnused, sizeof(nUnused)); // Yes, the binary discards the second word.
         for (const auto &entry : kLegacyStageBlends) {
             if (entry.mLegacy == nLegacyBlend) {
                 mBlend = entry.mBlend;
@@ -418,24 +417,24 @@ void Mat::Stage::Load(Stream &stream) {
             }
         }
     }
-    stream.Read(&mCoordIndex, sizeof(mCoordIndex));
-    stream.Read(&mGenMode, sizeof(mGenMode));
-    stream.Read(&mXfm.mBasisX.x, sizeof(float));
-    stream.Read(&mXfm.mBasisX.y, sizeof(float));
-    stream.Read(&mXfm.mBasisX.z, sizeof(float));
-    stream.Read(&mXfm.mBasisY.x, sizeof(float));
-    stream.Read(&mXfm.mBasisY.y, sizeof(float));
-    stream.Read(&mXfm.mBasisY.z, sizeof(float));
-    stream.Read(&mXfm.mBasisZ.x, sizeof(float));
-    stream.Read(&mXfm.mBasisZ.y, sizeof(float));
-    stream.Read(&mXfm.mBasisZ.z, sizeof(float));
-    stream.Read(&mXfm.mTranslation.x, sizeof(float));
-    stream.Read(&mXfm.mTranslation.y, sizeof(float));
-    stream.Read(&mXfm.mTranslation.z, sizeof(float));
+    stream.ReadLE(&mCoordIndex, sizeof(mCoordIndex));
+    stream.ReadLE(&mGenMode, sizeof(mGenMode));
+    stream.ReadLE(&mXfm.mBasisX.x, sizeof(float));
+    stream.ReadLE(&mXfm.mBasisX.y, sizeof(float));
+    stream.ReadLE(&mXfm.mBasisX.z, sizeof(float));
+    stream.ReadLE(&mXfm.mBasisY.x, sizeof(float));
+    stream.ReadLE(&mXfm.mBasisY.y, sizeof(float));
+    stream.ReadLE(&mXfm.mBasisY.z, sizeof(float));
+    stream.ReadLE(&mXfm.mBasisZ.x, sizeof(float));
+    stream.ReadLE(&mXfm.mBasisZ.y, sizeof(float));
+    stream.ReadLE(&mXfm.mBasisZ.z, sizeof(float));
+    stream.ReadLE(&mXfm.mTranslation.x, sizeof(float));
+    stream.ReadLE(&mXfm.mTranslation.y, sizeof(float));
+    stream.ReadLE(&mXfm.mTranslation.z, sizeof(float));
     char chUseXfm = 0;
-    stream.ReadBytes(&chUseXfm, sizeof(chUseXfm));
+    stream.Read(&chUseXfm, sizeof(chUseXfm));
     mUseXfm = chUseXfm != 0;
-    stream.Read(&mWrap, sizeof(mWrap));
+    stream.ReadLE(&mWrap, sizeof(mWrap));
     if (g_nRndMatLoadVersion <= kStageMatRefRevision) {
         ReadObjectRef(stream, mMat);
     }
@@ -455,7 +454,6 @@ void Mat::operator delete(void *pBlock) {
 // NTSC-U/C: 0x004d2198, PAL: 0x005105e8
 void Mat::AddStage() {
     Stage stage;
-    stage.InitDefaults();
     mStages.resize(mStages.size() + 1, stage);
     mStages.back().mMat = this;
 }
@@ -555,27 +553,27 @@ void Mat::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x004d1638, PAL: 0x0050fa88
 void Mat::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
 
     WriteStageVector(stream, mStages);
-    stream.Write(&mBlend, sizeof(mBlend));
+    stream.WriteLE(&mBlend, sizeof(mBlend));
 
-    stream.Write(&mAmbient.r, sizeof(float));
-    stream.Write(&mAmbient.g, sizeof(float));
-    stream.Write(&mAmbient.b, sizeof(float));
-    stream.Write(&mAmbient.a, sizeof(float));
-    stream.Write(&mDiffuse.r, sizeof(float));
-    stream.Write(&mDiffuse.g, sizeof(float));
-    stream.Write(&mDiffuse.b, sizeof(float));
-    stream.Write(&mDiffuse.a, sizeof(float));
-    stream.Write(&mSpecular.r, sizeof(float));
-    stream.Write(&mSpecular.g, sizeof(float));
-    stream.Write(&mSpecular.b, sizeof(float));
-    stream.Write(&mSpecular.a, sizeof(float));
-    stream.Write(&mEmissive.r, sizeof(float));
-    stream.Write(&mEmissive.g, sizeof(float));
-    stream.Write(&mEmissive.b, sizeof(float));
-    stream.Write(&mEmissive.a, sizeof(float));
+    stream.WriteLE(&mAmbient.r, sizeof(float));
+    stream.WriteLE(&mAmbient.g, sizeof(float));
+    stream.WriteLE(&mAmbient.b, sizeof(float));
+    stream.WriteLE(&mAmbient.a, sizeof(float));
+    stream.WriteLE(&mDiffuse.r, sizeof(float));
+    stream.WriteLE(&mDiffuse.g, sizeof(float));
+    stream.WriteLE(&mDiffuse.b, sizeof(float));
+    stream.WriteLE(&mDiffuse.a, sizeof(float));
+    stream.WriteLE(&mSpecular.r, sizeof(float));
+    stream.WriteLE(&mSpecular.g, sizeof(float));
+    stream.WriteLE(&mSpecular.b, sizeof(float));
+    stream.WriteLE(&mSpecular.a, sizeof(float));
+    stream.WriteLE(&mEmissive.r, sizeof(float));
+    stream.WriteLE(&mEmissive.g, sizeof(float));
+    stream.WriteLE(&mEmissive.b, sizeof(float));
+    stream.WriteLE(&mEmissive.a, sizeof(float));
 
     const char achFlags[] = {static_cast<char>(mEnable),
                              static_cast<char>(mVertAmbient),
@@ -584,15 +582,15 @@ void Mat::Save(Stream &stream) {
                              static_cast<char>(mVertEmissive),
                              static_cast<char>(mVertAlpha)};
     for (const auto chFlag : achFlags) {
-        stream.WriteBytes(&chFlag, sizeof(chFlag));
+        stream.Write(&chFlag, sizeof(chFlag));
     }
 
-    stream.Write(&mCull, sizeof(mCull));
-    stream.Write(&mMultiPass, sizeof(mMultiPass));
+    stream.WriteLE(&mCull, sizeof(mCull));
+    stream.WriteLE(&mMultiPass, sizeof(mMultiPass));
     const char chNormalize = static_cast<char>(mNormalize);
-    stream.WriteBytes(&chNormalize, sizeof(chNormalize));
+    stream.Write(&chNormalize, sizeof(chNormalize));
     const char chFlat = static_cast<char>(mFlat);
-    stream.WriteBytes(&chFlat, sizeof(chFlat));
+    stream.Write(&chFlat, sizeof(chFlat));
 }
 
 // NTSC-U/C: 0x004dcc20, PAL: 0x0051b1c0
@@ -615,7 +613,7 @@ void Mat::Replace(Object *pFrom, Object *pTo) {
 
 // NTSC-U/C: 0x004dbc70, PAL: 0x0051a210
 const HxStr &Mat::ClassName() const {
-    return g_matClassName;
+    return Mat::sClassName;
 }
 
 // NTSC-U/C: 0x004dce18, PAL: 0x0051b3b8
@@ -648,9 +646,9 @@ void Mat::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
 
 // NTSC-U/C: 0x004d1a90, PAL: 0x0050fee0
 void Mat::Load(Stream &stream) {
-    stream.Read(&g_nRndMatLoadVersion, sizeof(g_nRndMatLoadVersion));
+    stream.ReadLE(&g_nRndMatLoadVersion, sizeof(g_nRndMatLoadVersion));
     if (g_nRndMatLoadVersion > kSerialVersion) {
-        g_failSink.Report("Can't load new Mat\n");
+        Rnd::TheDbg.Notify("Can't load new Mat\n");
         return;
     }
 
@@ -662,69 +660,69 @@ void Mat::Load(Stream &stream) {
     ReadStageVector(stream, mStages);
 
     if (g_nRndMatLoadVersion >= 3) {
-        stream.Read(&mBlend, sizeof(mBlend));
+        stream.ReadLE(&mBlend, sizeof(mBlend));
     } else {
         int nSrcFactor = 0;
         int nDstFactor = 0;
-        stream.Read(&nSrcFactor, sizeof(nSrcFactor));
-        stream.Read(&nDstFactor, sizeof(nDstFactor));
+        stream.ReadLE(&nSrcFactor, sizeof(nSrcFactor));
+        stream.ReadLE(&nDstFactor, sizeof(nDstFactor));
         mBlend = MapLegacyBlendFactors(mBlend, nSrcFactor, nDstFactor);
     }
 
-    stream.Read(&mAmbient.r, sizeof(float));
-    stream.Read(&mAmbient.g, sizeof(float));
-    stream.Read(&mAmbient.b, sizeof(float));
-    stream.Read(&mAmbient.a, sizeof(float));
-    stream.Read(&mDiffuse.r, sizeof(float));
-    stream.Read(&mDiffuse.g, sizeof(float));
-    stream.Read(&mDiffuse.b, sizeof(float));
-    stream.Read(&mDiffuse.a, sizeof(float));
-    stream.Read(&mSpecular.r, sizeof(float));
-    stream.Read(&mSpecular.g, sizeof(float));
-    stream.Read(&mSpecular.b, sizeof(float));
-    stream.Read(&mSpecular.a, sizeof(float));
-    stream.Read(&mEmissive.r, sizeof(float));
-    stream.Read(&mEmissive.g, sizeof(float));
-    stream.Read(&mEmissive.b, sizeof(float));
-    stream.Read(&mEmissive.a, sizeof(float));
+    stream.ReadLE(&mAmbient.r, sizeof(float));
+    stream.ReadLE(&mAmbient.g, sizeof(float));
+    stream.ReadLE(&mAmbient.b, sizeof(float));
+    stream.ReadLE(&mAmbient.a, sizeof(float));
+    stream.ReadLE(&mDiffuse.r, sizeof(float));
+    stream.ReadLE(&mDiffuse.g, sizeof(float));
+    stream.ReadLE(&mDiffuse.b, sizeof(float));
+    stream.ReadLE(&mDiffuse.a, sizeof(float));
+    stream.ReadLE(&mSpecular.r, sizeof(float));
+    stream.ReadLE(&mSpecular.g, sizeof(float));
+    stream.ReadLE(&mSpecular.b, sizeof(float));
+    stream.ReadLE(&mSpecular.a, sizeof(float));
+    stream.ReadLE(&mEmissive.r, sizeof(float));
+    stream.ReadLE(&mEmissive.g, sizeof(float));
+    stream.ReadLE(&mEmissive.b, sizeof(float));
+    stream.ReadLE(&mEmissive.a, sizeof(float));
 
     if (g_nRndMatLoadVersion < 6) {
         // The two alpha values used to sit after the colours rather than inside them.
         float flSpecularAlpha = 0.0f;
         float flDiffuseAlpha = 0.0f;
-        stream.Read(&flSpecularAlpha, sizeof(flSpecularAlpha));
-        stream.Read(&flDiffuseAlpha, sizeof(flDiffuseAlpha));
+        stream.ReadLE(&flSpecularAlpha, sizeof(flSpecularAlpha));
+        stream.ReadLE(&flDiffuseAlpha, sizeof(flDiffuseAlpha));
         mDiffuse.a = flDiffuseAlpha;
         mSpecular.a = flSpecularAlpha;
     }
 
     char chFlag = 0;
-    stream.ReadBytes(&chFlag, sizeof(chFlag));
+    stream.Read(&chFlag, sizeof(chFlag));
     mEnable = chFlag != 0;
-    stream.ReadBytes(&chFlag, sizeof(chFlag));
+    stream.Read(&chFlag, sizeof(chFlag));
     mVertAmbient = chFlag != 0;
-    stream.ReadBytes(&chFlag, sizeof(chFlag));
+    stream.Read(&chFlag, sizeof(chFlag));
     mVertDiffuse = chFlag != 0;
-    stream.ReadBytes(&chFlag, sizeof(chFlag));
+    stream.Read(&chFlag, sizeof(chFlag));
     mVertSpecular = chFlag != 0;
-    stream.ReadBytes(&chFlag, sizeof(chFlag));
+    stream.Read(&chFlag, sizeof(chFlag));
     mVertEmissive = chFlag != 0;
-    stream.ReadBytes(&chFlag, sizeof(chFlag));
+    stream.Read(&chFlag, sizeof(chFlag));
     mVertAlpha = chFlag != 0;
 
-    stream.Read(&mCull, sizeof(mCull));
+    stream.ReadLE(&mCull, sizeof(mCull));
     if (g_nRndMatLoadVersion >= 7) {
-        stream.Read(&mMultiPass, sizeof(mMultiPass));
+        stream.ReadLE(&mMultiPass, sizeof(mMultiPass));
     } else if (g_nRndMatLoadVersion >= 2) {
-        stream.ReadBytes(&chFlag, sizeof(chFlag));
+        stream.Read(&chFlag, sizeof(chFlag));
         mMultiPass = chFlag != 0;
     }
     if (g_nRndMatLoadVersion >= 4) {
-        stream.ReadBytes(&chFlag, sizeof(chFlag));
+        stream.Read(&chFlag, sizeof(chFlag));
         mNormalize = chFlag != 0;
     }
     if (g_nRndMatLoadVersion >= 5) {
-        stream.ReadBytes(&chFlag, sizeof(chFlag));
+        stream.Read(&chFlag, sizeof(chFlag));
         mFlat = chFlag != 0;
     }
 

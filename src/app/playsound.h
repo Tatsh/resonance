@@ -136,7 +136,7 @@ void PlayActivateSound();
  * Play the sound of a captured powerup.
  *
  * The neutralizer, crippler, freestyler, autocatcher, bumper, and multiplier each have a sound.
- * The effect powerups and the guides have none. LocalPlayer::HandleMessage() and the routine at
+ * The effect powerups and the guides have none. LocalPlayer::DispatchPriv() and the routine at
  * `0x00122ab8` are the callers. The title is inferred.
  *
  * @param kind The captured powerup.

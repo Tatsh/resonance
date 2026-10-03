@@ -124,7 +124,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 // Resolve one named object of the renderer as T.
 template <class T>
 inline T *FindObject(const char *pszName) {
-    return dynamic_cast<T *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<T *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 // Append the first entry of GlobalSettings::mCardSlots after index 0 with a packed port and slot.

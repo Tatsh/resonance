@@ -116,7 +116,7 @@ public:
     /**
      * The first bar of the captured phrase, which PrintExtra() writes ahead of `--`. +0x04
      *
-     * Public because Gamer's HandleMessage() at `0x00112a80` reads it directly with no accessor in
+     * Public because Gamer's DispatchPriv() at `0x00112a80` reads it directly with no accessor in
      * the image.
      */
     int mFirstBar;
@@ -125,7 +125,7 @@ private:
     int mEndBar; // +0x08, written after `--` by PrintExtra()
 
 public:
-    // Public because LocalPlayer::HandleMessage() reads both directly at `0x0011ee88` and
+    // Public because LocalPlayer::DispatchPriv() reads both directly at `0x0011ee88` and
     // `0x0011ef0c`, and the image has no accessor.
     int mRunFirstBar; /*!< The first bar of the caught run. +0x0c */
     int mRunEndBar;   /*!< One past the last bar of the run. +0x10 */
@@ -145,7 +145,7 @@ public:
      * Non-zero when the capture extends the player's streak of consecutive captures.
      *
      * The inverse of SingleCatcher::CapturePhrase()'s automatic-catch argument. Public because
-     * LocalPlayer::HandleMessage() reads it directly at `0x0011ee9c` and lengthens the streak only
+     * LocalPlayer::DispatchPriv() reads it directly at `0x0011ee9c` and lengthens the streak only
      * when it is set, and the image has no accessor. +0x24
      */
     int mExtendsStreak;

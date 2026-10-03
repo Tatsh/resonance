@@ -56,7 +56,7 @@ void MetButtonList::SelectPrevious() {
         }
     } while (!bDone);
     mSelectedButton = mButtons[mSelected];
-    OnSelectionChanged(nStart, mSelected);
+    ChangeButtonSelected(nStart, mSelected);
 }
 
 // NTSC-U/C: 0x001fcd10, PAL: 0x002041b8
@@ -81,11 +81,11 @@ void MetButtonList::SelectNext() {
         }
     } while (!bDone);
     mSelectedButton = mButtons[mSelected];
-    OnSelectionChanged(nStart, mSelected);
+    ChangeButtonSelected(nStart, mSelected);
 }
 
 // NTSC-U/C: 0x001feed8, PAL: 0x002063a8
-void MetButtonList::OnSelectionChanged(int nPreviousIndex, int nIndex) {
+void MetButtonList::ChangeButtonSelected(int nPreviousIndex, int nIndex) {
     if (nPreviousIndex == nIndex) {
         return;
     }
@@ -102,7 +102,7 @@ void MetButtonList::Clear() {
 
 // NTSC-U/C: 0x001fcb28, PAL: 0x00203fd0
 void MetButtonList::Add(const HxStr &objectName, const HxStr &labelText) {
-    Rnd::Button *pButton = dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(objectName));
+    Rnd::Button *pButton = dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(objectName));
     if (pButton == nullptr) {
         LogPrintf("bad button is %s",
                   objectName.mStr != nullptr ? objectName.mStr : g_szEmptyString);
@@ -118,7 +118,7 @@ void MetButtonList::SetSelected(int nIndex) {
     if (nIndex == kNoSelection) {
         mButtons[mSelected]->SetState(kButtonStateNormal);
     } else if (mSelected != nIndex) {
-        OnSelectionChanged(mSelected, nIndex);
+        ChangeButtonSelected(mSelected, nIndex);
     } else {
         // Yes, the binary keeps this branch, which the test above makes unreachable.
         mButtons[nIndex]->SetState(kButtonStateSelected);
@@ -129,7 +129,7 @@ void MetButtonList::SetSelected(int nIndex) {
 }
 
 // NTSC-U/C: 0x001fef40, PAL: 0x00206410
-Rnd::Button *MetButtonList::ButtonAt(int nIndex) const {
+Rnd::Button *MetButtonList::GetButton(int nIndex) const {
     if (nIndex == kNoSelection) {
         return nullptr;
     }

@@ -109,8 +109,8 @@ inline unsigned long long PackWordPair(unsigned nLow, unsigned nHigh) {
 }
 
 inline GifQuadword *TakeQuadword() {
-    GifQuadword *pQuad = g_gfxDevice.mpWrite;
-    g_gfxDevice.mpWrite = pQuad + 1;
+    GifQuadword *pQuad = Rnd::ThePs.mpWrite;
+    Rnd::ThePs.mpWrite = pQuad + 1;
     return pQuad;
 }
 
@@ -123,9 +123,9 @@ inline const GifQuadword *AsQuadwords(const void *pRecord) {
 inline void AppendDrawVert(const DrawVert &vert, int nFirstQuadword, int nQuadwords) {
     const GifQuadword *pSource = AsQuadwords(&vert) + nFirstQuadword;
     for (int i = 0; i < nQuadwords; ++i) {
-        GifQuadword *pDest = g_gfxDevice.mpWrite;
+        GifQuadword *pDest = Rnd::ThePs.mpWrite;
         *pDest = pSource[i];
-        g_gfxDevice.mpWrite = pDest + 1;
+        Rnd::ThePs.mpWrite = pDest + 1;
     }
 }
 
@@ -135,7 +135,7 @@ inline void WritePackedGifTag(int nRegCount, unsigned long long qwRegs) {
     GifQuadword tag;
     tag.mLo = (static_cast<unsigned long long>(nRegCount) << kGifTagNRegShift) | kGifTagEop;
     tag.mHi = qwRegs;
-    g_gfxDevice.WriteGifTag(&tag);
+    Rnd::ThePs.WriteGifTag(&tag);
 }
 
 // Screen-space reject for one sprite. The near corner must not fall below the origin and the far
@@ -162,27 +162,27 @@ PsParticleSys::~PsParticleSys() {
 // NTSC-U/C: 0x005ffaf0, PAL: 0x00640868
 inline void PsParticleSys::EmitGifPoints(int nVertCount) {
     g_renderStats.mnPoints += nVertCount;
-    g_gfxDevice.SetGsReg(kGsRegPrim, kGsPrimPoint | kGsPrimAbe, kGsPrimFieldMask);
+    Rnd::ThePs.SetGsReg(kGsRegPrim, kGsPrimPoint | kGsPrimAbe, kGsPrimFieldMask);
     WritePackedGifTag(kGifNRegPoint, kGifRegsPoint);
     for (int i = 0; i < nVertCount; i += kVertsPerPointParticle) {
         AppendDrawVert(g_aDrawVerts[i], kDrawVertColorQuadword, kQuadwordsColorAndPos);
-        g_gfxDevice.FlushGifPacket(1, 1);
+        Rnd::ThePs.FlushGifPacket(1, 1);
     }
 }
 
 // NTSC-U/C: 0x005fcb18, PAL: 0x0063d828
-int PsParticleSys::DrawSelf() {
+int PsParticleSys::DrawShowing() {
     ++g_renderStats.mnMeshDraws;
     if (mLiveParticles == nullptr) {
         return 1;
     }
 
     if (mMode == kModeSprite) {
-        g_gfxDevice.ReserveGifSpace(kGifReserveQuadwords);
+        Rnd::ThePs.ReserveGifSpace(kGifReserveQuadwords);
     }
-    g_gfxDevice.SetGsReg(kGsRegZbuf1, kZbufZMaskField, kZbufZMaskField);
+    Rnd::ThePs.SetGsReg(kGsRegZbuf1, kZbufZMaskField, kZbufZMaskField);
     const int nZTest = mReadZ != 0 ? kGsZTestGreater : kGsZTestAlways;
-    g_gfxDevice.SetGsReg(
+    Rnd::ThePs.SetGsReg(
         kGsRegTest1, static_cast<unsigned long long>(nZTest) << kTestZTestShift, kTestZTestField);
 
     int nMorePasses = 0;
@@ -192,7 +192,7 @@ int PsParticleSys::DrawSelf() {
         PsMat::SelectDefault();
     }
 
-    if (g_gfxDevice.mnUseVu1 != 0) {
+    if (Rnd::ThePs.mnUseVu1 != 0) {
         // Only the sprite mode has a microprogram. A point or line system draws nothing at all on
         // the vector unit path.
         if (mMode != kModeSprite) {
@@ -200,7 +200,7 @@ int PsParticleSys::DrawSelf() {
         }
         DrawSpritesDmaKicked();
         while (nMorePasses != 0) {
-            g_gfxDevice.ReserveGifSpace(kGifReserveQuadwords);
+            Rnd::ThePs.ReserveGifSpace(kGifReserveQuadwords);
             nMorePasses = static_cast<PsMat *>(mMat)->Select();
             DrawSpritesDmaKicked();
         }
@@ -210,9 +210,9 @@ int PsParticleSys::DrawSelf() {
     if (static_cast<int>(mParticlesOwner->mParticles.size()) > kMaxSoftwareParticles) {
         // The guard measures the pool of whichever system owns the particles, and the message
         // prints the size of this system's own pool. Faithful to the binary.
-        g_failSink.Report("DrawShowing particle buffer overflow... %d\n", mParticles.size());
-        if (g_failSink.mAbortProc != nullptr) {
-            g_failSink.mAbortProc();
+        Rnd::TheDbg.Notify("DrawShowing particle buffer overflow... %d\n", mParticles.size());
+        if (Rnd::TheDbg.mAbortProc != nullptr) {
+            Rnd::TheDbg.mAbortProc();
         } else {
             throw; // With no handler the binary rethrows the exception in flight.
         }
@@ -238,13 +238,13 @@ void PsParticleSys::EmitGifLines(int nVertCount) {
     // The counter advances by the whole vertex count before any line is built, so it records what
     // was offered rather than what was drawn.
     g_renderStats.mnLines += nVertCount;
-    g_gfxDevice.SetGsReg(kGsRegPrim, kGsPrimLine | kGsPrimIip | kGsPrimAbe, kGsPrimFieldMask);
+    Rnd::ThePs.SetGsReg(kGsRegPrim, kGsPrimLine | kGsPrimIip | kGsPrimAbe, kGsPrimFieldMask);
     WritePackedGifTag(kGifNRegLine, kGifRegsLine);
 
     for (int i = 0; i < nVertCount; i += kVertsPerPairedParticle) {
         AppendDrawVert(g_aDrawVerts[i], kDrawVertColorQuadword, kQuadwordsColorAndPos);
         AppendDrawVert(g_aDrawVerts[i + 1], kDrawVertColorQuadword, kQuadwordsColorAndPos);
-        g_gfxDevice.FlushGifPacket(1, 1);
+        Rnd::ThePs.FlushGifPacket(1, 1);
     }
 }
 
@@ -255,7 +255,7 @@ void PsParticleSys::EmitGifSprites(int nVertCount) {
         kGsPrimSprite | kGsPrimIip |
         (static_cast<unsigned long long>(nTextured) << kGsPrimTmeShift) |
         (static_cast<unsigned long long>(g_nAlphaBlendEnabled) << kGsPrimAbeShift);
-    g_gfxDevice.SetGsReg(kGsRegPrim, qwPrim, kGsPrimFieldMask);
+    Rnd::ThePs.SetGsReg(kGsRegPrim, qwPrim, kGsPrimFieldMask);
 
     if (nTextured != 0) {
         WritePackedGifTag(kGifNRegTexturedSprite, kGifRegsTexturedSprite);
@@ -280,14 +280,14 @@ void PsParticleSys::EmitGifSprites(int nVertCount) {
             AppendDrawVert(nearCorner, kDrawVertColorQuadword, kQuadwordsColorAndPos);
             AppendDrawVert(farCorner, kDrawVertPosQuadword, kQuadwordsPosOnly);
         }
-        g_gfxDevice.FlushGifPacket(1, 1);
+        Rnd::ThePs.FlushGifPacket(1, 1);
     }
 }
 
 // NTSC-U/C: 0x005fc940, PAL: 0x0063d650
 void PsParticleSys::DrawSpritesDmaKicked() {
-    g_gfxDevice.CloseGifTag(1);
-    g_gfxDevice.SwapGifWrite();
+    Rnd::ThePs.CloseGifTag(1);
+    Rnd::ThePs.SwapGifWrite();
     EmitParticleVu1Setup();
 
     Particle *pParticle = mLiveParticles;
@@ -306,7 +306,7 @@ void PsParticleSys::DrawSpritesDmaKicked() {
         pCount->mLo = 0;
         pCount->mHi = 0;
 
-        GifQuadword *pWrite = g_gfxDevice.mpWrite;
+        GifQuadword *pWrite = Rnd::ThePs.mpWrite;
         int nVuAddr = kVu1SpriteBatchAddr;
         int nBatchQuadwords = 1;
         int nEmitted = 0;
@@ -346,11 +346,11 @@ void PsParticleSys::DrawSpritesDmaKicked() {
                                        MakeVifCode(kVifCmdUnpackV4_32,
                                                    nBatchQuadwords,
                                                    kVifUnpackFlg | static_cast<unsigned>(nVuAddr)));
-        g_gfxDevice.mpWrite = pWrite;
+        Rnd::ThePs.mpWrite = pWrite;
         pCount->mLo = static_cast<unsigned>(nEmitted);
         g_renderStats.mnSpritesDrawn += nEmitted;
 
-        g_gfxDevice.FlushReservedGif();
+        Rnd::ThePs.FlushReservedGif();
         GifQuadword *pEntry = TakeQuadword();
         pEntry->mHi = 0;
         if (bFirstBatch) {
@@ -359,7 +359,7 @@ void PsParticleSys::DrawSpritesDmaKicked() {
         } else {
             pEntry->mLo = MakeVifCode(kVifCmdMsCnt, 0, 0);
         }
-        g_gfxDevice.FlushGifPacket(0, 0);
+        Rnd::ThePs.FlushGifPacket(0, 0);
     }
 }
 

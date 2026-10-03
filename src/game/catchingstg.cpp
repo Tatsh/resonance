@@ -69,7 +69,7 @@ void CatchingSTG::Stop() {
 }
 
 // NTSC-U/C: 0x0019fd88, PAL: 0x001a5af0
-void CatchingSTG::ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
+void CatchingSTG::ConnectInputs(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
     pPrimary->AddSink(mMixer);
     pPrimary->AddSink(mCatcher);
     pPrimary->AddSink(mNeutralizer);
@@ -91,7 +91,7 @@ void CatchingSTG::ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgS
 }
 
 // NTSC-U/C: 0x001a0558, PAL: 0x001a62c0
-void CatchingSTG::AddMixerToSource(MsgSource *pSource) {
+void CatchingSTG::ConnectGamer(MsgSource *pSource) {
     pSource->AddSink(mMixer);
 }
 
@@ -102,7 +102,7 @@ void CatchingSTG::SetMixerOutput(MsgSink *pOutput) {
 }
 
 // NTSC-U/C: 0x001a05c8, PAL: 0x001a6330
-void CatchingSTG::AddSinkToSources(MsgSink *pSink) {
+void CatchingSTG::ConnectToTunnel(MsgSink *pSink) {
     mPhraseMgr->AddSink(pSink);
     mCatcher->AddSink(pSink);
     mNeutralizer->AddSink(pSink);

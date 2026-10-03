@@ -50,8 +50,8 @@ void TexturePairRecord::ResolveTextures() {
         return;
     }
     mResolved = 1;
-    mTextures.push_back(dynamic_cast<Rnd::Tex *>(Rnd::g_manager.Find(mFirstName)));
-    mTextures.push_back(dynamic_cast<Rnd::Tex *>(Rnd::g_manager.Find(mSecondName)));
+    mTextures.push_back(dynamic_cast<Rnd::Tex *>(Rnd::TheManager.Find(mFirstName)));
+    mTextures.push_back(dynamic_cast<Rnd::Tex *>(Rnd::TheManager.Find(mSecondName)));
 }
 
 // NTSC-U/C: 0x00249760, PAL: 0x0025ea70

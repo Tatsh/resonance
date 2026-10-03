@@ -14,7 +14,7 @@ Message *JamEffectMsg::Clone() {
 
 // NTSC-U/C: 0x001caa60, PAL: 0x001d0918
 int JamEffectMsg::Type() {
-    return g_nJamEffectMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x001caa70, PAL: 0x001d0928

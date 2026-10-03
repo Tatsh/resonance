@@ -18,7 +18,7 @@ public:
     }
 
     // NTSC-U/C: 0x00546198, PAL: 0x005866c8
-    virtual int Sample(float flTime, float *pValue) {
+    virtual int GetValue(float flTime, float *pValue) {
         *pValue = (std::sin((mRate * flTime) + mPhase) * kSineHalfRange) + kSineHalfRange;
         return 1;
     }
@@ -34,7 +34,7 @@ public:
     }
 
     // NTSC-U/C: 0x00546290, PAL: 0x005867c0
-    virtual int Sample(float flTime, float *pValue) {
+    virtual int GetValue(float flTime, float *pValue) {
         // The binary compares with 0.5 rather than half the period.
         *pValue = std::fmod(flTime, mPeriod) < 0.5 ? 1.0f : 0.0f;
         return 1;
@@ -51,7 +51,7 @@ public:
     }
 
     // NTSC-U/C: 0x00546398, PAL: 0x005868c8
-    virtual int Sample(float flTime, float *pValue) {
+    virtual int GetValue(float flTime, float *pValue) {
         *pValue = std::fmod(flTime + mOffset, mPeriod) * mScale;
         if (*pValue > 1.0) {
             *pValue = kTriangleSpan - *pValue;
@@ -72,7 +72,7 @@ public:
     }
 
     // NTSC-U/C: 0x005464c0, PAL: 0x005869f0
-    virtual int Sample(float flTime, float *pValue) {
+    virtual int GetValue(float flTime, float *pValue) {
         *pValue = std::fmod(flTime + mOffset, mPeriod) * mScale;
         return 1;
     }
@@ -90,7 +90,7 @@ public:
     }
 
     // NTSC-U/C: 0x005465b8, PAL: 0x00586ae8
-    virtual int Sample(float flTime, float *pValue) {
+    virtual int GetValue(float flTime, float *pValue) {
         if (mDuration < flTime) {
             *pValue = mTarget;
             return mStopAtEnd == 0;
@@ -116,7 +116,7 @@ public:
     }
 
     // NTSC-U/C: 0x00546708, PAL: 0x00586c38
-    virtual int Sample(float flTime, float *pValue) {
+    virtual int GetValue(float flTime, float *pValue) {
         if (flTime <= mHold) {
             *pValue = 1.0f;
             return 1;

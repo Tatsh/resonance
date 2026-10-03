@@ -60,7 +60,7 @@ TrackSelector::TrackSelector(const std::vector<Player *> &players)
     : mChannelCount(kTrackSelectorChannelCount), mSlotCount(players.size()) {
     for (int nChannel = 0; nChannel < kTrackSelectorChannelCount; ++nChannel) {
         for (int nSlot = 0; nSlot < mSlotCount; ++nSlot) {
-            mGrid[nChannel][nSlot] = &g_nullPlayer;
+            mGrid[nChannel][nSlot] = &NullPlayer::sInstance;
         }
     }
     for (unsigned nIndex = 0; nIndex < players.size(); ++nIndex) {
@@ -83,7 +83,7 @@ void TrackSelector::RemoveLightFromColumn(Player *pPlayer, int nChannel, int nPa
         ++nFound;
     }
     for (int nSlot = nFound; nSlot < mSlotCount; ++nSlot) {
-        Player *pNext = (nSlot + 1 == mSlotCount) ? static_cast<Player *>(&g_nullPlayer) :
+        Player *pNext = (nSlot + 1 == mSlotCount) ? static_cast<Player *>(&NullPlayer::sInstance) :
                                                     mGrid[nChannel][nSlot + 1];
         if (pNext != mGrid[nChannel][nSlot]) {
             TrackSelectMsg message;
@@ -100,7 +100,7 @@ void TrackSelector::RemoveLightFromColumn(Player *pPlayer, int nChannel, int nPa
 // NTSC-U/C: 0x0013b5e8, PAL: 0x0013bf30
 void TrackSelector::InsertLightForDrawable(Player *pPlayer, int nChannel, int nPayload) {
     for (int nSlot = 0; nSlot < mSlotCount; ++nSlot) {
-        if (mGrid[nChannel][nSlot] == &g_nullPlayer) {
+        if (mGrid[nChannel][nSlot] == &NullPlayer::sInstance) {
             mGrid[nChannel][nSlot] = pPlayer;
             TrackSelectMsg message;
             message.mTrack = nChannel;
@@ -134,7 +134,7 @@ int TrackSelector::RebuildChannelGrid(BumpPacket *pPacket) {
         Send(&message);
     }
     while (pPlayer->GetPlace() != 0) {
-        RebindLightIfChanged(mGrid[nChannel][0], nChannel, position.mTick);
+        MovePlayerToBack(mGrid[nChannel][0], nChannel, position.mTick);
     }
     pPacket->mResult = 1;
     return 1;
@@ -144,7 +144,7 @@ int TrackSelector::RebuildChannelGrid(BumpPacket *pPacket) {
 // NTSC-U/C: 0x0013f5a0, PAL: 0x0013ff68
 inline void TrackSelector::OnMsg(const RotLeftMsg &msg) {
     Player *pPlayer = msg.mPlayer;
-    if (pPlayer->HasInputSlot()) {
+    if (pPlayer->IsLocal()) {
         AddLightToChannel(pPlayer, msg.mPosition.mTick, kRotateDown);
     }
 }
@@ -153,7 +153,7 @@ inline void TrackSelector::OnMsg(const RotLeftMsg &msg) {
 // NTSC-U/C: 0x0013f608, PAL: 0x0013ffd0
 inline void TrackSelector::OnMsg(const RotRightMsg &msg) {
     Player *pPlayer = msg.mPlayer;
-    if (pPlayer->HasInputSlot()) {
+    if (pPlayer->IsLocal()) {
         AddLightToChannel(pPlayer, msg.mPosition.mTick, kRotateUp);
     }
 }
@@ -162,8 +162,8 @@ inline void TrackSelector::OnMsg(const RotRightMsg &msg) {
 // NTSC-U/C: 0x0013f670, PAL: 0x00140038
 inline void TrackSelector::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
-    if (pPlayer->HasInputSlot()) {
-        pPlayer->Handle(pMsg);
+    if (pPlayer->IsLocal()) {
+        pPlayer->Dispatch(pMsg);
     }
 }
 
@@ -171,11 +171,11 @@ inline void TrackSelector::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
 // NTSC-U/C: 0x0013f6d8, PAL: 0x001400a0
 inline void TrackSelector::OnRemoteTrackSelect(RemoteTrackSelectMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
-    RebindLightColumn(pPlayer, pPlayer->GetTrack(), pMsg->mTrack, pMsg->mPosition.mTick);
+    MovePlayer(pPlayer, pPlayer->GetTrack(), pMsg->mTrack, pMsg->mPosition.mTick);
 }
 
 // NTSC-U/C: 0x0013b868, PAL: 0x0013c1b0
-void TrackSelector::HandleMessage(Message *pMsg) {
+void TrackSelector::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nRotLeftMsgType) {
         OnMsg(*static_cast<RotLeftMsg *>(pMsg));
@@ -206,14 +206,14 @@ int TrackSelector::SelfTest() {
         ProbePlayer(players[nIndex]);
     }
 
-    selector.RebindLightColumn(
+    selector.MovePlayer(
         players[kTestFourthPlayer], kTestFourthPlayer, kTestHomeChannel, Mid::MBT(kTestTick).mTick);
     // Yes, the binary keeps an empty loop here.
     for (int nSlot = kTrackSelectorSlotCount - 1; nSlot >= 0; --nSlot) {
     }
     ProbePlayer(players[kTestFourthPlayer]);
 
-    selector.RebindLightColumn(
+    selector.MovePlayer(
         players[kTestThirdPlayer], kTestThirdPlayer, kTestHomeChannel, Mid::MBT(kTestTick).mTick);
     // Yes, the binary keeps an empty loop here.
     for (int nSlot = kTrackSelectorSlotCount - 1; nSlot >= 0; --nSlot) {
@@ -222,19 +222,19 @@ int TrackSelector::SelfTest() {
     ProbePlayer(players[kTestFourthPlayer]);
     ProbePlayer(players[kTestThirdPlayer]);
 
-    selector.RebindLightIfChanged(
+    selector.MovePlayerToBack(
         players[kTestThirdPlayer], kTestHomeChannel, Mid::MBT(kTestTick).mTick);
     ProbePlayer(players[kTestFirstPlayer]);
     ProbePlayer(players[kTestFourthPlayer]);
     ProbePlayer(players[kTestThirdPlayer]);
 
-    selector.RebindLightIfChanged(
+    selector.MovePlayerToBack(
         players[kTestFourthPlayer], kTestHomeChannel, Mid::MBT(kTestTick).mTick);
     ProbePlayer(players[kTestFirstPlayer]);
     ProbePlayer(players[kTestThirdPlayer]);
     ProbePlayer(players[kTestFourthPlayer]);
 
-    selector.RebindLightIfChanged(
+    selector.MovePlayerToBack(
         players[kTestFirstPlayer], kTestHomeChannel, Mid::MBT(kTestTick).mTick);
     ProbePlayer(players[kTestThirdPlayer]);
     ProbePlayer(players[kTestFourthPlayer]);
@@ -254,17 +254,14 @@ TrackSelector::~TrackSelector() {
 }
 
 // NTSC-U/C: 0x0013f748, PAL: 0x00140110
-void TrackSelector::RebindLightColumn(Player *pPlayer,
-                                      int nFromChannel,
-                                      int nToChannel,
-                                      int nPayload) {
+void TrackSelector::MovePlayer(Player *pPlayer, int nFromChannel, int nToChannel, int nPayload) {
     RemoveLightFromColumn(pPlayer, nFromChannel, nPayload);
     InsertLightForDrawable(pPlayer, nToChannel, nPayload);
 }
 
 // NTSC-U/C: 0x0013f7a8, PAL: 0x00140170
-void TrackSelector::RebindLightIfChanged(Player *pPlayer, int nChannel, int nPayload) {
-    if (mGrid[nChannel][0] == pPlayer && mGrid[nChannel][1] == &g_nullPlayer) {
+void TrackSelector::MovePlayerToBack(Player *pPlayer, int nChannel, int nPayload) {
+    if (mGrid[nChannel][0] == pPlayer && mGrid[nChannel][1] == &NullPlayer::sInstance) {
         return;
     }
     RemoveLightFromColumn(pPlayer, nChannel, nPayload);

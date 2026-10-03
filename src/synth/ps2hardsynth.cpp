@@ -48,10 +48,10 @@ Ps2HardSynth::Ps2HardSynth() : mUseSfxBank(1), mAlternateBanksResident(0) {
 
 // NTSC-U/C: 0x003f6540, PAL: 0x0042ed28
 void Ps2HardSynth::SelectSfxProgram() {
-    SendMidi(kStatusControlChange | kSfxChannel, kControllerBankSelectMsb, 0);
-    SendMidi(
+    PlayMidi(kStatusControlChange | kSfxChannel, kControllerBankSelectMsb, 0);
+    PlayMidi(
         kStatusControlChange | kSfxChannel, kControllerBankSelectLsb, mUseSfxBank ? kSfxBank : 0);
-    SendMidi(kStatusProgramChange | kSfxChannel, kSfxProgram, 0);
+    PlayMidi(kStatusProgramChange | kSfxChannel, kSfxProgram, 0);
 }
 
 // NTSC-U/C: 0x003f4db8, PAL: 0x0042d530
@@ -112,7 +112,7 @@ void Ps2HardSynth::UnloadBanks() {
 }
 
 // NTSC-U/C: 0x003f66d8, PAL: 0x0042eec0
-void Ps2HardSynth::SendMidi(unsigned char nStatus, unsigned char nData1, unsigned char nData2) {
+void Ps2HardSynth::PlayMidi(unsigned char nStatus, unsigned char nData1, unsigned char nData2) {
     SendMidiToDriver(nStatus, nData1, nData2);
 }
 
@@ -123,8 +123,8 @@ void Ps2HardSynth::SelectBank(unsigned char nChannel, unsigned char nBank) {
     }
 
     const unsigned char nStatus = kStatusControlChange | nChannel;
-    SendMidi(nStatus, kControllerBankSelectMsb, 0);
-    SendMidi(nStatus, kControllerBankSelectLsb, nBank);
+    PlayMidi(nStatus, kControllerBankSelectMsb, 0);
+    PlayMidi(nStatus, kControllerBankSelectLsb, nBank);
 }
 
 // NTSC-U/C: 0x003f6700, PAL: 0x0042eee8
@@ -148,15 +148,15 @@ void Ps2HardSynth::AllNotesOff() {
 
     for (unsigned char nChannel = 0; nChannel < kChannelCount; ++nChannel) {
         const unsigned char nStatus = kStatusControlChange | nChannel;
-        SendMidi(nStatus, kControllerExpression, kFullExpression);
-        SendMidi(nStatus, kControllerBankSelectMsb, 0);
-        SendMidi(nStatus, kControllerBankSelectLsb, 0);
-        SendMidi(kStatusProgramChange | nChannel, 0, 0);
+        PlayMidi(nStatus, kControllerExpression, kFullExpression);
+        PlayMidi(nStatus, kControllerBankSelectMsb, 0);
+        PlayMidi(nStatus, kControllerBankSelectLsb, 0);
+        PlayMidi(kStatusProgramChange | nChannel, 0, 0);
     }
 
     SetChannelVolume(kDefaultVolume);
     SelectSfxProgram();
-    SendMidi(kStatusProgramChange | kMuseChannel, kMuseProgram, 0);
+    PlayMidi(kStatusProgramChange | kMuseChannel, kMuseProgram, 0);
 }
 
 // NTSC-U/C: 0x003f4590, PAL: 0x0042cbc8

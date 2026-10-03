@@ -12,7 +12,7 @@
  *
  * Its RTTI descriptor is at `0x008f2a70`. It derives from MsgSink at offset 0. The base vptr lands
  * at `+0x00` and the class is 0x20 bytes. Its vtable is at `0x007e5b00` and runs the type
- * function, the destructor, the inherited MsgSink::Handle(), and HandleMessage().
+ * function, the destructor, the inherited MsgSink::Dispatch(), and DispatchPriv().
  *
  * Two sets of note numbers drive the filter. The sounding set records every note a note-on has let
  * through, and the sustained set records every note a SustainNoteMsg has requested the filter
@@ -49,7 +49,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x001d2a10
      * @ghidraAddress PAL: 0x001d88c8
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 private:
     // Add the requested note to the sustained set unless it is already sounding.

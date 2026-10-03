@@ -26,7 +26,7 @@ public:
     /**
      * One client's status, eight bytes, from the stride the copy constructor divides by.
      *
-     * Public because AppendEntry() takes one by value. The names are attested by the labels
+     * Public because AddClientStatus() takes one by value. The names are attested by the labels
      * `(id:` and ` stat:` that PrintExtra() writes ahead of the two words.
      */
     struct ClientStatus {
@@ -104,13 +104,13 @@ public:
      * Append one entry.
      *
      * The entry arrives by value in two argument registers. The image lists no caller for the
-     * out-of-line body, and the verb is inferred from the body alone.
+     * out-of-line body.
      *
      * @param entry The entry to append.
      * @ghidraAddress NTSC-U/C: 0x003f2218
      * @ghidraAddress PAL: 0x0042a760
      */
-    void AppendEntry(ClientStatus entry);
+    void AddClientStatus(ClientStatus entry);
 
 private:
     std::vector<ClientStatus> mClients; // +0x14

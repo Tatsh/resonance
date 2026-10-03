@@ -26,6 +26,14 @@ class Player;
 class PitchRiffMsg : public Message {
 public:
     /**
+     * Identity that Type() reports.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d0134
+     * @ghidraAddress PAL: 0x007138cc
+     */
+    static int sID;
+
+    /**
      * Construct a message with the position at kMBTInfinity and the rest unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
@@ -75,7 +83,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nPitchRiffMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x003da680
      * @ghidraAddress PAL: 0x00412ab8
      */
@@ -101,7 +109,7 @@ public:
     virtual void PrintExtra(std::ostream &stream) const;
 
 public:
-    // Public because Scratcher::HandleMessage() reads these directly, through a PitchRiffMsg
+    // Public because Scratcher::DispatchPriv() reads these directly, through a PitchRiffMsg
     // pointer from outside the hierarchy, and the image exposes no accessor. A friend declaration
     // fits equally well.
     int mButton;        // +0x04, labelled `b#` by PrintExtra()
@@ -109,15 +117,3 @@ public:
     Mid::MBT mPosition; // +0x0c
     int mTrack;         // +0x10
 };
-
-/**
- * Identity that PitchRiffMsg::Type() reports.
- *
- * This word belongs to PitchRiffMsg because PitchRiffMsg::Type() at `0x003da680` returns it.
- * Several handlers elsewhere read the same word to compare against it, which is the expected
- * shape for a registered identity and does not make the word theirs.
- *
- * @ghidraAddress NTSC-U/C: 0x006d0134
- * @ghidraAddress PAL: 0x007138cc
- */
-extern int g_nPitchRiffMsgType;

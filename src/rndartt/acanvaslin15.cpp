@@ -57,7 +57,7 @@ inline const APalette *ResolvePalette(const ABitmap &source, const ABitmap &canv
     if (canvas.mPalette != nullptr) {
         return canvas.mPalette;
     }
-    return g_pDefaultPalette;
+    return ACanvas::palDefault;
 }
 
 } // namespace
@@ -174,7 +174,7 @@ void ACanvasLin15::DrawTmapRow8U(int nY,
 }
 
 // NTSC-U/C: 0x00618b00, PAL: 0x00659690
-// Each row is unpacked into g_abCanvasRowScratch first, and the key is compared against
+// Each row is unpacked into ACanvas::tempBuff first, and the key is compared against
 // the low byte of the transparent colour.
 void ACanvasLin15::DrawBitmapLin4U(const ABitmap &source, int nX, int nY) {
     const APalette *pPalette = ResolvePalette(source, mBitmap);
@@ -184,8 +184,8 @@ void ACanvasLin15::DrawBitmapLin4U(const ABitmap &source, int nX, int nY) {
     unsigned short *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
     const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
     for (int nRows = source.mHeight; nRows > 0; --nRows) {
-        Unpack4(pSourceRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
-        const unsigned char *pIndex = g_abCanvasRowScratch;
+        Unpack4(pSourceRow, ACanvas::tempBuff, source.mWidth, source.mOddNibbleStart);
+        const unsigned char *pIndex = ACanvas::tempBuff;
         for (int nRemaining = source.mWidth; nRemaining > 0; --nRemaining) {
             if (source.mHasTransparentColor == 0 ||
                 *pIndex != static_cast<unsigned char>(source.mTransparentColor)) {

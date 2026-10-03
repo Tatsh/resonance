@@ -317,10 +317,10 @@ void PrintObjectRef(Dbg &sink, const Object *pObject) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 // An object reference is stored as a name and resolves through the renderer registry. A name no
@@ -329,7 +329,7 @@ template <class T>
 void ReadObjectRef(Stream &stream, T *&refOut) {
     HxStr name(nullptr);
     stream.ReadString(name);
-    refOut = dynamic_cast<T *>(g_manager.Find(name));
+    refOut = dynamic_cast<T *>(TheManager.Find(name));
 }
 
 // Every labelled number in the dumps is a Print of the label and then a Format of the value alone.
@@ -426,22 +426,22 @@ Dbg &DumpEdgeVector(Dbg &sink, const std::vector<MeshEdge> &edges) {
 // NTSC-U/C: 0x0048a9b0, PAL: 0x004c8838
 Stream &WriteVertVector(Stream &stream, const std::vector<MeshVert> &verts) {
     const int nCount = static_cast<int>(verts.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &vert : verts) {
-        stream.Write(&vert.mPoint.x, sizeof(float));
-        stream.Write(&vert.mPoint.y, sizeof(float));
-        stream.Write(&vert.mPoint.z, sizeof(float));
-        stream.Write(&vert.mNorm.x, sizeof(float));
-        stream.Write(&vert.mNorm.y, sizeof(float));
-        stream.Write(&vert.mNorm.z, sizeof(float));
-        stream.Write(&vert.mColor.r, sizeof(float));
-        stream.Write(&vert.mColor.g, sizeof(float));
-        stream.Write(&vert.mColor.b, sizeof(float));
-        stream.Write(&vert.mColor.a, sizeof(float));
-        stream.Write(&vert.mTex1.x, sizeof(float));
-        stream.Write(&vert.mTex1.y, sizeof(float));
-        stream.Write(&vert.mTex2.x, sizeof(float));
-        stream.Write(&vert.mTex2.y, sizeof(float));
+        stream.WriteLE(&vert.mPoint.x, sizeof(float));
+        stream.WriteLE(&vert.mPoint.y, sizeof(float));
+        stream.WriteLE(&vert.mPoint.z, sizeof(float));
+        stream.WriteLE(&vert.mNorm.x, sizeof(float));
+        stream.WriteLE(&vert.mNorm.y, sizeof(float));
+        stream.WriteLE(&vert.mNorm.z, sizeof(float));
+        stream.WriteLE(&vert.mColor.r, sizeof(float));
+        stream.WriteLE(&vert.mColor.g, sizeof(float));
+        stream.WriteLE(&vert.mColor.b, sizeof(float));
+        stream.WriteLE(&vert.mColor.a, sizeof(float));
+        stream.WriteLE(&vert.mTex1.x, sizeof(float));
+        stream.WriteLE(&vert.mTex1.y, sizeof(float));
+        stream.WriteLE(&vert.mTex2.x, sizeof(float));
+        stream.WriteLE(&vert.mTex2.y, sizeof(float));
     }
     return stream;
 }
@@ -449,11 +449,11 @@ Stream &WriteVertVector(Stream &stream, const std::vector<MeshVert> &verts) {
 // NTSC-U/C: 0x0048ac40, PAL: 0x004c8ac8
 Stream &WriteFaceVector(Stream &stream, const std::vector<MeshFace> &faces) {
     const int nCount = static_cast<int>(faces.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &face : faces) {
-        stream.Write(&face.mV1, sizeof(face.mV1));
-        stream.Write(&face.mV2, sizeof(face.mV2));
-        stream.Write(&face.mV3, sizeof(face.mV3));
+        stream.WriteLE(&face.mV1, sizeof(face.mV1));
+        stream.WriteLE(&face.mV2, sizeof(face.mV2));
+        stream.WriteLE(&face.mV3, sizeof(face.mV3));
     }
     return stream;
 }
@@ -461,42 +461,42 @@ Stream &WriteFaceVector(Stream &stream, const std::vector<MeshFace> &faces) {
 // NTSC-U/C: 0x004945e0, PAL: 0x004d24a8
 Stream &WriteEdgeVector(Stream &stream, const std::vector<MeshEdge> &edges) {
     const int nCount = static_cast<int>(edges.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &edge : edges) {
-        stream.Write(&edge.mV1, sizeof(edge.mV1));
-        stream.Write(&edge.mV2, sizeof(edge.mV2));
+        stream.WriteLE(&edge.mV1, sizeof(edge.mV1));
+        stream.WriteLE(&edge.mV2, sizeof(edge.mV2));
     }
     return stream;
 }
 
 // NTSC-U/C: 0x00482368, PAL: 0x004c0138
 Stream &ReadVert(Stream &stream, MeshVert &vert) {
-    stream.Read(&vert.mPoint.x, sizeof(float));
-    stream.Read(&vert.mPoint.y, sizeof(float));
-    stream.Read(&vert.mPoint.z, sizeof(float));
+    stream.ReadLE(&vert.mPoint.x, sizeof(float));
+    stream.ReadLE(&vert.mPoint.y, sizeof(float));
+    stream.ReadLE(&vert.mPoint.z, sizeof(float));
     if (g_nRndMeshLoadVersion < kVertPadFirstDroppedVersion) {
         float aflDiscarded[2];
-        stream.Read(&aflDiscarded[0], sizeof(float));
-        stream.Read(&aflDiscarded[1], sizeof(float));
+        stream.ReadLE(&aflDiscarded[0], sizeof(float));
+        stream.ReadLE(&aflDiscarded[1], sizeof(float));
     }
-    stream.Read(&vert.mNorm.x, sizeof(float));
-    stream.Read(&vert.mNorm.y, sizeof(float));
-    stream.Read(&vert.mNorm.z, sizeof(float));
-    stream.Read(&vert.mColor.r, sizeof(float));
-    stream.Read(&vert.mColor.g, sizeof(float));
-    stream.Read(&vert.mColor.b, sizeof(float));
-    stream.Read(&vert.mColor.a, sizeof(float));
-    stream.Read(&vert.mTex1.x, sizeof(float));
-    stream.Read(&vert.mTex1.y, sizeof(float));
-    stream.Read(&vert.mTex2.x, sizeof(float));
-    stream.Read(&vert.mTex2.y, sizeof(float));
+    stream.ReadLE(&vert.mNorm.x, sizeof(float));
+    stream.ReadLE(&vert.mNorm.y, sizeof(float));
+    stream.ReadLE(&vert.mNorm.z, sizeof(float));
+    stream.ReadLE(&vert.mColor.r, sizeof(float));
+    stream.ReadLE(&vert.mColor.g, sizeof(float));
+    stream.ReadLE(&vert.mColor.b, sizeof(float));
+    stream.ReadLE(&vert.mColor.a, sizeof(float));
+    stream.ReadLE(&vert.mTex1.x, sizeof(float));
+    stream.ReadLE(&vert.mTex1.y, sizeof(float));
+    stream.ReadLE(&vert.mTex2.x, sizeof(float));
+    stream.ReadLE(&vert.mTex2.y, sizeof(float));
     return stream;
 }
 
 // NTSC-U/C: 0x0048ad48, PAL: 0x004c8bd0
 Stream &ReadVertVector(Stream &stream, std::vector<MeshVert> &verts) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     verts.resize(nCount);
     for (auto &vert : verts) {
         ReadVert(stream, vert);
@@ -506,16 +506,16 @@ Stream &ReadVertVector(Stream &stream, std::vector<MeshVert> &verts) {
 
 // NTSC-U/C: 0x00482e28, PAL: 0x004c0bf8
 Stream &ReadFace(Stream &stream, MeshFace &face) {
-    stream.Read(&face.mV1, sizeof(face.mV1))
-        .Read(&face.mV2, sizeof(face.mV2))
-        .Read(&face.mV3, sizeof(face.mV3));
+    stream.ReadLE(&face.mV1, sizeof(face.mV1))
+        .ReadLE(&face.mV2, sizeof(face.mV2))
+        .ReadLE(&face.mV3, sizeof(face.mV3));
     if (g_nRndMeshLoadVersion <= kFaceNormalLastVersion) {
         // Files of these versions store a face normal after the indices, which is discarded.
         Vector3 normal;
         normal.w = 1.0f;
-        stream.Read(&normal.x, sizeof(normal.x))
-            .Read(&normal.y, sizeof(normal.y))
-            .Read(&normal.z, sizeof(normal.z));
+        stream.ReadLE(&normal.x, sizeof(normal.x))
+            .ReadLE(&normal.y, sizeof(normal.y))
+            .ReadLE(&normal.z, sizeof(normal.z));
     }
     return stream;
 }
@@ -523,7 +523,7 @@ Stream &ReadFace(Stream &stream, MeshFace &face) {
 // NTSC-U/C: 0x0048ae78, PAL: 0x004c8d00
 Stream &ReadFaceVector(Stream &stream, std::vector<MeshFace> &faces) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     faces.resize(nCount);
     for (auto &face : faces) {
         ReadFace(stream, face);
@@ -534,11 +534,11 @@ Stream &ReadFaceVector(Stream &stream, std::vector<MeshFace> &faces) {
 // NTSC-U/C: 0x0048af78, PAL: 0x004c8e00
 Stream &ReadEdgeVector(Stream &stream, std::vector<MeshEdge> &edges) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     edges.resize(nCount);
     for (auto &edge : edges) {
-        stream.Read(&edge.mV1, sizeof(edge.mV1));
-        stream.Read(&edge.mV2, sizeof(edge.mV2));
+        stream.ReadLE(&edge.mV1, sizeof(edge.mV1));
+        stream.ReadLE(&edge.mV2, sizeof(edge.mV2));
     }
     return stream;
 }
@@ -559,8 +559,8 @@ TransformPoint(const float aflXfm[kXfmRowCount][kXfmRowFloatCount], const float 
     pOut[2] = aflXfm[0][2] * pIn[0] + aflXfm[1][2] * pIn[1] + aflXfm[2][2] * pIn[2] + aflXfm[3][2];
 }
 
-// De-inlined from the head of Mesh::Collide, which inverts the owner's world transform by hand
-// rather than through a helper.
+// De-inlined from the head of Mesh::FindCollisions, which inverts the owner's world transform by
+// hand rather than through a helper.
 inline void InvertXfm(const float aflWorld[kXfmRowCount][kXfmRowFloatCount],
                       float aflInverse[kXfmRowCount][kXfmRowFloatCount]) {
     const float flDet =
@@ -603,10 +603,10 @@ inline void InvertXfm(const float aflWorld[kXfmRowCount][kXfmRowFloatCount],
 // NTSC-U/C: 0x0048c040, PAL: 0x004c9ec8
 Stream &ReadIndexRun(Stream &stream, std::vector<unsigned short> &run) {
     int nIndexCount;
-    stream.Read(&nIndexCount, sizeof(nIndexCount));
+    stream.ReadLE(&nIndexCount, sizeof(nIndexCount));
     run.resize(nIndexCount);
     for (auto &index : run) {
-        stream.Read(&index, sizeof(index));
+        stream.ReadLE(&index, sizeof(index));
     }
     return stream;
 }
@@ -616,7 +616,7 @@ Stream &ReadIndexRun(Stream &stream, std::vector<unsigned short> &run) {
 // them, and the loader releases the vector as soon as it has been read.
 Stream &ReadIndexRunVector(Stream &stream, std::vector<std::vector<unsigned short> > &runs) {
     int nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     runs.resize(nCount);
     for (auto &run : runs) {
         ReadIndexRun(stream, run);
@@ -648,12 +648,12 @@ void Mesh::operator delete(void *pBlock) {
 }
 
 // NTSC-U/C: 0x006eed60, PAL: 0x00732780
-Mesh *(*g_pfnNewMesh)(const HxStr &name) = NewMesh;
+Mesh *(*Mesh::sNew)(const HxStr &name) = NewMesh;
 
 // NTSC-U/C: 0x004926f0, PAL: 0x004d05a0
 Mesh *NewMeshThroughHook(const HxStr &name) {
     try {
-        return g_pfnNewMesh(name);
+        return Mesh::sNew(name);
     } catch (...) {
         return nullptr; // The binary's handler returns null.
     }
@@ -662,14 +662,14 @@ Mesh *NewMeshThroughHook(const HxStr &name) {
 // NTSC-U/C: 0x00492f50, PAL: 0x004d0e00
 Object *CreateRegisteredMesh(const HxStr &name) {
     try {
-        return g_pfnNewMesh(name);
+        return Mesh::sNew(name);
     } catch (...) {
         return nullptr; // The binary's handler returns null.
     }
 }
 
 // NTSC-U/C: 0x006eed68, PAL: 0x00732788
-HxStr g_meshClassName("Mesh");
+HxStr Mesh::sClassName("Mesh");
 
 // NTSC-U/C: 0x00894d68, PAL: 0x008d9d78
 int g_nRndMeshLoadVersion;
@@ -689,7 +689,7 @@ Mesh::Mesh(const HxStr &name)
 
 // NTSC-U/C: 0x00492838, PAL: 0x004d06e8
 Mesh::~Mesh() {
-    RemoveObjectRefs();
+    ReleaseObjects();
     ReleaseAllRefs();
 }
 
@@ -755,14 +755,14 @@ void Mesh::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x00481300, PAL: 0x004beff8
 void Mesh::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
 
     Transformable::Save(stream);
     Drawable::Save(stream);
     Collideable::Save(stream);
 
-    stream.Write(&mZMode, sizeof(mZMode));
-    stream.Write(&mZFunc, sizeof(mZFunc));
+    stream.WriteLE(&mZMode, sizeof(mZMode));
+    stream.WriteLE(&mZFunc, sizeof(mZFunc));
     WriteObjectRef(stream, mMat);
 
     WriteObjectRef(stream, mVertsOwner);
@@ -771,14 +771,14 @@ void Mesh::Save(Stream &stream) {
     WriteObjectRef(stream, mTrans1Owner);
     WriteObjectRef(stream, mTrans2Owner);
 
-    stream.Write(&mSphere.mCenter.x, sizeof(float));
-    stream.Write(&mSphere.mCenter.y, sizeof(float));
-    stream.Write(&mSphere.mCenter.z, sizeof(float));
-    stream.Write(&mSphere.mRadius, sizeof(mSphere.mRadius));
+    stream.WriteLE(&mSphere.mCenter.x, sizeof(float));
+    stream.WriteLE(&mSphere.mCenter.y, sizeof(float));
+    stream.WriteLE(&mSphere.mCenter.z, sizeof(float));
+    stream.WriteLE(&mSphere.mRadius, sizeof(mSphere.mRadius));
 
     WriteObjectRef(stream, mNext);
-    stream.Write(&mMinScreen, sizeof(mMinScreen));
-    stream.Write(&mMaxVerts, sizeof(mMaxVerts));
+    stream.WriteLE(&mMinScreen, sizeof(mMinScreen));
+    stream.WriteLE(&mMaxVerts, sizeof(mMaxVerts));
 
     WriteVertVector(stream, mVerts);
     WriteFaceVector(stream, mFaces);
@@ -874,7 +874,7 @@ void Mesh::Replace(Object *pFrom, Object *pTo) {
 
 // NTSC-U/C: 0x00492f00, PAL: 0x004d0db0
 const HxStr &Mesh::ClassName() const {
-    return g_meshClassName;
+    return Mesh::sClassName;
 }
 
 // NTSC-U/C: 0x00482568, PAL: 0x004c0338
@@ -884,7 +884,7 @@ void Mesh::Copy(const Object *pSource, unsigned nFlags) {
     Transformable::Copy(pSource, nFlags);
     Drawable::Copy(pSource, nFlags);
     Collideable::Copy(pSource, nFlags);
-    RemoveObjectRefs();
+    ReleaseObjects();
 
     mZMode = pMesh->mZMode;
     mZFunc = pMesh->mZFunc;
@@ -927,23 +927,23 @@ void Mesh::Copy(const Object *pSource, unsigned nFlags) {
 
 // NTSC-U/C: 0x004817d0, PAL: 0x004bf4c8
 void Mesh::Load(Stream &stream) {
-    stream.Read(&g_nRndMeshLoadVersion, sizeof(g_nRndMeshLoadVersion));
+    stream.ReadLE(&g_nRndMeshLoadVersion, sizeof(g_nRndMeshLoadVersion));
     if (g_nRndMeshLoadVersion > kSerialVersion) {
-        g_failSink.Report("Can't load new Mesh\n");
+        Rnd::TheDbg.Notify("Can't load new Mesh\n");
         return;
     }
 
     Transformable::Load(stream);
     Drawable::Load(stream);
     Collideable::Load(stream);
-    RemoveObjectRefs();
+    ReleaseObjects();
 
-    stream.Read(&mZMode, sizeof(mZMode));
-    stream.Read(&mZFunc, sizeof(mZFunc));
+    stream.ReadLE(&mZMode, sizeof(mZMode));
+    stream.ReadLE(&mZFunc, sizeof(mZFunc));
     if (g_nRndMeshLoadVersion < 3) {
         // A mesh used to store the transform billboard mode itself.
         int nBillboard = 0;
-        stream.Read(&nBillboard, sizeof(nBillboard));
+        stream.ReadLE(&nBillboard, sizeof(nBillboard));
         Transformable::SetBillboard(nBillboard);
     }
 
@@ -958,34 +958,34 @@ void Mesh::Load(Stream &stream) {
         // A mesh used to store the transform origin itself.
         Vector3 origin;
         origin.w = 1.0f;
-        stream.Read(&origin.x, sizeof(float));
-        stream.Read(&origin.y, sizeof(float));
-        stream.Read(&origin.z, sizeof(float));
+        stream.ReadLE(&origin.x, sizeof(float));
+        stream.ReadLE(&origin.y, sizeof(float));
+        stream.ReadLE(&origin.z, sizeof(float));
         Transformable::SetOrigin(&origin.x);
     }
 
-    stream.Read(&mSphere.mCenter.x, sizeof(float));
-    stream.Read(&mSphere.mCenter.y, sizeof(float));
-    stream.Read(&mSphere.mCenter.z, sizeof(float));
-    stream.Read(&mSphere.mRadius, sizeof(mSphere.mRadius));
+    stream.ReadLE(&mSphere.mCenter.x, sizeof(float));
+    stream.ReadLE(&mSphere.mCenter.y, sizeof(float));
+    stream.ReadLE(&mSphere.mCenter.z, sizeof(float));
+    stream.ReadLE(&mSphere.mRadius, sizeof(mSphere.mRadius));
 
     bool bKeepEdges = true;
     if (g_nRndMeshLoadVersion >= 5 && g_nRndMeshLoadVersion <= 7) {
         char chKeepEdges = 0;
-        stream.ReadBytes(&chKeepEdges, sizeof(chKeepEdges));
+        stream.Read(&chKeepEdges, sizeof(chKeepEdges));
         bKeepEdges = chKeepEdges != 0;
     }
 
     if (g_nRndMeshLoadVersion >= 6) {
         ReadObjectRef(stream, mNext);
-        stream.Read(&mMinScreen, sizeof(mMinScreen));
+        stream.ReadLE(&mMinScreen, sizeof(mMinScreen));
     }
     if (g_nRndMeshLoadVersion == 7) {
         char chUnused = 0;
-        stream.ReadBytes(&chUnused, sizeof(chUnused));
+        stream.Read(&chUnused, sizeof(chUnused));
     }
     if (g_nRndMeshLoadVersion >= 9) {
-        stream.Read(&mMaxVerts, sizeof(mMaxVerts));
+        stream.ReadLE(&mMaxVerts, sizeof(mMaxVerts));
     }
 
     ReadVertVector(stream, mVerts);
@@ -1003,12 +1003,12 @@ void Mesh::Load(Stream &stream) {
     }
     if (g_nRndMeshLoadVersion == 0) {
         char chUnused = 0;
-        stream.ReadBytes(&chUnused, sizeof(chUnused));
+        stream.Read(&chUnused, sizeof(chUnused));
         float aflUnused[4];
-        stream.Read(&aflUnused[0], sizeof(float));
-        stream.Read(&aflUnused[1], sizeof(float));
-        stream.Read(&aflUnused[2], sizeof(float));
-        stream.Read(&aflUnused[3], sizeof(float));
+        stream.ReadLE(&aflUnused[0], sizeof(float));
+        stream.ReadLE(&aflUnused[1], sizeof(float));
+        stream.ReadLE(&aflUnused[2], sizeof(float));
+        stream.ReadLE(&aflUnused[3], sizeof(float));
     }
 
     ClearSharedGeometry();
@@ -1036,7 +1036,7 @@ void Mesh::Refresh() {
 }
 
 // NTSC-U/C: 0x0047f950, PAL: 0x004bd648
-void Mesh::Collide(const Ray &ray, HitSink &sink) {
+void Mesh::FindCollisions(const Ray &ray, HitSink &sink) {
     if (Drawable::mShowing == 0) {
         return;
     }
@@ -1085,11 +1085,11 @@ void Mesh::Collide(const Ray &ray, HitSink &sink) {
     }
 
     // The children are tested after this mesh's own faces.
-    Collideable::Collide(ray, sink);
+    Collideable::FindCollisions(ray, sink);
 }
 
 // NTSC-U/C: 0x00493a78, PAL: 0x004d1928
-void Mesh::SetMaterial(Mat *pMat) {
+void Mesh::SetMat(Mat *pMat) {
     if (mMat != nullptr) {
         mMat->RemoveRef(this);
     }
@@ -1736,7 +1736,7 @@ void Mesh::AddObjectRefs() {
 }
 
 // NTSC-U/C: 0x00493d48, PAL: 0x004d1bf8
-void Mesh::RemoveObjectRefs() {
+void Mesh::ReleaseObjects() {
     if (mNext != nullptr) {
         mNext->RemoveRef(this);
     }
@@ -1777,7 +1777,7 @@ int Mesh::PrepareDraw(Sphere &worldSphere) {
         return 0;
     }
 
-    Cam *pCam = g_pCurrentCam;
+    Cam *pCam = Cam::sCurrent;
     if (mSphere.mRadius == 0.0f) {
         return 1;
     }

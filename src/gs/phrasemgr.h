@@ -37,7 +37,7 @@ class TickClock;
  * `+0x04`, mTrack at `+0x08`, and the phrase at `+0x0c`, and delivers it through
  * MsgSource::Send().
  *
- * HandleMessage() dispatches six identities, three of them packets rather than messages. A
+ * DispatchPriv() dispatches six identities, three of them packets rather than messages. A
  * PhrasePacket, a CaughtPhrasePacket, and a GemPacket arrive from the network, and an
  * InvalidateTrackMsg, a RefreshNetMsg, and a GameBeginMsg arrive locally. The PhrasePacket and the
  * InvalidateTrackMsg paths both loop, clearing and posting bars through RefreshBar(), and the
@@ -131,8 +131,8 @@ public:
      * chained to it, and post the gem for the first window bar mapped to each step.
      *
      * A step with no phrase is first given to the packet's player, and TrackData::SetOwner()
-     * receives g_nullPlayer as the previous owner. The GemPacket path of HandleMessage() is the
-     * one recovered caller.
+     * receives NullPlayer::sInstance as the previous owner. The GemPacket path of DispatchPriv()
+     * is the one recovered caller.
      *
      * @param pMsg The packet the gem is read out of.
      * @ghidraAddress NTSC-U/C: 0x001ba6d0
@@ -154,9 +154,9 @@ public:
     /**
      * Post each gem the track description lists for a bar as a GemMsg, when the bar is enabled.
      *
-     * A ghost gem is posted in g_nullPlayer's name, and any other in the name of the phrase owner
-     * at the bar. RefreshBar() posts ghosts on a riff track outside jukebox mode and plain gems on
-     * a catch track.
+     * A ghost gem is posted in NullPlayer::sInstance's name, and any other in the name of the
+     * phrase owner at the bar. RefreshBar() posts ghosts on a riff track outside jukebox mode and
+     * plain gems on a catch track.
      *
      * @param nBar The bar.
      * @param bGhost Non-zero to post ghost gems.
@@ -348,8 +348,8 @@ public:
      * affected window bars again.
      *
      * It first marks the world's statistics through GrooveWorld::MarkStatsFlag(). A
-     * CaughtPhrasePacket naming g_nullPlayer goes to mNetSink for each cleared step when one is
-     * installed. The chain is followed only in kPlayModeGame with bAll set. AxePhraseMaker,
+     * CaughtPhrasePacket naming NullPlayer::sInstance goes to mNetSink for each cleared step when
+     * one is installed. The chain is followed only in kPlayModeGame with bAll set. AxePhraseMaker,
      * NotePitcher, and PhraseNeutralizer are the recovered callers.
      *
      * @param nBar The bar, mapped through slot 5 of mMap.
@@ -364,7 +364,7 @@ public:
      * or clear it, and post the chained window bars again.
      *
      * The phrase is cleared rather than given when the packet's player is a stand-in, and the
-     * first window bar mapped to each step is posted again. HandleMessage() is the recovered
+     * first window bar mapped to each step is posted again. DispatchPriv() is the recovered
      * caller.
      *
      * @param pMsg The packet.
@@ -421,7 +421,7 @@ public:
      * the packet has none, and post the window bar mapped to that step again.
      *
      * When the owner changes, TrackData::SetOwner() receives the owner PhraseDatabase::GetOwner()
-     * reported before the change, which is what the binary passes. HandleMessage() expands the
+     * reported before the change, which is what the binary passes. DispatchPriv() expands the
      * body inline, and the out-of-line copy has no caller.
      *
      * @param pPacket The packet.
@@ -434,7 +434,7 @@ public:
      * Clear and post again every window bar whose mapped bar lies in the range an
      * InvalidateTrackMsg for this track names.
      *
-     * HandleMessage() expands the body inline, and the out-of-line copy has no caller.
+     * DispatchPriv() expands the body inline, and the out-of-line copy has no caller.
      *
      * @param pMsg The message.
      * @ghidraAddress NTSC-U/C: 0x001c0110
@@ -446,9 +446,9 @@ public:
      * Send mNetSink a CaughtPhrasePacket for the step of each bar a RefreshNetMsg for this track
      * names.
      *
-     * Each packet names the owner of the phrase at its step, or g_nullPlayer. Nothing is sent
-     * while no sink is installed. The RefreshNetMsg path of HandleMessage() is the one recovered
-     * caller.
+     * Each packet names the owner of the phrase at its step, or NullPlayer::sInstance. Nothing is
+     * sent while no sink is installed. The RefreshNetMsg path of DispatchPriv() is the one
+     * recovered caller.
      *
      * @param pMsg The RefreshNetMsg.
      * @ghidraAddress NTSC-U/C: 0x001ba928
@@ -460,11 +460,12 @@ public:
      * Report the player who owns the phrase at a bar.
      *
      * @param nBar The bar, passed to PhraseDatabase::GetPhraseAt().
-     * @return The owner of the phrase the database reports, or g_nullPlayer when there is none.
+     * @return The owner of the phrase the database reports, or NullPlayer::sInstance when there is
+     * none.
      * @ghidraAddress NTSC-U/C: 0x001c0268
      * @ghidraAddress PAL: 0x001c6098
      */
-    Player *GetPhraseOwner(int nBar);
+    Player *GetOwner(int nBar) const;
 
     /**
      * Give the phrase at a bar a new owner.
@@ -496,7 +497,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x001bc718
      * @ghidraAddress PAL: 0x001c24f0
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 public:
     /**
@@ -514,7 +515,7 @@ public:
      *
      * The constructor clears it and every one of the four stages writes it from outside the class,
      * which is what records the member public. InstallPhrase(), ClearPhrase(), AddGem(), and
-     * SetPhraseOwner() send it GemPacket and CaughtPhrasePacket objects through MsgSink::Handle()
+     * SetPhraseOwner() send it GemPacket and CaughtPhrasePacket objects through MsgSink::Dispatch()
      * when it is set.
      *
      * +0x1c
@@ -528,7 +529,7 @@ private:
 
     const TrackData *mTrackData; // +0x20
     // Created by the constructor over mMap, deleted by the destructor, and the object
-    // PostPhraseMsg() and three HandleMessage() paths look a phrase up in.
+    // PostPhraseMsg() and three DispatchPriv() paths look a phrase up in.
     PhraseDatabase *mDatabase; // +0x24
     PlayMap *mMap;             // +0x28
     // Created by CreatePowerbarMgr() and deleted by the destructor.

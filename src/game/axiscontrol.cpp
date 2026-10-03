@@ -48,7 +48,8 @@ constexpr int kLaneDivisor = 8;
 // NTSC-U/C: 0x0019e940, PAL: 0x001a46a8
 AxisControl::AxisControl(const TrackData *pTrackData)
     : mTrack(pTrackData->mIndex), mChannel(pTrackData->mChannel), mLane(kLaneCenter),
-      mAxis(kNoAxis), mBending(0), mBendOrigin(0), mSustainTick(0), mPlayer(&g_nullPlayer) {
+      mAxis(kNoAxis), mBending(0), mBendOrigin(0), mSustainTick(0),
+      mPlayer(&NullPlayer::sInstance) {
 }
 
 // NTSC-U/C: 0x0019ea80, PAL: 0x001a47e8
@@ -114,7 +115,7 @@ void AxisControl::SendPitchBend(int nTick, int nValue) {
 }
 
 // NTSC-U/C: 0x0019ed80, PAL: 0x001a4ae8
-void AxisControl::HandleMessage(Message *pMsg) {
+void AxisControl::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nAxisRegisterMsgType) {
         OnAxisRegister(static_cast<AxisRegisterMsg *>(pMsg));
@@ -127,13 +128,13 @@ void AxisControl::HandleMessage(Message *pMsg) {
         OnTrackSelect(static_cast<TrackSelectMsg *>(pMsg));
         return;
     }
-    if (nType == static_cast<int>(g_dwSustainNoteMsgType)) {
+    if (nType == static_cast<int>(SustainNoteMsg::sID)) {
         // The tick is stored without the finiteness check.
         mSustainTick.mTick = static_cast<SustainNoteMsg *>(pMsg)->mTick;
         return;
     }
 
-    if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
+    if (nType == static_cast<int>(StdMidiMsg::sID)) {
         OnStdMidi(static_cast<StdMidiMsg *>(pMsg));
     } else if (nType == static_cast<int>(g_dwAllNotesOffMsgType)) {
         OnAllNotesOff(static_cast<AllNotesOffMsg *>(pMsg));

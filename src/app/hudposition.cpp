@@ -68,28 +68,28 @@ HudPosition::HudPosition(PlayMap *pPlayMap)
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mView = dynamic_cast<Rnd::View *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s pos.view", pszLayout))));
-    mView->ClearTransList();
-    mView->ClearDraws();
+        Rnd::TheManager.Find(HxStr(FormatString("%s pos.view", pszLayout))));
+    mView->RemoveAllTranses();
+    mView->RemoveAllDraws();
 
-    mNormalMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("pos_norm.mat")));
-    mPastMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("pos_past.mat")));
-    mCurrentMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("pos_current.mat")));
-    mBlackFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr("HUD pos_black.font")));
-    mWhiteFont = dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr("HUD pos_white.font")));
-    mAnim = dynamic_cast<Rnd::MeshAnim *>(Rnd::g_manager.Find(HxStr("HUD pos.msnm")));
-    mRepeatView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("HUD pos_repeat.view")));
+    mNormalMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("pos_norm.mat")));
+    mPastMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("pos_past.mat")));
+    mCurrentMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("pos_current.mat")));
+    mBlackFont = dynamic_cast<Rnd::Font *>(Rnd::TheManager.Find(HxStr("HUD pos_black.font")));
+    mWhiteFont = dynamic_cast<Rnd::Font *>(Rnd::TheManager.Find(HxStr("HUD pos_white.font")));
+    mAnim = dynamic_cast<Rnd::MeshAnim *>(Rnd::TheManager.Find(HxStr("HUD pos.msnm")));
+    mRepeatView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("HUD pos_repeat.view")));
 
     mView->SetShowing(1);
     const Vector3 origin{0.0f, 0.0f, 0.0f, 1.0f};
     mView->SetOrigin(&origin.x);
 
     Rnd::Mesh *pBlockTemplate =
-        dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD pos_norm.mesh")));
+        dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr("HUD pos_norm.mesh")));
     Rnd::Text *pLabelTemplate =
-        dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr("HUD pos.txt")));
+        dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr("HUD pos.txt")));
 
-    const int nSections = mPlayMap->GetSectionCount();
+    const int nSections = mPlayMap->GetNumSections();
     int nStartBar = 0;
     Rnd::Text *pFirstLabel = nullptr;
     float flX = 0.0f;
@@ -151,16 +151,16 @@ void HudPosition::Update() {
         Section &section = mSections[i];
         if (i < nCurrent) {
             ScaleBlock(section.mBlock, kOtherScale);
-            section.mBlock->SetMaterial(mPastMat);
+            section.mBlock->SetMat(mPastMat);
             section.mLabel->SetFont(mWhiteFont);
         } else if (i == nCurrent) {
             ScaleBlock(section.mBlock, kCurrentScale);
-            section.mBlock->SetMaterial(mCurrentMat);
+            section.mBlock->SetMat(mCurrentMat);
             section.mLabel->SetFont(mBlackFont);
             mCurrentSection = i;
         } else {
             ScaleBlock(section.mBlock, kOtherScale);
-            section.mBlock->SetMaterial(mNormalMat);
+            section.mBlock->SetMat(mNormalMat);
             section.mLabel->SetFont(mWhiteFont);
         }
     }

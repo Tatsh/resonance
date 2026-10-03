@@ -171,14 +171,14 @@ inline int AMovieSet::RequestRead(int nBytes) {
     if (mStreaming == 0 || mLoaded == 0 || g_nStreamingReadPending != 0) {
         return 0;
     }
-    const int nFree = mCircBuff->FreeSpace();
+    const int nFree = mCircBuff->Avail();
     if (nFree < nBytes) {
         nBytes = nFree;
     }
     if (nBytes <= kMinReadBytes) {
         return 0;
     }
-    nBytes = mCircBuff->ContiguousWriteSize(nBytes);
+    nBytes = mCircBuff->WillWriteWrap(nBytes);
     if (mFileOffset + nBytes > mFileLength) {
         const int nLeft = mFileLength - mFileOffset;
         if (nLeft > 0) {
@@ -229,7 +229,7 @@ void AMovieSet::Update(int nTick, int nReadSize) {
 
     bool bVideoDispatched = false;
     while (mCircBuff->mRead != mCircBuff->mWrite &&
-           mCircBuff->IsClearOfWrite(mCircBuff->mRead, sizeof(ChunkHeader))) {
+           mCircBuff->FullyRead(mCircBuff->mRead, sizeof(ChunkHeader))) {
         char *pChunk = mCircBuff->mRead;
         ChunkHeader *pHeader = reinterpret_cast<ChunkHeader *>(pChunk);
 
@@ -238,7 +238,7 @@ void AMovieSet::Update(int nTick, int nReadSize) {
         if (static_cast<unsigned>(mCircBuff->mWrap - pChunk) < sizeof(ChunkHeader)) {
             memcpy(mCircBuff->mWrap, mCircBuff->mBuff, sizeof(ChunkHeader));
         }
-        if (!mCircBuff->IsClearOfWrite(pChunk, pHeader->mSize + sizeof(ChunkHeader))) {
+        if (!mCircBuff->FullyRead(pChunk, pHeader->mSize + sizeof(ChunkHeader))) {
             return;
         }
         if (nTick < mLoopTicks + pHeader->mTicks) {
@@ -350,7 +350,7 @@ int AMovieSet::ParseHeader(char *pBuffer, int nBytes) {
 }
 
 // NTSC-U/C: 0x005808d0, PAL: 0x005c3908
-void AMovieSet::SetTrackHandler(int nTrackId, ChunkHandler pfnHandler, void *pData) {
+void AMovieSet::AssignHandler(int nTrackId, ChunkHandler pfnHandler, void *pData) {
     mHandlers[nTrackId] = pfnHandler;
     mHandlerData[nTrackId] = pData;
 }

@@ -7,13 +7,10 @@
 /**
  * Handle to one of the eight pad slots, two ports of four multitap slots each.
  *
- * The class is not polymorphic, emits no RTTI, and has no embedded file path. Its name comes from
- * the debugging symbols of the North American demo release. The demo's destructor, Poll(), and
- * DeInitPadData() have the same instructions as this class's destructor, Read(), and Close().
- * The eight-byte object, the allocation InputPoller::Setup() makes, stores the slot index and the
- * position mId. Constructing a handle marks
- * its slot in sSlotsInUse and destroying it clears the mark. Every other member forwards to the
- * PadRecord of the slot in sRecords.
+ * The class is not polymorphic, emits no RTTI, and has no embedded file path. The eight-byte
+ * object, the allocation InputPoller::Setup() makes, stores the slot index and the position mId.
+ * Constructing a handle marks its slot in sSlotsInUse and destroying it clears the mark. Every
+ * other member forwards to the PadRecord of the slot in sRecords.
  */
 class JoypadPS2 {
 public:
@@ -40,7 +37,7 @@ public:
     /**
      * Decode the slot's latest report through PadRecord::Read(), without the pressure outputs.
      *
-     * InputPoller::ReadControllers() is the caller. The title is inferred.
+     * InputPoller::ReadControllers() is the caller.
      *
      * @param pButtons Receives the button word, or null.
      * @param pAxis0 Receives the first analog byte, or null.
@@ -51,7 +48,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004ecaf8
      * @ghidraAddress PAL: 0x0052b680
      */
-    int Read(unsigned int *pButtons,
+    int Poll(unsigned int *pButtons,
              unsigned char *pAxis0,
              unsigned char *pAxis1,
              unsigned char *pAxis2,
@@ -84,12 +81,12 @@ public:
     /**
      * Close the slot's pad through scePadPortClose().
      *
-     * InputPoller::Shutdown() is the caller. The title is inferred.
+     * InputPoller::Shutdown() is the caller.
      *
      * @ghidraAddress NTSC-U/C: 0x004ecb90
      * @ghidraAddress PAL: 0x0052b738
      */
-    void Close();
+    void DeInitPadData();
 
     /**
      * Drive the slot's motors through PadRecord::SetVibration().

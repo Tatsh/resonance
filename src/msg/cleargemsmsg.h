@@ -10,7 +10,7 @@
  * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). Both members are public because
- * AppTunnel::HandleMessage() at `0x00449938` reads them directly with no accessor in the image. It
+ * AppTunnel::DispatchPriv() at `0x00449938` reads them directly with no accessor in the image. It
  * scales mBar by the 1920 ticks of a bar and loads mTrack with `lb`, which reads only the low byte
  * of the word.
  *

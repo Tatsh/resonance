@@ -98,8 +98,8 @@ public:
      *
      * An implementation returns one word from the per-class identity table that spans `0x006d01ac`
      * through `0x006d035c`. A sink compares the result against the identity it listens for, which
-     * is what ScriptSink::HandleMessage() does against `0x006d024c`. The read has no side effect,
-     * so the call MsgQueue::HandleMessage() makes and discards has none either.
+     * is what ScriptSink::DispatchPriv() does against `0x006d024c`. The read has no side effect,
+     * so the call MsgQueue::DispatchPriv() makes and discards has none either.
      *
      * @return The identity.
      */
@@ -161,14 +161,14 @@ public:
      * Write this message to a diagnostic stream as `{GetName() PrintExtra()}`.
      *
      * The payload comes from PrintExtra(). PrintMuseEntry() is the one caller, and it discards the
-     * result. The title is inferred.
+     * result.
      *
      * @param stream The stream to write to.
      * @return The stream.
      * @ghidraAddress NTSC-U/C: 0x00556290
      * @ghidraAddress PAL: 0x00596918
      */
-    std::ostream &PrintBraced(std::ostream &stream);
+    std::ostream &Print(std::ostream &stream) const;
 
     /**
      * Produce a message of the identified class through the factory list.

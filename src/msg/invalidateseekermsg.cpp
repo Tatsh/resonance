@@ -14,7 +14,7 @@ Message *InvalidateSeekerMsg::Clone() {
 
 // NTSC-U/C: 0x00116100, PAL: 0x001165a8
 int InvalidateSeekerMsg::Type() {
-    return g_nInvalidateSeekerMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x00116110, PAL: 0x001165b8

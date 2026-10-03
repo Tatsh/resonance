@@ -6,9 +6,9 @@
 
 // NTSC-U/C: 0x0042a888, PAL: 0x00465bd8
 OvyAssembly::OvyAssembly(const HxStr &name, float flFrom, float flTo, float flDuration) {
-    mAnim = dynamic_cast<Rnd::Animatable *>(Rnd::g_manager.Find(name));
+    mAnim = dynamic_cast<Rnd::Animatable *>(Rnd::TheManager.Find(name));
     mAnim->SetFrame(0.0f);
-    mRamp.SetRange(flFrom, flTo, flDuration);
+    mRamp.SetParams(flFrom, flTo, flDuration);
 }
 
 // NTSC-U/C: 0x0042a958, PAL: 0x00465ca8
@@ -22,8 +22,8 @@ void OvyAssembly::Jump(float flTarget) {
 }
 
 // NTSC-U/C: 0x0042a998, PAL: 0x00465ce8
-void OvyAssembly::Update(float flTime) {
-    if (mRamp.Update(flTime) != 0) {
-        mAnim->SetFrame(mRamp.Value());
+void OvyAssembly::Execute(float flTime) {
+    if (mRamp.Execute(flTime) != 0) {
+        mAnim->SetFrame(mRamp.Val());
     }
 }

@@ -60,7 +60,7 @@ PhrasePlayer::PhrasePlayer(PhraseMgr *pPhraseMgr,
 // NTSC-U/C: 0x001c1860, PAL: 0x001c76a8
 void PhrasePlayer::PlayBar(int nBar) {
     if (mJamEffects != nullptr) {
-        mJamEffects->ApplyStepMask(*mPhraseMgr->GetStepValue(nBar));
+        mJamEffects->Enable(*mPhraseMgr->GetStepValue(nBar));
     }
     if (!(mLastBar < nBar)) {
         return;
@@ -171,6 +171,6 @@ void PhrasePlayer::PlayPhraseMuse(Phrase *pPhrase, int nBar) {
 }
 
 // NTSC-U/C: 0x001c2928, PAL: 0x001c8770
-void PhrasePlayer::HandleMessage(Message *pMsg) {
+void PhrasePlayer::DispatchPriv(Message *pMsg) {
     pMsg->Type(); // Yes, the binary discards this call's result.
 }

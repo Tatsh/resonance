@@ -52,15 +52,15 @@ MetCreditsScreen::MetCreditsScreen(MetRenderer *pRenderer, int nPriority)
 // NTSC-U/C: 0x00211ae8, PAL: 0x0021b520
 void MetCreditsScreen::ResolveContainerViews() {
     ResolveAnimationViews();
-    mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kViewName)));
-    mView->ReleaseAnimsRefs(); // Yes, the binary does not test the view for null.
+    mView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kViewName)));
+    mView->RemoveAllAnims(); // Yes, the binary does not test the view for null.
     mViewsUnresolved = 0;
 
-    mAnimation = dynamic_cast<Rnd::TransAnim *>(Rnd::g_manager.Find(HxStr(kAnimationName)));
-    mEndFrame = mAnimation->EndFrame();
+    mAnimation = dynamic_cast<Rnd::TransAnim *>(Rnd::TheManager.Find(HxStr(kAnimationName)));
+    mEndFrame = mAnimation->FilteredFrameEnd();
     mAnimation->SetFrame(0.0f);
 
-    Rnd::Cam *pCam = dynamic_cast<Rnd::Cam *>(Rnd::g_manager.Find(HxStr(kCameraName)));
+    Rnd::Cam *pCam = dynamic_cast<Rnd::Cam *>(Rnd::TheManager.Find(HxStr(kCameraName)));
     mCreditsRoll = new CreditsRoll(HxStr(kPicturePrefix), HxStr(kTextPrefix), pCam, kFirstCredit);
     mCreditsRoll->Build();
 #ifdef ENABLE_PATCHES
@@ -71,7 +71,7 @@ void MetCreditsScreen::ResolveContainerViews() {
 #ifdef ENABLE_PATCHES
 void MetCreditsScreen::AddLeadingCredit() {
     mAnimationEndFrame = mEndFrame;
-    mGroup = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kGroupName)));
+    mGroup = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kGroupName)));
     const float flDistance = mCreditsRoll->AddLeadingCredit(
         HxStr(RESONANCE_CREDITS_TEXT), kCreditsAvatarTexels, RESONANCE_CREDITS_AVATAR_SIZE);
     if (mGroup == nullptr || flDistance == 0.0f || mAnimationEndFrame <= 0.0f) {

@@ -160,7 +160,7 @@ void LocalPlayer::AnnounceState() {
     trackSelect.mPlayer = this;
     Send(&trackSelect);
 
-    mCollection->AnnounceState();
+    mCollection->SendState();
 
     PointAmountMsg points;
     points.mPlayer = this;
@@ -341,7 +341,7 @@ inline void LocalPlayer::OnCaughtPowerbar(CaughtPowerbarMsg *pMsg) {
     }
 
     if (mCollection != nullptr) {
-        mCollection->AddPowerup(pMsg->mKind);
+        mCollection->Add(pMsg->mKind);
     }
     PlaySoundByName(kCaughtPowerSound);
     PlayPowerupSound(pMsg->mKind);
@@ -349,7 +349,7 @@ inline void LocalPlayer::OnCaughtPowerbar(CaughtPowerbarMsg *pMsg) {
 }
 
 // NTSC-U/C: 0x0011ed98, PAL: 0x0011f358
-void LocalPlayer::HandleMessage(Message *pMsg) {
+void LocalPlayer::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (static_cast<unsigned int>(nType) == g_dwTrackSelectMsgType) {
         OnTrackSelect(static_cast<TrackSelectMsg *>(pMsg));
@@ -377,7 +377,7 @@ void LocalPlayer::HandleMessage(Message *pMsg) {
     } else if (nType == g_nCaughtPowerbarMsgType) {
         OnCaughtPowerbar(static_cast<CaughtPowerbarMsg *>(pMsg));
     } else {
-        Player::HandleMessage(pMsg);
+        Player::DispatchPriv(pMsg);
     }
 }
 

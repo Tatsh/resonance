@@ -200,7 +200,7 @@ void MetLoadNewFreqScreen::OnKeyboardTextEntered(const HxStr &text) {
 
 // NTSC-U/C: 0x002a85c0, PAL: 0x002c69d8
 void MetLoadNewFreqScreen::UpdateNameLabel() {
-    Rnd::Text *pLabel = mButtonList->ButtonAt(kNameButtonIndex)->mText;
+    Rnd::Text *pLabel = mButtonList->GetButton(kNameButtonIndex)->mText;
 
     HxStr label = MetConfigText(kMetStrNfEnter, kLabelConfigCode, kNameLabelKey);
     pLabel->SetText(label);

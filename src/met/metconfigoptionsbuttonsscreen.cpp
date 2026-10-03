@@ -113,9 +113,9 @@ void MetConfigOptionsButtonsScreen::EnterAndShow() {
     const int bDiscButton = GlobalSettings::shared()->mGameOptions.mExpansionPack;
 
     // Yes, the binary does not test either frame view for null.
-    dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kFiveButtonFrame)))
+    dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kFiveButtonFrame)))
         ->SetShowing(bDiscButton);
-    dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kFourButtonFrame)))
+    dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kFourButtonFrame)))
         ->SetShowing(bDiscButton ^ 1);
 
     mOptionButtons->Clear();

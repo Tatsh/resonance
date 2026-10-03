@@ -55,7 +55,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001cb890
      * @ghidraAddress PAL: 0x001d1748
      */
-    virtual void AddPowerup(int nType);
+    virtual void Add(int nType);
 
     /**
      * Do nothing. A store of one has no other entry to move to.
@@ -111,7 +111,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001cba20
      * @ghidraAddress PAL: 0x001d18d8
      */
-    virtual void AnnounceState();
+    virtual void SendState();
 
 private:
     // The stored kind, or -1 for an empty store.

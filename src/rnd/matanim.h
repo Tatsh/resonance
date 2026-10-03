@@ -30,9 +30,10 @@ namespace Rnd {
  *
  * Two vtables belong to the class, each with the type function at `0x004dbf10` in slot 0. The
  * Object subobject table at `0x00822d68` stores the destructor and the seven Object overrides, and
- * the primary table at `0x00822db0` stores EndFrame() at slot 1 and SetFrameSelf(float) at slot 3,
- * followed by an all-zero terminator. Slot 2 still addresses the base Rnd::Animatable::StartAnim()
- * at `0x0049a3b8`, so restarting an animation does nothing of its own here.
+ * the primary table at `0x00822db0` stores FilteredFrameEnd() at slot 1 and SetFrameSelf(float) at
+ * slot 3, followed by an all-zero terminator. Slot 2 still addresses the base
+ * Rnd::Animatable::StartAnim() at `0x0049a3b8`, so restarting an animation does nothing of its own
+ * here.
  *
  * Five channels animate the four material colours and the alpha, and the stage vector animates the
  * texture stages one for one against the material's own stages. Two independent readings agree on
@@ -43,10 +44,20 @@ namespace Rnd {
  * SetSpecular(), and SetAlpha() in the declaration order of src/rnd/mat.h.
  *
  * Keys are shared rather than copied, the same arrangement Rnd::MeshAnim uses with mKeysOwner.
- * EndFrame() and SetFrameSelf() read the channels of mKeysOwner rather than their own.
+ * FilteredFrameEnd() and SetFrameSelf() read the channels of mKeysOwner rather than their own.
  */
 class MatAnim : public Animatable {
 public:
+    /**
+     * Registered class name of Rnd::MatAnim, the string "MatAnim".
+     *
+     * A static constructor fills the string from the literal at `0x00822e68`.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00700428
+     * @ghidraAddress PAL: 0x00743e50
+     */
+    static HxStr sClassName;
+
     /** Revision Save() writes, and the highest revision Load() accepts. */
     enum { kSerialVersion = 2 };
 
@@ -146,8 +157,8 @@ public:
         /**
          * Serialise the stage animation.
          *
-         * Writes the translation, scale, and rotation channels through WriteVector3Keys() and
-         * then the texture channel, each texture as its name.
+         * Writes the translation, scale, and rotation channels through the Rnd::Stream insertion
+         * operator and then the texture channel, each texture as its name.
          *
          * @param stream The stream to write to.
          * @ghidraAddress NTSC-U/C: 0x004dd500
@@ -346,7 +357,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004d42f0
      * @ghidraAddress PAL: 0x005127e0
      */
-    virtual float EndFrame();
+    virtual float FilteredFrameEnd();
 
     /**
      * Change the material this animation drives.
@@ -477,15 +488,5 @@ MatAnim *NewMatAnim(const HxStr &name);
  * @ghidraAddress PAL: 0x0051a520
  */
 void RegisterMatAnimClass();
-
-/**
- * Registered class name of Rnd::MatAnim, the string "MatAnim".
- *
- * A static constructor fills the string from the literal at `0x00822e68`.
- *
- * @ghidraAddress NTSC-U/C: 0x00700428
- * @ghidraAddress PAL: 0x00743e50
- */
-extern HxStr g_matAnimClassName;
 
 } // namespace Rnd

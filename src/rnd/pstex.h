@@ -27,8 +27,8 @@ namespace Rnd {
  * inline in the class body, and each translation unit that emits a vtable emits its own copy. Slot
  * 8 is therefore not an override of this class and is not declared here.
  *
- * A texture becomes a Rnd::PsTex through the creator hook. StaticInit() installs NewPsTex() over
- * Rnd::g_pfnNewTex, and GfxDevice::Init() runs StaticInit() at `0x0049af50`. Every texture the
+ * A texture becomes a Rnd::PsTex through the creator hook. Init() installs NewPsTex() over
+ * Rnd::Tex::sNew, and GfxDevice::Init() runs Init() at `0x0049af50`. Every texture the
  * renderer loads from a file on this target is therefore a Rnd::PsTex.
  *
  * The object is 0x4b0 bytes and the subclass occupies `+0x58` through `+0x4af`. Four of the GS
@@ -185,8 +185,8 @@ public:
      * width and storage mode of TEX0, XYOFFSET_1 centres the surface in the GS coordinate space,
      * ZBUF_1 masks depth writes, and TEST_1 passes every depth test.
      *
-     * Rnd::PsCam::DrawSelf() is the one caller. The routine was previously labelled after surface
-     * restoration.
+     * Rnd::PsCam::DrawShowing() is the one caller. The routine was previously labelled after
+     * surface restoration.
      *
      * @ghidraAddress NTSC-U/C: 0x00596d68
      * @ghidraAddress PAL: 0x005da170
@@ -240,13 +240,13 @@ public:
     /**
      * Install this class as the texture the renderer builds and program the default filtering.
      *
-     * Writes NewPsTex() into Rnd::g_pfnNewTex, then programs the MXL, MMAG, and MMIN fields of GS
+     * Writes NewPsTex() into Rnd::Tex::sNew, then programs the MXL, MMAG, and MMIN fields of GS
      * TEX1_1. GfxDevice::Init() is the one caller.
      *
      * @ghidraAddress NTSC-U/C: 0x0059a888
      * @ghidraAddress PAL: 0x005ddd08
      */
-    static void StaticInit();
+    static void Init();
 
 protected:
     /**
@@ -356,7 +356,7 @@ private:
 /**
  * Allocate and construct a PlayStation 2 texture.
  *
- * This is the creator StaticInit() installs over Rnd::g_pfnNewTex. The body is
+ * This is the creator Init() installs over Rnd::Tex::sNew. The body is
  * `return new PsTex(name);`, and the binary bills the 0x4b0-byte allocation to the tag "Rnd::Tex".
  * The gap between `0x0059a7a8` and `0x0059a7d4` is the exception cleanup that releases the block
  * when the constructor throws.

@@ -69,7 +69,7 @@ constexpr int kCommandMoveDown = 12;
 constexpr int kFirstRow = 0;
 
 inline Rnd::Object *Find(const char *pszName) {
-    return Rnd::g_manager.Find(HxStr(pszName));
+    return Rnd::TheManager.Find(HxStr(pszName));
 }
 
 inline const char *TextOrEmpty(const HxStr &text) {
@@ -247,7 +247,7 @@ void MetJukeboxEditPlaylistScreen::ShowRemixDetails() {
 
     HxStr third = QueryConfigString(kDetailConfigCode3, TextOrEmpty(pRecord->levelName));
     const float flWrapWidth = mSongTitleText->mWrapWidth;
-    if (flWrapWidth < mSongTitleText->MeasureText(TextOrEmpty(third), third.mLen)) {
+    if (flWrapWidth < mSongTitleText->GetFontWidth(TextOrEmpty(third), third.mLen)) {
         HxStr shorter = QueryConfigString(kDetailConfigCode3Short, TextOrEmpty(pRecord->levelName));
         third = shorter;
     }

@@ -25,7 +25,7 @@ constexpr int kChannelCount = 3;
 
 // Every routine that needs a palette resolves it this way, falling back to the engine-wide one.
 inline APalette *ResolvePalette(APalette *pOwn) {
-    return pOwn != nullptr ? pOwn : g_pDefaultPalette;
+    return pOwn != nullptr ? pOwn : ACanvas::palDefault;
 }
 
 // Expand a 1555 colour into three channel bytes. The low three bits of each channel expand to zero
@@ -71,8 +71,7 @@ inline int IndexForChannels(APalette *pPalette, const unsigned char *pRGB) {
         return pPalette->mpRgb15ToIndex[Rgb15KeyFromChannels(pRGB)] &
                static_cast<int>(kChannelMask);
     }
-    return pPalette->FindNearestEntry(
-               Rgb8888FromChannels(pRGB), kPaletteFirstIndex, kPaletteLastIndex) &
+    return pPalette->FindClosest(Rgb8888FromChannels(pRGB), kPaletteFirstIndex, kPaletteLastIndex) &
            static_cast<int>(kChannelMask);
 }
 

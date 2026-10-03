@@ -105,16 +105,14 @@ public:
     /**
      * Grow the buffer by nSize bytes and write nSize bytes at the cursor.
      *
-     * IBStream vtable slot 9. The cursor is not advanced. The title is inferred from the shape and
-     * from the one call site, which loads a freshly constructed stream and then reads from the
-     * start.
+     * IBStream vtable slot 9. The cursor is not advanced.
      *
      * @param pSrc The bytes to write.
      * @param nSize The number of bytes to write.
      * @ghidraAddress NTSC-U/C: 0x004ee018
      * @ghidraAddress PAL: 0x0052cbc0
      */
-    virtual void Load(const void *pSrc, int nSize);
+    virtual void Fill(const void *pSrc, int nSize);
 
     /**
      * Resize the buffer and rewind the cursor.
@@ -144,12 +142,12 @@ public:
      *
      * The unread tail moves to the start of the buffer, and the buffer shrinks by the old cursor
      * position. The routine is absent from the vtable, and no call site survives in the shipped
-     * program. The name is inferred.
+     * program.
      *
      * @ghidraAddress NTSC-U/C: 0x004ee1f0
      * @ghidraAddress PAL: 0x0052cd98
      */
-    void DiscardReadBytes();
+    void Compact();
 
     /**
      * @ghidraAddress NTSC-U/C: 0x004ed068

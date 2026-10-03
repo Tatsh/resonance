@@ -77,25 +77,25 @@ public:
 public:
     /**
      * The selected track. NetPlayer's packet handler at `0x00122f78` writes it from the packet's
-     * track, and TrackSelector::HandleMessage() reads it. +0x04
+     * track, and TrackSelector::DispatchPriv() reads it. +0x04
      */
     int mTrack;
 
     /**
      * The place on the track. NetPlayer's packet handler at `0x00122f78` writes it from the
-     * packet's place, and TrackSelector::HandleMessage() reads it. +0x08
+     * packet's place, and TrackSelector::DispatchPriv() reads it. +0x08
      */
     int mPlace;
 
     /**
      * The song position of the selection. NetPlayer's packet handler at `0x00122f78` writes it,
-     * and TrackSelector::HandleMessage() reads it. +0x0c
+     * and TrackSelector::DispatchPriv() reads it. +0x0c
      */
     Mid::MBT mPosition;
 
     /**
      * The player that selected. NetPlayer's packet handler at `0x00122f78` writes it, and
-     * TrackSelector::HandleMessage() reads it. +0x10
+     * TrackSelector::DispatchPriv() reads it. +0x10
      */
     Player *mPlayer;
 };

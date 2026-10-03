@@ -52,7 +52,7 @@ enum MemcardStatus {
  *
  * Fourteen classes derive from this one, one per libmc entry point, and each of them supplies the
  * three virtuals below. `Memcard` owns the queue, constructs an operation on the heap for every
- * request, and drives it through Issue(), then Complete(), then destruction.
+ * request, and drives it through Execute(), then NotifyDone(), then destruction.
  *
  * The three method titles are inferred from the bodies. No string in the image identifies any of
  * them. The base bodies at `0x0055f310`, `0x0055f318` and `0x0055f320` are each a single `jr ra`,
@@ -70,7 +70,7 @@ public:
      * the compiler inlined this body into all twelve of the operations that address a card. No
      * address of its own survives.
      *
-     * @param pHandler The receiver Complete() reports to.
+     * @param pHandler The receiver NotifyDone() reports to.
      * @param nPortSlot The port shifted up by kMemcardPortShift, with the slot in the low bits.
      * @param nCookie The tag Memcard::Cancel() matches on.
      */
@@ -82,7 +82,7 @@ public:
      * mPortSlot is not written. `SeekOp` and `CloseOp` are the two operations that use this form,
      * and neither reads mPortSlot.
      *
-     * @param pHandler The receiver Complete() reports to.
+     * @param pHandler The receiver NotifyDone() reports to.
      * @param nCookie The tag Memcard::Cancel() matches on.
      */
     MemcardOp(MemcardCBHandler *pHandler, int nCookie);
@@ -91,7 +91,7 @@ public:
      * Release the operation.
      *
      * The body is empty. MemcardPS2::Update() destroys an operation through this slot as soon as
-     * Complete() has returned.
+     * NotifyDone() has returned.
      *
      * @ghidraAddress NTSC-U/C: 0x0055f2e0
      * @ghidraAddress PAL: 0x005a05c0
@@ -107,7 +107,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055f310
      * @ghidraAddress PAL: 0x005a05f0
      */
-    virtual void Issue();
+    virtual void Execute();
 
     /**
      * Interpret the finished libmc call and report it to the handler.
@@ -118,7 +118,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055f318
      * @ghidraAddress PAL: 0x005a05f8
      */
-    virtual void Complete();
+    virtual void NotifyDone();
 
     /**
      * Map mResult to mStatus, and copy any result the call delivered out of it.
@@ -141,7 +141,7 @@ public:
     int mCookie;
 
     /**
-     * Zero until Issue() has run, then 1 while libmc is servicing the call.
+     * Zero until Execute() has run, then 1 while libmc is servicing the call.
      *
      * Public because MemcardPS2::Update() reads it directly.
      *
@@ -168,10 +168,10 @@ public:
     int mStatus;
 
 protected:
-    // The port shifted up by kMemcardPortShift with the slot in the low bits. Every Issue() body
+    // The port shifted up by kMemcardPortShift with the slot in the low bits. Every Execute() body
     // that addresses a card rather than an open descriptor unpacks this member. +0x00
     int mPortSlot;
 
-    // The receiver Complete() reports to. +0x14
+    // The receiver NotifyDone() reports to. +0x14
     MemcardCBHandler *mHandler;
 };

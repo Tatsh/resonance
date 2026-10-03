@@ -179,7 +179,7 @@ enum InstrumentKind {
 // Look an object up by name and cast it to its class, null when either step fails.
 template <class T>
 inline T *FindObject(const char *pszName) {
-    return dynamic_cast<T *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<T *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 // Rate the ghost material's alpha moves at while a ghost shows, negated while it hides.
@@ -422,7 +422,7 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
     pTunnel->ApplyMeshLodScreenSizes(screenSizes);
     pTunnel->mCulledFarSlices = nCulledFarSlices;
     pTunnel->SetPath(pTunnel->mPath);
-    FindObject<Rnd::Environ>("tunnel.env")->ClearLights();
+    FindObject<Rnd::Environ>("tunnel.env")->RemoveAllLights();
     if (nSplitScreen) {
         g_flTunnelBrightness = kSplitScreenBrightness;
     } else {
@@ -750,7 +750,7 @@ void AppTunnel::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
         return;
     }
     const int nStep = mPlayMap->FindStepIndex(mPlayMap->MapBar(nBar));
-    TnlPanel panel(nTrack, nBar, &g_nullPlayer, -1, TnlPanel::kKindLane, 1, nStep);
+    TnlPanel panel(nTrack, nBar, &NullPlayer::sInstance, -1, TnlPanel::kKindLane, 1, nStep);
     panel.Apply();
 }
 
@@ -953,7 +953,7 @@ inline void AppTunnel::OnDurGem(DurGemMsg *pMsg) {
 }
 
 // NTSC-U/C: 0x00449688, PAL: 0x00486938
-void AppTunnel::HandleMessage(Message *pMsg) {
+void AppTunnel::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
         OnTrackSelect(static_cast<TrackSelectMsg *>(pMsg));
@@ -991,7 +991,7 @@ void AppTunnel::HandleMessage(Message *pMsg) {
         OnPhraseMuffed(static_cast<PhraseMuffedMsg *>(pMsg));
     } else if (nType == g_nSectionCapturedMsgType) {
         OnSectionCaptured(static_cast<SectionCapturedMsg *>(pMsg));
-    } else if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
+    } else if (nType == static_cast<int>(StdMidiMsg::sID)) {
         // Ignored.
     } else if (nType == g_nToggleGhostMsgType) {
         OnToggleGhost(static_cast<ToggleGhostMsg *>(pMsg));
@@ -1246,7 +1246,7 @@ int AppTunnel::IsTrackBarLocked(int nTrack, int nBar) {
 
 // NTSC-U/C: 0x00457418, PAL: 0x00494948
 void AppTunnel::ShowTrackGhost(int nTrack, Rnd::Drawable *pGhost) {
-    pGhost->ClearDraws();
+    pGhost->RemoveAllDraws();
     mGemManager->AddKindDraws(mGhostGemKinds[nTrack], pGhost);
     mGemManager->SetKindShowing(mGhostGemKinds[nTrack], 1);
     GetGhostMat(nTrack)->SetAlpha(0.0f);

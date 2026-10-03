@@ -120,10 +120,10 @@ public:
     virtual void restoreGuts(IBStream &stream);
 
 public:
-    /** The identifier of the scoring player. Player::HandleMessage() reads it. +0x14 */
+    /** The identifier of the scoring player. Player::DispatchPriv() reads it. +0x14 */
     int mPlayerId;
 
-    /** The points to add. Player::HandleMessage() reads it. +0x18 */
+    /** The points to add. Player::DispatchPriv() reads it. +0x18 */
     int mScoreDelta;
 };
 

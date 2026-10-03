@@ -75,14 +75,14 @@ struct Particle;
  *
  * The table at `0x0081ba38` has four entries, the same length as MsgSink's table at `0x007ccc40`,
  * and the class therefore introduces no virtual. It overrides the destructor at slot 1 and
- * HandleMessage() at slot 3, and inherits MsgSink::Handle() at slot 2.
+ * DispatchPriv() at slot 3, and inherits MsgSink::Dispatch() at slot 2.
  *
  * The object is 0x170 bytes, the size Renderer's constructor requests under the MsgSink tag at
  * `0x0042c89c`. No routine of the unit reads or writes the words from `+0x14c` to `+0x15c` or from
  * `+0x164` to the end.
  *
  * The unit ends with the out-of-line copies of the inline routines of the tunnel helper classes,
- * and of the members below that HandleMessage() and the helpers inline. Those copies have no
+ * and of the members below that DispatchPriv() and the helpers inline. Those copies have no
  * caller.
  */
 class AppTunnel : public MsgSink {
@@ -123,7 +123,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00449688
      * @ghidraAddress PAL: 0x00486938
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Advance the tunnel to one song position.
@@ -299,7 +299,7 @@ private:
         Rnd::Particle *mParticle;  // The flash, or null while the record is free.
     };
 
-    // Offer a fire to each TnlFireFX in turn until one starts it. HandleMessage() inlines this.
+    // Offer a fire to each TnlFireFX in turn until one starts it. DispatchPriv() inlines this.
     // NTSC-U/C: 0x004576a0, PAL: 0x00494bd0
     void StartFireFX(float flPathStart,
                      int nIndex,
@@ -309,18 +309,18 @@ private:
                      float flPathEnd);
 
     // Launch the first idle TnlCrippleFX at the targets, through TnlCrippleFX::Start() inlined.
-    // Returns 1 when one launched. HandleMessage() inlines this. 0x00457758.
+    // Returns 1 when one launched. DispatchPriv() inlines this. 0x00457758.
     int StartCrippleFX(const std::vector<TnlPlayer *> &targets, float flFrame);
 
-    // Start the first idle TnlBumpFX. Returns 1 when one started. HandleMessage() inlines this.
+    // Start the first idle TnlBumpFX. Returns 1 when one started. DispatchPriv() inlines this.
     // NTSC-U/C: 0x00457828, PAL: 0x00494d58
     int StartBumpFX(int nStep, const HxStr &colorName, int nForward, float flPathOffset);
 
     // Start the first idle TnlSnake, through TnlSnake::Start() inlined. Returns 1 when one
-    // started. HandleMessage() inlines this. 0x00457880.
+    // started. DispatchPriv() inlines this. 0x00457880.
     int StartSnake(float flFrame, int nRing, const Color &color, float flPhase, float flAmplitude);
 
-    // Append a trigger to mPendingTriggers. HandleMessage() inlines this. 0x004579e0.
+    // Append a trigger to mPendingTriggers. DispatchPriv() inlines this. 0x004579e0.
     void AddPendingTrigger(TnlTrigger *pTrigger, float flFrame);
 
     // Move the first unplaced particle of "string flare.ps" onto one ring at the renderer's song
@@ -364,21 +364,21 @@ private:
     // NTSC-U/C: 0x00448d58, PAL: 0x00485fc8
     void OnDeployedPowerup(DeployedPowerupMsg *pMsg);
 
-    // NowBarMsg: ease the player's pointer toward a lane. HandleMessage() inlines this.
+    // NowBarMsg: ease the player's pointer toward a lane. DispatchPriv() inlines this.
     // NTSC-U/C: 0x00457cf0, PAL: 0x00495220
     void OnNowBar(NowBarMsg *pMsg);
 
-    // ClearGemMsg: remove one gem. HandleMessage() inlines this. 0x00457d88.
+    // ClearGemMsg: remove one gem. DispatchPriv() inlines this. 0x00457d88.
     void OnClearGem(ClearGemMsg *pMsg);
 
-    // ClearGemsMsg: remove one bar's gems and end its trail. HandleMessage() inlines this.
+    // ClearGemsMsg: remove one bar's gems and end its trail. DispatchPriv() inlines this.
     // NTSC-U/C: 0x00457dd8, PAL: 0x00495308
     void OnClearGems(ClearGemsMsg *pMsg);
 
-    // SusGemMsg: start or stop a sustain strip. HandleMessage() inlines this. 0x00457e48.
+    // SusGemMsg: start or stop a sustain strip. DispatchPriv() inlines this. 0x00457e48.
     void OnSusGem(SusGemMsg *pMsg);
 
-    // DurGemMsg: add a duration gem segment. HandleMessage() inlines this. 0x00457f38.
+    // DurGemMsg: add a duration gem segment. DispatchPriv() inlines this. 0x00457f38.
     void OnDurGem(DurGemMsg *pMsg);
 
     // TrackSelectMsg: turn the player's seeker, activator, grid markers, and now-ring slot to the
@@ -406,19 +406,19 @@ private:
     // scratch, and vocal track for 2000 scaled frames. 0x00449500.
     void OnPowerupFailed(PowerupFailedMsg *pMsg);
 
-    // AxeButtonMsg: spin or reset the player's pointer. HandleMessage() inlines this. 0x00457ff0.
+    // AxeButtonMsg: spin or reset the player's pointer. DispatchPriv() inlines this. 0x00457ff0.
     void OnAxeButton(AxeButtonMsg *pMsg);
 
-    // PlayersTrackNeutralizedMsg: rumble the player's controller. HandleMessage() inlines this.
+    // PlayersTrackNeutralizedMsg: rumble the player's controller. DispatchPriv() inlines this.
     // NTSC-U/C: 0x004580e8, PAL: 0x00495658
     void OnPlayersTrackNeutralized(PlayersTrackNeutralizedMsg *pMsg);
 
-    // ToggleGhostMsg: show or hide the player's track ghost. HandleMessage() inlines this.
+    // ToggleGhostMsg: show or hide the player's track ghost. DispatchPriv() inlines this.
     // NTSC-U/C: 0x00458120, PAL: 0x00495690
     void OnToggleGhost(ToggleGhostMsg *pMsg);
 
     // JuiceAmountMsg: in a solo game, blink the player's activator while the juice is low.
-    // HandleMessage() inlines this. 0x004581b8.
+    // DispatchPriv() inlines this. 0x004581b8.
     void OnJuiceAmount(JuiceAmountMsg *pMsg);
 
     // Find the TnlPlayer of a game player, or null. The search is inlined wherever a handler

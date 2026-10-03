@@ -100,7 +100,7 @@ public:
     /**
      * Player the message is addressed to.
      *
-     * NetPlayer::HandleMessage() compares this member against the receiving player and acts only on
+     * NetPlayer::DispatchPriv() compares this member against the receiving player and acts only on
      * a match, which is what types it as a player rather than as a payload word.
      *
      * +0x10

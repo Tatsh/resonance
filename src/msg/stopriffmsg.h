@@ -27,6 +27,14 @@ class Player;
 class StopRiffMsg : public Message {
 public:
     /**
+     * Identity that Type() reports.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d013c
+     * @ghidraAddress PAL: 0x007138d4
+     */
+    static int sID;
+
+    /**
      * Construct a message with the position at kMBTInfinity and the rest unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
@@ -75,7 +83,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nStopRiffMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x003da858
      * @ghidraAddress PAL: 0x00412c90
      */
@@ -105,15 +113,3 @@ public:
     Mid::MBT mPosition; /*!< The song position of the stop. +0x0c */
     int mTrack;         /*!< The player's track, from its slot 4. +0x10 */
 };
-
-/**
- * Identity that StopRiffMsg::Type() reports.
- *
- * This word belongs to StopRiffMsg because StopRiffMsg::Type() at `0x003da858` returns it.
- * Several handlers elsewhere read the same word to compare against it, which is the expected
- * shape for a registered identity and does not make the word theirs.
- *
- * @ghidraAddress NTSC-U/C: 0x006d013c
- * @ghidraAddress PAL: 0x007138d4
- */
-extern int g_nStopRiffMsgType;

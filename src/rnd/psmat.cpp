@@ -88,7 +88,7 @@ Transform g_stageUvXfm;
 } // namespace
 
 // NTSC-U/C: 0x0076d658, PAL: 0x007b13b0
-Mat *g_pSelectedMat;
+Mat *PsMat::sCurrent;
 
 // NTSC-U/C: 0x0076d660, PAL: 0x007b13b8
 int g_nSelectedGenMode;
@@ -120,15 +120,15 @@ PsMat::PsMat(const HxStr &name) : Mat(name) {
 
 // NTSC-U/C: 0x00591590, PAL: 0x005d4928
 PsMat::~PsMat() {
-    if (g_pSelectedMat == this) {
-        g_pSelectedMat = nullptr;
+    if (PsMat::sCurrent == this) {
+        PsMat::sCurrent = nullptr;
     }
 }
 
 // NTSC-U/C: 0x00591240, PAL: 0x005d45c0
 void PsMat::InstallCreator() {
     g_pfnNewMat = NewPsMat;
-    g_pSelectedMat = nullptr;
+    PsMat::sCurrent = nullptr;
     // The emitted code writes an identity and then the four values after it, which is an inlined
     // transform reset followed by the four assignments the source made.
     g_sphereMapUvXfm.mBasisX.x = 1.0f;
@@ -153,7 +153,7 @@ void PsMat::InstallCreator() {
 // NTSC-U/C: 0x005916b0, PAL: 0x005d4a48
 void PsMat::SetAmbient(const Color &color) {
     mAmbient = color;
-    g_pSelectedMat = nullptr;
+    PsMat::sCurrent = nullptr;
 }
 
 // NTSC-U/C: 0x005916c8, PAL: 0x005d4a60
@@ -161,19 +161,19 @@ void PsMat::SetDiffuse(const Color &color) {
     mDiffuse.r = color.r;
     mDiffuse.g = color.g;
     mDiffuse.b = color.b;
-    g_pSelectedMat = nullptr;
+    PsMat::sCurrent = nullptr;
 }
 
 // NTSC-U/C: 0x005916f0, PAL: 0x005d4a88
 void PsMat::SetEmissive(const Color &color) {
     mEmissive = color;
-    g_pSelectedMat = nullptr;
+    PsMat::sCurrent = nullptr;
 }
 
 // NTSC-U/C: 0x00591730, PAL: 0x005d4ac8
 void PsMat::SetAlpha(float flAlpha) {
     mDiffuse.a = flAlpha;
-    g_pSelectedMat = nullptr;
+    PsMat::sCurrent = nullptr;
 }
 
 // NTSC-U/C: 0x00591708, PAL: 0x005d4aa0
@@ -182,7 +182,7 @@ void PsMat::SetSpecular(const Color &color, float flAlpha) {
     mSpecular.g = color.g;
     mSpecular.b = color.b;
     mSpecular.a = flAlpha; // Yes, the binary discards color.a and stores the argument instead.
-    g_pSelectedMat = nullptr;
+    PsMat::sCurrent = nullptr;
 }
 
 // NTSC-U/C: 0x005914b8, PAL: 0x005d4850
@@ -196,7 +196,7 @@ Mat *(*g_pfnNewMat)(const HxStr &name) = nullptr;
 
 // NTSC-U/C: 0x0058eb40, PAL: 0x005d1e98
 int PsMat::Select() {
-    if (this == g_pSelectedMat && mStages.size() < 2) {
+    if (this == PsMat::sCurrent && mStages.size() < 2) {
         if (g_nBlendOverridden != 0) {
             g_nSelectedStage = 0;
             SelectBlendMode();
@@ -205,14 +205,14 @@ int PsMat::Select() {
         return 0;
     }
     ++g_renderStats.mnMatSelects;
-    if (this != g_pSelectedMat || static_cast<unsigned>(g_nSelectedStage) >= mStages.size()) {
+    if (this != PsMat::sCurrent || static_cast<unsigned>(g_nSelectedStage) >= mStages.size()) {
         g_nSelectedStage = 0;
     }
     g_nSelectedFlat = mFlat;
     SelectBlendMode();
     BindStageTexture();
     SetupUvXfm();
-    g_pSelectedMat = this;
+    PsMat::sCurrent = this;
     ++g_nSelectedStage;
     return static_cast<unsigned>(g_nSelectedStage) < mStages.size();
 }
@@ -222,22 +222,22 @@ void PsMat::SelectDefault() {
     ++g_renderStats.mnMatSelects;
     g_nAlphaBlendEnabled = 1;
     g_nStageTextureBound = 0;
-    g_pSelectedMat = nullptr;
+    PsMat::sCurrent = nullptr;
     g_nSelectedFlat = 0;
     g_nLightingEnabled = 0;
     g_nBlendOverridden = 0;
-    g_gfxDevice.SetGsReg(kGsRegAlpha1, kAlphaSrcAlpha, kAlphaSelectorMask);
-    g_gfxDevice.SetGsReg(kGsRegFba1, 1, kFbaMask);
-    g_gfxDevice.SetGsReg(kGsRegDimx, kDimxStandard, kDimxMask);
+    Rnd::ThePs.SetGsReg(kGsRegAlpha1, kAlphaSrcAlpha, kAlphaSelectorMask);
+    Rnd::ThePs.SetGsReg(kGsRegFba1, 1, kFbaMask);
+    Rnd::ThePs.SetGsReg(kGsRegDimx, kDimxStandard, kDimxMask);
 }
 
 // NTSC-U/C: 0x00591170, PAL: 0x005d44f0
 void PsMat::SelectAlphaBlend() {
-    if (this == g_pSelectedMat && g_nAlphaBlendEnabled != 0) {
+    if (this == PsMat::sCurrent && g_nAlphaBlendEnabled != 0) {
         return;
     }
     ++g_renderStats.mnMatSelects;
-    g_gfxDevice.SetGsReg(kGsRegAlpha1, kAlphaSrcAlpha, kAlphaSelectorMask);
+    Rnd::ThePs.SetGsReg(kGsRegAlpha1, kAlphaSrcAlpha, kAlphaSelectorMask);
     g_nBlendOverridden = 1;
 }
 
@@ -247,40 +247,40 @@ void PsMat::SelectBlendMode() {
     if (g_nSelectedStage != 0) {
         nBlend = mStages[g_nSelectedStage].mBlend;
     }
-    g_gfxDevice.SetGsReg(kGsRegFba1, nBlend != kBlendModeSrc, kFbaMask);
+    Rnd::ThePs.SetGsReg(kGsRegFba1, nBlend != kBlendModeSrc, kFbaMask);
     switch (nBlend) {
     case kBlendModeDest:
         g_nAlphaBlendEnabled = 1;
-        g_gfxDevice.SetGsReg(kGsRegAlpha1, kAlphaKeepDest, kAlphaSelectorMask);
+        Rnd::ThePs.SetGsReg(kGsRegAlpha1, kAlphaKeepDest, kAlphaSelectorMask);
         break;
     case kBlendModeAdd:
         g_nAlphaBlendEnabled = 1;
-        g_gfxDevice.SetGsReg(kGsRegAlpha1, kAlphaAddFixed, kAlphaSelectorAndFixedMask);
+        Rnd::ThePs.SetGsReg(kGsRegAlpha1, kAlphaAddFixed, kAlphaSelectorAndFixedMask);
         break;
     case kBlendModeSrcAlphaAdd:
         g_nAlphaBlendEnabled = 1;
-        g_gfxDevice.SetGsReg(kGsRegAlpha1, kAlphaSrcAlphaAdd, kAlphaSelectorMask);
+        Rnd::ThePs.SetGsReg(kGsRegAlpha1, kAlphaSrcAlphaAdd, kAlphaSelectorMask);
         break;
     case kBlendModeSrcAlpha:
     case kBlendModeSrcAlphaCutout:
         g_nAlphaBlendEnabled = 1;
-        g_gfxDevice.SetGsReg(kGsRegAlpha1, kAlphaSrcAlpha, kAlphaSelectorMask);
+        Rnd::ThePs.SetGsReg(kGsRegAlpha1, kAlphaSrcAlpha, kAlphaSelectorMask);
         break;
     case kBlendModeInvSrcAlpha:
         g_nAlphaBlendEnabled = 1;
-        g_gfxDevice.SetGsReg(kGsRegAlpha1, kAlphaInvSrcAlpha, kAlphaSelectorMask);
+        Rnd::ThePs.SetGsReg(kGsRegAlpha1, kAlphaInvSrcAlpha, kAlphaSelectorMask);
         break;
     case kBlendModeDestAlpha:
         g_nAlphaBlendEnabled = 1;
-        g_gfxDevice.SetGsReg(kGsRegAlpha1, kAlphaDestAlpha, kAlphaSelectorMask);
+        Rnd::ThePs.SetGsReg(kGsRegAlpha1, kAlphaDestAlpha, kAlphaSelectorMask);
         break;
     case kBlendModeInvDestAlpha:
         g_nAlphaBlendEnabled = 1;
-        g_gfxDevice.SetGsReg(kGsRegAlpha1, kAlphaInvDestAlpha, kAlphaSelectorMask);
+        Rnd::ThePs.SetGsReg(kGsRegAlpha1, kAlphaInvDestAlpha, kAlphaSelectorMask);
         break;
     case kBlendModeSrcAlphaOpaque:
         g_nAlphaBlendEnabled = 1;
-        g_gfxDevice.SetGsReg(kGsRegAlpha1, kAlphaSrcAlphaOpaque, kAlphaSelectorMask);
+        Rnd::ThePs.SetGsReg(kGsRegAlpha1, kAlphaSrcAlphaOpaque, kAlphaSelectorMask);
         break;
     // Src, Multiply, Multiply2, and SrcAdd turn frame buffer blending off, because the texture
     // function performs the combine instead.
@@ -292,16 +292,16 @@ void PsMat::SelectBlendMode() {
         break;
     }
     if (nBlend == kBlendModeDest || nBlend == kBlendModeAdd || nBlend == kBlendModeSrcAlphaAdd) {
-        g_gfxDevice.SetGsReg(kGsRegDimx, kDimxGentle, kDimxMask);
+        Rnd::ThePs.SetGsReg(kGsRegDimx, kDimxGentle, kDimxMask);
     } else {
-        g_gfxDevice.SetGsReg(kGsRegDimx, kDimxStandard, kDimxMask);
+        Rnd::ThePs.SetGsReg(kGsRegDimx, kDimxStandard, kDimxMask);
     }
     if (nBlend == kBlendModeSrcAlpha) {
-        g_gfxDevice.SetGsReg(kGsRegTest1, kTestDiscardClearZOnly, kTestAlphaAndFailMask);
+        Rnd::ThePs.SetGsReg(kGsRegTest1, kTestDiscardClearZOnly, kTestAlphaAndFailMask);
     } else if (nBlend == kBlendModeSrcAlphaCutout) {
-        g_gfxDevice.SetGsReg(kGsRegTest1, kTestDiscardClear, kTestAlphaAndFailMask);
+        Rnd::ThePs.SetGsReg(kGsRegTest1, kTestDiscardClear, kTestAlphaAndFailMask);
     } else {
-        g_gfxDevice.SetGsReg(kGsRegTest1, 0, kTestAlphaEnableMask);
+        Rnd::ThePs.SetGsReg(kGsRegTest1, 0, kTestAlphaEnableMask);
     }
 }
 
@@ -372,9 +372,9 @@ void PsMat::SetupUvXfm() {
 // it as an instance method rather than a free function.
 void PsMat::SelectStageClamp(const Stage &stage) {
     if (stage.mWrap == Stage::kWrapModeClamp) {
-        g_gfxDevice.SetGsReg(kGsRegClamp1, kClampBothAxes, kClampModeMask);
+        Rnd::ThePs.SetGsReg(kGsRegClamp1, kClampBothAxes, kClampModeMask);
     } else {
-        g_gfxDevice.SetGsReg(kGsRegClamp1, kRepeatBothAxes, kClampModeMask);
+        Rnd::ThePs.SetGsReg(kGsRegClamp1, kRepeatBothAxes, kClampModeMask);
     }
 }
 

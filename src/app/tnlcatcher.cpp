@@ -27,7 +27,7 @@ constexpr int kHitFramesPerUpdate = 2;
 
 template <typename T>
 T *FindObject(const HxStr &name) {
-    return dynamic_cast<T *>(Rnd::g_manager.Find(name));
+    return dynamic_cast<T *>(Rnd::TheManager.Find(name));
 }
 
 } // namespace
@@ -66,7 +66,7 @@ void TnlCatcher::SetMultiplied(int nMultiplied) {
 // NTSC-U/C: 0x004553c0, PAL: 0x004928f0
 void TnlCatcher::ResetTargets() {
     for (int i = 0; i < kTargetCount; ++i) {
-        mTargets[i]->SetMaterial(mUpMat);
+        mTargets[i]->SetMat(mUpMat);
     }
 }
 
@@ -76,7 +76,7 @@ void TnlCatcher::Hit(int nTarget) {
         return;
     }
     ResetTargets();
-    mTargets[nTarget]->SetMaterial(mDownMat);
+    mTargets[nTarget]->SetMat(mDownMat);
     mTarget = nTarget;
     mHitCount = 0;
 }

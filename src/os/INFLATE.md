@@ -37,11 +37,11 @@ These macros precede the include and do not modify the upstream file:
 
 | Upstream name  | Game definition                                         |
 | -------------- | ------------------------------------------------------- |
-| `inbuf`        | `g_bGzipInputBuffer`                                    |
-| `insize`       | `g_nGzipInputLength`                                    |
-| `inptr`        | `g_nGzipInputPosition`                                  |
-| `outcnt`       | `g_nGzipWindowPosition` (upstream `wp`)                 |
-| `window`       | `g_bGzipWindow` (upstream `slide`)                      |
+| `inbuf`        | `gzipInbuf`                                             |
+| `insize`       | `gzipInsize`                                            |
+| `inptr`        | `gzipInptr`                                             |
+| `outcnt`       | `gzipOutcnt` (upstream `wp`)                            |
+| `window`       | `gzipWindow` (upstream `slide`)                         |
 | `fill_inbuf`   | `GzipRefillInputBuffer`                                 |
 | `flush_window` | `GzipFlushWindow`                                       |
 | `malloc`       | `HuftAlloc`, given the entry count rather than the size |
@@ -84,19 +84,19 @@ used and rewinds the pool. The image inlines it into `inflate()`. The peak is ne
 | `HuftAlloc`       | `0x0063e1e0` | `0x0067ed70` |
 | `huft_free`       | `0x0063e230` | `0x0067edc0` |
 
-| Global                | NTSC-U/C     | PAL          |
-| --------------------- | ------------ | ------------ |
-| `border`              | `0x007c3a98` | `0x00807798` |
-| `cplens`              | `0x007c3ae8` | `0x008077e8` |
-| `cplext`              | `0x007c3b28` | `0x00807828` |
-| `cpdist`              | `0x007c3b68` | `0x00807868` |
-| `cpdext`              | `0x007c3ba8` | `0x008078a8` |
-| `mask_bits`           | `0x007c3be8` | `0x008078e8` |
-| `lbits`               | `0x007c3c0c` | `0x0080790c` |
-| `dbits`               | `0x007c3c10` | `0x00807910` |
-| `bb`                  | `0x008ee930` | `0x00933930` |
-| `bk`                  | `0x008ee938` | `0x00933938` |
-| `hufts`               | `0x008ee93c` | `0x0093393c` |
-| `g_aGzipHuftPool`     | `0x008ea930` | `0x0092f930` |
-| `g_pGzipHuftPoolNext` | `0x007c3a90` | `0x00807790` |
-| `g_nGzipHuftPeak`     | `0x007c3a94` | `0x00807794` |
+| Global      | NTSC-U/C     | PAL          |
+| ----------- | ------------ | ------------ |
+| `border`    | `0x007c3a98` | `0x00807798` |
+| `cplens`    | `0x007c3ae8` | `0x008077e8` |
+| `cplext`    | `0x007c3b28` | `0x00807828` |
+| `cpdist`    | `0x007c3b68` | `0x00807868` |
+| `cpdext`    | `0x007c3ba8` | `0x008078a8` |
+| `mask_bits` | `0x007c3be8` | `0x008078e8` |
+| `lbits`     | `0x007c3c0c` | `0x0080790c` |
+| `dbits`     | `0x007c3c10` | `0x00807910` |
+| `bb`        | `0x008ee930` | `0x00933930` |
+| `bk`        | `0x008ee938` | `0x00933938` |
+| `hufts`     | `0x008ee93c` | `0x0093393c` |
+| `huftTable` | `0x008ea930` | `0x0092f930` |
+| `pHuftNext` | `0x007c3a90` | `0x00807790` |
+| `highWater` | `0x007c3a94` | `0x00807794` |

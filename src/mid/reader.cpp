@@ -52,7 +52,7 @@ Mid::Reader::Reader(HxIListChunk *pReader, Receiver *pReceiver)
 }
 
 // NTSC-U/C: 0x003d6528, PAL: 0x0040e418
-void Mid::Reader::Read() {
+void Mid::Reader::ReadAllTracks() {
     while (ReadChunk()) {
     }
 }
@@ -61,14 +61,14 @@ void Mid::Reader::Read() {
 bool Mid::Reader::ReadChunk() {
     HxChunkHeader *pId = mReader->Next();
     if (pId == nullptr) {
-        EndOfFile();
+        AllTracksRead();
         return false;
     }
 
-    if (pId->Name() == g_mthdChunkName) {
+    if (pId->Name() == kMidiHeaderChunkID) {
         HxIDataChunk chunk(mReader);
         ReadHeader(chunk);
-    } else if (pId->Name() == g_mtrkChunkName) {
+    } else if (pId->Name() == kMidiTrackChunkID) {
         HxIDataChunk chunk(mReader);
         ReadTrackChunk(chunk);
     }
@@ -76,15 +76,15 @@ bool Mid::Reader::ReadChunk() {
 }
 
 // NTSC-U/C: 0x003d65a8, PAL: 0x0040e498
-void Mid::Reader::EndOfFile() {
+void Mid::Reader::AllTracksRead() {
     mReceiver->AllDone();
 }
 
 // NTSC-U/C: 0x003d6558, PAL: 0x0040e448
 void Mid::Reader::ReadHeader(HxStream &stream) {
-    stream.ReadSwapped(&mFormat, sizeof(mFormat))
-        .ReadSwapped(&mTrackCount, sizeof(mTrackCount))
-        .ReadSwapped(&mDivision, sizeof(mDivision));
+    stream.ReadNum(&mFormat, sizeof(mFormat))
+        .ReadNum(&mTrackCount, sizeof(mTrackCount))
+        .ReadNum(&mDivision, sizeof(mDivision));
 }
 
 // NTSC-U/C: 0x003d65d8, PAL: 0x0040e4c8
@@ -120,7 +120,7 @@ void Mid::Reader::ReadEvent(HxStream &stream) {
     MBT tick(mTick * mTargetDivision / mDivision);
 
     unsigned char nData1;
-    stream.ReadSwapped(&nData1, sizeof(nData1));
+    stream.ReadNum(&nData1, sizeof(nData1));
     bool bRunning = true;
     if ((nData1 & kStatusBit) != 0) {
         mRunningStatus = nData1;
@@ -134,7 +134,7 @@ void Mid::Reader::ReadEvent(HxStream &stream) {
     }
 
     if (!bRunning) {
-        stream.ReadSwapped(&nData1, sizeof(nData1));
+        stream.ReadNum(&nData1, sizeof(nData1));
     }
 
     unsigned char nStatus = mRunningStatus;
@@ -144,10 +144,10 @@ void Mid::Reader::ReadEvent(HxStream &stream) {
     case kStatusPolyPressure:
     case kStatusController:
     case kStatusPitchBend:
-        stream.ReadSwapped(&nData2, sizeof(nData2));
+        stream.ReadNum(&nData2, sizeof(nData2));
         break;
     case kStatusNoteOn:
-        stream.ReadSwapped(&nData2, sizeof(nData2));
+        stream.ReadNum(&nData2, sizeof(nData2));
         if (nData2 == 0) {
             nStatus = (nStatus & kChannelMask) | kStatusNoteOff;
         }
@@ -167,12 +167,12 @@ void Mid::Reader::ReadSystemEvent(HxStream &stream) {
     case kStatusSysExContinue: {
         int nLength;
         ReadVarLen(nLength, stream);
-        stream.Seek(nLength, kHxSeekCur);
+        stream.SetMarker(nLength, kHxSeekCur);
         break;
     }
     case kStatusMeta: {
         unsigned char nType;
-        stream.ReadSwapped(&nType, sizeof(nType));
+        stream.ReadNum(&nType, sizeof(nType));
         ReadMeta(nType, stream);
         break;
     }
@@ -183,7 +183,7 @@ void Mid::Reader::ReadSystemEvent(HxStream &stream) {
 void Mid::Reader::ReadMeta(unsigned char nType, HxStream &stream) {
     int nLength;
     ReadVarLen(nLength, stream);
-    int nStart = stream.Tell();
+    int nStart = stream.GetMarker();
     MBT tick(mTick * mTargetDivision / mDivision);
 
     switch (nType) {
@@ -202,9 +202,9 @@ void Mid::Reader::ReadMeta(unsigned char nType, HxStream &stream) {
         unsigned char nHigh;
         unsigned char nMiddle;
         unsigned char nLow;
-        stream.ReadSwapped(&nHigh, sizeof(nHigh))
-            .ReadSwapped(&nMiddle, sizeof(nMiddle))
-            .ReadSwapped(&nLow, sizeof(nLow));
+        stream.ReadNum(&nHigh, sizeof(nHigh))
+            .ReadNum(&nMiddle, sizeof(nMiddle))
+            .ReadNum(&nLow, sizeof(nLow));
         mReceiver->Tempo(tick.mTick,
                          ((nHigh << kTempoHighShift) + (nMiddle << kTempoMiddleShift)) | nLow);
         break;
@@ -212,21 +212,21 @@ void Mid::Reader::ReadMeta(unsigned char nType, HxStream &stream) {
     default:
         if (nType >= kMetaFirstText && nType <= kMetaLastText) {
             char *pszText = new char[nLength + 1];
-            stream.Read(pszText, nLength);
+            stream.ReadData(pszText, nLength);
             pszText[nLength] = '\0';
             mReceiver->TextEvent(tick.mTick, pszText, nType);
             delete[] pszText;
         }
         break;
     }
-    stream.Seek(nStart + nLength, kHxSeekSet);
+    stream.SetMarker(nStart + nLength, kHxSeekSet);
 }
 
 // NTSC-U/C: 0x003d5260, PAL: 0x0040d150
-void Mid::Reader::Dispatch(MBT tick,
-                           unsigned char nStatus,
-                           unsigned char nData1,
-                           unsigned char nData2) {
+void Mid::Reader::SendChannelMsg(MBT tick,
+                                 unsigned char nStatus,
+                                 unsigned char nData1,
+                                 unsigned char nData2) {
     unsigned char nChannel = nStatus & kChannelMask;
     switch (nStatus & kStatusTypeMask) {
     case kStatusNoteOn:
@@ -253,7 +253,7 @@ void Mid::Reader::QueueEvent(MBT tick,
                              unsigned char nData1,
                              unsigned char nData2) {
     if (mCompare == nullptr) {
-        Dispatch(tick, nStatus, nData1, nData2);
+        SendChannelMsg(tick, nStatus, nData1, nData2);
         return;
     }
 
@@ -277,7 +277,7 @@ void Mid::Reader::Flush() {
 
     std::sort(mPending.begin(), mPending.end(), mCompare);
     for (const auto &event : mPending) {
-        Dispatch(mPendingTick, event.mStatus, event.mData1, event.mData2);
+        SendChannelMsg(mPendingTick, event.mStatus, event.mData1, event.mData2);
     }
     mPending.erase(mPending.begin(), mPending.end());
 }

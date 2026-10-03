@@ -46,18 +46,18 @@ PlayMapLinear::PlayMapLinear(int bLoadStepRings)
 
 // NTSC-U/C: 0x00128c38, PAL: 0x00129368
 void PlayMapLinear::AppendSection(int nSection) {
-    mWindowStarts.push_back(GetExtent());
+    mWindowStarts.push_back(GetLength());
     const Entry entry{nSection, 1};
     mWindow.push_back(entry);
 }
 
 // NTSC-U/C: 0x00129150, PAL: 0x00129880
 void PlayMapLinear::GrowPastLimit(int nLimit) {
-    while (!(nLimit < GetExtent())) {
-        // The extent is re-read on every iteration rather than cached, and GetExtent() is called
+    while (!(nLimit < GetLength())) {
+        // The extent is re-read on every iteration rather than cached, and GetLength() is called
         // once per element rather than once per pass.
         for (std::vector<Entry>::size_type nIndex = 0; nIndex < mPattern.size(); ++nIndex) {
-            mWindowStarts.push_back(GetExtent());
+            mWindowStarts.push_back(GetLength());
             const Entry entry{mPattern[nIndex].mSection, 1};
             mWindow.push_back(entry);
         }
@@ -179,7 +179,7 @@ PlayMapLinear::~PlayMapLinear() {
 // NTSC-U/C: 0x0012aa18, PAL: 0x0012b150
 void PlayMapLinear::RecordPattern() {
     mPattern = mWindow;
-    mPatternEnd = GetExtent();
+    mPatternEnd = GetLength();
 }
 
 // NTSC-U/C: 0x0012aa60, PAL: 0x0012b198
@@ -188,7 +188,7 @@ int PlayMapLinear::GetEndBar() {
 }
 
 // NTSC-U/C: 0x0012aa68, PAL: 0x0012b1a0
-int PlayMapLinear::GetSectionCount() {
+int PlayMapLinear::GetNumSections() const {
     return static_cast<int>(mPattern.size());
 }
 
@@ -206,7 +206,7 @@ int PlayMapLinear::MapBar(int nBar) {
 }
 
 // NTSC-U/C: 0x0012ae38, PAL: 0x0012b570
-int PlayMapLinear::GetExtent() {
+int PlayMapLinear::GetLength() const {
     if (mWindowStarts.empty()) {
         return 0;
     }

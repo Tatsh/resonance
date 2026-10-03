@@ -80,7 +80,7 @@ int Cmd::sCmdID;
 AutoRiffer::AutoRiffer(Sch::TickClock *pClock, Quantizer *pQuantizer, const TrackData *pTrackData)
     : mTrack(pTrackData->mIndex), mQuantizer(pQuantizer), mTrackData(pTrackData),
       mCurrentRiff(nullptr), mClock(pClock), mSynth(nullptr), mPhraseMaker(nullptr),
-      mPlayer(&g_nullPlayer) {
+      mPlayer(&NullPlayer::sInstance) {
     mCommand.mValue = kUnallocatedCommand;
     std::memset(mLevelHeld, 0, sizeof(mLevelHeld));
 }
@@ -165,7 +165,7 @@ void AutoRiffer::OnErase(EraseMsg *pMsg) {
 
     StopRiff(pMsg->mPosition.mTick);
     AllNotesOffMsg notesOff;
-    mSynth->Handle(&notesOff);
+    mSynth->Dispatch(&notesOff);
     mPhraseMaker->Erase(pMsg->mPlayer, pMsg->mPosition.mTick, pMsg->mDoubleTap);
 }
 
@@ -198,7 +198,7 @@ void AutoRiffer::OnCommand(int nTick) {
 // NTSC-U/C: 0x00199758, PAL: 0x0019f4c0
 void AutoRiffer::PlayRiff(int nTick) {
     AllNotesOffMsg notesOff;
-    mSynth->Handle(&notesOff);
+    mSynth->Dispatch(&notesOff);
 
     MultiMuseMsg riffMsg(mCurrentRiff);
     mSource.Send(&riffMsg);
@@ -218,17 +218,17 @@ void AutoRiffer::PlayRiff(int nTick) {
 }
 
 // NTSC-U/C: 0x00199910, PAL: 0x0019f678
-void AutoRiffer::HandleMessage(Message *pMsg) {
+void AutoRiffer::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
-    if (nType == g_nPitchRiffMsgType) {
+    if (nType == PitchRiffMsg::sID) {
         OnPitchRiff(static_cast<PitchRiffMsg *>(pMsg));
         return;
     }
-    if (nType == g_nEraseMsgType) {
+    if (nType == EraseMsg::sID) {
         OnErase(static_cast<EraseMsg *>(pMsg));
         return;
     }
-    if (nType == g_nStopRiffMsgType) {
+    if (nType == StopRiffMsg::sID) {
         OnStopRiff(static_cast<StopRiffMsg *>(pMsg));
         return;
     }

@@ -63,7 +63,7 @@ NotePitcher::NotePitcher(PhraseMgr *pPhraseMgr,
                          int bAllowOwnedBars,
                          int nUnreadOption)
     : Pitcher(pClock), mPhraseMgr(pPhraseMgr), mQuantizer(pQuantizer), mTrack(pTrackData->mIndex),
-      mPlayer(&g_nullPlayer), mLastErasePosition(kNoValue), mBarDivisor(kMBTInfinity),
+      mPlayer(&NullPlayer::sInstance), mLastErasePosition(kNoValue), mBarDivisor(kMBTInfinity),
       mCapturedBar(kNoValue), mPlayModeOne(bPlayModeOne), mStepBars(kInitialStepBars),
       mAllowOwnedBars(bAllowOwnedBars), mUnreadOption(nUnreadOption), mTrackData(pTrackData),
       mClock(pClock) {
@@ -125,7 +125,7 @@ void NotePitcher::PostAllNotesOffMsg(EraseMsg *pMsg) {
     }
 
     for (int nClear = nFirstBar; nClear < nEndBar; ++nClear) {
-        if (mPhraseMgr->GetPhraseOwner(nClear) != mPlayer) {
+        if (mPhraseMgr->GetOwner(nClear) != mPlayer) {
             continue;
         }
         bErased = 1;
@@ -166,7 +166,7 @@ void NotePitcher::PostPhraseCapturedMsg(int nGem, int nTick) {
     const int nBar = nTick / mBarDivisor;
     if (mCapturedBar != nBar) {
         mCapturedBar = nBar;
-        if (mPlayModeOne != 0 && mPhraseMgr->GetPhraseOwner(nBar)->IsNull() == 0) {
+        if (mPlayModeOne != 0 && mPhraseMgr->GetOwner(nBar)->IsNull() == 0) {
             mPhraseMgr->ClearPhrase(nBar, 0);
         }
         PhraseCapturedMsg captured(mCapturedBar,
@@ -253,13 +253,13 @@ int NotePitcher::Tick(int nElapsedTicks) {
 }
 
 // NTSC-U/C: 0x001b3bd0, PAL: 0x001b99a8
-void NotePitcher::HandleMessage(Message *pMsg) {
+void NotePitcher::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
-    if (nType == static_cast<int>(g_nPitchRiffMsgType)) {
+    if (nType == static_cast<int>(PitchRiffMsg::sID)) {
         PostPitchMsg(static_cast<PitchRiffMsg *>(pMsg));
         return;
     }
-    if (nType == static_cast<int>(g_nEraseMsgType)) {
+    if (nType == static_cast<int>(EraseMsg::sID)) {
         PostAllNotesOffMsg(static_cast<EraseMsg *>(pMsg));
         return;
     }
@@ -270,7 +270,7 @@ void NotePitcher::HandleMessage(Message *pMsg) {
         PostSeekerMsg(static_cast<TrackSelectMsg *>(pMsg));
         return;
     }
-    if (nType == static_cast<int>(g_nInvalidateSeekerMsgType)) {
+    if (nType == static_cast<int>(InvalidateSeekerMsg::sID)) {
         InvalidateSeekerMsg *pInvalidate = static_cast<InvalidateSeekerMsg *>(pMsg);
         if (pInvalidate->mTrack == mTrack) {
             PostSeekerMsgSecond(pInvalidate->mBar, 0);
@@ -295,7 +295,7 @@ int NotePitcher::CanPlayBar(int nBar, int nCurrentBar) {
         return bPlayable;
     }
 
-    Player *pOwner = mPhraseMgr->GetPhraseOwner(nBar);
+    Player *pOwner = mPhraseMgr->GetOwner(nBar);
     int bPlayable = mTrackData->QueryBar(nBar);
     if (mAllowOwnedBars == 0) {
         bPlayable = bPlayable != 0 && (pOwner->IsNull() != 0 || nCurrentBar == nBar);

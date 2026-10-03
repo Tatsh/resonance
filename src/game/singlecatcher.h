@@ -63,7 +63,7 @@ public:
      *
      * Slot 10. The routine queries PhraseMgr::GetPowerbar() for the bar and, for an answer other
      * than -1, sends a CaughtPowerbarMsg carrying that answer and the player, then delivers the
-     * same message to the player directly through MsgSink::Handle().
+     * same message to the player directly through MsgSink::Dispatch().
      *
      * @param nBar The caught bar.
      * @ghidraAddress NTSC-U/C: 0x001ad840

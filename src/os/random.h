@@ -8,7 +8,7 @@
  * @ghidraAddress NTSC-U/C: 0x0072407c
  * @ghidraAddress PAL: 0x00767c6c
  */
-extern int g_nRandomSeed;
+extern int gRandom;
 
 /**
  * Advance the shared seed and return it.

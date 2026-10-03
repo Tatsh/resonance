@@ -43,7 +43,7 @@ public:
     /**
      * Construct a player with the next serial number.
      *
-     * Increments g_nMusePlayerSerial and records the new value in mId.
+     * Increments sMuseID and records the new value in mId.
      *
      * @ghidraAddress NTSC-U/C: 0x001aa440
      * @ghidraAddress PAL: 0x001b01a8
@@ -91,7 +91,7 @@ public:
     virtual int DisplacesSiblings() = 0;
 
 private:
-    // Serial number, taken from g_nMusePlayerSerial. Nothing recovered so far reads it.
+    // Serial number, taken from sMuseID. Nothing recovered so far reads it.
     int mId; // +0x00
 };
 
@@ -103,4 +103,4 @@ private:
  * @ghidraAddress NTSC-U/C: 0x00686290
  * @ghidraAddress PAL: 0x006c74f8
  */
-extern int g_nMusePlayerSerial;
+extern int sMuseID;

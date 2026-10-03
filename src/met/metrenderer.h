@@ -104,14 +104,14 @@ public:
      *
      * A RawControllerMsg is decoded into a MetScreenCommand and delivered to the active panel. A
      * MetStartNetLaunchMsg and a LobbyConnectionLostMsg are forwarded to the active panel's
-     * MsgSink::Handle(). A GameConnectionLostMsg is discarded. An IsRecordingMsg stores its payload
-     * in mRecording.
+     * MsgSink::Dispatch(). A GameConnectionLostMsg is discarded. An IsRecordingMsg stores its
+     * payload in mRecording.
      *
      * @param pMsg The message to dispatch.
      * @ghidraAddress NTSC-U/C: 0x0036c5d8
      * @ghidraAddress PAL: 0x0039afd8
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Start the front end running.
@@ -515,7 +515,7 @@ private:
 
     // NTSC-U/C: 0x00371ba8, PAL: 0x003a06a0
     // Translates a raw controller reading into a command, arms its auto-repeat, and delivers it
-    // to the active panel. HandleMessage() expands it inline.
+    // to the active panel. DispatchPriv() expands it inline.
     inline void OnRawController(RawControllerMsg *pMsg);
 
     // NTSC-U/C: 0x00369b08, PAL: 0x00397d88
@@ -573,7 +573,7 @@ private:
     // Time the previous frame ran at, in nanoseconds since the watchdog's base. Both frame
     // routines difference it against the current time and then overwrite it.
     long long mPreviousFrameNs; // +0x70
-    // Payload of the last IsRecordingMsg. HandleMessage() is the one writer.
+    // Payload of the last IsRecordingMsg. DispatchPriv() is the one writer.
     int mRecording; // +0x78
     // The screen that receives decoded commands. SetActivePanel() is the named writer, and the two
     // promotion sequences write it directly.
@@ -632,7 +632,7 @@ private:
 
 public:
     /**
-     * Highest pad index HandleMessage() accepts a RawControllerMsg from. The constructor sets 4.
+     * Highest pad index DispatchPriv() accepts a RawControllerMsg from. The constructor sets 4.
      * The test is `mMaxPadIndex < padIndex`, and index 4 is accepted while index 5 is not.
      * MetMainScreen writes it at `0x002c6dc0` (slot 5) and `0x002c7520`. +0xd4
      */

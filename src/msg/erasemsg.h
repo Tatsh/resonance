@@ -28,6 +28,14 @@ class Player;
 class EraseMsg : public Message {
 public:
     /**
+     * Identity that Type() reports.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d0174
+     * @ghidraAddress PAL: 0x0071390c
+     */
+    static int sID;
+
+    /**
      * Construct a message with the position at kMBTInfinity and the rest unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
@@ -75,7 +83,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nEraseMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x003db440
      * @ghidraAddress PAL: 0x00413878
      */
@@ -101,23 +109,12 @@ public:
     virtual void PrintExtra(std::ostream &stream) const;
 
 public:
-    // Public because Voxer::HandleMessage(), Scratcher::HandleMessage(), and
-    // NotePitcher::HandleMessage() reads these directly, through a EraseMsg pointer from outside
-    // the hierarchy, and the image exposes no accessor. A friend declaration fits equally well.
+    // Public because Voxer::DispatchPriv(), Scratcher::DispatchPriv(), and
+    // NotePitcher::DispatchPriv() read the members below directly, through an EraseMsg pointer
+    // from outside the hierarchy, and the image exposes no accessor. A friend declaration fits
+    // equally well.
     Player *mPlayer;    // +0x04
     Mid::MBT mPosition; // +0x08
     int mTrack;         // +0x0c
     int mDoubleTap;     // +0x10
 };
-
-/**
- * Identity that EraseMsg::Type() reports.
- *
- * This word belongs to EraseMsg because EraseMsg::Type() at `0x003db440` returns it. Several
- * handlers elsewhere read the same word to compare against it, which is the expected shape for a
- * registered identity and does not make the word theirs.
- *
- * @ghidraAddress NTSC-U/C: 0x006d0174
- * @ghidraAddress PAL: 0x0071390c
- */
-extern int g_nEraseMsgType;

@@ -57,7 +57,7 @@ Message *Message::NewMessage(int nType) {
 }
 
 // NTSC-U/C: 0x00556290, PAL: 0x00596918
-std::ostream &Message::PrintBraced(std::ostream &stream) {
+std::ostream &Message::Print(std::ostream &stream) const {
     stream << "{" << GetName() << " ";
     PrintExtra(stream);
     return stream << "}";

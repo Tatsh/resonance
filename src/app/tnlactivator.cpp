@@ -53,7 +53,7 @@ constexpr float kIntroEndFrame = -1920.0f;
 
 template <typename T>
 T *FindObject(const char *pszName) {
-    return dynamic_cast<T *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<T *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 } // namespace
@@ -77,14 +77,14 @@ TnlActivator::TnlActivator(int nIndex, HxStr colorName, TnlPlayer *pOwner)
     }
     mMesh->SetShowing(0);
     mGhostView = FindObject<Rnd::View>(FormatString("ghost%d.view", mOwner->mPlayerNum));
-    mGhostView->ClearDraws();
+    mGhostView->RemoveAllDraws();
     GetCachedTunnelObject()->GetSeeker(mIndex)->SetMesh(mMesh);
-    mFxView->ClearTransList();
-    mFxView->ClearDraws();
+    mFxView->RemoveAllTranses();
+    mFxView->RemoveAllDraws();
     mCatcher.AttachTo(mFxView);
     mPointer.AttachTo(mFxView);
     GetCachedTunnelObject()->GetSeeker(mIndex)->SetMeshFrameOffset(0.0f);
-    mOffsetRamp.SetRange(kOffsetFrom, kOffsetTo, kOffsetDuration);
+    mOffsetRamp.SetParams(kOffsetFrom, kOffsetTo, kOffsetDuration);
     mOffsetRamp.Jump(0.0f);
     SetLeader(0);
 }
@@ -116,12 +116,12 @@ void TnlActivator::Update(float flFrame, float flScaledFrame) {
         std::memcpy(trans.mLocalXfm[kBasisZRow], &basisZ, sizeof(basisZ));
         trans.mDirty = 1;
     }
-    if (mOffsetRamp.Update(flFrame)) {
+    if (mOffsetRamp.Execute(flFrame)) {
         nSettled = 0;
-        GetCachedTunnelObject()->GetSeeker(mIndex)->SetMeshFrameOffset(mOffsetRamp.Value());
-        GetCachedTunnelObject()->GetSeeker(mIndex)->SetTransFrameOffset(
-            mTransOffset + mOffsetRamp.Value() * kHalf);
-        GetCachedTunnelObject()->GetSeeker(mIndex)->SetLookFrameOffset(mOffsetRamp.Value() * kHalf);
+        GetCachedTunnelObject()->GetSeeker(mIndex)->SetMeshFrameOffset(mOffsetRamp.Val());
+        GetCachedTunnelObject()->GetSeeker(mIndex)->SetTransFrameOffset(mTransOffset +
+                                                                        mOffsetRamp.Val() * kHalf);
+        GetCachedTunnelObject()->GetSeeker(mIndex)->SetLookFrameOffset(mOffsetRamp.Val() * kHalf);
     }
     if (mTurning && nSettled) {
         mTurning = 0;

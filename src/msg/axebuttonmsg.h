@@ -16,7 +16,7 @@ class Player;
  * ShowEraseEffectMsg build stores as the player, and Overlay compares that word with
  * HudTrack::mPlayer. AutoRiffer stores 1 at `+0x04` when a riff starts and 0 when it stops. The
  * purpose of the word at `+0x08` is not recovered. Every member is public because
- * AppTunnel::HandleMessage() at `0x004499c4` reads all three directly with no accessor in the
+ * AppTunnel::DispatchPriv() at `0x004499c4` reads all three directly with no accessor in the
  * image.
  *
  * The destructor at `0x0019a698` is compiler-generated and has no declaration here.

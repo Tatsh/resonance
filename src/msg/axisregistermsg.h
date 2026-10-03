@@ -97,7 +97,7 @@ public:
      */
     virtual void PrintExtra(std::ostream &stream) const;
 
-    // PitchPicker::HandleMessage() at 0x001c3220 reads the two members below directly with no
+    // PitchPicker::DispatchPriv() at 0x001c3220 reads the two members below directly with no
     // accessor in the image, comparing mPlayer with its own player and scaling mValue by 1024.
     Player *mPlayer; /*!< The player the controller belongs to. +0x04 */
     float mValue;    /*!< The axis value. +0x08 */
@@ -113,7 +113,7 @@ public:
     /**
      * The player's track. +0x10
      *
-     * Public because AxePhraseMaker::HandleMessage() at `0x0019c448` compares it with its own track
+     * Public because AxePhraseMaker::DispatchPriv() at `0x0019c448` compares it with its own track
      * directly, and the image has no accessor.
      */
     int mTrack;

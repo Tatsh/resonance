@@ -86,7 +86,7 @@ IBStream &IOBMemStream::Flush() {
 }
 
 // NTSC-U/C: 0x004ee018, PAL: 0x0052cbc0
-void IOBMemStream::Load(const void *pSrc, int nSize) {
+void IOBMemStream::Fill(const void *pSrc, int nSize) {
     mBuffer.resize(mBuffer.size() + nSize);
     memcpy(&mBuffer[mPos], pSrc, nSize);
 }
@@ -103,7 +103,7 @@ char *IOBMemStream::Buffer() {
 }
 
 // NTSC-U/C: 0x004ee1f0, PAL: 0x0052cd98
-void IOBMemStream::DiscardReadBytes() {
+void IOBMemStream::Compact() {
     mBuffer.erase(mBuffer.begin(), mBuffer.begin() + mPos);
     mPos = 0;
 }

@@ -26,9 +26,9 @@ TnlSeekerFade::TnlSeekerFade(int nIndex, const Color &color)
       mFadeRate(0.0f), mIndex(nIndex) {
     Rnd::Mat *pMat;
     if (Application::shared()->GetPlayMode() == kPlayModeGame) {
-        pMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("seeker.mat")));
+        pMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("seeker.mat")));
     } else {
-        pMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("seeker_loop.mat")));
+        pMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("seeker_loop.mat")));
     }
     mColor.a = 1.0f;
     GetCachedTunnelObject()->GetSeeker(mIndex)->SetMat(pMat);

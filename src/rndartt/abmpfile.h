@@ -60,7 +60,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0061c860
      * @ghidraAddress PAL: 0x0065d3f0
      */
-    virtual int ReadImage(ABitmap *pImage, int *pbEnd);
+    virtual int ReadFrame(ABitmap *pImage, int *pbEnd);
 
     /**
      * Slot 5. Write a bitmap as an uncompressed file.
@@ -141,5 +141,5 @@ private:
     int mHeight;              // +0x2c Always positive.
     int mRowStep;             // +0x30 -1 for a bottom-up file, 1 for a top-down one.
     int mColorCount;          // +0x34 Colour table entries, zero above eight bits per pixel.
-    int mImageRead;           // +0x38 Set once ReadImage() has returned the image.
+    int mImageRead;           // +0x38 Set once ReadFrame() has returned the image.
 };

@@ -111,7 +111,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x00185998
      * @ghidraAddress PAL: 0x0018b3c0
      */
-    void AbortOnError();
+    void HandleError();
 
     // The receiver Finish() reports to. +0x04
     MemcardUser *mUser;

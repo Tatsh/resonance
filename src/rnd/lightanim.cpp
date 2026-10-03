@@ -38,10 +38,10 @@ void PrintObjectRef(Dbg &sink, const Object *pObject) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 // Replace a colour from a channel at a frame, retaining it while the channel is empty. The blend
@@ -158,7 +158,7 @@ void LightAnim::Replace(Object *pFrom, Object *pTo) {
 }
 
 // NTSC-U/C: 0x00541790, PAL: 0x005814b8
-float LightAnim::EndFrame() {
+float LightAnim::FilteredFrameEnd() {
     const float flAmbient = ChannelEndFrame(mKeysOwner->mAmbientKeys);
     const float flDiffuse = ChannelEndFrame(mKeysOwner->mDiffuseKeys);
     const float flSpecular = ChannelEndFrame(mKeysOwner->mSpecularKeys);
@@ -185,7 +185,7 @@ void LightAnim::SetFrameSelf(float flFrame) {
 // NTSC-U/C: 0x00541230, PAL: 0x00580f08
 void LightAnim::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
 
     Animatable::Save(stream);
 
@@ -235,9 +235,9 @@ void LightAnim::Copy(const Object *pSource, unsigned nFlags) {
 // NTSC-U/C: 0x00541388, PAL: 0x00581060
 void LightAnim::Load(Stream &stream) {
     int nRevision = 0;
-    stream.Read(&nRevision, sizeof(nRevision));
+    stream.ReadLE(&nRevision, sizeof(nRevision));
     if (nRevision > kSerialVersion) {
-        g_failSink.Report("Can't load new LightAnim\n");
+        Rnd::TheDbg.Notify("Can't load new LightAnim\n");
         return;
     }
 
@@ -252,7 +252,7 @@ void LightAnim::Load(Stream &stream) {
 
     HxStr lightName(nullptr);
     stream.ReadString(lightName);
-    mLight = dynamic_cast<Light *>(g_manager.Find(lightName));
+    mLight = dynamic_cast<Light *>(TheManager.Find(lightName));
 
     ReadColorKeys(stream, mAmbientKeys);
     ReadColorKeys(stream, mDiffuseKeys);
@@ -260,7 +260,7 @@ void LightAnim::Load(Stream &stream) {
 
     HxStr ownerName(nullptr);
     stream.ReadString(ownerName);
-    mKeysOwner = dynamic_cast<LightAnim *>(g_manager.Find(ownerName));
+    mKeysOwner = dynamic_cast<LightAnim *>(TheManager.Find(ownerName));
 
     // The revision test is redundant, because a revision above 0 has already returned above. The
     // binary tests it a second time regardless.
@@ -296,7 +296,7 @@ Object *CreateRegisteredLightAnim(const HxStr &name) {
 
 // NTSC-U/C: 0x005449c8, PAL: 0x00584740
 void RegisterLightAnimClass() {
-    g_manager.RegisterClass(g_lightAnimClassName, CreateRegisteredLightAnim);
+    TheManager.RegisterClass(g_lightAnimClassName, CreateRegisteredLightAnim);
 }
 
 // NTSC-U/C: 0x00545570, PAL: 0x005852e8

@@ -12,7 +12,7 @@
  * The class emits no RTTI, because it is not polymorphic. Its title is attested by the allocation
  * tag `Harmony`, under which TrackData allocates it and its deleter releases it. The object is 12
  * bytes, one vector of one-byte notes kept in ascending order. LevelConverter builds one note at a
- * time through AddNote() and hands it to TrackData::AddHarmony(), which copies it.
+ * time through AddPitch() and hands it to TrackData::AddHarmony(), which copies it.
  *
  * The notes are unsigned. The two binary searches and every reader load them zero-extended and
  * compare them unsigned. Print() alone loads them sign-extended, which is the conversion to `char`
@@ -48,14 +48,13 @@ struct Harmony {
     /**
      * Insert a note in ascending order, after any equal note.
      *
-     * The position comes from std::upper_bound(), instantiated at `0x001a4f80`. The title is
-     * inferred.
+     * The position comes from std::upper_bound(), instantiated at `0x001a4f80`.
      *
      * @param nNote The note.
      * @ghidraAddress NTSC-U/C: 0x001a4db0
      * @ghidraAddress PAL: 0x001aab18
      */
-    void AddNote(unsigned char nNote);
+    void AddPitch(unsigned char nNote);
 
     /**
      * Snap a note to the nearer note of the harmony.
@@ -63,14 +62,14 @@ struct Harmony {
      * The routine finds the first note not below nNote with std::lower_bound(), instantiated at
      * `0x001a4fd0`, stepping back one when the search runs off the end, and takes the note below
      * that one as well when one exists. A note above the midpoint of the two resolves to the higher
-     * one, and a note at or below it to the lower one. The title is inferred.
+     * one, and a note at or below it to the lower one.
      *
      * @param nNote The note.
      * @return The nearer note, or nNote when the harmony is empty.
      * @ghidraAddress NTSC-U/C: 0x001a4e28
      * @ghidraAddress PAL: 0x001aab90
      */
-    unsigned char Snap(unsigned char nNote);
+    unsigned char SnapToHarmony(unsigned char nNote) const;
 
     /**
      * Report the lowest and highest notes.

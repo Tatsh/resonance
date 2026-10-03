@@ -37,7 +37,7 @@ Message *StdMidiMsg::Clone() {
 
 // NTSC-U/C: 0x003dc010, PAL: 0x00414448
 int StdMidiMsg::Type() {
-    return g_dwStdMidiMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x003dc020, PAL: 0x00414458

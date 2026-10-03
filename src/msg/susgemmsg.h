@@ -16,7 +16,7 @@ class Player;
  * AxeNewGemMaker::PostGemMessages() stores it at `0x001a3094` and `0x001a3110`.
  *
  * The payload layout comes from the run of field copies in Clone(). Every member is public because
- * AppTunnel::HandleMessage() at `0x0044987c` reads them directly with no accessor in the image. It
+ * AppTunnel::DispatchPriv() at `0x0044987c` reads them directly with no accessor in the image. It
  * copies the colour name of mPlayer, stops the strip mStripId when mStop is set, and otherwise
  * extends it on mLane to mFrame and mBlend.
  */

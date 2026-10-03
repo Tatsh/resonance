@@ -94,10 +94,10 @@ void PrintFlag(Dbg &sink, int nFlag) {
 // byte, the empty name a reader resolves to nothing.
 void WriteObjectName(Stream &stream, const Object *pObject) {
     if (pObject != nullptr) {
-        stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+        stream.Write(NameText(pObject), pObject->mName.mLen + 1);
     } else {
         const char cEmpty = 0;
-        stream.WriteBytes(&cEmpty, sizeof(cEmpty));
+        stream.Write(&cEmpty, sizeof(cEmpty));
     }
 }
 
@@ -139,15 +139,15 @@ Dbg &DumpPointVector(Dbg &sink, const std::vector<String::Point> &points) {
 // position never arrives at a file.
 Stream &WritePointVector(Stream &stream, const std::vector<String::Point> &points) {
     const int nCount = static_cast<int>(points.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (unsigned nIndex = 0; nIndex < points.size(); ++nIndex) {
-        stream.Write(&points[nIndex].mPos.x, sizeof(float));
-        stream.Write(&points[nIndex].mPos.y, sizeof(float));
-        stream.Write(&points[nIndex].mPos.z, sizeof(float));
-        stream.Write(&points[nIndex].mColor.r, sizeof(float));
-        stream.Write(&points[nIndex].mColor.g, sizeof(float));
-        stream.Write(&points[nIndex].mColor.b, sizeof(float));
-        stream.Write(&points[nIndex].mColor.a, sizeof(float));
+        stream.WriteLE(&points[nIndex].mPos.x, sizeof(float));
+        stream.WriteLE(&points[nIndex].mPos.y, sizeof(float));
+        stream.WriteLE(&points[nIndex].mPos.z, sizeof(float));
+        stream.WriteLE(&points[nIndex].mColor.r, sizeof(float));
+        stream.WriteLE(&points[nIndex].mColor.g, sizeof(float));
+        stream.WriteLE(&points[nIndex].mColor.b, sizeof(float));
+        stream.WriteLE(&points[nIndex].mColor.a, sizeof(float));
     }
     return stream;
 }
@@ -157,16 +157,16 @@ Stream &WritePointVector(Stream &stream, const std::vector<String::Point> &point
 // with a default-constructed point before the seven floats overwrite its first two members.
 Stream &ReadPointVector(Stream &stream, std::vector<String::Point> &points) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     points.resize(nCount);
     for (unsigned nIndex = 0; nIndex < points.size(); ++nIndex) {
-        stream.Read(&points[nIndex].mPos.x, sizeof(float));
-        stream.Read(&points[nIndex].mPos.y, sizeof(float));
-        stream.Read(&points[nIndex].mPos.z, sizeof(float));
-        stream.Read(&points[nIndex].mColor.r, sizeof(float));
-        stream.Read(&points[nIndex].mColor.g, sizeof(float));
-        stream.Read(&points[nIndex].mColor.b, sizeof(float));
-        stream.Read(&points[nIndex].mColor.a, sizeof(float));
+        stream.ReadLE(&points[nIndex].mPos.x, sizeof(float));
+        stream.ReadLE(&points[nIndex].mPos.y, sizeof(float));
+        stream.ReadLE(&points[nIndex].mPos.z, sizeof(float));
+        stream.ReadLE(&points[nIndex].mColor.r, sizeof(float));
+        stream.ReadLE(&points[nIndex].mColor.g, sizeof(float));
+        stream.ReadLE(&points[nIndex].mColor.b, sizeof(float));
+        stream.ReadLE(&points[nIndex].mColor.a, sizeof(float));
     }
     return stream;
 }
@@ -177,11 +177,8 @@ Stream &ReadPointVector(Stream &stream, std::vector<String::Point> &points) {
 HxStr g_stringClassName("String");
 
 // NTSC-U/C: 0x004bf440, PAL: 0x004fd4c8
-// The creator the class registry stores. NewString() is inlined into it, and the null
-// test the compiler emits there is the conversion of a Rnd::String pointer to its Rnd::Object
-// virtual base rather than a check the source requests.
-static Object *NewStringObject(const HxStr &name) {
-    return String::NewString(name);
+Object *String::NewObject(const HxStr &name) {
+    return New(name);
 }
 
 String::Point::Point() {
@@ -194,7 +191,7 @@ String::Point::Point() {
     mColor.b = 1.0f;
     mColor.a = 1.0f;
     // Only the padding word of the camera-space position is written. The rest of the frame scratch
-    // stays indeterminate until DrawSelf() fills it, matching the binary.
+    // stays indeterminate until DrawShowing() fills it, matching the binary.
     mCamPos.w = 1.0f;
 }
 
@@ -214,7 +211,7 @@ String::~String() {
 // A point is behind the camera when it is closer than this beyond the near plane.
 constexpr float kNearPlaneMargin = 0.01f;
 
-// Fewest points DrawSelf() draws a ribbon through.
+// Fewest points DrawShowing() draws a ribbon through.
 constexpr unsigned kMinRibbonPoints = 2;
 
 // A point carried through a transform, the VU0 multiply and accumulate the image inlines. The w
@@ -319,8 +316,8 @@ void String::EmitRibbonVerts(Point *pFirst, Point *pLast) {
 }
 
 // NTSC-U/C: 0x004b95f8, PAL: 0x004f7570
-int String::DrawSelf() {
-    Cam *pCam = g_pCurrentCam;
+int String::DrawShowing() {
+    Cam *pCam = Cam::sCurrent;
     if (pCam == nullptr || mPoints.size() < kMinRibbonPoints) {
         return 1;
     }
@@ -408,7 +405,7 @@ int String::DrawSelf() {
     }
 
     mpMesh->SyncChanged(Mesh::kSyncPoints);
-    memcpy(mpMesh->mLocalXfm, g_pCurrentCam->mWorldXfm, sizeof(mpMesh->mLocalXfm));
+    memcpy(mpMesh->mLocalXfm, Cam::sCurrent->mWorldXfm, sizeof(mpMesh->mLocalXfm));
     mpMesh->mDirty = 1;
     mpMesh->UpdateWorldXfm(nullptr, 0);
     mpMesh->Draw();
@@ -531,7 +528,7 @@ void String::SetNumPoints(int nCount) {
 }
 
 // NTSC-U/C: 0x004bf3c0, PAL: 0x004fd448
-int String::GetNumPoints() const {
+int String::NumPoints() const {
     return static_cast<int>(mPoints.size());
 }
 
@@ -566,13 +563,13 @@ void String::SetPointColor(int nIndex, const Color &color) {
 }
 
 // NTSC-U/C: 0x004bf418, PAL: 0x004fd4a0
-Color *String::GetPointColor(int nIndex) {
+Color *String::PointColor(int nIndex) {
     return &mPoints[nIndex].mColor;
 }
 
 // NTSC-U/C: 0x004bf668, PAL: 0x004fd6f0
 void String::SetMat(Mat *pMat) {
-    mpMesh->SetMaterial(pMat);
+    mpMesh->SetMat(pMat);
 }
 
 // NTSC-U/C: 0x004bf500, PAL: 0x004fd588
@@ -599,7 +596,7 @@ float String::GetFoldAngle() const {
 // NTSC-U/C: 0x004bf688, PAL: 0x004fd710
 void String::SetHasCaps(int nHasCaps) {
     mHasCaps = nHasCaps;
-    SetNumPoints(GetNumPoints());
+    SetNumPoints(NumPoints());
 }
 
 // NTSC-U/C: 0x004bf3e8, PAL: 0x004fd470
@@ -610,7 +607,7 @@ int String::GetHasCaps() const {
 // NTSC-U/C: 0x004bf6c8, PAL: 0x004fd750
 void String::SetLinePairs(int nLinePairs) {
     mLinePairs = nLinePairs;
-    SetNumPoints(GetNumPoints());
+    SetNumPoints(NumPoints());
 }
 
 // NTSC-U/C: 0x004bf3f0, PAL: 0x004fd478
@@ -624,7 +621,7 @@ void String::SetHighlight(int nHighlight) {
 }
 
 // NTSC-U/C: 0x004bf570, PAL: 0x004fd5f8
-void String::Collide(const Ray &ray, HitSink &sink) {
+void String::FindCollisions(const Ray &ray, HitSink &sink) {
     if (mShowing == 0) {
         return;
     }
@@ -635,13 +632,13 @@ void String::Collide(const Ray &ray, HitSink &sink) {
     std::list<Hit>::iterator itBefore = sink.mHits.end();
     --itBefore;
 
-    mpMesh->Collide(ray, sink);
+    mpMesh->FindCollisions(ray, sink);
 
     for (std::list<Hit>::iterator it = ++itBefore; it != sink.mHits.end(); ++it) {
         it->mObject = this;
     }
 
-    Collideable::Collide(ray, sink);
+    Collideable::FindCollisions(ray, sink);
 }
 
 // NTSC-U/C: 0x004ba038, PAL: 0x004f7fb0
@@ -682,7 +679,7 @@ void String::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x004ba258, PAL: 0x004f81d0
 void String::Save(Stream &stream) {
     const int nVersion = kStringVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
 
     Drawable::Save(stream);
     Collideable::Save(stream);
@@ -690,13 +687,13 @@ void String::Save(Stream &stream) {
 
     WriteObjectName(stream, mpMesh->mMat);
     WritePointVector(stream, mPoints);
-    stream.Write(&mWidth, sizeof(mWidth));
-    stream.Write(&mFoldAngle, sizeof(mFoldAngle));
+    stream.WriteLE(&mWidth, sizeof(mWidth));
+    stream.WriteLE(&mFoldAngle, sizeof(mFoldAngle));
 
     const char cHasCaps = mHasCaps;
-    stream.WriteBytes(&cHasCaps, sizeof(cHasCaps));
+    stream.Write(&cHasCaps, sizeof(cHasCaps));
     const char cLinePairs = mLinePairs;
-    stream.WriteBytes(&cLinePairs, sizeof(cLinePairs));
+    stream.Write(&cLinePairs, sizeof(cLinePairs));
 }
 
 // NTSC-U/C: 0x004bf510, PAL: 0x004fd598
@@ -734,9 +731,9 @@ void String::Copy(const Object *pSource, unsigned nFlags) {
 // NTSC-U/C: 0x004ba678, PAL: 0x004f8678
 void String::Load(Stream &stream) {
     int nVersion = 0;
-    stream.Read(&nVersion, sizeof(nVersion));
+    stream.ReadLE(&nVersion, sizeof(nVersion));
     if (nVersion >= kStringRejectedVersion) {
-        g_failSink.Report("Can't load new String\n");
+        Rnd::TheDbg.Notify("Can't load new String\n");
         return;
     }
 
@@ -748,21 +745,21 @@ void String::Load(Stream &stream) {
 
     HxStr matName(nullptr);
     stream.ReadString(matName);
-    mpMat = dynamic_cast<Mat *>(g_manager.Find(matName));
+    mpMat = dynamic_cast<Mat *>(TheManager.Find(matName));
 
     ReadPointVector(stream, mPoints);
-    stream.Read(&mWidth, sizeof(mWidth));
+    stream.ReadLE(&mWidth, sizeof(mWidth));
 
     if (nVersion >= kStringFoldVersion) {
-        stream.Read(&mFoldAngle, sizeof(mFoldAngle));
+        stream.ReadLE(&mFoldAngle, sizeof(mFoldAngle));
         char cHasCaps = 0;
-        stream.ReadBytes(&cHasCaps, sizeof(cHasCaps));
+        stream.Read(&cHasCaps, sizeof(cHasCaps));
         mHasCaps = cHasCaps != 0;
     }
 
     if (nVersion >= kStringLinePairsVersion) {
         char cLinePairs = 0;
-        stream.ReadBytes(&cLinePairs, sizeof(cLinePairs));
+        stream.Read(&cLinePairs, sizeof(cLinePairs));
         mLinePairs = cLinePairs != 0;
     }
 
@@ -773,11 +770,11 @@ void String::Load(Stream &stream) {
 void String::CreateMesh() {
     mpMesh = NewMeshThroughHook(HxStr("[") + mName + "_mesh]");
     mpMesh->mInternal = 1;
-    mpMesh->SetMaterial(mpMat);
+    mpMesh->SetMat(mpMat);
     mpMesh->mZMode = Mesh::kZModeZReadOnly;
     mpMesh->mZFunc = Mesh::kZFuncLess;
     mFoldCos = cosf(mFoldAngle);
-    SetNumPoints(GetNumPoints());
+    SetNumPoints(NumPoints());
 }
 
 // NTSC-U/C: 0x004bf810, PAL: 0x004fd898
@@ -789,7 +786,7 @@ void String::DeleteMesh() {
 }
 
 // NTSC-U/C: 0x004bedc8, PAL: 0x004fce50
-String *String::NewString(const HxStr &name) {
+String *String::New(const HxStr &name) {
     try {
         return new String(name);
     } catch (...) {
@@ -799,7 +796,7 @@ String *String::NewString(const HxStr &name) {
 
 // NTSC-U/C: 0x004bed98, PAL: 0x004fce20
 void String::Init() {
-    g_manager.RegisterClass(g_stringClassName, NewStringObject);
+    TheManager.RegisterClass(g_stringClassName, NewObject);
 }
 
 } // namespace Rnd

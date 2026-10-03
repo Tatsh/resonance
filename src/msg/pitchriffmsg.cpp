@@ -19,7 +19,7 @@ Message *PitchRiffMsg::Clone() {
 
 // NTSC-U/C: 0x003da680, PAL: 0x00412ab8
 int PitchRiffMsg::Type() {
-    return g_nPitchRiffMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x003da690, PAL: 0x00412ac8

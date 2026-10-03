@@ -72,7 +72,7 @@ constexpr int kExitDelayBars = 4;
 // The span a solo win passes to Player::SetFreestyleSpan().
 constexpr int kWonBarSpan = 100000;
 
-// SetFreeUntil()'s end bar that frees a track for good.
+// ForceEnabled()'s end bar that frees a track for good.
 constexpr int kFreeForever = -1;
 
 // A solo player below this juice cannot continue.
@@ -168,17 +168,17 @@ void Gamer::Withdraw() {
 }
 
 // NTSC-U/C: 0x00112978, PAL: 0x00112dd8
-void Gamer::HandleMessage(Message *pMsg) {
+void Gamer::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
-    if (nType == g_nAdvanceSectionMsgType) {
+    if (nType == AdvanceSectionMsg::sID) {
         OnMsg(*static_cast<AdvanceSectionMsg *>(pMsg));
     } else if (nType == g_nPhraseCapturedMsgType) {
         OnPhraseCaptured(static_cast<PhraseCapturedMsg *>(pMsg));
     } else if (nType == g_nEnableFreestyleMsgType) {
         OnEnableFreestyle(static_cast<EnableFreestyleMsg *>(pMsg));
-    } else if (nType == g_nPlaybackModeMsgType) {
+    } else if (nType == PlaybackModeMsg::sID) {
         OnPlaybackMode(static_cast<PlaybackModeMsg *>(pMsg));
-    } else if (nType == g_nCrippleMsgType) {
+    } else if (nType == CrippleMsg::sID) {
         OnCripple(static_cast<CrippleMsg *>(pMsg));
     }
 }
@@ -200,7 +200,7 @@ void Gamer::OnPhraseCaptured(PhraseCapturedMsg *pMsg) {
     if (mPlayMode == kPlayModeJam || mEndState != kEndStateNone) {
         return;
     }
-    pMsg->mPlayer->Handle(pMsg);
+    pMsg->mPlayer->Dispatch(pMsg);
     if (mTutorial == 0 && mGameMode == kGameModeSolo) {
         FreeTracksAfterCapture(pMsg->mFirstBar); // Yes, the binary discards this call's result.
     }
@@ -218,7 +218,7 @@ void Gamer::OnEnableFreestyle(EnableFreestyleMsg *pMsg) {
     const int nBar = pMsg->mBar;
     const int nEndBar = nBar + kFreestyleBars;
     pPlayer->SetFreestyleSpan(nBar, nEndBar);
-    mEnableMgr->SetFreeUntil(nTrack, nBar, nEndBar);
+    mEnableMgr->ForceEnabled(nTrack, nBar, nEndBar);
 
     InvalidateSeekerMsg invalidateSeeker(nTick / mBarLength.mTick, nTrack);
     mTrackSources[nTrack].Send(&invalidateSeeker);
@@ -297,8 +297,8 @@ void Gamer::CreateEnableMgr(std::vector<ScoreTrackGraph *> *pGraphs) {
             mEnableMgr = GameEnableMgr::CreateUnrestricted(mTrackCount, this);
         }
         for (int i = 0; i < mTrackCount; ++i) {
-            if (IsNonCatchTrack(i)) {
-                mEnableMgr->DisableTrack(i);
+            if (IsFreestyleTrack(i)) {
+                mEnableMgr->ForceDisable(i);
             }
         }
     } else if (mGameMode == kGameModeSolo) {
@@ -331,7 +331,7 @@ int Gamer::QueryBar(int nTrack, int nBar) {
 }
 
 // NTSC-U/C: 0x00116888, PAL: 0x00116d40
-bool Gamer::IsNonCatchTrack(int nTrack) {
+bool Gamer::IsFreestyleTrack(int nTrack) {
     return GetTrack(nTrack)->mKind != kTrackModeCatch;
 }
 
@@ -411,7 +411,7 @@ bool Gamer::FreeTracksAfterCapture(int nBar) {
         }
 
         const int nStartBar = std::max(nBar, mFreeEndBar);
-        mEnableMgr->SetFreeUntil(i, nStartBar, nNextBar);
+        mEnableMgr->ForceEnabled(i, nStartBar, nNextBar);
         FreestyleFXMsg msg(i, nStartBar, nNextBar);
         Send(&msg);
         nFreeEndBar = nNextBar;
@@ -497,7 +497,7 @@ void Gamer::OnBar(int nBar) {
                 }
                 for (int i = 0; i < mTrackCount; ++i) {
                     if (GetTrack(i)->mKind != kTrackModeCatch) {
-                        mEnableMgr->SetFreeUntil(i, 0, kFreeForever);
+                        mEnableMgr->ForceEnabled(i, 0, kFreeForever);
                     } else if ((*mGraphs)[i]->CanGivePhrases() != 0) {
                         (*mGraphs)[i]->GivePhrases(nBar, pPlayer);
                     }

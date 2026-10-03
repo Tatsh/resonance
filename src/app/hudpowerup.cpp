@@ -15,23 +15,23 @@ HudPowerup::HudPowerup(int nIndex) : mContainer(nullptr) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     Rnd::Mesh *pMesh = dynamic_cast<Rnd::Mesh *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s pup%d.mesh", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s pup%d.mesh", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mContainer = dynamic_cast<Rnd::View *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s pup%d.view", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s pup%d.view", pszLayout, nIndex))));
     mAutocatcherView = dynamic_cast<Rnd::View *>(
-        Rnd::g_manager.Find(HxStr(FormatString("HUD pup auto%d.view", nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("HUD pup auto%d.view", nIndex))));
     mNeutralizerView = dynamic_cast<Rnd::View *>(
-        Rnd::g_manager.Find(HxStr(FormatString("HUD pup neut%d.view", nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("HUD pup neut%d.view", nIndex))));
     mBumperView = dynamic_cast<Rnd::View *>(
-        Rnd::g_manager.Find(HxStr(FormatString("HUD pup bump%d.view", nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("HUD pup bump%d.view", nIndex))));
     mCripplerView = dynamic_cast<Rnd::View *>(
-        Rnd::g_manager.Find(HxStr(FormatString("HUD pup crip%d.view", nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("HUD pup crip%d.view", nIndex))));
     mFreestylerView = dynamic_cast<Rnd::View *>(
-        Rnd::g_manager.Find(HxStr(FormatString("HUD pup free%d.view", nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("HUD pup free%d.view", nIndex))));
     mMultiplierView = dynamic_cast<Rnd::View *>(
-        Rnd::g_manager.Find(HxStr(FormatString("HUD pup mult%d.view", nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("HUD pup mult%d.view", nIndex))));
 
     pMesh->SetShowing(Application::shared()->GetPlayMode() == kPlayModeGame);
     Show(kHudItemNone);
@@ -41,9 +41,9 @@ HudPowerup::HudPowerup(int nIndex) : mContainer(nullptr) {
 void HudPowerup::Show(int nKind) {
     Rnd::View *pView = nullptr;
 
-    mContainer->ClearDraws();
-    mContainer->ReleaseAnimsRefs();
-    mContainer->ClearTransList();
+    mContainer->RemoveAllDraws();
+    mContainer->RemoveAllAnims();
+    mContainer->RemoveAllTranses();
 
     switch (nKind) {
     case kHudItemNone:

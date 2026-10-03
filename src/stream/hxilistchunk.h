@@ -23,7 +23,7 @@ public:
      *
      * With bReadHeader set, the reader reads the chunk header at the read position and walks the
      * chunks inside it. Otherwise the reader treats the rest of the stream as one `LIST` whose
-     * size is HxStream::Size() less HxStream::Tell().
+     * size is HxStream::Size() less HxStream::GetMarker().
      *
      * @param pStream The stream to read. The reader does not take ownership.
      * @param bReadHeader Read an enclosing chunk header first.
@@ -52,7 +52,7 @@ public:
     ~HxIListChunk();
 
     /**
-     * Compute mEnd from the enclosing header, lock the parent reader, if any, and rewind.
+     * Compute mEnd from the enclosing header, lock the parent reader, if any, and reset.
      *
      * @ghidraAddress NTSC-U/C: 0x00146360
      * @ghidraAddress PAL: 0x00146e78
@@ -65,7 +65,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001463b0
      * @ghidraAddress PAL: 0x00146ec8
      */
-    void Rewind();
+    void Reset();
 
     /**
      * Advance to the next chunk and read its header.
@@ -86,7 +86,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00146408
      * @ghidraAddress PAL: 0x00146f20
      */
-    HxChunkHeader *Current();
+    HxChunkHeader *CurSubChunkHeader();
 
     /**
      * Advance until a chunk with the given name is current.
@@ -98,7 +98,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00146428
      * @ghidraAddress PAL: 0x00146f40
      */
-    HxChunkHeader *Find(const HxChunkName &name);
+    HxChunkHeader *Next(const HxChunkName &name);
 
     /**
      * Mark the reader as having a nested reader or chunk open.
@@ -124,6 +124,6 @@ public:
     int mLocked;            /*!< Non-zero while a nested reader or chunk is open. +0x14 */
     HxChunkHeader mCurrent; /*!< Header of the current chunk. +0x18 */
     int mHasCurrent;        /*!< Non-zero while mCurrent is valid. +0x24 */
-    int mAtStart;           /*!< Non-zero from Rewind() until the first Next(). +0x28 */
+    int mAtStart;           /*!< Non-zero from Reset() until the first Next(). +0x28 */
     int mNext;              /*!< Stream position of the next chunk header. +0x2c */
 };

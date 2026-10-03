@@ -6,8 +6,8 @@
 
 // NTSC-U/C: 0x00145fe0, PAL: 0x00146af8
 HxStream &HxChunkHeader::Read(HxStream &stream) {
-    (stream >> mName).ReadSwapped(&mSize, sizeof(mSize));
-    if (mName == g_listChunkName || mName == g_riffChunkName) {
+    (stream >> mName).ReadNum(&mSize, sizeof(mSize));
+    if (mName == kListChunkID || mName == kRiffChunkID) {
         stream >> mName;
         mIsList = 1;
         mSize -= HxChunkName::kLength;

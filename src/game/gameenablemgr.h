@@ -110,7 +110,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00101c68
      * @ghidraAddress PAL: 0x00101c68
      */
-    virtual void SetFreeUntil(int nTrack, int nBar, int nUntilBar);
+    virtual void ForceEnabled(int nTrack, int nBar, int nUntilBar);
 
     /**
      * Stop one track from ever being enabled.
@@ -121,7 +121,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00101bb0
      * @ghidraAddress PAL: 0x00101bb0
      */
-    virtual void DisableTrack(int nTrack);
+    virtual void ForceDisable(int nTrack);
 
     /**
      * Report whether one bar of one track may be caught.
@@ -152,7 +152,7 @@ private:
     // NTSC-U/C: 0x00105498, PAL: 0x00105498
     // Sets pOwned[i] for each of the kOwnedTrackCount tracks to whether the track has
     // an owner at nBar.
-    void FindOwnedTracks(int *pOwned, int nBar);
+    void QueryOwnershipAtSongBar(int *pOwned, int nBar) const;
 
     // NTSC-U/C: 0x00105530, PAL: 0x00105530
     // Reports whether every requirement of nTrack is owned in pOwned.

@@ -45,7 +45,7 @@ inline int ClampTick(int nTick) {
 // NTSC-U/C: 0x001a2da0, PAL: 0x001a8b08
 AxeNewGemMaker::AxeNewGemMaker(const TrackData *pTrackData)
     : mTrack(pTrackData->mIndex), mTrackData(pTrackData), mStripId(0), mValue(kAxisCenter),
-      mPlayer(&g_nullPlayer) {
+      mPlayer(&NullPlayer::sInstance) {
 }
 
 // NTSC-U/C: 0x001a2f18, PAL: 0x001a8c80
@@ -97,7 +97,7 @@ void AxeNewGemMaker::PostGemMessages(StdMidiMsg *pMsg) {
 }
 
 // NTSC-U/C: 0x001a46e0, PAL: 0x001aa448
-void AxeNewGemMaker::HandleMessage(Message *pMsg) {
+void AxeNewGemMaker::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
         TrackSelectMsg *pSelect = static_cast<TrackSelectMsg *>(pMsg);
@@ -111,7 +111,7 @@ void AxeNewGemMaker::HandleMessage(Message *pMsg) {
         }
     } else if (nType == g_nAxisFXMsgType) {
         return;
-    } else if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
+    } else if (nType == static_cast<int>(StdMidiMsg::sID)) {
         PostGemMessages(static_cast<StdMidiMsg *>(pMsg));
     }
 }

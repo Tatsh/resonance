@@ -84,7 +84,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0011dc20
      * @ghidraAddress PAL: 0x0011e1a8
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Report the map that exists.

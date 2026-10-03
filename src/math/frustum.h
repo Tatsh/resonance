@@ -17,6 +17,25 @@ struct Sphere;
  * assumed, and it is not the order the per-vertex clip flags of Rnd::DrawVert use.
  */
 struct Frustum {
+    /**
+     * Build the six planes of a perspective view volume.
+     *
+     * Every plane is expressed in camera space. A caller that needs world space therefore
+     * transforms the result afterwards. Rnd::Cam::UpdateProjection() is the only caller recovered.
+     *
+     * The four side planes pass through the origin unless flFov is zero. A zero flFov gives each
+     * side plane the distance of the unit offset it is built through.
+     *
+     * @param flNear Distance to the near plane.
+     * @param flFar Distance to the far plane.
+     * @param flFov Field of view in radians.
+     * @param flAspect Vertical extent divided by the horizontal extent.
+     * @return This view volume.
+     * @ghidraAddress NTSC-U/C: 0x00550b78
+     * @ghidraAddress PAL: 0x005911b8
+     */
+    Frustum &Set(float flNear, float flFar, float flFov, float flAspect);
+
     Plane mFront;  // +0x00
     Plane mBack;   // +0x10
     Plane mLeft;   // +0x20
@@ -24,26 +43,6 @@ struct Frustum {
     Plane mTop;    // +0x40
     Plane mBottom; // +0x50
 };
-
-/**
- * Build the six planes of a perspective view volume.
- *
- * Every plane is expressed in camera space. A caller that needs world space therefore transforms
- * the result afterwards. Rnd::Cam::UpdateProjection() is the only caller recovered.
- *
- * The four side planes pass through the origin unless flFov is zero, in which case they keep the
- * distances of the unit offsets they are built through.
- *
- * @param frustum Receives the six planes.
- * @param flNear Distance to the near plane.
- * @param flFar Distance to the far plane.
- * @param flFov Field of view in radians.
- * @param flAspect Vertical extent divided by the horizontal extent.
- * @return frustum.
- * @ghidraAddress NTSC-U/C: 0x00550b78
- * @ghidraAddress PAL: 0x005911b8
- */
-Frustum &BuildFrustum(Frustum &frustum, float flNear, float flFar, float flFov, float flAspect);
 
 /**
  * Write the six planes of a view volume to a diagnostic sink.

@@ -4,12 +4,10 @@
  * Value that moves toward a target at a fixed rate, read through a linear mapping.
  *
  * The class is not polymorphic and emits no RTTI. Its name comes from the debugging symbols of the
- * North American demo release. The demo's constructor, SetParams(), Val(), and Execute() have the
- * same instructions as the constructor, SetRange(), Value(), and Update(). The head-up display and
- * the tunnel both embed it by value.
+ * North American demo release. The head-up display and the tunnel both embed it by value.
  *
- * The raw value runs from 0 toward mTarget at mRate per unit of Update()'s time, and Value()
- * reports it as `mCurrent * mScale + mOffset`. SetRange() fixes the mapping and the rate.
+ * The raw value runs from 0 toward mTarget at mRate per unit of Execute()'s time, and Val()
+ * reports it as `mCurrent * mScale + mOffset`. SetParams() fixes the mapping and the rate.
  */
 class LinearAnim {
 public:
@@ -33,7 +31,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004118d0
      * @ghidraAddress PAL: 0x0044b398
      */
-    void SetRange(float flFrom, float flTo, float flDuration);
+    void SetParams(float flFrom, float flTo, float flDuration);
 
     /**
      * Set the raw value to move toward.
@@ -48,7 +46,7 @@ public:
      * Set the target and move the raw value almost onto it at once.
      *
      * The raw value lands one millionth short of the target, computed in double precision. The next
-     * Update() then finishes the move and reports a change. The title is inferred.
+     * Execute() then finishes the move and reports a change. The title is inferred.
      *
      * @param flTarget The raw target.
      * @ghidraAddress NTSC-U/C: 0x00411908
@@ -63,7 +61,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00411958
      * @ghidraAddress PAL: 0x0044b420
      */
-    float Value();
+    float Val() const;
 
     /**
      * Move the raw value toward the target by the time elapsed since the last call.
@@ -77,10 +75,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00411970
      * @ghidraAddress PAL: 0x0044b438
      */
-    int Update(float flTime);
+    int Execute(float flTime);
 
 private:
-    // The time Update() last ran at. 9999999 marks no time recorded.
+    // The time Execute() last ran at. 9999999 marks no time recorded.
     float mLastTime; // +0x00
     float mTarget;   // +0x04
     float mCurrent;  // +0x08

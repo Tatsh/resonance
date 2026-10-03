@@ -25,7 +25,7 @@ class TickClock;
  *
  * Its RTTI descriptor is at `0x008f0830`. It has Pitcher as its one base. Its three tables are at
  * `0x007e61a8`, `0x007e6180`, and `0x007e6150`, and it overrides exactly the two slots Pitcher
- * declares pure: HandleMessage() in the primary table and Tick() in the TickTask table. VoxingSTG's
+ * declares pure: DispatchPriv() in the primary table and Tick() in the TickTask table. VoxingSTG's
  * tagged allocation measures the object at 0x70 bytes, and VoxingSTG builds exactly one of these
  * without branching.
  *
@@ -151,14 +151,14 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x001d9050
      * @ghidraAddress PAL: 0x001defc0
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // The out-of-line copy of the EraseMsg branch HandleMessage() expands inline.
+    // The out-of-line copy of the EraseMsg branch DispatchPriv() expands inline.
     // NTSC-U/C: 0x001d9e40, PAL: 0x001dfdb0
     void OnEraseMsg(EraseMsg *pMsg);
 
-    // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
+    // The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
     // NTSC-U/C: 0x001d9e98, PAL: 0x001dfe08
     void OnInvalidateSeekerMsg(InvalidateSeekerMsg *pMsg);
 
@@ -194,8 +194,8 @@ private:
     // Divisor that turns an elapsed tick count into a bar index.
     int mBarTicks;          // +0x48 copied from the phrase manager's `+0x34`
     unsigned char mChannel; // +0x4c copied from the track description's `+0x08`
-    // Matched against an EraseMsg's `+0x04`, and defaulted to g_nullPlayer, which Mixer also
-    // defaults its own selection to.
+    // Matched against an EraseMsg's `+0x04`, and defaulted to NullPlayer::sInstance, which Mixer
+    // also defaults its own selection to.
     Player *mPlayer; // +0x50
     // Non-zero while the sustain controller is down, which is while any level is held.
     int mSustaining;     // +0x54

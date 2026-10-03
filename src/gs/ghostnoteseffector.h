@@ -10,11 +10,11 @@
  * size of the base alone, and it therefore fixes the size of the base as well.
  *
  * The table at `0x007de7a0` runs GetTypeInfo, the destructor, the two inherited MsgSource
- * registration routines, then Type() and Enable().
+ * registration routines, then Type() and SetEnabled().
  *
- * Enable() has an empty body. The ghost-notes powerup therefore does not act through this object,
- * and the object exists only for Type() to report. An effect the synthesiser does not implement as
- * a control change still needs an Effector for the powerup that selects it.
+ * SetEnabled() has an empty body. The ghost-notes powerup therefore does not act through this
+ * object, and the object exists only for Type() to report. An effect the synthesiser does not
+ * implement as a control change still needs an Effector for the powerup that selects it.
  */
 class GhostNotesEffector : public Effector {
 public:
@@ -40,5 +40,5 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001a1e38
      * @ghidraAddress PAL: 0x001a7ba0
      */
-    virtual void Enable(int bEnabled);
+    virtual void SetEnabled(int bEnabled);
 };

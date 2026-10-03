@@ -100,7 +100,7 @@ MetLoadGameScreen::MetLoadGameScreen(MetRenderer *pRenderer, int nPriority)
 // NTSC-U/C: 0x0028d4c0, PAL: 0x002a9180
 void MetLoadGameScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    mpEvent = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kEventText)));
+    mpEvent = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kEventText)));
 }
 
 // NTSC-U/C: 0x0028d590, PAL: 0x002ad9e8
@@ -111,7 +111,7 @@ void MetLoadGameScreen::EnterAndShow() {
 // NTSC-U/C: 0x0028d590, PAL: 0x002a9270
 void MetLoadGameScreen::LLEnter() {
     const GameParams params(*Application::shared()->GetGameManager()->GetParams());
-    Rnd::Text *pLoading = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kLoadingText)));
+    Rnd::Text *pLoading = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kLoadingText)));
 
     if (params.mJukeboxMode == 0) {
         pLoading->SetText(Caption(kMetStrLoadLoading, kLoadingCaption));
@@ -213,8 +213,8 @@ void MetLoadGameScreen::OnFadeInDone() {
     mRenderer->RemoveScreen(this);
     MetFrontEndState::shared()->mSettingsDirty = 0;
     const Color black{0.0f, 0.0f, 0.0f, kOpaque};
-    g_gfxDevice.SetClearColor(black);
-    g_gfxDevice.FlipFrameBuffer();
+    Rnd::ThePs.SetClearColor(black);
+    Rnd::ThePs.FlipFrameBuffer();
 }
 
 // NTSC-U/C: 0x0028e158, PAL: 0x002a9fb8

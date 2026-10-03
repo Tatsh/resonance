@@ -30,7 +30,7 @@ public:
      */
     RiffRangeFinder(MultiMuse *pMuse, int *pLow, int *pHigh) : mLow(kHighestNote), mHigh(0) {
         for (const auto &entry : pMuse->mEntries) {
-            HandleMessage(entry.mValue);
+            DispatchPriv(entry.mValue);
         }
         *pLow = mLow;
         *pHigh = mHigh;
@@ -45,7 +45,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001c4538
      * @ghidraAddress PAL: 0x001ca380
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 private:
     static constexpr unsigned int kHighestNote = 127;

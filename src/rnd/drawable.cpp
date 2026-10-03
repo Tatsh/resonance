@@ -51,18 +51,18 @@ static Dbg &operator<<(Dbg &sink, const std::list<Drawable *> &draws) {
 // NTSC-U/C: 0x00505fe8, PAL: 0x00544e78
 //
 // Each entry is written as the referenced object's name including its terminator, so a reader has
-// to resolve the names through Rnd::g_manager. An empty entry writes one zero byte.
+// to resolve the names through Rnd::TheManager. An empty entry writes one zero byte.
 static Stream &operator<<(Stream &stream, const std::list<Drawable *> &draws) {
     int nCount = draws.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
 
     for (std::list<Drawable *>::const_iterator it = draws.begin(); it != draws.end(); ++it) {
         const Object *pObject = *it;
         if (pObject != nullptr) {
-            stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+            stream.Write(NameText(pObject), pObject->mName.mLen + 1);
         } else {
             const char cEmpty = 0;
-            stream.WriteBytes(&cEmpty, sizeof(cEmpty));
+            stream.Write(&cEmpty, sizeof(cEmpty));
         }
     }
     return stream;
@@ -71,13 +71,13 @@ static Stream &operator<<(Stream &stream, const std::list<Drawable *> &draws) {
 // NTSC-U/C: 0x005062c0, PAL: 0x00545150
 static Stream &operator>>(Stream &stream, std::list<Drawable *> &draws) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     draws.resize(nCount, nullptr);
 
     for (std::list<Drawable *>::iterator it = draws.begin(); it != draws.end(); ++it) {
         HxStr name(nullptr);
         stream.ReadString(name);
-        Object *pObject = g_manager.Find(name);
+        Object *pObject = TheManager.Find(name);
         *it = dynamic_cast<Drawable *>(pObject);
     }
     return stream;
@@ -97,7 +97,7 @@ void Drawable::Draw() {
     if (mShowing == 0) {
         return;
     }
-    if (DrawSelf() == 0) {
+    if (DrawShowing() == 0) {
         return;
     }
     for (std::list<Drawable *>::iterator it = mDraws.begin(); it != mDraws.end(); ++it) {
@@ -116,7 +116,7 @@ void Drawable::SetHighlight(int nHighlight) {
 }
 
 // NTSC-U/C: 0x005066f0, PAL: 0x005455b0
-int Drawable::DrawSelf() {
+int Drawable::DrawShowing() {
     return 1;
 }
 
@@ -138,7 +138,7 @@ Drawable *Drawable::Parent() {
 // NTSC-U/C: 0x00503188, PAL: 0x00541fb0
 void Drawable::AddDraw(Drawable *pDraw, Drawable *pBefore) {
     if (std::find(mDraws.begin(), mDraws.end(), pDraw) != mDraws.end()) {
-        g_failSink.Report(kAlreadyInFormat, NameText(pDraw), NameText(this));
+        Rnd::TheDbg.Notify(kAlreadyInFormat, NameText(pDraw), NameText(this));
         return;
     }
 
@@ -156,7 +156,7 @@ void Drawable::AddDraw(Drawable *pDraw) {
 
 // NTSC-U/C: 0x00506528, PAL: 0x005453e8
 Drawable *Drawable::Find(const HxStr &name) {
-    return dynamic_cast<Drawable *>(g_manager.Find(name));
+    return dynamic_cast<Drawable *>(TheManager.Find(name));
 }
 
 // NTSC-U/C: 0x00503360, PAL: 0x00542188
@@ -171,7 +171,7 @@ void Drawable::RemoveDraw(Drawable *pDraw) {
 }
 
 // NTSC-U/C: 0x00503420, PAL: 0x00542248
-void Drawable::ClearDraws() {
+void Drawable::RemoveAllDraws() {
     for (std::list<Drawable *>::iterator it = mDraws.begin(); it != mDraws.end();) {
         if (*it != nullptr) {
             (*it)->RemoveRef(this);
@@ -237,10 +237,10 @@ void Drawable::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x00506b28, PAL: 0x005459f0
 void Drawable::Save(Stream &stream) {
     int nRevision = kDrawableRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
 
     const char cShowing = static_cast<char>(mShowing);
-    stream.WriteBytes(&cShowing, sizeof(cShowing));
+    stream.Write(&cShowing, sizeof(cShowing));
 
     stream << mDraws;
 }
@@ -248,11 +248,11 @@ void Drawable::Save(Stream &stream) {
 // NTSC-U/C: 0x00503020, PAL: 0x00541e48
 void Drawable::Load(Stream &stream) {
     int nRevision = 0;
-    stream.Read(&nRevision, sizeof(nRevision));
+    stream.ReadLE(&nRevision, sizeof(nRevision));
     if (nRevision > kDrawableRevision) {
-        g_failSink.Report("Can't load new Drawable\n");
-        if (g_failSink.mAbortProc != nullptr) {
-            g_failSink.mAbortProc();
+        Rnd::TheDbg.Notify("Can't load new Drawable\n");
+        if (Rnd::TheDbg.mAbortProc != nullptr) {
+            Rnd::TheDbg.mAbortProc();
         } else {
             throw; // With no handler the binary rethrows the exception in flight.
         }
@@ -261,7 +261,7 @@ void Drawable::Load(Stream &stream) {
     ReleaseDrawsRefs();
 
     char cShowing = 0;
-    stream.ReadBytes(&cShowing, sizeof(cShowing));
+    stream.Read(&cShowing, sizeof(cShowing));
     mShowing = cShowing != 0 ? 1 : 0;
 
     stream >> mDraws;
@@ -284,7 +284,7 @@ void Drawable::Copy(const Object *pSource, unsigned nFlags) {
 void Drawable::Replace(Object *pFrom, Object *pTo) {
     for (std::list<Drawable *>::iterator it = mDraws.begin(); it != mDraws.end();) {
         if (*it == pTo) {
-            g_failSink.Report(kAlreadyInFormat, NameText(pTo), NameText(this));
+            Rnd::TheDbg.Notify(kAlreadyInFormat, NameText(pTo), NameText(this));
         }
 
         if (*it == pFrom) {

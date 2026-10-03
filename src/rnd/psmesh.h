@@ -88,10 +88,10 @@ public:
      * Write the GS depth mask and depth test a mesh needs for one material pass.
      *
      * Does nothing while the current camera renders to a texture, and nothing from the third pass
-     * onward. DrawSelf() expands the same decision inline for its own passes, and this out-of-line
-     * copy exists because Rnd::PsMultiMesh::DrawSelf() in another translation unit is its only
-     * caller. Static rather than an instance method because the mesh arrives as an argument, and
-     * the body reads only the two Rnd::Mesh depth fields.
+     * onward. DrawShowing() expands the same decision inline for its own passes, and this
+     * out-of-line copy exists because Rnd::PsMultiMesh::DrawShowing() in another translation unit
+     * is its only caller. Static rather than an instance method because the mesh arrives as an
+     * argument, and the body reads only the two Rnd::Mesh depth fields.
      *
      * @param mesh The mesh whose depth mode and depth function decide the registers.
      * @param nPass The material pass index, counted from zero.
@@ -136,7 +136,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x00602128
      * @ghidraAddress PAL: 0x00642d18
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
     /**
      * Rebuild the draw runs from the face and the edge vectors.

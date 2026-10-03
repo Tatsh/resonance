@@ -19,7 +19,7 @@ namespace Rnd {
  * One directional light as the vertex lighting path consumes it.
  *
  * The record is not polymorphic and does not emit an RTTI descriptor. The name is inferred.
- * PsEnviron::DrawSelf() fills every member except mTransformedDirection.
+ * PsEnviron::DrawShowing() fills every member except mTransformedDirection.
  */
 struct DirectionalLightRecord {
     Vector3 mDirection; /*!< Negated second row of the light's world transform. */
@@ -33,7 +33,7 @@ struct DirectionalLightRecord {
  * One point light as the vertex lighting path consumes it.
  *
  * The record is not polymorphic and does not emit an RTTI descriptor. The name is inferred.
- * PsEnviron::DrawSelf() fills mPosition, mAmbient, and mDiffuse.
+ * PsEnviron::DrawShowing() fills mPosition, mAmbient, and mDiffuse.
  */
 struct PointLightRecord {
     /*!< Translation row of the light's world transform, with Rnd::Light::mRange in the padding
@@ -116,10 +116,26 @@ int SelectLightForVertex(GifQuadword *pLight,
  *
  * Two vtables belong to the class. The four-entry table at `0x00833968` is addressed by the
  * `Rnd::Drawable` vptr at `0x10`, and the eight-entry table at `0x00833920` by the `Rnd::Object`
- * subobject vptr. DrawSelf() is the only entry that is not the base implementation.
+ * subobject vptr. DrawShowing() is the only entry that is not the base implementation.
  */
 class PsEnviron : public Environ {
 public:
+    /**
+     * Directional lights of the current environment, rebuilt by DrawShowing().
+     *
+     * @ghidraAddress NTSC-U/C: 0x00776120
+     * @ghidraAddress PAL: 0x007b9ff8
+     */
+    static std::vector<DirectionalLightRecord> sDirLights;
+
+    /**
+     * Point lights of the current environment, rebuilt by DrawShowing().
+     *
+     * @ghidraAddress NTSC-U/C: 0x00776130
+     * @ghidraAddress PAL: 0x007ba008
+     */
+    static std::vector<PointLightRecord> sPointLights;
+
     /**
      * Construct an environment with no lights and no fog.
      *
@@ -157,9 +173,9 @@ public:
      * Rnd::g_pfnNewEnviron becomes NewEnviron(), which is how a `.rnd` file naming the unchanged
      * "Environ" key loads this subclass. The environment named "[default environ]" is then built
      * with a direct allocation rather than through the factory, marked internal, and added to the
-     * draw list of Rnd::g_pDefaultCam. A light named "[default light]" follows, built through
+     * draw list of Rnd::PsCam::sDefault. A light named "[default light]" follows, built through
      * Rnd::g_pfnNewLight, marked internal, added to the environment, and made a transform child of
-     * Rnd::g_pDefaultCam.
+     * Rnd::PsCam::sDefault.
      *
      * @ghidraAddress NTSC-U/C: 0x005aea68
      * @ghidraAddress PAL: 0x005f0fd0
@@ -193,13 +209,13 @@ protected:
      * Both record vectors are then emptied and each entry of mLights appended to one of them, a
      * directional light contributing the negated second basis row of its world transform and a
      * point light its translation row and its range. A spot light is skipped. The routine ends by
-     * making this environment Rnd::g_pCurrentEnviron.
+     * making this environment Rnd::Environ::sCurrent.
      *
      * @return Non-zero, which draws the children as well.
      * @ghidraAddress NTSC-U/C: 0x005aecb8
      * @ghidraAddress PAL: 0x005f1260
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 };
 
 /**
@@ -234,21 +250,5 @@ extern float g_flFogScale;
  * @ghidraAddress PAL: 0x007b9fec
  */
 extern float g_flFogOffset;
-
-/**
- * Directional lights of the current environment, rebuilt by PsEnviron::DrawSelf().
- *
- * @ghidraAddress NTSC-U/C: 0x00776120
- * @ghidraAddress PAL: 0x007b9ff8
- */
-extern std::vector<DirectionalLightRecord> g_directionalLightRecords;
-
-/**
- * Point lights of the current environment, rebuilt by PsEnviron::DrawSelf().
- *
- * @ghidraAddress NTSC-U/C: 0x00776130
- * @ghidraAddress PAL: 0x007ba008
- */
-extern std::vector<PointLightRecord> g_pointLightRecords;
 
 } // namespace Rnd

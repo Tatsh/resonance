@@ -33,13 +33,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005104e0
      * @ghidraAddress PAL: 0x0054fac8
      */
-    virtual Stream &ReadBytes(void *pDest, int nSize);
+    virtual Stream &Read(void *pDest, int nSize);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x00510558
      * @ghidraAddress PAL: 0x0054fb40
      */
-    virtual Stream &WriteBytes(const void *pSrc, int nSize);
+    virtual Stream &Write(const void *pSrc, int nSize);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0050fe68

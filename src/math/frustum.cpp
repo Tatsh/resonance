@@ -34,35 +34,31 @@ inline void SetPlaneThrough(Plane &plane, const Vector3 &normal, const Vector3 &
 } // namespace
 
 // NTSC-U/C: 0x00550b78, PAL: 0x005911b8
-Frustum &BuildFrustum(Frustum &frustum, float flNear, float flFar, float flFov, float flAspect) {
-    SetPlaneThrough(
-        frustum.mFront, Vector3{0.0f, 1.0f, 0.0f, 1.0f}, Vector3{0.0f, flNear, 0.0f, 1.0f});
-    SetPlaneThrough(
-        frustum.mBack, Vector3{0.0f, -1.0f, 0.0f, 1.0f}, Vector3{0.0f, flFar, 0.0f, 1.0f});
+Frustum &Frustum::Set(float flNear, float flFar, float flFov, float flAspect) {
+    SetPlaneThrough(mFront, Vector3{0.0f, 1.0f, 0.0f, 1.0f}, Vector3{0.0f, flNear, 0.0f, 1.0f});
+    SetPlaneThrough(mBack, Vector3{0.0f, -1.0f, 0.0f, 1.0f}, Vector3{0.0f, flFar, 0.0f, 1.0f});
 
     const float flHalfFov = flFov * 0.5f;
     const float flCos = cosf(flHalfFov);
     const float flSin = sinf(flHalfFov);
-    SetPlaneThrough(
-        frustum.mLeft, Vector3{flCos, flSin, 0.0f, 1.0f}, Vector3{-1.0f, 0.0f, 0.0f, 1.0f});
-    SetPlaneThrough(
-        frustum.mRight, Vector3{-flCos, flSin, 0.0f, 1.0f}, Vector3{1.0f, 0.0f, 0.0f, 1.0f});
+    SetPlaneThrough(mLeft, Vector3{flCos, flSin, 0.0f, 1.0f}, Vector3{-1.0f, 0.0f, 0.0f, 1.0f});
+    SetPlaneThrough(mRight, Vector3{-flCos, flSin, 0.0f, 1.0f}, Vector3{1.0f, 0.0f, 0.0f, 1.0f});
 
     const float flRise = flSin * flAspect;
     Vector3 normal{0.0f, flRise, -flCos, 1.0f};
     Vec3Normalize(&normal.x, &normal.x);
-    SetPlaneThrough(frustum.mTop, normal, Vector3{0.0f, 0.0f, flAspect, 1.0f});
+    SetPlaneThrough(mTop, normal, Vector3{0.0f, 0.0f, flAspect, 1.0f});
     normal = Vector3{0.0f, flRise, flCos, 1.0f};
     Vec3Normalize(&normal.x, &normal.x);
-    SetPlaneThrough(frustum.mBottom, normal, Vector3{0.0f, 0.0f, -flAspect, 1.0f});
+    SetPlaneThrough(mBottom, normal, Vector3{0.0f, 0.0f, -flAspect, 1.0f});
 
     if (flFov != 0.0f) {
-        frustum.mLeft.d = 0.0f;
-        frustum.mBottom.d = 0.0f;
-        frustum.mTop.d = 0.0f;
-        frustum.mRight.d = 0.0f;
+        mLeft.d = 0.0f;
+        mBottom.d = 0.0f;
+        mTop.d = 0.0f;
+        mRight.d = 0.0f;
     }
-    return frustum;
+    return *this;
 }
 
 // NTSC-U/C: 0x0054f798, PAL: 0x0058fdd8

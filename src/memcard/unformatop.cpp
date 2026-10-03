@@ -14,13 +14,13 @@ UnformatOp::~UnformatOp() {
 }
 
 // NTSC-U/C: 0x0055e5d0, PAL: 0x0059f8a0
-void UnformatOp::Issue() {
+void UnformatOp::Execute() {
     sceMcUnformat(mPortSlot >> kMemcardPortShift, mPortSlot & kMemcardSlotMask);
     mIssued = kMemcardOpInFlight;
 }
 
 // NTSC-U/C: 0x0055d670, PAL: 0x0059e8c8
-void UnformatOp::Complete() {
+void UnformatOp::NotifyDone() {
     InterpretResult();
     mHandler->OnUnformat(this);
 }

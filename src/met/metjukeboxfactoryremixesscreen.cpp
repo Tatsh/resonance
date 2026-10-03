@@ -55,7 +55,7 @@ constexpr int kPlayListContext = 1;
 constexpr int kPlayListRowCount = 5;
 
 inline Rnd::Object *Find(const char *pszName) {
-    return Rnd::g_manager.Find(HxStr(pszName));
+    return Rnd::TheManager.Find(HxStr(pszName));
 }
 
 } // namespace

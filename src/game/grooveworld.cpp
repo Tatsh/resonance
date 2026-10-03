@@ -366,17 +366,17 @@ void GrooveWorld::StartPlay() {
     Attachment::ReleaseIfSet(pStart);
 
     GameBeginMsg begin;
-    mDelayer->Handle(&begin);
-    mJoiner->Handle(&begin);
+    mDelayer->Dispatch(&begin);
+    mJoiner->Dispatch(&begin);
     {
         FadeGameMsg fade;
         fade.mDuration = kStartFadeMs;
         fade.mFadeIn = kStartFadeIn;
-        mDelayer->Handle(&fade);
+        mDelayer->Dispatch(&fade);
     }
 
     mStats->Reset(mPlayers.size());
-    std::for_each(mPlayers.begin(), mPlayers.end(), std::mem_fn(&Player::CallAnnounceState));
+    std::for_each(mPlayers.begin(), mPlayers.end(), std::mem_fn(&Player::StartMF));
     mForceFeedback->SetJukeboxMode(Application::shared()->IsJukeboxMode());
     mForceFeedback->SetPlaybackMode(mIsPlayback);
     mForceFeedback->SetEnabled(GlobalSettings::shared()->mGameOptions.mForceFeedback);
@@ -438,7 +438,7 @@ void GrooveWorld::ReplayControllerReading(const MetControllerReading *pReading) 
     msg.mReading = *pReading;
     // Yes, the binary stores the tick without the finite check an Mid::MBT constructor runs.
     msg.mPosition.mTick = mSongClock->SongTick();
-    mInputMap->Handle(&msg);
+    mInputMap->Dispatch(&msg);
 }
 
 // NTSC-U/C: 0x0018e368, PAL: 0x00193e98
@@ -466,7 +466,7 @@ void GrooveWorld::Exit(int nMode, int bContinueJukebox, int bRestart) {
     mInputMap->StopAllRiffs();
     mInputMap->DisableEntries();
     GameOverMsg over;
-    mDelayer->Handle(&over);
+    mDelayer->Dispatch(&over);
 
     int bFadeSynth = 0;
     if (mExitMode == kExitModeFinish || mApp->GetGameManager()->IsPlaybackActive() != 0) {
@@ -482,7 +482,7 @@ void GrooveWorld::Exit(int nMode, int bContinueJukebox, int bRestart) {
         FadeGameMsg fade;
         fade.mDuration = nFadeMs + kExitScreenFadeExtraMs;
         fade.mFadeIn = kFadeOut;
-        mDelayer->Handle(&fade);
+        mDelayer->Dispatch(&fade);
     }
 
     if (bFadeSynth != 0) {
@@ -503,7 +503,7 @@ void GrooveWorld::Exit(int nMode, int bContinueJukebox, int bRestart) {
 }
 
 // NTSC-U/C: 0x00195388, PAL: 0x0019b008
-void GrooveWorld::HandleMessage(Message *pMsg) {
+void GrooveWorld::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nCripplePacketType) {
         OnCripplePacket(pMsg);
@@ -514,16 +514,16 @@ void GrooveWorld::HandleMessage(Message *pMsg) {
 
 // NTSC-U/C: 0x00195348, PAL: 0x0019afc8
 void GrooveWorld::OnCripplePacket(Message *pMsg) {
-    mDelayer->Handle(pMsg);
+    mDelayer->Dispatch(pMsg);
 }
 
 // NTSC-U/C: 0x00194b50, PAL: 0x0019a7d0
 void GrooveWorld::OnBumpPacket(Message *pMsg) {
-    mTrackSelector->Handle(pMsg);
+    mTrackSelector->Dispatch(pMsg);
 }
 
 // NTSC-U/C: 0x00194b80, PAL: 0x0019a800
-void GrooveWorld::SetNetLink(MsgSink *pSink, MsgSource *pSource) {
+void GrooveWorld::SetNetIO(MsgSink *pSink, MsgSource *pSource) {
     mNetSink = pSink;
     if (mApp->GetGameMode() == kGameModeNet) {
         mNetSource = pSource;
@@ -700,11 +700,11 @@ void GrooveWorld::BuildGraphs() {
             Fatal("Unsupported STG for track %d", pTrack->mIndex);
         }
         mTrackGraphs.push_back(pGraph);
-        pGraph->ConnectSources(mJoiner, mNetSource, &mGamer->mTrackSources[i]);
-        pGraph->AddMixerToSource(mGamer);
-        pGraph->AddSinkToSources(mDelayer);
-        pGraph->AddSinkToSources(mGamer);
-        pGraph->AddSinkToSources(mTrackSelector);
+        pGraph->ConnectInputs(mJoiner, mNetSource, &mGamer->mTrackSources[i]);
+        pGraph->ConnectGamer(mGamer);
+        pGraph->ConnectToTunnel(mDelayer);
+        pGraph->ConnectToTunnel(mGamer);
+        pGraph->ConnectToTunnel(mTrackSelector);
         pGraph->SetMixerOutput(mApp->GetSynth());
         if (mApp->GetGameMode() == kGameModeNet) {
             pGraph->SetNetSink(mNetSink);
@@ -756,11 +756,11 @@ void GrooveWorld::CreateRenderer() {
         select.mPlace = 0;
         select.mPosition = Mid::MBT(0);
         select.mPlayer = *it;
-        mRenderer->Handle(&select);
+        mRenderer->Dispatch(&select);
 
         if ((*it)->GetInputSlot() == kNoSeeker) {
             SeekerMsg seeker(*it);
-            mRenderer->Handle(&seeker);
+            mRenderer->Dispatch(&seeker);
         }
     }
 }
@@ -801,8 +801,7 @@ void GrooveWorld::StartSequencers() {
     std::for_each(mBackingGraphs.begin(),
                   mBackingGraphs.end(),
                   std::mem_fn(&BGTrackGraph::CallBuildSequencer));
-    std::for_each(
-        mTrackGraphs.begin(), mTrackGraphs.end(), std::mem_fn(&ScoreTrackGraph::CallStart));
+    std::for_each(mTrackGraphs.begin(), mTrackGraphs.end(), std::mem_fn(&ScoreTrackGraph::StartMF));
     if (mOwnTrackGraph != nullptr) {
         mOwnTrackGraph->BuildSequencer();
     }
@@ -846,16 +845,15 @@ void GrooveWorld::FinishSong() {
         memcpy(pLog->Buffer(), &nSize, sizeof(nSize));
     }
 
-    std::for_each(
-        mTrackGraphs.begin(), mTrackGraphs.end(), std::mem_fn(&ScoreTrackGraph::CallStop));
+    std::for_each(mTrackGraphs.begin(), mTrackGraphs.end(), std::mem_fn(&ScoreTrackGraph::StopMF));
     std::for_each(mBackingGraphs.begin(),
                   mBackingGraphs.end(),
                   std::mem_fn(&BGTrackGraph::CallDeleteSequencer));
     std::for_each(
         mIntroGraphs.begin(), mIntroGraphs.end(), std::mem_fn(&BGTrackGraph::CallDeleteSequencer));
-    std::for_each(mPlayers.begin(), mPlayers.end(), std::mem_fn(&Player::CallDeactivatePlacer));
+    std::for_each(mPlayers.begin(), mPlayers.end(), std::mem_fn(&Player::StopMF));
     if (mOwnTrackGraph != nullptr) {
-        mOwnTrackGraph->DeleteSequencer();
+        mOwnTrackGraph->Stop();
     }
 
     if (mExitMode == kExitModeQuit) {
@@ -871,7 +869,7 @@ void GrooveWorld::FinishSong() {
 void GrooveWorld::EndLevel() {
     if (mExitMode == kExitModeRestart) {
         const Color black{0.0f, 0.0f, 0.0f, kOpaque};
-        g_gfxDevice.SetClearColor(black);
+        Rnd::ThePs.SetClearColor(black);
     }
     mState = kStateEnded;
 
@@ -907,7 +905,7 @@ void GrooveWorld::StopLevel() {
 void GrooveWorld::DisplayText(const HxStr &text) {
     if (mDelayer != nullptr) {
         TextMsg msg(text);
-        mDelayer->Handle(&msg);
+        mDelayer->Dispatch(&msg);
     }
 }
 

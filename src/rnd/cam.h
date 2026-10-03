@@ -47,11 +47,41 @@ namespace Rnd {
  * `Rnd::Object` subobject vptr, each entry with the adjustment back to the Cam pointer.
  *
  * The routine at `0x004b1ff0` is an out-of-line copy of an inline accessor that returns
- * g_pCurrentCam. It has no caller, because every reader in the image loads the global
+ * Cam::sCurrent. It has no caller, because every reader in the image loads the global
  * directly.
  */
 class Cam : public Drawable, public Transformable, public Collideable {
 public:
+    /**
+     * Camera the frame is being drawn through.
+     *
+     * Rnd::Cam::DrawShowing() stores itself here, the destructor clears it when it addresses the
+     * camera going away, and Rnd::PsCam::DrawShowing() stores its own camera the same way.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006f9588
+     * @ghidraAddress PAL: 0x0073cfd8
+     */
+    static Cam *sCurrent;
+
+    /**
+     * Creator the registered "Cam" class builds through.
+     *
+     * Starts as Cam::NewCam(). Rnd::PsCam::Init() installs Rnd::PsCam::NewCam(), and a camera
+     * loaded from a file on the PlayStation 2 is therefore a Rnd::PsCam.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006f958c
+     * @ghidraAddress PAL: 0x0073cfdc
+     */
+    static Cam *(*sNew)(const HxStr &name);
+
+    /**
+     * Registered class name of Rnd::Cam, the string "Cam".
+     *
+     * @ghidraAddress NTSC-U/C: 0x006f9590
+     * @ghidraAddress PAL: 0x0073cfe0
+     */
+    static HxStr sClassName;
+
     /**
      * Allocate a camera from the tagged heap under the tag "Rnd::Cam".
      *
@@ -102,7 +132,7 @@ public:
     explicit Cam(const HxStr &name);
 
     /**
-     * Clear g_pCurrentCam when it addresses this camera and release the render target.
+     * Clear Cam::sCurrent when it addresses this camera and release the render target.
      *
      * @ghidraAddress NTSC-U/C: 0x004af668
      * @ghidraAddress PAL: 0x004ed858
@@ -428,8 +458,8 @@ public:
 
 protected:
     // The view volume in camera space, which UpdateProjection() builds from the four projection
-    // parameters below. Protected because Rnd::PsCam::DrawSelf() reads it, along with the near and
-    // far planes, the field of view, and mZRange.
+    // parameters below. Protected because Rnd::PsCam::DrawShowing() reads it, along with the near
+    // and far planes, the field of view, and mZRange.
     Frustum mLocalFrustum; // +0x220
 
 public:
@@ -465,7 +495,7 @@ public:
     /**
      * Texture this camera draws into, or null to draw into the frame buffer.
      *
-     * Rnd::PsMesh::DrawSelf() tests it and suppresses its depth register writes while it is set,
+     * Rnd::PsMesh::DrawShowing() tests it and suppresses its depth register writes while it is set,
      * which is what makes a camera with a render target skip them. +0x308
      */
     Tex *mpTargetTex;
@@ -497,7 +527,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x004b1fe0
      * @ghidraAddress PAL: 0x004f0208
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
 private:
     // NTSC-U/C: 0x004b27a8, PAL: 0x004f09d0
@@ -552,31 +582,9 @@ inline Vector2 Cam::ProjectToUnit(const Vector3 &pt) {
 }
 
 /**
- * Camera the frame is being drawn through.
- *
- * Rnd::Cam::DrawSelf() stores itself here, the destructor clears it when it addresses the camera
- * going away, and Rnd::PsCam::DrawSelf() stores its own camera the same way.
- *
- * @ghidraAddress NTSC-U/C: 0x006f9588
- * @ghidraAddress PAL: 0x0073cfd8
- */
-extern Cam *g_pCurrentCam;
-
-/**
- * Creator the registered "Cam" class builds through.
- *
- * Cam::NewCam() until Rnd::PsCam::Init() installs Rnd::PsCam::NewCam(), so a camera loaded from a
- * file on the PlayStation 2 is a Rnd::PsCam.
- *
- * @ghidraAddress NTSC-U/C: 0x006f958c
- * @ghidraAddress PAL: 0x0073cfdc
- */
-extern Cam *(*g_pfnNewCam)(const HxStr &name);
-
-/**
  * Build a camera for the registered "Cam" class.
  *
- * Calls through g_pfnNewCam and converts the result to its Rnd::Object virtual base, reading the
+ * Calls through Cam::sNew and converts the result to its Rnd::Object virtual base, reading the
  * base pointer only when the camera is not null.
  *
  * @param name The object name.
@@ -587,7 +595,7 @@ extern Cam *(*g_pfnNewCam)(const HxStr &name);
 Object *CreateRegisteredCam(const HxStr &name);
 
 /**
- * Build a camera through g_pfnNewCam, without the narrowing CreateRegisteredCam() performs.
+ * Build a camera through Cam::sNew, without the narrowing CreateRegisteredCam() performs.
  *
  * The one recovered reference to this routine is its entry in the exception range table at
  * `0x00868e64`, and nothing in the image calls it. The title follows Rnd::NewTextThroughHook().
@@ -601,15 +609,7 @@ Object *CreateRegisteredCam(const HxStr &name);
 Cam *NewCamThroughHook(const HxStr &name);
 
 /**
- * Registered class name of Rnd::Cam, the string "Cam".
- *
- * @ghidraAddress NTSC-U/C: 0x006f9590
- * @ghidraAddress PAL: 0x0073cfe0
- */
-extern HxStr g_camClassName;
-
-/**
- * Point g_pfnNewCam at Cam::NewCam(), clear g_pCurrentCam, and register the "Cam" class with
+ * Point Cam::sNew at Cam::NewCam(), clear Cam::sCurrent, and register the "Cam" class with
  * Rnd::Manager.
  *
  * The out-of-line copy has no caller. Rnd::PsCam::Terminate() expands the body after destroying
@@ -621,9 +621,9 @@ extern HxStr g_camClassName;
  * @ghidraAddress PAL: 0x004f00f8
  */
 inline void RegisterCamClass() {
-    g_pfnNewCam = Cam::NewCam;
-    g_pCurrentCam = nullptr;
-    g_manager.RegisterClass(g_camClassName, CreateRegisteredCam);
+    Cam::sNew = Cam::NewCam;
+    Cam::sCurrent = nullptr;
+    TheManager.RegisterClass(Cam::sClassName, CreateRegisteredCam);
 }
 
 } // namespace Rnd

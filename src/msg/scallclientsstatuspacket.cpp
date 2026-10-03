@@ -60,6 +60,6 @@ void SCAllClientsStatusPacket::restoreGuts(IBStream &stream) {
 }
 
 // NTSC-U/C: 0x003f2218, PAL: 0x0042a760
-void SCAllClientsStatusPacket::AppendEntry(ClientStatus entry) {
+void SCAllClientsStatusPacket::AddClientStatus(ClientStatus entry) {
     mClients.push_back(entry);
 }

@@ -56,7 +56,7 @@ enum LevelConverterTrackType {
  * the file, the byte stream, and the Standard MIDI File reader, hands itself to the reader as the
  * event sink, and runs it. The three stack objects are an HxMemStream with HxStream::mSwapBytes set
  * to 1, an HxIListChunk over the whole stream, and a Mid::Reader. The file-static
- * comparator at `0x001e6450` is stored in Mid::Reader::mCompare before Mid::Reader::Read()
+ * comparator at `0x001e6450` is stored in Mid::Reader::mCompare before Mid::Reader::ReadAllTracks()
  * runs. The comparator ranks each event by its status class (note off first, note on last).
  *
  * The five event handlers all follow one shape. They report through ReportError() on the error
@@ -116,7 +116,7 @@ public:
      * The error log path is the file's base name with `.err` appended. The file is read through
      * an HxMemStream with byte swapping on, an HxIListChunk, and a Mid::Reader whose
      * events of one position are ordered by status class (note off first, note on last).
-     * LevelBuilder::PrepareTracks() and FinishErrorLog() run after the file is read.
+     * LevelBuilder::DoneLoading() and FinishErrorLog() run after the file is read.
      *
      * @param pszPath The file to read.
      * @param pBuffer The file's contents, forwarded to the HxMemStream constructor.
@@ -222,7 +222,7 @@ public:
     /**
      * Hand a tempo meta event to the builder and record that the file has a tempo.
      *
-     * Both parameters pass through to LevelBuilder::SetTempo() in the registers they arrive in.
+     * Both parameters pass through to LevelBuilder::AddTempo() in the registers they arrive in.
      *
      * @param nTick The event position, in MIDI ticks.
      * @param nMicrosecondsPerQuarter The tempo.
@@ -470,7 +470,7 @@ private:
     int mProgramSent;                   // +0x68
     int mRiffOpened;                    // +0x6c, set when a riff opens
     std::vector<PendingEvent> mPending; // +0x70
-    // The harmony the converter builds note by note through Harmony::AddNote() (0x001e7b90) and
+    // The harmony the converter builds note by note through Harmony::AddPitch() (0x001e7b90) and
     // hands to LevelBuilder::AddHarmony() (0x001e6a60, 0x001e7b04). The constructor, NewTrack(),
     // and 0x001e7ac0 call its implicit default constructor, emitted at 0x001ea1e8.
     Harmony mHarmony;        // +0x7c

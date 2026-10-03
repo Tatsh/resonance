@@ -24,6 +24,14 @@ class Player;
 class NeutralizeMsg : public CmdMsg {
 public:
     /**
+     * Identity that Type() reports.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d031c
+     * @ghidraAddress PAL: 0x00713ab4
+     */
+    static int sID;
+
+    /**
      * Produce a message with a zero result on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory.
@@ -46,7 +54,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nNeutralizeMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x003e0418
      * @ghidraAddress PAL: 0x00418870
      */
@@ -74,15 +82,3 @@ public:
     int mTrack;      /*!< The track to neutralise. +0x0c */
     Player *mPlayer; /*!< The player who deployed the neutraliser. +0x10 */
 };
-
-/**
- * Identity that NeutralizeMsg::Type() reports.
- *
- * This word belongs to NeutralizeMsg because NeutralizeMsg::Type() at `0x003e0418` returns it.
- * Several handlers elsewhere read the same word to compare against it, which is the expected
- * shape for a registered identity and does not make the word theirs.
- *
- * @ghidraAddress NTSC-U/C: 0x006d031c
- * @ghidraAddress PAL: 0x00713ab4
- */
-extern int g_nNeutralizeMsgType;

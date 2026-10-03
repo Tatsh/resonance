@@ -179,13 +179,13 @@ void Tex::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x004e4910, PAL: 0x005231e8
 void Tex::Save(Stream &stream) {
     const int nRevision = kTexRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
-    stream.Write(&mWidth, sizeof(mWidth));
-    stream.Write(&mHeight, sizeof(mHeight));
-    stream.Write(&mBitsPerPixel, sizeof(mBitsPerPixel));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&mWidth, sizeof(mWidth));
+    stream.WriteLE(&mHeight, sizeof(mHeight));
+    stream.WriteLE(&mBitsPerPixel, sizeof(mBitsPerPixel));
     mBitmapPath.Save(stream);
-    stream.Write(&mFlags, sizeof(mFlags));
-    stream.Write(&mMipSelect, sizeof(mMipSelect));
+    stream.WriteLE(&mFlags, sizeof(mFlags));
+    stream.WriteLE(&mMipSelect, sizeof(mMipSelect));
 }
 
 // NTSC-U/C: 0x004e7610, PAL: 0x005260b0
@@ -194,7 +194,7 @@ void Tex::Replace([[maybe_unused]] Object *pFrom, [[maybe_unused]] Object *pTo) 
 
 // NTSC-U/C: 0x004e7618, PAL: 0x005260b8
 const HxStr &Tex::ClassName() const {
-    return g_texClassName;
+    return Tex::sClassName;
 }
 
 // NTSC-U/C: 0x004e79f0, PAL: 0x005264a0
@@ -213,9 +213,9 @@ void Tex::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
 // NTSC-U/C: 0x004e4a20, PAL: 0x005232f8
 void Tex::Load(Stream &stream) {
     int nRevision = 0;
-    stream.Read(&nRevision, sizeof(nRevision));
+    stream.ReadLE(&nRevision, sizeof(nRevision));
     if (nRevision > kTexRevision) {
-        g_failSink.Report("Can't load new Tex\n");
+        Rnd::TheDbg.Notify("Can't load new Tex\n");
         return;
     }
 
@@ -223,23 +223,23 @@ void Tex::Load(Stream &stream) {
     if (nRevision == kShortSizeRevision) {
         short nShortWidth = 0;
         short nShortHeight = 0;
-        stream.Read(&nShortWidth, sizeof(nShortWidth));
-        stream.Read(&nShortHeight, sizeof(nShortHeight));
+        stream.ReadLE(&nShortWidth, sizeof(nShortWidth));
+        stream.ReadLE(&nShortHeight, sizeof(nShortHeight));
         mWidth = nShortWidth;
         mHeight = nShortHeight;
     } else {
-        stream.Read(&mWidth, sizeof(mWidth));
-        stream.Read(&mHeight, sizeof(mHeight));
+        stream.ReadLE(&mWidth, sizeof(mWidth));
+        stream.ReadLE(&mHeight, sizeof(mHeight));
     }
-    stream.Read(&mBitsPerPixel, sizeof(mBitsPerPixel));
+    stream.ReadLE(&mBitsPerPixel, sizeof(mBitsPerPixel));
     mBitmapPath.Load(stream);
-    stream.Read(&mFlags, sizeof(mFlags));
+    stream.ReadLE(&mFlags, sizeof(mFlags));
     if (nRevision >= kShortSizeRevision && nRevision <= kLastRevisionWithSpareByte) {
         char cSpare = 0;
-        stream.ReadBytes(&cSpare, sizeof(cSpare)); // Read and then discarded, as in the binary.
+        stream.Read(&cSpare, sizeof(cSpare)); // Read and then discarded, as in the binary.
     }
     if (nRevision >= kFirstRevisionWithMipSelect) {
-        stream.Read(&mMipSelect, sizeof(mMipSelect));
+        stream.ReadLE(&mMipSelect, sizeof(mMipSelect));
     }
     AllocateBitmapFromStream();
 }
@@ -292,7 +292,7 @@ void Tex::RestoreSurfaces() {
 }
 
 // NTSC-U/C: 0x007033b0, PAL: 0x00746e60
-HxStr g_texClassName("Tex");
+HxStr Tex::sClassName("Tex");
 
 // NTSC-U/C: 0x004e77f0, PAL: 0x005262a0
 Tex *NewTex(const HxStr &name) {
@@ -300,12 +300,12 @@ Tex *NewTex(const HxStr &name) {
 }
 
 // NTSC-U/C: 0x007033a8, PAL: 0x00746e58
-Tex *(*g_pfnNewTex)(const HxStr &name) = NewTex;
+Tex *(*Tex::sNew)(const HxStr &name) = NewTex;
 
 // NTSC-U/C: 0x004e7770, PAL: 0x00526220
 Object *CreateRegisteredTex(const HxStr &name) {
     try {
-        return g_pfnNewTex(name);
+        return Tex::sNew(name);
     } catch (...) {
         return nullptr;
     }
@@ -457,7 +457,7 @@ bool Tex::PollAsyncMips() {
             continue;
         }
         if (nStatus > 0) {
-            g_failSink.Report(
+            Rnd::TheDbg.Notify(
                 "Texture %s mip %d: async read error %d\n", TextOf(mBitmapPath), nMip, nStatus);
             // A failed read clears its bit and reports the load complete, which stops the caller
             // spinning on a mip that will never arrive.
@@ -504,11 +504,11 @@ void Tex::OnMipLoaded(int nMip) {
     pBitmap->ApplyColorKey(mFlags);
 
     if (ClassifyPowerOfTwo(pBitmap->mWidth) < 0 || ClassifyPowerOfTwo(pBitmap->mHeight) < 0) {
-        g_failSink.Report("%s (mipmap %d) is not power of 2 in width and height (%d x %d)\n",
-                          TextOf(mBitmapPath.RelativeToRoot()),
-                          nMip,
-                          pBitmap->mWidth,
-                          pBitmap->mHeight);
+        Rnd::TheDbg.Notify("%s (mipmap %d) is not power of 2 in width and height (%d x %d)\n",
+                           TextOf(mBitmapPath.RelativeToRoot()),
+                           nMip,
+                           pBitmap->mWidth,
+                           pBitmap->mHeight);
     }
     if (nMip <= 0) {
         return;
@@ -516,7 +516,7 @@ void Tex::OnMipLoaded(int nMip) {
     const int nExpectedWidth = mWidth >> nMip;
     const int nExpectedHeight = mHeight >> nMip;
     if (pBitmap->mWidth != nExpectedWidth || pBitmap->mHeight != nExpectedHeight) {
-        g_failSink.Report(
+        Rnd::TheDbg.Notify(
             "%s (mipmap %d) is not expected width/height (got %dx%d, expected %dx%d)\n",
             TextOf(mBitmapPath.RelativeToRoot()),
             nMip,
@@ -546,7 +546,7 @@ void Tex::operator delete(void *pBlock) {
 // NTSC-U/C: 0x004e7448, PAL: 0x00525ee8
 Tex *NewTexThroughHook(const HxStr &name) {
     try {
-        return g_pfnNewTex(name);
+        return Tex::sNew(name);
     } catch (...) {
         return nullptr; // The binary's handler returns null.
     }
@@ -701,7 +701,7 @@ void FilePath::Print(Dbg &sink) const {
 // NTSC-U/C: 0x004e7bf8, PAL: 0x005266b8
 void FilePath::Save(Stream &stream) const {
     const HxStr &relative = RelativeToRoot();
-    stream.WriteBytes(TextOf(relative), relative.mLen + 1);
+    stream.Write(TextOf(relative), relative.mLen + 1);
 }
 
 // NTSC-U/C: 0x004e7c50, PAL: 0x00526710

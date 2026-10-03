@@ -13,8 +13,8 @@ class Globals;
  * bytes. The compiler-generated vptr lands at offset 0, and the Globals back pointer occupies
  * `+0x04`. Globals::InitServices() at `0x001170d0` allocates eight bytes, stores the Globals
  * pointer at `+0x04`, and writes the vptr, and CreateInstance() does the same. The table at
- * `0x007cee50` runs GetTypeInfo, the destructor, the inherited MsgSink::Handle(), then the override
- * below.
+ * `0x007cee50` runs GetTypeInfo, the destructor, the inherited MsgSink::Dispatch(), then the
+ * override below.
  *
  * Globals creates the single instance in Init() and destroys it in Shutdown(). The sink accepts
  * every message, acts only on one identity, and is registered broadly.
@@ -56,11 +56,11 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x00118b50
      * @ghidraAddress PAL: 0x00119088
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 private:
     // Run the message's script text without testing its identity first. The receiver is unused,
-    // and HandleMessage() inlines a copy of this body rather than calling it. 0x00118ad0
+    // and DispatchPriv() inlines a copy of this body rather than calling it. 0x00118ad0
     void RunMessageScript(Message *pMsg);
 
     Globals *mGlobals; // +0x04

@@ -25,7 +25,7 @@ SinglePowerupCollection::~SinglePowerupCollection() {
 // NTSC-U/C: 0x001cb890, PAL: 0x001d1748
 // The kind is stored before the powerup is built, and the message reports an index of
 // 0 because the store holds one.
-void SinglePowerupCollection::AddPowerup(int nType) {
+void SinglePowerupCollection::Add(int nType) {
     delete mPowerup;
     mType = nType;
     mPowerup = Powerup::CreateForType(nType);
@@ -62,7 +62,7 @@ int SinglePowerupCollection::HasSelection() {
 }
 
 // NTSC-U/C: 0x001cba20, PAL: 0x001d18d8
-void SinglePowerupCollection::AnnounceState() {
+void SinglePowerupCollection::SendState() {
     if (HasSelection() == 0) {
         return;
     }

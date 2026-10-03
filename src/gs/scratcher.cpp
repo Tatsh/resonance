@@ -103,10 +103,10 @@ Scratcher::Scratcher(PhraseMgr *pPhraseMgr,
                      const TrackData *pTrackData)
     : Pitcher(pClock), mPhraseMgr(pPhraseMgr), mQuantizer(pQuantizer), mTrackData(pTrackData),
       mTrack(pTrackData->mIndex), mBarDivisor(pPhraseMgr->mBarTicks), mClock(pClock),
-      mId(kIDableUnregistered), mPlayer(&g_nullPlayer), mLastScratchPlayer(&g_nullPlayer),
-      mLastGem(0), mAnnouncedBar(kNoValue), mScratchDirection(0),
-      mReadings(kReadingCount, kInitialReading), mLastGemEnd(0), mLastGemEndBlend(0.0f),
-      mLastStep(0) {
+      mId(kIDableUnregistered), mPlayer(&NullPlayer::sInstance),
+      mLastScratchPlayer(&NullPlayer::sInstance), mLastGem(0), mAnnouncedBar(kNoValue),
+      mScratchDirection(0), mReadings(kReadingCount, kInitialReading), mLastGemEnd(0),
+      mLastGemEndBlend(0.0f), mLastStep(0) {
     mSwitchesBanks = 0;
     if (QueryConfigFlag(kBankSwitchConfigCode) != 0) {
         mSwitchesBanks = QueryConfigFlag(kBankSwitchOverrideConfigCode) == 0;
@@ -169,7 +169,7 @@ void Scratcher::EraseGemRange(EraseMsg *pMsg) {
     }
 
     for (int nClear = nFirstBar; nClear < nEndBar; ++nClear) {
-        if (mPhraseMgr->GetPhraseOwner(nClear) != pMsg->mPlayer) {
+        if (mPhraseMgr->GetOwner(nClear) != pMsg->mPlayer) {
             continue;
         }
         bErased = 1;
@@ -238,7 +238,7 @@ void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
 
     if (mAnnouncedBar != nBar) {
         mAnnouncedBar = nBar;
-        if (mPhraseMgr->GetPhraseOwner(nBar)->IsNull() == 0) {
+        if (mPhraseMgr->GetOwner(nBar)->IsNull() == 0) {
             mPhraseMgr->ClearPhrase(nBar, 0);
         }
         int nPoints = mTrackData->GetPoints(nBar);
@@ -321,9 +321,9 @@ Scratcher::~Scratcher() {
 }
 
 // NTSC-U/C: 0x001d0980, PAL: 0x001d6838
-void Scratcher::HandleMessage(Message *pMsg) {
+void Scratcher::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
-    if (nType == static_cast<int>(g_nPitchRiffMsgType)) {
+    if (nType == static_cast<int>(PitchRiffMsg::sID)) {
         PitchRiffMsg *pRiff = static_cast<PitchRiffMsg *>(pMsg);
         if (pRiff->mTrack != mTrack) {
             return;
@@ -335,7 +335,7 @@ void Scratcher::HandleMessage(Message *pMsg) {
         OnPitchRiff(pRiff->mButton, 0, pRiff->mPosition.mTick);
         return;
     }
-    if (nType == static_cast<int>(g_nEraseMsgType)) {
+    if (nType == static_cast<int>(EraseMsg::sID)) {
         EraseGemRange(static_cast<EraseMsg *>(pMsg));
         return;
     }
@@ -343,7 +343,7 @@ void Scratcher::HandleMessage(Message *pMsg) {
         OnTrackSelect(static_cast<TrackSelectMsg *>(pMsg));
         return;
     }
-    if (nType == static_cast<int>(g_nInvalidateSeekerMsgType)) {
+    if (nType == static_cast<int>(InvalidateSeekerMsg::sID)) {
         InvalidateSeekerMsg *pInvalidate = static_cast<InvalidateSeekerMsg *>(pMsg);
         if (pInvalidate->mTrack == mTrack) {
             SendSeekerMsg(pInvalidate->mBar);

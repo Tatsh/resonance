@@ -20,7 +20,7 @@ constexpr int kAppendFirst = 1;
 // builds one on its stack and visits every entry of the sequence through it.
 class Shifter : public MsgSink {
 public:
-    // Builds a new sequence holding a copy of every entry, each transposed as HandleMessage()
+    // Builds a new sequence holding a copy of every entry, each transposed as DispatchPriv()
     // decides, and returns it with one reference.
     // NTSC-U/C: 0x001ab4c8, PAL: 0x001b1230
     MultiMuse *Transpose(MultiMuse *pMuse, int nTrans) {
@@ -28,17 +28,17 @@ public:
         mTrans = nTrans;
         for (const auto &entry : pMuse->mEntries) {
             mPosition = entry.mPosition;
-            Handle(entry.mValue);
+            Dispatch(entry.mValue);
         }
         return mResult;
     }
 
     // NTSC-U/C: 0x001ab970, PAL: 0x001b16d8
-    virtual void HandleMessage(Message *pMsg) {
+    virtual void DispatchPriv(Message *pMsg) {
         const int nType = pMsg->Type();
-        if (nType == static_cast<int>(g_dwNoteMsgType)) {
+        if (nType == static_cast<int>(NoteMsg::sID)) {
             OnMsg(*static_cast<NoteMsg *>(pMsg));
-        } else if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
+        } else if (nType == static_cast<int>(StdMidiMsg::sID)) {
             OnMsg(*static_cast<StdMidiMsg *>(pMsg));
         } else if (nType >= g_nFirstMuseMsgType && nType < g_nEndMuseMsgType) {
             OnMsg(*static_cast<MuseMsg *>(pMsg));
@@ -65,7 +65,7 @@ private:
         mResult->Add(&shifted, mPosition.mTick, kAppendFirst);
     }
 
-    // The out-of-line copy of the branch HandleMessage() expands inline for any other message in
+    // The out-of-line copy of the branch DispatchPriv() expands inline for any other message in
     // the MuseMsg identity range. The image has no caller of this copy.
     // NTSC-U/C: 0x001ab948, PAL: 0x001b16b0
     void OnMsg(MuseMsg &msg) {

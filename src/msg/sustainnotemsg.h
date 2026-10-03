@@ -27,6 +27,14 @@ class OBStream;
 class SustainNoteMsg : public MuseMsg {
 public:
     /**
+     * Identity that Type() reports.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d01e4
+     * @ghidraAddress PAL: 0x0071397c
+     */
+    static unsigned int sID;
+
+    /**
      * Construct a message with the song position at kMBTInfinity and the byte unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
@@ -71,7 +79,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_dwSustainNoteMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x003dc7d8
      * @ghidraAddress PAL: 0x00414c10
      */
@@ -126,15 +134,3 @@ public:
      */
     unsigned char mNote;
 };
-
-/**
- * Identity that SustainNoteMsg::Type() reports.
- *
- * This word belongs to SustainNoteMsg because SustainNoteMsg::Type() at `0x003dc7d8` returns it.
- * Several handlers elsewhere read the same word to compare against it, which is the expected
- * shape for a registered identity and does not make the word theirs.
- *
- * @ghidraAddress NTSC-U/C: 0x006d01e4
- * @ghidraAddress PAL: 0x0071397c
- */
-extern unsigned int g_dwSustainNoteMsgType;

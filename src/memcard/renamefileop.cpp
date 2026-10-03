@@ -18,7 +18,7 @@ RenameFileOp::~RenameFileOp() {
 }
 
 // NTSC-U/C: 0x0055f108, PAL: 0x005a03e8
-void RenameFileOp::Issue() {
+void RenameFileOp::Execute() {
     sceMcRename(mPortSlot >> kMemcardPortShift,
                 mPortSlot & kMemcardSlotMask,
                 mOldPath.mStr != nullptr ? mOldPath.mStr : g_szEmptyString,
@@ -27,7 +27,7 @@ void RenameFileOp::Issue() {
 }
 
 // NTSC-U/C: 0x0055e1a0, PAL: 0x0059f470
-void RenameFileOp::Complete() {
+void RenameFileOp::NotifyDone() {
     InterpretResult();
     mHandler->OnRenameFile(this);
 }

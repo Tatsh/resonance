@@ -17,18 +17,18 @@ constexpr int kUserRevision = 32;
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
     const char *pszName = pObject->mName.mStr != nullptr ? pObject->mName.mStr : g_szEmptyString;
-    stream.WriteBytes(pszName, pObject->mName.mLen + 1);
+    stream.Write(pszName, pObject->mName.mLen + 1);
 }
 
 template <class T>
 void ReadObjectRef(Stream &stream, T *&refOut) {
     HxStr name(nullptr);
     stream.ReadString(name);
-    refOut = dynamic_cast<T *>(g_manager.Find(name));
+    refOut = dynamic_cast<T *>(TheManager.Find(name));
 }
 
 } // namespace
@@ -36,16 +36,18 @@ void ReadObjectRef(Stream &stream, T *&refOut) {
 // NTSC-U/C: 0x0046dd40, PAL: 0x004ab880
 void TunnelEvent::Save(Stream &stream) const {
     WriteObjectRef(stream, mObject);
-    stream.Write(&mFrame, sizeof(mFrame)).Write(&mId, sizeof(mId)).Write(&mUser, sizeof(mUser));
+    stream.WriteLE(&mFrame, sizeof(mFrame))
+        .WriteLE(&mId, sizeof(mId))
+        .WriteLE(&mUser, sizeof(mUser));
 }
 
 // NTSC-U/C: 0x0046de48, PAL: 0x004ab988
 void TunnelEvent::Load(Stream &stream) {
     mUser = 0;
     ReadObjectRef(stream, mObject);
-    stream.Read(&mFrame, sizeof(mFrame)).Read(&mId, sizeof(mId));
+    stream.ReadLE(&mFrame, sizeof(mFrame)).ReadLE(&mId, sizeof(mId));
     if (g_nTunnelLoadVersion >= kUserRevision) {
-        stream.Read(&mUser, sizeof(mUser));
+        stream.ReadLE(&mUser, sizeof(mUser));
     }
 }
 

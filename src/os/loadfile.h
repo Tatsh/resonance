@@ -194,15 +194,15 @@ extern "C" {
  * @ghidraAddress NTSC-U/C: 0x00731468
  * @ghidraAddress PAL: 0x00774398
  */
-extern unsigned char g_bGzipWindow[2 * kGzipWindowSize];
+extern unsigned char gzipWindow[2 * kGzipWindowSize];
 
 /**
- * The write position in g_bGzipWindow.
+ * The write position in gzipWindow.
  *
  * @ghidraAddress NTSC-U/C: 0x00761470
  * @ghidraAddress PAL: 0x007a43a0
  */
-extern unsigned g_nGzipWindowPosition;
+extern unsigned gzipOutcnt;
 
 /**
  * The staging buffer refilled from the memory source or the file.
@@ -210,23 +210,23 @@ extern unsigned g_nGzipWindowPosition;
  * @ghidraAddress NTSC-U/C: 0x00728c28
  * @ghidraAddress PAL: 0x0076bb58
  */
-extern unsigned char g_bGzipInputBuffer[];
+extern unsigned char gzipInbuf[];
 
 /**
- * The valid byte count in g_bGzipInputBuffer.
+ * The valid byte count in gzipInbuf.
  *
  * @ghidraAddress NTSC-U/C: 0x00761468
  * @ghidraAddress PAL: 0x007a4398
  */
-extern unsigned g_nGzipInputLength;
+extern unsigned gzipInsize;
 
 /**
- * The read position in g_bGzipInputBuffer.
+ * The read position in gzipInbuf.
  *
  * @ghidraAddress NTSC-U/C: 0x0076146c
  * @ghidraAddress PAL: 0x007a439c
  */
-extern unsigned g_nGzipInputPosition;
+extern unsigned gzipInptr;
 
 /**
  * Refill the staging buffer from the memory source or the file and report its first byte.
@@ -239,7 +239,7 @@ extern unsigned g_nGzipInputPosition;
 int GzipRefillInputBuffer(int nSilentEof);
 
 /**
- * Checksum the filled part of g_bGzipWindow, copy it to the output, and rewind the window.
+ * Checksum the filled part of gzipWindow, copy it to the output, and rewind the window.
  *
  * An empty window is not flushed.
  *
@@ -256,8 +256,8 @@ void GzipFlushWindow();
  * @return The byte.
  */
 inline int GzipGetByte() {
-    if (g_nGzipInputPosition < g_nGzipInputLength) {
-        return g_bGzipInputBuffer[g_nGzipInputPosition++];
+    if (gzipInptr < gzipInsize) {
+        return gzipInbuf[gzipInptr++];
     }
     return GzipRefillInputBuffer(0);
 }

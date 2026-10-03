@@ -6,7 +6,7 @@
  * Reference-counted control signal sampled against elapsed time.
  *
  * Its RTTI descriptor is at `0x008ef3b0`. It has Attachment as its only base at offset 0. The
- * object is Attachment's eight bytes and adds Sample() as slot 3 of the table it shares with
+ * object is Attachment's eight bytes and adds GetValue() as slot 3 of the table it shares with
  * Attachment. The six subclass tables all fill slot 3 and no factory builds a plain Source, and the
  * slot is modelled as pure on that evidence.
  *
@@ -21,13 +21,13 @@ public:
     /**
      * Produce the signal's value at a time.
      *
-     * Slot 3. The title is inferred from the six bodies.
+     * Slot 3.
      *
      * @param flTime The time since the source started, in the unit its factory arguments use.
      * @param pValue Receives the value, between 0 and 1.
      * @return 1 while the source continues, and 0 once a fade built to stop has finished.
      */
-    virtual int Sample(float flTime, float *pValue) = 0;
+    virtual int GetValue(float flTime, float *pValue) = 0;
 
     /**
      * Build a sine wave between 0 and 1.

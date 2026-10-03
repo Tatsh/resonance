@@ -3,11 +3,10 @@
 /**
  * Linear map from one integer range onto another, clamped to the output range.
  *
- * The class is not polymorphic and emits no RTTI. Its name comes from the debugging symbols of the
- * North American demo release. The demo's Recalc() and Apply() have the same instructions as Init()
- * and Map(). The object is 0x20 bytes. PitchPicker's pitch chooser at `0x001c4488` builds one on
- * its stack, storing the four range words directly before calling Init(). The sequence has the
- * shape of an inline constructor around an out-of-line initialiser.
+ * The class is not polymorphic and emits no RTTI. The object is 0x20 bytes. PitchPicker's pitch
+ * chooser at `0x001c4488` builds one on its stack, storing the four range words directly before
+ * calling Recalc(). The sequence has the shape of an inline constructor around an out-of-line
+ * initialiser.
  */
 class LinearTransform {
 public:
@@ -21,7 +20,7 @@ public:
      */
     LinearTransform(int nInMin, int nInMax, int nOutMin, int nOutMax)
         : mInMin(nInMin), mInMax(nInMax), mOutMin(nOutMin), mOutMax(nOutMax) {
-        Init();
+        Recalc();
     }
 
     /**
@@ -32,13 +31,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00536fe0
      * @ghidraAddress PAL: 0x005768a0
      */
-    int Map(int nValue);
+    int Apply(int nValue);
 
 private:
     // Computes mSlope and mOffset in single precision from the four ends, and orders the two
     // output ends into mLower and mUpper.
     // NTSC-U/C: 0x00536f50, PAL: 0x00576810
-    void Init();
+    void Recalc();
 
     int mInMin;    // +0x00
     int mInMax;    // +0x04

@@ -21,7 +21,7 @@ VolumeEffector::VolumeEffector(unsigned char nChannel, int nAppliedLevel)
 
 // NTSC-U/C: 0x001a1a68, PAL: 0x001a77d0
 VolumeEffector::~VolumeEffector() {
-    Enable(0);
+    SetEnabled(0);
 }
 
 // NTSC-U/C: 0x001a1b30, PAL: 0x001a7898
@@ -30,7 +30,7 @@ int VolumeEffector::Type() {
 }
 
 // NTSC-U/C: 0x001a07c0, PAL: 0x001a6528
-void VolumeEffector::Enable(int bEnabled) {
+void VolumeEffector::SetEnabled(int bEnabled) {
     if (bEnabled == mEnabled) {
         return;
     }

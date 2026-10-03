@@ -8,7 +8,7 @@ namespace {
 // Nesting depth of Send(). No instruction outside Send() touches the word. Nothing therefore acts
 // on the depth, and the counter survives only as a debugging aid.
 // NTSC-U/C: 0x00723208, PAL: 0x00766df8
-int g_nMsgSendDepth;
+int gMsgIndentLevel;
 
 } // namespace
 
@@ -45,9 +45,9 @@ void MsgSource::RemoveSink(MsgSink *pSink) {
 void MsgSource::Send(Message *pMsg) {
     // The increment is compiled into the branch delay slot of the empty-vector test. It therefore
     // runs whether or not the loop below is entered.
-    ++g_nMsgSendDepth;
+    ++gMsgIndentLevel;
     for (std::vector<MsgSink *>::iterator it = mSinks.begin(); it != mSinks.end(); ++it) {
-        (*it)->Handle(pMsg);
+        (*it)->Dispatch(pMsg);
     }
-    --g_nMsgSendDepth;
+    --gMsgIndentLevel;
 }

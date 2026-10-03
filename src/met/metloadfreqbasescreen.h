@@ -208,7 +208,7 @@ public:
      * Resolve the two cycle arrows after the container load.
      *
      * Slot 38. The MetScreen body runs first as a direct call. `cid_left.but` and `cid_right.but`
-     * are then resolved out of Rnd::g_manager and each cast to Rnd::Button, and a name that
+     * are then resolved out of Rnd::TheManager and each cast to Rnd::Button, and a name that
      * resolves to nothing stores a null rather than reporting.
      *
      * @ghidraAddress NTSC-U/C: 0x00292000
@@ -375,7 +375,7 @@ protected:
     /**
      * Reapply the selected identity to the preview and the label.
      *
-     * The body resolves `cid_char.mat` out of Rnd::g_manager and casts it to Rnd::Mat, runs
+     * The body resolves `cid_char.mat` out of Rnd::TheManager and casts it to Rnd::Mat, runs
      * MetPersonaData::AttachToBurnSlot() on the selected identity with slot 0, assigns
      * mBurnTexture into the material's second stage through Rnd::Mat::Stage::SetTex(), and
      * finishes with UpdateNameLabel(). The title is inferred from those three steps.

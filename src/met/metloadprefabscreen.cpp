@@ -122,7 +122,7 @@ void MetLoadPreFabScreen::BuildButtonList() {
 // NTSC-U/C: 0x002a8fe0, PAL: 0x002c7580
 void MetLoadPreFabScreen::UpdateNameLabel() {
     HxStr username((*mIdentityList)[mSelectedIdentity]->mAppearance.mUserName);
-    mButtonList->ButtonAt(kNameButtonIndex)->mText->SetText(username);
+    mButtonList->GetButton(kNameButtonIndex)->mText->SetText(username);
 
 #ifdef VIDEO_STANDARD_PAL
     HxStr editLabel = GetMetString(kMetStrPfEdit);
@@ -132,7 +132,7 @@ void MetLoadPreFabScreen::UpdateNameLabel() {
     HxStr editLabelWithName(editLabel);
     HxStr editText(editLabelWithName += username);
 #endif
-    mButtonList->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
+    mButtonList->GetButton(kEditButtonIndex)->mText->SetText(editText);
 }
 
 // NTSC-U/C: 0x002a91b8, PAL: 0x002c7770

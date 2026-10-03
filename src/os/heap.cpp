@@ -21,13 +21,13 @@ constexpr int kCyclesPerMicrosecond = 0x127;
 int g_bHeapTimingSuspended = 0;
 
 // NTSC-U/C: 0x0072457c, PAL: 0x0076816c
-int g_nHeapAllocMicroseconds = 0;
+int tMalloc = 0;
 
 // NTSC-U/C: 0x00724580, PAL: 0x00768170
-int g_nHeapReallocMicroseconds = 0;
+int tRealloc = 0;
 
 // NTSC-U/C: 0x00724584, PAL: 0x00768174
-int g_nHeapFreeMicroseconds = 0;
+int tFree = 0;
 
 HeapNode *NodePrev(const HeapNode *pNode) {
     return reinterpret_cast<HeapNode *>(pNode->mPrevAndFree & ~static_cast<uintptr_t>(1));
@@ -201,7 +201,7 @@ Heap::Alloc(unsigned nSize, [[maybe_unused]] const char *pszFile, [[maybe_unused
         if ((mFlags & kHeapFlagFatalWhenFull) != 0) {
             Fatal("Python heap is out of memory!");
         }
-        AccumulateMicroseconds(&g_nHeapAllocMicroseconds, nStart);
+        AccumulateMicroseconds(&tMalloc, nStart);
         return nullptr;
     }
 
@@ -233,7 +233,7 @@ Heap::Alloc(unsigned nSize, [[maybe_unused]] const char *pszFile, [[maybe_unused
 
     ++mUsedNodes;
     mBytes += NodeExtent(pChosen);
-    AccumulateMicroseconds(&g_nHeapAllocMicroseconds, nStart);
+    AccumulateMicroseconds(&tMalloc, nStart);
     return NodePayload(pChosen);
 }
 
@@ -241,7 +241,7 @@ Heap::Alloc(unsigned nSize, [[maybe_unused]] const char *pszFile, [[maybe_unused
 void Heap::Free(void *pBlock, [[maybe_unused]] const char *pszFile, [[maybe_unused]] int nLine) {
     unsigned nStart = ReadCycleCount();
     if (pBlock == nullptr) {
-        AccumulateMicroseconds(&g_nHeapFreeMicroseconds, nStart);
+        AccumulateMicroseconds(&tFree, nStart);
         return;
     }
 
@@ -292,7 +292,7 @@ void Heap::Free(void *pBlock, [[maybe_unused]] const char *pszFile, [[maybe_unus
         PushFreeNode(pNode);
     }
 
-    AccumulateMicroseconds(&g_nHeapFreeMicroseconds, nStart);
+    AccumulateMicroseconds(&tFree, nStart);
 }
 
 // NTSC-U/C: 0x005519d0, PAL: 0x00592010
@@ -332,7 +332,7 @@ void *Heap::Realloc(void *pBlock,
                 MarkNodeFree(pRemainder);
             }
         }
-        AddMicroseconds(&g_nHeapReallocMicroseconds, nStart);
+        AddMicroseconds(&tRealloc, nStart);
         return pBlock;
     }
 
@@ -347,7 +347,7 @@ void *Heap::Realloc(void *pBlock,
                 (reinterpret_cast<char *>(pRemainder) - static_cast<char *>(pBlock)) - nExtent;
             ReplaceFreeNode(pNext, pRemainder);
             pNode->mNext = pRemainder;
-            AddMicroseconds(&g_nHeapReallocMicroseconds, nStart);
+            AddMicroseconds(&tRealloc, nStart);
             return pBlock;
         }
         if (nCombined >= nWant + kHeapSplitThreshold) {
@@ -357,7 +357,7 @@ void *Heap::Realloc(void *pBlock,
             SetNodePrev(pNext->mNext, pNode);
             pNode->mNext = pNext->mNext;
             --mFreeNodes;
-            AddMicroseconds(&g_nHeapReallocMicroseconds, nStart);
+            AddMicroseconds(&tRealloc, nStart);
             return pBlock;
         }
     }
@@ -367,13 +367,13 @@ void *Heap::Realloc(void *pBlock,
     void *pMoved = Alloc(nWant, __FILE__, __LINE__);
     if (pMoved == nullptr) {
         g_bHeapTimingSuspended = 0;
-        AddMicroseconds(&g_nHeapReallocMicroseconds, nStart);
+        AddMicroseconds(&tRealloc, nStart);
         return nullptr;
     }
     memcpy(pMoved, pBlock, NodeExtent(pNode) - kHeapNodePrologueSize);
     Free(pBlock, __FILE__, __LINE__);
     g_bHeapTimingSuspended = 0;
-    AddMicroseconds(&g_nHeapReallocMicroseconds, nStart);
+    AddMicroseconds(&tRealloc, nStart);
     return pMoved;
 }
 
@@ -431,15 +431,8 @@ void Heap::DumpToFile(const char *pszPath) {
               mCallsRealloc,
               mCallsFree,
               mBytes);
-    fprintf(pFile,
-            "Timing:(M:%d R:%d F:%d)\n",
-            g_nHeapAllocMicroseconds,
-            g_nHeapReallocMicroseconds,
-            g_nHeapFreeMicroseconds);
-    LogPrintf("Timing:(M:%d R:%d F:%d)\n",
-              g_nHeapAllocMicroseconds,
-              g_nHeapReallocMicroseconds,
-              g_nHeapFreeMicroseconds);
+    fprintf(pFile, "Timing:(M:%d R:%d F:%d)\n", tMalloc, tRealloc, tFree);
+    LogPrintf("Timing:(M:%d R:%d F:%d)\n", tMalloc, tRealloc, tFree);
     fprintf(pFile, "ptr  len  isfree\n");
 
     for (HeapNode *pNode = mStart; pNode != nullptr && pNode->mNext != nullptr;
@@ -466,7 +459,7 @@ void Heap::DumpStats() {
 }
 
 // NTSC-U/C: 0x00723998, PAL: 0x00767588
-Heap *g_pPythonHeap = nullptr;
+Heap *gpPythonHeap = nullptr;
 
 namespace {
 
@@ -484,19 +477,19 @@ extern "C" void PyHeap_Init(void) {
     ZoneSetCurrent(FindZoneByName(kPythonZoneName));
     const int nSize = ZoneGetAvail(kPythonHeapFallbackSize);
     void *pBlock = ZoneAlloc(static_cast<unsigned>(nSize));
-    g_pPythonHeap = Heap::Create(
+    gpPythonHeap = Heap::Create(
         pBlock, static_cast<unsigned>(nSize), kHeapFlagFirstFit | kHeapFlagFatalWhenFull);
     ZoneSetCurrent(nPreviousZone);
 }
 
 extern "C" void *PyHeap_Alloc(unsigned nSize, const char *pszFile, int nLine) {
-    return g_pPythonHeap->Alloc(nSize, pszFile, nLine);
+    return gpPythonHeap->Alloc(nSize, pszFile, nLine);
 }
 
 extern "C" void *PyHeap_Realloc(void *pBlock, unsigned nSize, const char *pszFile, int nLine) {
-    return g_pPythonHeap->Realloc(pBlock, nSize, pszFile, nLine);
+    return gpPythonHeap->Realloc(pBlock, nSize, pszFile, nLine);
 }
 
 extern "C" void PyHeap_Free(void *pBlock, const char *pszFile, int nLine) {
-    g_pPythonHeap->Free(pBlock, pszFile, nLine);
+    gpPythonHeap->Free(pBlock, pszFile, nLine);
 }

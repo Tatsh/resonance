@@ -21,7 +21,7 @@ constexpr float kScaleNumerator = 1000.0f;
 
 // NTSC-U/C: 0x0041b150, PAL: 0x00455a88
 HudScreenFlash::HudScreenFlash() : mStart(kNoFade), mRate(1.0f) {
-    mMesh = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD screen rect")));
+    mMesh = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr("HUD screen rect")));
     mMesh->SetShowing(1);
     mMesh->SetVertexColor(Color{0.0f, 0.0f, 0.0f, 1.0f});
     mScale =

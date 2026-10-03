@@ -197,7 +197,7 @@ public:
      * Read this font from stream.
      *
      * A revision above 2 produces the report "Can't load new Font" followed by the abort handler of
-     * g_failSink. Revision 0 reads a character map of its own, with a 12-byte record rather than
+     * Rnd::TheDbg. Revision 0 reads a character map of its own, with a 12-byte record rather than
      * the 20-byte one this build uses, and then discards every entry; such a file supplies no
      * material and no atlas either, and all five of those fields survive at their constructed
      * values. Revision 0 and revision 1 both take the default character set rather than reading

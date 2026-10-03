@@ -22,7 +22,7 @@ void MemcardPS2::Update() {
     }
 
     if (mOps.front()->mIssued == kMemcardOpNotIssued) {
-        mOps.front()->Issue();
+        mOps.front()->Execute();
         return;
     }
 
@@ -37,7 +37,7 @@ void MemcardPS2::Update() {
     }
 
     mOps.front()->mResult = nResult;
-    mOps.front()->Complete();
+    mOps.front()->NotifyDone();
     delete mOps.front();
     mOps.pop_front();
 }

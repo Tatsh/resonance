@@ -12,17 +12,6 @@ class PhraseMsg;
 class StdMidiMsg;
 
 /**
- * Counter AxeOldGemMaker::NextStripId() issues sustain strip identities from.
- *
- * Zero at start. Its only readers are NextStripId() and the copy of it that
- * AxeNewGemMaker::PostGemMessages() expands.
- *
- * @ghidraAddress NTSC-U/C: 0x00683f70
- * @ghidraAddress PAL: 0x006c51d8
- */
-extern int g_nNextStripId;
-
-/**
  * Producer of the gems a guitar or vocal track presents, in its earlier form.
  *
  * Its RTTI descriptor is at `0x008ef220`. It is built over MsgSink at offset 0 and MsgSource at
@@ -33,7 +22,7 @@ extern int g_nNextStripId;
  * Both classes build one of these and one AxeNewGemMaker, and the pair coexists rather than one
  * replacing the other. Which of the two a given track reaches is not recovered.
  *
- * The maker replays a PhraseMsg's sequence through its own HandleMessage(), advancing mPosition to
+ * The maker replays a PhraseMsg's sequence through its own DispatchPriv(), advancing mPosition to
  * each entry. Every NoteMsg becomes a DurGemMsg from mPosition, and a sustain-pedal release and
  * press on controller 46 bound a DurGemMsg of their own.
  *
@@ -59,7 +48,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001a47a8
      * @ghidraAddress PAL: 0x001aa510
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Issue the next sustain strip identity.
@@ -72,7 +61,9 @@ public:
      * @ghidraAddress PAL: 0x001aa2c8
      */
     static int NextStripId() {
-        return g_nNextStripId++;
+        // NTSC-U/C: 0x00683f70, PAL: 0x006c51d8
+        static int sID;
+        return sID++;
     }
 
     /**
@@ -118,7 +109,7 @@ private:
     // NTSC-U/C: 0x001a34e8, PAL: 0x001a9250
     void OnStdMidi(StdMidiMsg *pMsg);
 
-    // Replays every entry of the phrase's sequence through HandleMessage() with mPosition
+    // Replays every entry of the phrase's sequence through DispatchPriv() with mPosition
     // advanced to the entry, then clears mPhrase.
     // NTSC-U/C: 0x001a3600, PAL: 0x001a9368
     void OnPhrase(PhraseMsg *pMsg);

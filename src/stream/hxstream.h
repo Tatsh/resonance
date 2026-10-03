@@ -3,11 +3,11 @@
 class HxStr;
 
 /**
- * Origin an HxStream::Seek() offset is measured from.
+ * Origin an HxStream::SetMarker() offset is measured from.
  *
- * HxMemStream::Seek() treats every origin other than 1 and 2 as the start rather than rejecting
- * it, so the three values below are the whole set. The titles are inferred, and the enumeration is
- * separate from StreamSeekOrigin because the two class families are unrelated.
+ * HxMemStream::SetMarker() treats every origin other than 1 and 2 as the start rather than
+ * rejecting it. The three values below are the whole set. The titles are inferred, and the
+ * enumeration is separate from StreamSeekOrigin because the two class families are unrelated.
  */
 enum HxStreamSeekOrigin {
     kHxSeekSet = 0, /*!< Measure from the start of the data. */
@@ -29,8 +29,8 @@ enum HxStreamSeekOrigin {
  * subsystem.
  *
  * Only HxIDataChunk's two constructors write mFatalOnEnd, each setting it on the chunk itself. No
- * HxMemStream ever has it set, so the diagnostic HxMemStream::Read() guards on it is unreachable
- * in the shipped build.
+ * HxMemStream ever has it set. The diagnostic HxMemStream::ReadData() guards on it is therefore
+ * unreachable in the shipped build.
  */
 class HxStream {
 public:
@@ -56,7 +56,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00145f18
      * @ghidraAddress PAL: 0x00146a30
      */
-    virtual void Seek(int nOffset, int nWhence);
+    virtual void SetMarker(int nOffset, int nWhence);
 
     /**
      * Report the read position.
@@ -67,7 +67,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00145f20
      * @ghidraAddress PAL: 0x00146a38
      */
-    virtual int Tell();
+    virtual int GetMarker();
 
     /**
      * Report the length of the data.
@@ -104,7 +104,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00145f38
      * @ghidraAddress PAL: 0x00146a50
      */
-    virtual HxStream &Read(void *pDest, int nSize);
+    virtual HxStream &ReadData(void *pDest, int nSize);
 
     /**
      * Report the stream this one reads through, if any.
@@ -121,10 +121,9 @@ public:
     /**
      * Move nSize bytes into pDest, reversing their order when the stream swaps bytes.
      *
-     * With mSwapBytes clear, or for a single byte, this is one Read(). Otherwise it reads one byte
-     * at a time from the last position of pDest to the first. Mid::Reader reads every header
-     * and track field through it, and HxChunkHeader reads chunk sizes through it. The title is
-     * inferred.
+     * With mSwapBytes clear, or for a single byte, this is one ReadData(). Otherwise it reads one
+     * byte at a time from the last position of pDest to the first. Mid::Reader reads every header
+     * and track field through it, and HxChunkHeader reads chunk sizes through it.
      *
      * @param pDest The destination buffer.
      * @param nSize The number of bytes to move.
@@ -132,14 +131,14 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004059f8
      * @ghidraAddress PAL: 0x0043f2e8
      */
-    HxStream &ReadSwapped(void *pDest, int nSize);
+    HxStream &ReadNum(void *pDest, int nSize);
 
     /**
      * Move nSize bytes out of pSrc, reversing their order when the stream swaps bytes.
      *
-     * The writing counterpart of ReadSwapped(). With mSwapBytes clear, or for a single byte, this
-     * is one Write(). Otherwise it writes one byte at a time from the last position of pSrc to the
-     * first. The shipped program calls it only from WriteVarLen(). The title is inferred.
+     * The writing counterpart of ReadNum(). With mSwapBytes clear, or for a single byte, this is
+     * one Write(). Otherwise it writes one byte at a time from the last position of pSrc to the
+     * first. The shipped program calls it only from WriteVarLen().
      *
      * @param pSrc The source buffer.
      * @param nSize The number of bytes to move.
@@ -147,15 +146,14 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00405958
      * @ghidraAddress PAL: 0x0043f248
      */
-    HxStream &WriteSwapped(const void *pSrc, int nSize);
+    HxStream &WriteNum(const void *pSrc, int nSize);
 
     /**
      * Read a string with a variable-length size prefix into a fixed buffer.
      *
      * The length comes from ReadVarLen(). A string shorter than nDestSize is read whole and
      * terminated. A longer one is cut to `nDestSize - 1` bytes and terminated, and the read
-     * position then skips the rest of the string. The shipped program does not call it. The title
-     * is inferred.
+     * position then skips the rest of the string. The shipped program does not call it.
      *
      * @param pszDest The destination buffer.
      * @param nDestSize The size of pszDest in bytes, terminator included.
@@ -163,7 +161,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004057c8
      * @ghidraAddress PAL: 0x0043f0b8
      */
-    HxStream &ReadString(char *pszDest, int nDestSize);
+    HxStream &ReadStr(char *pszDest, int nDestSize);
 
     /**
      * Read a string with a variable-length size prefix into an HxStr.
@@ -183,25 +181,25 @@ public:
      * Follow UnderlyingStream() from this stream until a stream reports none, and report that
      * stream.
      *
-     * The shipped program does not call it. The title is inferred.
+     * The shipped program does not call it.
      *
      * @return The innermost stream, which is this stream when it reads through no other.
      * @ghidraAddress NTSC-U/C: 0x00405a98
      * @ghidraAddress PAL: 0x0043f388
      */
-    HxStream *BaseStream();
+    HxStream *GetRootStream();
 
     /**
      * Status value of a stream with nothing wrong.
      *
-     * HxIDataChunk loads the four status values from memory rather than as immediates. That places
-     * them as class constants defined in this class's translation unit. HxMemStream writes the same
-     * two values, 0 and 1, as immediates. The names of all four are inferred.
+     * HxIDataChunk loads the four status values from memory rather than as immediates. The memory
+     * loads place them as class constants defined in this class's translation unit. HxMemStream
+     * writes the same two values, 0 and 1, as immediates. The name of kStatusEnd is inferred.
      *
      * @ghidraAddress NTSC-U/C: 0x00816d40
      * @ghidraAddress PAL: 0x00859cb8
      */
-    static const int kStatusOk;
+    static const int goodbit;
 
     /**
      * Status value of a stream whose read position arrived at the end of its data.
@@ -212,25 +210,25 @@ public:
     static const int kStatusEnd;
 
     /**
-     * Status bit a seek outside a chunk's bounds would set. Tell() reports -1 while it is set.
+     * Status bit a seek outside a chunk's bounds would set. GetMarker() reports -1 while it is set.
      *
      * @ghidraAddress NTSC-U/C: 0x00816d48
      * @ghidraAddress PAL: 0x00859cc0
      */
-    static const int kStatusRange;
+    static const int failbit;
 
     /**
-     * Second status bit Tell() and Seek() of HxIDataChunk test. No writer is recovered.
+     * Second status bit GetMarker() and SetMarker() of HxIDataChunk test. No writer is recovered.
      *
      * @ghidraAddress NTSC-U/C: 0x00816d4c
      * @ghidraAddress PAL: 0x00859cc4
      */
-    static const int kStatusFailed;
+    static const int badbit;
 
     /**
      * Non-zero when multi-byte values on the stream are in the opposite byte order.
      *
-     * ReadSwapped() tests it and the constructor clears it. Public because HxIDataChunk copies it
+     * ReadNum() tests it and the constructor clears it. Public because HxIDataChunk copies it
      * from another stream object and the image exposes no accessor.
      *
      * +0x00
@@ -249,7 +247,7 @@ protected:
     // Status word. HxMemStream stores 1 once the read position arrives at the end of the data and
     // 0 when a seek clamps to the start.
     int mStatus;
-    // When non-zero, HxMemStream::Read() reports a fatal error rather than a short read. Only
+    // When non-zero, HxMemStream::ReadData() reports a fatal error rather than a short read. Only
     // HxIDataChunk's constructors set it.
     int mFatalOnEnd;
 };
@@ -257,7 +255,7 @@ protected:
 /**
  * Read a variable-length quantity, seven bits per byte, most significant group first.
  *
- * The value is cleared and each byte read through HxStream::ReadSwapped() adds its low seven bits
+ * The value is cleared and each byte read through HxStream::ReadNum() adds its low seven bits
  * after a seven-bit shift, until a byte with its top bit clear ends the quantity. That is the
  * Standard MIDI File encoding. Mid::Reader reads delta times and meta lengths through it, and
  * the two string readers in HxStream's translation unit read their length prefixes through it.
@@ -276,7 +274,7 @@ HxStream &ReadVarLen(int &nValue, HxStream &stream);
  *
  * The encoding ReadVarLen() reads. The groups are packed into one word, lowest group in the lowest
  * byte and every higher group marked with the continuation bit, and the word's bytes are written
- * lowest first through HxStream::WriteSwapped(). The value is shifted arithmetically, so a
+ * lowest first through HxStream::WriteNum(). The value is shifted arithmetically, so a
  * negative value never terminates. The shipped program does not call it. The title is inferred.
  *
  * @param nValue The quantity.

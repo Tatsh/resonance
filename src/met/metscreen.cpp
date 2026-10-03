@@ -314,26 +314,26 @@ void MetScreen::ResolveAnimationViews() {
     {
         HxStr name(FormatString(kEnterAnimationFormat,
                                 mScreenName.mStr != nullptr ? mScreenName.mStr : g_szEmptyString));
-        Rnd::Object *pObject = Rnd::g_manager.Find(name);
+        Rnd::Object *pObject = Rnd::TheManager.Find(name);
         mEnterAnim = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
     }
     {
         HxStr name(FormatString(kExitAnimationFormat,
                                 mScreenName.mStr != nullptr ? mScreenName.mStr : g_szEmptyString));
-        Rnd::Object *pObject = Rnd::g_manager.Find(name);
+        Rnd::Object *pObject = Rnd::TheManager.Find(name);
         mBackAnim = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
     }
-    mAnimEndFrame = mEnterAnim != nullptr ? mEnterAnim->EndFrame() : 0.0f;
+    mAnimEndFrame = mEnterAnim != nullptr ? mEnterAnim->FilteredFrameEnd() : 0.0f;
 }
 
 // NTSC-U/C: 0x0038b1b0, PAL: 0x003bc8a8
 void MetScreen::ResolveContainerViews() {
     ResolveAnimationViews();
     HxStr name = mContainerName + kViewSuffix;
-    Rnd::Object *pObject = Rnd::g_manager.Find(name);
+    Rnd::Object *pObject = Rnd::TheManager.Find(name);
     mView = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
     if (mView != nullptr) {
-        mView->ReleaseAnimsRefs();
+        mView->RemoveAllAnims();
     } else {
         Fatal(" the screen %s doesn't have a valid view!\n",
               mContainerName.mStr != nullptr ? mContainerName.mStr : g_szEmptyString);
@@ -522,7 +522,7 @@ void MetScreen::OnExitFinished() {
 }
 
 // NTSC-U/C: 0x003907a8, PAL: 0x003c2078
-void MetScreen::HandleMessage([[maybe_unused]] Message *pMsg) {
+void MetScreen::DispatchPriv([[maybe_unused]] Message *pMsg) {
 }
 
 // NTSC-U/C: 0x00390140, PAL: 0x003c1a10

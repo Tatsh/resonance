@@ -39,7 +39,7 @@ Py::Object ScriptAddPowerup(Py::Tuple args) {
                 CaughtPowerbarMsg message;
                 message.mKind = static_cast<HudItemKind>(nKind);
                 message.mPlayer = *it;
-                (*it)->Handle(&message);
+                (*it)->Dispatch(&message);
                 break;
             }
         }

@@ -10,7 +10,7 @@ class Message;
  *
  * It has MsgSource at offset 0 and MsgSink at `+0x14`. The primary table at `0x007dcc78` retains
  * MsgSource::AddSink() and MsgSource::RemoveSink(), and the MsgSink table at `0x007dcc50` adjusts
- * `this` by `-20`, retains MsgSink::Handle(), and fills slot 3 with HandleMessage() below.
+ * `this` by `-20`, retains MsgSink::Dispatch(), and fills slot 3 with DispatchPriv() below.
  * GrooveWorld's setup routine at `0x0018cce8` creates the one instance with a 0x18-byte allocation.
  * The allocation has no room for a member beyond the two bases.
  *
@@ -30,5 +30,5 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00195b70
      * @ghidraAddress PAL: 0x0019b808
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 };

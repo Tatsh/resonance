@@ -41,12 +41,12 @@ namespace Rnd {
  *
  * Five vtables belong to the class, each identified by a GetTypeInfo slot addressing `0x005bb800`
  * and by an adjustment matching its subobject offset. The Drawable table at `0x00834220` adjusts
- * by `-0xe0` and overrides DrawSelf(). The Transformable table at `0x00834248` adjusts by `-0x30`
- * and overrides UpdateWorldXfm(). The Collideable table at `0x00834268` adjusts by `-0x18` and
- * overrides Collide(). The Animatable table at `0x00834288` has a zero adjustment and overrides
- * SetFrameSelf(). The Object subobject table at `0x008342b0` adjusts by `-0x130` and stores the
- * seven Object virtuals. Every table ends in an all-zero entry, which is the terminator rather
- * than a null slot. No table gains a slot past the own count of its base. This class therefore
+ * by `-0xe0` and overrides DrawShowing(). The Transformable table at `0x00834248` adjusts by
+ * `-0x30` and overrides UpdateWorldXfm(). The Collideable table at `0x00834268` adjusts by `-0x18`
+ * and overrides FindCollisions(). The Animatable table at `0x00834288` has a zero adjustment and
+ * overrides SetFrameSelf(). The Object subobject table at `0x008342b0` adjusts by `-0x130` and
+ * stores the seven Object virtuals. Every table ends in an all-zero terminator entry rather than a
+ * null slot. No table gains a slot past the own count of its base. This class therefore
  * declares no virtual of its own.
  *
  * The member and section titles come from the text the dumps write: "[Arena]", "loopDist:",
@@ -108,7 +108,8 @@ public:
      * The image supplies no name for the type or for either member, so both are inferred from
      * their use. The record is 8 bytes, which the element size the list allocation passes to the
      * node tagger establishes. SetFrameSelf() writes each section's view and its sort key into the
-     * entry of the same index, sorts the list, and DrawSelf() then draws the views in list order.
+     * entry of the same index, sorts the list, and DrawShowing() then draws the views in list
+     * order.
      */
     struct DrawEntry {
         /**
@@ -244,7 +245,7 @@ public:
     Vector3 &LoopDist();
 
     /**
-     * Install the creator hook and register the class with Rnd::g_manager under the key "Arena".
+     * Install the creator hook and register the class with Rnd::TheManager under the key "Arena".
      *
      * Rnd::Manager::Init() also expands this inline.
      *
@@ -370,7 +371,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005bc020
      * @ghidraAddress PAL: 0x005fe6e8
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
     /**
      * Recompute the world transform, and then that of every showing section view.
@@ -396,7 +397,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005bc090
      * @ghidraAddress PAL: 0x005fe758
      */
-    virtual void Collide(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Ray &ray, HitSink &sink);
 
     /**
      * Place every section and rebuild the draw order.
@@ -435,8 +436,8 @@ private:
     float mLoopFrames;              // +0x110
     std::vector<Section> mSections; // +0x114
     // +0x120 The sections' views in drawing order. The two hit-list helpers resize it to the
-    // section count and empty it again, SetFrameSelf() refills and sorts it, DrawSelf() walks it,
-    // and Replace() clears an entry rather than repointing it. Neither dump writes it and the
+    // section count and empty it again, SetFrameSelf() refills and sorts it, DrawShowing() walks
+    // it, and Replace() clears an entry rather than repointing it. Neither dump writes it and the
     // serialiser does not touch it, so the title is inferred.
     std::list<DrawEntry> mDrawOrder;
 };

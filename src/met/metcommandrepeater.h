@@ -51,7 +51,7 @@ public:
      *
      * The record of pad nPadIndex is rearmed when the command is not 0 or when the record already
      * belongs to nButton. It then takes the button and the command, starts the three-second
-     * initial delay, and records the current time. MetRenderer::HandleMessage() is the one caller,
+     * initial delay, and records the current time. MetRenderer::DispatchPriv() is the one caller,
      * and it runs the routine only for a `joy ` reading whose command is one of 0, 1, 2, 3, 4,
      * 0x10, 0x11, 0x12, or 0x13.
      *

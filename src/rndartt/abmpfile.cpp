@@ -80,18 +80,6 @@ constexpr unsigned char kRleDelta = 2;
 constexpr int kRow4Mask = 0xfff8;
 constexpr int kRowWordMask = 0xfffc;
 
-// NTSC-U/C: 0x008e68e0, PAL: 0x0092b8e0
-BmpFileHeader s_readFileHeader;
-
-// NTSC-U/C: 0x008e68f0, PAL: 0x0092b8f0
-BmpInfoHeader s_readInfoHeader;
-
-// NTSC-U/C: 0x008e6918, PAL: 0x0092b918
-BmpFileHeader s_writeFileHeader;
-
-// NTSC-U/C: 0x008e6928, PAL: 0x0092b928
-BmpInfoHeader s_writeInfoHeader;
-
 // NTSC-U/C: 0x007a5768, PAL: 0x007e9468
 // the zero bytes each written row is padded with.
 const unsigned char kRowPadding[kRowAlignment] = {0, 0, 0, 0};
@@ -104,13 +92,17 @@ inline unsigned char SwapNibbles(unsigned char nByte) {
 
 // NTSC-U/C: 0x0061c688, PAL: 0x0065d218
 int ABmpFile::StartRead() {
-    fread(&s_readFileHeader, 1, kFileHeaderSize, mFile);
-    fread(&s_readInfoHeader, 1, kInfoHeaderSize, mFile);
+    // NTSC-U/C: 0x008e68e0, PAL: 0x0092b8e0
+    static BmpFileHeader buffHdr;
+    // NTSC-U/C: 0x008e68f0, PAL: 0x0092b8f0
+    static BmpInfoHeader buffInfo;
+    fread(&buffHdr, 1, kFileHeaderSize, mFile);
+    fread(&buffInfo, 1, kInfoHeaderSize, mFile);
     BmpHeader header;
-    header.mType = s_readFileHeader.mType;
-    header.mFileSize = s_readFileHeader.mFileSize;
-    header.mPixelOffset = s_readFileHeader.mPixelOffset;
-    header.mInfo = s_readInfoHeader;
+    header.mType = buffHdr.mType;
+    header.mFileSize = buffHdr.mFileSize;
+    header.mPixelOffset = buffHdr.mPixelOffset;
+    header.mInfo = buffInfo;
     if (header.mType != kBmpType || header.mInfo.mSize != kInfoHeaderSize ||
         header.mInfo.mPlanes != kPlaneCount || header.mInfo.mBitCount == kUnsupportedBitCount) {
         return kAGfxFileBadFormat;
@@ -145,7 +137,7 @@ int ABmpFile::StartRead() {
 }
 
 // NTSC-U/C: 0x0061c860, PAL: 0x0065d3f0
-int ABmpFile::ReadImage(ABitmap *pImage, int *pbEnd) {
+int ABmpFile::ReadFrame(ABitmap *pImage, int *pbEnd) {
     if (mImageRead != 0) {
         *pbEnd = 1;
         return kAGfxFileOk;
@@ -211,6 +203,10 @@ int ABmpFile::ReadImage(ABitmap *pImage, int *pbEnd) {
 
 // NTSC-U/C: 0x0061ca78, PAL: 0x0065d608
 int ABmpFile::Write(const ABitmap &bitmap) {
+    // NTSC-U/C: 0x008e6918, PAL: 0x0092b918
+    static BmpFileHeader buffHdr;
+    // NTSC-U/C: 0x008e6928, PAL: 0x0092b928
+    static BmpInfoHeader buffInfo;
     BmpHeader header;
     header.mType = kBmpType;
     header.mPixelOffset = kPixelOffsetDirect;
@@ -220,9 +216,9 @@ int ABmpFile::Write(const ABitmap &bitmap) {
     header.mReserved1 = 0;
     header.mReserved2 = 0;
     header.mFileSize = header.mPixelOffset + bitmap.mHeight * bitmap.mBytesPerRow;
-    s_writeFileHeader.mType = header.mType;
-    s_writeFileHeader.mFileSize = header.mFileSize;
-    s_writeFileHeader.mPixelOffset = header.mPixelOffset;
+    buffHdr.mType = header.mType;
+    buffHdr.mFileSize = header.mFileSize;
+    buffHdr.mPixelOffset = header.mPixelOffset;
 
     header.mInfo.mSize = kInfoHeaderSize;
     header.mInfo.mWidth = bitmap.mWidth;
@@ -247,9 +243,9 @@ int ABmpFile::Write(const ABitmap &bitmap) {
     header.mInfo.mYPixelsPerMeter = kPixelsPerMeter;
     header.mInfo.mColorsUsed = bitmap.mFormat == kABitmapFormatLinear8 ? kPaletteEntryCount : 0;
     header.mInfo.mColorsImportant = header.mInfo.mColorsUsed;
-    s_writeInfoHeader = header.mInfo;
-    fwrite(&s_writeFileHeader, 1, kFileHeaderSize, mFile);
-    fwrite(&s_writeInfoHeader, 1, kInfoHeaderSize, mFile);
+    buffInfo = header.mInfo;
+    fwrite(&buffHdr, 1, kFileHeaderSize, mFile);
+    fwrite(&buffInfo, 1, kInfoHeaderSize, mFile);
 
     if (bitmap.mFormat == kABitmapFormatLinear8) {
         unsigned int aEntries[kPaletteEntryCount];

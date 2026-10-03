@@ -8,7 +8,7 @@ namespace {
 
 // The compiler generated the initialiser and destructor pair at 0x00198c58 for this definition.
 // NTSC-U/C: 0x00680f50, PAL: 0x006c21a0
-Application g_app;
+Application s_app;
 
 } // namespace
 
@@ -40,5 +40,5 @@ int Application::ExitInstance() {
 
 // NTSC-U/C: 0x00198da8, PAL: 0x0019eaf8
 Application *Application::shared() {
-    return &g_app;
+    return &s_app;
 }

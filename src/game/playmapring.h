@@ -64,5 +64,5 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0012e430
      * @ghidraAddress PAL: 0x0012eba8
      */
-    virtual int GetExtent();
+    virtual int GetLength() const;
 };

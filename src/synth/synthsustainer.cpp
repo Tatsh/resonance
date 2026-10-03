@@ -20,11 +20,11 @@ SynthSustainer::~SynthSustainer() {
 }
 
 // NTSC-U/C: 0x001d2a10, PAL: 0x001d88c8
-void SynthSustainer::HandleMessage(Message *pMsg) {
+void SynthSustainer::DispatchPriv(Message *pMsg) {
     unsigned dwType = pMsg->Type();
-    if (dwType == g_dwSustainNoteMsgType) {
+    if (dwType == SustainNoteMsg::sID) {
         HandleSustainNote(static_cast<SustainNoteMsg *>(pMsg));
-    } else if (dwType == g_dwStdMidiMsgType) {
+    } else if (dwType == StdMidiMsg::sID) {
         HandleStdMidi(static_cast<StdMidiMsg *>(pMsg));
     }
 }
@@ -48,7 +48,7 @@ void SynthSustainer::HandleStdMidi(StdMidiMsg *pMsg) {
         if (std::find(mSustained.begin(), mSustained.end(), nNote) != mSustained.end()) {
             return;
         }
-        mSink->Handle(pMsg);
+        mSink->Dispatch(pMsg);
         std::vector<unsigned char>::iterator sounding =
             std::find(mSounding.begin(), mSounding.end(), nNote);
         if (sounding != mSounding.end()) {
@@ -58,12 +58,12 @@ void SynthSustainer::HandleStdMidi(StdMidiMsg *pMsg) {
         std::vector<unsigned char>::iterator held =
             std::find(mSustained.begin(), mSustained.end(), nNote);
         if (held == mSustained.end()) {
-            mSink->Handle(pMsg);
+            mSink->Dispatch(pMsg);
             mSounding.push_back(nNote);
         } else {
             mSustained.erase(held);
         }
     } else {
-        mSink->Handle(pMsg);
+        mSink->Dispatch(pMsg);
     }
 }

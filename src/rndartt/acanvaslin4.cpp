@@ -78,8 +78,8 @@ void ACanvasLin4::DrawBitmapLin4U(const ABitmap &source, int nX, int nY) {
         return;
     }
     for (int nRow = 0; nRow < source.mHeight; ++nRow) {
-        Unpack4(pSourceRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
-        DrawBitmapRowLin8U(&source, g_abCanvasRowScratch, nX, nY + nRow);
+        Unpack4(pSourceRow, ACanvas::tempBuff, source.mWidth, source.mOddNibbleStart);
+        DrawBitmapRowLin8U(&source, ACanvas::tempBuff, nX, nY + nRow);
         pSourceRow += source.mBytesPerRow;
     }
 }
@@ -107,8 +107,8 @@ void ACanvasLin4::DrawBitmapRle8U(const ABitmap &source, int nX, int nY) {
                                    static_cast<int>(source.mTransparentColor) :
                                    kARleReaderNoTransparentValue;
     for (int nRow = nY; nRow < nY + source.mHeight; ++nRow) {
-        (void)reader.UnpackRow(g_abCanvasRowScratch); // The advanced destination is discarded.
-        DrawBitmapRowLin8U(&source, g_abCanvasRowScratch, nX, nRow);
+        (void)reader.UnpackRow(ACanvas::tempBuff); // The advanced destination is discarded.
+        DrawBitmapRowLin8U(&source, ACanvas::tempBuff, nX, nRow);
     }
 }
 

@@ -24,7 +24,7 @@ constexpr int kNoInputSlot = -1;
  * Three vtables belong to it, each walked to its all-zero terminator rather than counted from the
  * slot titles, which understate every one of them. The primary at `0x007d2170` has 21 entries, so
  * this class declares 19 virtuals of its own after slot 0 and the destructor. The `MsgSink` table
- * at `0x007d2148` has 4 and overrides only `HandleMessage`, and the `MsgSource` table at
+ * at `0x007d2148` has 4 and overrides only `DispatchPriv`, and the `MsgSource` table at
  * `0x007d2120` has 4 and overrides nothing, leaving `AddSink` and `RemoveSink` as inherited.
  *
  * Almost all of the primary table is inert defaults: slots 2 and 4 return -1, six return 0, two
@@ -185,7 +185,7 @@ public:
      *
      * Slot 12. Empty here. LocalPlayer runs PowerupPlacer::Deactivate(), the counterpart of the
      * PowerupPlacer::Activate() that AnnounceState() runs. The image has no caller of the slot but
-     * CallDeactivatePlacer(), itself uncalled. The title is inferred from the forwarding alone.
+     * StopMF(), itself uncalled. The title is inferred from the forwarding alone.
      *
      * @ghidraAddress NTSC-U/C: 0x00132d30
      * @ghidraAddress PAL: 0x00133570
@@ -302,13 +302,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00133240
      * @ghidraAddress PAL: 0x00133a90
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     // Declared in recovered offset order. The base subobjects occupy +0x00 through +0x1f.
     /**
      * Identifier a message addresses this player by.
      *
-     * Print() writes it after the "{player " literal and HandleMessage compares it against a
+     * Print() writes it after the "{player " literal and DispatchPriv compares it against a
      * field of an incoming message. Gem reads it directly at `0x001a2608` and `0x001a2d84` from
      * outside the hierarchy, and the image exposes no accessor. The member is therefore public
      * here. A friend declaration for Gem fits the image equally well.
@@ -407,7 +407,7 @@ public:
     /**
      * Add a captured phrase's score and juice, announcing both.
      *
-     * LocalPlayer::HandleMessage() and the routine at `0x00122be8` are the callers.
+     * LocalPlayer::DispatchPriv() and the routine at `0x00122be8` are the callers.
      *
      * @param msg The capture.
      * @ghidraAddress NTSC-U/C: 0x001331c8
@@ -418,14 +418,14 @@ public:
     /**
      * Report whether the player has an input slot.
      *
-     * Inline, and TrackSelector::HandleMessage() expands it. The address is its uncalled
-     * out-of-line copy. The title is inferred.
+     * Inline, and TrackSelector::DispatchPriv() expands it. The address is its uncalled
+     * out-of-line copy.
      *
      * @return Non-zero when GetInputSlot() reports a value other than -1.
      * @ghidraAddress NTSC-U/C: 0x00132c30
      * @ghidraAddress PAL: 0x00133470
      */
-    int HasInputSlot() {
+    int IsLocal() {
         return GetInputSlot() != kNoInputSlot;
     }
 
@@ -474,7 +474,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00132cd0
      * @ghidraAddress PAL: 0x00133510
      */
-    int CallAnnounceState();
+    int StartMF();
 
     /**
      * Run DeactivatePlacer() and report zero.
@@ -485,11 +485,11 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00132d00
      * @ghidraAddress PAL: 0x00133540
      */
-    int CallDeactivatePlacer();
+    int StopMF();
 
 private:
     // NTSC-U/C: 0x00133210, PAL: 0x00133a60
-    // Inline, and HandleMessage() expands it. Adds the packet's delta without notifying when the
+    // Inline, and DispatchPriv() expands it. Adds the packet's delta without notifying when the
     // packet names this player.
     void OnUpdateScore(UpdateScorePacket *pPacket);
 

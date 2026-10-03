@@ -18,7 +18,7 @@ Message *CrippleMsg::Clone() {
 
 // NTSC-U/C: 0x003e27f8, PAL: 0x0041ac98
 int CrippleMsg::Type() {
-    return g_nCrippleMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x003e2808, PAL: 0x0041aca8

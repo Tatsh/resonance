@@ -49,7 +49,7 @@ class TickClock;
  * RawController subobject addresses `0x007dc628`, whose three entries each adjust `this` by `-4`,
  * and the MsgSink subobject addresses `0x007dc648` with no adjustment. The primary table has four
  * entries and a zero terminator at index 4, the type function at `0x001936f8`, the destructor at
- * `0x0018c368`, the inherited MsgSink::Handle() at `0x00105158`, and the HandleMessage() override
+ * `0x0018c368`, the inherited MsgSink::Dispatch() at `0x00105158`, and the DispatchPriv() override
  * below. The secondary table has three entries and a zero terminator at index 3, the same type
  * function and destructor followed by the RawController override below.
  *
@@ -99,7 +99,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00195388
      * @ghidraAddress PAL: 0x0019b008
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Report a controller reading. Slot 2 of the secondary table.
@@ -174,7 +174,7 @@ public:
     /**
      * Hand a CripplePacket to the delayer.
      *
-     * HandleMessage() expands this body inline, and a second out-of-line copy sits at
+     * DispatchPriv() expands this body inline, and a second out-of-line copy sits at
      * `0x00194b20`.
      *
      * @param pMsg The packet.
@@ -186,7 +186,7 @@ public:
     /**
      * Hand a BumpPacket to the track selector.
      *
-     * HandleMessage() expands this body inline.
+     * DispatchPriv() expands this body inline.
      *
      * @param pMsg The packet.
      * @ghidraAddress NTSC-U/C: 0x00194b50
@@ -205,7 +205,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00194b80
      * @ghidraAddress PAL: 0x0019a800
      */
-    void SetNetLink(MsgSink *pSink, MsgSource *pSource);
+    void SetNetIO(MsgSink *pSink, MsgSource *pSource);
 
     /**
      * Create the level and begin reading its MIDI file asynchronously.

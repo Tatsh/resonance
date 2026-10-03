@@ -39,7 +39,7 @@ void PhraseNeutralizer::PostTrackNeutralizedMsg(NeutralizeMsg *pMsg) {
     const int nFirstBar = pMsg->mBar + 1;
     const int nEndBar = nFirstBar + kNeutralizedBars;
     for (int nBar = nFirstBar; nBar < nEndBar; ++nBar) {
-        Player *pOwner = mPhraseMgr->GetPhraseOwner(nBar);
+        Player *pOwner = mPhraseMgr->GetOwner(nBar);
         if (pOwner->IsNull()) {
             continue;
         }
@@ -69,8 +69,8 @@ void PhraseNeutralizer::PostTrackNeutralizedMsg(NeutralizeMsg *pMsg) {
 }
 
 // NTSC-U/C: 0x001c1700, PAL: 0x001c7548
-void PhraseNeutralizer::HandleMessage(Message *pMsg) {
-    if (pMsg->Type() == g_nNeutralizeMsgType) {
+void PhraseNeutralizer::DispatchPriv(Message *pMsg) {
+    if (pMsg->Type() == NeutralizeMsg::sID) {
         PostTrackNeutralizedMsg(static_cast<NeutralizeMsg *>(pMsg));
     }
 }

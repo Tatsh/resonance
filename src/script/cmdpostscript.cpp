@@ -32,7 +32,7 @@ public:
     // NTSC-U/C: 0x0015a408, PAL: 0x0015c158
     virtual void Execute() {
         ScriptMsg msg(mScript);
-        Application::shared()->GetScriptSink()->Handle(&msg);
+        Application::shared()->GetScriptSink()->Dispatch(&msg);
     }
 
     // The word at 0x00676e68, which the image initialises to zero.

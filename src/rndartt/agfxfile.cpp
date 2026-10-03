@@ -56,7 +56,7 @@ AGfxFile *AGfxFile::Open(const char *pszPath, int *pnError, bool bRead) {
 }
 
 // NTSC-U/C: 0x005f9d18, PAL: 0x0063aa28
-int AGfxFile::WriteBitmap(const char *pszPath, const ABitmap &bitmap) {
+int AGfxFile::Write(const char *pszPath, const ABitmap &bitmap) {
     int nError = kAGfxFileOk;
     AGfxFile *pGfxFile = Open(pszPath, &nError, false);
     if (nError == kAGfxFileOk) {

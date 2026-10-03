@@ -23,9 +23,9 @@ constexpr float kFadeLength = 250.0f;
 // NTSC-U/C: 0x00416dd8, PAL: 0x00450ac0
 HudTextMessage::HudTextMessage(const HxStr &name)
     : mText(nullptr), mStart(kMessageIdle), mActive(0) {
-    mBlur = dynamic_cast<Rnd::Blur *>(Rnd::g_manager.Find(name + ".blur"));
-    mText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(name + ".txt"));
-    mAnim = dynamic_cast<Rnd::TransAnim *>(Rnd::g_manager.Find(name + ".tnm"));
+    mBlur = dynamic_cast<Rnd::Blur *>(Rnd::TheManager.Find(name + ".blur"));
+    mText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(name + ".txt"));
+    mAnim = dynamic_cast<Rnd::TransAnim *>(Rnd::TheManager.Find(name + ".tnm"));
 
     mFont = mText->GetFont();
     mFontSize = mFont->mSize;

@@ -301,17 +301,17 @@ void MetLoadFreqBaseScreen::OnExitFinished() {
 void MetLoadFreqBaseScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
-    Rnd::Object *pLeft = Rnd::g_manager.Find(HxStr(kLeftArrowObject));
+    Rnd::Object *pLeft = Rnd::TheManager.Find(HxStr(kLeftArrowObject));
     mLeftArrow = pLeft != nullptr ? dynamic_cast<Rnd::Button *>(pLeft) : nullptr;
 
-    Rnd::Object *pRight = Rnd::g_manager.Find(HxStr(kRightArrowObject));
+    Rnd::Object *pRight = Rnd::TheManager.Find(HxStr(kRightArrowObject));
     mRightArrow = pRight != nullptr ? dynamic_cast<Rnd::Button *>(pRight) : nullptr;
 }
 
 // NTSC-U/C: 0x00292620, PAL: 0x002ae700
 void MetLoadFreqBaseScreen::UpdateNameLabel() {
     HxStr username((*mIdentityList)[mSelectedIdentity]->mAppearance.mUserName);
-    mButtonList->ButtonAt(kNameButtonIndex)->mText->SetText(username);
+    mButtonList->GetButton(kNameButtonIndex)->mText->SetText(username);
 }
 
 // NTSC-U/C: 0x00296a50, PAL: 0x002b49b0
@@ -425,7 +425,7 @@ void MetLoadFreqBaseScreen::UpdateCycleArrows() {
 
 // NTSC-U/C: 0x00292508, PAL: 0x002ae5c8
 void MetLoadFreqBaseScreen::RefreshSelection() {
-    Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr(kPreviewMaterial)));
+    Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr(kPreviewMaterial)));
     (*mIdentityList)[mSelectedIdentity]->AttachToBurnSlot(kPreviewBurnSlot);
     pMat->mStages[kPreviewStage].SetTex(mBurnTexture);
     UpdateNameLabel();

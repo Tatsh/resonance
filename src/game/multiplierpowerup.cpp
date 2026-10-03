@@ -23,7 +23,7 @@ int MultiplierPowerup::Type() {
 // NTSC-U/C: 0x001ca218, PAL: 0x001d00b8
 int MultiplierPowerup::Deploy(int, int nBar, Player *pPlayer, int) {
     MultiplierMsg msg(pPlayer, nBar, kRequestedFactor);
-    pPlayer->Handle(&msg);
+    pPlayer->Dispatch(&msg);
     PlaySoundByName("SND_DEPLOY_MULTIPLIER");
     return kDeployed;
 }

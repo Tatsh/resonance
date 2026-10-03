@@ -104,7 +104,7 @@ public:
     /**
      * The axis value. +0x08
      *
-     * Public because AxeFX::HandleMessage() at `0x0019b538` and AxeFX::OnAxisFX() at `0x0019b498`
+     * Public because AxeFX::DispatchPriv() at `0x0019b538` and AxeFX::OnAxisFX() at `0x0019b498`
      * read it directly, and the image has no accessor.
      */
     float mValue;

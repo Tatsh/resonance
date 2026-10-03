@@ -27,6 +27,14 @@ class OBStream;
 class StdMidiMsg : public MuseMsg {
 public:
     /**
+     * Identity that Type() reports.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d01c4
+     * @ghidraAddress PAL: 0x0071395c
+     */
+    static unsigned int sID;
+
+    /**
      * Construct a message with the song position at kMBTInfinity and the three bytes unset.
      *
      * Inline. New() and the Mixer's stack builds expand it. A declaration is required because the
@@ -38,7 +46,7 @@ public:
     /**
      * Construct one channel message at a song position.
      *
-     * Inline, with no address of its own. NotePlayer::PostStdMidiMsg() at `0x001b3fb8` expands it
+     * Inline, with no address of its own. NotePlayer::NoteOn() at `0x001b3fb8` expands it
      * on its stack, storing the position and then the three bytes in order.
      *
      * @param nTick The song position, in MIDI ticks.
@@ -74,7 +82,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_dwStdMidiMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x003dc010
      * @ghidraAddress PAL: 0x00414448
      */
@@ -140,15 +148,3 @@ public:
     unsigned char mData1;
     unsigned char mData2;
 };
-
-/**
- * Identity that StdMidiMsg::Type() reports.
- *
- * This word belongs to StdMidiMsg because StdMidiMsg::Type() at `0x003dc010` returns it. Several
- * handlers elsewhere read the same word to compare against it, which is the expected shape for a
- * registered identity and does not make the word theirs.
- *
- * @ghidraAddress NTSC-U/C: 0x006d01c4
- * @ghidraAddress PAL: 0x0071395c
- */
-extern unsigned int g_dwStdMidiMsgType;

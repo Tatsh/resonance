@@ -25,7 +25,7 @@ class Mat;
  *
  * The table at `0x00817390` has four entries, the same length as MsgSink's table at `0x007ccc40`,
  * and the class therefore introduces no virtual. It overrides the destructor at slot 1 and
- * HandleMessage() at slot 3, and inherits MsgSink::Handle() at slot 2.
+ * DispatchPriv() at slot 3, and inherits MsgSink::Dispatch() at slot 2.
  *
  * The object is 0x2c bytes, the size Renderer's constructor requests under the MsgSink tag at
  * `0x0042c8fc`. The constructor records the object in g_pTnlArena and the destructor clears it.
@@ -55,7 +55,7 @@ public:
          * @ghidraAddress PAL: 0x00446310
          */
         ~ScreenMesh() {
-            mMesh->SetMaterial(mMat);
+            mMesh->SetMat(mMat);
         }
 
         /**
@@ -128,7 +128,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00406ff0
      * @ghidraAddress PAL: 0x00440950
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Advance the screen animation to one song position.
@@ -143,19 +143,19 @@ public:
     void SetFrame(float flFrame);
 
 private:
-    // PointAmountMsg: refresh the leaders. HandleMessage() inlines this, and the out-of-line copy
+    // PointAmountMsg: refresh the leaders. DispatchPriv() inlines this, and the out-of-line copy
     // has no caller.
     void OnPointAmount(PointAmountMsg *pMsg);
 
     // JuiceAmountMsg: pick the level from a solo player's juice, comparing in double precision.
-    // HandleMessage() inlines this, and the out-of-line copy has no caller.
+    // DispatchPriv() inlines this, and the out-of-line copy has no caller.
     void OnJuiceAmount(JuiceAmountMsg *pMsg);
 
-    // WinMsg: raise the level by one for a solo winner. HandleMessage() inlines this, and the
+    // WinMsg: raise the level by one for a solo winner. DispatchPriv() inlines this, and the
     // out-of-line copy has no caller.
     void OnWin(WinMsg *pMsg);
 
-    // Set mJuiceLock to 1 (HandleMessage() then ignores a JuiceAmountMsg), and pass the
+    // Set mJuiceLock to 1 (DispatchPriv() then ignores a JuiceAmountMsg), and pass the
     // neutral level. Nothing calls it or inlines it, and the title is inferred.
     void LockLevel();
 
@@ -172,7 +172,7 @@ private:
     int mGameMode;
 
 public:
-    // Starts at -1, and HandleMessage() acts on a JuiceAmountMsg only while the value is still
+    // Starts at -1, and DispatchPriv() acts on a JuiceAmountMsg only while the value is still
     // -1. It is public because the test-arena script command sets it directly.
     int mJuiceLock;
 

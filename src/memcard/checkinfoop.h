@@ -8,14 +8,14 @@
  * Its RTTI descriptor is at `0x008efba0`. It has single inheritance from `MemcardOp` at offset 0.
  * An instance is 0x28 bytes and the vtable is at `0x0082be80`.
  *
- * Issue() calls `sceMcGetInfo()`, which fills all three result members at once.
+ * Execute() calls `sceMcGetInfo()`, which fills all three result members at once.
  */
 class CheckInfoOp : public MemcardOp {
 public:
     /**
      * Construct an enquiry against one slot.
      *
-     * @param pHandler The receiver Complete() reports to.
+     * @param pHandler The receiver NotifyDone() reports to.
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag Memcard::Cancel() matches on.
      * @ghidraAddress NTSC-U/C: 0x0055e368
@@ -33,13 +33,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055e390
      * @ghidraAddress PAL: 0x0059f660
      */
-    virtual void Issue();
+    virtual void Execute();
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0055d350
      * @ghidraAddress PAL: 0x0059e598
      */
-    virtual void Complete();
+    virtual void NotifyDone();
 
     /**
      * Report kMemcardStatusNotFormatted for `sceMcResNoFormat`, and kMemcardStatusOk for both zero

@@ -13,7 +13,7 @@ class Player;
  * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). Every member but the word at
- * `+0x18` is public because AppTunnel::HandleMessage() at `0x004497e0` reads them directly with no
+ * `+0x18` is public because AppTunnel::DispatchPriv() at `0x004497e0` reads them directly with no
  * accessor in the image. It copies the colour name of mPlayer and draws the gem from mLane between
  * the two frame and blend pairs, converting each frame to a float.
  */

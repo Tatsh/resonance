@@ -28,8 +28,8 @@ MidiChase::~MidiChase() {
 }
 
 // NTSC-U/C: 0x001a6660, PAL: 0x001ac3c8
-void MidiChase::HandleMessage(Message *pMsg) {
-    if (static_cast<unsigned int>(pMsg->Type()) != g_dwStdMidiMsgType) {
+void MidiChase::DispatchPriv(Message *pMsg) {
+    if (static_cast<unsigned int>(pMsg->Type()) != StdMidiMsg::sID) {
         return;
     }
 
@@ -54,7 +54,7 @@ void MidiChase::HandleMessage(Message *pMsg) {
 // NTSC-U/C: 0x001a6900, PAL: 0x001ac668
 void MidiChase::HandleRange(const TickObj<MuseMsg *> *pBegin, const TickObj<MuseMsg *> *pEnd) {
     for (const TickObj<MuseMsg *> *pItem = pBegin; pItem != pEnd; ++pItem) {
-        Handle(pItem->mValue);
+        Dispatch(pItem->mValue);
     }
 }
 
@@ -66,17 +66,17 @@ void MidiChase::Replay(MsgSink *pSink) {
                                mChannel | kStatusControlChange,
                                static_cast<unsigned char>(i),
                                mControllers[i]);
-            pSink->Handle(&message);
+            pSink->Dispatch(&message);
         }
     }
 
     if (mProgram != kUnset) {
         StdMidiMsg message(kMBTInfinity, mChannel | kStatusProgramChange, mProgram, 0);
-        pSink->Handle(&message);
+        pSink->Dispatch(&message);
     }
 
     if (mBendLow != kUnset) {
         StdMidiMsg message(kMBTInfinity, mChannel | kStatusPitchBend, mBendLow, mBendHigh);
-        pSink->Handle(&message);
+        pSink->Dispatch(&message);
     }
 }

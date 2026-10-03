@@ -84,22 +84,22 @@ constexpr int kMaxLoadedLineLength = 1;
 // The stream helpers below reproduce the inline stream operators the binary open-codes.
 
 inline void WriteFloat(Stream &stream, float flValue) {
-    stream.Write(&flValue, sizeof(flValue));
+    stream.WriteLE(&flValue, sizeof(flValue));
 }
 
 inline void WriteInt(Stream &stream, int nValue) {
-    stream.Write(&nValue, sizeof(nValue));
+    stream.WriteLE(&nValue, sizeof(nValue));
 }
 
 // A flag goes out as its low byte.
 inline void WriteFlag(Stream &stream, int bValue) {
     const unsigned char chValue = static_cast<unsigned char>(bValue);
-    stream.WriteBytes(&chValue, sizeof(chValue));
+    stream.Write(&chValue, sizeof(chValue));
 }
 
 inline int ReadFlag(Stream &stream) {
     unsigned char chValue = 0;
-    stream.ReadBytes(&chValue, sizeof(chValue));
+    stream.Read(&chValue, sizeof(chValue));
     return chValue != 0;
 }
 
@@ -116,19 +116,19 @@ inline void WritePlane(Stream &stream, const Plane &plane) {
 inline void ReadPlane(Stream &stream, Plane &plane) {
     Vector3 point;
     point.w = 1.0f;
-    stream.Read(&point.x, sizeof(point.x))
-        .Read(&point.y, sizeof(point.y))
-        .Read(&point.z, sizeof(point.z));
-    stream.Read(&plane.a, sizeof(plane.a))
-        .Read(&plane.b, sizeof(plane.b))
-        .Read(&plane.c, sizeof(plane.c));
+    stream.ReadLE(&point.x, sizeof(point.x))
+        .ReadLE(&point.y, sizeof(point.y))
+        .ReadLE(&point.z, sizeof(point.z));
+    stream.ReadLE(&plane.a, sizeof(plane.a))
+        .ReadLE(&plane.b, sizeof(plane.b))
+        .ReadLE(&plane.c, sizeof(plane.c));
     plane.d = -(point.x * plane.a + point.y * plane.b + point.z * plane.c);
 }
 
 // NTSC-U/C: 0x00529ee0, PAL: 0x0056a530
 Stream &operator>>(Stream &stream, std::list<Plane> &planes) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     planes.resize(nCount);
     for (Plane &plane : planes) {
         ReadPlane(stream, plane);
@@ -139,18 +139,18 @@ Stream &operator>>(Stream &stream, std::list<Plane> &planes) {
 inline void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, sizeof(chTerminator));
+        stream.Write(&chTerminator, sizeof(chTerminator));
         return;
     }
-    stream.WriteBytes(pObject->mName.mStr != nullptr ? pObject->mName.mStr : g_szEmptyString,
-                      pObject->mName.mLen + 1);
+    stream.Write(pObject->mName.mStr != nullptr ? pObject->mName.mStr : g_szEmptyString,
+                 pObject->mName.mLen + 1);
 }
 
 template <class T>
 inline void ReadObjectRef(Stream &stream, T *&refOut) {
     HxStr name(nullptr);
     stream.ReadString(name);
-    refOut = dynamic_cast<T *>(g_manager.Find(name));
+    refOut = dynamic_cast<T *>(TheManager.Find(name));
 }
 
 // DumpText() lists the particles only at this dump level or above.
@@ -438,7 +438,7 @@ Particle *ParticleSys::FreeParticle(Particle *pParticle) {
         return nullptr;
     }
     if (pParticle->mPrev == nullptr) {
-        g_failSink.Print("Tried to refree particle from ")
+        Rnd::TheDbg.Print("Tried to refree particle from ")
             ->Format("\"%s\"", mName.mStr != nullptr ? mName.mStr : g_szEmptyString)
             ->Print("\n");
         return nullptr;
@@ -598,9 +598,9 @@ void ParticleSys::Save(Stream &stream) {
 
 // NTSC-U/C: 0x00523718, PAL: 0x00563ca0
 void ParticleSys::Load(Stream &stream) {
-    stream.Read(&g_nParticleSysLoadRevision, sizeof(g_nParticleSysLoadRevision));
+    stream.ReadLE(&g_nParticleSysLoadRevision, sizeof(g_nParticleSysLoadRevision));
     if (g_nParticleSysLoadRevision > kParticleSysRevision) {
-        g_failSink.Report("Can't load new ParticleSys\n");
+        Rnd::TheDbg.Notify("Can't load new ParticleSys\n");
         return;
     }
     if (g_nParticleSysLoadRevision >= kRevisionBaseRecords) {
@@ -629,14 +629,14 @@ void ParticleSys::Load(Stream &stream) {
                               &mSizeLow,
                               &mSizeHigh};
     for (float *pflValue : apFloatFields) {
-        stream.Read(pflValue, sizeof(*pflValue));
+        stream.ReadLE(pflValue, sizeof(*pflValue));
     }
     Color *apColors[] = {&mStartColorLow, &mStartColorHigh, &mEndColorLow, &mEndColorHigh};
     for (Color *pColor : apColors) {
-        stream.Read(&pColor->r, sizeof(pColor->r));
-        stream.Read(&pColor->g, sizeof(pColor->g));
-        stream.Read(&pColor->b, sizeof(pColor->b));
-        stream.Read(&pColor->a, sizeof(pColor->a));
+        stream.ReadLE(&pColor->r, sizeof(pColor->r));
+        stream.ReadLE(&pColor->g, sizeof(pColor->g));
+        stream.ReadLE(&pColor->b, sizeof(pColor->b));
+        stream.ReadLE(&pColor->a, sizeof(pColor->a));
     }
 
     if (g_nParticleSysLoadRevision < kRevisionSingleCollidePlane) {
@@ -648,29 +648,29 @@ void ParticleSys::Load(Stream &stream) {
         mCollide = ReadFlag(stream);
         ReadPlane(stream, mCollidePlane);
     }
-    stream.Read(&mForce.x, sizeof(mForce.x));
-    stream.Read(&mForce.y, sizeof(mForce.y));
-    stream.Read(&mForce.z, sizeof(mForce.z));
+    stream.ReadLE(&mForce.x, sizeof(mForce.x));
+    stream.ReadLE(&mForce.y, sizeof(mForce.y));
+    stream.ReadLE(&mForce.z, sizeof(mForce.z));
     ReadObjectRef(stream, mMat);
 
     int nMode = 0;
-    stream.Read(&nMode, sizeof(nMode));
+    stream.ReadLE(&nMode, sizeof(nMode));
     mMode = static_cast<Mode>(nMode);
     int nParticles = 0;
-    stream.Read(&nParticles, sizeof(nParticles));
+    stream.ReadLE(&nParticles, sizeof(nParticles));
     mParticles.resize(nParticles);
 
     if (g_nParticleSysLoadRevision >= kRevisionLineLength) {
-        stream.Read(&mLineLength, sizeof(mLineLength));
+        stream.ReadLE(&mLineLength, sizeof(mLineLength));
         if (mLineLength > kMaxLoadedLineLength) {
             mLineLength = kMaxLoadedLineLength; // Yes, the binary discards any longer line.
         }
     }
     if (g_nParticleSysLoadRevision >= kRevisionBubble) {
-        stream.Read(&mBubblePeriod.x, sizeof(mBubblePeriod.x));
-        stream.Read(&mBubblePeriod.y, sizeof(mBubblePeriod.y));
-        stream.Read(&mBubbleSize.x, sizeof(mBubbleSize.x));
-        stream.Read(&mBubbleSize.y, sizeof(mBubbleSize.y));
+        stream.ReadLE(&mBubblePeriod.x, sizeof(mBubblePeriod.x));
+        stream.ReadLE(&mBubblePeriod.y, sizeof(mBubblePeriod.y));
+        stream.ReadLE(&mBubbleSize.x, sizeof(mBubbleSize.x));
+        stream.ReadLE(&mBubbleSize.y, sizeof(mBubbleSize.y));
         mBubble = ReadFlag(stream);
     }
     if (g_nParticleSysLoadRevision >= kRevisionReadZ) {

@@ -34,7 +34,7 @@ constexpr int kTrackSelectorSlotCount = 4;
  * offset 4. Two tables belong to it, the primary at `0x007d37d8` with four entries and the
  * MsgSource subobject table at `0x007d37b0` with four and a `-4` adjustment on every entry. Both
  * run to the same length as their bases, so the class introduces no virtual of its own and
- * overrides only the destructor and HandleMessage().
+ * overrides only the destructor and DispatchPriv().
  *
  * The grid is `kTrackSelectorChannelCount` columns of `kTrackSelectorSlotCount` player pointers at
  * `+0x20`, which makes the object 0xa0 bytes. An unoccupied slot stores the address of the
@@ -92,7 +92,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0013b868
      * @ghidraAddress PAL: 0x0013c1b0
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Exercise the grid against four stand-in players.
@@ -140,7 +140,7 @@ private:
     // NTSC-U/C: 0x0013b6a8, PAL: 0x0013bff0
     int RebuildChannelGrid(BumpPacket *pPacket);
 
-    // The four handlers below are inline, and HandleMessage() expands each. The addresses are
+    // The four handlers below are inline, and DispatchPriv() expands each. The addresses are
     // their uncalled out-of-line copies.
 
     // NTSC-U/C: 0x0013f5a0, PAL: 0x0013ff68
@@ -161,12 +161,12 @@ private:
 
     // Move a player from one channel to another.
     // NTSC-U/C: 0x0013f748, PAL: 0x00140110
-    void RebindLightColumn(Player *pPlayer, int nFromChannel, int nToChannel, int nPayload);
+    void MovePlayer(Player *pPlayer, int nFromChannel, int nToChannel, int nPayload);
 
     // Rebind a channel unless the player already occupies its first slot and its second slot is
     // unoccupied.
     // NTSC-U/C: 0x0013f7a8, PAL: 0x00140170
-    void RebindLightIfChanged(Player *pPlayer, int nChannel, int nPayload);
+    void MovePlayerToBack(Player *pPlayer, int nChannel, int nPayload);
 
     // Move a player the given number of channels from its own, wrapping at the channel count.
     // NTSC-U/C: 0x0013f840, PAL: 0x00140208

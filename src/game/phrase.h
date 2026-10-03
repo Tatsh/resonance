@@ -30,7 +30,7 @@ class Player;
  * Every member is private. AxePhraseMaker::StartPhrase() and Voxer::StartPhrase() write mPlayer
  * at `0x0019bd7c` and `0x001d8aa8`, and AxeOldGemMaker reads mPlayer and mMuse at `0x001a3420`
  * and `0x001a3698`. PhraseDatabase writes mPlayer and reads and writes mScore directly,
- * PhraseMgr::GetPhraseOwner() reads mPlayer, TrackData::AddPhrases() walks mGems directly,
+ * PhraseMgr::GetOwner() reads mPlayer, TrackData::AddPhrases() walks mGems directly,
  * PhrasePlayer reads mPlayer, mGems, and mMuse when it plays a bar, the image exposes no accessor,
  * and friend declarations model that access. Promoting the members to public fits the image equally
  * well.
@@ -188,7 +188,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001b6d88
      * @ghidraAddress PAL: 0x001bcb60
      */
-    void AddValue(int nTick, float flValue);
+    void AddXLocal(int nTick, float flValue);
 
     /**
      * Report the value in force at a song position.

@@ -33,7 +33,7 @@ inline const APalette *ResolvePalette(const ABitmap &source, const ABitmap &canv
     if (canvas.mPalette != nullptr) {
         return canvas.mPalette;
     }
-    return g_pDefaultPalette;
+    return ACanvas::palDefault;
 }
 
 // A palette entry keeps red in its low byte, so the three channels are its three low bytes.

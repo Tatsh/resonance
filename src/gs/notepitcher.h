@@ -28,7 +28,7 @@ class TickClock;
  * It ignores an EraseOffMsg rather than forwarding it, which is the one message the three Pitcher
  * subclasses treat differently from each other.
  *
- * The names of the routines HandleMessage() and Tick() dispatch to come from the message each
+ * The names of the routines DispatchPriv() and Tick() dispatch to come from the message each
  * routine posts rather than from the message it receives.
  */
 class NotePitcher : public Pitcher {
@@ -162,10 +162,10 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x001b3bd0
      * @ghidraAddress PAL: 0x001b99a8
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
+    // The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
     // NTSC-U/C: 0x001b3a38, PAL: 0x001b9810
     void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
 
@@ -188,7 +188,7 @@ private:
     // Copied from the track description's `+0x04`. Matched against an InvalidateSeekerMsg's
     // `+0x08`, so it identifies the track this pitcher serves.
     int mTrack;                  // +0x40
-    Player *mPlayer;             // +0x44, starts at g_nullPlayer
+    Player *mPlayer;             // +0x44, starts at NullPlayer::sInstance
     Mid::MBT mLastErasePosition; // +0x48, MBT(-1), stored and then tested at 0x001b1e60
     Mid::MBT mLastPitchPosition; // +0x4c, starts at kMBTInfinity
     // Copied from the phrase manager's `+0x34` after an initial kMBTInfinity. Turns an elapsed

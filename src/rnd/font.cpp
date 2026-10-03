@@ -110,33 +110,33 @@ void PrintObjectRef(Dbg &sink, const Object *pObject) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 void WriteString(Stream &stream, const HxStr &text) {
-    stream.WriteBytes(StringText(text), text.mLen + 1);
+    stream.Write(StringText(text), text.mLen + 1);
 }
 
 // NTSC-U/C: 0x004cab18, PAL: 0x00508d80
 Stream &operator>>(Stream &stream, LegacyCharInfo &info) {
     HxStr matName(nullptr);
     stream.ReadString(matName);
-    info.mMat = dynamic_cast<Mat *>(g_manager.Find(matName));
-    stream.Read(&info.mWidth, sizeof(info.mWidth));
-    stream.Read(&info.mHeight, sizeof(info.mHeight));
+    info.mMat = dynamic_cast<Mat *>(TheManager.Find(matName));
+    stream.ReadLE(&info.mWidth, sizeof(info.mWidth));
+    stream.ReadLE(&info.mHeight, sizeof(info.mHeight));
     return stream;
 }
 
 // NTSC-U/C: 0x004ce9c0, PAL: 0x0050ccd0
 Stream &operator>>(Stream &stream, std::map<char, LegacyCharInfo> &charMap) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     while (nCount > 0) {
         char chKey = '\0';
-        stream.ReadBytes(&chKey, sizeof(chKey));
+        stream.Read(&chKey, sizeof(chKey));
         stream >> charMap[chKey];
         --nCount;
     }
@@ -259,21 +259,21 @@ void Font::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x004ca720, PAL: 0x00508988
 void Font::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
-    stream.Write(&mType, sizeof(mType));
-    stream.Write(&mHeight, sizeof(mHeight));
-    stream.Write(&mWeight, sizeof(mWeight));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&mType, sizeof(mType));
+    stream.WriteLE(&mHeight, sizeof(mHeight));
+    stream.WriteLE(&mWeight, sizeof(mWeight));
 
     const char chItalic = static_cast<char>(mItalic);
-    stream.WriteBytes(&chItalic, sizeof(chItalic));
+    stream.Write(&chItalic, sizeof(chItalic));
 
-    stream.Write(&mFamily, sizeof(mFamily));
+    stream.WriteLE(&mFamily, sizeof(mFamily));
     WriteString(stream, mName);
     WriteObjectRef(stream, mMat);
-    stream.Write(&mRows, sizeof(mRows));
-    stream.Write(&mCols, sizeof(mCols));
-    stream.Write(&mSize, sizeof(mSize));
-    stream.Write(&mSpace, sizeof(mSpace));
+    stream.WriteLE(&mRows, sizeof(mRows));
+    stream.WriteLE(&mCols, sizeof(mCols));
+    stream.WriteLE(&mSize, sizeof(mSize));
+    stream.WriteLE(&mSpace, sizeof(mSpace));
     WriteString(stream, mChars);
 }
 
@@ -320,45 +320,45 @@ void Font::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
 // NTSC-U/C: 0x004cac20, PAL: 0x00508eb8
 void Font::Load(Stream &stream) {
     int nVersion = 0;
-    stream.Read(&nVersion, sizeof(nVersion));
+    stream.ReadLE(&nVersion, sizeof(nVersion));
     if (nVersion > kSerialVersion) {
-        g_failSink.Report("Can't load new Font\n");
+        Rnd::TheDbg.Notify("Can't load new Font\n");
         return;
     }
 
     RemoveMatRef();
 
-    stream.Read(&mType, sizeof(mType));
-    stream.Read(&mHeight, sizeof(mHeight));
-    stream.Read(&mWeight, sizeof(mWeight));
+    stream.ReadLE(&mType, sizeof(mType));
+    stream.ReadLE(&mHeight, sizeof(mHeight));
+    stream.ReadLE(&mWeight, sizeof(mWeight));
 
     char chItalic = '\0';
-    stream.ReadBytes(&chItalic, sizeof(chItalic));
+    stream.Read(&chItalic, sizeof(chItalic));
     mItalic = chItalic != '\0';
 
-    stream.Read(&mFamily, sizeof(mFamily));
+    stream.ReadLE(&mFamily, sizeof(mFamily));
     stream.ReadString(mName);
 
     if (nVersion > 0) {
         HxStr matName(nullptr);
         stream.ReadString(matName);
-        mMat = dynamic_cast<Mat *>(g_manager.Find(matName));
+        mMat = dynamic_cast<Mat *>(TheManager.Find(matName));
 
         if (nVersion < 2) {
             // The two grid dimensions arrived as integers and are widened here.
             int nRows = 0;
             int nCols = 0;
-            stream.Read(&nRows, sizeof(nRows));
-            stream.Read(&nCols, sizeof(nCols));
+            stream.ReadLE(&nRows, sizeof(nRows));
+            stream.ReadLE(&nCols, sizeof(nCols));
             mRows = static_cast<float>(nRows);
             mCols = static_cast<float>(nCols);
         } else {
-            stream.Read(&mRows, sizeof(mRows));
-            stream.Read(&mCols, sizeof(mCols));
+            stream.ReadLE(&mRows, sizeof(mRows));
+            stream.ReadLE(&mCols, sizeof(mCols));
         }
 
-        stream.Read(&mSize, sizeof(mSize));
-        stream.Read(&mSpace, sizeof(mSpace));
+        stream.ReadLE(&mSize, sizeof(mSize));
+        stream.ReadLE(&mSpace, sizeof(mSpace));
     } else {
         // Revision 0 stored a character map of its own, one material and two floats per character.
         // Every entry is read and then discarded, and neither the material nor the atlas of this
@@ -541,7 +541,7 @@ Font *NewFont(const HxStr &name) {
 
 // NTSC-U/C: 0x006fecb8, PAL: 0x007426b8
 // Null in the image until RegisterFontClass() or Rnd::Manager::Init() fills it,
-// unlike g_pfnNewText.
+// unlike Text::sNew.
 Font *(*g_pfnNewFont)(const HxStr &name);
 
 // NTSC-U/C: 0x004ced40, PAL: 0x0050d078
@@ -565,7 +565,7 @@ Object *CreateRegisteredFont(const HxStr &name) {
 // NTSC-U/C: 0x004ced00, PAL: 0x0050d038
 void RegisterFontClass() {
     g_pfnNewFont = NewFont;
-    g_manager.RegisterClass(g_fontClassName, CreateRegisteredFont);
+    TheManager.RegisterClass(g_fontClassName, CreateRegisteredFont);
 }
 
 // NTSC-U/C: 0x006fecb0, PAL: 0x007426b0

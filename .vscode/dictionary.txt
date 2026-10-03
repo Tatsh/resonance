@@ -545,6 +545,7 @@ levelbuilder
 levelconverter
 leveldata
 levelstats
+lfversion
 libc
 libcconsole
 libcdvd
@@ -795,9 +796,7 @@ mtap
 mtapman
 mtapman's
 mtba
-mthd
 mtir
-mtrk
 mtsab
 mulaw
 mulax
@@ -1297,6 +1296,7 @@ trackselector
 trackselectpacket
 tracksonmsg
 transanim
+transes
 transformops
 transportaddress
 trmopn

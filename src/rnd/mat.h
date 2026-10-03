@@ -36,6 +36,14 @@ namespace Rnd {
 class Mat : public Object {
 public:
     /**
+     * Registered class name of Rnd::Mat, the string "Mat".
+     *
+     * @ghidraAddress NTSC-U/C: 0x00700420
+     * @ghidraAddress PAL: 0x00743e48
+     */
+    static HxStr sClassName;
+
+    /**
      * Frame buffer blend, as the text dump labels the values.
      *
      * The same enumeration types a texture stage, where the default is kBlendModeMultiply.
@@ -106,17 +114,15 @@ public:
         void SetTex(Tex *pTex);
 
         /**
-         * Reset the stage to the default surface.
+         * Construct a stage with the default surface.
          *
          * The blend becomes kBlendModeMultiply, the coordinate set and the generation mode zero,
-         * the transform the identity, the wrap kWrapModeRepeat, and both references null. The
-         * routine returns nothing, so it is an initialiser rather than a constructor. The name is
-         * inferred.
+         * the transform the identity, the wrap kWrapModeRepeat, and both references null.
          *
          * @ghidraAddress NTSC-U/C: 0x004dd020
          * @ghidraAddress PAL: 0x0051b5c0
          */
-        void InitDefaults();
+        Stage();
 
         /**
          * Write the stage to the engine text sink.
@@ -457,7 +463,7 @@ public:
      * Ambient colour. Defaults to white. +0x40
      *
      * Public because EmitFaceVu1Setup(), SelectLightForVertex(), and the PsMesh upload at
-     * `0x00583ba0` read it directly through Rnd::g_pSelectedMat, and the image has no accessor.
+     * `0x00583ba0` read it directly through Rnd::PsMat::sCurrent, and the image has no accessor.
      */
     Color mAmbient;
     /**
@@ -480,7 +486,7 @@ public:
      * one byte. +0x74
      *
      * Public because EmitFaceVu1Setup(), SelectLightForVertex(), and the PsMesh upload at
-     * `0x00583ba0` read it directly through Rnd::g_pSelectedMat, and the image has no accessor.
+     * `0x00583ba0` read it directly through Rnd::PsMat::sCurrent, and the image has no accessor.
      */
     int mVertAmbient;
     /**
@@ -512,9 +518,9 @@ protected:
     int mNormalize; // +0x88 Serialised as one byte.
 
 public:
-    /*!< Winding the rasteriser discards. Public because Rnd::Mesh::Collide() at 0x0047f950 reads
-         it directly to decide whether a back-facing hit counts, which is access from outside the
-         hierarchy, and the image has no accessor for it. +0x8c */
+    /*!< Winding the rasteriser discards. Public because Rnd::Mesh::FindCollisions() at 0x0047f950
+         reads it directly to decide whether a back-facing hit counts, which is access from outside
+         the hierarchy, and the image has no accessor for it. +0x8c */
     CullMode mCull;
 
 protected:
@@ -527,14 +533,6 @@ public:
          accessor for it. +0x94 */
     int mFlat;
 };
-
-/**
- * Registered class name of Rnd::Mat, the string "Mat".
- *
- * @ghidraAddress NTSC-U/C: 0x00700420
- * @ghidraAddress PAL: 0x00743e48
- */
-extern HxStr g_matClassName;
 
 /**
  * Serial version of the material record currently being read.
@@ -605,21 +603,8 @@ Object *CreateRegisteredMat(const HxStr &name);
  */
 inline void RegisterMatClass() {
     g_pfnNewMat = NewMat;
-    g_manager.RegisterClass(g_matClassName, CreateRegisteredMat);
+    TheManager.RegisterClass(Mat::sClassName, CreateRegisteredMat);
 }
-
-/**
- * Material that Rnd::Mat::SelectMaterial() last applied, or null when the applied state is stale.
- *
- * Selecting a material stores it here, and the PlayStation 2 entry point compares against it to
- * skip work that is already done. Every property setter writes null so that the next selection
- * applies the change, and Rnd::PsMat's destructor clears it when the dying material is the
- * selected one.
- *
- * @ghidraAddress NTSC-U/C: 0x0076d658
- * @ghidraAddress PAL: 0x007b13b0
- */
-extern Mat *g_pSelectedMat;
 
 /**
  * Non-zero while the material stage being applied has a texture bound.

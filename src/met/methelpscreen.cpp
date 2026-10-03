@@ -63,11 +63,11 @@ constexpr int kFillInfoTexts = 0;
 constexpr int kFillTitleTexts = 1;
 
 inline Rnd::Text *FindText(const char *pszName) {
-    return dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 inline Rnd::Animatable *FindAnimation(const char *pszName) {
-    return dynamic_cast<Rnd::Animatable *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<Rnd::Animatable *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 inline MetHelpScreen *FindHelpScreen() {
@@ -85,7 +85,7 @@ inline void
 PlaceText(Rnd::Text *pText, const HxStr &fontName, const HxStr &textValue, Vector3 &end) {
     std::memcpy(pText->mLocalXfm[kTranslationRow], &end, sizeof(end));
     pText->mDirty = 1;
-    pText->SetFont(dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(fontName)));
+    pText->SetFont(dynamic_cast<Rnd::Font *>(Rnd::TheManager.Find(fontName)));
     pText->SetText(textValue);
     Vector3 advance = pText->CharPosition(textValue.mLen);
     AddVec3(&end.x, &advance.x, &end.x);
@@ -146,10 +146,10 @@ void MetHelpScreen::ResolveContainerViews() {
     mShowAnim = FindAnimation(kShowAnimation);
     mHideAnim = FindAnimation(kHideAnimation);
     if (mShowAnim != nullptr) {
-        mShowEnd = mShowAnim->EndFrame();
+        mShowEnd = mShowAnim->FilteredFrameEnd();
     }
     if (mHideAnim != nullptr) {
-        mHideEnd = mHideAnim->EndFrame();
+        mHideEnd = mHideAnim->FilteredFrameEnd();
     }
 }
 

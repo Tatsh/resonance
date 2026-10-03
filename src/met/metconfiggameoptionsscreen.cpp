@@ -78,7 +78,7 @@ static const char *const kOptionsButtonsScreen = "MetConfigOptionsButtonsScreen"
 inline Rnd::Button *FindArrow(const char *pszFormat, int nNumber) {
     char szName[kArrowNameBufferSize];
     sprintf(szName, pszFormat, nNumber);
-    return dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(szName)));
+    return dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(HxStr(szName)));
 }
 
 } // namespace
@@ -98,9 +98,9 @@ void MetConfigGameOptionsScreen::ResolveContainerViews() {
     MetScreenMultiSoundBank::ResolveContainerViews();
 
     // Yes, the binary does not test either label for null.
-    dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kAudioLabel)))
+    dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kAudioLabel)))
         ->SetText(MetConfigText(kMetStrPangameAudioLbl, kPromptConfigCode, kAudioLabelKey));
-    dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kForceFeedbackLabel)))
+    dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kForceFeedbackLabel)))
         ->SetText(MetConfigText(kMetStrPangameForceLbl, kPromptConfigCode, kForceFeedbackLabelKey));
 
     mRows->Add(HxStr(kAudioButton),
@@ -197,10 +197,10 @@ void MetConfigGameOptionsScreen::EnterAndShow() {
 
 // NTSC-U/C: 0x0020d448, PAL: 0x00216b98
 void MetConfigGameOptionsScreen::UpdateOptionLabels() {
-    mRows->ButtonAt(kRowAudio)->mText->SetText(mOptions.mStereo != 0 ?
-                                                   MetText(kMetStrGsStereo, kStereoText) :
-                                                   MetText(kMetStrGsMono, kMonoText));
-    mRows->ButtonAt(kRowForceFeedback)
+    mRows->GetButton(kRowAudio)->mText->SetText(mOptions.mStereo != 0 ?
+                                                    MetText(kMetStrGsStereo, kStereoText) :
+                                                    MetText(kMetStrGsMono, kMonoText));
+    mRows->GetButton(kRowForceFeedback)
         ->mText->SetText(mOptions.mForceFeedback != 0 ? MetText(kMetStrGsFfOn, kOnText) :
                                                         MetText(kMetStrGsFfOff, kOffText));
 }

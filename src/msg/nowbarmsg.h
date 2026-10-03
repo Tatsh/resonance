@@ -12,7 +12,7 @@ class Player;
  * the same size.
  *
  * The payload layout comes from the run of field copies in Clone(). mPlayer and mLane are public
- * because AppTunnel::HandleMessage() at `0x004496e8` reads them directly with no accessor in the
+ * because AppTunnel::DispatchPriv() at `0x004496e8` reads them directly with no accessor in the
  * image. It compares mPlayer with the player each tunnel item stores, which types it, and eases
  * the item toward mLane.
  *

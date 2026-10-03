@@ -15,9 +15,8 @@ class Mesh;
  * Chain of generated meshes, one per level of detail, that deletes its meshes with itself.
  *
  * The class is not polymorphic and has no RTTI. Its name comes from the debugging symbols of the
- * North American demo release. The demo's SetTransOwner() and FindCollisions() have the same
- * instructions as SetTransOwner() and Collide(). Rnd::Tunnel stores one per grid cell and one per
- * slice, and Rnd::TunnelSeekSection stores one per section. Its routines sit inside the Rnd::Tunnel
+ * North American demo release. Rnd::Tunnel stores one per grid cell and one per slice, and
+ * Rnd::TunnelSeekSection stores one per section. Its routines sit inside the Rnd::Tunnel
  * translation unit.
  *
  * The class is a `std::vector<Mesh *>` with a destructor. That destructor, at 0x00476a80, is what
@@ -53,7 +52,7 @@ public:
      * Replace the chain with nCount newly created meshes.
      *
      * The existing meshes are deleted first. The meshes are created from the last level down,
-     * each through g_pfnNewMesh(), called "[<name>.<level>]" when bInternal is set and
+     * each through Mesh::sNew(), called "[<name>.<level>]" when bInternal is set and
      * "<name>.<level>" otherwise, and each one takes the previously created mesh as its mNext.
      * Every mesh draws with kZModeZReadWrite and kZFuncLess, and every mesh with a coarser link
      * has its screen size threshold cleared.
@@ -132,7 +131,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00476ec0
      * @ghidraAddress PAL: 0x004b4b38
      */
-    void Collide(const Ray &ray, Collideable::HitSink &sink);
+    void FindCollisions(const Ray &ray, Collideable::HitSink &sink);
 
     /**
      * Resize the vertices of the finest level, which every level draws.

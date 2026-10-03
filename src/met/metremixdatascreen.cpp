@@ -62,15 +62,15 @@ inline const char *TextOrEmpty(const HxStr &text) {
 }
 
 inline Rnd::Text *FindText(const char *pszName) {
-    return dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 inline Rnd::Mat *FindMaterial(const char *pszName) {
-    return dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 inline Rnd::Mesh *FindMesh(const char *pszName) {
-    return dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 } // namespace
@@ -125,7 +125,7 @@ void MetRemixDataScreen::ShowRecord(MetRemixRecord *pRecord) {
         HxStr level(pRecord->levelName);
         HxStr songName = QueryConfigString(kSongNameConfigCode, TextOrEmpty(level));
         const float flWrapWidth = mSongTitleText->mWrapWidth;
-        if (flWrapWidth < mSongTitleText->MeasureText(TextOrEmpty(songName), songName.mLen)) {
+        if (flWrapWidth < mSongTitleText->GetFontWidth(TextOrEmpty(songName), songName.mLen)) {
             HxStr shorter = QueryConfigString(kShortSongNameConfigCode, TextOrEmpty(level));
             songName = shorter;
         }

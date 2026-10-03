@@ -123,13 +123,13 @@ inline const char *TextOf(const HxStr &text) {
 
 // Resolves a registry key to a Rnd::Text, or null.
 inline Rnd::Text *FindText(const HxStr &name) {
-    Rnd::Object *pObject = Rnd::g_manager.Find(name);
+    Rnd::Object *pObject = Rnd::TheManager.Find(name);
     return pObject != nullptr ? dynamic_cast<Rnd::Text *>(pObject) : nullptr;
 }
 
 // Resolves a registry key to a Rnd::View, or null.
 inline Rnd::View *FindView(const HxStr &name) {
-    Rnd::Object *pObject = Rnd::g_manager.Find(name);
+    Rnd::Object *pObject = Rnd::TheManager.Find(name);
     return pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
 }
 
@@ -290,8 +290,8 @@ void MetStageFinishScreen::UpdateIdle(float flTime) {
     ++mNextMessage;
     // The button shows one interval after the last message, which matches the binary.
     if (mMessages.size() < static_cast<unsigned>(mNextMessage)) {
-        mContinueButtons->ButtonAt(kContinueButtonIndex)->SetShowing(1);
-        mContinueButtons->ButtonAt(kContinueButtonIndex)->SetState(kButtonNormalState);
+        mContinueButtons->GetButton(kContinueButtonIndex)->SetShowing(1);
+        mContinueButtons->GetButton(kContinueButtonIndex)->SetState(kButtonNormalState);
         mContinueButtons->SetSelected(kContinueButtonIndex);
         mLastStepTime = 0.0f;
         ActivateNamedPanel(HxStr(kPanelName));
@@ -390,7 +390,7 @@ void MetStageFinishScreen::ShowMessages() {
     Rnd::View *pCountLines = FindView(linesName);
     Rnd::View *pLines = FindView(HxStr(kLinesView));
     // The binary does not test the container view for null.
-    pLines->ClearDraws();
+    pLines->RemoveAllDraws();
     pLines->AddDraw(pCountLines, nullptr);
 
     for (int i = kFirstCongratulationText; i <= kLastCongratulationText; ++i) {
@@ -407,8 +407,8 @@ void MetStageFinishScreen::ShowMessages() {
         mMessageDrawables.push_back(pText);
     }
 
-    mContinueButtons->ButtonAt(kContinueButtonIndex)->SetShowing(0);
-    mContinueButtons->ButtonAt(kContinueButtonIndex)->SetState(kButtonDisabledState);
+    mContinueButtons->GetButton(kContinueButtonIndex)->SetShowing(0);
+    mContinueButtons->GetButton(kContinueButtonIndex)->SetState(kButtonDisabledState);
     mContinueButtons->SetSelected(kContinueButtonIndex);
     mNextMessage = 0;
     MetScreen::EnterAndShow();

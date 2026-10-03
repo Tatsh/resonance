@@ -11,11 +11,11 @@ ACircBuff::ACircBuff(char *pBuff, int nSize)
 }
 
 // NTSC-U/C: 0x0060e930, PAL: 0x0064f5a0
-int ACircBuff::FreeSpace() {
+int ACircBuff::Avail() {
     if (mWrite == mRead) {
         return 0;
     }
-    WrapWrite();
+    WrapWriteIfOk();
     if (mWrite < mRead) {
         return mRead - mWrite - 1;
     }
@@ -23,11 +23,11 @@ int ACircBuff::FreeSpace() {
 }
 
 // NTSC-U/C: 0x0060e998, PAL: 0x0064f608
-int ACircBuff::HasSpace(int nBytes) {
+int ACircBuff::IsRoom(int nBytes) {
     if (mWrite == mRead) {
         return 0;
     }
-    WrapWrite();
+    WrapWriteIfOk();
     if (mWrite < mRead) {
         return nBytes < mRead - mWrite;
     }
@@ -39,7 +39,7 @@ int ACircBuff::HasSpace(int nBytes) {
 }
 
 // NTSC-U/C: 0x0060ea20, PAL: 0x0064f690
-void ACircBuff::WrapWrite() {
+void ACircBuff::WrapWriteIfOk() {
     if (mWrite >= mWrap && mBuff < mRead) {
         mWrite = mBuff;
     }
@@ -55,7 +55,7 @@ char *ACircBuff::AdvanceRead(int nBytes) {
 }
 
 // NTSC-U/C: 0x0060ea80, PAL: 0x0064f6f0
-int ACircBuff::IsClearOfWrite(const char *pStart, int nBytes) const {
+int ACircBuff::FullyRead(const char *pStart, int nBytes) const {
     const char *pEnd = pStart + nBytes;
     if (mWrap < pEnd) {
         pEnd = mBuff + (pEnd - mWrap);
@@ -70,7 +70,7 @@ int ACircBuff::IsClearOfWrite(const char *pStart, int nBytes) const {
 }
 
 // NTSC-U/C: 0x0060eaf0, PAL: 0x0064f760
-int ACircBuff::ContiguousWriteSize(int nBytes) const {
+int ACircBuff::WillWriteWrap(int nBytes) const {
     if (mWrite + nBytes > mWrap) {
         return mWrap - mWrite;
     }
@@ -88,7 +88,7 @@ char *ACircBuff::AdvanceWrite(int nBytes) {
 
 // NTSC-U/C: 0x0060eb48, PAL: 0x0064f7b8
 int ACircBuff::Write(const void *pSrc, int nBytes) {
-    WrapWrite();
+    WrapWriteIfOk();
     if (mWrite < mRead) {
         if (nBytes >= mRead - mWrite) {
             return 0;
@@ -111,8 +111,8 @@ int ACircBuff::Write(const void *pSrc, int nBytes) {
 }
 
 // NTSC-U/C: 0x0060ec08, PAL: 0x0064f878
-int ACircBuff::ReadFromFile(int nFile, int nBytes) {
-    WrapWrite();
+int ACircBuff::Write(int nFile, int nBytes) {
+    WrapWriteIfOk();
     if (mWrite < mRead) {
         if (nBytes >= mRead - mWrite) {
             return 0;

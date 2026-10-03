@@ -48,12 +48,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ccb40
      * @ghidraAddress PAL: 0x001d29f8
      */
-    virtual void AddPowerup(int nType);
+    virtual void Add(int nType);
 
     /**
      * Move the selection by one step, skipping an empty entry.
      *
-     * Slot 5, and an empty default. PowerupCollection::AddPowerup() calls it with 1 once a first
+     * Slot 5, and an empty default. PowerupCollection::Add() calls it with 1 once a first
      * powerup arrives with nothing selected.
      *
      * @param nDelta The step, which the one implementation applies as an addition.
@@ -109,5 +109,5 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ccb68
      * @ghidraAddress PAL: 0x001d2a20
      */
-    virtual void AnnounceState();
+    virtual void SendState();
 };

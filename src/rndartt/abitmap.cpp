@@ -33,13 +33,13 @@ inline short PackedBytesPerRow(int nFormat, int nWidth) {
     if (nFormat == kABitmapFormatLinear4) {
         return static_cast<short>((nWidth + 2) / 2);
     }
-    return static_cast<short>(nWidth * g_abBitmapBytesPerPixel[nFormat]);
+    return static_cast<short>(nWidth * ABitmap::bmPixelSize[nFormat]);
 }
 
 } // namespace
 
 // NTSC-U/C: 0x00725cc0, PAL: 0x00769960
-const unsigned char g_abBitmapBytesPerPixel[kABitmapFormatCount] = {0, 1, 2, 3, 4, 1};
+const unsigned char ABitmap::bmPixelSize[kABitmapFormatCount] = {0, 1, 2, 3, 4, 1};
 
 // NTSC-U/C: 0x00725cc8, PAL: 0x00769968
 const unsigned char g_abBitmapBitsPerPixel[kABitmapFormatCount] = {4, 8, 16, 24, 32, 8};
@@ -49,7 +49,7 @@ ABitmap::ABitmap(const ABitmap &source, int nX, int nY, int nWidth, int nHeight)
     mFormat = source.mFormat;
     unsigned char *pRow = static_cast<unsigned char *>(source.mPixels) + nY * source.mBytesPerRow;
     if (mFormat != kABitmapFormatLinear4) {
-        mPixels = pRow + nX * g_abBitmapBytesPerPixel[mFormat];
+        mPixels = pRow + nX * ABitmap::bmPixelSize[mFormat];
     } else {
         mOddNibbleStart = source.mOddNibbleStart;
         if ((nX & 1) == 0) {
@@ -122,7 +122,7 @@ int ABitmap::ComputeByteCount(int nFormat, int nWidth, int nHeight) {
     if (nFormat == kABitmapFormatLinear4) {
         nBytesPerRow = (nWidth + 2) / 2;
     } else {
-        nBytesPerRow = nWidth * g_abBitmapBytesPerPixel[nFormat];
+        nBytesPerRow = nWidth * ABitmap::bmPixelSize[nFormat];
     }
     return nBytesPerRow * nHeight;
 }

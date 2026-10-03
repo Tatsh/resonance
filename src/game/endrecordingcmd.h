@@ -54,7 +54,7 @@ public:
     virtual int CmdID();
 
     /**
-     * Run GameRecorder::EndRecording() on the recorder.
+     * Run GameRecorder::FinishUp() on the recorder.
      *
      * @ghidraAddress NTSC-U/C: 0x0010efa8
      * @ghidraAddress PAL: 0x0010f408

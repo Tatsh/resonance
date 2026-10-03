@@ -15,7 +15,7 @@ class Message;
  * Sink that notes whether any note sounds past a position.
  *
  * Its RTTI descriptor is at `0x008eeef8`. It derives publicly from MsgSink at offset 0. Its type
- * function is at `0x001055c0` and its table at `0x007ccb98` retains MsgSink::Handle(). The object
+ * function is at `0x001055c0` and its table at `0x007ccb98` retains MsgSink::Dispatch(). The object
  * is 0xc bytes. LocalJamEnableMgr::QueryBar() builds one on its stack and searches the MIDI of one
  * or two bars with it. The destructor at `0x00105588` is implicitly declared.
  */
@@ -26,7 +26,7 @@ public:
     }
 
     /**
-     * Pass every message of a MIDI range through Handle() against a position.
+     * Pass every message of a MIDI range through Dispatch() against a position.
      *
      * LocalJamEnableMgr::QueryBar() expands the body twice. The title is inferred.
      *
@@ -40,7 +40,7 @@ public:
         for (std::vector<TickObj<MuseMsg *> >::const_iterator it = pMidi->begin();
              it != pMidi->end();
              ++it) {
-            Handle(it->mValue);
+            Dispatch(it->mValue);
         }
     }
 
@@ -51,7 +51,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001023b0
      * @ghidraAddress PAL: 0x001023b0
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Non-zero once a note sounds past mTick.
@@ -66,7 +66,7 @@ private:
      * Set mFound when a note sounds past mTick.
      *
      * A note sounds past mTick when mTick lies before the note's start or before its end.
-     * HandleMessage() expands the body. The title is inferred.
+     * DispatchPriv() expands the body. The title is inferred.
      *
      * @param pNote The note.
      * @ghidraAddress NTSC-U/C: 0x001056d8

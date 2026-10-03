@@ -27,7 +27,7 @@ JoypadPS2::~JoypadPS2() {
 }
 
 // NTSC-U/C: 0x004ecaf8, PAL: 0x0052b680
-int JoypadPS2::Read(unsigned int *pButtons,
+int JoypadPS2::Poll(unsigned int *pButtons,
                     unsigned char *pAxis0,
                     unsigned char *pAxis1,
                     unsigned char *pAxis2,
@@ -47,7 +47,7 @@ void JoypadPS2::Open(int nPort, int nSlot, int nDeadZone) {
 }
 
 // NTSC-U/C: 0x004ecb90, PAL: 0x0052b738
-void JoypadPS2::Close() {
+void JoypadPS2::DeInitPadData() {
     const PadRecord &record = sRecords[mIndex];
     scePadPortClose(record.mPort, record.mSlot);
 }

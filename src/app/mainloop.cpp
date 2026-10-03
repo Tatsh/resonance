@@ -89,7 +89,7 @@ MainLoop::MainLoop(int nInCharge, Sch::Scheduler *pWatchdog, GameManagerImpl *pG
     g_profileTimers[kAppTimerDraw].mName = HxStr("    app draw");
     g_profileTimers[kAppTimerAsync].mName = HxStr("    app async");
     g_profileTimers[kAppTimerBank].mName = HxStr("    app bank");
-    UpdateNextDeadline();
+    UpdateCallbackTime();
 }
 
 // NTSC-U/C: 0x001ef158, PAL: 0x001f54f8
@@ -108,7 +108,7 @@ void MainLoop::Run() {
 }
 
 // NTSC-U/C: 0x001ef2e0, PAL: 0x001f5680
-void MainLoop::UpdateNextDeadline() {
+void MainLoop::UpdateCallbackTime() {
     mNextDeadlineNs = mNextWatchdogPollNs < mNextBankPollNs ? mNextWatchdogPollNs : mNextBankPollNs;
 }
 
@@ -119,31 +119,31 @@ void MainLoop::FirePollTimer(long long nNowNs) {
 }
 
 // NTSC-U/C: 0x001ef398, PAL: 0x001f5738
-void MainLoop::FireWatchdogPoll(long long nNowNs) {
+void MainLoop::SchCallback(long long nNowNs) {
     mNextWatchdogPollNs = nNowNs + kTimerPeriodNs;
     mWatchdog->Service();
     PollSynthEvents();
 }
 
 // NTSC-U/C: 0x001ef308, PAL: 0x001f56a8
-void MainLoop::FireDueTimers(long long nNowNs) {
+void MainLoop::Callback(long long nNowNs) {
     if (nNowNs >= mNextBankPollNs) {
         FirePollTimer(nNowNs);
     }
     if (nNowNs >= mNextWatchdogPollNs) {
-        FireWatchdogPoll(nNowNs);
+        SchCallback(nNowNs);
     }
-    UpdateNextDeadline();
+    UpdateCallbackTime();
 }
 
 // NTSC-U/C: 0x001ef230, PAL: 0x001f55d0
-void MainLoop::FlushWatchdogNow() {
+void MainLoop::Resume() {
     mFlushFrame = kFlushFrameNever;
     mWatchdog->Flush();
 }
 
 // NTSC-U/C: 0x001ef260, PAL: 0x001f5600
-void MainLoop::FlushWatchdogAfter(int nFrames) {
+void MainLoop::Step(int nFrames) {
     mFlushFrame = mFrameCount + nFrames;
     mWatchdog->Flush();
 }
@@ -185,7 +185,7 @@ int MainLoop::Poll() {
         s_nFramesThisWindow = 0;
     }
 
-    UpdateNextDeadline();
+    UpdateCallbackTime();
     mGameManager->DrawFrame();
     PostDraw();
     ++s_nFramesThisWindow;
@@ -206,7 +206,7 @@ void MainLoop::PumpTimers() {
     }
     long long nNowNs = FrameClockNs(s_pPumpedWatchdog);
     if (nNowNs >= s_pPumpedLoop->mNextDeadlineNs) {
-        s_pPumpedLoop->FireDueTimers(nNowNs);
+        s_pPumpedLoop->Callback(nNowNs);
     }
 }
 

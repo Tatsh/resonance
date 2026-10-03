@@ -115,18 +115,18 @@ Renderer::Renderer()
     } while (nLoaded == 0);
     IsLevelLoaded(arena, level); // Yes, the binary tests once more and discards the result.
 
-    Rnd::Environ *pEnviron = dynamic_cast<Rnd::Environ *>(Rnd::g_manager.Find(HxStr("outer.env")));
-    g_vramTable.Clear(1);
-    g_gfxDevice.SetClearColor(pEnviron->mFogColor);
+    Rnd::Environ *pEnviron = dynamic_cast<Rnd::Environ *>(Rnd::TheManager.Find(HxStr("outer.env")));
+    Rnd::TheVRAM.Clear(1);
+    Rnd::ThePs.SetClearColor(pEnviron->mFogColor);
 
-    mOuterView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("outer.view")));
-    mTunnelView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("tnl.view")));
-    mHudView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("hud.view")));
+    mOuterView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("outer.view")));
+    mTunnelView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("tnl.view")));
+    mHudView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("hud.view")));
 
     const int nLocalViews = Application::shared()->GetWorld()->mLocalPlayers.size();
     for (int i = 0; i < nLocalViews; ++i) {
         Rnd::View *pView = dynamic_cast<Rnd::View *>(
-            Rnd::g_manager.Find(HxStr(FormatString("tnl local%d.view", i + 1))));
+            Rnd::TheManager.Find(HxStr(FormatString("tnl local%d.view", i + 1))));
         mLocalViews.push_back(pView);
     }
 
@@ -140,7 +140,7 @@ Renderer::Renderer()
     AddSink(mOverlay);
     AddSink(mArena);
 
-    Rnd::Tunnel *pTunnel = dynamic_cast<Rnd::Tunnel *>(Rnd::g_manager.Find(HxStr("tunnel")));
+    Rnd::Tunnel *pTunnel = dynamic_cast<Rnd::Tunnel *>(Rnd::TheManager.Find(HxStr("tunnel")));
     mCellsPerRow = pTunnel->mSliceCount;
     mRowCount = pTunnel->mRingCount;
 
@@ -150,7 +150,7 @@ Renderer::Renderer()
     for (int i = 0; i < mCellsPerRow * mRowCount; ++i) {
         Cell &cell = mCells[i];
         cell.mBar = kNoBar;
-        cell.mPlayer = &g_nullPlayer;
+        cell.mPlayer = &NullPlayer::sInstance;
         cell.mEnabled = 0;
         cell.mPowerup = kNoPowerup;
         cell.mEffects.reset();
@@ -168,7 +168,7 @@ Renderer::~Renderer() {
 }
 
 // NTSC-U/C: 0x0042d3b8, PAL: 0x00468f70
-void Renderer::HandleMessage(Message *pMsg) {
+void Renderer::DispatchPriv(Message *pMsg) {
     int nType = pMsg->Type();
     if (nType == g_nGameBeginMsgType) {
         OnMsg(*static_cast<GameBeginMsg *>(pMsg));
@@ -205,10 +205,10 @@ void Renderer::Draw() {
     mOuterView->Draw();
 
     if (g_nLsdMode != 0) {
-        g_gfxDevice.mFeedbackAlpha = kLsdFeedbackAlpha;
-        g_gfxDevice.mFeedbackInset = kLsdFeedbackInset;
-        g_gfxDevice.mFeedbackRect = GfxDevice::Rect{0.0f, 0.0f, 1.0f, 1.0f};
-        g_gfxDevice.SetupGsDrawContext();
+        Rnd::ThePs.mFeedbackAlpha = kLsdFeedbackAlpha;
+        Rnd::ThePs.mFeedbackInset = kLsdFeedbackInset;
+        Rnd::ThePs.mFeedbackRect = GfxDevice::Rect{0.0f, 0.0f, 1.0f, 1.0f};
+        Rnd::ThePs.SetupGsDrawContext();
     }
 
     int nView = 0;
@@ -223,10 +223,10 @@ void Renderer::Draw() {
     mOverlay->Draw();
 
     if (mDrawTimingGraph != 0) {
-        g_gfxDevice.DrawSubsystemTimingGraph(kTimingGraphFullScaleMs);
+        Rnd::ThePs.DrawSubsystemTimingGraph(kTimingGraphFullScaleMs);
     }
     if (mDrawRenderStats != 0) {
-        g_gfxDevice.DrawRenderStatsOverlay();
+        Rnd::ThePs.DrawRenderStatsOverlay();
     }
 }
 

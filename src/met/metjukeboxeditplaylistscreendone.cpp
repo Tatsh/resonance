@@ -224,9 +224,9 @@ void MetJukeboxEditPlaylistScreenDone::EnterAndShow() {
     mButtons->SetSelected(kButtonRandom);
 #ifndef VIDEO_STANDARD_PAL
     if (MetFrontEndState::shared()->mUsingMemcard != 0) {
-        mButtons->ButtonAt(kButtonSave)->SetState(kButtonStateNormal);
+        mButtons->GetButton(kButtonSave)->SetState(kButtonStateNormal);
     } else {
-        mButtons->ButtonAt(kButtonSave)->SetState(kButtonStateDisabled);
+        mButtons->GetButton(kButtonSave)->SetState(kButtonStateDisabled);
     }
 #endif
 }

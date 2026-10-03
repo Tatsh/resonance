@@ -16,7 +16,7 @@ constexpr float kMaxAnimFrame = 8160.0f;
 
 // NTSC-U/C: 0x0043c598, PAL: 0x00478bb8
 TnlLattice::TnlLattice() : mStartFrame(kNoFrame) {
-    mMatAnim = dynamic_cast<Rnd::MatAnim *>(Rnd::g_manager.Find(HxStr("lattice.mnm")));
+    mMatAnim = dynamic_cast<Rnd::MatAnim *>(Rnd::TheManager.Find(HxStr("lattice.mnm")));
     mMatAnim->SetFrame(0.0f);
 }
 

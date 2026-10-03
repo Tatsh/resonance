@@ -65,7 +65,7 @@ enum VramBlockKind {
 enum VramList {
     kVramListFree = 0, /*!< Blocks available for allocation, walked best fit. */
     kVramListUsed = 1, /*!< Blocks a surface owns, walked for the least recently used victim. */
-    kVramListPool = 2  /*!< Records describing no block, the supply AllocEntry() draws from. */
+    kVramListPool = 2  /*!< Records describing no block, the supply GetAvailEntry() draws from. */
 };
 
 /** Slots one word of the palette occupancy bitmap covers. */
@@ -84,7 +84,7 @@ constexpr int kGsTexelsPerTbwUnit = 64;
  * GS pixel storage modes this unit distinguishes.
  *
  * Three of these select a page shape other than the default. The remaining modes take the 64 by 32
- * texel page Rnd::VRAM::Entry::BlocksForImage() falls back to, and the jump table the routine
+ * texel page Rnd::VRAM::Entry::ComputeBlockSize() falls back to, and the jump table the routine
  * dispatches through routes PSMCT16S to that fallback rather than to the 64 by 64 page the hardware
  * gives it. The two 32-bit and 24-bit modes appear because g_anGsPixelStorageModes maps bitmap
  * formats onto them.
@@ -264,7 +264,7 @@ public:
      *
      * The body is empty. The start-up glue's shutdown branch calls it for the file scope instance,
      * which is what identifies it as the destructor. GfxDevice::Terminate() also calls it
-     * explicitly on g_vramTable as its last step.
+     * explicitly on Rnd::TheVRAM as its last step.
      *
      * @ghidraAddress NTSC-U/C: 0x005149f0
      * @ghidraAddress PAL: 0x00554d20
@@ -351,7 +351,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005149f8
      * @ghidraAddress PAL: 0x00554d28
      */
-    Entry *AllocEntry();
+    Entry *GetAvailEntry();
 
     /**
      * Take an unused record from the palette free list.
@@ -461,7 +461,7 @@ public:
      *
      * The zone "temp" is reset and supplies a 16-bit bitmap of the display size, which
      * ReadBackBitmap() fills from block 0. The red and blue channels are swapped without testing
-     * g_nSkipColorSwap, and AGfxFile::WriteBitmap() writes `<pszName>_<n>.bmp`, n being
+     * g_nSkipColorSwap, and AGfxFile::Write() writes `<pszName>_<n>.bmp`, n being
      * g_nScreendumpIndex before it advances. The previous zone is selected again once the pixels
      * are allocated.
      *
@@ -520,9 +520,9 @@ public:
  * One entry of the GS video memory block table.
  *
  * The class is not polymorphic and has no RTTI. Its name comes from the debugging symbols of the
- * North American demo release. The demo's ComputeBlockSize(), SetUnused(), and InitRaw() have the
- * same instructions as BlocksForImage(), Reset(), and MakeFree(). Of the members, only mMemAddr,
- * mpPrev, and mpNext are attested by a literal, the first two through the sibling diagnostic
+ * North American demo release. The demo's SetUnused() and InitRaw() have the same instructions as
+ * Reset() and MakeFree(). Of the members, only mMemAddr, mpPrev, and mpNext are attested by a
+ * literal, the first two through the sibling diagnostic
  * "Pal entry in chain has mMemAddr of 0 (mpPrev: %p, mpNext: %p)" and the parallel layout of the
  * two records. Every other title is inferred from use.
  *
@@ -594,7 +594,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00515058
      * @ghidraAddress PAL: 0x00555388
      */
-    int BlocksForImage(int nWidth, int nHeight, int nBitsPerPixel, int nPsm) const;
+    int ComputeBlockSize(int nWidth, int nHeight, int nBitsPerPixel, int nPsm) const;
 
     /**
      * Mark the record as used this packet and return the GS address of its blocks.
@@ -693,13 +693,17 @@ extern const int g_anGsPixelStorageModes[kABitmapFormatCount];
  */
 extern const int g_anBitsPerPixelTable[kABitmapFormatCount];
 
+namespace Rnd {
+
 /**
  * The video memory cache.
  *
  * @ghidraAddress NTSC-U/C: 0x0070d400
  * @ghidraAddress PAL: 0x007512f0
  */
-extern Rnd::VRAM g_vramTable;
+extern VRAM TheVRAM;
+
+} // namespace Rnd
 
 /**
  * Every block table record.

@@ -199,7 +199,7 @@ void MetFreqMakerButtonsScreen::EnterAndShow() {
         HxStr title = MetConfigText(kMetStrTFreqMakerEditButtons, kTitleConfigCode, kEditTitleKey);
         MetScreenTitleScreen::SetTitle(title);
     }
-    Rnd::Button *pSave = dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(kSaveButton)));
+    Rnd::Button *pSave = dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(HxStr(kSaveButton)));
     if (MetFrontEndState::shared()->mUsingMemcard != 0) {
         pSave->mText->SetText(MetText(kMetStrFmButSave, kSaveLabel));
     } else {
@@ -226,7 +226,7 @@ void MetFreqMakerButtonsScreen::OnPanelActivated() {
     ShowPageForButton(mButtonList->mSelectedButton);
     int nCount = mButtonList->mButtons.size();
     for (int i = 0; i < nCount; ++i) {
-        mButtonList->ButtonAt(i)->SetState(kButtonStateNormal);
+        mButtonList->GetButton(i)->SetState(kButtonStateNormal);
     }
     mButtonList->mSelectedButton->SetState(kButtonStateSelected);
     ShowDirectionsForButton(mButtonList->mSelectedButton);
@@ -524,7 +524,7 @@ void MetFreqMakerButtonsScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ActivateNamedPanel(HxStr(kInventoryScreen));
     int nCount = mButtonList->mButtons.size();
     for (int i = 0; i < nCount; ++i) {
-        mButtonList->ButtonAt(i)->SetState(kButtonStateDisabled);
+        mButtonList->GetButton(i)->SetState(kButtonStateDisabled);
     }
     mButtonList->mSelectedButton->SetState(kButtonStatePressed);
 }
@@ -563,7 +563,7 @@ void MetFreqMakerButtonsScreen::SetEditing(int nEditing) {
 
 // NTSC-U/C: 0x0025a228, PAL: 0x002702c8
 void MetFreqMakerButtonsScreen::UpdateRandomizeLabel() {
-    Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kRandomizeText)));
+    Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kRandomizeText)));
     switch (mEditing) {
     case kEditing:
         pText->SetText(MetText(kMetStrFmButMutate, kMutateLabel));

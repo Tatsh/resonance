@@ -57,11 +57,8 @@ typedef struct {
     TtyQueue *pQueue;
 } TtyState;
 
-// NTSC-U/C: 0x008e7d40, PAL: 0x0092cd40
-static TtyQueue g_ttyQueue;
-
 // NTSC-U/C: 0x008e7e50, PAL: 0x0092ce50
-static TtyState g_ttyState;
+static TtyState tinfo;
 
 // NTSC-U/C: 0x008e7e80, PAL: 0x0092ce80
 static TtyPacket g_ttySendPacket __attribute__((aligned(64)));
@@ -70,15 +67,18 @@ static TtyPacket g_ttySendPacket __attribute__((aligned(64)));
 static TtyPacket g_ttyReceivePacket __attribute__((aligned(64)));
 
 // NTSC-U/C: 0x0076f014, PAL: 0x007b2d74
-static int g_bConsoleOpen;
+static int ttyinit;
 
 // NTSC-U/C: 0x006277d8, PAL: 0x00668368
 static TtyQueue *QueueInit(int nCapacity) {
-    g_ttyQueue.nCapacity = nCapacity;
-    g_ttyQueue.pHead = g_ttyQueue.mData;
-    g_ttyQueue.nCount = 0;
-    g_ttyQueue.pTail = g_ttyQueue.mData;
-    return &g_ttyQueue;
+    // NTSC-U/C: 0x008e7d40, PAL: 0x0092cd40
+    static TtyQueue q;
+
+    q.nCapacity = nCapacity;
+    q.pHead = q.mData;
+    q.nCount = 0;
+    q.pTail = q.mData;
+    return &q;
 }
 
 // NTSC-U/C: 0x00627800, PAL: 0x00668390
@@ -154,22 +154,22 @@ static int sceTtyInit(void) {
     TtyPacket *pSend;
 
     FlushCache(0);
-    g_ttyState.mSocket = sceDeci2Open(kTtyProtocol, &g_ttyState, sceTtyHandler);
-    if (g_ttyState.mSocket < 0) {
+    tinfo.mSocket = sceDeci2Open(kTtyProtocol, &tinfo, sceTtyHandler);
+    if (tinfo.mSocket < 0) {
         return 0;
     }
-    g_ttyState.bBusy = 0;
-    g_ttyState.nSendLength = 0;
-    g_ttyState.nReceived = 0;
-    g_ttyState.pReceive = (unsigned char *)UNCACHED_SEG(&g_ttyReceivePacket);
+    tinfo.bBusy = 0;
+    tinfo.nSendLength = 0;
+    tinfo.nReceived = 0;
+    tinfo.pReceive = (unsigned char *)UNCACHED_SEG(&g_ttyReceivePacket);
     pSend = (TtyPacket *)UNCACHED_SEG(&g_ttySendPacket);
-    g_ttyState.pSend = (unsigned char *)pSend;
+    tinfo.pSend = (unsigned char *)pSend;
     pSend->nProtocol = kTtyProtocol;
     pSend->nSource = kTtySourceEe;
     pSend->nDestination = kTtyDestinationHost;
     pSend->nTtyId = 0;
     pSend->nReserved = 0;
-    g_ttyState.pQueue = QueueInit(kTtyQueueSize);
+    tinfo.pQueue = QueueInit(kTtyQueueSize);
     return 1;
 }
 
@@ -181,13 +181,13 @@ static int TtyWrite(const char *pBuffer, int nLength) {
     int nOut = 0;
     int nConsumed = 0;
 
-    if (g_ttyState.bBusy != 0) {
+    if (tinfo.bBusy != 0) {
         return -1;
     }
     DIntr();
     pSend = (TtyPacket *)UNCACHED_SEG(&g_ttySendPacket);
-    g_ttyState.bBusy = 1;
-    g_ttyState.pSend = (unsigned char *)pSend;
+    tinfo.bBusy = 1;
+    tinfo.pSend = (unsigned char *)pSend;
     while (nLength-- != 0) {
         if (*pBuffer == '\n') {
             pSend->mPayload[nOut++] = '\r';
@@ -201,15 +201,15 @@ static int TtyWrite(const char *pBuffer, int nLength) {
             break;
         }
     }
-    g_ttyState.nSendLength = nOut + kTtyHeaderSize;
-    pSend->nLength = (unsigned short)g_ttyState.nSendLength;
-    if (sceDeci2ReqSend(g_ttyState.mSocket, (char)pSend->nDestination) < 0) {
-        g_ttyState.bBusy = 0;
+    tinfo.nSendLength = nOut + kTtyHeaderSize;
+    pSend->nLength = (unsigned short)tinfo.nSendLength;
+    if (sceDeci2ReqSend(tinfo.mSocket, (char)pSend->nDestination) < 0) {
+        tinfo.bBusy = 0;
         EIntr();
         return -1;
     }
-    while (g_ttyState.bBusy != 0) {
-        sceDeci2Poll(g_ttyState.mSocket);
+    while (tinfo.bBusy != 0) {
+        sceDeci2Poll(tinfo.mSocket);
     }
     EIntr();
     return nConsumed;
@@ -221,14 +221,14 @@ static int sceTtyRead(char *pBuffer, int nLength) {
     int nRead = 0;
 
     while (nRead < nLength) {
-        TtyQueue *pQueue = g_ttyState.pQueue;
+        TtyQueue *pQueue = tinfo.pQueue;
         char c;
 
         while (pQueue->nCount == 0) {
         }
-        c = (char)*g_ttyState.pQueue->pHead;
+        c = (char)*tinfo.pQueue->pHead;
         pBuffer[nRead++] = c;
-        QueuePeekReadDone(g_ttyState.pQueue);
+        QueuePeekReadDone(tinfo.pQueue);
         if (c == '\n' || c == '\r') {
             break;
         }
@@ -241,7 +241,7 @@ int writx(int nFile, const void *pBuffer, int nLength) {
     if (nFile != kConsoleOutput && nFile != kConsoleError) {
         return -1;
     }
-    if (g_bConsoleOpen == 0) {
+    if (ttyinit == 0) {
         if (sceTtyInit() == 0) {
 #ifdef ENABLE_PATCHES
             // Without a DECI2 host (after an IOP reboot, or on a retail console) the original drops
@@ -257,7 +257,7 @@ int writx(int nFile, const void *pBuffer, int nLength) {
             return -1;
 #endif
         }
-        g_bConsoleOpen = 1;
+        ttyinit = 1;
     }
     return TtyWrite((const char *)pBuffer, nLength);
 }
@@ -267,11 +267,11 @@ int reax(int nFile, void *pBuffer, int nLength) {
     if (nFile != kConsoleInput) {
         return -1;
     }
-    if (g_bConsoleOpen == 0) {
+    if (ttyinit == 0) {
         if (sceTtyInit() == 0) {
             return -1;
         }
-        g_bConsoleOpen = 1;
+        ttyinit = 1;
     }
     return sceTtyRead((char *)pBuffer, nLength);
 }
@@ -298,5 +298,5 @@ int LibcConsoleIsatty(int nFile) {
 
 // NTSC-U/C: 0x005963d0, PAL: 0x005d97d8
 void LibcConsoleReset(void) {
-    g_bConsoleOpen = 0;
+    ttyinit = 0;
 }

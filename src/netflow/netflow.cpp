@@ -27,15 +27,15 @@ void NetflowFindAugmentingPaths(struct netflow_graph *graph, struct netflow_v_si
 
 // NTSC-U/C: 0x007b88d8, PAL: 0x007fc5d8
 // Edge examinations counted across the search, statistics only.
-int g_nNetflowProbeCount = 0;
+int eq = 0;
 
 // NTSC-U/C: 0x007b88dc, PAL: 0x007fc5dc
 // Augmentations applied, statistics only.
-int g_nNetflowAugmentTotal = 0;
+int eex = 0;
 
 // NTSC-U/C: 0x007b88e0, PAL: 0x007fc5e0
 // Head of the free U queue, 2500 when the queue is empty.
-int g_nNetflowQueueHead = 0;
+int iUnmatched = 0;
 
 // One slot of the augmenting path search queue.
 struct NetflowQueueEntry {
@@ -46,11 +46,11 @@ struct NetflowQueueEntry {
 
 // NTSC-U/C: 0x007b88e8, PAL: 0x007fc5e8
 // The search queue, 2500 slots of twelve bytes.
-NetflowQueueEntry g_aNetflowQueue[NETFLOW_MAX_VERTICES];
+NetflowQueueEntry queue[NETFLOW_MAX_VERTICES];
 
 // NTSC-U/C: 0x007bfe18, PAL: 0x00803b18
 // The U vertices on the current search path.
-unsigned char g_abNetflowVisited[NETFLOW_MAX_VERTICES];
+unsigned char visited[NETFLOW_MAX_VERTICES];
 
 // NTSC-U/C: 0x005e6508, PAL: 0x006286f0
 // Clear every adjacency list and mate, and clear the U count.
@@ -132,56 +132,56 @@ void NetflowReportInitialMatching(struct netflow_graph *graph, struct netflow_v_
 // Clears the search statistics and queues every unmatched U vertex.
 void NetflowInitMatchingPool(struct netflow_graph *graph, struct netflow_v_side *side) {
     (void)side;
-    g_nNetflowProbeCount = 0;
-    g_nNetflowAugmentTotal = 0;
+    eq = 0;
+    eex = 0;
     int nSlot = NETFLOW_MAX_VERTICES;
     for (int u = 1; u <= graph->u_count; ++u) {
         // The reserved field stores the resume pointer for the search.
         graph->u[u].reserved = reinterpret_cast<int>(graph->u[u].edges);
-        g_abNetflowVisited[u] = 0;
+        visited[u] = 0;
         if (graph->u[u].mate == 0) {
             --nSlot;
-            g_aNetflowQueue[nSlot].mUVertex = u;
+            queue[nSlot].mUVertex = u;
         }
     }
-    g_nNetflowQueueHead = nSlot;
+    iUnmatched = nSlot;
 }
 
 // NTSC-U/C: 0x0062bb38, PAL: 0x0066c6c8
 // Grows the matching along augmenting paths from every queued U vertex.
 void NetflowFindAugmentingPaths(struct netflow_graph *graph, struct netflow_v_side *side) {
-    while (g_nNetflowQueueHead < NETFLOW_MAX_VERTICES) {
-        const int nRoot = g_aNetflowQueue[g_nNetflowQueueHead].mUVertex;
-        ++g_nNetflowQueueHead;
-        g_aNetflowQueue[0].mUVertex = nRoot;
-        g_aNetflowQueue[0].mParent = -1;
+    while (iUnmatched < NETFLOW_MAX_VERTICES) {
+        const int nRoot = queue[iUnmatched].mUVertex;
+        ++iUnmatched;
+        queue[0].mUVertex = nRoot;
+        queue[0].mParent = -1;
         int nWrite = 0;
         int nRead = 0;
         int nParent = -1;
-        NetflowQueueEntry *pSlot = g_aNetflowQueue;
+        NetflowQueueEntry *pSlot = queue;
         for (;;) {
             const int nNode = pSlot->mUVertex;
             ++nParent;
             ++nRead;
             ++pSlot;
-            ++g_nNetflowProbeCount;
+            ++eq;
             struct netflow_edge *pEdge = graph->u[nNode].edges;
             if (pEdge != nullptr) {
                 do {
-                    ++g_nNetflowProbeCount;
+                    ++eq;
                     const int nVertex = pEdge->v;
                     const int nMatched = side->mate[nVertex];
-                    if (g_abNetflowVisited[nMatched] == 0) {
-                        ++g_nNetflowProbeCount;
+                    if (visited[nMatched] == 0) {
+                        ++eq;
                         ++nWrite;
-                        g_aNetflowQueue[nWrite].mUVertex = nMatched;
-                        g_aNetflowQueue[nWrite].mParent = nParent;
-                        g_aNetflowQueue[nWrite].mVVertex = nVertex;
-                        g_abNetflowVisited[nMatched] = 1;
+                        queue[nWrite].mUVertex = nMatched;
+                        queue[nWrite].mParent = nParent;
+                        queue[nWrite].mVVertex = nVertex;
+                        visited[nMatched] = 1;
                         struct netflow_edge *pResume =
                             reinterpret_cast<struct netflow_edge *>(graph->u[nMatched].reserved);
                         while (pResume != nullptr && side->mate[pResume->v] != 0) {
-                            ++g_nNetflowProbeCount;
+                            ++eq;
                             pResume = pResume->next;
                         }
                         graph->u[nMatched].reserved = reinterpret_cast<int>(pResume);
@@ -190,19 +190,19 @@ void NetflowFindAugmentingPaths(struct netflow_graph *graph, struct netflow_v_si
                             side->mate[nFree] = nMatched;
                             graph->u[nMatched].mate = nFree;
                             int nChild = nWrite;
-                            int nUp = g_aNetflowQueue[nChild].mParent;
+                            int nUp = queue[nChild].mParent;
                             while (nUp >= 0) {
-                                const int nUpVertex = g_aNetflowQueue[nChild].mVVertex;
-                                const int nUpMate = g_aNetflowQueue[nUp].mUVertex;
+                                const int nUpVertex = queue[nChild].mVVertex;
+                                const int nUpMate = queue[nUp].mUVertex;
                                 side->mate[nUpVertex] = nUpMate;
                                 graph->u[nUpMate].mate = nUpVertex;
                                 nChild = nUp;
-                                nUp = g_aNetflowQueue[nChild].mParent;
+                                nUp = queue[nChild].mParent;
                                 // Yes, the binary counts every step of the path, not each path.
-                                ++g_nNetflowAugmentTotal;
+                                ++eex;
                             }
                             for (int i = 0; i <= nWrite; ++i) {
-                                g_abNetflowVisited[g_aNetflowQueue[i].mUVertex] = 0;
+                                visited[queue[i].mUVertex] = 0;
                             }
                             // The binary abandons this root after one augmentation.
                             nWrite = nParent;

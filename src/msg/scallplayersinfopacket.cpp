@@ -80,6 +80,6 @@ void SCAllPlayersInfoPacket::restoreGuts(IBStream &stream) {
 }
 
 // NTSC-U/C: 0x003f23a8, PAL: 0x0042a8f0
-void SCAllPlayersInfoPacket::AppendEntry(const PlayerEntry &entry) {
+void SCAllPlayersInfoPacket::AddPlayerInfo(const PlayerEntry &entry) {
     mPlayers.push_back(entry);
 }

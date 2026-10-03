@@ -60,7 +60,7 @@ static const char *const kButtonViewObject = "dlg_buts.view";
 constexpr int kNoButtons = 0;
 
 inline Rnd::View *FindView(const HxStr &name) {
-    return dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(name));
+    return dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(name));
 }
 
 } // namespace
@@ -157,7 +157,7 @@ void MetMsgScreen::SetButtons(const std::vector<HxStr> &buttons) {
 
 // NTSC-U/C: 0x002ecd10, PAL: 0x00310640
 void MetMsgScreen::Refresh() {
-    mButtonView->ClearDraws();
+    mButtonView->RemoveAllDraws();
     Rnd::View *pButtons = FindView(HxStr(FormatString(kButtonViewFormat, mButtonCount)));
     mButtonView->AddDraw(pButtons);
     mTitleText->SetText(mTitle);
@@ -173,8 +173,8 @@ void MetMsgScreen::Refresh() {
         pFrame = FindView(HxStr(kLargeFrameView));
     }
     Rnd::View *pGroup = FindView(HxStr(kFrameGroupView));
-    pGroup->ClearTransList();
-    pGroup->ClearDraws();
+    pGroup->RemoveAllTranses();
+    pGroup->RemoveAllDraws();
     pGroup->AddTrans(pFrame);
     pGroup->AddDraw(pFrame);
 
@@ -187,7 +187,7 @@ void MetMsgScreen::Refresh() {
     }
     if (mButtonList != nullptr) {
         for (int i = 0; i < static_cast<int>(mButtonList->mButtons.size()); ++i) {
-            mButtonList->ButtonAt(i)->mText->SetText(mButtons[i]);
+            mButtonList->GetButton(i)->mText->SetText(mButtons[i]);
         }
         mButtonList->SetSelected(kFirstButtonIndex);
     }
@@ -195,7 +195,7 @@ void MetMsgScreen::Refresh() {
 }
 
 // NTSC-U/C: 0x002f0640, PAL: 0x00313ff0
-void MetMsgScreen::HandleMessage(Message *pMsg) {
+void MetMsgScreen::DispatchPriv(Message *pMsg) {
     pMsg->Type(); // Yes, the binary discards this call's result.
     ForwardToOwner(pMsg);
 }
@@ -303,7 +303,7 @@ void MetMsgScreen::ResolveContainerViews() {
     mTwoButtonList->Add(HxStr(kTwoButtonSecond), HxStr(kNoLabel));
     mOneButtonList = new MetButtonList;
     mOneButtonList->Add(HxStr(kOneButtonOnly), HxStr(kNoLabel));
-    mTitleText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kTitleTextObject)));
-    mMessageText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kMessageTextObject)));
+    mTitleText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kTitleTextObject)));
+    mMessageText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kMessageTextObject)));
     mButtonView = FindView(HxStr(kButtonViewObject));
 }

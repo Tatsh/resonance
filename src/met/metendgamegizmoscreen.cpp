@@ -34,11 +34,11 @@ MetEndGameGizmoScreen *MetEndGameGizmoScreen::New(MetRenderer *pRenderer, int nP
 
 // NTSC-U/C: 0x0027bfd0, PAL: 0x00294ce8
 void MetEndGameGizmoScreen::BeginExit() {
-    dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(mViewNames[kEqualizerViewIndex]))->SetShowing(0);
+    dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(mViewNames[kEqualizerViewIndex]))->SetShowing(0);
     MetScreen::BeginExit();
 }
 
 // NTSC-U/C: 0x0027bf50, PAL: 0x00294c68
 void MetEndGameGizmoScreen::OnEnterFinished() {
-    dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(mViewNames[kEqualizerViewIndex]))->SetShowing(1);
+    dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(mViewNames[kEqualizerViewIndex]))->SetShowing(1);
 }

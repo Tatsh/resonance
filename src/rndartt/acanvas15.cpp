@@ -62,7 +62,7 @@ ACanvas15::ACanvas15(const ABitmap &bitmap) : ACanvas(bitmap), mColor(0) {
 void ACanvas15::SetColor8(int nIndex) {
     APalette *pPalette = mBitmap.mPalette;
     if (pPalette == nullptr) {
-        pPalette = g_pDefaultPalette;
+        pPalette = ACanvas::palDefault;
         if (pPalette == nullptr) {
             return;
         }
@@ -94,7 +94,7 @@ void ACanvas15::SetColorNative(unsigned int nColor) {
 int ACanvas15::GetColor8() {
     APalette *pPalette = mBitmap.mPalette;
     if (pPalette == nullptr) {
-        pPalette = g_pDefaultPalette;
+        pPalette = ACanvas::palDefault;
         if (pPalette == nullptr) {
             return 0;
         }
@@ -102,8 +102,7 @@ int ACanvas15::GetColor8() {
     if (pPalette->mpRgb15ToIndex != nullptr) {
         return pPalette->mpRgb15ToIndex[mColor & kColor15Mask] & kChannelMask;
     }
-    return pPalette->FindNearestEntry(
-               Rgb8888From1555(mColor), kPaletteFirstIndex, kPaletteLastIndex) &
+    return pPalette->FindClosest(Rgb8888From1555(mColor), kPaletteFirstIndex, kPaletteLastIndex) &
            kChannelMask;
 }
 
@@ -133,7 +132,7 @@ unsigned int ACanvas15::GetColorNative() {
 void ACanvas15::DrawPixel8U(int nX, int nY, int nIndex) {
     APalette *pPalette = mBitmap.mPalette;
     if (pPalette == nullptr) {
-        pPalette = g_pDefaultPalette;
+        pPalette = ACanvas::palDefault;
         if (pPalette == nullptr) {
             return;
         }
@@ -160,7 +159,7 @@ void ACanvas15::DrawPixelNativeU(int nX, int nY, unsigned int nColor) {
 int ACanvas15::GetPixel8U(int nX, int nY) {
     APalette *pPalette = mBitmap.mPalette;
     if (pPalette == nullptr) {
-        pPalette = g_pDefaultPalette;
+        pPalette = ACanvas::palDefault;
         if (pPalette == nullptr) {
             return 0;
         }
@@ -169,8 +168,7 @@ int ACanvas15::GetPixel8U(int nX, int nY) {
     if (pPalette->mpRgb15ToIndex != nullptr) {
         return pPalette->mpRgb15ToIndex[nColor & kColor15Mask] & kChannelMask;
     }
-    return pPalette->FindNearestEntry(
-               Rgb8888From1555(nColor), kPaletteFirstIndex, kPaletteLastIndex) &
+    return pPalette->FindClosest(Rgb8888From1555(nColor), kPaletteFirstIndex, kPaletteLastIndex) &
            kChannelMask;
 }
 

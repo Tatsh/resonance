@@ -10,7 +10,7 @@ class OBStream;
  *
  * The four fields are recovered rather than inferred. RawControllerMsg::Clone() at `0x003da200`
  * copies them, RawController's one virtual receives them as three ints followed by a float in
- * this order, and MetRenderer::HandleMessage() passes the address of the first of them to
+ * this order, and MetRenderer::DispatchPriv() passes the address of the first of them to
  * MetCommandMap::Translate(). The record sits at `+0x04` of the message, so the three words
  * MetRenderer reads at message offsets 4, 8, and 0x0c are mTag, mPadIndex, and mButton.
  *

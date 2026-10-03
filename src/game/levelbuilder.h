@@ -34,7 +34,7 @@ enum LevelTrackKind {
  *
  * LevelConverter drives it. LevelConverter::Convert() stores the builder at its own `+0x50`, each
  * MIDI event handler forwards to AddEvent() with the status byte for the event, and
- * LevelConverter::Tempo() forwards to SetTempo().
+ * LevelConverter::Tempo() forwards to AddTempo().
  *
  * The object is at least 0x38 bytes. Three vectors of pointers occupy `+0x04` through `+0x27`, and
  * the destructor clears each one with a std::for_each over the deleting function at `0x001ec328`,
@@ -117,7 +117,7 @@ public:
     /**
      * Report the play map's extent.
      *
-     * @return PlayMap::GetExtent() of the play map.
+     * @return PlayMap::GetLength() of the play map.
      * @ghidraAddress NTSC-U/C: 0x001ec738
      * @ghidraAddress PAL: 0x001f29c0
      */
@@ -320,7 +320,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ec5f8
      * @ghidraAddress PAL: 0x001f2880
      */
-    void SetTempo(int nTick, int nMicrosecondsPerQuarter);
+    void AddTempo(int nTick, int nMicrosecondsPerQuarter);
 
     /**
      * Run TrackData::ScoreBars() on every score track.
@@ -331,7 +331,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ec680
      * @ghidraAddress PAL: 0x001f2908
      */
-    void PrepareTracks();
+    void DoneLoading();
 
 private:
     // All three vectors manage their elements. The destructor clears each with a std::for_each
@@ -353,7 +353,7 @@ private:
     TrackData *mOwnTrack; // +0x28
     // The track the forwarding members append to. The destructor does not release it.
     TrackData *mCurrentTrack; // +0x2c
-    // Released by the destructor through Attachment::Release(). SetTempo() replaces it.
+    // Released by the destructor through Attachment::Release(). AddTempo() replaces it.
     Sch::TempoMap *mTempoMap; // +0x30
     // Deleted by the destructor through its own table slot 1.
     PlayMap *mPlayMap; // +0x34

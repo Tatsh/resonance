@@ -19,7 +19,7 @@ static const char *const kWaveView = "wave.view";
 
 // Resolves a registry key to a Rnd::View, or null.
 inline Rnd::View *FindView(const HxStr &name) {
-    Rnd::Object *pObject = Rnd::g_manager.Find(name);
+    Rnd::Object *pObject = Rnd::TheManager.Find(name);
     return pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
 }
 
@@ -50,7 +50,7 @@ void MetTopLogoScreen::UpdateIdle(float flTime) {
 void MetTopLogoScreen::ResolveContainerViews() {
     ResolveAnimationViews();
     mView = FindView(HxStr(kPanelView));
-    mView->ReleaseAnimsRefs(); // The binary does not test the view for null.
+    mView->RemoveAllAnims(); // The binary does not test the view for null.
     mViewsUnresolved = 0;
     mWaveView = FindView(HxStr(kWaveView));
 }

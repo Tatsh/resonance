@@ -16,7 +16,7 @@ class Receiver;
  *
  * The class is not polymorphic and has no RTTI. Its name comes from the debugging symbols of the
  * North American demo release. LevelConverter::Convert() is the one user. It builds the reader on
- * the stack over an HxIListChunk, sets mCompare, and calls Read().
+ * the stack over an HxIListChunk, sets mCompare, and calls ReadAllTracks().
  *
  * Event positions are rescaled from the file's division to kTargetDivision ticks per quarter note.
  * With mCompare unset, every channel event goes straight to the receiver. With mCompare set, the
@@ -65,13 +65,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d6528
      * @ghidraAddress PAL: 0x0040e418
      */
-    void Read();
+    void ReadAllTracks();
 
     /**
      * Read the next chunk.
      *
      * An `MThd` chunk fills the header fields and an `MTrk` chunk is read as a track. A chunk with
-     * any other name is skipped. At the end of the file EndOfFile() is called.
+     * any other name is skipped. At the end of the file AllTracksRead() is called.
      *
      * @return Whether a chunk was read.
      * @ghidraAddress NTSC-U/C: 0x003d4ac8
@@ -85,7 +85,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d65a8
      * @ghidraAddress PAL: 0x0040e498
      */
-    void EndOfFile();
+    void AllTracksRead();
 
     /**
      * Read the format, track count, and division of an `MThd` chunk.
@@ -159,7 +159,8 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003d5260
      * @ghidraAddress PAL: 0x0040d150
      */
-    void Dispatch(MBT tick, unsigned char nStatus, unsigned char nData1, unsigned char nData2);
+    void
+    SendChannelMsg(MBT tick, unsigned char nStatus, unsigned char nData1, unsigned char nData2);
 
     /**
      * Deliver a channel event, or collect it in mPending when mCompare is set.

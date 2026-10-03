@@ -22,8 +22,8 @@ public:
     /**
      * Open a stream over a caller-owned byte range.
      *
-     * @param pszName The stream title, which appears in the diagnostic Read() produces at the end
-     * of the data. A copy is stored.
+     * @param pszName The stream title, which appears in the diagnostic ReadData() produces at the
+     * end of the data. A copy is stored.
      * @param pData The first byte of the range. The stream does not take ownership.
      * @param nSize The range length in bytes.
      * @ghidraAddress NTSC-U/C: 0x00405cf8
@@ -51,13 +51,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00405e00
      * @ghidraAddress PAL: 0x0043f700
      */
-    virtual void Seek(int nOffset, int nWhence);
+    virtual void SetMarker(int nOffset, int nWhence);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x00405e80
      * @ghidraAddress PAL: 0x0043f780
      */
-    virtual int Tell();
+    virtual int GetMarker();
 
     /**
      * @ghidraAddress NTSC-U/C: 0x00405e90
@@ -91,7 +91,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00405ed0
      * @ghidraAddress PAL: 0x0043f7d0
      */
-    virtual HxStream &Read(void *pDest, int nSize);
+    virtual HxStream &ReadData(void *pDest, int nSize);
 
 private:
     HxStr mName;

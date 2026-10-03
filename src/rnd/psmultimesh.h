@@ -13,7 +13,7 @@ namespace Rnd {
  * 0. The class does not declare a data member. It is the same 0x38 bytes the base occupies, and
  * the creator at `0x005b5c28` allocates exactly that. Its two vtables at `0x00833d80` and
  * `0x00833dc8` differ from the Rnd::MultiMesh pair only in the type info accessor, the destructor,
- * and DrawSelf().
+ * and DrawShowing().
  */
 class PsMultiMesh : public MultiMesh {
 public:
@@ -39,7 +39,7 @@ protected:
     /**
      * Draw every instance through the vector unit path.
      *
-     * Rnd::Drawable vtable slot 3. Falls back on Rnd::MultiMesh::DrawSelf() while the device
+     * Rnd::Drawable vtable slot 3. Falls back on Rnd::MultiMesh::DrawShowing() while the device
      * submits geometry through the software path. An empty transform list, an absent mesh, and a
      * mesh with no faces all yield without drawing. Otherwise the material passes run in a loop,
      * each one selecting the depth registers and the material and then submitting the whole
@@ -49,7 +49,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005b2ed0
      * @ghidraAddress PAL: 0x005f54b8
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
     /**
      * Submit the GIF packets for every instance of the current material pass.

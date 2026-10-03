@@ -51,9 +51,9 @@ void HudWinMessage::SetFrame(float flTime) {
 
     if (mState == kStateStart) {
         mStart = flTime;
-        g_gfxDevice.mFeedbackAlpha = kFeedbackAlpha;
-        g_gfxDevice.mFeedbackInset = kFeedbackInset;
-        g_gfxDevice.mFeedbackRect = GfxDevice::Rect{0.0f, 0.0f, 1.0f, 1.0f};
+        Rnd::ThePs.mFeedbackAlpha = kFeedbackAlpha;
+        Rnd::ThePs.mFeedbackInset = kFeedbackInset;
+        Rnd::ThePs.mFeedbackRect = GfxDevice::Rect{0.0f, 0.0f, 1.0f, 1.0f};
 
 #ifdef VIDEO_STANDARD_PAL
         HxStr congrats;
@@ -129,7 +129,7 @@ void HudWinMessage::Draw() {
     if (mState == kStateIdle) {
         return;
     }
-    g_gfxDevice.SetupGsDrawContext();
-    mMessage.mText->DrawSelf(); // Yes, the binary discards this result.
+    Rnd::ThePs.SetupGsDrawContext();
+    mMessage.mText->DrawShowing(); // Yes, the binary discards this result.
     mPrompt.mText->Draw();
 }

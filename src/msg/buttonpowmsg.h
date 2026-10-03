@@ -98,7 +98,7 @@ public:
     /**
      * The player the controller belongs to.
      *
-     * Public because LocalPlayer::HandleMessage() reads it directly at `0x0011f004`, and the image
+     * Public because LocalPlayer::DispatchPriv() reads it directly at `0x0011f004`, and the image
      * has no accessor. +0x04
      */
     Player *mPlayer;

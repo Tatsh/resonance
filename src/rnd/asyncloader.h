@@ -65,7 +65,7 @@ public:
      * A request already in either queue logs an internal error with its directory and file and is
      * not added again. The first request resolves g_nRndLoaderZone from the zone "rndfile". The
      * request is then marked not pending, not read, and not finished, and appended to
-     * g_pendingLoads.
+     * gPendingRndFiles.
      *
      * @ghidraAddress NTSC-U/C: 0x003f8308
      * @ghidraAddress PAL: 0x00430b68
@@ -76,7 +76,7 @@ public:
      * Abandon this request.
      *
      * A request whose file has been read is not affected. Otherwise its read is cancelled and its
-     * entry removed from g_activeLoads, and it is removed from g_pendingLoads.
+     * entry removed from gInProgressRndFiles, and it is removed from gPendingRndFiles.
      *
      * @ghidraAddress NTSC-U/C: 0x003f8030
      * @ghidraAddress PAL: 0x00430870
@@ -154,12 +154,12 @@ public:
      * Runs with g_nRndLoaderZone selected and restores the previous zone on return. The zone is
      * reset when requests are waiting and no read is in flight. Each waiting request then has
      * `gen/<file>.gz` under its directory read into a block of that zone and moves to
-     * g_activeLoads, until a file does not fit. A file of length 0 raises
+     * gInProgressRndFiles, until a file does not fit. A file of length 0 raises
      * "RndAsyncLoader::Poll(): couldn't find: %s".
      *
      * The reads are then collected in issue order. The first one still in flight stops the
      * collection. A failed read logs "ERROR reading RND file async: %s:%s!!" and is dropped. A
-     * finished read selects the request's zone, loads the objects through Rnd::g_manager, marks
+     * finished read selects the request's zone, loads the objects through Rnd::TheManager, marks
      * the file read, and ends the collection. Only one file is loaded per call.
      *
      * @ghidraAddress NTSC-U/C: 0x003f8930
@@ -188,13 +188,13 @@ public:
     std::list<Rnd::Drawable *> mDrawables;
 
 private:
-    // Copy Rnd::g_manager.mLoaded into mLoadedObjects, then append every `Tex` in mLoaded and then
+    // Copy Rnd::TheManager.mLoaded into mLoadedObjects, then append every `Tex` in mLoaded and then
     // in mMergeObjects to mObjects and every `Text` to mDrawables. PollAsyncLoads() is the one
     // caller, and the name is inferred.
     // NTSC-U/C: 0x003f8460, PAL: 0x00430cc0
     void HarvestLoadedObjects();
 
-    // Every object the request loaded, copied from Rnd::g_manager.mLoaded.
+    // Every object the request loaded, copied from Rnd::TheManager.mLoaded.
     std::list<Rnd::Object *> mLoadedObjects; // +0x08
     HxStr mDirectory;                        // +0x0c
     HxStr mFile;                             // +0x14
@@ -236,19 +236,3 @@ struct RndActiveLoadEntry {
  * @ghidraAddress PAL: 0x0071f228
  */
 extern int g_nRndLoaderZone;
-
-/**
- * Requests waiting for their file read to be issued, in queue order.
- *
- * @ghidraAddress NTSC-U/C: 0x006dba40
- * @ghidraAddress PAL: 0x0071f230
- */
-extern std::vector<RndAsyncLoader *> g_pendingLoads;
-
-/**
- * File reads issued and not yet collected, in issue order.
- *
- * @ghidraAddress NTSC-U/C: 0x006dba50
- * @ghidraAddress PAL: 0x0071f240
- */
-extern std::vector<RndActiveLoadEntry> g_activeLoads;

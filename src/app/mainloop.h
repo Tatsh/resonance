@@ -25,7 +25,7 @@ class Scheduler;
  * second, and then requests one frame from the game manager.
  *
  * Two periodic timers run alongside the frame, each with a four-millisecond period. One polls the
- * game manager and the other services the long-operation watchdog. FireDueTimers() is what
+ * game manager and the other services the long-operation watchdog. Callback() is what
  * a blocked long operation calls back into through the poll callback the constructor installs, so
  * both timers continue to run while the frame loop itself is stalled.
  */
@@ -81,7 +81,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ef308
      * @ghidraAddress PAL: 0x001f56a8
      */
-    void FireDueTimers(long long nNowNs);
+    void Callback(long long nNowNs);
 
     /**
      * Recompute the earliest of the two timer deadlines.
@@ -89,7 +89,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ef2e0
      * @ghidraAddress PAL: 0x001f5680
      */
-    void UpdateNextDeadline();
+    void UpdateCallbackTime();
 
     /**
      * Write the watchdog's readings out now and disarm the scheduled write.
@@ -99,7 +99,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ef230
      * @ghidraAddress PAL: 0x001f55d0
      */
-    void FlushWatchdogNow();
+    void Resume();
 
     /**
      * Schedule the watchdog's readings to be written out after a further run of frames.
@@ -110,7 +110,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ef260
      * @ghidraAddress PAL: 0x001f5600
      */
-    void FlushWatchdogAfter(int nFrames);
+    void Step(int nFrames);
 
 protected:
     /**
@@ -174,7 +174,7 @@ private:
 
     // Rearm the watchdog timer and service the watchdog.
     // NTSC-U/C: 0x001ef398, PAL: 0x001f5738
-    void FireWatchdogPoll(long long nNowNs);
+    void SchCallback(long long nNowNs);
 
     // Runs after the frame is drawn, with an empty body.
     // NTSC-U/C: 0x001ef410, PAL: 0x001f57b0

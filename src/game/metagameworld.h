@@ -38,7 +38,7 @@ public:
 
     /**
      * Release the cheat detector through its own table, then the renderer through
-     * DestroyRenderer().
+     * KillRenderer().
      *
      * @ghidraAddress NTSC-U/C: 0x003d4790
      * @ghidraAddress PAL: 0x0040c680
@@ -50,7 +50,7 @@ public:
      *
      * The body forwards all four arguments unchanged to slot 2 of the cheat detector. It then
      * builds a RawControllerMsg on the stack whose reading is the four arguments in parameter
-     * order and whose position is Mid::MBT(0), and hands it to the renderer's Handle().
+     * order and whose position is Mid::MBT(0), and hands it to the renderer's Dispatch().
      *
      * @param nTag The device tag, a four-character code.
      * @param nPadIndex The controller that produced the reading, from 1.
@@ -88,7 +88,7 @@ public:
      * Stop the front end running through RendererBase::Stop().
      *
      * GameManagerImpl::OnBeginGameLocal(), GameManagerImpl::OnUnpauseGameSystem(), and
-     * GameManagerImpl::StartPlayback() call it.
+     * GameManagerImpl::Recreate() call it.
      *
      * @ghidraAddress NTSC-U/C: 0x003d4890
      * @ghidraAddress PAL: 0x0040c780
@@ -130,7 +130,7 @@ private:
      * @ghidraAddress NTSC-U/C: 0x003d4810
      * @ghidraAddress PAL: 0x0040c700
      */
-    void DestroyRenderer();
+    void KillRenderer();
 
     // The front-end renderer, a MetNullRenderer or a MetRenderer. +0x04
     RendererBase *mRenderer;

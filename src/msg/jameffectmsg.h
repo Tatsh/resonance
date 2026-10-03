@@ -20,6 +20,14 @@ class Player;
 class JamEffectMsg : public Message {
 public:
     /**
+     * Identity that Type() reports, 417.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d032c
+     * @ghidraAddress PAL: 0x00713ac4
+     */
+    static int sID;
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory against identity 417.
@@ -42,7 +50,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nJamEffectMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x001caa60
      * @ghidraAddress PAL: 0x001d0918
      */
@@ -63,15 +71,3 @@ public:
     /** The deploying player, which PostRemixFxMsg() copies into RemixFXMsg::mPlayer. +0x10 */
     Player *mPlayer;
 };
-
-/**
- * Identity that JamEffectMsg::Type() reports.
- *
- * This word belongs to JamEffectMsg because JamEffectMsg::Type() at `0x001caa60` returns it, and
- * the registration at `0x003d9818` passes the same value, 417, as the identity of this class's
- * factory.
- *
- * @ghidraAddress NTSC-U/C: 0x006d032c
- * @ghidraAddress PAL: 0x00713ac4
- */
-extern int g_nJamEffectMsgType;

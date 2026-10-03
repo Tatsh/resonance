@@ -16,7 +16,8 @@ namespace Rnd {
 
 namespace {
 
-// Quadwords reserved ahead of one material pass, the same budget Rnd::PsMesh::DrawSelf() reserves.
+// Quadwords reserved ahead of one material pass, the same budget Rnd::PsMesh::DrawShowing()
+// reserves.
 constexpr int kGifReserveQuadwords = 32;
 
 // VU1 data quadwords an instance batch may share with the face run, and the most one UNPACK may
@@ -73,10 +74,10 @@ PsMultiMesh::~PsMultiMesh() {
 }
 
 // NTSC-U/C: 0x005b2ed0, PAL: 0x005f54b8
-int PsMultiMesh::DrawSelf() {
+int PsMultiMesh::DrawShowing() {
     ++g_renderStats.mnMeshDraws;
-    if (g_gfxDevice.mnUseVu1 == 0) {
-        return MultiMesh::DrawSelf();
+    if (Rnd::ThePs.mnUseVu1 == 0) {
+        return MultiMesh::DrawShowing();
     }
 
     if (mTransforms.empty()) {
@@ -93,7 +94,7 @@ int PsMultiMesh::DrawSelf() {
     int nPass = 0;
     int nMorePasses = 0;
     do {
-        g_gfxDevice.ReserveGifSpace(kGifReserveQuadwords);
+        Rnd::ThePs.ReserveGifSpace(kGifReserveQuadwords);
         PsMesh::SelectDepthRegsForPass(*mMesh, nPass);
         if (pMat != nullptr) {
             // The narrowing is what psmat.h records as undecidable. Every material on this target
@@ -113,9 +114,10 @@ void PsMultiMesh::SubmitInstanceGifPackets() {
     const int nInstances = static_cast<int>(mTransforms.size());
     g_renderStats.mnTriangles += nInstances * static_cast<int>(mMesh->mFacesOwner->mFaces.size());
 
-    g_gfxDevice.CloseGifTag(1);
-    g_gfxDevice.SwapGifWrite();
-    // The same narrowing DrawSelf() makes for the material. Every mesh on this target is a PsMesh.
+    Rnd::ThePs.CloseGifTag(1);
+    Rnd::ThePs.SwapGifWrite();
+    // The same narrowing DrawShowing() makes for the material. Every mesh on this target is a
+    // PsMesh.
     const int nFaceQuadwords = static_cast<PsMesh *>(mMesh)->EmitMultiMeshFaceRun();
     const int nBatchLimit =
         std::min(kVu1InstanceQuadwordBudget - nFaceQuadwords, kInstanceUnpackQuadwordLimit) /
@@ -124,7 +126,7 @@ void PsMultiMesh::SubmitInstanceGifPackets() {
     int bFirstBatch = 1;
     std::list<Transform>::iterator it = mTransforms.begin();
     while (it != mTransforms.end()) {
-        GifQuadword *pHeader = g_gfxDevice.mpWrite;
+        GifQuadword *pHeader = Rnd::ThePs.mpWrite;
         pHeader[0] = GifQuadword{0, 0};
         pHeader[1] = GifQuadword{0, 0};
         GifQuadword *pWrite = pHeader + 2;
@@ -145,17 +147,17 @@ void PsMultiMesh::SubmitInstanceGifPackets() {
                          MakeVifCode(kVifCmdUnpackV4_32,
                                      nBatch * kQuadwordsPerTransform + kBatchHeaderQuadwords,
                                      kVifUnpackFlg | static_cast<unsigned>(nFaceQuadwords)));
-        g_gfxDevice.mpWrite = pWrite;
+        Rnd::ThePs.mpWrite = pWrite;
         pHeader[1].mLo = static_cast<unsigned>(nBatch);
-        g_gfxDevice.FlushReservedGif();
+        Rnd::ThePs.FlushReservedGif();
 
-        GifQuadword *pCall = g_gfxDevice.mpWrite;
-        g_gfxDevice.mpWrite = pCall + 1;
+        GifQuadword *pCall = Rnd::ThePs.mpWrite;
+        Rnd::ThePs.mpWrite = pCall + 1;
         pCall->mHi = 0;
         pCall->mLo = bFirstBatch != 0 ? MakeVifCode(kVifCmdMsCal, 0, kVu1InstanceEntry) :
                                         MakeVifCode(kVifCmdMsCnt, 0, 0);
         bFirstBatch = 0;
-        g_gfxDevice.FlushGifPacket(0, 0);
+        Rnd::ThePs.FlushGifPacket(0, 0);
     }
 }
 

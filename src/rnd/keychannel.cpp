@@ -31,11 +31,11 @@ Dbg &DumpColorKey(Dbg &sink, const ColorKey &key) {
 
 // NTSC-U/C: 0x004d9658, PAL: 0x00517b70
 Stream &ReadColorKey(Stream &stream, ColorKey &key) {
-    stream.Read(&key.mValue.r, sizeof(float));
-    stream.Read(&key.mValue.g, sizeof(float));
-    stream.Read(&key.mValue.b, sizeof(float));
-    stream.Read(&key.mValue.a, sizeof(float));
-    stream.Read(&key.mFrame, sizeof(key.mFrame));
+    stream.ReadLE(&key.mValue.r, sizeof(float));
+    stream.ReadLE(&key.mValue.g, sizeof(float));
+    stream.ReadLE(&key.mValue.b, sizeof(float));
+    stream.ReadLE(&key.mValue.a, sizeof(float));
+    stream.ReadLE(&key.mFrame, sizeof(key.mFrame));
     return stream;
 }
 
@@ -43,11 +43,11 @@ Stream &ReadColorKey(Stream &stream, ColorKey &key) {
 // the original moved every float through a by-value parameter.
 // NTSC-U/C: 0x004d9098, PAL: 0x005175b0
 Stream &WriteColorKey(Stream &stream, const ColorKey &key) {
-    stream.Write(&key.mValue.r, sizeof(float));
-    stream.Write(&key.mValue.g, sizeof(float));
-    stream.Write(&key.mValue.b, sizeof(float));
-    stream.Write(&key.mValue.a, sizeof(float));
-    stream.Write(&key.mFrame, sizeof(key.mFrame));
+    stream.WriteLE(&key.mValue.r, sizeof(float));
+    stream.WriteLE(&key.mValue.g, sizeof(float));
+    stream.WriteLE(&key.mValue.b, sizeof(float));
+    stream.WriteLE(&key.mValue.a, sizeof(float));
+    stream.WriteLE(&key.mFrame, sizeof(key.mFrame));
     return stream;
 }
 
@@ -110,7 +110,7 @@ Dbg &DumpFloatKeys(Dbg &sink, const std::list<FloatKey> &keys) {
 // NTSC-U/C: 0x004dd9b0, PAL: 0x0051bf68
 Stream &ReadColorKeys(Stream &stream, std::list<ColorKey> &keys) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     keys.resize(nCount);
     for (auto &key : keys) {
         ReadColorKey(stream, key);
@@ -121,7 +121,7 @@ Stream &ReadColorKeys(Stream &stream, std::list<ColorKey> &keys) {
 // NTSC-U/C: 0x004d9180, PAL: 0x00517698
 Stream &WriteColorKeys(Stream &stream, const std::list<ColorKey> &keys) {
     const int nCount = keys.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &key : keys) {
         WriteColorKey(stream, key);
     }
@@ -131,10 +131,10 @@ Stream &WriteColorKeys(Stream &stream, const std::list<ColorKey> &keys) {
 // NTSC-U/C: 0x004d9238, PAL: 0x00517750
 Stream &WriteFloatKeys(Stream &stream, const std::list<FloatKey> &keys) {
     const int nCount = keys.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &key : keys) {
-        stream.Write(&key.mValue, sizeof(key.mValue));
-        stream.Write(&key.mFrame, sizeof(key.mFrame));
+        stream.WriteLE(&key.mValue, sizeof(key.mValue));
+        stream.WriteLE(&key.mFrame, sizeof(key.mFrame));
     }
     return stream;
 }
@@ -142,11 +142,11 @@ Stream &WriteFloatKeys(Stream &stream, const std::list<FloatKey> &keys) {
 // NTSC-U/C: 0x004d98d8, PAL: 0x00517df0
 Stream &ReadFloatKeys(Stream &stream, std::list<FloatKey> &keys) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     keys.resize(nCount);
     for (auto &key : keys) {
-        stream.Read(&key.mValue, sizeof(key.mValue));
-        stream.Read(&key.mFrame, sizeof(key.mFrame));
+        stream.ReadLE(&key.mValue, sizeof(key.mValue));
+        stream.ReadLE(&key.mFrame, sizeof(key.mFrame));
     }
     return stream;
 }
@@ -171,26 +171,26 @@ Dbg &DumpVector3Keys(Dbg &sink, const std::list<Vector3Key> &keys) {
 // NTSC-U/C: 0x004db3d0, PAL: 0x00519918
 Stream &ReadVector3Keys(Stream &stream, std::list<Vector3Key> &keys) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     keys.resize(nCount);
     for (auto &key : keys) {
-        stream.Read(&key.mValue.x, sizeof(float));
-        stream.Read(&key.mValue.y, sizeof(float));
-        stream.Read(&key.mValue.z, sizeof(float));
-        stream.Read(&key.mFrame, sizeof(key.mFrame));
+        stream.ReadLE(&key.mValue.x, sizeof(float));
+        stream.ReadLE(&key.mValue.y, sizeof(float));
+        stream.ReadLE(&key.mValue.z, sizeof(float));
+        stream.ReadLE(&key.mFrame, sizeof(key.mFrame));
     }
     return stream;
 }
 
 // NTSC-U/C: 0x004dac80, PAL: 0x00519198
-Stream &WriteVector3Keys(Stream &stream, const std::list<Vector3Key> &keys) {
+Stream &operator<<(Stream &stream, const std::list<Vector3Key> &keys) {
     const int nCount = keys.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &key : keys) {
-        stream.Write(&key.mValue.x, sizeof(float));
-        stream.Write(&key.mValue.y, sizeof(float));
-        stream.Write(&key.mValue.z, sizeof(float));
-        stream.Write(&key.mFrame, sizeof(key.mFrame));
+        stream.WriteLE(&key.mValue.x, sizeof(float));
+        stream.WriteLE(&key.mValue.y, sizeof(float));
+        stream.WriteLE(&key.mValue.z, sizeof(float));
+        stream.WriteLE(&key.mFrame, sizeof(key.mFrame));
     }
     return stream;
 }

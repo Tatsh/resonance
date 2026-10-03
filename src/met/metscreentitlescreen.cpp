@@ -85,6 +85,6 @@ void MetScreenTitleScreen::OnExitFinished() {
 // NTSC-U/C: 0x00390f88, PAL: 0x003c2ae8
 void MetScreenTitleScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    Rnd::Object *pObject = Rnd::g_manager.Find(HxStr(kTitleText));
+    Rnd::Object *pObject = Rnd::TheManager.Find(HxStr(kTitleText));
     mTitleText = pObject != nullptr ? dynamic_cast<Rnd::Text *>(pObject) : nullptr;
 }

@@ -121,10 +121,10 @@ void ShowLoadingScreen() {
 
     // The progress the poll reports is discarded; the screen is resolved by name instead. The
     // binary really does dispatch this through the runtime cast helper.
-    Rnd::View *pView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("view")));
-    g_gfxDevice.BeginFrame();
+    Rnd::View *pView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("view")));
+    Rnd::ThePs.BeginFrame();
     pView->Draw();
-    g_gfxDevice.PresentFrame(1);
+    Rnd::ThePs.PresentFrame(1);
 }
 
 } // namespace
@@ -139,11 +139,11 @@ int main() {
     InitIop();
     InitAsync();
 
-    g_failSink.SetReportHandler(RecordFailMessage);
-    g_failSink.mAbortProc = HaltOnFailure;
+    Rnd::TheDbg.SetNotify(RecordFailMessage);
+    Rnd::TheDbg.mAbortProc = HaltOnFailure;
 
-    Rnd::g_manager.Init();
-    g_gfxDevice.Init(kDisplayWidth, kDisplayHeight, kDisplayBitDepth);
+    Rnd::TheManager.Init();
+    Rnd::ThePs.Init(kDisplayWidth, kDisplayHeight, kDisplayBitDepth);
 
     if (UsingArkFiles() != 0) {
         if (OpenArkObject::Open(kLoadingArkPath) == 0) {

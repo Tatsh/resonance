@@ -71,7 +71,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001a2558
      * @ghidraAddress PAL: 0x001a82c0
      */
-    virtual void Enable(int bEnabled);
+    virtual void SetEnabled(int bEnabled);
 
     /**
      * Build the effect one type selects.

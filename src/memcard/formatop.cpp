@@ -14,13 +14,13 @@ FormatOp::~FormatOp() {
 }
 
 // NTSC-U/C: 0x0055e550, PAL: 0x0059f820
-void FormatOp::Issue() {
+void FormatOp::Execute() {
     sceMcFormat(mPortSlot >> kMemcardPortShift, mPortSlot & kMemcardSlotMask);
     mIssued = kMemcardOpInFlight;
 }
 
 // NTSC-U/C: 0x0055d578, PAL: 0x0059e7d0
-void FormatOp::Complete() {
+void FormatOp::NotifyDone() {
     InterpretResult();
     mHandler->OnFormat(this);
 }

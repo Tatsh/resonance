@@ -37,7 +37,7 @@ namespace Rnd {
  * to mFacesOwner for the face and edge vectors. A newly constructed mesh owns its own geometry,
  * because the constructor sets both owners to this.
  *
- * The drawing implementation belongs to the platform subclass. Rnd::PsMesh supplies DrawSelf()
+ * The drawing implementation belongs to the platform subclass. Rnd::PsMesh supplies DrawShowing()
  * and Sync(), and GfxDevice::Init() replaces the creator hook at `0x006eed60` with the PsMesh
  * factory, so every mesh a file loads on the PlayStation 2 is a PsMesh.
  *
@@ -45,6 +45,26 @@ namespace Rnd {
  */
 class Mesh : public Drawable, public Transformable, public Collideable {
 public:
+    /**
+     * Creator the registered "Mesh" class builds through.
+     *
+     * GfxDevice::Init() overwrites the hook with the Rnd::PsMesh creator. A mesh loaded from a file
+     * on the PlayStation 2 is therefore a PsMesh. Rnd::Blur, HudDisplay, and Rnd::Tunnel also build
+     * their meshes through it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006eed60
+     * @ghidraAddress PAL: 0x00732780
+     */
+    static Mesh *(*sNew)(const HxStr &name);
+
+    /**
+     * Registered class name of Rnd::Mesh, the string "Mesh".
+     *
+     * @ghidraAddress NTSC-U/C: 0x006eed68
+     * @ghidraAddress PAL: 0x00732788
+     */
+    static HxStr sClassName;
+
     /** Depth buffer read and write mode, as the text dump labels the values. */
     enum ZMode {
         kZModeDisable = 0,    /*!< No depth test and no depth write. */
@@ -205,7 +225,7 @@ public:
      * Load the mesh.
      *
      * Reports "Can't load new Mesh" through the failure sink when the file version exceeds
-     * kSerialVersion. Object references arrive as names and resolve through Rnd::g_manager with a
+     * kSerialVersion. Object references arrive as names and resolve through Rnd::TheManager with a
      * checked cast. A name that no loaded object matches produces a null reference. Versions below
      * 10 are all still readable, and each version test is documented at its reading site.
      *
@@ -225,7 +245,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00493a78
      * @ghidraAddress PAL: 0x004d1928
      */
-    void SetMaterial(Mat *pMat);
+    void SetMat(Mat *pMat);
 
     /**
      * Point the mesh at the transform it draws with.
@@ -243,9 +263,9 @@ public:
      * Set the smallest screen size to draw at, and the mesh to draw in its place below it.
      *
      * Stores flMinScreen into mMinScreen, then swaps the reference on mNext the same way as
-     * SetMaterial() and SetTransOwner(), storing pNext whether or not it is null. The pointer
+     * SetMat() and SetTransOwner(), storing pNext whether or not it is null. The pointer
      * arrives in $a1 and the float in $f12, so the order of the two parameters in the source
-     * cannot be recovered. Rnd::MultiMesh::DrawSelf() and Rnd::LodMesh inline it, and the
+     * cannot be recovered. Rnd::MultiMesh::DrawShowing() and Rnd::LodMesh inline it, and the
      * out-of-line copy has no caller. The title is inferred from the members it writes.
      *
      * @param pNext The next mesh in the chain, or null.
@@ -538,7 +558,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0047f950
      * @ghidraAddress PAL: 0x004bd648
      */
-    virtual void Collide(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Ray &ray, HitSink &sink);
 
     /**
      * Rebuild whatever the platform subclass derives from the geometry.
@@ -602,7 +622,7 @@ private:
 
     // Drop the reference on each object this mesh points at. The destructor, Load(), and Copy()
     // are its callers. 0x00493d48.
-    void RemoveObjectRefs();
+    void ReleaseObjects();
 
     // Empty the vertex vector when mVertsOwner is another mesh, and the face and edge vectors when
     // mFacesOwner is another mesh. Load() and Copy() are its callers. 0x0047fe68.
@@ -641,7 +661,7 @@ private:
     // Data members follow the recovered offset order, and the access specifiers interleave.
 
 public:
-    /*!< Depth buffer read and write mode. Rnd::PsMesh::DrawSelf() reads it to build the GS
+    /*!< Depth buffer read and write mode. Rnd::PsMesh::DrawShowing() reads it to build the GS
          register writes. Public rather than protected on two counts:
          Rnd::PsMesh::SelectDepthRegsForPass() reads it through a `Rnd::Mesh &` that is not its own
          object, and Rnd::Text::BuildGlyphMesh() at `0x004c9ad4` writes it on the mesh it owns from
@@ -665,13 +685,13 @@ public:
 
 protected:
 public:
-    /*!< Material this mesh draws with. Rnd::PsMesh::DrawSelf() reads it to select it, and public
-         rather than protected because Rnd::PsMultiMesh::DrawSelf() at `0x005b2f58` reads it out of
-         the mesh it instances, from outside this hierarchy. +0x10c */
+    /*!< Material this mesh draws with. Rnd::PsMesh::DrawShowing() reads it to select it, and
+         public rather than protected because Rnd::PsMultiMesh::DrawShowing() at `0x005b2f58` reads
+         it out of the mesh it instances, from outside this hierarchy. +0x10c */
     Mat *mMat;
 
 protected:
-    // Rnd::PsMesh::DrawSelf() reads the sphere radius to cull.
+    // Rnd::PsMesh::DrawShowing() reads the sphere radius to cull.
     Sphere mSphere; // +0x110
 
 public:
@@ -684,8 +704,8 @@ public:
 
 protected:
     // SetTransOwner() is the accessor for the first of the three, and the other two are written
-    // only by a load or a copy. Rnd::PsMesh::DrawSelf() reads mTransOwner directly, which is what
-    // keeps it out of the private section.
+    // only by a load or a copy. Rnd::PsMesh::DrawShowing() reads mTransOwner directly, which is
+    // what keeps it out of the private section.
     Transformable *mTransOwner; // +0x138
 
 private:
@@ -693,14 +713,14 @@ private:
     Transformable *mTrans2Owner; // +0x140
 
 protected:
-    // Rnd::PsMesh::DrawSelf() reads the cap to decide how much of the mesh to submit.
+    // Rnd::PsMesh::DrawShowing() reads the cap to decide how much of the mesh to submit.
     int mMaxVerts; // +0x144
 
 public:
     /*!< Projected size below which this mesh yields to a coarser link of the mNext chain. Zero
-         disables the substitution. SetNext() writes it. Public because Rnd::MultiMesh::DrawSelf()
-         at `0x004e83f4` and Rnd::LodMesh read it directly, and the image has no accessor
-         for it. +0x148 */
+         disables the substitution. SetNext() writes it. Public because
+         Rnd::MultiMesh::DrawShowing() at `0x004e83f4` and Rnd::LodMesh read it directly, and the
+         image has no accessor for it. +0x148 */
     float mMinScreen;
     /*!< Next coarser level of detail, or null at the end of the chain. Public on the same
          evidence: the same routine reads it at `0x004e8444` to hand it back to SetNext(). +0x14c */
@@ -728,21 +748,9 @@ inline void Mesh::ScaleUniform(float flScale) {
 Mesh *NewMesh(const HxStr &name);
 
 /**
- * Creator the registered "Mesh" class builds through.
- *
- * GfxDevice::Init() overwrites the hook with the Rnd::PsMesh creator, so a mesh loaded from a file
- * on the PlayStation 2 is a PsMesh. Rnd::Blur, HudDisplay, and Rnd::Tunnel also build their meshes
- * through it.
- *
- * @ghidraAddress NTSC-U/C: 0x006eed60
- * @ghidraAddress PAL: 0x00732780
- */
-extern Mesh *(*g_pfnNewMesh)(const HxStr &name);
-
-/**
  * Build a mesh for the registered "Mesh" class.
  *
- * Calls through g_pfnNewMesh and narrows the result to its Rnd::Object subobject, which is why the
+ * Calls through Mesh::sNew and narrows the result to its Rnd::Object subobject, which is why the
  * routine exists at all rather than the hook being registered directly. Rnd::Manager::Init()
  * registers this factory.
  *
@@ -754,7 +762,7 @@ extern Mesh *(*g_pfnNewMesh)(const HxStr &name);
 Object *CreateRegisteredMesh(const HxStr &name);
 
 /**
- * Build a mesh through g_pfnNewMesh, without the narrowing CreateRegisteredMesh() performs.
+ * Build a mesh through Mesh::sNew, without the narrowing CreateRegisteredMesh() performs.
  *
  * The one recovered reference to this routine is its entry in the exception range table at
  * `0x00868634`, and nothing in the image calls it. The title follows Rnd::NewCamThroughHook(). The
@@ -768,15 +776,7 @@ Object *CreateRegisteredMesh(const HxStr &name);
 Mesh *NewMeshThroughHook(const HxStr &name);
 
 /**
- * Registered class name of Rnd::Mesh, the string "Mesh".
- *
- * @ghidraAddress NTSC-U/C: 0x006eed68
- * @ghidraAddress PAL: 0x00732788
- */
-extern HxStr g_meshClassName;
-
-/**
- * Point g_pfnNewMesh at NewMesh() and register the "Mesh" class with Rnd::Manager.
+ * Point Mesh::sNew at NewMesh() and register the "Mesh" class with Rnd::Manager.
  *
  * An inline function. The image has two identical out-of-line copies without callers (the second
  * at 0x006068c8), and the static initialiser at 0x0049afe0 inlines the body.
@@ -787,8 +787,8 @@ extern HxStr g_meshClassName;
  * @ghidraAddress PAL: 0x004d0560
  */
 inline void RegisterMeshClass() {
-    g_pfnNewMesh = NewMesh;
-    g_manager.RegisterClass(g_meshClassName, CreateRegisteredMesh);
+    Mesh::sNew = NewMesh;
+    TheManager.RegisterClass(Mesh::sClassName, CreateRegisteredMesh);
 }
 
 /**

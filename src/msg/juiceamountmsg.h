@@ -82,7 +82,7 @@ public:
      * Report the player's juice as a fraction of mMaxJuice.
      *
      * Both values are converted to float before the division. Six sites call it, among them
-     * Overlay::OnJuiceAmount() twice, TnlArena::HandleMessage(), and AppTunnel::HandleMessage().
+     * Overlay::OnJuiceAmount() twice, TnlArena::DispatchPriv(), and AppTunnel::DispatchPriv().
      * The name is inferred.
      *
      * @return The juice divided by mMaxJuice.

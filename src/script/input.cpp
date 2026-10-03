@@ -176,11 +176,11 @@ Py::Object ScriptTrackCtrl(const Py::Tuple &args) {
         return Py::Object();
     }
     if (command == "enable") {
-        pPolicy->SetFreeUntil(static_cast<int>(nTrack), 0, -1);
+        pPolicy->ForceEnabled(static_cast<int>(nTrack), 0, -1);
         return Py::Object();
     }
     if (command == "disable") {
-        pPolicy->DisableTrack(static_cast<int>(nTrack));
+        pPolicy->ForceDisable(static_cast<int>(nTrack));
         return Py::Object();
     }
     return Py::Object();

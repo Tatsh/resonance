@@ -27,7 +27,7 @@
  *
  * Every override that reads a palette stores the three low bytes of the entry, red first. The
  * block copy and the textured row resolve the palette from the source, then the canvas, then
- * g_pDefaultPalette, and the span overrides read ARowInfo::mPalette or AScaledRowInfo::mPalette.
+ * ACanvas::palDefault, and the span overrides read ARowInfo::mPalette or AScaledRowInfo::mPalette.
  * Each returns without drawing when the palette is null.
  *
  * The destructor in slot 1 at `0x006183d0` is compiler-generated. It restores ACanvas's table at

@@ -71,7 +71,7 @@ void SingleCatcher::ReportCaughtPowerbar(int nBar) {
     msg.mKind = static_cast<HudItemKind>(nPowerbar);
     msg.mPlayer = mPlayer;
     Send(&msg);
-    mPlayer->Handle(&msg);
+    mPlayer->Dispatch(&msg);
 }
 
 // NTSC-U/C: 0x001b1a40, PAL: 0x001b7800

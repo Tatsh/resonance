@@ -18,18 +18,18 @@ HxIListChunk::HxIListChunk(HxStream *pStream, bool bReadHeader)
         mHeader = new HxChunkHeader;
         mHeader->Read(*mStream);
     } else {
-        int nSize = pStream->Size() - pStream->Tell();
-        mHeader = new HxChunkHeader(g_listChunkName, nSize, 1);
+        int nSize = pStream->Size() - pStream->GetMarker();
+        mHeader = new HxChunkHeader(kListChunkID, nSize, 1);
     }
-    mStart = mStream->Tell();
+    mStart = mStream->GetMarker();
     Init();
 }
 
 // NTSC-U/C: 0x00146220, PAL: 0x00146d38
 HxIListChunk::HxIListChunk(HxIListChunk *pParent)
     : mParent(pParent), mStream(pParent->mStream), mHeader(nullptr), mLocked(0), mAtStart(1) {
-    mHeader = new HxChunkHeader(*mParent->Current());
-    mStart = mStream->Tell();
+    mHeader = new HxChunkHeader(*mParent->CurSubChunkHeader());
+    mStart = mStream->GetMarker();
     Init();
 }
 
@@ -47,12 +47,12 @@ void HxIListChunk::Init() {
     if (mParent != nullptr) {
         mParent->Lock();
     }
-    Rewind();
+    Reset();
 }
 
 // NTSC-U/C: 0x001463b0, PAL: 0x00146ec8
-void HxIListChunk::Rewind() {
-    mStream->Seek(mStart, kHxSeekSet);
+void HxIListChunk::Reset() {
+    mStream->SetMarker(mStart, kHxSeekSet);
     mAtStart = 1;
     mNext = mStart;
     mHasCurrent = 0;
@@ -67,10 +67,10 @@ HxChunkHeader *HxIListChunk::Next() {
     }
 
     mHasCurrent = 1;
-    mStream->Seek(mNext, kHxSeekSet);
+    mStream->SetMarker(mNext, kHxSeekSet);
     *mStream >> mCurrent;
     int nSize = mCurrent.mSize + (mCurrent.mIsList != 0 ? kListHeaderSize : kChunkHeaderSize);
-    if (mCurrent.Name() != g_mtrkChunkName) {
+    if (mCurrent.Name() != kMidiTrackChunkID) {
         nSize = (nSize - nSize / 2) * 2;
     }
     mNext += nSize;
@@ -78,12 +78,12 @@ HxChunkHeader *HxIListChunk::Next() {
 }
 
 // NTSC-U/C: 0x00146408, PAL: 0x00146f20
-HxChunkHeader *HxIListChunk::Current() {
+HxChunkHeader *HxIListChunk::CurSubChunkHeader() {
     return mHasCurrent != 0 ? &mCurrent : nullptr;
 }
 
 // NTSC-U/C: 0x00146428, PAL: 0x00146f40
-HxChunkHeader *HxIListChunk::Find(const HxChunkName &name) {
+HxChunkHeader *HxIListChunk::Next(const HxChunkName &name) {
     while (Next() != nullptr) {
         if (name == mCurrent.Name()) {
             return &mCurrent;

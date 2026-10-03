@@ -52,16 +52,17 @@ TnlPanelFX::TnlPanelFX(int nIndex) : mStateFrame(kNoFrame), mState(kStateIdle), 
 
     mMesh = Rnd::NewMeshThroughHook(HxStr("pnl") + NextAppTunnelName());
     mMat = nullptr;
-    mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("tnl transparent")));
+    mView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("tnl transparent")));
     mMesh->mZFunc = Rnd::Mesh::kZFuncLess;
     mMesh->mZMode = Rnd::Mesh::kZModeZReadOnly;
     mMesh->SetShowing(0);
     mView->AddDraw(mMesh, nullptr);
 
     const HxStr matName(FormatString("tunnel erase%d", nIndex));
-    mMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(matName));
+    mMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(matName));
     if (mMat == nullptr) {
-        Rnd::Mat *pTemplate = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("tunnel erase0")));
+        Rnd::Mat *pTemplate =
+            dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("tunnel erase0")));
         mMat = Rnd::NewMatThroughHook(matName);
         mMat->Copy(pTemplate, 0);
     }
@@ -78,7 +79,7 @@ void TnlPanelFX::Start(int nRing, int nSlice, int nForward) {
     mMesh->Sync();
     mMesh->mVertsOwner->mVerts = pSection->mVertsOwner->mVerts;
     mMesh->SyncAll();
-    mMesh->SetMaterial(mMat);
+    mMesh->SetMat(mMat);
 
     const float flFrame = static_cast<float>(nSlice * kFramesPerBar + kHalfBarFrames);
     Transform xfm;

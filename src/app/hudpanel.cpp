@@ -30,8 +30,8 @@ HudPanel::HudPanel()
 void HudPanel::SetFrame(float flFrame, float flTime) {
     mPosition.SetFrame(flFrame);
     mScreenFlash.SetFrame();
-    mAssembly.Update(flTime);
-    mLabelSwap.Update(flTime);
+    mAssembly.Execute(flTime);
+    mLabelSwap.Execute(flTime);
     mHighlight.SetFrame(flFrame);
     mLetterbox.SetFrame(flFrame);
     mWinMessage.SetFrame(flTime);

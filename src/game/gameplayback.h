@@ -4,7 +4,7 @@ class GameManagerImpl;
 class HxStr;
 
 /**
- * Playback of a recorded game session that GameManagerImpl::StartPlayback() installs.
+ * Playback of a recorded game session that GameManagerImpl::Recreate() installs.
  *
  * The class is not polymorphic, emits no RTTI, and has no embedded file path, so the title is
  * inferred from its counterpart GameRecorder and from the manager slot that installs it. The object
@@ -21,7 +21,7 @@ public:
      *
      * @param file The recording.
      * @param pManager The manager that installs the playback.
-     * @param nFlag The flag StartPlayback() passes. The body does not read it.
+     * @param nFlag The flag Recreate() passes. The body does not read it.
      * @ghidraAddress NTSC-U/C: 0x0010cf30
      * @ghidraAddress PAL: 0x0010d208
      */

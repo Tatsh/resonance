@@ -57,7 +57,7 @@ struct HxChunkHeader {
     /**
      * Read the header from a stream.
      *
-     * Reads the name raw and the size through HxStream::ReadSwapped(). A `LIST` or `RIFF` header
+     * Reads the name raw and the size through HxStream::ReadNum(). A `LIST` or `RIFF` header
      * then reads its form type over the name, is marked a list, and loses four bytes of size.
      * Any other header is marked not a list.
      *

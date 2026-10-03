@@ -157,7 +157,7 @@ public:
     /**
      * Report that the whole file has been delivered.
      *
-     * Slot 11. Mid::Reader::EndOfFile() calls it with no argument once the chunk reader has
+     * Slot 11. Mid::Reader::AllTracksRead() calls it with no argument once the chunk reader has
      * no chunk left. LevelConverter's table points at a two-instruction body of its own at
      * `0x001ea360`. That body is this default re-emitted rather than an override.
      *

@@ -33,8 +33,8 @@ namespace Rnd {
  * 0x40-byte prototype whose four padding words it sets to 1.0 and then reading three floats into
  * each of the four rows.
  *
- * The hardware submission path belongs to Rnd::PsMultiMesh, and DrawSelf() below is the portable
- * implementation it replaces.
+ * The hardware submission path belongs to Rnd::PsMultiMesh, and DrawShowing() below is the
+ * portable implementation it replaces.
  */
 class MultiMesh : public Drawable {
 public:
@@ -120,7 +120,7 @@ public:
      * Load the multi-mesh.
      *
      * Reports "Can't load new MultiMesh" through the failure sink when the file version exceeds
-     * kSerialVersion. The mesh reference arrives as a name and resolves through Rnd::g_manager
+     * kSerialVersion. The mesh reference arrives as a name and resolves through Rnd::TheManager
      * with a checked cast.
      *
      * @param stream The stream to read from.
@@ -152,8 +152,8 @@ public:
     /**
      * Report the instance transforms.
      *
-     * The out-of-line copy has no callers. Rnd::Generator::DrawSelf() inlines it to walk the list
-     * from outside this hierarchy.
+     * The out-of-line copy has no callers. Rnd::Generator::DrawShowing() inlines it to walk the
+     * list from outside this hierarchy.
      *
      * @return The transform list.
      * @ghidraAddress NTSC-U/C: 0x004eba98
@@ -224,7 +224,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x004e83d0
      * @ghidraAddress PAL: 0x00526f08
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
     // Both members are protected because Rnd::PsMultiMesh reads the mesh and walks the transform
     // list to submit its GIF packets. The order below is the recovered offset order.
@@ -292,7 +292,7 @@ extern HxStr g_multiMeshClassName;
  */
 inline void RegisterMultiMeshClass() {
     g_pfnNewMultiMesh = NewMultiMesh;
-    g_manager.RegisterClass(g_multiMeshClassName, CreateRegisteredMultiMesh);
+    TheManager.RegisterClass(g_multiMeshClassName, CreateRegisteredMultiMesh);
 }
 
 /**

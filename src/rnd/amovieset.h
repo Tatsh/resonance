@@ -16,7 +16,7 @@ namespace Rnd {
  * A file begins with a MOVS chunk and one MOVT chunk per track, which ParseHeader() copies into
  * mTracks. The chunks that follow carry palettes (PALL), frames (FRAM), blank frames (BLAK), loop
  * points (LOOP), and three kinds of sound data (SNDH, SNDB, SNDP). Update() consumes every
- * chunk whose tick has arrived and passes it to the handler SetTrackHandler() installed for its
+ * chunk whose tick has arrived and passes it to the handler AssignHandler() installed for its
  * track. A whole file is read into memory at once. A streaming file is read in 0x8000 byte and
  * smaller requests into an ACircBuff in the zone "movieStreamBuff", which must be at least 512K.
  */
@@ -147,7 +147,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005808d0
      * @ghidraAddress PAL: 0x005c3908
      */
-    void SetTrackHandler(int nTrackId, ChunkHandler pfnHandler, void *pData);
+    void AssignHandler(int nTrackId, ChunkHandler pfnHandler, void *pData);
 
     /**
      * Queue the next streaming read of up to nBytes, as Update() does inline.

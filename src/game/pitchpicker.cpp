@@ -50,7 +50,7 @@ inline PitchPicker::NoteMapping MakeMapping(unsigned char nNote, unsigned char n
 // NTSC-U/C: 0x001c29c8, PAL: 0x001c8810
 PitchPicker::PitchPicker(const TrackData *pTrackData)
     : mTrackData(pTrackData), mAxis(kAxisCenter), mSustainTick(kNoSustainTick), mRiffLow(kMiddleC),
-      mRiffHigh(kMiddleC), mTrack(pTrackData->mIndex), mPlayer(&g_nullPlayer) {
+      mRiffHigh(kMiddleC), mTrack(pTrackData->mIndex), mPlayer(&NullPlayer::sInstance) {
 }
 
 // NTSC-U/C: 0x001c2c60, PAL: 0x001c8aa8
@@ -109,13 +109,13 @@ unsigned char PitchPicker::GetSustainPitch(int nTick, unsigned char nNote) {
 }
 
 // NTSC-U/C: 0x001c3130, PAL: 0x001c8f78
-void PitchPicker::HandleMessage(Message *pMsg) {
+void PitchPicker::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwMultiMuseMsgType)) {
         OnMsg(*static_cast<MultiMuseMsg *>(pMsg));
-    } else if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
+    } else if (nType == static_cast<int>(StdMidiMsg::sID)) {
         OnStdMidi(static_cast<StdMidiMsg *>(pMsg));
-    } else if (nType == static_cast<int>(g_dwSustainNoteMsgType)) {
+    } else if (nType == static_cast<int>(SustainNoteMsg::sID)) {
         PostSustainNoteMsg(static_cast<SustainNoteMsg *>(pMsg));
     } else if (nType == g_nAxisRegisterMsgType) {
         AxisRegisterMsg *pAxis = static_cast<AxisRegisterMsg *>(pMsg);
@@ -157,5 +157,5 @@ unsigned char PitchPicker::PickPitch(int nTick, unsigned char nNote) {
     int nHigh;
     pHarmony->GetRange(&nLow, &nHigh);
     LinearTransform map(kAxisMinimum, kAxisMaximum, nLow - mRiffLow, nHigh - mRiffHigh);
-    return pHarmony->Snap(static_cast<unsigned char>(nNote + map.Map(mAxis)));
+    return pHarmony->SnapToHarmony(static_cast<unsigned char>(nNote + map.Apply(mAxis)));
 }

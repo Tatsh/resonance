@@ -154,8 +154,8 @@ int MetNullRenderer::ParseRuleset(const HxStr &ruleset) {
 }
 
 // NTSC-U/C: 0x00311ff0, PAL: 0x00337d50
-void MetNullRenderer::HandleMessage(Message *pMsg) {
-    if (pMsg->Type() == g_nRawControllerMsgType) {
+void MetNullRenderer::DispatchPriv(Message *pMsg) {
+    if (pMsg->Type() == RawControllerMsg::sID) {
         OnRawController(static_cast<RawControllerMsg *>(pMsg));
     }
 }

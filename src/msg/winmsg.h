@@ -20,7 +20,7 @@ class Player;
  *
  * The vector is public because two handlers outside the class read it directly with no accessor in
  * the image. Overlay::OnWin() at `0x0041e020` searches it for HudTrack::mPlayer with std::find at
- * `0x0041e1d0`. That search types the elements as players. TnlArena::HandleMessage() tests the
+ * `0x0041e1d0`. That search types the elements as players. TnlArena::DispatchPriv() tests the
  * vector for emptiness.
  *
  * The destructors at `0x00116238` and `0x003e0c00` are compiler-generated, release mWinners, and

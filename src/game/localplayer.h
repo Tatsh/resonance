@@ -33,7 +33,7 @@ class TickClock;
  * the end of the base table rather than overriding into it. It replaces slots 2 and 4 through 12
  * and 14 through 20, and inherits only slots 3 and 13. In the `MsgSource` table it replaces both
  * `AddSink` and `RemoveSink`, which the base leaves inherited, and in the `MsgSink` table it
- * replaces `HandleMessage`.
+ * replaces `DispatchPriv`.
  *
  * The constructor gives the player a powerup collection and a placer that fits the play mode, and
  * AddSink() and RemoveSink() fan registration out to both. The player also keeps the capture
@@ -233,13 +233,13 @@ public:
      * Receive one message.
      *
      * Acts on the controller, capture, and powerup messages that address this player, and passes
-     * every message it does not recognise to Player::HandleMessage().
+     * every message it does not recognise to Player::DispatchPriv().
      *
      * @param pMsg The message.
      * @ghidraAddress NTSC-U/C: 0x0011ed98
      * @ghidraAddress PAL: 0x0011f358
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x001228f8
@@ -292,7 +292,7 @@ private:
     // Starts a multiplier bonus of 2 for eight bars from the message's bar.
     void OnMultiplier(MultiplierMsg *pMsg);
 
-    // The six handlers below are inline, and HandleMessage() expands each. The addresses are
+    // The six handlers below are inline, and DispatchPriv() expands each. The addresses are
     // their uncalled out-of-line copies.
 
     // NTSC-U/C: 0x00122a20, PAL: 0x00123038

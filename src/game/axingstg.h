@@ -86,7 +86,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0019df58
      * @ghidraAddress PAL: 0x001a3cc0
      */
-    virtual void ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
+    virtual void ConnectInputs(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary);
 
     /**
      * Attach the mixer to the base's synthesiser and give it its output sink.
@@ -108,7 +108,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0019e850
      * @ghidraAddress PAL: 0x001a45b8
      */
-    virtual void AddSinkToSources(MsgSink *pSink);
+    virtual void ConnectToTunnel(MsgSink *pSink);
 
     /**
      * Install the sink the phrase manager reports phrase changes to.

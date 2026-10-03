@@ -23,23 +23,23 @@ void HudFeedback::SetFrame(float flFrame) {
     }
 
     if (flFrame == mLastFrame) {
-        g_gfxDevice.mFeedbackEnabled = 0;
+        Rnd::ThePs.mFeedbackEnabled = 0;
         return;
     }
     mLastFrame = flFrame;
     if (kFadeEnd < flFrame) {
-        g_gfxDevice.mFeedbackEnabled = 0;
+        Rnd::ThePs.mFeedbackEnabled = 0;
         return;
     }
 
     if (kFadeStart < flFrame) {
         const float flRemaining = 1.0f - (flFrame - kFadeStart) / kFadeLength;
-        g_gfxDevice.mFeedbackInset = static_cast<int>(flRemaining * kFadeInset);
-        g_gfxDevice.mFeedbackAlpha = flRemaining * kFullAlpha;
+        Rnd::ThePs.mFeedbackInset = static_cast<int>(flRemaining * kFadeInset);
+        Rnd::ThePs.mFeedbackAlpha = flRemaining * kFullAlpha;
     } else {
-        g_gfxDevice.mFeedbackAlpha = kFullAlpha;
-        g_gfxDevice.mFeedbackInset = kFullInset;
+        Rnd::ThePs.mFeedbackAlpha = kFullAlpha;
+        Rnd::ThePs.mFeedbackInset = kFullInset;
     }
-    g_gfxDevice.mFeedbackRect = GfxDevice::Rect{0.0f, 0.0f, 1.0f, 1.0f};
-    g_gfxDevice.mFeedbackEnabled = 1;
+    Rnd::ThePs.mFeedbackRect = GfxDevice::Rect{0.0f, 0.0f, 1.0f, 1.0f};
+    Rnd::ThePs.mFeedbackEnabled = 1;
 }

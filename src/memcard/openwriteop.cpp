@@ -14,7 +14,7 @@ OpenWriteOp::~OpenWriteOp() {
 }
 
 // NTSC-U/C: 0x0055ebe8, PAL: 0x0059feb8
-void OpenWriteOp::Issue() {
+void OpenWriteOp::Execute() {
     sceMcOpen(mPortSlot >> kMemcardPortShift,
               mPortSlot & kMemcardSlotMask,
               mPath.mStr != nullptr ? mPath.mStr : g_szEmptyString,
@@ -23,7 +23,7 @@ void OpenWriteOp::Issue() {
 }
 
 // NTSC-U/C: 0x0055dd08, PAL: 0x0059ef90
-void OpenWriteOp::Complete() {
+void OpenWriteOp::NotifyDone() {
     InterpretResult();
     mHandler->OnOpenWrite(this);
 }

@@ -113,7 +113,7 @@ public:
      * @param pSecondary The source every override registers the phrase manager with.
      */
     virtual void
-    ConnectSources(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) = 0;
+    ConnectInputs(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) = 0;
 
     /**
      * Register the mixer with one source.
@@ -125,7 +125,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001cf750
      * @ghidraAddress PAL: 0x001d5608
      */
-    virtual void AddMixerToSource(MsgSource *pSource);
+    virtual void ConnectGamer(MsgSource *pSource);
 
     /**
      * Attach the mixer to the synthesiser and give it its output sink.
@@ -146,13 +146,13 @@ public:
      *
      * @param pSink The sink to register.
      */
-    virtual void AddSinkToSources(MsgSink *pSink) = 0;
+    virtual void ConnectToTunnel(MsgSink *pSink) = 0;
 
     /**
      * Install the sink the phrase manager reports phrase changes to.
      *
      * Slot 8, pure. All four overrides store the argument in PhraseMgr::mNetSink and ignore a
-     * null sink. PhraseMgr sends messages through that member's MsgSink::Handle(), which is what
+     * null sink. PhraseMgr sends messages through that member's MsgSink::Dispatch(), which is what
      * types the argument.
      *
      * @param pSink The sink to install, ignored when null.
@@ -222,7 +222,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001cf6b8
      * @ghidraAddress PAL: 0x001d5570
      */
-    int CallStart();
+    int StartMF();
 
     /**
      * Run Stop() and report zero.
@@ -234,7 +234,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001cf6e8
      * @ghidraAddress PAL: 0x001d55a0
      */
-    int CallStop();
+    int StopMF();
 
     /**
      * Delete a stage, which may be null.
@@ -272,14 +272,14 @@ protected:
 
 // NTSC-U/C: 0x001cf6b8, PAL: 0x001d5570
 // The out-of-line copy.
-inline int ScoreTrackGraph::CallStart() {
+inline int ScoreTrackGraph::StartMF() {
     Start();
     return 0;
 }
 
 // NTSC-U/C: 0x001cf6e8, PAL: 0x001d55a0
 // The out-of-line copy.
-inline int ScoreTrackGraph::CallStop() {
+inline int ScoreTrackGraph::StopMF() {
     Stop();
     return 0;
 }

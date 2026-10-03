@@ -19,6 +19,14 @@
 class InvalidateSeekerMsg : public Message {
 public:
     /**
+     * Identity that Type() reports, 317.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d0274
+     * @ghidraAddress PAL: 0x00713a0c
+     */
+    static int sID;
+
+    /**
      * Construct a message with the payload unset.
      *
      * Inline. New() expands it. A declaration is required because the class declares a second
@@ -62,7 +70,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nInvalidateSeekerMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x00116100
      * @ghidraAddress PAL: 0x001165a8
      */
@@ -78,22 +86,10 @@ public:
     virtual const char *GetName() const;
 
 public:
-    // Public because Voxer::HandleMessage(), Scratcher::HandleMessage(), and
-    // NotePitcher::HandleMessage() reads these directly, through a InvalidateSeekerMsg pointer from
-    // outside the hierarchy, and the image exposes no accessor. A friend declaration fits equally
-    // well.
+    // Public because Voxer::DispatchPriv(), Scratcher::DispatchPriv(), and
+    // NotePitcher::DispatchPriv() read the members below directly, through an InvalidateSeekerMsg
+    // pointer from outside the hierarchy, and the image exposes no accessor. A friend declaration
+    // fits equally well.
     int mBar;   // +0x04
     int mTrack; // +0x08
 };
-
-/**
- * Identity that InvalidateSeekerMsg::Type() reports.
- *
- * This word belongs to InvalidateSeekerMsg because InvalidateSeekerMsg::Type() at `0x00116100`
- * returns it, and the registration at `0x003d9818` passes the same value, 317, as the identity of
- * this class's factory.
- *
- * @ghidraAddress NTSC-U/C: 0x006d0274
- * @ghidraAddress PAL: 0x00713a0c
- */
-extern int g_nInvalidateSeekerMsgType;

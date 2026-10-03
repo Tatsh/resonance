@@ -12,7 +12,7 @@ constexpr char kSectorCacheZoneName[] = "seccache";
 // The access clock, not a flag. Stamps start at 1 so that a row that has never been used, whose
 // stamp is zero, always sorts as the oldest.
 // NTSC-U/C: 0x008de798, PAL: 0x00923758
-unsigned g_nSectorCacheClock;
+unsigned gCurrTimestamp;
 
 // The image initialises this word to kNoZone and nothing writes it. The read below is its only
 // reference, so the ZoneFree() branch it selects is dead code.
@@ -39,7 +39,7 @@ void InitSectorCache(int nRows) {
 
     g_pSectorCacheRows = static_cast<SectorCacheRow *>(
         MemAllocTagged(g_nSectorCacheRows * sizeof(SectorCacheRow), __FILE__, __LINE__));
-    g_nSectorCacheClock = 1;
+    gCurrTimestamp = 1;
 
     SectorCacheRow *pRow = g_pSectorCacheRows;
     for (int i = 0; i < g_nSectorCacheRows; ++i) {
@@ -93,8 +93,8 @@ SectorCacheRow *SectorCacheFind(int nFile, int nSector) {
             continue;
         }
         if (pRow->mStamp != kSectorCacheLocked) {
-            pRow->mStamp = g_nSectorCacheClock;
-            ++g_nSectorCacheClock;
+            pRow->mStamp = gCurrTimestamp;
+            ++gCurrTimestamp;
         }
         return pRow;
     }
@@ -125,8 +125,8 @@ void UnlockCachedSector(int nFile, int nSector) {
         LogPrintf("CAN'T FIND SECTOR IN CACHE TO UNLOCK!!!!\n");
         return;
     }
-    pRow->mStamp = g_nSectorCacheClock;
-    ++g_nSectorCacheClock;
+    pRow->mStamp = gCurrTimestamp;
+    ++gCurrTimestamp;
 }
 
 // NTSC-U/C: 0x005554a0, PAL: 0x00595b28
@@ -171,8 +171,8 @@ SectorCacheRow *SectorCacheGetLru(int nFile, int nSector) {
             }
             ++pRow;
         }
-        if (g_nSectorCacheClock > kSectorCacheStampHalfway) {
-            g_nSectorCacheClock -= kSectorCacheStampRebase;
+        if (gCurrTimestamp > kSectorCacheStampHalfway) {
+            gCurrTimestamp -= kSectorCacheStampRebase;
         }
     }
 
@@ -182,7 +182,7 @@ SectorCacheRow *SectorCacheGetLru(int nFile, int nSector) {
         // Unreachable, because the search above never chooses a locked row.
         LogPrintf("ARRGHGHGHGH - SECTORCACHEGETLRU GOT LOCKED SECTOR\n");
     }
-    pChosen->mStamp = g_nSectorCacheClock;
-    ++g_nSectorCacheClock;
+    pChosen->mStamp = gCurrTimestamp;
+    ++gCurrTimestamp;
     return pChosen;
 }

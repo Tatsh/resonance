@@ -29,7 +29,7 @@ constexpr unsigned kCopyChildLists = 0x200;
  * The class is 0x1c bytes. Following the g++ 2.x layout for a class with no base, the vptr sits
  * after the data members at `+0x18`, and the eight-entry vtable is at `0x00829010`.
  *
- * Construction registers the object in Rnd::g_manager under its name, and destruction erases that
+ * Construction registers the object in Rnd::TheManager under its name, and destruction erases that
  * registration. A second object stores a pointer to this one by registering itself through
  * AddRef(). ReleaseAllRefs() then notifies every referrer through Replace() before this object
  * goes away.
@@ -50,8 +50,8 @@ public:
     /**
      * Construct an object and register it under name.
      *
-     * A name already present in Rnd::g_manager produces the report "%s already exists" and then
-     * transfers control to the abort handler of g_failSink. The map entry is overwritten with this
+     * A name already present in Rnd::TheManager produces the report "%s already exists" and then
+     * transfers control to the abort handler of Rnd::TheDbg. The map entry is overwritten with this
      * object either way.
      *
      * @param name The registry key for this object.
@@ -72,7 +72,7 @@ public:
      * Re-register this object under a different name.
      *
      * A name equal to mName is discarded without further work, and a name already present in
-     * Rnd::g_manager produces the report "%s already exists" and no change.
+     * Rnd::TheManager produces the report "%s already exists" and no change.
      *
      * @param name The new registry key.
      * @ghidraAddress NTSC-U/C: 0x0053e400

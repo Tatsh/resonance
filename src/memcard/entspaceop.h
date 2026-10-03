@@ -9,16 +9,16 @@
  * Its RTTI descriptor is at `0x008ef048`. It has single inheritance from `MemcardOp` at offset 0.
  * An instance is 0x28 bytes and the vtable is at `0x0082be50`.
  *
- * Issue() calls `sceMcGetEntSpace()`, whose result is the free entry count rather than a status, so
- * InterpretResult() treats every value that is not negative as success. The count survives only in
- * MemcardOp::mResult, because InterpretResult() copies it nowhere.
+ * Execute() calls `sceMcGetEntSpace()`, whose result is the free entry count rather than a status,
+ * so InterpretResult() treats every value that is not negative as success. The count survives only
+ * in MemcardOp::mResult, because InterpretResult() copies it nowhere.
  */
 class EntSpaceOp : public MemcardOp {
 public:
     /**
      * Construct an enquiry against one directory.
      *
-     * @param pHandler The receiver Complete() reports to.
+     * @param pHandler The receiver NotifyDone() reports to.
      * @param nPortSlot The packed port and slot.
      * @param path The directory to measure.
      * @param nCookie The tag Memcard::Cancel() matches on.
@@ -37,13 +37,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055e4a8
      * @ghidraAddress PAL: 0x0059f778
      */
-    virtual void Issue();
+    virtual void Execute();
 
     /**
      * @ghidraAddress NTSC-U/C: 0x0055d480
      * @ghidraAddress PAL: 0x0059e6d8
      */
-    virtual void Complete();
+    virtual void NotifyDone();
 
     /**
      * Report kMemcardStatusOk for any result that is not negative, and

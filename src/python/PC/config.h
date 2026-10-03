@@ -86,7 +86,7 @@
 #include "os/heap.h"
 
 /* The one interpreter heap, built by Py_Initialize over the whole of the zone titled python. */
-extern Heap *g_pPythonHeap;
+extern Heap *gpPythonHeap;
 
 /* The C translation units of the interpreter cannot call methods, so the redirect goes through
    these functions, which forward to the heap. Their names are build scaffolding rather than

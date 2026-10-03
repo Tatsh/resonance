@@ -35,7 +35,7 @@ ToolStream::~ToolStream() {
 }
 
 // NTSC-U/C: 0x00510308, PAL: 0x0054f8f0
-Stream &ToolStream::ReadBytes(void *pDest, int nSize) {
+Stream &ToolStream::Read(void *pDest, int nSize) {
     char *pCursor = static_cast<char *>(pDest);
     while (Eof()) {
     }
@@ -57,10 +57,10 @@ Stream &ToolStream::ReadBytes(void *pDest, int nSize) {
 }
 
 // NTSC-U/C: 0x00510400, PAL: 0x0054f9e8
-Stream &ToolStream::WriteBytes([[maybe_unused]] const void *pSrc, [[maybe_unused]] int nSize) {
-    g_failSink.Report("Can't write to a PS ToolStream\n");
-    if (g_failSink.mAbortProc != nullptr) {
-        g_failSink.mAbortProc();
+Stream &ToolStream::Write([[maybe_unused]] const void *pSrc, [[maybe_unused]] int nSize) {
+    Rnd::TheDbg.Notify("Can't write to a PS ToolStream\n");
+    if (Rnd::TheDbg.mAbortProc != nullptr) {
+        Rnd::TheDbg.mAbortProc();
     } else {
         throw; // With no handler the binary rethrows the exception in flight.
     }

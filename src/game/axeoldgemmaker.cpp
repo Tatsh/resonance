@@ -39,8 +39,6 @@ inline int ClampTick(int nTick) {
 
 } // namespace
 
-int g_nNextStripId;
-
 // NTSC-U/C: 0x001a31c8, PAL: 0x001a8f30
 AxeOldGemMaker::AxeOldGemMaker(const TrackData *pTrackData)
     : mTrack(pTrackData->mIndex), mPhrase(nullptr), mSustainStart(0) {
@@ -103,7 +101,7 @@ void AxeOldGemMaker::OnPhrase(PhraseMsg *pMsg) {
         for (const auto &entry : pMuse->mEntries) {
             // The replay steps the position without the finiteness check.
             mPosition.mTick = ClampTick(mPosition.mTick + entry.mPosition.mTick);
-            Handle(entry.mValue);
+            Dispatch(entry.mValue);
             mPosition.mTick = ClampTick(mPosition.mTick - entry.mPosition.mTick);
         }
     }
@@ -120,13 +118,13 @@ float AxeOldGemMaker::BlendForStep(int nStep) {
 }
 
 // NTSC-U/C: 0x001a47a8, PAL: 0x001aa510
-void AxeOldGemMaker::HandleMessage(Message *pMsg) {
+void AxeOldGemMaker::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
-    if (nType == g_nPhraseMsgType) {
+    if (nType == PhraseMsg::sID) {
         OnPhrase(static_cast<PhraseMsg *>(pMsg));
-    } else if (nType == static_cast<int>(g_dwNoteMsgType)) {
+    } else if (nType == static_cast<int>(NoteMsg::sID)) {
         PostDurGemMsg(static_cast<NoteMsg *>(pMsg));
-    } else if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
+    } else if (nType == static_cast<int>(StdMidiMsg::sID)) {
         OnStdMidi(static_cast<StdMidiMsg *>(pMsg));
     }
 }

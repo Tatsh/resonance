@@ -168,7 +168,7 @@ const LabelText kPanelLabels[] = {
 };
 
 inline void FillLabel(const LabelText &label) {
-    dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(label.pszObject)))
+    dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(label.pszObject)))
         ->SetText(GetMetString(label.nId));
 }
 #endif
@@ -293,10 +293,10 @@ void MetConfigControllerScreen::ResolveContainerViews() {
 #endif
 
     // Yes, the binary does not test either instruction text for null.
-    dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kInstructionText1)))
+    dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kInstructionText1)))
         ->SetText(
             MetConfigText(kMetStrControllerConfigInstruct1, kPromptConfigCode, kInstructionKey1));
-    dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kInstructionText2)))
+    dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kInstructionText2)))
         ->SetText(
             MetConfigText(kMetStrControllerConfigInstruct2, kPromptConfigCode, kInstructionKey2));
 
@@ -309,13 +309,13 @@ void MetConfigControllerScreen::ResolveContainerViews() {
 
     for (int nButton = 0; nButton < kButtonCount; ++nButton) {
         mButtonMeshes[nButton] =
-            dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(mButtonMeshNames[nButton]));
+            dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(mButtonMeshNames[nButton]));
         mButtonMeshes[nButton]->SetShowing(false);
     }
 
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
         mRowValueTexts[nRow] =
-            dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(mRowValueTextNames[nRow]));
+            dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(mRowValueTextNames[nRow]));
     }
 }
 

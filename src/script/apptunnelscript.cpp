@@ -46,7 +46,7 @@ Py::Object ShowDrawable(Py::Tuple args, Rnd::Drawable *pTarget) {
 // NTSC-U/C: 0x0044a7b0, PAL: 0x00487aa0
 Py::Object ScriptActivatorShow(Py::Tuple args) {
     Rnd::Drawable *pTarget =
-        dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("activator0")));
+        dynamic_cast<Rnd::Drawable *>(Rnd::TheManager.Find(HxStr("activator0")));
     return ShowDrawable(Py::Tuple(args), pTarget);
 }
 
@@ -54,7 +54,7 @@ Py::Object ScriptActivatorShow(Py::Tuple args) {
 // NTSC-U/C: 0x0044a930, PAL: 0x00487c40
 Py::Object ScriptNowRing(Py::Tuple args) {
     Rnd::Drawable *pTarget =
-        dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("nowring.view")));
+        dynamic_cast<Rnd::Drawable *>(Rnd::TheManager.Find(HxStr("nowring.view")));
     return ShowDrawable(Py::Tuple(args), pTarget);
 }
 
@@ -62,13 +62,13 @@ Py::Object ScriptNowRing(Py::Tuple args) {
 // NTSC-U/C: 0x0044aab0, PAL: 0x00487de0
 Py::Object ScriptHudEnable(Py::Tuple args) {
     Rnd::Drawable *pEnergy =
-        dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("HUD1 energy.mesh")));
+        dynamic_cast<Rnd::Drawable *>(Rnd::TheManager.Find(HxStr("HUD1 energy.mesh")));
     ShowDrawable(Py::Tuple(args), pEnergy);
     Rnd::Drawable *pScore =
-        dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("HUD1 score0.mesh")));
+        dynamic_cast<Rnd::Drawable *>(Rnd::TheManager.Find(HxStr("HUD1 score0.mesh")));
     ShowDrawable(Py::Tuple(args), pScore);
     Rnd::Drawable *pPos =
-        dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("HUD1 pos.view")));
+        dynamic_cast<Rnd::Drawable *>(Rnd::TheManager.Find(HxStr("HUD1 pos.view")));
     ShowDrawable(Py::Tuple(args), pPos);
     return Py::Object();
 }
@@ -77,10 +77,10 @@ Py::Object ScriptHudEnable(Py::Tuple args) {
 // NTSC-U/C: 0x0044af40, PAL: 0x004882e8
 Py::Object ScriptSections(Py::Tuple args) {
     Rnd::Drawable *pMessage =
-        dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("boundary msg")));
+        dynamic_cast<Rnd::Drawable *>(Rnd::TheManager.Find(HxStr("boundary msg")));
     ShowDrawable(Py::Tuple(args), pMessage);
     Rnd::Drawable *pRing =
-        dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("boundary_ring.mesh")));
+        dynamic_cast<Rnd::Drawable *>(Rnd::TheManager.Find(HxStr("boundary_ring.mesh")));
     ShowDrawable(Py::Tuple(args), pRing);
     return Py::Object();
 }
@@ -120,12 +120,12 @@ Py::Object ScriptSeeker(Py::Tuple args) {
 // All five materials have to resolve, or nothing happens. The tuple carries the alpha.
 // NTSC-U/C: 0x0044b7a0, PAL: 0x00488ba8
 Py::Object ScriptFadeActivator(Py::Tuple args) {
-    Rnd::Mat *pActTarUp = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("act_g tar up.mat")));
-    Rnd::Mat *pScratch = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("scratch_g.mat")));
-    Rnd::Mat *pAct = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("act_g.mat")));
-    Rnd::Mat *pPtrAxe = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("ptr_g_axe.mat")));
+    Rnd::Mat *pActTarUp = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("act_g tar up.mat")));
+    Rnd::Mat *pScratch = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("scratch_g.mat")));
+    Rnd::Mat *pAct = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("act_g.mat")));
+    Rnd::Mat *pPtrAxe = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("ptr_g_axe.mat")));
     Rnd::Mat *pScratchPlate =
-        dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("scratchplate_g.mat")));
+        dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("scratchplate_g.mat")));
     if (pActTarUp == nullptr || pScratch == nullptr || pAct == nullptr || pPtrAxe == nullptr ||
         pScratchPlate == nullptr) {
         return Py::Object();

@@ -13,7 +13,7 @@ namespace {
 // The configuration code the constructor reads the list of kinds from.
 constexpr int kPowerupKindsConfigCode = 905;
 
-// The largest count one entry stores. AddPowerup ignores an entry already at this count.
+// The largest count one entry stores. Add() ignores an entry already at this count.
 constexpr int kMaximumCount = 9;
 
 // The fourth argument Deploy() passes to Powerup::Deploy().
@@ -28,7 +28,7 @@ struct MatchesType {
     }
 
     bool operator()(const PowerupCollection::Entry &entry) const {
-        return entry.IsType(mType);
+        return entry == mType;
     }
 
     int mType;
@@ -62,7 +62,7 @@ PowerupCollection::~PowerupCollection() {
 }
 
 // NTSC-U/C: 0x001cb230, PAL: 0x001d10e8
-void PowerupCollection::AddPowerup(int nType) {
+void PowerupCollection::Add(int nType) {
     std::vector<Entry>::iterator it =
         std::find_if(mEntries.begin(), mEntries.end(), MatchesType(nType));
     if (it == mEntries.end()) {
@@ -145,7 +145,7 @@ int PowerupCollection::HasSelection() {
 }
 
 // NTSC-U/C: 0x001cb620, PAL: 0x001d14d8
-void PowerupCollection::AnnounceState() {
+void PowerupCollection::SendState() {
     for (std::vector<Entry>::iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
         if (it->mCount != 0) {
             PowerupCountMsg msg(it - mEntries.begin(), it->mCount, mOwner);

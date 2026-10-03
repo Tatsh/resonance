@@ -35,7 +35,7 @@ void ScriptParseAnimatableArgs(Py::Tuple args, Rnd::Animatable **ppTarget, float
     Py::Object element = args.getItem(0);
     Py::String text(element);
     HxStr name = text;
-    Rnd::Animatable *pTarget = dynamic_cast<Rnd::Animatable *>(Rnd::g_manager.Find(name));
+    Rnd::Animatable *pTarget = dynamic_cast<Rnd::Animatable *>(Rnd::TheManager.Find(name));
     *ppTarget = pTarget;
     if (pTarget == nullptr) {
         throw Py::TypeError(HxStr(FormatString(
@@ -61,7 +61,7 @@ void ScriptParseAnimLoopRange(Py::Tuple args,
     Py::Object element = args.getItem(0);
     Py::String text(element);
     HxStr name = text;
-    Rnd::Animatable *pTarget = dynamic_cast<Rnd::Animatable *>(Rnd::g_manager.Find(name));
+    Rnd::Animatable *pTarget = dynamic_cast<Rnd::Animatable *>(Rnd::TheManager.Find(name));
     *ppTarget = pTarget;
     if (pTarget == nullptr) {
         throw Py::TypeError(HxStr(FormatString(
@@ -116,7 +116,7 @@ Py::Object ScriptAnimMinmax(Py::Tuple args) {
 
 // Lock the arena screens at the neutral level.
 //
-// Sets the arena's juice-trip flag so HandleMessage() stops acting on juice, and passes level 1
+// Sets the arena's juice-trip flag so DispatchPriv() stops acting on juice, and passes level 1
 // to the screen animation, which is what TnlArena::LockLevel() does. The arguments are unused;
 // the tuple arrives by value and is released here.
 // NTSC-U/C: 0x00408910, PAL: 0x00442310

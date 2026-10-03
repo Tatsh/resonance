@@ -16,14 +16,14 @@ class Message;
  * MsgSink and 40 of them derive directly.
  *
  * The vtable at `0x007ccc40` runs four entries and a zero terminator: the type function, the
- * destructor, Handle(), and HandleMessage(). The HandleMessage() entry addresses the shared
+ * destructor, Dispatch(), and DispatchPriv(). The DispatchPriv() entry addresses the shared
  * pure-virtual stub at `0x005381a8`, the target of 355 slots across the image. That entry marks
  * the member pure rather than defaulted.
  *
- * The destructor and Handle() are defined inline. g++ 2.9x emitted the vtable into every
+ * The destructor and Dispatch() are defined inline. g++ 2.9x emitted the vtable into every
  * translation unit that constructs or destroys a derived object, producing 45 byte-identical
  * copies, and emitted the two bodies alongside them. 48 further copies of the destructor, 104 of
- * Handle(), and 44 of the type function remain in the image. Every copy that occupies no vtable
+ * Dispatch(), and 44 of the type function remain in the image. Every copy that occupies no vtable
  * slot is referenced only from a frame-unwind record. The reconstruction therefore owes two
  * definitions rather than 196.
  *
@@ -74,7 +74,7 @@ public:
     /**
      * Accept a message.
      *
-     * The body dispatches table slot 3, HandleMessage(), through the object's own vptr. Two
+     * The body dispatches table slot 3, DispatchPriv(), through the object's own vptr. Two
      * overrides are recovered. RendererBase::Router at `0x00139f50` forwards the message to the
      * sink it stores, and RendererBase at `0x00139f80` stores the message in its queue. Every other
      * MsgSink subobject table in the image places this body at slot 2.
@@ -83,19 +83,19 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00105158
      * @ghidraAddress PAL: 0x00105158
      */
-    virtual void Handle(Message *pMsg);
+    virtual void Dispatch(Message *pMsg);
 
     /**
      * Act on a message.
      *
      * Public rather than protected. The counter-example is one of the two classes that override
-     * Handle(). RendererBase::Router at `0x00139f50` dispatches this member's slot on the separate
-     * sink it stores at `+0x04`, which is an object of an unrelated class, so protected access
-     * would not reach it. Every other dispatch in the image does come from Handle() on the same
-     * object, which is why the narrower reading held until that override was found. A friend
-     * declaration fits equally well.
+     * Dispatch(). RendererBase::Router at `0x00139f50` dispatches this member's slot on the
+     * separate sink it stores at `+0x04`. The stored sink is an object of an unrelated class, and
+     * protected access would not reach it. Every other dispatch in the image comes from Dispatch()
+     * on the same object. The protected reading held until the Router override was found. A
+     * friend declaration fits equally well.
      *
      * @param pMsg The message.
      */
-    virtual void HandleMessage(Message *pMsg) = 0;
+    virtual void DispatchPriv(Message *pMsg) = 0;
 };

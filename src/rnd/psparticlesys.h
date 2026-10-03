@@ -14,8 +14,8 @@ namespace Rnd {
  * shows the subclass does not add data.
  *
  * The subclass overrides exactly two virtuals, the destructor in the Object subobject table at
- * `0x0083a250` and DrawSelf() in the Drawable table at `0x0083a298`. Every other slot of all four
- * tables still addresses the Rnd::ParticleSys implementation. The constructor body is empty.
+ * `0x0083a250` and DrawShowing() in the Drawable table at `0x0083a298`. Every other slot of all
+ * four tables still addresses the Rnd::ParticleSys implementation. The constructor body is empty.
  *
  * Three submission paths serve the three modes, and which one runs also depends on whether the
  * device is on the vector unit path. With VU1 selected only a sprite system draws at all, through
@@ -64,11 +64,11 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005fcb18
      * @ghidraAddress PAL: 0x0063d828
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
 private:
     // Submit one GS point per particle from the packed vertices, each with its colour and
-    // position. The point counter advances by the whole vertex count first. DrawSelf() expands
+    // position. The point counter advances by the whole vertex count first. DrawShowing() expands
     // the body, and the out-of-line copy at 0x005ffaf0 has no caller. The body reads no member,
     // but the copy still receives the object in its first argument register.
     void EmitGifPoints(int nVertCount);

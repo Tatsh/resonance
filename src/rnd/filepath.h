@@ -139,7 +139,7 @@ public:
     /**
      * Directory every relative path is resolved against, empty until SetRoot() is called.
      *
-     * The Rnd::Tex unit's static initialiser constructs it after Rnd::g_texClassName.
+     * The Rnd::Tex unit's static initialiser constructs it after Rnd::Tex::sClassName.
      *
      * @ghidraAddress NTSC-U/C: 0x007033b8
      * @ghidraAddress PAL: 0x00746e68

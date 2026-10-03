@@ -37,7 +37,7 @@ struct MetContainerLoad {
  * One navigation command delivered to a screen.
  *
  * The record is 12 bytes and is not polymorphic, so it emits no RTTI and its title is inferred
- * from its use rather than recovered. MetRenderer::HandleMessage builds one on its own stack from
+ * from its use rather than recovered. MetRenderer::DispatchPriv builds one on its own stack from
  * an input message through the translator at `0x002e3738` and passes it to
  * MetScreen::DeliverCommand(). The three fields come straight from that translator, which copies
  * the pad index and the button identifier out of the input message and maps the button to a
@@ -134,8 +134,8 @@ enum MetScreenCommandCode {
  * in seconds. MetRenderer advances the field at its own `+0x68` by a rate at `+0x64` that defaults
  * to 500, and hands the result to Rnd::Animatable::SetFrame(). That is what makes the arithmetic
  * here coherent: mEnterStartTime and mExitStartTime store frame positions, mAnimEndFrame stores the
- * enter animation's end frame from Rnd::View::EndFrame(), and UpdateEnterAnimation() subtracts one
- * from the sum of the other two.
+ * enter animation's end frame from Rnd::View::FilteredFrameEnd(), and UpdateEnterAnimation()
+ * subtracts one from the sum of the other two.
  *
  * The 39 entries follow in table order. Slot 0 is the compiler-generated GetTypeInfo at
  * `0x0038fd78` and is not source. An entry marked empty is a two-instruction `jr ra` stub. Each
@@ -144,8 +144,8 @@ enum MetScreenCommandCode {
  * each.
  *
  *  - 1 `0x0038a848` the destructor.
- *  - 2 `0x00105158` MsgSink::Handle(), inherited unchanged.
- *  - 3 `0x003907a8` MsgSink::HandleMessage(), overridden empty.
+ *  - 2 `0x00105158` MsgSink::Dispatch(), inherited unchanged.
+ *  - 3 `0x003907a8` MsgSink::DispatchPriv(), overridden empty.
  *  - 4 `0x00390200` PushNamedScreen().
  *  - 5 `0x003900a8` EnterAndShow().
  *  - 6 `0x0038b828` ActivateNamedPanel().
@@ -194,7 +194,7 @@ enum MetScreenCommandCode {
  * and compares it against the selector it recorded.
  *
  * The selector is the controller index. DeliverCommand() loads it from `+0x04` of the command
- * record, MetRenderer::HandleMessage rejects a command whose `+0x04` exceeds its own bound at
+ * record, MetRenderer::DispatchPriv rejects a command whose `+0x04` exceeds its own bound at
  * `+0xd4` before delivering it, and the translator at `0x002e3738` copies that word out of the
  * input message unchanged. A screen that records -1 plays its sound for every controller.
  *
@@ -423,7 +423,7 @@ public:
     /**
      * Play the sound one navigation command calls for and then act on the command.
      *
-     * Not a vtable slot. MetRenderer::HandleMessage at `0x0036c6e8` and three further routines
+     * Not a vtable slot. MetRenderer::DispatchPriv at `0x0036c6e8` and three further routines
      * arrive at it with a direct call. A screen whose mAcceptsCommands is clear ignores the command
      * completely, and a screen whose mPlaysCommandSounds is clear skips the sound and acts on the
      * command regardless. The sound is chosen through a six-entry jump table at `0x0080b460`
@@ -989,7 +989,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x003907a8
      * @ghidraAddress PAL: 0x003c2078
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 protected:
     // NTSC-U/C: 0x0038bd60, PAL: 0x003bd538

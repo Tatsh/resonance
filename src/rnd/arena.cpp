@@ -88,21 +88,21 @@ void PrintVector(Dbg &sink, const Vector3 &vec) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, sizeof(chTerminator));
+        stream.Write(&chTerminator, sizeof(chTerminator));
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 // A byte is written for each of the two section flags even though both are stored as words.
 void WriteBool(Stream &stream, int nValue) {
     const char chFlag = static_cast<char>(nValue);
-    stream.WriteBytes(&chFlag, sizeof(chFlag));
+    stream.Write(&chFlag, sizeof(chFlag));
 }
 
 int ReadBool(Stream &stream) {
     char chFlag = 0;
-    stream.ReadBytes(&chFlag, sizeof(chFlag));
+    stream.Read(&chFlag, sizeof(chFlag));
     return chFlag != 0 ? 1 : 0;
 }
 
@@ -154,14 +154,14 @@ static Dbg &operator<<(Dbg &sink, const std::vector<Arena::Section> &sections) {
 // NTSC-U/C: 0x005ba750, PAL: 0x005fce08
 static Stream &operator<<(Stream &stream, const std::vector<Arena::Section> &sections) {
     const int nCount = sections.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
 
     for (std::vector<Arena::Section>::const_iterator it = sections.begin(); it != sections.end();
          ++it) {
         WriteObjectRef(stream, it->mView);
-        stream.Write(&it->mFrame, sizeof(it->mFrame));
-        stream.Write(&it->mLoop, sizeof(it->mLoop));
-        stream.Write(&it->mDelta, sizeof(it->mDelta));
+        stream.WriteLE(&it->mFrame, sizeof(it->mFrame));
+        stream.WriteLE(&it->mLoop, sizeof(it->mLoop));
+        stream.WriteLE(&it->mDelta, sizeof(it->mDelta));
         WriteBool(stream, it->mTeleport);
         WriteBool(stream, it->mSortStart);
     }
@@ -172,13 +172,13 @@ static Stream &operator<<(Stream &stream, const std::vector<Arena::Section> &sec
 static Stream &operator>>(Stream &stream, Arena::Section &section) {
     HxStr viewName(nullptr);
     stream.ReadString(viewName);
-    section.mView = dynamic_cast<View *>(g_manager.Find(viewName));
+    section.mView = dynamic_cast<View *>(TheManager.Find(viewName));
 
-    stream.Read(&section.mFrame, sizeof(section.mFrame));
-    stream.Read(&section.mLoop, sizeof(section.mLoop));
+    stream.ReadLE(&section.mFrame, sizeof(section.mFrame));
+    stream.ReadLE(&section.mLoop, sizeof(section.mLoop));
 
     if (g_nRndArenaLoadRevision >= kArenaSectionDeltaRevision) {
-        stream.Read(&section.mDelta, sizeof(section.mDelta));
+        stream.ReadLE(&section.mDelta, sizeof(section.mDelta));
     }
     if (g_nRndArenaLoadRevision >= kArenaTeleportRevision) {
         section.mTeleport = ReadBool(stream);
@@ -192,7 +192,7 @@ static Stream &operator>>(Stream &stream, Arena::Section &section) {
 // NTSC-U/C: 0x005ba908, PAL: 0x005fcfc0
 static Stream &operator>>(Stream &stream, std::vector<Arena::Section> &sections) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
 
     sections.resize(nCount, Arena::Section());
 
@@ -253,26 +253,26 @@ void Arena::DumpText(Dbg &sink) {
 // is not written at all, because AddInstancesToHitList() rebuilds it from the section count.
 void Arena::Save(Stream &stream) {
     const int nRevision = kArenaRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
 
     Animatable::Save(stream);
     Collideable::Save(stream);
     Drawable::Save(stream);
     Transformable::Save(stream);
 
-    stream.Write(&mLoopDist.x, sizeof(mLoopDist.x));
-    stream.Write(&mLoopDist.y, sizeof(mLoopDist.y));
-    stream.Write(&mLoopDist.z, sizeof(mLoopDist.z));
-    stream.Write(&mLoopFrames, sizeof(mLoopFrames));
+    stream.WriteLE(&mLoopDist.x, sizeof(mLoopDist.x));
+    stream.WriteLE(&mLoopDist.y, sizeof(mLoopDist.y));
+    stream.WriteLE(&mLoopDist.z, sizeof(mLoopDist.z));
+    stream.WriteLE(&mLoopFrames, sizeof(mLoopFrames));
 
     stream << mSections;
 }
 
 // NTSC-U/C: 0x005b61e8, PAL: 0x005f8850
 void Arena::Load(Stream &stream) {
-    stream.Read(&g_nRndArenaLoadRevision, sizeof(g_nRndArenaLoadRevision));
+    stream.ReadLE(&g_nRndArenaLoadRevision, sizeof(g_nRndArenaLoadRevision));
     if (g_nRndArenaLoadRevision >= kArenaRejectedRevision) {
-        g_failSink.Report("Can't load new Arena\n");
+        Rnd::TheDbg.Notify("Can't load new Arena\n");
         return;
     }
 
@@ -287,10 +287,10 @@ void Arena::Load(Stream &stream) {
 
     RemoveInstancesFromHitList();
 
-    stream.Read(&mLoopDist.x, sizeof(mLoopDist.x));
-    stream.Read(&mLoopDist.y, sizeof(mLoopDist.y));
-    stream.Read(&mLoopDist.z, sizeof(mLoopDist.z));
-    stream.Read(&mLoopFrames, sizeof(mLoopFrames));
+    stream.ReadLE(&mLoopDist.x, sizeof(mLoopDist.x));
+    stream.ReadLE(&mLoopDist.y, sizeof(mLoopDist.y));
+    stream.ReadLE(&mLoopDist.z, sizeof(mLoopDist.z));
+    stream.ReadLE(&mLoopFrames, sizeof(mLoopFrames));
 
     stream >> mSections;
 
@@ -396,7 +396,7 @@ void Arena::SetLoopDist(const Vector3 &loopDist) {
 // NTSC-U/C: 0x005b7c48, PAL: 0x005fa2b0
 void Arena::SetLoopFrames(float flLoopFrames) {
     if (flLoopFrames == 0.0f) {
-        g_failSink.Report("Can't set frames = 0\n");
+        Rnd::TheDbg.Notify("Can't set frames = 0\n");
         return;
     }
     if (flLoopFrames == mLoopFrames) {
@@ -498,7 +498,7 @@ int Arena::UpdateWorldXfm(Transformable *pParent, int nForce) {
 }
 
 // NTSC-U/C: 0x005bc020, PAL: 0x005fe6e8
-int Arena::DrawSelf() {
+int Arena::DrawShowing() {
     for (DrawEntry &entry : mDrawOrder) {
         if (entry.mView != nullptr) {
             entry.mView->Draw();
@@ -508,10 +508,10 @@ int Arena::DrawSelf() {
 }
 
 // NTSC-U/C: 0x005bc090, PAL: 0x005fe758
-void Arena::Collide(const Ray &ray, HitSink &sink) {
+void Arena::FindCollisions(const Ray &ray, HitSink &sink) {
     for (Section &section : mSections) {
         if ((section.mView != nullptr) && section.mView->GetShowing()) {
-            section.mView->Collide(ray, sink);
+            section.mView->FindCollisions(ray, sink);
         }
     }
 }
@@ -576,7 +576,7 @@ Object *CreateRegisteredArena(const HxStr &name) {
 // NTSC-U/C: 0x005bb8b0, PAL: 0x005fdf78
 void Arena::Init() {
     g_pfnNewArena = NewArena;
-    g_manager.RegisterClass(g_arenaClassName, CreateRegisteredArena);
+    TheManager.RegisterClass(g_arenaClassName, CreateRegisteredArena);
 }
 
 } // namespace Rnd

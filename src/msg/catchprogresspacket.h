@@ -23,7 +23,7 @@ class Player;
  * `0x004acf28` alone could not distinguish it from a CmdID. PrintExtra() labels `+0x20` as `track`
  * and `+0x24` as `succ`. The player reference at `+0x14` is transferred but not printed.
  *
- * Every member is public because Catcher::HandleMessage() at `0x001adbec` reads the payload
+ * Every member is public because Catcher::DispatchPriv() at `0x001adbec` reads the payload
  * directly with no accessor in the image.
  *
  * The destructor at `0x003f09f8` is compiler-generated and has no declaration here.

@@ -34,7 +34,7 @@ typedef struct {
 } HeapLoadArgs;
 
 // NTSC-U/C: 0x0077d68c, PAL: 0x007c1484, negative until the client is bound.
-static int g_nHeapBound = -1;
+static int _bind = -1;
 
 // NTSC-U/C: 0x008e5180, PAL: 0x0092a180
 static sceSifClientData g_heapClient __attribute__((aligned(64)));
@@ -67,13 +67,13 @@ int sceSifInitIopHeap(void) {
             __asm__ volatile("nop");
         }
     }
-    g_nHeapBound = 0;
+    _bind = 0;
     return 0;
 }
 
 // NTSC-U/C: 0x005e6010, PAL: 0x006281f8
 void *sceSifAllocIopHeap(unsigned int size) {
-    if (g_nHeapBound < 0) {
+    if (_bind < 0) {
         return NULL;
     }
     g_heapSend.nSize = size;
@@ -93,7 +93,7 @@ void *sceSifAllocIopHeap(unsigned int size) {
 
 // NTSC-U/C: 0x005e6080, PAL: 0x00628268
 void *sceSifAllocSysMemory(int type, unsigned int size, void *addr) {
-    if (g_nHeapBound < 0) {
+    if (_bind < 0) {
         return NULL;
     }
     g_heapSend.allocSysMemory.nSize = size;
@@ -115,7 +115,7 @@ void *sceSifAllocSysMemory(int type, unsigned int size, void *addr) {
 
 // NTSC-U/C: 0x005e6100, PAL: 0x006282e8
 int sceSifFreeIopHeap(void *addr) {
-    if (g_nHeapBound < 0) {
+    if (_bind < 0) {
         return 0;
     }
     g_heapSend.pAddr = addr;
@@ -142,7 +142,7 @@ int sceSifFreeSysMemory(void *addr) {
 int sceSifLoadIopHeap(const char *filename, void *addr) {
     int nLength;
 
-    if (g_nHeapBound < 0) {
+    if (_bind < 0) {
         return 0;
     }
     for (nLength = 0; nLength < kHeapPathSize; ++nLength) {

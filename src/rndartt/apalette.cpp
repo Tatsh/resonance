@@ -73,7 +73,7 @@ void APalette::SetEntriesRGB(const unsigned char *pRGB, int nFirst, int nCount) 
 }
 
 // NTSC-U/C: 0x00613f10, PAL: 0x00654aa0
-int APalette::FindNearestEntry(unsigned int nColor, int nFirst, int nLast) const {
+int APalette::FindClosest(unsigned int nColor, int nFirst, int nLast) const {
     const long long nRed = nColor & kChannelMask;
     const long long nGreen = (nColor >> kGreenShift) & kChannelMask;
     const long long nBlue = (nColor >> kBlueShift) & kChannelMask;

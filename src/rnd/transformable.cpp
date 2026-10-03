@@ -134,19 +134,19 @@ static inline Dbg &DumpXfmRow(Dbg &sink, const float *pRow) {
 // NTSC-U/C: 0x004f88a0, PAL: 0x00537540
 //
 // Each entry is written as the referenced object's name including its terminator. A reader has to
-// resolve the names through Rnd::g_manager. An empty entry writes one zero byte.
+// resolve the names through Rnd::TheManager. An empty entry writes one zero byte.
 static Stream &operator<<(Stream &stream, const std::list<Transformable *> &transList) {
     int nCount = transList.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
 
     for (std::list<Transformable *>::const_iterator it = transList.begin(); it != transList.end();
          ++it) {
         const Object *pObject = *it;
         if (pObject != nullptr) {
-            stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+            stream.Write(NameText(pObject), pObject->mName.mLen + 1);
         } else {
             const char cEmpty = 0;
-            stream.WriteBytes(&cEmpty, sizeof(cEmpty));
+            stream.Write(&cEmpty, sizeof(cEmpty));
         }
     }
     return stream;
@@ -155,13 +155,13 @@ static Stream &operator<<(Stream &stream, const std::list<Transformable *> &tran
 // NTSC-U/C: 0x004f8b78, PAL: 0x00537818
 static Stream &operator>>(Stream &stream, std::list<Transformable *> &transList) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     transList.resize(nCount, nullptr);
 
     for (std::list<Transformable *>::iterator it = transList.begin(); it != transList.end(); ++it) {
         HxStr name(nullptr);
         stream.ReadString(name);
-        Object *pObject = g_manager.Find(name);
+        Object *pObject = TheManager.Find(name);
         *it = dynamic_cast<Transformable *>(pObject);
     }
     return stream;
@@ -245,11 +245,11 @@ static inline void CameraToDrawTranslation(const Cam &cam, float *pOut) {
 
 // NTSC-U/C: 0x004f0cc0, PAL: 0x0052f8b0
 float *Transformable::GetDrawXfm() {
-    if (mBillboard == kBillboardNone || g_pCurrentCam == nullptr) {
+    if (mBillboard == kBillboardNone || Cam::sCurrent == nullptr) {
         memcpy(g_drawXfm, mWorldXfm, sizeof(g_drawXfm));
         return g_drawXfm[0];
     }
-    const Cam &cam = *g_pCurrentCam;
+    const Cam &cam = *Cam::sCurrent;
 
     Vector3 scale;
     scale.w = 1.0f;
@@ -405,7 +405,7 @@ int Transformable::UpdateWorldXfm(Transformable *pParent, int nForce) {
 // NTSC-U/C: 0x004f0838, PAL: 0x0052f428
 void Transformable::AddTrans(Transformable *pTrans) {
     if (std::find(mTransList.begin(), mTransList.end(), pTrans) != mTransList.end()) {
-        g_failSink.Report(kAlreadyInFormat, NameText(pTrans), NameText(this));
+        Rnd::TheDbg.Notify(kAlreadyInFormat, NameText(pTrans), NameText(this));
         return;
     }
 
@@ -440,7 +440,7 @@ void Transformable::SetOrigin(const float *pOrigin) {
 }
 
 // NTSC-U/C: 0x004f0a80, PAL: 0x0052f670
-void Transformable::ClearTransList() {
+void Transformable::RemoveAllTranses() {
     for (std::list<Transformable *>::iterator it = mTransList.begin(); it != mTransList.end();) {
         if (*it != nullptr) {
             (*it)->RemoveRef(this);
@@ -505,40 +505,40 @@ void Transformable::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x004f1a58, PAL: 0x00530648
 void Transformable::Save(Stream &stream) {
     int nRevision = kTransformableRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
 
     for (int nRow = 0; nRow < kXfmRowCount; ++nRow) {
         for (int nAxis = 0; nAxis < kXfmRowStoredFloatCount; ++nAxis) {
             float flValue = mLocalXfm[nRow][nAxis];
-            stream.Write(&flValue, sizeof(flValue));
+            stream.WriteLE(&flValue, sizeof(flValue));
         }
     }
     for (int nRow = 0; nRow < kXfmRowCount; ++nRow) {
         for (int nAxis = 0; nAxis < kXfmRowStoredFloatCount; ++nAxis) {
             float flValue = mWorldXfm[nRow][nAxis];
-            stream.Write(&flValue, sizeof(flValue));
+            stream.WriteLE(&flValue, sizeof(flValue));
         }
     }
 
     stream << mTransList;
 
     int nBillboard = mBillboard;
-    stream.Write(&nBillboard, sizeof(nBillboard));
+    stream.WriteLE(&nBillboard, sizeof(nBillboard));
 
     for (int nAxis = 0; nAxis < kXfmRowStoredFloatCount; ++nAxis) {
         float flValue = mOrigin[nAxis];
-        stream.Write(&flValue, sizeof(flValue));
+        stream.WriteLE(&flValue, sizeof(flValue));
     }
 }
 
 // NTSC-U/C: 0x004f1f18, PAL: 0x00530b08
 void Transformable::Load(Stream &stream) {
     int nRevision = 0;
-    stream.Read(&nRevision, sizeof(nRevision));
+    stream.ReadLE(&nRevision, sizeof(nRevision));
     if (nRevision > kTransformableRevision) {
-        g_failSink.Report("Can't load new Transformable\n");
-        if (g_failSink.mAbortProc != nullptr) {
-            g_failSink.mAbortProc();
+        Rnd::TheDbg.Notify("Can't load new Transformable\n");
+        if (Rnd::TheDbg.mAbortProc != nullptr) {
+            Rnd::TheDbg.mAbortProc();
         } else {
             throw; // With no handler the binary rethrows the exception in flight.
         }
@@ -548,12 +548,12 @@ void Transformable::Load(Stream &stream) {
 
     for (int nRow = 0; nRow < kXfmRowCount; ++nRow) {
         for (int nAxis = 0; nAxis < kXfmRowStoredFloatCount; ++nAxis) {
-            stream.Read(&mLocalXfm[nRow][nAxis], sizeof(mLocalXfm[nRow][nAxis]));
+            stream.ReadLE(&mLocalXfm[nRow][nAxis], sizeof(mLocalXfm[nRow][nAxis]));
         }
     }
     for (int nRow = 0; nRow < kXfmRowCount; ++nRow) {
         for (int nAxis = 0; nAxis < kXfmRowStoredFloatCount; ++nAxis) {
-            stream.Read(&mWorldXfm[nRow][nAxis], sizeof(mWorldXfm[nRow][nAxis]));
+            stream.ReadLE(&mWorldXfm[nRow][nAxis], sizeof(mWorldXfm[nRow][nAxis]));
         }
     }
 
@@ -566,22 +566,22 @@ void Transformable::Load(Stream &stream) {
             const int anLegacyBillboard[] = {
                 kBillboardNone, kBillboardX, kBillboardY, kBillboardZ, kBillboardXZ, kBillboardXYZ};
             int nLegacy = 0;
-            stream.Read(&nLegacy, sizeof(nLegacy));
+            stream.ReadLE(&nLegacy, sizeof(nLegacy));
             mBillboard = static_cast<unsigned>(nLegacy) < sizeof(anLegacyBillboard) ?
                              anLegacyBillboard[nLegacy] :
                              kBillboardNone;
         } else {
-            stream.Read(&mBillboard, sizeof(mBillboard));
+            stream.ReadLE(&mBillboard, sizeof(mBillboard));
         }
 
         for (int nAxis = 0; nAxis < kXfmRowStoredFloatCount; ++nAxis) {
-            stream.Read(&mOrigin[nAxis], sizeof(mOrigin[nAxis]));
+            stream.ReadLE(&mOrigin[nAxis], sizeof(mOrigin[nAxis]));
         }
     }
 
     if (nRevision >= kFirstRevisionWithSpareByte && nRevision <= kLastRevisionWithSpareByte) {
         char cSpare = 0;
-        stream.ReadBytes(&cSpare, sizeof(cSpare)); // Read and then discarded, as in the binary.
+        stream.Read(&cSpare, sizeof(cSpare)); // Read and then discarded, as in the binary.
     }
 
     AcquireTransRefs();
@@ -591,7 +591,7 @@ void Transformable::Load(Stream &stream) {
 void Transformable::Replace(Object *pFrom, Object *pTo) {
     for (std::list<Transformable *>::iterator it = mTransList.begin(); it != mTransList.end();) {
         if (*it == pTo) {
-            g_failSink.Report(kAlreadyInFormat, NameText(pTo), NameText(this));
+            Rnd::TheDbg.Notify(kAlreadyInFormat, NameText(pTo), NameText(this));
         }
 
         if (*it == pFrom) {

@@ -7,9 +7,9 @@
 
 // NTSC-U/C: 0x0043d008, PAL: 0x00479708
 TnlMultFX::TnlMultFX() : mActive(0) {
-    mRange.SetAnim(dynamic_cast<Rnd::TransAnim *>(Rnd::g_manager.Find(HxStr("multfx.path"))));
-    mEmitter.Attach(dynamic_cast<Rnd::ParticleSys *>(Rnd::g_manager.Find(HxStr("multfx.ps"))));
-    mAltEmitter.Attach(dynamic_cast<Rnd::ParticleSys *>(Rnd::g_manager.Find(HxStr("multfxa.ps"))));
+    mRange.SetAnim(dynamic_cast<Rnd::TransAnim *>(Rnd::TheManager.Find(HxStr("multfx.path"))));
+    mEmitter.Attach(dynamic_cast<Rnd::ParticleSys *>(Rnd::TheManager.Find(HxStr("multfx.ps"))));
+    mAltEmitter.Attach(dynamic_cast<Rnd::ParticleSys *>(Rnd::TheManager.Find(HxStr("multfxa.ps"))));
 }
 
 // NTSC-U/C: 0x004564a0, PAL: 0x004939d0

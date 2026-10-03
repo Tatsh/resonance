@@ -12,7 +12,7 @@ PowerupCollectionI::~PowerupCollectionI() {
 }
 
 // NTSC-U/C: 0x001ccb40, PAL: 0x001d29f8
-void PowerupCollectionI::AddPowerup(int) {
+void PowerupCollectionI::Add(int) {
 }
 
 // NTSC-U/C: 0x001ccb48, PAL: 0x001d2a00
@@ -34,5 +34,5 @@ int PowerupCollectionI::HasSelection() {
 }
 
 // NTSC-U/C: 0x001ccb68, PAL: 0x001d2a20
-void PowerupCollectionI::AnnounceState() {
+void PowerupCollectionI::SendState() {
 }

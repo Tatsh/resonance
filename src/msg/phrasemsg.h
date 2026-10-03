@@ -24,6 +24,14 @@ class Phrase;
 class PhraseMsg : public Message {
 public:
     /**
+     * Identity that Type() reports.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d036c
+     * @ghidraAddress PAL: 0x00713b04
+     */
+    static int sID;
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
@@ -46,7 +54,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nPhraseMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x003e1240
      * @ghidraAddress PAL: 0x00419698
      */
@@ -92,15 +100,3 @@ public:
      */
     Phrase *mPhrase;
 };
-
-/**
- * Identity that PhraseMsg::Type() reports.
- *
- * This word belongs to PhraseMsg because PhraseMsg::Type() at `0x003e1240` returns it. Several
- * handlers elsewhere read the same word to compare against it, which is the expected shape for a
- * registered identity and does not make the word theirs.
- *
- * @ghidraAddress NTSC-U/C: 0x006d036c
- * @ghidraAddress PAL: 0x00713b04
- */
-extern int g_nPhraseMsgType;

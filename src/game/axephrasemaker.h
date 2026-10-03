@@ -62,7 +62,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0019c408
      * @ghidraAddress PAL: 0x001a2170
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Act on the start of a bar. Slot 4.
@@ -154,17 +154,17 @@ private:
     // Sends a SeekerMsg that turns mPlayer's seeker off, unless mPlayer is the stand-in. The bar
     // is not read.
     // NTSC-U/C: 0x0019c368, PAL: 0x001a20d0
-    void PostSeekerMsg(int nBar);
+    void SendSeekerMsg(int nBar);
 
-    // The out-of-line copy of the TrackSelectMsg branch HandleMessage() expands inline.
+    // The out-of-line copy of the TrackSelectMsg branch DispatchPriv() expands inline.
     // NTSC-U/C: 0x0019d860, PAL: 0x001a35c8
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
-    // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
+    // The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
     // NTSC-U/C: 0x0019d8f0, PAL: 0x001a3658
     void OnMsg(const InvalidateSeekerMsg &msg);
 
-    // The out-of-line copy of the SustainNoteMsg branch HandleMessage() expands inline.
+    // The out-of-line copy of the SustainNoteMsg branch DispatchPriv() expands inline.
     // NTSC-U/C: 0x0019d920, PAL: 0x001a3688
     void OnSustainNote(SustainNoteMsg *pMsg);
 
@@ -174,7 +174,7 @@ private:
     unsigned char mChannel;           // +0x24
     Phrase *mPhrase;                  // +0x28, the phrase in progress, or null
     int mPhraseBar;                   // +0x2c, the bar mPhrase records, -1 at first
-    Player *mPlayer;                  // +0x30, g_nullPlayer until a TrackSelectMsg
+    Player *mPlayer;                  // +0x30, NullPlayer::sInstance until a TrackSelectMsg
     std::vector<HeldNote> mHeldNotes; // +0x34
     Mid::MBT mBarTicks;               // +0x40
     const TrackData *mTrackData;      // +0x44

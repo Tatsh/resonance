@@ -33,7 +33,7 @@ void MsgQueue::Store(Message *pMsg) {
 }
 
 // NTSC-U/C: 0x0054b290, PAL: 0x0058b7c0
-void MsgQueue::HandleMessage(Message *pMsg) {
+void MsgQueue::DispatchPriv(Message *pMsg) {
     pMsg->Type(); // Yes, the binary discards this call's result.
     mTarget->push_back(pMsg->Clone());
 }

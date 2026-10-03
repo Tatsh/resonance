@@ -1,12 +1,12 @@
 #include "app/rendererbase.h"
 
 // NTSC-U/C: 0x00139f50, PAL: 0x0013a898
-void RendererBase::Router::Handle(Message *pMsg) {
-    mTarget->HandleMessage(pMsg);
+void RendererBase::Router::Dispatch(Message *pMsg) {
+    mTarget->DispatchPriv(pMsg);
 }
 
 // NTSC-U/C: 0x00139f48, PAL: 0x0013a890
-void RendererBase::Router::HandleMessage(Message *) {
+void RendererBase::Router::DispatchPriv(Message *) {
 }
 
 // NTSC-U/C: 0x00139c10, PAL: 0x0013a558
@@ -20,8 +20,8 @@ RendererBase::~RendererBase() {
 }
 
 // NTSC-U/C: 0x00139f80, PAL: 0x0013a8c8
-void RendererBase::Handle(Message *pMsg) {
-    mQueue.Handle(pMsg);
+void RendererBase::Dispatch(Message *pMsg) {
+    mQueue.Dispatch(pMsg);
 }
 
 // NTSC-U/C: 0x00139f28, PAL: 0x0013a870

@@ -81,7 +81,7 @@ public:
      */
     virtual void Dispatch() {
         MuseMsg *pMsg = mCursor->mValue->CloneAndShift(mNextTick.mTick);
-        mSink->Handle(pMsg);
+        mSink->Dispatch(pMsg);
         delete pMsg;
         ++mCursor;
         ScheduleNext();

@@ -54,17 +54,17 @@ Object::Object() : mName(nullptr) {
 
 // NTSC-U/C: 0x0053e0d8, PAL: 0x0057dd08
 Object::Object(const HxStr &name) : mName(name), mInternal(0), mMerge(1), mDeleting(0) {
-    if (g_manager.Find(name) != nullptr) {
-        g_failSink.Report(kAlreadyExistsFormat, name.mStr != nullptr ? name.mStr : "");
-        if (g_failSink.mAbortProc != nullptr) {
-            g_failSink.mAbortProc();
+    if (TheManager.Find(name) != nullptr) {
+        Rnd::TheDbg.Notify(kAlreadyExistsFormat, name.mStr != nullptr ? name.mStr : "");
+        if (Rnd::TheDbg.mAbortProc != nullptr) {
+            Rnd::TheDbg.mAbortProc();
         } else {
             throw; // With no handler the binary rethrows the exception in flight.
         }
     }
 
     // The duplicate above is overwritten rather than preserved.
-    g_manager.mObjects[mName] = this;
+    TheManager.mObjects[mName] = this;
 }
 
 // NTSC-U/C: 0x0053e348, PAL: 0x0057dfa8
@@ -72,7 +72,7 @@ Object::~Object() {
     if (g_pfnNameChanged != nullptr) {
         g_pfnNameChanged(this);
     }
-    g_manager.mObjects.erase(mName);
+    TheManager.mObjects.erase(mName);
 }
 
 // NTSC-U/C: 0x0053e400, PAL: 0x0057e070
@@ -80,17 +80,17 @@ void Object::SetName(const HxStr &name) {
     if (mName == name) {
         return;
     }
-    if (g_manager.Find(name) != nullptr) {
-        g_failSink.Report(kAlreadyExistsFormat, name.mStr != nullptr ? name.mStr : "");
+    if (TheManager.Find(name) != nullptr) {
+        Rnd::TheDbg.Notify(kAlreadyExistsFormat, name.mStr != nullptr ? name.mStr : "");
         return;
     }
 
     if (g_pfnNameChanged != nullptr) {
         g_pfnNameChanged(this);
     }
-    g_manager.mObjects.erase(mName);
+    TheManager.mObjects.erase(mName);
     mName = name;
-    g_manager.mObjects[mName] = this;
+    TheManager.mObjects[mName] = this;
 }
 
 // NTSC-U/C: 0x0053e720, PAL: 0x0057e3b0

@@ -65,16 +65,16 @@ static unsigned char g_abCmdUnusedBuffer[kUnusedBufferSize] __attribute__((align
 static sceSifCmdCSData g_cmdInitPacket __attribute__((aligned(64)));
 
 // NTSC-U/C: 0x008e4bd4, PAL: 0x00929bd4
-static int g_nCmdHandlerId;
+static int sif0_handleid;
 
 // NTSC-U/C: 0x008e4bd8, PAL: 0x00929bd8
-static SifCmdState g_sifCmdState;
+static SifCmdState _data_table;
 
 // NTSC-U/C: 0x008e4c00, PAL: 0x00929c00
 static sceSifCmdData g_aSystemHandlers[kSystemHandlerCount];
 
 // NTSC-U/C: 0x008e4d00, PAL: 0x00929d00
-static int g_anSoftwareRegisters[kSoftwareRegisterCount];
+static int soft_reg[kSoftwareRegisterCount];
 
 // NTSC-U/C: 0x005d3558, PAL: 0x006155c0
 static void _set_sreg(void *pPacket, void *pData) {
@@ -97,7 +97,7 @@ static void changeAddressHandler(void *pPacket, void *pData) {
 // one before the handler runs.
 static int cmdInterruptHandler(int nChannel) {
     SifCmdPacket packet;
-    SifCmdPacket *pReceived = g_sifCmdState.pReceiveBuffer;
+    SifCmdPacket *pReceived = _data_table.pReceiveBuffer;
     sceSifCmdData *pHandler;
     int nSize;
     int nQuads;
@@ -120,14 +120,14 @@ static int cmdInterruptHandler(int nChannel) {
     nCode = (int)packet.header.fcode;
     if (nCode < 0) {
         nCode &= ~SIF_CMDC_SYSTEM;
-        if (nCode < g_sifCmdState.nSystemHandlerCount) {
-            pHandler = &g_sifCmdState.pSystemHandlers[nCode];
+        if (nCode < _data_table.nSystemHandlerCount) {
+            pHandler = &_data_table.pSystemHandlers[nCode];
             if (pHandler->func != NULL) {
                 pHandler->func(&packet, pHandler->data);
             }
         }
-    } else if (nCode < g_sifCmdState.nUserHandlerCount) {
-        pHandler = &g_sifCmdState.pUserHandlers[nCode];
+    } else if (nCode < _data_table.nUserHandlerCount) {
+        pHandler = &_data_table.pUserHandlers[nCode];
         if (pHandler->func != NULL) {
             pHandler->func(&packet, pHandler->data);
         }
@@ -168,7 +168,7 @@ static unsigned int _sceSifSendCmd(unsigned int fcode,
         pPacket->daddr = 0;
     }
     aTransfers[nCount].data = (unsigned int)(uintptr_t)pPacket;
-    aTransfers[nCount].addr = g_sifCmdState.nIopBuffer;
+    aTransfers[nCount].addr = _data_table.nIopBuffer;
     aTransfers[nCount].size = (unsigned int)nPacketSize;
     aTransfers[nCount].mode = kPacketTransferMode;
     pPacket->fcode = fcode;
@@ -183,12 +183,12 @@ static unsigned int _sceSifSendCmd(unsigned int fcode,
 
 // NTSC-U/C: 0x005d3588, PAL: 0x006155f0
 int sceSifGetSreg(int reg) {
-    return g_anSoftwareRegisters[reg];
+    return soft_reg[reg];
 }
 
 // NTSC-U/C: 0x005d35a0, PAL: 0x00615608
 int sceSifSetSreg(int reg, int value) {
-    g_anSoftwareRegisters[reg] = value;
+    soft_reg[reg] = value;
     return value;
 }
 
@@ -204,25 +204,25 @@ void sceSifInitCmd(void) {
         return;
     }
     g_nCmdInitialized = 1;
-    g_sifCmdState.pReceiveBuffer = UNCACHED_SEG(&g_cmdReceiveBuffer);
-    g_sifCmdState.pUnusedBuffer = UNCACHED_SEG(g_abCmdUnusedBuffer);
-    g_sifCmdState.nIopBuffer = 0;
-    g_sifCmdState.pSystemHandlers = g_aSystemHandlers;
-    g_sifCmdState.nSystemHandlerCount = kSystemHandlerCount;
-    g_sifCmdState.pUserHandlers = NULL;
-    g_sifCmdState.nUserHandlerCount = 0;
-    g_sifCmdState.pSoftwareRegisters = g_anSoftwareRegisters;
+    _data_table.pReceiveBuffer = UNCACHED_SEG(&g_cmdReceiveBuffer);
+    _data_table.pUnusedBuffer = UNCACHED_SEG(g_abCmdUnusedBuffer);
+    _data_table.nIopBuffer = 0;
+    _data_table.pSystemHandlers = g_aSystemHandlers;
+    _data_table.nSystemHandlerCount = kSystemHandlerCount;
+    _data_table.pUserHandlers = NULL;
+    _data_table.nUserHandlerCount = 0;
+    _data_table.pSoftwareRegisters = soft_reg;
     for (i = 0; i < kSystemHandlerCount; ++i) {
         g_aSystemHandlers[i].func = NULL;
         g_aSystemHandlers[i].data = NULL;
     }
     for (i = 0; i < kSoftwareRegisterCount; ++i) {
-        g_anSoftwareRegisters[i] = 0;
+        soft_reg[i] = 0;
     }
     g_aSystemHandlers[kChangeAddressSlot].func = changeAddressHandler;
-    g_aSystemHandlers[kChangeAddressSlot].data = &g_sifCmdState;
+    g_aSystemHandlers[kChangeAddressSlot].data = &_data_table;
     g_aSystemHandlers[kSetSoftwareRegisterSlot].func = _set_sreg;
-    g_aSystemHandlers[kSetSoftwareRegisterSlot].data = &g_sifCmdState;
+    g_aSystemHandlers[kSetSoftwareRegisterSlot].data = &_data_table;
     EIntr();
 
     FlushCache(WRITEBACK_DCACHE);
@@ -232,13 +232,13 @@ void sceSifInitCmd(void) {
     if ((*pSif0Chcr & kChcrStart) == 0) {
         sceSifSetDChain();
     }
-    g_nCmdHandlerId = AddDmacHandler(DMAC_SIF0, cmdInterruptHandler, 0);
+    sif0_handleid = AddDmacHandler(DMAC_SIF0, cmdInterruptHandler, 0);
     EnableDmac(DMAC_SIF0);
 
     // A nonzero address means the IOP command layer is already running, and it only needs the new
     // receive buffer.
-    g_sifCmdState.nIopBuffer = (unsigned int)sceSifGetReg(SIF_SYSREG_SUBADDR);
-    if (g_sifCmdState.nIopBuffer != 0) {
+    _data_table.nIopBuffer = (unsigned int)sceSifGetReg(SIF_SYSREG_SUBADDR);
+    if (_data_table.nIopBuffer != 0) {
         g_cmdInitPacket.newaddr = (unsigned int)(uintptr_t)&g_cmdReceiveBuffer;
         sceSifSendCmd(
             SIF_CMDC_CHANGE_SADDR, &g_cmdInitPacket, sizeof(g_cmdInitPacket), NULL, NULL, 0);
@@ -246,9 +246,9 @@ void sceSifInitCmd(void) {
     }
     while ((sceSifGetReg(SIF_REG_SMFLAG) & SIF_STAT_CMDINIT) == 0) {
     }
-    g_sifCmdState.nIopBuffer = (unsigned int)sceSifGetReg(SIF_REG_SUBADDR);
-    sceSifSetReg(SIF_SYSREG_SUBADDR, (int)g_sifCmdState.nIopBuffer);
-    sceSifSetReg(SIF_SYSREG_MAINADDR, (int)(uintptr_t)&g_sifCmdState);
+    _data_table.nIopBuffer = (unsigned int)sceSifGetReg(SIF_REG_SUBADDR);
+    sceSifSetReg(SIF_SYSREG_SUBADDR, (int)_data_table.nIopBuffer);
+    sceSifSetReg(SIF_SYSREG_MAINADDR, (int)(uintptr_t)&_data_table);
     g_cmdInitPacket.newaddr = (unsigned int)(uintptr_t)&g_cmdReceiveBuffer;
     g_cmdInitPacket.chdr.opt = 0;
     sceSifSendCmd(SIF_CMDC_INIT_CMD, &g_cmdInitPacket, sizeof(g_cmdInitPacket), NULL, NULL, 0);
@@ -257,34 +257,34 @@ void sceSifInitCmd(void) {
 // NTSC-U/C: 0x005d3850, PAL: 0x006158b8
 void sceSifExitCmd(void) {
     DisableDmac(DMAC_SIF0);
-    RemoveDmacHandler(DMAC_SIF0, g_nCmdHandlerId);
+    RemoveDmacHandler(DMAC_SIF0, sif0_handleid);
     g_nCmdInitialized = 0;
 }
 
 // NTSC-U/C: 0x005d3888, PAL: 0x006158f0
 sceSifCmdData *sceSifSetCmdBuffer(sceSifCmdData *db, int size) {
-    sceSifCmdData *pPrevious = g_sifCmdState.pUserHandlers;
+    sceSifCmdData *pPrevious = _data_table.pUserHandlers;
 
-    g_sifCmdState.nUserHandlerCount = size;
-    g_sifCmdState.pUserHandlers = db;
+    _data_table.nUserHandlerCount = size;
+    _data_table.pUserHandlers = db;
     return pPrevious;
 }
 
 // NTSC-U/C: 0x005d38a0, PAL: 0x00615908
 sceSifCmdData *sceSifSetSysCmdBuffer(sceSifCmdData *db, int size) {
-    sceSifCmdData *pPrevious = g_sifCmdState.pSystemHandlers;
+    sceSifCmdData *pPrevious = _data_table.pSystemHandlers;
 
-    g_sifCmdState.nSystemHandlerCount = size;
-    g_sifCmdState.pSystemHandlers = db;
+    _data_table.nSystemHandlerCount = size;
+    _data_table.pSystemHandlers = db;
     return pPrevious;
 }
 
 // NTSC-U/C: 0x005d38b8, PAL: 0x00615920
 void sceSifAddCmdHandler(unsigned int fcode, sceSifCmdHandler handler, void *data) {
-    sceSifCmdData *pTable = g_sifCmdState.pUserHandlers;
+    sceSifCmdData *pTable = _data_table.pUserHandlers;
 
     if ((fcode & SIF_CMDC_SYSTEM) != 0) {
-        pTable = g_sifCmdState.pSystemHandlers;
+        pTable = _data_table.pSystemHandlers;
     }
     pTable[fcode & ~SIF_CMDC_SYSTEM].data = data;
     pTable[fcode & ~SIF_CMDC_SYSTEM].func = handler;
@@ -292,10 +292,10 @@ void sceSifAddCmdHandler(unsigned int fcode, sceSifCmdHandler handler, void *dat
 
 // NTSC-U/C: 0x005d38e8, PAL: 0x00615950
 void sceSifRemoveCmdHandler(unsigned int fcode) {
-    sceSifCmdData *pTable = g_sifCmdState.pUserHandlers;
+    sceSifCmdData *pTable = _data_table.pUserHandlers;
 
     if ((fcode & SIF_CMDC_SYSTEM) != 0) {
-        pTable = g_sifCmdState.pSystemHandlers;
+        pTable = _data_table.pSystemHandlers;
     }
     pTable[fcode & ~SIF_CMDC_SYSTEM].func = NULL;
 }

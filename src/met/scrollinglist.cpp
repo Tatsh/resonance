@@ -87,7 +87,7 @@ ScrollingList::~ScrollingList() {
     for (int i = 0; i < mRowCount; ++i) {
         HxStr prefix(FormatString(kRowNameFormat, i));
         HxStr name = prefix + templateName;
-        Rnd::Object *pObject = Rnd::g_manager.Find(name);
+        Rnd::Object *pObject = Rnd::TheManager.Find(name);
         Rnd::View *pRow = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
 
         std::list<Rnd::Object *> objects;
@@ -108,7 +108,7 @@ ScrollingList::~ScrollingList() {
 Rnd::View *ScrollingList::makeRow(int nIndex) {
     HxStr prefix(FormatString(kRowNameFormat, nIndex));
     Rnd::Object *pObject =
-        Rnd::g_manager.ResolveAndLinkObject(mTemplate, prefix, kRowCloneFlags, 1, 1);
+        Rnd::TheManager.ResolveAndLinkObject(mTemplate, prefix, kRowCloneFlags, 1, 1);
     return pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
 }
 

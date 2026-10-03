@@ -139,7 +139,7 @@ public:
      *
      * A revision above 0 produces the report "Can't load new Button" and then returns, leaving the
      * object as it was. Unlike the other renderer classes, this one does not transfer control to
-     * the abort handler of g_failSink afterwards.
+     * the abort handler of Rnd::TheDbg afterwards.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x005307f8

@@ -48,15 +48,15 @@ enum PlayMode { kPlayModeNone = 0, kPlayModeGame = 1, kPlayModeJam = 2 };
  * only so that the descriptor chain reads correctly.
  *
  * Every entry of the 39-entry table. Slot 0 is the compiler-generated type function at `0x0010b7c8`
- * and is not source. Slot 2 is MsgSink::Handle() at `0x00105158`, inherited unchanged.
+ * and is not source. Slot 2 is MsgSink::Dispatch() at `0x00105158`, inherited unchanged.
  *
  *  - 1 `0x001062d0` the destructor.
- *  - 3 `0x00107540` HandleMessage().
+ *  - 3 `0x00107540` DispatchPriv().
  *  - 4 `0x001065a8` DrawFrame().
  *  - 5 `0x0010bfa0` DrawFrameSimple().
  *  - 6 `0x0010c128` StartPlay().
  *  - 7 `0x0010c420` StartRecording().
- *  - 8 `0x0010c4b8` StartPlayback().
+ *  - 8 `0x0010c4b8` Recreate().
  *  - 9 `0x0010b870` GetWorldLoadFlag().
  *  - 10 `0x00105e80` AddPersona().
  *  - 11 `0x0010b888` GetPersonas().
@@ -88,7 +88,7 @@ enum PlayMode { kPlayModeNone = 0, kPlayModeGame = 1, kPlayModeJam = 2 };
  *  - 37 `0x00106af8` OnUnpauseGameSystem().
  *  - 38 `0x0010bf10` OnDoPlayback().
  *
- * The five handler slots are each pinned by HandleMessage(), which compares the reported message
+ * The five handler slots are each pinned by DispatchPriv(), which compares the reported message
  * type against five globals and dispatches one slot for each. `0x006d03a4` belongs to
  * BeginGameLocalMsg, `0x006d03ac` to EndGameMsg, `0x006d03b4` to PauseGameSystemMsg, `0x006d03bc`
  * to UnpauseGameSystemMsg, and `0x006d03c4` to GameManagerDoPlaybackMsg. Each of the five globals
@@ -96,7 +96,7 @@ enum PlayMode { kPlayModeNone = 0, kPlayModeGame = 1, kPlayModeJam = 2 };
  * makes the pairing certain. A type that matches none of the five trips
  * `FatalError("DISPATCH_CHECK: Unhandled Message: %s", pMsg->Name())`.
  *
- * StartRecording() installs a GameRecorder and StartPlayback() a GamePlayback. Neither class emits
+ * StartRecording() installs a GameRecorder and Recreate() a GamePlayback. Neither class emits
  * RTTI, so both titles are inferred, from EndRecordingCmd, whose name the RTTI attests, running the
  * recorder's end.
  *
@@ -201,7 +201,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0010c4b8
      * @ghidraAddress PAL: 0x0010c670
      */
-    virtual void StartPlayback(const HxStr &file, int nUnusedFlag);
+    virtual void Recreate(const HxStr &file, int nUnusedFlag);
 
     /**
      * Report the flag the world load sets.
@@ -481,7 +481,7 @@ public:
      * Store a message on the embedded queue.
      *
      * Slot 32. The call runs through the queue's MsgSink subobject at `+0x14` rather than through
-     * the queue itself, so it reaches MsgQueue::HandleMessage() virtually.
+     * the queue itself, so it reaches MsgQueue::DispatchPriv() virtually.
      *
      * @param pMsg The message to store.
      * @ghidraAddress NTSC-U/C: 0x0010bee0
@@ -509,7 +509,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x00107540
      * @ghidraAddress PAL: 0x00107610
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Enter a local game.
@@ -519,7 +519,7 @@ protected:
      * The world is then created and finished, its mIsPlayback cleared, and the poller hands it
      * readings outside jukebox mode. A recorder starts recording, the watchdog is flushed, and a
      * DoGameSystemPlayCmd is posted on the watchdog timer to start play. The message itself is
-     * ignored, and HandleMessage() passes it all the same.
+     * ignored, and DispatchPriv() passes it all the same.
      *
      * @param pMsg The message, ignored.
      * @ghidraAddress NTSC-U/C: 0x00106720
@@ -621,7 +621,7 @@ private:
     // and a playback, and then either queues a BeginGameLocalMsg or returns to the front end.
     void EndGame(int bRestart);
 
-    // A state word. The two diagnostics StartRecording() and StartPlayback() trip both describe it
+    // A state word. The two diagnostics StartRecording() and Recreate() trip both describe it
     // as the state, and both fire when it is non-zero. Load() is the only writer recovered, so its
     // value set is unrecovered.
     int mState; // +0x04
@@ -644,7 +644,7 @@ private:
     // work advances only in the front end.
     int mFrontEndActive;      // +0xa8
     GameRecorder *mpRecorder; // +0xac the recorder StartRecording() installs
-    GamePlayback *mpPlayback; // +0xb0 the playback StartPlayback() installs
+    GamePlayback *mpPlayback; // +0xb0 the playback Recreate() installs
     // The constructor clears both of its words and the destructor frees the buffer at +0xb8 only
     // when it is set, which is HxStr's own destruction. Nothing recovered writes it otherwise.
     HxStr mUnusedString; // +0xb4

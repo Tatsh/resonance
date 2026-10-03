@@ -61,7 +61,7 @@ void MultiCatcher::CapturePhrase(int nBar, int nRun, int nAutoCatch) {
         msg.mKind = static_cast<HudItemKind>(nPowerbar);
         msg.mPlayer = mPlayer;
         Send(&msg);
-        mPlayer->Handle(&msg);
+        mPlayer->Dispatch(&msg);
     }
 }
 

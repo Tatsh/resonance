@@ -14,7 +14,7 @@ CreateDirOp::~CreateDirOp() {
 }
 
 // NTSC-U/C: 0x0055e6b8, PAL: 0x0059f988
-void CreateDirOp::Issue() {
+void CreateDirOp::Execute() {
     sceMcMkdir(mPortSlot >> kMemcardPortShift,
                mPortSlot & kMemcardSlotMask,
                mPath.mStr != nullptr ? mPath.mStr : g_szEmptyString);
@@ -22,7 +22,7 @@ void CreateDirOp::Issue() {
 }
 
 // NTSC-U/C: 0x0055d7a0, PAL: 0x0059ea08
-void CreateDirOp::Complete() {
+void CreateDirOp::NotifyDone() {
     InterpretResult();
     mHandler->OnCreateDir(this);
 }

@@ -18,7 +18,7 @@ constexpr char kLowercaseOffset = 'a' - 'A';
 } // namespace
 
 // NTSC-U/C: 0x00725840, PAL: 0x007694e0
-const char *g_szGenDirectory = "gen/";
+const char *dirpath = "gen/";
 
 // NTSC-U/C: 0x005585a8, PAL: 0x00599700
 char *BuildBitmapCacheFileName(char *pszPath, const char *pszExtension) {
@@ -29,9 +29,9 @@ char *BuildBitmapCacheFileName(char *pszPath, const char *pszExtension) {
     }
     pszName = pszName != nullptr ? pszName + 1 : pszPath;
 
-    const int nPrefixLength = strlen(g_szGenDirectory);
+    const int nPrefixLength = strlen(dirpath);
     memmove(pszName + nPrefixLength, pszName, strlen(pszName) + 1);
-    memcpy(pszName, g_szGenDirectory, nPrefixLength);
+    memcpy(pszName, dirpath, nPrefixLength);
 
     char *pszDot = strrchr(pszPath, '.');
     if (pszDot != nullptr) {

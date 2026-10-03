@@ -3,11 +3,11 @@
 #include "stream/hxstream.h"
 
 // Defined in address order. The static initialiser at 0x00145608 builds all fifteen.
-HxChunkName g_listChunkName("LIST");
-HxChunkName g_riffChunkName("RIFF");
+HxChunkName kListChunkID("LIST");
+HxChunkName kRiffChunkID("RIFF");
 HxChunkName g_midiChunkName("MIDI");
-HxChunkName g_mthdChunkName("MThd");
-HxChunkName g_mtrkChunkName("MTrk");
+HxChunkName kMidiHeaderChunkID("MThd");
+HxChunkName kMidiTrackChunkID("MTrk");
 HxChunkName g_waveChunkName("WAVE");
 HxChunkName g_fmtChunkName("fmt ");
 HxChunkName g_dataChunkName("data");
@@ -21,6 +21,6 @@ HxChunkName g_adtlChunkName("adtl");
 
 // NTSC-U/C: 0x00146550, PAL: 0x00147068
 HxStream &operator>>(HxStream &stream, HxChunkName &name) {
-    stream.Read(name.mText, HxChunkName::kLength);
+    stream.ReadData(name.mText, HxChunkName::kLength);
     return stream;
 }

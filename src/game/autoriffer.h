@@ -29,7 +29,7 @@
  * The source at `+0x30` is a data member rather than a base. The constructor constructs it at that
  * offset, and every caller calls MsgSource::AddSink() on it directly rather than through a vptr.
  *
- * HandleMessage() dispatches five identities. A PitchRiffMsg goes to OnPitchRiff(), an EraseMsg
+ * DispatchPriv() dispatches five identities. A PitchRiffMsg goes to OnPitchRiff(), an EraseMsg
  * to OnErase(), a StopRiffMsg to OnStopRiff(), and a GameOverMsg to StopRiff() at position 0. A
  * TrackSelectMsg runs the inline copy of OnTrackSelect().
  *
@@ -60,7 +60,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00199910
      * @ghidraAddress PAL: 0x0019f678
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Repeat the current riff at a song position, or release the buttons.
@@ -112,12 +112,12 @@ private:
     // NTSC-U/C: 0x00199758, PAL: 0x0019f4c0
     void PlayRiff(int nTick);
 
-    // The out-of-line copy of the GameOverMsg branch HandleMessage() expands inline. It stops the
+    // The out-of-line copy of the GameOverMsg branch DispatchPriv() expands inline. It stops the
     // riff at position zero and reads nothing from the message.
     // NTSC-U/C: 0x0019a920, PAL: 0x001a0688
     void OnGameOver();
 
-    // The out-of-line copy of the TrackSelectMsg branch HandleMessage() expands inline.
+    // The out-of-line copy of the TrackSelectMsg branch DispatchPriv() expands inline.
     // NTSC-U/C: 0x0019a898, PAL: 0x001a0600
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
@@ -133,7 +133,7 @@ public:
     /**
      * Synthesiser AxingSTG installs while it wires the stage up.
      *
-     * The constructor clears this member and the one below, and AxingSTG::ConnectSources() writes
+     * The constructor clears this member and the one below, and AxingSTG::ConnectInputs() writes
      * both from outside the class. Those outside writes record them public. A friend declaration on
      * AxingSTG fits the image equally well.
      *

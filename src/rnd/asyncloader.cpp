@@ -32,11 +32,17 @@ inline const char *NameText(const HxStr &name) {
 // NTSC-U/C: 0x006dba38, PAL: 0x0071f228
 int g_nRndLoaderZone = kNoZone;
 
-// NTSC-U/C: 0x006dba40, PAL: 0x0071f230
-std::vector<RndAsyncLoader *> g_pendingLoads;
+namespace {
 
+// Requests waiting for their file read to be issued, in queue order.
+// NTSC-U/C: 0x006dba40, PAL: 0x0071f230
+std::vector<RndAsyncLoader *> gPendingRndFiles;
+
+// File reads issued and not yet collected, in issue order.
 // NTSC-U/C: 0x006dba50, PAL: 0x0071f240
-std::vector<RndActiveLoadEntry> g_activeLoads;
+std::vector<RndActiveLoadEntry> gInProgressRndFiles;
+
+} // namespace
 
 // NTSC-U/C: 0x003f7c00, PAL: 0x00430428
 RndAsyncLoader::RndAsyncLoader(const HxStr &directory, const HxStr &file, int nZone)
@@ -58,17 +64,17 @@ void RndAsyncLoader::Cancel() {
         return;
     }
 
-    for (auto it = g_activeLoads.begin(); it != g_activeLoads.end(); ++it) {
+    for (auto it = gInProgressRndFiles.begin(); it != gInProgressRndFiles.end(); ++it) {
         if (it->mRequest == this) {
             AsyncCancelRequest(it->mHandle);
-            g_activeLoads.erase(it);
+            gInProgressRndFiles.erase(it);
             break;
         }
     }
 
-    for (auto it = g_pendingLoads.begin(); it != g_pendingLoads.end(); ++it) {
+    for (auto it = gPendingRndFiles.begin(); it != gPendingRndFiles.end(); ++it) {
         if (*it == this) {
-            g_pendingLoads.erase(it);
+            gPendingRndFiles.erase(it);
             return;
         }
     }
@@ -94,13 +100,13 @@ void RndAsyncLoader::Unload() {
 
 // NTSC-U/C: 0x003f8308, PAL: 0x00430b68
 void RndAsyncLoader::Enqueue() {
-    for (const auto &entry : g_activeLoads) {
+    for (const auto &entry : gInProgressRndFiles) {
         if (entry.mRequest == this) {
             LogPrintf(kDuplicateRequestFormat, NameText(mDirectory), NameText(mFile));
             return;
         }
     }
-    for (RndAsyncLoader *pRequest : g_pendingLoads) {
+    for (RndAsyncLoader *pRequest : gPendingRndFiles) {
         if (pRequest == this) {
             LogPrintf(kDuplicateRequestFormat, NameText(mDirectory), NameText(mFile));
             return;
@@ -113,14 +119,14 @@ void RndAsyncLoader::Enqueue() {
     mPending = 0;
     mFileRead = 0;
     mFinished = 0;
-    g_pendingLoads.push_back(this);
+    gPendingRndFiles.push_back(this);
 }
 
 // NTSC-U/C: 0x003f8460, PAL: 0x00430cc0
 void RndAsyncLoader::HarvestLoadedObjects() {
-    mLoadedObjects = Rnd::g_manager.mLoaded;
+    mLoadedObjects = Rnd::TheManager.mLoaded;
 
-    for (auto it = Rnd::g_manager.mLoaded.begin(); it != Rnd::g_manager.mLoaded.end(); ++it) {
+    for (auto it = Rnd::TheManager.mLoaded.begin(); it != Rnd::TheManager.mLoaded.end(); ++it) {
         if ((*it)->ClassName() == "Tex") {
             mObjects.push_back(dynamic_cast<Rnd::Tex *>(*it)); // The binary's cast helper.
         }
@@ -129,7 +135,7 @@ void RndAsyncLoader::HarvestLoadedObjects() {
             mDrawables.push_back(dynamic_cast<Rnd::Text *>(*it)); // The binary's cast helper.
         }
     }
-    for (auto it = Rnd::g_manager.mMergeObjects.begin(); it != Rnd::g_manager.mMergeObjects.end();
+    for (auto it = Rnd::TheManager.mMergeObjects.begin(); it != Rnd::TheManager.mMergeObjects.end();
          ++it) {
         if ((*it)->ClassName() == "Tex") {
             mObjects.push_back(dynamic_cast<Rnd::Tex *>(*it)); // The binary's cast helper.
@@ -144,12 +150,12 @@ void RndAsyncLoader::HarvestLoadedObjects() {
 void RndAsyncLoader::PollAsyncLoads() {
     const int nPreviousZone = ZoneGetCurrent();
     ZoneSetCurrent(g_nRndLoaderZone);
-    if (g_pendingLoads.size() != 0 && g_activeLoads.size() == 0) {
+    if (gPendingRndFiles.size() != 0 && gInProgressRndFiles.size() == 0) {
         ZoneReset();
     }
 
-    while (g_pendingLoads.size() != 0) {
-        RndAsyncLoader *pRequest = g_pendingLoads.front();
+    while (gPendingRndFiles.size() != 0) {
+        RndAsyncLoader *pRequest = gPendingRndFiles.front();
         HxStr freqPath = MakeFreqPath(pRequest->mDirectory);
         HxStr path = freqPath + "gen/" + pRequest->mFile + ".gz";
 
@@ -163,16 +169,16 @@ void RndAsyncLoader::PollAsyncLoads() {
 
         void *pBuffer = ZoneAlloc(nLength);
         const int nHandle = AsyncLoadFileByPath(NameText(path), pBuffer, nLength, nullptr);
-        g_activeLoads.push_back(RndActiveLoadEntry{pRequest, nHandle, pBuffer, nLength});
-        g_pendingLoads.erase(g_pendingLoads.begin());
+        gInProgressRndFiles.push_back(RndActiveLoadEntry{pRequest, nHandle, pBuffer, nLength});
+        gPendingRndFiles.erase(gPendingRndFiles.begin());
     }
 
     AsyncPumpCompletedRequests();
 
-    while (g_activeLoads.size() != 0) {
+    while (gInProgressRndFiles.size() != 0) {
         void *pData;
         int nSize;
-        const auto it = g_activeLoads.begin();
+        const auto it = gInProgressRndFiles.begin();
         const int nStatus = AsyncPollComplete(it->mHandle, &pData, &nSize);
         RndAsyncLoader *pRequest = it->mRequest;
         if (nStatus == 0) {
@@ -184,7 +190,7 @@ void RndAsyncLoader::PollAsyncLoads() {
             }
 
             Rnd::BufStream stream(static_cast<char *>(pData), nSize);
-            Rnd::g_manager.Read(stream);
+            Rnd::TheManager.Read(stream);
             if (MemAccountingEnabled()) {
                 char szReport[kMemoryReportSize];
                 MemEndAccounting(szReport, sizeof(szReport));
@@ -193,7 +199,7 @@ void RndAsyncLoader::PollAsyncLoads() {
 
             pRequest->HarvestLoadedObjects();
             pRequest->mFileRead = 1;
-            g_activeLoads.erase(it);
+            gInProgressRndFiles.erase(it);
             break;
         }
         if (nStatus < 0) {
@@ -203,7 +209,7 @@ void RndAsyncLoader::PollAsyncLoads() {
         LogPrintf("ERROR reading RND file async: %s:%s!!\n",
                   NameText(pRequest->mDirectory),
                   NameText(pRequest->mFile));
-        g_activeLoads.erase(it);
+        gInProgressRndFiles.erase(it);
     }
 
     ZoneSetCurrent(nPreviousZone);

@@ -134,7 +134,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 // Resolve one named object of the renderer as T.
 template <class T>
 inline T *FindObject(const char *pszName) {
-    return dynamic_cast<T *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<T *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 // Delete every persona of a list and empty it.

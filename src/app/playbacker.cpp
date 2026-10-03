@@ -36,16 +36,16 @@ void Sch::Playbacker::Load(IBStream &stream) {
             delete pCommand;
             break;
         }
-        CmdID::Reserve(pCommand->mCmdID);
+        CmdID::ReserveID(pCommand->mCmdID);
         mCommands.push_back(pCommand);
     }
     mCursor = mCommands.begin();
 }
 
 // NTSC-U/C: 0x005962e8, PAL: 0x005d96f0
-void Sch::Playbacker::Start() {
+void Sch::Playbacker::Play() {
     mWatchdog->mClock.Pause();
-    mWatchdog->RestartClock();
+    mWatchdog->ResetTimes();
     QueueRemaining();
     mWatchdog->mClock.Resume();
 }

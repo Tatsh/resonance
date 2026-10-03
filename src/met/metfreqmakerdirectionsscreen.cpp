@@ -360,10 +360,10 @@ void MetFreqMakerDirectionsScreen::ResolveContainerViews() {
 #ifdef VIDEO_STANDARD_PAL
     LoadPageTexts();
     // Yes, the binary does not test the text for null.
-    dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kTitleText)))
+    dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kTitleText)))
         ->SetText(GetMetString(kMetStrFmDirections));
 #endif
-    mRowTemplate = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kRowTemplate)));
+    mRowTemplate = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kRowTemplate)));
     mList = new ScrollingList(
         this, kRowPitch, kPageRowCount, mRowTemplate, nullptr, nullptr, nullptr, kListContext);
     mList->setItemCount(kPageRowCount);

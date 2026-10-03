@@ -110,7 +110,7 @@ public:
     /**
      * Report the level's end bar. Slot 9, and pure.
      *
-     * LevelBuilder returns what PlayMap::GetExtent() of its play map reports.
+     * LevelBuilder returns what PlayMap::GetLength() of its play map reports.
      * GrooveWorld::BuildGraphs() at `0x0018cce8` passes the result to Gamer's constructor as the
      * end bar.
      *

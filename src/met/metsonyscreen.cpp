@@ -191,9 +191,9 @@ void MetSonyScreen::OnExitFinished() {
         return;
     }
     if (IntroMovieEnabled() != 0) {
-        g_gfxDevice.ResetVramAndSavePacket();
+        Rnd::ThePs.ResetVramAndSavePacket();
         PlayIntroMovie();
-        g_gfxDevice.InitDisplayMode();
+        Rnd::ThePs.InitDisplayMode();
     }
     g_nSonyIntroPending = 0;
     MetFrontEndState::shared()->mReturnScreen = HxStr(kOwnScreenName);
@@ -215,5 +215,5 @@ void MetSonyScreen::Finish() {
     mRenderer->Stop();
     MetFreqEndedMsg msg;
     msg.mStopJukebox = kFreqEndedPayload;
-    mRenderer->Handle(&msg);
+    mRenderer->Dispatch(&msg);
 }

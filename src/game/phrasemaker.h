@@ -10,7 +10,7 @@
  * Its RTTI descriptor is at `0x008f0300`. It is built over MsgSink at offset 0 and MsgSource at
  * offset 4. AxePhraseMaker derives from it at offset 0.
  *
- * The primary table at `0x007ddc88` runs six entries. Slot 3, MsgSink::HandleMessage(), and slot
+ * The primary table at `0x007ddc88` runs six entries. Slot 3, MsgSink::DispatchPriv(), and slot
  * 4 address the shared pure-virtual stub at `0x005381a8`, and slot 5 has a body of its own, so the
  * class introduces two virtuals and is abstract. The MsgSource table at `0x007dddf0` adjusts
  * `this` by `-4` and retains AddSink() and RemoveSink(). GsPeriodical drives both new slots: it

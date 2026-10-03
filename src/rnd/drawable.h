@@ -50,7 +50,7 @@ public:
     /**
      * Draw this object followed by each of its children.
      *
-     * Draws nothing when mShowing is clear, and skips the children when DrawSelf() reports that
+     * Draws nothing when mShowing is clear, and skips the children when DrawShowing() reports that
      * the subtree is invisible.
      *
      * @ghidraAddress NTSC-U/C: 0x00506920
@@ -110,7 +110,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00503420
      * @ghidraAddress PAL: 0x00542248
      */
-    void ClearDraws();
+    void RemoveAllDraws();
 
     /**
      * Move pDraw nSteps places later in mDraws, or earlier for a negative count.
@@ -243,7 +243,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005066f0
      * @ghidraAddress PAL: 0x005455b0
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
     /**
      * Drop this object's reference on every mDraws entry without emptying the list.
@@ -257,7 +257,8 @@ protected:
 
 public:
     // Declared in recovered offset order, with the access specifiers interleaved. Protected
-    // because Rnd::Mesh derives from this class and Mesh::Collide tests this flag at its top.
+    // because Rnd::Mesh derives from this class and Mesh::FindCollisions tests this flag at its
+    // top.
     // Public because the drawable show commands read it with no accessor in the image.
     int mShowing; // +0x04
 

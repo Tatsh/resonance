@@ -48,6 +48,16 @@ constexpr unsigned kCopyShareFrames = 0x100;
  */
 class TransAnim : public Animatable, public Drawable {
 public:
+    /**
+     * Creator the registered "TransAnim" class builds through.
+     *
+     * RegisterTransAnimClass() points it at NewTransAnim().
+     *
+     * @ghidraAddress NTSC-U/C: 0x00706820
+     * @ghidraAddress PAL: 0x0074a340
+     */
+    static TransAnim *(*sNew)(const HxStr &name);
+
     /** Interpolation a channel applies between two keyframes. */
     enum Interp {
         kInterpLinear = 0, /*!< Straight line between the two values. */
@@ -262,7 +272,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004f4020
      * @ghidraAddress PAL: 0x00532c58
      */
-    virtual float EndFrame();
+    virtual float FilteredFrameEnd();
 
     /**
      * Report the first frame the frames owner's three channels animate from.
@@ -290,7 +300,7 @@ public:
      * Write the revision, both bases, both target names, the three channels, and the flags.
      *
      * The two targets are written as the names of the objects they address, so a reader has to
-     * resolve them through Rnd::g_manager.
+     * resolve them through Rnd::TheManager.
      *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x004f2d50
@@ -511,16 +521,6 @@ private:
 TransAnim *NewTransAnim(const HxStr &name);
 
 /**
- * Creator the registered "TransAnim" class builds through.
- *
- * RegisterTransAnimClass() points it at NewTransAnim().
- *
- * @ghidraAddress NTSC-U/C: 0x00706820
- * @ghidraAddress PAL: 0x0074a340
- */
-extern TransAnim *(*g_pfnNewTransAnim)(const HxStr &name);
-
-/**
  * Build a transform animation through the creator hook.
  *
  * No call site survives in the shipped program. The name is inferred from the Rnd::Button
@@ -535,7 +535,7 @@ TransAnim *NewTransAnimThroughHook(const HxStr &name);
 
 /**
  * Build a transform animation for the registered "TransAnim" class by calling through
- * g_pfnNewTransAnim.
+ * TransAnim::sNew.
  *
  * Rnd::Manager::Init() registers it as well.
  *
@@ -547,7 +547,7 @@ TransAnim *NewTransAnimThroughHook(const HxStr &name);
 Object *CreateRegisteredTransAnim(const HxStr &name);
 
 /**
- * Point g_pfnNewTransAnim at NewTransAnim() and register the "TransAnim" class with Rnd::Manager.
+ * Point TransAnim::sNew at NewTransAnim() and register the "TransAnim" class with Rnd::Manager.
  *
  * No call site survives in the shipped program. The name is inferred.
  *

@@ -38,11 +38,11 @@ MetRightGizmoScreen *MetRightGizmoScreen::New(MetRenderer *pRenderer, int nPrior
 
 // NTSC-U/C: 0x0027bc38, PAL: 0x00294938
 void MetRightGizmoScreen::BeginExit() {
-    dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(mViewNames[kEqualizerViewIndex]))->SetShowing(0);
+    dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(mViewNames[kEqualizerViewIndex]))->SetShowing(0);
     MetScreen::BeginExit();
 }
 
 // NTSC-U/C: 0x0027bbb0, PAL: 0x002948b0
 void MetRightGizmoScreen::OnEnterFinished() {
-    dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(mViewNames[kEqualizerViewIndex]))->SetShowing(1);
+    dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(mViewNames[kEqualizerViewIndex]))->SetShowing(1);
 }

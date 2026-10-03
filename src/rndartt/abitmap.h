@@ -35,20 +35,9 @@ enum ABitmapColorKey {
 };
 
 /**
- * Bytes one pixel of each ABitmapFormat occupies.
- *
- * The entry for kABitmapFormatLinear4 is zero, because four bit rows use a separate stride
- * formula. Both ABitmap::ABitmap() and ACanvas::NewCompatibleCanvas() read the table.
- *
- * @ghidraAddress NTSC-U/C: 0x00725cc0
- * @ghidraAddress PAL: 0x00769960
- */
-extern const unsigned char g_abBitmapBytesPerPixel[kABitmapFormatCount];
-
-/**
  * Bits one pixel of each ABitmapFormat occupies.
  *
- * The table sits immediately after g_abBitmapBytesPerPixel and no reader of it was located inside
+ * The table sits immediately after ABitmap::bmPixelSize and no reader of it was located inside
  * the art library. A second pair of the same shape exists at 0x0070d3d0, where the first table
  * maps the same codes to PlayStation 2 graphics synthesiser storage modes.
  *
@@ -105,12 +94,23 @@ extern int g_nSkipColorSwap;
  */
 struct ABitmap {
     /**
+     * Bytes one pixel of each ABitmapFormat occupies.
+     *
+     * The entry for kABitmapFormatLinear4 is zero, because four-bit rows use a separate stride
+     * formula. Both ABitmap::ABitmap() and ACanvas::NewCompatibleCanvas() read the table.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00725cc0
+     * @ghidraAddress PAL: 0x00769960
+     */
+    static const unsigned char bmPixelSize[kABitmapFormatCount];
+
+    /**
      * Describe a pixel rectangle, allocating the pixels when the caller supplies none.
      *
      * Writes mFormat from the second argument, clears mOddNibbleStart, and writes
      * mHasTransparentColor from the third. A row stride of zero is derived from the format
      * instead, as `(nWidth + 2) / 2` for kABitmapFormatLinear4 and as nWidth times the matching
-     * entry of g_abBitmapBytesPerPixel for every other code. mByteCount then becomes the stride
+     * entry of ABitmap::bmPixelSize for every other code. mByteCount then becomes the stride
      * times the height.
      *
      * A null pixel pointer allocates mByteCount bytes, tagged with the source file and line, and
@@ -186,7 +186,7 @@ struct ABitmap {
      * Return the size of a pixel rectangle in bytes, with rows packed at the format's own stride.
      *
      * The stride matches the one the constructor derives, `(nWidth + 2) / 2` for
-     * kABitmapFormatLinear4 and nWidth times the matching entry of g_abBitmapBytesPerPixel
+     * kABitmapFormatLinear4 and nWidth times the matching entry of ABitmap::bmPixelSize
      * otherwise.
      *
      * @param nFormat The ABitmapFormat code.

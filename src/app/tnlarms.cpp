@@ -27,18 +27,18 @@ constexpr float kShowFrames = 9600.0f;
 
 // NTSC-U/C: 0x0043f3f8, PAL: 0x0047bd80
 TnlArms::TnlArms() : mStartFrame(kNoFrame) {
-    mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("arms.view")));
+    mView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("arms.view")));
     mView->SetShowing(0);
     for (int i = kFirstLocalView; i <= kLastLocalView; ++i) {
         Rnd::View *pLocal = dynamic_cast<Rnd::View *>(
-            Rnd::g_manager.Find(HxStr(FormatString("tnl local%d.view", i))));
+            Rnd::TheManager.Find(HxStr(FormatString("tnl local%d.view", i))));
         pLocal->RemoveDraw(mView);
     }
 
     mEmitters.resize(kEmitterCount, TnlEmitter());
     for (unsigned i = 0; i < mEmitters.size(); ++i) {
         mEmitters[i].Attach(dynamic_cast<Rnd::ParticleSys *>(
-            Rnd::g_manager.Find(HxStr(FormatString("arms%d.ps", i)))));
+            Rnd::TheManager.Find(HxStr(FormatString("arms%d.ps", i)))));
     }
 }
 

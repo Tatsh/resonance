@@ -75,7 +75,7 @@ HxStream &operator>>(HxStream &stream, HxChunkName &name);
  * @ghidraAddress NTSC-U/C: 0x00673a80
  * @ghidraAddress PAL: 0x006b4690
  */
-extern HxChunkName g_listChunkName;
+extern HxChunkName kListChunkID;
 
 /**
  * `RIFF`, the name of a top-level chunk.
@@ -83,7 +83,7 @@ extern HxChunkName g_listChunkName;
  * @ghidraAddress NTSC-U/C: 0x00673a88
  * @ghidraAddress PAL: 0x006b4698
  */
-extern HxChunkName g_riffChunkName;
+extern HxChunkName kRiffChunkID;
 
 /**
  * `MIDI`.
@@ -99,7 +99,7 @@ extern HxChunkName g_midiChunkName;
  * @ghidraAddress NTSC-U/C: 0x00673a98
  * @ghidraAddress PAL: 0x006b46a8
  */
-extern HxChunkName g_mthdChunkName;
+extern HxChunkName kMidiHeaderChunkID;
 
 /**
  * `MTrk`, a Standard MIDI File track chunk.
@@ -107,7 +107,7 @@ extern HxChunkName g_mthdChunkName;
  * @ghidraAddress NTSC-U/C: 0x00673aa0
  * @ghidraAddress PAL: 0x006b46b0
  */
-extern HxChunkName g_mtrkChunkName;
+extern HxChunkName kMidiTrackChunkID;
 
 /**
  * `WAVE`.

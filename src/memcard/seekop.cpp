@@ -14,13 +14,13 @@ SeekOp::~SeekOp() {
 }
 
 // NTSC-U/C: 0x0055ead8, PAL: 0x0059fda8
-void SeekOp::Issue() {
+void SeekOp::Execute() {
     sceMcSeek(mFile, mOffset, mOrigin);
     mIssued = kMemcardOpInFlight;
 }
 
 // NTSC-U/C: 0x0055dbd8, PAL: 0x0059ee50
-void SeekOp::Complete() {
+void SeekOp::NotifyDone() {
     InterpretResult();
     mHandler->OnSeek(this);
 }

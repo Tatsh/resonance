@@ -12,7 +12,7 @@
  *
  * Its RTTI descriptor is at `0x008ff3f0`. It is built over MsgSource at offset 0 and MsgSink at
  * offset 20. Its primary table is at `0x007e2e88` with four entries. Its MsgSink subobject table at
- * `0x007e2e60` adjusts `this` by `-20` and fills slot 3 with HandleMessage(). MsgSource coming
+ * `0x007e2e60` adjusts `this` by `-20` and fills slot 3 with DispatchPriv(). MsgSource coming
  * first is why CatchingSTG's wiring adjusts by `+0x14` when it registers this object as a sink and
  * guards the adjustment against a null pointer. CatchingSTG's tagged allocation measures the object
  * at 0x3c bytes.
@@ -40,7 +40,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001c1700
      * @ghidraAddress PAL: 0x001c7548
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 private:
     // Clears the owned phrases of the four bars after the message's bar on this track. Each owner

@@ -11,10 +11,10 @@ constexpr int kBitsPerByte = 8;
 
 } // namespace
 
-const int HxStream::kStatusOk = 0;
+const int HxStream::goodbit = 0;
 const int HxStream::kStatusEnd = 1;
-const int HxStream::kStatusRange = 2;
-const int HxStream::kStatusFailed = 4;
+const int HxStream::failbit = 2;
+const int HxStream::badbit = 4;
 
 // NTSC-U/C: 0x004057a8, PAL: 0x0043f098
 HxStream::HxStream() {
@@ -28,11 +28,11 @@ HxStream::~HxStream() {
 }
 
 // NTSC-U/C: 0x00145f18, PAL: 0x00146a30
-void HxStream::Seek([[maybe_unused]] int nOffset, [[maybe_unused]] int nWhence) {
+void HxStream::SetMarker([[maybe_unused]] int nOffset, [[maybe_unused]] int nWhence) {
 }
 
 // NTSC-U/C: 0x00145f20, PAL: 0x00146a38
-int HxStream::Tell() {
+int HxStream::GetMarker() {
     return 0;
 }
 
@@ -47,7 +47,7 @@ HxStream &HxStream::Write([[maybe_unused]] const void *pSrc, [[maybe_unused]] in
 }
 
 // NTSC-U/C: 0x00145f38, PAL: 0x00146a50
-HxStream &HxStream::Read([[maybe_unused]] void *pDest, [[maybe_unused]] int nSize) {
+HxStream &HxStream::ReadData([[maybe_unused]] void *pDest, [[maybe_unused]] int nSize) {
     return *this;
 }
 
@@ -57,21 +57,21 @@ HxStream *HxStream::UnderlyingStream() {
 }
 
 // NTSC-U/C: 0x004059f8, PAL: 0x0043f2e8
-HxStream &HxStream::ReadSwapped(void *pDest, int nSize) {
+HxStream &HxStream::ReadNum(void *pDest, int nSize) {
     if (mSwapBytes == 0 || nSize == 1) {
-        return Read(pDest, nSize);
+        return ReadData(pDest, nSize);
     }
 
     unsigned char *pBytes = static_cast<unsigned char *>(pDest);
     while (nSize != 0) {
         --nSize;
-        Read(&pBytes[nSize], 1);
+        ReadData(&pBytes[nSize], 1);
     }
     return *this;
 }
 
 // NTSC-U/C: 0x00405958, PAL: 0x0043f248
-HxStream &HxStream::WriteSwapped(const void *pSrc, int nSize) {
+HxStream &HxStream::WriteNum(const void *pSrc, int nSize) {
     if (mSwapBytes == 0 || nSize == 1) {
         return Write(pSrc, nSize);
     }
@@ -85,17 +85,17 @@ HxStream &HxStream::WriteSwapped(const void *pSrc, int nSize) {
 }
 
 // NTSC-U/C: 0x004057c8, PAL: 0x0043f0b8
-HxStream &HxStream::ReadString(char *pszDest, int nDestSize) {
+HxStream &HxStream::ReadStr(char *pszDest, int nDestSize) {
     int nLength;
     ReadVarLen(nLength, *this);
     if (nLength < nDestSize) {
-        Read(pszDest, nLength);
+        ReadData(pszDest, nLength);
         pszDest[nLength] = '\0';
         return *this;
     }
-    Read(pszDest, nDestSize - 1);
+    ReadData(pszDest, nDestSize - 1);
     pszDest[nDestSize - 1] = '\0';
-    Seek(nLength - nDestSize + 1, kHxSeekCur);
+    SetMarker(nLength - nDestSize + 1, kHxSeekCur);
     return *this;
 }
 
@@ -104,7 +104,7 @@ HxStream &HxStream::ReadString(HxStr &str) {
     int nLength;
     ReadVarLen(nLength, *this);
     char *pszBuffer = new char[nLength + 1];
-    Read(pszBuffer, nLength);
+    ReadData(pszBuffer, nLength);
     pszBuffer[nLength] = '\0';
     str = pszBuffer;
     delete[] pszBuffer;
@@ -112,7 +112,7 @@ HxStream &HxStream::ReadString(HxStr &str) {
 }
 
 // NTSC-U/C: 0x00405a98, PAL: 0x0043f388
-HxStream *HxStream::BaseStream() {
+HxStream *HxStream::GetRootStream() {
     HxStream *pStream = this;
     while (HxStream *pInner = pStream->UnderlyingStream()) {
         pStream = pInner;
@@ -131,7 +131,7 @@ HxStream &WriteVarLen(const int &nValue, HxStream &stream) {
     }
     for (; nBytes != 0; --nBytes) {
         const unsigned char byte = static_cast<unsigned char>(nPacked);
-        stream.WriteSwapped(&byte, sizeof(byte));
+        stream.WriteNum(&byte, sizeof(byte));
         nPacked >>= kBitsPerByte;
     }
     return stream;
@@ -142,7 +142,7 @@ HxStream &ReadVarLen(int &nValue, HxStream &stream) {
     nValue = 0;
     unsigned char byte;
     do {
-        stream.ReadSwapped(&byte, sizeof(byte));
+        stream.ReadNum(&byte, sizeof(byte));
         nValue = (nValue << kVarLenBits) + (byte & kVarLenValueMask);
     } while ((byte & kVarLenContinue) != 0);
     return stream;

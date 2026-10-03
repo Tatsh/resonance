@@ -45,7 +45,7 @@ public:
     }
 
     /**
-     * Switch the effect off through this class's own Enable(), then release the oscillator.
+     * Switch the effect off through this class's own SetEnabled(), then release the oscillator.
      *
      * @ghidraAddress NTSC-U/C: 0x001a2338
      * @ghidraAddress PAL: 0x001a80a0
@@ -70,7 +70,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001a0ae0
      * @ghidraAddress PAL: 0x001a6848
      */
-    virtual void Enable(int bEnabled);
+    virtual void SetEnabled(int bEnabled);
 
     /**
      * Send controller 0x30 at the level the oscillator's value selects.

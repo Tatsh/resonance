@@ -19,7 +19,7 @@ Message *StopRiffMsg::Clone() {
 
 // NTSC-U/C: 0x003da858, PAL: 0x00412c90
 int StopRiffMsg::Type() {
-    return g_nStopRiffMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x003da868, PAL: 0x00412ca0

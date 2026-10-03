@@ -33,6 +33,17 @@ namespace Rnd {
 class PsCam : public Cam {
 public:
     /**
+     * Camera the renderer falls back on when a scene selects none.
+     *
+     * Rnd::GfxDevice::BeginFrame() reads it, and Rnd::PsEnviron::Init() makes the default
+     * environment and the default light children of it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00768410
+     * @ghidraAddress PAL: 0x007ac160
+     */
+    static PsCam *sDefault;
+
+    /**
      * Construct a camera with the default projection.
      *
      * @param name The registry key for this object.
@@ -56,20 +67,20 @@ public:
      * side planes of the local frustum by it, moves all six planes into world space as
      * Rnd::g_drawFrustum, builds the viewport and projection transforms, programs
      * SCISSOR_1 from the screen rectangle clamped to the unit square, and stores itself in
-     * g_pCurrentCam. It does not call the base implementation.
+     * Cam::sCurrent. It does not call the base implementation.
      *
      * @return Non-zero, which draws the children as well.
      * @ghidraAddress NTSC-U/C: 0x00582830
      * @ghidraAddress PAL: 0x005c5a28
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
     /**
      * Place a point of the screen rectangle in render target pixels.
      *
      * Vtable slot 4 of the Rnd::Drawable table. The point is scaled by the screen rectangle
      * extents and offset by its origin, then scaled again by the size of the render target, or by
-     * the display size of g_gfxDevice when there is no render target.
+     * the display size of Rnd::ThePs when there is no render target.
      *
      * @param ptScreen The point, in the coordinates the screen rectangle is expressed in.
      * @return The same point in render target pixels.
@@ -107,7 +118,7 @@ public:
      * Build a camera the class registry vends.
      *
      * The return type is the base class, which is what lets Init() store the routine in
-     * Rnd::g_pfnNewCam.
+     * Rnd::Cam::sNew.
      *
      * @param name The registry key for the new camera.
      * @return The new camera.
@@ -119,7 +130,7 @@ public:
     /**
      * Install the PlayStation 2 camera factory and build the default camera.
      *
-     * Rnd::g_pfnNewCam becomes NewCam(), which is how a `.rnd` file naming the unchanged "Cam"
+     * Rnd::Cam::sNew becomes NewCam(), which is how a `.rnd` file naming the unchanged "Cam"
      * key loads this subclass. The camera named "[default cam]" is then built, marked internal,
      * and placed at the translation (0, -150, 0) with its dirty flag set, which puts the default
      * viewpoint 150 units back along the axis this engine looks down.
@@ -132,7 +143,7 @@ public:
     /**
      * Undo what Init() installs.
      *
-     * Destroys g_pDefaultCam through its virtual destructor, without clearing the pointer, and
+     * Destroys PsCam::sDefault through its virtual destructor, without clearing the pointer, and
      * then runs Rnd::RegisterCamClass(). The out-of-line copy has no caller, and
      * GfxDevice::Terminate() expands the body at `0x0049b01c`. The name is inferred from
      * GfxDevice::Terminate().
@@ -143,23 +154,12 @@ public:
     static void Terminate();
 };
 
-/**
- * Camera the renderer falls back on when a scene selects none.
- *
- * Rnd::GfxDevice::BeginFrame() reads it, and Rnd::PsEnviron::Init() makes the default environment
- * and the default light children of it.
- *
- * @ghidraAddress NTSC-U/C: 0x00768410
- * @ghidraAddress PAL: 0x007ac160
- */
-extern PsCam *g_pDefaultCam;
-
 inline void PsCam::Terminate() {
-    delete g_pDefaultCam;
+    delete PsCam::sDefault;
     RegisterCamClass();
 }
 
-// The globals below are the draw state PsCam::DrawSelf() leaves for the software and VU1 paths.
+// The globals below are the draw state PsCam::DrawShowing() leaves for the software and VU1 paths.
 // Every title is inferred from the computation that fills the global, because the image
 // retains no name for any of them.
 
@@ -251,7 +251,7 @@ extern float g_flCamNear;
 /**
  * Scissor rectangle of the camera last drawn through, in GS primitive coordinates of 1/16 pixel.
  *
- * DrawSelf() first stores pixel bounds here to program SCISSOR_1 and then converts them.
+ * DrawShowing() first stores pixel bounds here to program SCISSOR_1 and then converts them.
  *
  * @ghidraAddress NTSC-U/C: 0x008e41a4
  * @ghidraAddress PAL: 0x00929524

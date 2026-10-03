@@ -242,7 +242,7 @@ void PhraseMgr::PostGemMsg(Message *pMsg) {
         Phrase *pPhrase = mDatabase->GetPhrase(nStep);
         if (pPhrase == nullptr) {
             mDatabase->SetOwner(gem.mPlayer, nStep);
-            mTrackData->SetOwner(&g_nullPlayer, nStep);
+            mTrackData->SetOwner(&NullPlayer::sInstance, nStep);
             pPhrase = mDatabase->GetPhrase(nStep);
         }
         pPhrase->AddGem(gem.mLoc.mTick, gem.mGem, gem.mTrans);
@@ -273,8 +273,8 @@ void PhraseMgr::OnRefreshNet(Message *pMsg) {
         const int nStep = mMap->MapBar(nBar);
         Phrase *pPhrase = mDatabase->GetPhrase(nStep);
         CaughtPhrasePacket packet(
-            pPhrase != nullptr ? pPhrase->mPlayer : &g_nullPlayer, mTrack, nStep);
-        mNetSink->Handle(&packet);
+            pPhrase != nullptr ? pPhrase->mPlayer : &NullPlayer::sInstance, mTrack, nStep);
+        mNetSink->Dispatch(&packet);
     }
 }
 
@@ -298,7 +298,7 @@ void PhraseMgr::AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner
         fields.mLoc.mTick = nTick;
         fields.mPlayer = pOwner;
         GemPacket packet(fields, mTrack);
-        mNetSink->Handle(&packet);
+        mNetSink->Dispatch(&packet);
     }
 
     if (bPost != 0) {
@@ -355,7 +355,7 @@ void PhraseMgr::SetPhraseOwner(Player *pPlayer, int nBar) {
         }
         if (mNetSink != nullptr) {
             CaughtPhrasePacket packet(pPlayer, mTrack, nStep);
-            mNetSink->Handle(&packet);
+            mNetSink->Dispatch(&packet);
         }
 
         const std::vector<int> &bars = mMap->FindBarsPlaying(nStep, nBar, mWindowEnd);
@@ -378,7 +378,7 @@ void PhraseMgr::InstallPhrase(Phrase *pPhrase, int nBar, int bRefresh) {
     }
     if (mNetSink != nullptr) {
         CaughtPhrasePacket packet(pPhrase->mPlayer, mTrack, nStep);
-        mNetSink->Handle(&packet);
+        mNetSink->Dispatch(&packet);
     }
     if (bRefresh != 0) {
         RefreshBar(nBar, 0);
@@ -398,8 +398,8 @@ void PhraseMgr::ClearPhrase(int nBar, int bAll) {
             mTrackData->SetOwner(pPrevious, nStep);
         }
         if (mNetSink != nullptr) {
-            CaughtPhrasePacket packet(&g_nullPlayer, mTrack, nStep);
-            mNetSink->Handle(&packet);
+            CaughtPhrasePacket packet(&NullPlayer::sInstance, mTrack, nStep);
+            mNetSink->Dispatch(&packet);
         }
 
         const std::vector<int> &bars = mMap->FindBarsPlaying(nStep, nBar, mWindowEnd);
@@ -481,7 +481,7 @@ void PhraseMgr::PostBarStatusMsg(int nBar) {
     BarStatusMsg msg;
     msg.mBar = nBar;
     msg.mTrack = mTrack;
-    msg.mPlayer = pPhrase != nullptr ? pPhrase->mPlayer : &g_nullPlayer;
+    msg.mPlayer = pPhrase != nullptr ? pPhrase->mPlayer : &NullPlayer::sInstance;
     msg.mEnabled = nEnabled;
     msg.mRefreshing = mRefreshing;
     msg.mPowerup = nPowerup;
@@ -607,7 +607,7 @@ void PhraseMgr::PostGemMsgThird(int nBar, int bGhost) {
         return;
     }
 
-    Player *pPlayer = &g_nullPlayer;
+    Player *pPlayer = &NullPlayer::sInstance;
     if (bGhost == 0) {
         Phrase *pPhrase = mDatabase->GetPhraseAt(nBar);
         if (pPhrase != nullptr) {
@@ -660,7 +660,7 @@ void PhraseMgr::StartCommands() {
 }
 
 // NTSC-U/C: 0x001bc718, PAL: 0x001c24f0
-void PhraseMgr::HandleMessage(Message *pMsg) {
+void PhraseMgr::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nPhrasePacketType) {
         OnPhrasePacket(static_cast<PhrasePacket *>(pMsg));
@@ -698,7 +698,7 @@ void PhraseMgr::OnPhrasePacket(PhrasePacket *pPacket) {
     const int nStep = pPacket->mB;
     Phrase *pPhrase = pPacket->mPhrase;
     Player *pPrevious = mDatabase->GetOwner(nStep);
-    Player *pOwner = pPhrase != nullptr ? pPhrase->mPlayer : &g_nullPlayer;
+    Player *pOwner = pPhrase != nullptr ? pPhrase->mPlayer : &NullPlayer::sInstance;
     if (pPhrase != nullptr) {
         mDatabase->SetPhrase(pPhrase, nStep);
     } else {
@@ -742,10 +742,10 @@ long long *PhraseMgr::GetStepValue(int nBar) {
 }
 
 // NTSC-U/C: 0x001c0268, PAL: 0x001c6098
-Player *PhraseMgr::GetPhraseOwner(int nBar) {
+Player *PhraseMgr::GetOwner(int nBar) const {
     Phrase *pPhrase = mDatabase->GetPhraseAt(nBar);
     if (pPhrase == nullptr) {
-        return &g_nullPlayer;
+        return &NullPlayer::sInstance;
     }
     return pPhrase->mPlayer;
 }

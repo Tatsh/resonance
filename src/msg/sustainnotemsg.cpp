@@ -20,7 +20,7 @@ Message *SustainNoteMsg::Clone() {
 
 // NTSC-U/C: 0x003dc7d8, PAL: 0x00414c10
 int SustainNoteMsg::Type() {
-    return g_dwSustainNoteMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x003dc7e8, PAL: 0x00414c20

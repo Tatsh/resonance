@@ -27,7 +27,7 @@ enum {
 
 // The console slots. A null buffer marks a free slot.
 // NTSC-U/C: 0x008e6980, PAL: 0x0092b980
-static DevConsole g_devConsoles[kConsoleCount];
+static DevConsole s_Cons[kConsoleCount];
 
 // The console heap. An all-ones size in the first header marks the heap as not yet initialised.
 // NTSC-U/C: 0x007a8530, PAL: 0x007ec230
@@ -61,7 +61,7 @@ void sceDevVu0Reset(void) {
 
 // NTSC-U/C: 0x00622710, PAL: 0x00663120
 void sceDevConsInit(void) {
-    DevConsole *pConsoles = g_devConsoles;
+    DevConsole *pConsoles = s_Cons;
     int nIndex;
 
     for (nIndex = 0; nIndex < kConsoleCount; nIndex++) {
@@ -72,7 +72,7 @@ void sceDevConsInit(void) {
 // NTSC-U/C: 0x00622748, PAL: 0x00663158
 int sceDevConsOpen(
     unsigned int nGsX, unsigned int nGsY, unsigned int nColumns, unsigned int nRows) {
-    DevConsole *pConsoles = g_devConsoles;
+    DevConsole *pConsoles = s_Cons;
     DevConsole *pConsole = NULL;
     int nIndex;
 

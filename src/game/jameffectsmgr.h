@@ -60,20 +60,20 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001a63d0
      * @ghidraAddress PAL: 0x001ac138
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Switch every effect on or off from one bit of a mask.
      *
      * PhrasePlayer::PlayBar() passes the step value of each bar. For each effect, the bit its
-     * Type() reports, taken modulo 64, decides the argument to its Enable(). The bit test goes
-     * through a `std::bitset` reference built on the stack. The title is inferred.
+     * Type() reports, taken modulo 64, decides the argument to its SetEnabled(). The bit test goes
+     * through a `std::bitset` reference built on the stack.
      *
      * @param nMask The step's mask, one bit per effect type.
      * @ghidraAddress NTSC-U/C: 0x001a56d8
      * @ghidraAddress PAL: 0x001ab440
      */
-    void ApplyStepMask(long long nMask);
+    void Enable(long long nMask);
 
 private:
     // For a message on this track, flips the effect's bit in the step value of the message's bar,
@@ -85,9 +85,9 @@ private:
 
     // Returns the first effect whose Type() is nType, or null.
     // NTSC-U/C: 0x001a62d8, PAL: 0x001ac040
-    Effector *FindEffector(int nType);
+    Effector *GetEffector(int nType) const;
 
-    // Passes one flag to every effect's Enable(). The image has no caller.
+    // Passes one flag to every effect's SetEnabled(). The image has no caller.
     // NTSC-U/C: 0x001a6350, PAL: 0x001ac0b8
     void EnableAll(int bEnabled);
 

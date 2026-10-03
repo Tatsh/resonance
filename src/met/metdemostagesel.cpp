@@ -118,7 +118,7 @@ inline const char *TextOf(const HxStr &text) {
 // Resolves a registry key to an object of type T, or null.
 template <typename T>
 T *FindObject(const char *pszName) {
-    Rnd::Object *pObject = Rnd::g_manager.Find(HxStr(pszName));
+    Rnd::Object *pObject = Rnd::TheManager.Find(HxStr(pszName));
     return pObject != nullptr ? dynamic_cast<T *>(pObject) : nullptr;
 }
 
@@ -130,9 +130,9 @@ inline GameParams CurrentParams() {
 // Replaces the contents of `stage_buts.view` with one of the two button views.
 inline void ShowButtonView(const char *pszButtonView) {
     Rnd::View *pView = FindObject<Rnd::View>(kStageButtonsView);
-    pView->ReleaseAnimsRefs();
-    pView->ClearDraws();
-    pView->ClearTransList();
+    pView->RemoveAllAnims();
+    pView->RemoveAllDraws();
+    pView->RemoveAllTranses();
     Rnd::View *pButtons = FindObject<Rnd::View>(pszButtonView);
     pView->AddAnim(pButtons);
     pView->AddTrans(pButtons);
@@ -205,7 +205,7 @@ void MetDEMOStageSel::EnterAndShow() {
         mHelpKeys.push_back(GetMetString(kMetStrHDEMORemixSelectButton1));
         mHelpKeys.push_back(GetMetString(kMetStrHDEMORemixSelectButton2));
         for (int i = 0; i < kRemixButtonCount; ++i) {
-            mStageList->ButtonAt(i)->mText->SetText(
+            mStageList->GetButton(i)->mText->SetText(
                 GetMetString(kMetStrDEMORemixSelectButton0Text + i));
         }
         MetScreenTitleScreen::SetTitle(GetMetString(kMetStrTDEMORemixTitleText));
@@ -216,7 +216,7 @@ void MetDEMOStageSel::EnterAndShow() {
         mHelpKeys.push_back(GetMetString(kMetStrHDEMOGameSelectButton3));
         mHelpKeys.push_back(GetMetString(kMetStrHDEMOGameSelectButton4));
         for (int i = 0; i < kGameButtonCount; ++i) {
-            mStageList->ButtonAt(i)->mText->SetText(
+            mStageList->GetButton(i)->mText->SetText(
                 GetMetString(kMetStrDEMOGameSelectButton0Text + i));
         }
         MetScreenTitleScreen::SetTitle(GetMetString(kMetStrTDEMOGameTitleText));

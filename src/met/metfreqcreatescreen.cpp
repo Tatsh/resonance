@@ -245,8 +245,8 @@ void MetFreqCreateScreen::OnExitFinished() {
 // NTSC-U/C: 0x0029c330, PAL: 0x002b9bb8
 void MetFreqCreateScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
-    mLeftArrow = dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(kLeftArrowObject)));
-    mRightArrow = dynamic_cast<Rnd::Button *>(Rnd::g_manager.Find(HxStr(kRightArrowObject)));
+    mLeftArrow = dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(HxStr(kLeftArrowObject)));
+    mRightArrow = dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(HxStr(kRightArrowObject)));
     mLeftArrow->SetState(kArrowShownState);
     mRightArrow->SetState(kArrowShownState);
     mButtonList->Add(HxStr(kPrefabButtonObject),
@@ -278,7 +278,7 @@ void MetFreqCreateScreen::StepSelection(const MetScreenCommand *pCommand) {
 
 // NTSC-U/C: 0x0029cbb8, PAL: 0x002ba5a0
 void MetFreqCreateScreen::RefreshSelection() {
-    Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr(kPreviewMaterial)));
+    Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr(kPreviewMaterial)));
     (*mIdentities)[mSelectedIdentity]->AttachToBurnSlot(kPreviewBurnSlot);
     pMat->mStages[kPreviewStage].SetTex(mBurnTexture);
 }

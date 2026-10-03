@@ -21,7 +21,7 @@ MidiOnOffEffector::MidiOnOffEffector(unsigned char nChannel, int nType, unsigned
 
 // NTSC-U/C: 0x001a1c28, PAL: 0x001a7990
 MidiOnOffEffector::~MidiOnOffEffector() {
-    Enable(0);
+    SetEnabled(0);
 }
 
 // NTSC-U/C: 0x001a1cf0, PAL: 0x001a7a58
@@ -30,7 +30,7 @@ int MidiOnOffEffector::Type() {
 }
 
 // NTSC-U/C: 0x001a0860, PAL: 0x001a65c8
-void MidiOnOffEffector::Enable(int bEnabled) {
+void MidiOnOffEffector::SetEnabled(int bEnabled) {
     if (bEnabled == mEnabled) {
         return;
     }

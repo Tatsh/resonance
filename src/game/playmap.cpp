@@ -53,17 +53,17 @@ int PlayMap::MapToLinkedStep(int nPosition, [[maybe_unused]] int nSet) {
 }
 
 // NTSC-U/C: 0x001273c0, PAL: 0x00127ae0
-int PlayMap::GetExtent() {
+int PlayMap::GetLength() const {
     return mSteps.back();
 }
 
 // NTSC-U/C: 0x001273d0, PAL: 0x00127af0
 int PlayMap::GetEndBar() {
-    return GetExtent(); // Dispatched through the table, not called directly.
+    return GetLength(); // Dispatched through the table, not called directly.
 }
 
 // NTSC-U/C: 0x00127440, PAL: 0x00127b60
-int PlayMap::GetSectionCount() {
+int PlayMap::GetNumSections() const {
     return static_cast<int>(mSteps.size()) - 1;
 }
 

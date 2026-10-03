@@ -87,7 +87,7 @@ typedef struct {
 
 // The register block of each channel, VIF0 through the scratchpad input.
 // NTSC-U/C: 0x0077fc08, PAL: 0x00768d98
-static DmaChannelRegs *g_apDmacChannelRegs[kChannelCount] = {
+static DmaChannelRegs *dch[kChannelCount] = {
     (DmaChannelRegs *)(uintptr_t)0x10008000U,
     (DmaChannelRegs *)(uintptr_t)0x10009000U,
     (DmaChannelRegs *)(uintptr_t)0x1000A000U,
@@ -106,7 +106,7 @@ static int g_anDmacChannelEnabled[kChannelCount] = {1, 1, 1, 1, 1, 0, 0, 0, 1, 1
 
 // The environment sceDmaPutEnv() last applied, which sceDmaGetEnv() copies out.
 // NTSC-U/C: 0x0077fca0, PAL: 0x00768e30
-static sceDmaEnv g_dmaSavedEnv;
+static sceDmaEnv sceDmaCurrentEnv;
 
 // Raw environment view. Offsets match the image. Members expose every byte the put path validates.
 typedef struct {
@@ -167,7 +167,7 @@ static void memclr(unsigned char *pBytes, int nCount) {
 // Returns the channel block for the identifier. An out of range identifier yields a null pointer.
 sceDmaChan *sceDmaGetChan(int nChannel) {
     if ((unsigned int)nChannel < kChannelCount) {
-        return (sceDmaChan *)g_apDmacChannelRegs[nChannel];
+        return (sceDmaChan *)dch[nChannel];
     }
     return NULL;
 }
@@ -186,7 +186,7 @@ int sceDmaReset(int nMode) {
         if (g_anDmacChannelEnabled[index] != 0) {
             DmaChannelRegs *regs;
 
-            regs = g_apDmacChannelRegs[index];
+            regs = dch[index];
             regs->mSadr = 0U;
             regs->mChcr = 0U;
             regs->mTadr = 0U;
@@ -249,14 +249,14 @@ int sceDmaPutEnv(sceDmaEnv *pEnv) {
     DMAC_SQWC = ((unsigned int)raw->mTransferQwc << 16) | (unsigned int)raw->mStallQwc;
     DMAC_RBOR = raw->mRingBufferAddress;
     DMAC_RBSR = raw->mRingBufferMask;
-    g_dmaSavedEnv = *pEnv;
+    sceDmaCurrentEnv = *pEnv;
     return 0;
 }
 
 // NTSC-U/C: 0x005f39e0, PAL: 0x00597100
 // Copies the saved environment into the caller buffer and returns the caller buffer.
 sceDmaEnv *sceDmaGetEnv(sceDmaEnv *pEnv) {
-    *pEnv = g_dmaSavedEnv;
+    *pEnv = sceDmaCurrentEnv;
     return pEnv;
 }
 

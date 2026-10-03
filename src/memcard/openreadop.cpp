@@ -14,7 +14,7 @@ OpenReadOp::~OpenReadOp() {
 }
 
 // NTSC-U/C: 0x0055ed50, PAL: 0x005a0020
-void OpenReadOp::Issue() {
+void OpenReadOp::Execute() {
     sceMcOpen(mPortSlot >> kMemcardPortShift,
               mPortSlot & kMemcardSlotMask,
               mPath.mStr != nullptr ? mPath.mStr : g_szEmptyString,
@@ -23,7 +23,7 @@ void OpenReadOp::Issue() {
 }
 
 // NTSC-U/C: 0x0055de38, PAL: 0x0059f0d0
-void OpenReadOp::Complete() {
+void OpenReadOp::NotifyDone() {
     InterpretResult();
     mHandler->OnOpenRead(this);
 }

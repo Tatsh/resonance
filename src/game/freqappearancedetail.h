@@ -81,7 +81,7 @@ public:
      * Append the parts save() wrote.
      *
      * Each part is rebuilt from its template name as unpack() rebuilds a packed part. The name is
-     * also looked up in Rnd::g_manager as a texture, and that result is discarded.
+     * also looked up in Rnd::TheManager as a texture, and that result is discarded.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x0024b340

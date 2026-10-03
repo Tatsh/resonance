@@ -7,10 +7,8 @@ class OBFileStream;
 /**
  * Recording of a game session that GameManagerImpl::StartRecording() installs.
  *
- * The class is not polymorphic, emits no RTTI, and has no embedded file path, so the title is
- * inferred. EndRecordingCmd, whose name the RTTI attests, runs EndRecording() on it, which is the
- * evidence for the recording side. The object is 8 bytes and is allocated with the untagged
- * allocator.
+ * The class is not polymorphic and emits no RTTI. EndRecordingCmd runs FinishUp() on it. The
+ * object is 8 bytes and is allocated with the untagged allocator.
  */
 class GameRecorder {
 public:
@@ -49,12 +47,12 @@ public:
     /**
      * Close the watchdog's recording and delete the stream.
      *
-     * EndRecordingCmd::Execute() is the caller. The title is inferred.
+     * EndRecordingCmd::Execute() is the caller.
      *
      * @ghidraAddress NTSC-U/C: 0x0010f080
      * @ghidraAddress PAL: 0x0010f4e0
      */
-    void EndRecording();
+    void FinishUp();
 
     /**
      * Post an EndRecordingCmd for this recorder on the watchdog timer.
@@ -69,6 +67,6 @@ public:
 
 private:
     GameManagerImpl *mManager; // +0x00
-    // Nothing recovered writes it apart from the constructor and EndRecording(), which clear it.
+    // Nothing recovered writes it apart from the constructor and FinishUp(), which clear it.
     OBFileStream *mStream; // +0x04
 };

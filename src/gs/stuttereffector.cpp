@@ -19,7 +19,7 @@ constexpr float kLevelScale = 127.0f;
 } // namespace
 
 // NTSC-U/C: 0x001a0ae0, PAL: 0x001a6848
-void StutterEffector::Enable(int bEnabled) {
+void StutterEffector::SetEnabled(int bEnabled) {
     if (bEnabled == mEnabled && mPending != 0) {
         return;
     }
@@ -44,7 +44,7 @@ void StutterEffector::Enable(int bEnabled) {
 // NTSC-U/C: 0x001a0cc8, PAL: 0x001a6a30
 int StutterEffector::Tick(int nElapsedTicks) {
     float flValue;
-    mOscillator->Sample(static_cast<float>(nElapsedTicks), &flValue);
+    mOscillator->GetValue(static_cast<float>(nElapsedTicks), &flValue);
     const double dLevel = (flValue * kLevelScale) + ((1.0 - flValue) * mFloor);
     StdMidiMsg msg(kMBTInfinity,
                    kStatusControlChange | mChannel,
@@ -56,7 +56,8 @@ int StutterEffector::Tick(int nElapsedTicks) {
 
 // NTSC-U/C: 0x001a2338, PAL: 0x001a80a0
 StutterEffector::~StutterEffector() {
-    StutterEffector::Enable(0); // The binary calls this class's own body rather than dispatching.
+    // The binary calls this class's own body rather than dispatching.
+    StutterEffector::SetEnabled(0);
     delete mOscillator;
 }
 

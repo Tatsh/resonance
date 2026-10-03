@@ -67,7 +67,7 @@ public:
      *
      * Clears mpRgb15ToIndex and copies the entries in from index zero through SetEntries(), which
      * also writes mEnd. ABmpFile::ReadPalette() open-codes it at 0x0061ce90 and
-     * AGifFile::ReadImage() at 0x0062acd8.
+     * AGifFile::ReadFrame() at 0x0062acd8.
      *
      * @param pEntries The entries to copy in.
      * @param nCount The number of entries.
@@ -132,7 +132,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00613f10
      * @ghidraAddress PAL: 0x00654aa0
      */
-    int FindNearestEntry(unsigned int nColor, int nFirst, int nLast) const;
+    int FindClosest(unsigned int nColor, int nFirst, int nLast) const;
 
     /**
      * Fill the table with a ramp of sixteen shades for every key, from black towards the key's
@@ -159,7 +159,7 @@ public:
      *
      * ACanvas8::SetColor15() indexes it with the 1555 colour and the alpha bit cleared, and
      * ACanvas32::GetColor8() indexes it with the pen colour packed the same way. Both fall
-     * back to FindNearestEntry() over the whole table when the member is null, so the table is a
+     * back to FindClosest() over the whole table when the member is null, so the table is a
      * cache of that search rather than a required part of the palette. The entry count follows
      * the widest index either routine forms.
      *

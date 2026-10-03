@@ -31,7 +31,7 @@ public:
      *
      * An unissued head is issued and the call returns, which spends at most one libmc command per
      * step. An issued head is polled with `sceMcSync()` in its non-blocking mode. A finished call
-     * has its result recorded on the operation, is reported through MemcardOp::Complete(), and is
+     * has its result recorded on the operation, is reported through MemcardOp::NotifyDone(), and is
      * then destroyed and removed. A head with any other value in MemcardOp::mIssued is ignored.
      *
      * @ghidraAddress NTSC-U/C: 0x0055cfc0

@@ -36,8 +36,8 @@ public:
      *
      * The routine reads mOwnsPan from configuration code 0x398, mBoostVolume from code 0x399, and
      * mTrackLevels from code 0x39f, sets mLevel and all four gain factors to 127, mTracksOnBar to
-     * -1, and mSelection to g_nullPlayer, and zeroes mZeroedBytes twice over. mEndBar takes
-     * PlayMap::GetEndBar() of Globals::GetPlayMap(). It does not write mOutput.
+     * -1, and mSelection to NullPlayer::sInstance, and zeroes mZeroedBytes twice over. mEndBar
+     * takes PlayMap::GetEndBar() of Globals::GetPlayMap(). It does not write mOutput.
      *
      * @param nTrack The track this mixer serves. BGTrackGraph passes -1, which matches no track.
      * @param nChannel The MIDI channel every message it emits is sent on.
@@ -90,7 +90,7 @@ public:
      * controller 0x0a is discarded while mOwnsPan is set and forwarded otherwise, and everything
      * else including a controller outside the table's range is forwarded to mOutput unchanged.
      *
-     * The member is inline. HandleMessage() has its own emission of the whole body with its own
+     * The member is inline. DispatchPriv() has its own emission of the whole body with its own
      * copy of the jump table, which is why two addresses exist for one member.
      *
      * @param pMsg The control-change message.
@@ -160,7 +160,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x001a7780
      * @ghidraAddress PAL: 0x001ad4e8
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 public:
     /**
@@ -183,7 +183,7 @@ private:
     int mOwnsPan; // +0x14
     // Section the pan index is measured against.
     int mLastSection; // +0x18
-    // The player of the selected track, g_nullPlayer until OnTrackSelect() installs one.
+    // The player of the selected track, NullPlayer::sInstance until OnTrackSelect() installs one.
     Player *mSelection; // +0x1c
     // Combined gain most recently sent as controller 11. The constructor sets it to 127.
     unsigned char mLevel; // +0x20

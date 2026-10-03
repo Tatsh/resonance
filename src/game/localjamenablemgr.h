@@ -10,7 +10,7 @@ class TrackData;
  *
  * Its RTTI descriptor is at `0x008ef2f0`. It derives publicly from EnableMgr at offset 0. Its type
  * function is at `0x001057b8` and its table at `0x007ccb60`. The object is 0x24 bytes. It inherits
- * SetFreeUntil() and DisableTrack() from the base, and the destructor at `0x00105788` is implicitly
+ * ForceEnabled() and ForceDisable() from the base, and the destructor at `0x00105788` is implicitly
  * declared.
  */
 class LocalJamEnableMgr : public EnableMgr {

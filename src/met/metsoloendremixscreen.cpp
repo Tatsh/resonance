@@ -104,7 +104,7 @@ inline const char *TextOf(const HxStr &text) {
 // Resolves a registry key to an object of type T, or null.
 template <typename T>
 T *FindObject(const char *pszName) {
-    Rnd::Object *pObject = Rnd::g_manager.Find(HxStr(pszName));
+    Rnd::Object *pObject = Rnd::TheManager.Find(HxStr(pszName));
     return pObject != nullptr ? dynamic_cast<T *>(pObject) : nullptr;
 }
 
@@ -180,7 +180,7 @@ void MetSoloEndRemixScreen::ShowResults() {
 
     HxStr title = QueryConfigString(kTitleConfigCode, TextOf(params.mLevelName));
     const float flWrapWidth = mTitleText->mWrapWidth;
-    if (flWrapWidth < mTitleText->MeasureText(TextOf(title), title.mLen)) {
+    if (flWrapWidth < mTitleText->GetFontWidth(TextOf(title), title.mLen)) {
         HxStr shorter = QueryConfigString(kShortTitleConfigCode, TextOf(params.mLevelName));
         title = shorter;
     }

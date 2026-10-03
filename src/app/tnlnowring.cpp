@@ -26,13 +26,13 @@ constexpr float kPi = 3.1415925f;
 
 // NTSC-U/C: 0x0043c118, PAL: 0x004786e0
 TnlNowRing::TnlNowRing(int nMeshCount, int nPlayerCount) : mResetPending(1) {
-    mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("nowring.view")));
-    mRotView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("nowring rot.view")));
+    mView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("nowring.view")));
+    mRotView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("nowring rot.view")));
 
     mMeshes.resize(nMeshCount);
     for (int i = 0; i < nMeshCount; ++i) {
         mMeshes[i] =
-            dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(FormatString("nowmesh%d", i))));
+            dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(FormatString("nowmesh%d", i))));
         mMeshes[i]->SetShowing(1);
     }
     mPlayerMeshes.resize(nPlayerCount, 0);

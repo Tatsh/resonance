@@ -58,7 +58,7 @@ inline unsigned int Rgb8888FromChannels(const unsigned char *pRGB) {
 // written as one inline helper here rather than repeated, which is the de-inlining the
 // reconstruction rules sanction for a repeated block; ACanvas15 repeats it instead.
 inline APalette *ResolvePalette(APalette *pOwn) {
-    return pOwn != nullptr ? pOwn : g_pDefaultPalette;
+    return pOwn != nullptr ? pOwn : ACanvas::palDefault;
 }
 
 } // namespace
@@ -104,7 +104,7 @@ void ACanvas8::SetColor15(unsigned short nColor) {
         return;
     }
     mColor = static_cast<unsigned char>(
-        pPalette->FindNearestEntry(Rgb8888From1555(nColor), kPaletteFirstIndex, kPaletteLastIndex));
+        pPalette->FindClosest(Rgb8888From1555(nColor), kPaletteFirstIndex, kPaletteLastIndex));
 }
 
 // NTSC-U/C: 0x00635d08, PAL: 0x00676898
@@ -117,8 +117,8 @@ void ACanvas8::SetColor24(const unsigned char *pRGB) {
         mColor = pPalette->mpRgb15ToIndex[Rgb15KeyFromChannels(pRGB)];
         return;
     }
-    mColor = static_cast<unsigned char>(pPalette->FindNearestEntry(
-        Rgb8888FromChannels(pRGB), kPaletteFirstIndex, kPaletteLastIndex));
+    mColor = static_cast<unsigned char>(
+        pPalette->FindClosest(Rgb8888FromChannels(pRGB), kPaletteFirstIndex, kPaletteLastIndex));
 }
 
 // NTSC-U/C: 0x00635db0, PAL: 0x00676940
@@ -132,7 +132,7 @@ void ACanvas8::SetColor32(unsigned int nColor) {
         return;
     }
     mColor = static_cast<unsigned char>(
-        pPalette->FindNearestEntry(nColor, kPaletteFirstIndex, kPaletteLastIndex));
+        pPalette->FindClosest(nColor, kPaletteFirstIndex, kPaletteLastIndex));
 }
 
 // NTSC-U/C: 0x00635e30, PAL: 0x006769c0
@@ -197,8 +197,8 @@ void ACanvas8::DrawPixel15U(int nX, int nY, unsigned short nColor) {
     if (pPalette->mpRgb15ToIndex != nullptr) {
         nIndex = pPalette->mpRgb15ToIndex[nColor & kColor15Mask];
     } else {
-        nIndex = pPalette->FindNearestEntry(
-            Rgb8888From1555(nColor), kPaletteFirstIndex, kPaletteLastIndex);
+        nIndex =
+            pPalette->FindClosest(Rgb8888From1555(nColor), kPaletteFirstIndex, kPaletteLastIndex);
     }
     DrawPixel8U(nX, nY, nIndex & static_cast<int>(kChannelMask));
 }
@@ -213,8 +213,8 @@ void ACanvas8::DrawPixel24U(int nX, int nY, const unsigned char *pRGB) {
     if (pPalette->mpRgb15ToIndex != nullptr) {
         nIndex = pPalette->mpRgb15ToIndex[Rgb15KeyFromChannels(pRGB)];
     } else {
-        nIndex = pPalette->FindNearestEntry(
-            Rgb8888FromChannels(pRGB), kPaletteFirstIndex, kPaletteLastIndex);
+        nIndex =
+            pPalette->FindClosest(Rgb8888FromChannels(pRGB), kPaletteFirstIndex, kPaletteLastIndex);
     }
     DrawPixel8U(nX, nY, nIndex & static_cast<int>(kChannelMask));
 }
@@ -229,7 +229,7 @@ void ACanvas8::DrawPixel32U(int nX, int nY, unsigned int nColor) {
     if (pPalette->mpRgb15ToIndex != nullptr) {
         nIndex = pPalette->mpRgb15ToIndex[Rgb15KeyFrom8888(nColor)];
     } else {
-        nIndex = pPalette->FindNearestEntry(nColor, kPaletteFirstIndex, kPaletteLastIndex);
+        nIndex = pPalette->FindClosest(nColor, kPaletteFirstIndex, kPaletteLastIndex);
     }
     DrawPixel8U(nX, nY, nIndex & static_cast<int>(kChannelMask));
 }

@@ -10,10 +10,10 @@
 #include "synth/synthsustainer.h"
 
 // NTSC-U/C: 0x00686290, PAL: 0x006c74f8
-int g_nMusePlayerSerial;
+int sMuseID;
 
 // NTSC-U/C: 0x001aa440, PAL: 0x001b01a8
-MusePlayer::MusePlayer() : mId(++g_nMusePlayerSerial) {
+MusePlayer::MusePlayer() : mId(++sMuseID) {
 }
 
 // NTSC-U/C: 0x001aa4d8, PAL: 0x001b0240
@@ -43,7 +43,7 @@ void MuseSynth::CreateSustainer() {
 }
 
 // NTSC-U/C: 0x001aaf68, PAL: 0x001b0cd0
-int MuseSynth::HasPlayers() {
+int MuseSynth::IsActive() const {
     return mPlayers.size() != 0;
 }
 
@@ -54,12 +54,12 @@ void MuseSynth::AddSink(MsgSink *pSink) {
 
 // NTSC-U/C: 0x001ab058, PAL: 0x001b0dc0
 void MuseSynth::OnStdMidi(StdMidiMsg *pMsg) {
-    mOutput->Handle(pMsg);
+    mOutput->Dispatch(pMsg);
 }
 
 // NTSC-U/C: 0x001ab088, PAL: 0x001b0df0
 void MuseSynth::OnSustainNote(SustainNoteMsg *pMsg) {
-    mOutput->Handle(pMsg);
+    mOutput->Dispatch(pMsg);
 }
 
 // NTSC-U/C: 0x001ab0b8, PAL: 0x001b0e20
@@ -117,14 +117,14 @@ void MuseSynth::PlayerFinished(MusePlayer *pPlayer) {
 }
 
 // NTSC-U/C: 0x001ab170, PAL: 0x001b0ed8
-void MuseSynth::HandleMessage(Message *pMsg) {
+void MuseSynth::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
-    if (nType == static_cast<int>(g_dwStdMidiMsgType) ||
-        nType == static_cast<int>(g_dwSustainNoteMsgType)) {
-        mOutput->Handle(pMsg);
+    if (nType == static_cast<int>(StdMidiMsg::sID) ||
+        nType == static_cast<int>(SustainNoteMsg::sID)) {
+        mOutput->Dispatch(pMsg);
         return;
     }
-    if (nType == static_cast<int>(g_dwNoteMsgType)) {
+    if (nType == static_cast<int>(NoteMsg::sID)) {
         StartNotePlayer(pMsg);
         return;
     }
@@ -138,6 +138,6 @@ void MuseSynth::HandleMessage(Message *pMsg) {
 }
 
 // NTSC-U/C: 0x001ab4a8, PAL: 0x001b1210
-void MsgSplitter::HandleMessage(Message *pMsg) {
+void MsgSplitter::DispatchPriv(Message *pMsg) {
     Send(pMsg);
 }

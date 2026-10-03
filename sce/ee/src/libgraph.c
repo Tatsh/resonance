@@ -84,10 +84,6 @@ static const Vif1InitPacket g_dwVif1InitPacket = {{0x01000404U,
                                                    0x02000000U,
                                                    0x04000000U}};
 
-// The MSKPATH3 code restored to the VIF1 FIFO after image store work, padded with three NOP codes.
-// NTSC-U/C: 0x007729c0, PAL: 0x007b6bb0
-static const u_long128 g_vif1StorePacket = 0x06000000U;
-
 // NTSC-U/C: 0x00784900, PAL: 0x007ac150
 static GsState g_GsStateBlock = {1, 2, 1, 3, NULL, 0};
 
@@ -711,6 +707,11 @@ static inline int StoreImageWaitFifo(int *pSpins) {
 // destination. Ragged widths round the height up and drain the remainder
 // through the stack slot.
 int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
+    // The MSKPATH3 code restored to the VIF1 FIFO after image store work, padded with three NOP
+    // codes.
+    // NTSC-U/C: 0x007729c0, PAL: 0x007b6bb0
+    static const u_long128 init_mp3 = 0x06000000U;
+
     volatile unsigned long long *words = (volatile unsigned long long *)pStoreImage;
     unsigned long long packed = words[4];
     unsigned long long regs = words[8];
@@ -836,7 +837,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
         while ((GS_CSR & 2ULL) == 0ULL) {
             if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
                 LogPrintf("sceGsExecStoreImage: GS does not terminate\r\n");
-                ee_store_quadword(VIF1_FIFO, g_vif1StorePacket);
+                ee_store_quadword(VIF1_FIFO, init_mp3);
                 return -1;
             }
             spins++;
@@ -901,7 +902,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     GS_BUSDIR = 0ULL;
     GsPutIMR(saved);
     GS_CSR = 2ULL;
-    ee_store_quadword(VIF1_FIFO, g_vif1StorePacket);
+    ee_store_quadword(VIF1_FIFO, init_mp3);
     return 0;
 }
 

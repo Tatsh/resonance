@@ -27,7 +27,7 @@ Rnd::Tunnel *g_pTunnel;
 
 // NTSC-U/C: 0x0040d1e8, PAL: 0x00446c28
 void CacheTunnelObjectByName() {
-    g_pTunnel = dynamic_cast<Rnd::Tunnel *>(Rnd::g_manager.Find(HxStr(kTunnelObjectName)));
+    g_pTunnel = dynamic_cast<Rnd::Tunnel *>(Rnd::TheManager.Find(HxStr(kTunnelObjectName)));
 }
 
 // NTSC-U/C: 0x0040f6c0, PAL: 0x00449148

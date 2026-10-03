@@ -101,8 +101,8 @@ void GameRecorder::ScheduleEnd() {
 }
 
 // NTSC-U/C: 0x0010f080, PAL: 0x0010f4e0
-void GameRecorder::EndRecording() {
-    Application::shared()->GetWatchdog()->Close();
+void GameRecorder::FinishUp() {
+    Application::shared()->GetWatchdog()->StopRecOrPlayback();
     delete mStream;
     mStream = nullptr;
 }

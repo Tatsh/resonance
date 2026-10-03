@@ -69,7 +69,7 @@ constexpr unsigned int kConsoleRows = 30;
 int g_nDebugGsResetWord = 0;
 
 // NTSC-U/C: 0x008e4f20, PAL: 0x00929f20
-int g_nDebugConsole = 0;
+int gConsole = 0;
 
 // NTSC-U/C: 0x008e4f30, PAL: 0x00929f30
 sceGsDBuff g_debugDoubleBuffer;
@@ -142,26 +142,26 @@ void ShowScreenMessage([[maybe_unused]] const char *pszText, [[maybe_unused]] in
 // NTSC-U/C: 0x005e5ed8, PAL: 0x00628098
 void OpenDebugConsole() {
     sceDevConsInit();
-    g_nDebugConsole = sceDevConsOpen(kConsoleGsX, kConsoleGsY, kConsoleColumns, kConsoleRows);
-    sceDevConsClear(g_nDebugConsole);
+    gConsole = sceDevConsOpen(kConsoleGsX, kConsoleGsY, kConsoleColumns, kConsoleRows);
+    sceDevConsClear(gConsole);
 }
 
 // NTSC-U/C: 0x005e5f18, PAL: 0x006280d8
 void InitDebugConsole() {
     (void)InitDebugGs(); // Yes, the binary discards the result.
     sceDevConsInit();
-    g_nDebugConsole = sceDevConsOpen(kConsoleGsX, kConsoleGsY, kConsoleColumns, kConsoleRows);
-    sceDevConsClear(g_nDebugConsole);
+    gConsole = sceDevConsOpen(kConsoleGsX, kConsoleGsY, kConsoleColumns, kConsoleRows);
+    sceDevConsClear(gConsole);
 }
 
 // NTSC-U/C: 0x005e5f60, PAL: 0x00628148
 void ClearDebugConsole() {
-    sceDevConsClear(g_nDebugConsole);
+    sceDevConsClear(gConsole);
 }
 
 #ifdef VIDEO_STANDARD_PAL
 // PAL: 0x00628120
 void CloseDebugConsole() {
-    sceDevConsClose(g_nDebugConsole);
+    sceDevConsClose(gConsole);
 }
 #endif

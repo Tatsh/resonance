@@ -61,7 +61,7 @@ int MetFreqLoader::IsLoaded() {
 // NTSC-U/C: 0x002a0e30, PAL: 0x002bebe8
 void MetFreqLoader::ParseIdentities(const void *pBuffer, int nLength) {
     IOBMemStream stream;
-    stream.Load(pBuffer, nLength);
+    stream.Fill(pBuffer, nLength);
     int nCount;
     stream.Read(&nCount, sizeof(nCount));
     for (int i = 0; i < nCount; ++i) {

@@ -57,13 +57,13 @@ static const char *NameText(const Object *pObject) {
 // four components in order.
 static inline void WriteQuat(Stream &stream, const Quat &quat) {
     float flComponent = quat.x;
-    stream.Write(&flComponent, sizeof(flComponent));
+    stream.WriteLE(&flComponent, sizeof(flComponent));
     flComponent = quat.y;
-    stream.Write(&flComponent, sizeof(flComponent));
+    stream.WriteLE(&flComponent, sizeof(flComponent));
     flComponent = quat.z;
-    stream.Write(&flComponent, sizeof(flComponent));
+    stream.WriteLE(&flComponent, sizeof(flComponent));
     flComponent = quat.w;
-    stream.Write(&flComponent, sizeof(flComponent));
+    stream.WriteLE(&flComponent, sizeof(flComponent));
 }
 
 // Divisor and half weight of the Kochanek-Bartels tangent terms.
@@ -86,10 +86,10 @@ static inline Dbg &DumpTargetName(Dbg &sink, const Object *pTarget) {
 // a reader resolves to no object.
 static inline Stream &WriteTargetName(Stream &stream, const Object *pTarget) {
     if (pTarget != nullptr) {
-        stream.WriteBytes(NameText(pTarget), pTarget->mName.mLen + 1);
+        stream.Write(NameText(pTarget), pTarget->mName.mLen + 1);
     } else {
         const char cEmpty = 0;
-        stream.WriteBytes(&cEmpty, sizeof(cEmpty));
+        stream.Write(&cEmpty, sizeof(cEmpty));
     }
     return stream;
 }
@@ -99,7 +99,7 @@ template <class T>
 static void ReadTargetName(Stream &stream, T *&refOut) {
     HxStr name(nullptr);
     stream.ReadString(name);
-    refOut = dynamic_cast<T *>(g_manager.Find(name));
+    refOut = dynamic_cast<T *>(TheManager.Find(name));
 }
 
 // A rotation keyframe as a record below revision 2 stores it, a quaternion and a frame.
@@ -110,18 +110,18 @@ struct LegacyRotKey {
 
 // NTSC-U/C: 0x004f9f80, PAL: 0x00538c50
 static Stream &operator>>(Stream &stream, LegacyRotKey &key) {
-    stream.Read(&key.mValue.x, sizeof(float));
-    stream.Read(&key.mValue.y, sizeof(float));
-    stream.Read(&key.mValue.z, sizeof(float));
-    stream.Read(&key.mValue.w, sizeof(float));
-    stream.Read(&key.mFrame, sizeof(key.mFrame));
+    stream.ReadLE(&key.mValue.x, sizeof(float));
+    stream.ReadLE(&key.mValue.y, sizeof(float));
+    stream.ReadLE(&key.mValue.z, sizeof(float));
+    stream.ReadLE(&key.mValue.w, sizeof(float));
+    stream.ReadLE(&key.mFrame, sizeof(key.mFrame));
     return stream;
 }
 
 // NTSC-U/C: 0x004fd6b8, PAL: 0x0053c3b8
 static Stream &operator>>(Stream &stream, std::list<LegacyRotKey> &keys) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     keys.resize(nCount);
     for (auto &key : keys) {
         stream >> key;
@@ -133,38 +133,38 @@ static Stream &operator>>(Stream &stream, std::list<LegacyRotKey> &keys) {
 // The same order the writer uses, with the padding float of each vector left as it was.
 static Stream &operator>>(Stream &stream, TransAnim::TransKey &key) {
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
-        stream.Read(&key.mValue[nAxis], sizeof(float));
+        stream.ReadLE(&key.mValue[nAxis], sizeof(float));
     }
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
-        stream.Read(&key.mShape[nAxis], sizeof(float));
+        stream.ReadLE(&key.mShape[nAxis], sizeof(float));
     }
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
-        stream.Read(&key.mTangentIn[nAxis], sizeof(float));
+        stream.ReadLE(&key.mTangentIn[nAxis], sizeof(float));
     }
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
-        stream.Read(&key.mTangentOut[nAxis], sizeof(float));
+        stream.ReadLE(&key.mTangentOut[nAxis], sizeof(float));
     }
-    stream.Read(&key.mFrame, sizeof(key.mFrame));
+    stream.ReadLE(&key.mFrame, sizeof(key.mFrame));
     return stream;
 }
 
 // De-inlined from the four quaternion reads of the rotation keyframe reader.
 static inline void ReadQuat(Stream &stream, Quat &quat) {
-    stream.Read(&quat.x, sizeof(float));
-    stream.Read(&quat.y, sizeof(float));
-    stream.Read(&quat.z, sizeof(float));
-    stream.Read(&quat.w, sizeof(float));
+    stream.ReadLE(&quat.x, sizeof(float));
+    stream.ReadLE(&quat.y, sizeof(float));
+    stream.ReadLE(&quat.z, sizeof(float));
+    stream.ReadLE(&quat.w, sizeof(float));
 }
 
 // NTSC-U/C: 0x004fa948, PAL: 0x00539618
 static Stream &operator>>(Stream &stream, TransAnim::RotKey &key) {
     ReadQuat(stream, key.mQuat);
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
-        stream.Read(&key.mShape[nAxis], sizeof(float));
+        stream.ReadLE(&key.mShape[nAxis], sizeof(float));
     }
     ReadQuat(stream, key.mTangentIn);
     ReadQuat(stream, key.mTangentOut);
-    stream.Read(&key.mFrame, sizeof(key.mFrame));
+    stream.ReadLE(&key.mFrame, sizeof(key.mFrame));
     return stream;
 }
 
@@ -172,7 +172,7 @@ static Stream &operator>>(Stream &stream, TransAnim::RotKey &key) {
 // Every new element starts from a keyframe whose three vectors have a padding float of 1.0.
 static Stream &operator>>(Stream &stream, std::list<TransAnim::TransKey> &keys) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     TransAnim::TransKey defaultKey = {};
     defaultKey.mValue[kPaddingFloat] = 1.0f;
     defaultKey.mTangentIn[kPaddingFloat] = 1.0f;
@@ -187,7 +187,7 @@ static Stream &operator>>(Stream &stream, std::list<TransAnim::TransKey> &keys) 
 // NTSC-U/C: 0x004fab40, PAL: 0x00539810
 static Stream &operator>>(Stream &stream, std::list<TransAnim::RotKey> &keys) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     keys.resize(nCount);
     for (auto &key : keys) {
         stream >> key;
@@ -376,23 +376,23 @@ static Dbg &operator<<(Dbg &sink, const std::list<TransAnim::TransKey> &keys) {
 static Stream &operator<<(Stream &stream, const TransAnim::TransKey &key) {
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
         float flValue = key.mValue[nAxis];
-        stream.Write(&flValue, sizeof(flValue));
+        stream.WriteLE(&flValue, sizeof(flValue));
     }
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
         float flShape = key.mShape[nAxis];
-        stream.Write(&flShape, sizeof(flShape));
+        stream.WriteLE(&flShape, sizeof(flShape));
     }
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
         float flIn = key.mTangentIn[nAxis];
-        stream.Write(&flIn, sizeof(flIn));
+        stream.WriteLE(&flIn, sizeof(flIn));
     }
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
         float flOut = key.mTangentOut[nAxis];
-        stream.Write(&flOut, sizeof(flOut));
+        stream.WriteLE(&flOut, sizeof(flOut));
     }
 
     float flFrame = key.mFrame;
-    stream.Write(&flFrame, sizeof(flFrame));
+    stream.WriteLE(&flFrame, sizeof(flFrame));
     return stream;
 }
 
@@ -403,20 +403,20 @@ static Stream &operator<<(Stream &stream, const TransAnim::RotKey &key) {
     WriteQuat(stream, key.mQuat);
     for (int nAxis = 0; nAxis < kTransKeyStoredFloatCount; ++nAxis) {
         float flShape = key.mShape[nAxis];
-        stream.Write(&flShape, sizeof(flShape));
+        stream.WriteLE(&flShape, sizeof(flShape));
     }
     WriteQuat(stream, key.mTangentIn);
     WriteQuat(stream, key.mTangentOut);
 
     float flFrame = key.mFrame;
-    stream.Write(&flFrame, sizeof(flFrame));
+    stream.WriteLE(&flFrame, sizeof(flFrame));
     return stream;
 }
 
 // NTSC-U/C: 0x004f99b0, PAL: 0x00538680
 static Stream &operator<<(Stream &stream, const std::list<TransAnim::TransKey> &keys) {
     int nCount = keys.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
 
     for (std::list<TransAnim::TransKey>::const_iterator it = keys.begin(); it != keys.end(); ++it) {
         stream << *it;
@@ -427,7 +427,7 @@ static Stream &operator<<(Stream &stream, const std::list<TransAnim::TransKey> &
 // NTSC-U/C: 0x004f9d00, PAL: 0x005389d0
 static Stream &operator<<(Stream &stream, const std::list<TransAnim::RotKey> &keys) {
     int nCount = keys.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
 
     for (std::list<TransAnim::RotKey>::const_iterator it = keys.begin(); it != keys.end(); ++it) {
         stream << *it;
@@ -436,7 +436,7 @@ static Stream &operator<<(Stream &stream, const std::list<TransAnim::RotKey> &ke
 }
 
 // NTSC-U/C: 0x004f4020, PAL: 0x00532c58
-float TransAnim::EndFrame() {
+float TransAnim::FilteredFrameEnd() {
     const float flTrans =
         mFramesOwner->mTransKeys.size() != 0 ? mFramesOwner->mTransKeys.back().mFrame : 0.0f;
     const float flRot =
@@ -507,7 +507,7 @@ void TransAnim::DumpText(Dbg &sink) {
 // order below is the order the reader has to expect.
 void TransAnim::Save(Stream &stream) {
     int nRevision = kTransAnimRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
 
     Animatable::Save(stream);
     Drawable::Save(stream);
@@ -519,20 +519,20 @@ void TransAnim::Save(Stream &stream) {
     stream << mRotKeys;
 
     int nRotInterp = mRotInterp;
-    stream.Write(&nRotInterp, sizeof(nRotInterp));
+    stream.WriteLE(&nRotInterp, sizeof(nRotInterp));
     int nTransInterp = mTransInterp;
-    stream.Write(&nTransInterp, sizeof(nTransInterp));
+    stream.WriteLE(&nTransInterp, sizeof(nTransInterp));
 
     const char cRepeatTrans = static_cast<char>(mRepeatTrans);
-    stream.WriteBytes(&cRepeatTrans, sizeof(cRepeatTrans));
+    stream.Write(&cRepeatTrans, sizeof(cRepeatTrans));
 
     stream << mScaleKeys;
 
     int nScaleInterp = mScaleInterp;
-    stream.Write(&nScaleInterp, sizeof(nScaleInterp));
+    stream.WriteLE(&nScaleInterp, sizeof(nScaleInterp));
 
     const char cFollowPath = static_cast<char>(mFollowPath);
-    stream.WriteBytes(&cFollowPath, sizeof(cFollowPath));
+    stream.Write(&cFollowPath, sizeof(cFollowPath));
 }
 
 // NTSC-U/C: 0x004f28c8, PAL: 0x005314b8
@@ -1087,7 +1087,7 @@ void TransAnim::Normalize() {
     if (nEvenKeyCount == nSegmentCount) {
         AppendSortedTransKey(evenKeys, *prev);
     } else if (nEvenKeyCount != nKeyCount) {
-        g_failSink.Report("Couldn't normalize\n");
+        Rnd::TheDbg.Notify("Couldn't normalize\n");
         return;
     } else {
         evenKeys.back() = *prev;
@@ -1180,12 +1180,12 @@ TransAnim *NewTransAnim(const HxStr &name) {
 }
 
 // NTSC-U/C: 0x00706820, PAL: 0x0074a340
-TransAnim *(*g_pfnNewTransAnim)(const HxStr &name) = NewTransAnim;
+TransAnim *(*TransAnim::sNew)(const HxStr &name) = NewTransAnim;
 
 // NTSC-U/C: 0x004fba90, PAL: 0x0053a778
 TransAnim *NewTransAnimThroughHook(const HxStr &name) {
     try {
-        return g_pfnNewTransAnim(name);
+        return TransAnim::sNew(name);
     } catch (...) {
         return nullptr; // The binary's handler returns null.
     }
@@ -1194,7 +1194,7 @@ TransAnim *NewTransAnimThroughHook(const HxStr &name) {
 // NTSC-U/C: 0x004fbf70, PAL: 0x0053ac58
 Object *CreateRegisteredTransAnim(const HxStr &name) {
     try {
-        return g_pfnNewTransAnim(name);
+        return TransAnim::sNew(name);
     } catch (...) {
         return nullptr;
     }
@@ -1202,16 +1202,16 @@ Object *CreateRegisteredTransAnim(const HxStr &name) {
 
 // NTSC-U/C: 0x004fba50, PAL: 0x0053a738
 void RegisterTransAnimClass() {
-    g_pfnNewTransAnim = NewTransAnim;
-    g_manager.RegisterClass(g_transAnimClassName, CreateRegisteredTransAnim);
+    TransAnim::sNew = NewTransAnim;
+    TheManager.RegisterClass(g_transAnimClassName, CreateRegisteredTransAnim);
 }
 
 // NTSC-U/C: 0x004f2f68, PAL: 0x00531b58
 void TransAnim::Load(Stream &stream) {
     int nRevision = 0;
-    stream.Read(&nRevision, sizeof(nRevision));
+    stream.ReadLE(&nRevision, sizeof(nRevision));
     if (nRevision > kTransAnimRevision) {
-        g_failSink.Report("Can't load new TransAnim\n");
+        Rnd::TheDbg.Notify("Can't load new TransAnim\n");
         return;
     }
 
@@ -1231,10 +1231,10 @@ void TransAnim::Load(Stream &stream) {
     ReadTargetName(stream, mFramesOwner);
     stream >> mTransKeys;
     stream >> mRotKeys;
-    stream.Read(&mRotInterp, sizeof(mRotInterp));
-    stream.Read(&mTransInterp, sizeof(mTransInterp));
+    stream.ReadLE(&mRotInterp, sizeof(mRotInterp));
+    stream.ReadLE(&mTransInterp, sizeof(mTransInterp));
     char chRepeatTrans = '\0';
-    stream.ReadBytes(&chRepeatTrans, sizeof(chRepeatTrans));
+    stream.Read(&chRepeatTrans, sizeof(chRepeatTrans));
     mRepeatTrans = chRepeatTrans != '\0';
 
     if (nRevision >= kScaleChannelRevision) {
@@ -1242,12 +1242,12 @@ void TransAnim::Load(Stream &stream) {
             ReadVector3Keys(stream, legacyScaleKeys);
         }
         stream >> mScaleKeys;
-        stream.Read(&mScaleInterp, sizeof(mScaleInterp));
+        stream.ReadLE(&mScaleInterp, sizeof(mScaleInterp));
     }
 
     if (nRevision >= kCurrentKeyRevision) {
         char chFollowPath = '\0';
-        stream.ReadBytes(&chFollowPath, sizeof(chFollowPath));
+        stream.Read(&chFollowPath, sizeof(chFollowPath));
         mFollowPath = chFollowPath != '\0';
     } else {
         if (mTransInterp == kInterpLinear) {

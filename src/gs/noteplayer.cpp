@@ -96,7 +96,7 @@ void NotePlayer::Start(MsgSink *pSink) {
     mSink = pSink;
     const int nNow = mClock->SongTick();
     mParent->RetainOnly(this);
-    PostStdMidiMsg(nNow);
+    NoteOn(nNow);
 
     Cmd *pCommand = new Cmd(this, Mid::MBT(ClampPosition(nNow + mDuration)).mTick);
     const Mid::MBT end(ClampPosition(nNow + mDuration));
@@ -110,22 +110,22 @@ void NotePlayer::Start(MsgSink *pSink) {
 void NotePlayer::Stop() {
     if (mSink != nullptr) {
         StdMidiMsg msg(mClock->SongTick(), kNoteOffStatus | mChannel, mNote, kReleaseVelocity);
-        mSink->Handle(&msg);
+        mSink->Dispatch(&msg);
         mClock->Withdraw(mCommand);
     }
     mSink = nullptr;
 }
 
 // NTSC-U/C: 0x001b3fb8, PAL: 0x001b9d90
-void NotePlayer::PostStdMidiMsg(int nTick) {
+void NotePlayer::NoteOn(int nTick) {
     StdMidiMsg msg(nTick, kNoteOnStatus | mChannel, mNote, mVelocity);
-    mSink->Handle(&msg);
+    mSink->Dispatch(&msg);
 }
 
 // NTSC-U/C: 0x001b4040, PAL: 0x001b9e18
 void NotePlayer::OnCommand(int nTick) {
     StdMidiMsg msg(nTick, kNoteOffStatus | mChannel, mNote, kReleaseVelocity);
-    mSink->Handle(&msg);
+    mSink->Dispatch(&msg);
     mSink = nullptr;
     mParent->PlayerFinished(this);
 }

@@ -122,7 +122,7 @@ inline const char *TextOrEmpty(const HxStr &text) {
 // Resolve one named object of the renderer as T.
 template <class T>
 inline T *FindObject(const HxStr &name) {
-    return dynamic_cast<T *>(Rnd::g_manager.Find(name));
+    return dynamic_cast<T *>(Rnd::TheManager.Find(name));
 }
 
 // Append a copy of a persona list to another.
@@ -314,9 +314,9 @@ void MetLocPickCharScreen::ShowPickers() {
     mChosenPersonas.resize(nPlayers);
 
     if (nPlayers != mPlayerCount) {
-        mView->ReleaseAnimsRefs();
-        mView->ClearDraws();
-        mView->ClearTransList();
+        mView->RemoveAllAnims();
+        mView->RemoveAllDraws();
+        mView->RemoveAllTranses();
         mPlayerCount = nPlayers;
         Rnd::View *pLayout =
             FindObject<Rnd::View>(HxStr(FormatString(kLayoutViewFormat, nPlayers)));
@@ -325,7 +325,7 @@ void MetLocPickCharScreen::ShowPickers() {
         std::list<Rnd::Drawable *> &draws = mView->GetDraws();
         mView->AddDraw(pLayout, draws.empty() ? nullptr : draws.front());
         mEnterAnim = FindObject<Rnd::View>(HxStr(FormatString(kEnterAnimFormat, nPlayers)));
-        mAnimEndFrame = mEnterAnim->EndFrame();
+        mAnimEndFrame = mEnterAnim->FilteredFrameEnd();
     }
 
     AppendPersonas(mPersonas, *MetFreqMakerAssetManager::shared()->GetIdentityList());
@@ -374,7 +374,7 @@ void MetLocPickCharScreen::ShowPickers() {
         const ControllerConfig defaults;
         const bool bDefault =
             GlobalSettings::shared()->mControllers[i].mButtons == defaults.mButtons;
-        mControllerMeshes[i]->SetMaterial(bDefault ? mDefaultIconMat : mCustomIconMat);
+        mControllerMeshes[i]->SetMat(bDefault ? mDefaultIconMat : mCustomIconMat);
     }
 
     mReadyCount = 0;

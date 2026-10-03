@@ -197,7 +197,7 @@ Stream &ReadVector3Keys(Stream &stream, std::list<Vector3Key> &keys);
  * @ghidraAddress NTSC-U/C: 0x004dac80
  * @ghidraAddress PAL: 0x00519198
  */
-Stream &WriteVector3Keys(Stream &stream, const std::list<Vector3Key> &keys);
+Stream &operator<<(Stream &stream, const std::list<Vector3Key> &keys);
 
 /**
  * Report the frame of the last keyframe of a channel, and zero for an empty channel.

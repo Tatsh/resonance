@@ -14,7 +14,7 @@ EntSpaceOp::~EntSpaceOp() {
 }
 
 // NTSC-U/C: 0x0055e4a8, PAL: 0x0059f778
-void EntSpaceOp::Issue() {
+void EntSpaceOp::Execute() {
     sceMcGetEntSpace(mPortSlot >> kMemcardPortShift,
                      mPortSlot & kMemcardSlotMask,
                      mPath.mStr != nullptr ? mPath.mStr : g_szEmptyString);
@@ -22,7 +22,7 @@ void EntSpaceOp::Issue() {
 }
 
 // NTSC-U/C: 0x0055d480, PAL: 0x0059e6d8
-void EntSpaceOp::Complete() {
+void EntSpaceOp::NotifyDone() {
     InterpretResult();
     mHandler->OnEntSpace(this);
 }

@@ -73,7 +73,7 @@ public:
     /**
      * Report the player's score.
      *
-     * Forwards to Player::GetScore(). Overlay::HandleMessage() at `0x00420848` and
+     * Forwards to Player::GetScore(). Overlay::DispatchPriv() at `0x00420848` and
      * Overlay::OnPointAmount() at `0x0042b040` call it. The name is inferred from the accessor it
      * forwards to.
      *

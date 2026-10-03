@@ -25,6 +25,14 @@ class Player;
 class CrippleMsg : public CmdMsg {
 public:
     /**
+     * Identity that Type() reports.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d03d4
+     * @ghidraAddress PAL: 0x00713b6c
+     */
+    static int sID;
+
+    /**
      * Produce a message with a zero result on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory.
@@ -47,7 +55,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nCrippleMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x003e27f8
      * @ghidraAddress PAL: 0x0041ac98
      */
@@ -81,15 +89,3 @@ public:
      */
     int mBar;
 };
-
-/**
- * Identity that CrippleMsg::Type() reports.
- *
- * This word belongs to CrippleMsg because CrippleMsg::Type() at `0x003e27f8` returns it. Several
- * handlers elsewhere read the same word to compare against it, which is the expected shape for a
- * registered identity and does not make the word theirs.
- *
- * @ghidraAddress NTSC-U/C: 0x006d03d4
- * @ghidraAddress PAL: 0x00713b6c
- */
-extern int g_nCrippleMsgType;

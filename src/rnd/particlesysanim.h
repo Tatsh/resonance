@@ -27,20 +27,20 @@ namespace Rnd {
  *
  * Two vtables belong to the class, each identified by its own GetTypeInfo slot addressing
  * `0x0052b7f0`. The Object subobject table at `0x00827a80` stores the seven Object overrides, and
- * the Animatable table at `0x00827ac8` stores EndFrame() at slot 1 and SetFrameSelf() at slot 3.
- * Slot 2 still addresses the base StartAnim() at `0x0049a3b8`, so restarting an animation does
- * nothing of its own here.
+ * the Animatable table at `0x00827ac8` stores FilteredFrameEnd() at slot 1 and SetFrameSelf() at
+ * slot 3. Slot 2 still addresses the base StartAnim() at `0x0049a3b8`, so restarting an animation
+ * does nothing of its own here.
  *
  * Three channels drive the system, and the text dump labels them "startColorKeys:",
  * "endColorKeys:", and "emitRateKeys:". The two colour channels are `std::list` of Rnd::ColorKey
  * and share the dump routine at `0x004d8de8`. The emission rate channel is a `std::list` of
- * Rnd::FloatKey and has its own dump at `0x004d8f08`. EndFrame() reads the frame of the two colour
- * channels at list node `+0x20` and of the rate channel at node `+0x0c`, which is the two element
- * sizes rather than one.
+ * Rnd::FloatKey and has its own dump at `0x004d8f08`. FilteredFrameEnd() reads the frame of the
+ * two colour channels at list node `+0x20` and of the rate channel at node `+0x0c`, which is the
+ * two element sizes rather than one.
  *
  * Keys are shared rather than copied, the same arrangement Rnd::MeshAnim uses with mKeysOwner.
- * Both EndFrame() and SetFrameSelf() read the channels of mFramesOwner rather than their own, so
- * an animation whose frames belong to another animation reads that object's keys.
+ * Both FilteredFrameEnd() and SetFrameSelf() read the channels of mFramesOwner rather than their
+ * own, so an animation whose frames belong to another animation reads that object's keys.
  *
  * SetFrameSelf() is blocked rather than unrecovered; see its own documentation.
  */
@@ -156,7 +156,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00527128
      * @ghidraAddress PAL: 0x00567750
      */
-    virtual float EndFrame();
+    virtual float FilteredFrameEnd();
 
 protected:
     /**
@@ -288,7 +288,7 @@ extern HxStr g_particleSysAnimClassName;
  * @ghidraAddress PAL: 0x0056bef0
  */
 inline void RegisterParticleSysAnimClass() {
-    g_manager.RegisterClass(g_particleSysAnimClassName, CreateRegisteredParticleSysAnim);
+    TheManager.RegisterClass(g_particleSysAnimClassName, CreateRegisteredParticleSysAnim);
 }
 
 } // namespace Rnd

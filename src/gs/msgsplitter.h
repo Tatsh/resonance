@@ -39,5 +39,5 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ab4a8
      * @ghidraAddress PAL: 0x001b1210
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 };

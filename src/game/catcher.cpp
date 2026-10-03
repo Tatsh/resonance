@@ -170,12 +170,12 @@ Catcher::Catcher(PhraseMgr *pPhraseMgr,
                  int nSeekerBarCount,
                  Sch::Tick catchWindow)
     : mQuantizer(pQuantizer), mPhraseMgr(pPhraseMgr), mTrackData(pTrackData),
-      mPlayer(&g_nullPlayer), mClock(pClock), mSeekerBarCount(nSeekerBarCount),
+      mPlayer(&NullPlayer::sInstance), mClock(pClock), mSeekerBarCount(nSeekerBarCount),
       mCatchWindow(static_cast<int>(catchWindow.mValue)), mEnabled(kEnabledInitially),
       mLastCaughtPosition(kNoPosition), mLastMissedPosition(kNoPosition),
       mTrack(pTrackData->mIndex), mCaughtGems(0), mMissedGems(0), mMuffedGems(0), mLastEndedBar(0),
-      mPhraseRunBars(0), mLastMuffedBar(kNoBar), mSeekerEnabled(0), mRemotePlayer(&g_nullPlayer),
-      mRemoteSuccess(0), mRemotePosition(0) {
+      mPhraseRunBars(0), mLastMuffedBar(kNoBar), mSeekerEnabled(0),
+      mRemotePlayer(&NullPlayer::sInstance), mRemoteSuccess(0), mRemotePosition(0) {
     mPostGemCommand.mValue = kUnallocatedCommand;
     mGemCommand.mValue = kUnallocatedCommand;
     mTicksPerBar.mTick = pPhraseMgr->mBarTicks;
@@ -382,7 +382,7 @@ void Catcher::PostCaughtBarMsg(int nBar, int nNextBar) {
 
     ++mPhraseRunBars;
     CaughtBarMsg msg(mPlayer, nBar);
-    mPlayer->Handle(&msg);
+    mPlayer->Dispatch(&msg);
     ReportCaughtPowerbar(nBar);
 
     int nLastBar = nBar;
@@ -474,7 +474,7 @@ int Catcher::PostGemDelay(int nTick) {
 
 // NTSC-U/C: 0x001ace78, PAL: 0x001b2be0
 void Catcher::SimulateRemoteGem(int nTick) {
-    if (mRemotePlayer != &g_nullPlayer && mRemotePlayer->GetInputSlot() == kNoPlayerSlot) {
+    if (mRemotePlayer != &NullPlayer::sInstance && mRemotePlayer->GetInputSlot() == kNoPlayerSlot) {
         const Mid::MBT window = MakePosition(mRemotePosition.mTick + Mid::MBT(kBarTicks).mTick);
         if (!(window.mTick < nTick) &&
             static_cast<float>(std::rand() % kRandomScale) < mRemoteSuccess * kRandomScale) {
@@ -579,9 +579,9 @@ void Catcher::PostSeekerRangeMsg(int nFirstBar, int nBarCount) {
 }
 
 // NTSC-U/C: 0x001adb78, PAL: 0x001b38e0
-void Catcher::HandleMessage(Message *pMsg) {
+void Catcher::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
-    if (nType == g_nPitchRiffMsgType) {
+    if (nType == PitchRiffMsg::sID) {
         PostCatchMsg(static_cast<PitchRiffMsg *>(pMsg));
     } else if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
         OnTrackSelect(static_cast<TrackSelectMsg *>(pMsg));
@@ -594,7 +594,7 @@ void Catcher::HandleMessage(Message *pMsg) {
         }
     } else if (nType == g_nAutoCatchMsgType) {
         OnAutoCatch(static_cast<AutoCatchMsg *>(pMsg));
-    } else if (nType == g_nInvalidateSeekerMsgType) {
+    } else if (nType == InvalidateSeekerMsg::sID) {
         OnInvalidateSeeker(static_cast<InvalidateSeekerMsg *>(pMsg));
     }
 }
@@ -607,7 +607,7 @@ int Catcher::IsBarFree(int nBar) {
     if (mTrackData->QueryBar(nBar) == 0) {
         return 0;
     }
-    return mPhraseMgr->GetPhraseOwner(nBar)->IsNull() != 0;
+    return mPhraseMgr->GetOwner(nBar)->IsNull() != 0;
 }
 
 // NTSC-U/C: 0x001b1578, PAL: 0x001b7338

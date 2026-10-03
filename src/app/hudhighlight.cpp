@@ -26,8 +26,8 @@ constexpr int kLeadVertex = 0;
 
 // NTSC-U/C: 0x00417170, PAL: 0x00450f10
 HudHighlight::HudHighlight() : mStarting(0), mDone(1), mEndTime(kNoEndTime) {
-    mMesh = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("HUD1 hilite_box.mesh")));
-    mMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD hilite_box.mat")));
+    mMesh = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr("HUD1 hilite_box.mesh")));
+    mMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("HUD hilite_box.mat")));
     SetShowing(0);
 
     // The corner table is written after SetShowing(), one byte at a time.

@@ -101,8 +101,8 @@ void FreqAppearanceDetail::clear() {
     mParts.clear();
     mParts.resize(0); // Yes, the binary resizes the emptied list to zero.
 
-    mView->ClearDraws();
-    mView->ClearTransList();
+    mView->RemoveAllDraws();
+    mView->RemoveAllTranses();
     resetCursor();
     mView->SetShowing(1);
 }
@@ -176,7 +176,7 @@ void FreqAppearanceDetail::load(IBStream &stream) {
         stream.ReadBytes(name.mStr != nullptr ? name.mStr : const_cast<char *>(g_szEmptyString),
                          nLength);
         // Yes, the binary looks the name up as a texture and discards the result.
-        (void)dynamic_cast<Rnd::Tex *>(Rnd::g_manager.Find(name));
+        (void)dynamic_cast<Rnd::Tex *>(Rnd::TheManager.Find(name));
 
         FreqPart *pPart = new FreqPart(MetFreqMakerAssetManager::shared()->FindPart(name));
         stream.Read(&pPart->mPalettePosition.x, sizeof(pPart->mPalettePosition.x));
@@ -191,7 +191,7 @@ void FreqAppearanceDetail::load(IBStream &stream) {
 inline void FreqAppearanceDetail::addLoadedPart(FreqPart *pPart) {
     Rnd::Mesh *pMesh = MetFreqMakerAssetManager::shared()->CloneMesh(
         MetFreqMakerAssetManager::shared()->NextMeshName());
-    pMesh->SetMaterial(pPart->mTemplate->mMaterial);
+    pMesh->SetMat(pPart->mTemplate->mMaterial);
     MetFreqMakerAssetManager::shared()->ApplyPartScale(
         pMesh, pPart->mTemplate, &mScaleX, &mScaleZ, kPlacedScaleFactor, kPlacedScaleFactor);
     pPart->mPosition.y = kPlacedHeight;
@@ -216,7 +216,7 @@ inline void FreqAppearanceDetail::addLoadedPart(FreqPart *pPart) {
     ensureCursorMesh();
     mCursorMesh->SetShowing(0);
     PlaceMesh(mCursorMesh, kCursorOrigin);
-    mCursorMesh->SetMaterial(nullptr);
+    mCursorMesh->SetMat(nullptr);
     mScaleStepZ = kUnsetScaleStep;
     mScaleZ = kUnsetScale;
     mSelected = nullptr;
@@ -259,7 +259,7 @@ void FreqAppearanceDetail::resetCursor() {
     ensureCursorMesh();
     mCursorMesh->SetShowing(0);
     PlaceMesh(mCursorMesh, kCursorOrigin);
-    mCursorMesh->SetMaterial(nullptr);
+    mCursorMesh->SetMat(nullptr);
 
     mScaleStepZ = kUnsetScaleStep;
     mScaleZ = kUnsetScale;
@@ -283,7 +283,7 @@ void FreqAppearanceDetail::selectTemplate(const HxStr &name) {
     }
 
     mTemplate = MetFreqMakerAssetManager::shared()->FindPart(name);
-    mCursorMesh->SetMaterial(mTemplate->mMaterial);
+    mCursorMesh->SetMat(mTemplate->mMaterial);
     MetFreqMakerAssetManager::shared()->ApplyPartScale(
         mCursorMesh, mTemplate, &mScaleX, &mScaleZ, kPlacedScaleFactor, kPlacedScaleFactor);
     setColor(mColor, mPalettePosition);
@@ -307,7 +307,7 @@ void FreqAppearanceDetail::placeCursor() {
         Rnd::Mesh *pMesh = MetFreqMakerAssetManager::shared()->CloneMesh(
             MetFreqMakerAssetManager::shared()->NextMeshName());
         pMesh->Copy(mCursorMesh, kMeshCopyFlags);
-        pMesh->SetMaterial(mTemplate->mMaterial);
+        pMesh->SetMat(mTemplate->mMaterial);
         mView->AddDraw(pMesh, mCursorMesh);
         mView->AddTrans(pMesh);
         mView->MoveDraw(mCursorMesh, 1);
@@ -500,7 +500,7 @@ void FreqAppearanceDetail::randomize() {
                 ++pick;
             }
             pPart->mTemplate = *pick;
-            pPart->GetMesh()->SetMaterial(pPart->mTemplate->mMaterial);
+            pPart->GetMesh()->SetMat(pPart->mTemplate->mMaterial);
             MetFreqMakerAssetManager::shared()->ApplyPartScale(pPart->GetMesh(),
                                                                pPart->mTemplate,
                                                                &mScaleX,

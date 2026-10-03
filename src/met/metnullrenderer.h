@@ -52,7 +52,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00311ff0
      * @ghidraAddress PAL: 0x00337d50
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Unrecovered. RendererBase slot 7, pure in the base, with an empty body here.

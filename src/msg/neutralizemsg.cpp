@@ -19,7 +19,7 @@ Message *NeutralizeMsg::Clone() {
 
 // NTSC-U/C: 0x003e0418, PAL: 0x00418870
 int NeutralizeMsg::Type() {
-    return g_nNeutralizeMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x003e0428, PAL: 0x00418880

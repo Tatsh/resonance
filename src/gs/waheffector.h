@@ -43,7 +43,7 @@ public:
     }
 
     /**
-     * Switch the effect off through this class's own Enable(), then release the oscillator.
+     * Switch the effect off through this class's own SetEnabled(), then release the oscillator.
      *
      * @ghidraAddress NTSC-U/C: 0x001a2040
      * @ghidraAddress PAL: 0x001a7da8
@@ -68,7 +68,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001a08f8
      * @ghidraAddress PAL: 0x001a6660
      */
-    virtual void Enable(int bEnabled);
+    virtual void SetEnabled(int bEnabled);
 
     /**
      * Send controller 0x4a with mDepth times the oscillator's value at the elapsed count.

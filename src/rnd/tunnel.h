@@ -45,9 +45,9 @@ namespace Rnd {
  * Animatable table at `0x0081d4a0` by `-0x14`, and the Drawable table at `0x0081d4c8` by zero.
  *
  * Beyond the seven Object virtuals the class overrides exactly three, one in each mix-in:
- * Collide() at Collideable slot 1, SetFrameSelf() at Animatable slot 3, and DrawSelf() at Drawable
- * slot 3. Both remaining Animatable slots and both remaining Drawable slots still address the base
- * implementations.
+ * FindCollisions() at Collideable slot 1, SetFrameSelf() at Animatable slot 3, and DrawShowing() at
+ * Drawable slot 3. Both remaining Animatable slots and both remaining Drawable slots still address
+ * the base implementations.
  *
  * DumpText() is a stub the original author never finished. It emits the three base dumps and then
  * the two literals "[Tunnel]\n" and "TODO\n", and writes no member at all. **No member of this
@@ -62,7 +62,7 @@ namespace Rnd {
  * along the path mPath one slice of mSliceFrames frames at a time. Each slice owns one chain of
  * lane meshes, "[<name>_lat<slice>.<level>]", and each lane of each slice one chain of cell meshes,
  * "[<name>_pan<cell>.<level>]", that fill the gap to the next lane. The ring advance places one
- * column of every slice mesh per step, and DrawSelf() draws the slices of the visible window.
+ * column of every slice mesh per step, and DrawShowing() draws the slices of the visible window.
  * The seekers add "[<name>_seek<index>.<section>]" meshes over the lanes they highlight.
  *
  * The record the vector at `+0xdc` stores is Rnd::TunnelSeeker. The routines at `0x00477830` and
@@ -181,7 +181,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00476a10
      * @ghidraAddress PAL: 0x004b4688
      */
-    virtual void Collide(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Ray &ray, HitSink &sink);
 
     /**
      * Regenerate the geometry that the current state calls for.
@@ -382,9 +382,9 @@ public:
     /**
      * Replace the path the tunnel follows.
      *
-     * Moves the reference from the previous path to the new one, calls EndFrame() on a non-null
-     * path and discards the result, and fills mPlacedSlices with the 99999999 sentinel to force a
-     * rebuild of every slice.
+     * Moves the reference from the previous path to the new one, calls FilteredFrameEnd() on a
+     * non-null path and discards the result, and fills mPlacedSlices with the 99999999 sentinel to
+     * force a rebuild of every slice.
      *
      * @param pPath The path, or null.
      * @ghidraAddress NTSC-U/C: 0x004770d0
@@ -506,7 +506,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x00468850
      * @ghidraAddress PAL: 0x004a62b0
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
     /**
      * Advance the tunnel to a frame.
@@ -619,9 +619,9 @@ private:
     int mStartSlice;
 
 public:
-    /*!< The slices at the far end of the window that DrawSelf() skips, 0 at construction. Save(),
-         Load(), and Copy() carry it. Public because AppTunnel's constructor writes 2, 3, or 4
-         there by local player count at `0x004433a0`, and the image has no accessor. +0x60 */
+    /*!< The slices at the far end of the window that DrawShowing() skips, 0 at construction.
+         Save(), Load(), and Copy() carry it. Public because AppTunnel's constructor writes 2, 3,
+         or 4 there by local player count at `0x004433a0`, and the image has no accessor. +0x60 */
     int mCulledFarSlices;
 
 private:
@@ -637,11 +637,11 @@ public:
          has no accessor. +0x68 */
     std::vector<float> mLodScreenSizes;
 
-    // +0x74 Starts at 1. DrawSelf() draws the "_lat" slice meshes only while it is set. The
+    // +0x74 Starts at 1. DrawShowing() draws the "_lat" slice meshes only while it is set. The
     // hx.nolattice script command at 0x0044a080 cycles it with mDrawPanels. Public because that
     // command writes it with no accessor in the image.
     int mDrawLattice;
-    // +0x78 Starts at 1. DrawSelf() draws the "_pan" cell meshes and the seeker sections only
+    // +0x78 Starts at 1. DrawShowing() draws the "_pan" cell meshes and the seeker sections only
     // while it is set. Public because the hx.nolattice script command writes it with no accessor
     // in the image.
     int mDrawPanels;
@@ -744,7 +744,7 @@ extern HxStr g_tunnelClassName;
  * @ghidraAddress PAL: 0x004b3ed0
  */
 inline void RegisterTunnelClass() {
-    g_manager.RegisterClass(g_tunnelClassName, CreateRegisteredTunnel);
+    TheManager.RegisterClass(g_tunnelClassName, CreateRegisteredTunnel);
 }
 
 /**

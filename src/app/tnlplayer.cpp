@@ -30,7 +30,7 @@ constexpr float kCrippleFrames = 5000.0f;
 
 template <typename T>
 T *FindObject(const char *pszName) {
-    return dynamic_cast<T *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<T *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 // Copy identity into the local transform of pTrans and mark it dirty.

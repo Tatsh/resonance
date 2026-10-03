@@ -84,10 +84,10 @@ void PrintObjectRef(Dbg &sink, const Object *pObject) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, sizeof(chTerminator));
+        stream.Write(&chTerminator, sizeof(chTerminator));
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 void PrintBool(Dbg &sink, int nValue) {
@@ -109,12 +109,12 @@ void PrintRow(Dbg &sink, const Vector3 &row) {
 // A byte is written for each of the two flags even though both are stored as words.
 void WriteBool(Stream &stream, int nValue) {
     const char chFlag = static_cast<char>(nValue);
-    stream.WriteBytes(&chFlag, sizeof(chFlag));
+    stream.Write(&chFlag, sizeof(chFlag));
 }
 
 int ReadBool(Stream &stream) {
     char chFlag = 0;
-    stream.ReadBytes(&chFlag, sizeof(chFlag));
+    stream.Read(&chFlag, sizeof(chFlag));
     return chFlag != 0 ? 1 : 0;
 }
 
@@ -182,7 +182,7 @@ template <typename T>
 T *ReadObjectRef(Stream &stream) {
     HxStr name(nullptr);
     stream.ReadString(name);
-    return dynamic_cast<T *>(g_manager.Find(name));
+    return dynamic_cast<T *>(TheManager.Find(name));
 }
 
 // A path bound SetPath() replaces with the matching end of the path's keyframe range.
@@ -199,7 +199,7 @@ enum PathVarAxis {
     kPathVarAxisZ = 2,
 };
 
-// The draw paths of the table in DrawSelf(), in its order.
+// The draw paths of the table in DrawShowing(), in its order.
 enum DrawPath {
     kDrawPathView = 0,
     kDrawPathMesh = 1,
@@ -434,7 +434,7 @@ void Generator::SetParticleSys(ParticleSys *pParticleSys) {
 }
 
 // NTSC-U/C: 0x0045ea18, PAL: 0x0049c0c0
-void Generator::SetBirthCam(Cam *pCam) {
+void Generator::SetBirthCamera(Cam *pCam) {
     ReleaseObjectRef(this, mBirthCam);
     mBirthCam = pCam;
     AcquireObjectRef(this, mBirthCam);
@@ -447,8 +447,9 @@ void Generator::SetPath(TransAnim *pPath, float flStartFrame, float flEndFrame) 
     AcquireObjectRef(this, mPath);
     mPathStartFrame =
         mPath != nullptr && flStartFrame == kPathKeyframeBound ? mPath->StartFrame() : flStartFrame;
-    mPathEndFrame =
-        mPath != nullptr && flEndFrame == kPathKeyframeBound ? mPath->EndFrame() : flEndFrame;
+    mPathEndFrame = mPath != nullptr && flEndFrame == kPathKeyframeBound ?
+                        mPath->FilteredFrameEnd() :
+                        flEndFrame;
 }
 
 // NTSC-U/C: 0x0045aa40, PAL: 0x004980b0
@@ -547,7 +548,7 @@ void Generator::SetFrameSelf(float flFrame) {
 }
 
 // NTSC-U/C: 0x0045b040, PAL: 0x004986b0
-int Generator::DrawSelf() {
+int Generator::DrawShowing() {
     // NTSC-U/C: 0x0081c448, PAL: 0x0085ef68
     // the four draw paths in DrawPath order.
     static void (Generator::*const kDrawPaths[])(const Transform &, float) = {
@@ -736,7 +737,7 @@ void Generator::DumpText(Dbg &sink) {
 // through Regenerate().
 void Generator::Save(Stream &stream) {
     const int nRevision = kGeneratorRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
 
     Transformable::Save(stream);
     Drawable::Save(stream);
@@ -745,19 +746,19 @@ void Generator::Save(Stream &stream) {
     WriteObjectRef(stream, mMesh);
     WriteObjectRef(stream, mPath);
     WriteBool(stream, mBirthFrontOnly);
-    stream.Write(&mBirthSquareDist, sizeof(mBirthSquareDist));
+    stream.WriteLE(&mBirthSquareDist, sizeof(mBirthSquareDist));
     WriteObjectRef(stream, mBirthCam);
-    stream.Write(&mRateGenLow, sizeof(mRateGenLow));
-    stream.Write(&mRateGenHigh, sizeof(mRateGenHigh));
-    stream.Write(&mScaleGenLow, sizeof(mScaleGenLow));
-    stream.Write(&mScaleGenHigh, sizeof(mScaleGenHigh));
-    stream.Write(&mPathVarMax[0], sizeof(mPathVarMax[0]));
-    stream.Write(&mPathVarMax[1], sizeof(mPathVarMax[1]));
-    stream.Write(&mPathVarMax[2], sizeof(mPathVarMax[2]));
+    stream.WriteLE(&mRateGenLow, sizeof(mRateGenLow));
+    stream.WriteLE(&mRateGenHigh, sizeof(mRateGenHigh));
+    stream.WriteLE(&mScaleGenLow, sizeof(mScaleGenLow));
+    stream.WriteLE(&mScaleGenHigh, sizeof(mScaleGenHigh));
+    stream.WriteLE(&mPathVarMax[0], sizeof(mPathVarMax[0]));
+    stream.WriteLE(&mPathVarMax[1], sizeof(mPathVarMax[1]));
+    stream.WriteLE(&mPathVarMax[2], sizeof(mPathVarMax[2]));
     WriteObjectRef(stream, mView);
     WriteBool(stream, mAnimateFromStart);
-    stream.Write(&mPathEndFrame, sizeof(mPathEndFrame));
-    stream.Write(&mPathStartFrame, sizeof(mPathStartFrame));
+    stream.WriteLE(&mPathEndFrame, sizeof(mPathEndFrame));
+    stream.WriteLE(&mPathStartFrame, sizeof(mPathStartFrame));
     WriteObjectRef(stream, mMultiMesh);
     WriteObjectRef(stream, mParticleSys);
 }
@@ -765,9 +766,9 @@ void Generator::Save(Stream &stream) {
 // NTSC-U/C: 0x0045a090, PAL: 0x00497618
 void Generator::Load(Stream &stream) {
     int nRevision = 0;
-    stream.Read(&nRevision, sizeof(nRevision));
+    stream.ReadLE(&nRevision, sizeof(nRevision));
     if (nRevision >= kGeneratorRejectedRevision) {
-        g_failSink.Report("Can't load new Generator\n");
+        Rnd::TheDbg.Notify("Can't load new Generator\n");
         return;
     }
 
@@ -804,17 +805,17 @@ void Generator::Load(Stream &stream) {
         // The flag an emitter that spawned another emitter used to store. A cleared flag is the
         // case the build no longer supports, and the report is all that is left of it.
         if (ReadBool(stream) == 0) {
-            g_failSink.Report("%s no longer supports childOfGen\n", NameText(this));
+            Rnd::TheDbg.Notify("%s no longer supports childOfGen\n", NameText(this));
         }
     }
 
     if (nRevision < kGeneratorSplitBoundsRevision) {
-        stream.Read(&mRateGenHigh, sizeof(mRateGenHigh));
-        stream.Read(&mScaleGenHigh, sizeof(mScaleGenHigh));
+        stream.ReadLE(&mRateGenHigh, sizeof(mRateGenHigh));
+        stream.ReadLE(&mScaleGenHigh, sizeof(mScaleGenHigh));
     }
 
     mBirthFrontOnly = ReadBool(stream);
-    stream.Read(&mBirthSquareDist, sizeof(mBirthSquareDist));
+    stream.ReadLE(&mBirthSquareDist, sizeof(mBirthSquareDist));
     mBirthCam = ReadObjectRef<Cam>(stream);
 
     if (nRevision < kGeneratorSplitBoundsRevision) {
@@ -824,13 +825,13 @@ void Generator::Load(Stream &stream) {
         mPathVarMax[2] = 0.0f;
         mPathVarMax[1] = 0.0f;
     } else {
-        stream.Read(&mRateGenLow, sizeof(mRateGenLow));
-        stream.Read(&mRateGenHigh, sizeof(mRateGenHigh));
-        stream.Read(&mScaleGenLow, sizeof(mScaleGenLow));
-        stream.Read(&mScaleGenHigh, sizeof(mScaleGenHigh));
-        stream.Read(&mPathVarMax[0], sizeof(mPathVarMax[0]));
-        stream.Read(&mPathVarMax[1], sizeof(mPathVarMax[1]));
-        stream.Read(&mPathVarMax[2], sizeof(mPathVarMax[2]));
+        stream.ReadLE(&mRateGenLow, sizeof(mRateGenLow));
+        stream.ReadLE(&mRateGenHigh, sizeof(mRateGenHigh));
+        stream.ReadLE(&mScaleGenLow, sizeof(mScaleGenLow));
+        stream.ReadLE(&mScaleGenHigh, sizeof(mScaleGenHigh));
+        stream.ReadLE(&mPathVarMax[0], sizeof(mPathVarMax[0]));
+        stream.ReadLE(&mPathVarMax[1], sizeof(mPathVarMax[1]));
+        stream.ReadLE(&mPathVarMax[2], sizeof(mPathVarMax[2]));
     }
 
     if (nRevision < kGeneratorSquaredDistRevision) {
@@ -840,9 +841,9 @@ void Generator::Load(Stream &stream) {
         // both discarded.
         HxStr discardedName(nullptr);
         stream.ReadString(discardedName);
-        (void)g_manager.Find(discardedName); // Yes, the binary discards this call's result.
+        (void)TheManager.Find(discardedName); // Yes, the binary discards this call's result.
         int nDiscarded = 0;
-        stream.Read(&nDiscarded, sizeof(nDiscarded));
+        stream.ReadLE(&nDiscarded, sizeof(nDiscarded));
     }
 
     if (nRevision >= kGeneratorViewRevision) {
@@ -855,12 +856,12 @@ void Generator::Load(Stream &stream) {
 
     if (nRevision < kGeneratorPathFrameRevision) {
         if (mPath != nullptr) {
-            mPathEndFrame = mPath->EndFrame();
+            mPathEndFrame = mPath->FilteredFrameEnd();
         }
         mPathStartFrame = 0.0f;
     } else {
-        stream.Read(&mPathEndFrame, sizeof(mPathEndFrame));
-        stream.Read(&mPathStartFrame, sizeof(mPathStartFrame));
+        stream.ReadLE(&mPathEndFrame, sizeof(mPathEndFrame));
+        stream.ReadLE(&mPathStartFrame, sizeof(mPathStartFrame));
     }
 
     if (nRevision >= kGeneratorSubObjectRevision) {
@@ -911,7 +912,7 @@ static Object *NewGeneratorObject(const HxStr &name) {
 
 // NTSC-U/C: 0x0045dcc0, PAL: 0x0049b368
 void Generator::Init() {
-    g_manager.RegisterClass(g_generatorClassName, NewGeneratorObject);
+    TheManager.RegisterClass(g_generatorClassName, NewGeneratorObject);
 }
 
 } // namespace Rnd

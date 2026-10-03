@@ -20,8 +20,8 @@
  * null cache takes the stand-in object when the identifier is kIDableUnregistered and the table
  * entry otherwise, and the result is cached.
  *
- * The one instantiation is for Player, whose stand-in is g_nullPlayer. The resolution names that
- * object directly, so the template is written for that instantiation alone.
+ * The one instantiation is for Player, whose stand-in is NullPlayer::sInstance. The resolution
+ * names that object directly, so the template is written for that instantiation alone.
  *
  * Both members are public because the packets' transfer members read and write the identifier
  * directly and the image exposes no accessor.
@@ -55,7 +55,8 @@ public:
      */
     operator T *() const {
         if (mCached == nullptr) {
-            mCached = mId == kIDableUnregistered ? &g_nullPlayer : IDable<T>::sObjects[mId];
+            mCached =
+                mId == kIDableUnregistered ? &NullPlayer::sInstance : IDable<T>::sObjects[mId];
         }
         return mCached;
     }

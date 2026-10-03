@@ -10,7 +10,7 @@ namespace Rnd {
  * Its RTTI descriptor is at `0x008eefe8`. It has single inheritance from `Rnd::Stream` at offset 0.
  * Its vtable is at `0x00826118`.
  *
- * The stream reads a source that arrives in instalments. ReadBytes() spins on Eof() until data is
+ * The stream reads a source that arrives in instalments. Read() spins on Eof() until data is
  * present, copies what the buffer already holds, then calls Flush() to refill and spins again,
  * repeating until the request is satisfied. Eof() compares mArrived with mConsumed, and the
  * destructor releases mBuffer.
@@ -19,7 +19,7 @@ namespace Rnd {
  * pair is a delivery counter the transport advances and the snapshot of it taken at the last
  * refill. The constructor's highest store is `+0x14`, so the object is 0x18 bytes.
  *
- * The stream is read-only in the shipped build. WriteBytes() reports
+ * The stream is read-only in the shipped build. Write() reports
  * "Can't write to a PS ToolStream" and stops the machine, and both Tell() and Fail() always
  * report 0.
  */
@@ -55,13 +55,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00510308
      * @ghidraAddress PAL: 0x0054f8f0
      */
-    virtual Stream &ReadBytes(void *pDest, int nSize);
+    virtual Stream &Read(void *pDest, int nSize);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x00510400
      * @ghidraAddress PAL: 0x0054f9e8
      */
-    virtual Stream &WriteBytes(const void *pSrc, int nSize);
+    virtual Stream &Write(const void *pSrc, int nSize);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x00510468

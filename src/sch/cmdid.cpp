@@ -14,30 +14,30 @@ int g_nNextCmdIdValue = 1;
 
 // Handle values a replayed recording has reserved.
 // NTSC-U/C: 0x008e4f08, PAL: 0x00929f08
-std::set<int> g_reservedCmdIdValues;
+std::set<int> sReserved;
 
 // NTSC-U/C: 0x008e4f18, PAL: 0x00929f18
 // The first reserved value the counter has not yet passed.
-std::set<int>::iterator g_itNextReservedCmdIdValue = g_reservedCmdIdValues.end();
+std::set<int>::iterator sIter = sReserved.end();
 
 } // namespace
 
 // NTSC-U/C: 0x005e4dc8, PAL: 0x00626f88
 int CmdID::AllocateValue() {
-    while (g_itNextReservedCmdIdValue != g_reservedCmdIdValues.end()) {
-        if (*g_itNextReservedCmdIdValue != g_nNextCmdIdValue) {
+    while (sIter != sReserved.end()) {
+        if (*sIter != g_nNextCmdIdValue) {
             break;
         }
-        ++g_itNextReservedCmdIdValue;
+        ++sIter;
         ++g_nNextCmdIdValue;
     }
     return g_nNextCmdIdValue++;
 }
 
 // NTSC-U/C: 0x005e5908, PAL: 0x00627ac8
-void CmdID::Reserve(CmdID id) {
-    g_reservedCmdIdValues.insert(id.mValue);
-    g_itNextReservedCmdIdValue = g_reservedCmdIdValues.begin();
+void CmdID::ReserveID(CmdID id) {
+    sReserved.insert(id.mValue);
+    sIter = sReserved.begin();
 }
 
 // NTSC-U/C: 0x005e59a0, PAL: 0x00627b60

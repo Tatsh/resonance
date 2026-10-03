@@ -83,5 +83,5 @@ Effector::~Effector() {
 }
 
 // NTSC-U/C: 0x001a2558, PAL: 0x001a82c0
-void Effector::Enable([[maybe_unused]] int bEnabled) {
+void Effector::SetEnabled([[maybe_unused]] int bEnabled) {
 }

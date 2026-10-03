@@ -16,7 +16,7 @@ Message *RawControllerMsg::Clone() {
 
 // NTSC-U/C: 0x003da268, PAL: 0x004126a0
 int RawControllerMsg::Type() {
-    return g_nRawControllerMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x003da278, PAL: 0x004126b0

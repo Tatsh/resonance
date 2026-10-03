@@ -153,11 +153,11 @@ constexpr int kKeyboardMaxLength = 32;
 constexpr int kAnyPad = -1;
 
 inline Rnd::Text *FindText(const char *pszName) {
-    return dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 inline Rnd::Font *FindFont(const char *pszName) {
-    return dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<Rnd::Font *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 inline const char *TextOrEmpty(const HxStr &text) {
@@ -231,12 +231,12 @@ void MetRemixDelScreen::EnterAndShow() {
                                this);
             return;
         }
-        Rnd::View *pLine = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(kLineView)));
+        Rnd::View *pLine = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kLineView)));
         Rnd::Mesh *pHighlight =
-            dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kHighlightMesh)));
-        Rnd::Mesh *pUpArrow = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kUpArrowMesh)));
+            dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(kHighlightMesh)));
+        Rnd::Mesh *pUpArrow = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(kUpArrowMesh)));
         Rnd::Mesh *pDownArrow =
-            dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(kDownArrowMesh)));
+            dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(kDownArrowMesh)));
         // Yes, the binary does not delete a list an earlier entry left behind.
         mList = new ScrollingList(
             this, kRowPitch, kRowCount, pLine, pHighlight, pUpArrow, pDownArrow, kListContext);

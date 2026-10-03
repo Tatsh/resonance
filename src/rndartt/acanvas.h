@@ -73,6 +73,34 @@ enum ACanvasClipCode {
  */
 class ACanvas {
 public:
+    /**
+     * Palette every canvas falls back to when neither its bitmap nor its source supplies one.
+     *
+     * Read by ACanvas8::SetColor8() and every other slot that resolves a palette index, always
+     * after the bitmap palette is found null.
+     *
+     * No writer was located. The fallback may be permanently null.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0086f6f0
+     * @ghidraAddress PAL: 0x008b3dd0
+     */
+    static APalette *palDefault;
+
+    /**
+     * One row of indices, shared by every block copy that has to expand a row before writing it.
+     *
+     * ACanvasLin4 unpacks a four-bit row into it, both four-bit layout classes decode a run-length
+     * encoded row into it, and several ACanvas block copies use it the same way. Each writes the
+     * row and consumes it before returning.
+     *
+     * The bound is not recovered. The buffer is a plain static with no allocation to read a size
+     * from, and the definition takes the 0x400 bytes up to the nearest referenced address above it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x008f09f0
+     * @ghidraAddress PAL: 0x00935a00
+     */
+    static unsigned char tempBuff[];
+
     struct ARowInfo;
     struct AScaledRowInfo;
     struct Rle8Clip;
@@ -95,7 +123,7 @@ public:
      *
      * Copies the description. When asked to allocate, the copy gains a row stride derived from
      * its format, `(mWidth + 2) / 2` for kABitmapFormatLinear4 and mWidth times the matching entry
-     * of g_abBitmapBytesPerPixel otherwise, and a pixel rectangle allocated with the source file
+     * of ABitmap::bmPixelSize otherwise, and a pixel rectangle allocated with the source file
      * and line as its tag. The copy's mByteCount is not updated. The format code then
      * selects the subclass through the jump table at 0x00837d90.
      *
@@ -771,7 +799,7 @@ public:
     /**
      * Copy a run length encoded eight bit source bitmap, with no clip test.
      *
-     * Decodes one row into g_abCanvasRowScratch, describes the decoded row as an
+     * Decodes one row into ACanvas::tempBuff, describes the decoded row as an
      * eight bit ABitmap of one row, and copies it with DrawBitmapLin8U().
      *
      * @param source The source bitmap.
@@ -967,7 +995,7 @@ public:
     /**
      * Copy a four bit source bitmap through a remap table.
      *
-     * Unpacks one row into g_abCanvasRowScratch and stores the remapped row.
+     * Unpacks one row into ACanvas::tempBuff and stores the remapped row.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -1359,7 +1387,7 @@ protected:
      * Copy a run length encoded source through a remap table.
      *
      * The run length encoded arm of DrawClutBitmapU(), reached only for format code 5. It decodes
-     * each row into g_abCanvasRowScratch through ARle8Reader and stores it with
+     * each row into ACanvas::tempBuff through ARle8Reader and stores it with
      * DrawClutBitmapRowLin8U().
      *
      * The row loop advances nY rather than the span row, so its bound recedes with the row and a
@@ -1508,7 +1536,7 @@ protected:
      * step per row or column clamped away. AScaledRowInfo::mSource addresses the first source row
      * the walk samples.
      *
-     * The palette resolves from the source, then the canvas, then g_pDefaultPalette.
+     * The palette resolves from the source, then the canvas, then ACanvas::palDefault.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle, before clipping.
@@ -1537,7 +1565,7 @@ protected:
     /**
      * Stretch a four bit source bitmap into a destination rectangle.
      *
-     * Unpacks each sampled row into g_abCanvasRowScratch and stores it with
+     * Unpacks each sampled row into ACanvas::tempBuff and stores it with
      * DrawScaledBitmapRowLin8U(). The row walk starts at the first source row rather than at the
      * row ClipAndSetupScaledBitmap() selected. A rectangle clipped at the top samples rows from too
      * high in the source.
@@ -1596,7 +1624,7 @@ protected:
     /**
      * Stretch a run length encoded source into a destination rectangle.
      *
-     * Decodes the first sampled row into g_abCanvasRowScratch, then decodes again only when the
+     * Decodes the first sampled row into ACanvas::tempBuff, then decodes again only when the
      * sampled row changes, consuming any rows between through ARle8Reader::SkipRow().
      *
      * @param source The source bitmap.
@@ -1768,37 +1796,6 @@ protected:
     static void
     Unpack4(const unsigned char *pSource, unsigned char *pDest, int nCount, int bStartHighNibble);
 };
-
-/**
- * Palette every canvas falls back to when neither its bitmap nor its source supplies one.
- *
- * Read by ACanvas8::SetColor8() and every other slot that resolves a palette index, always
- * after the bitmap palette is found null.
- *
- * No writer was located. The fallback may be permanently null.
- *
- * @ghidraAddress NTSC-U/C: 0x0086f6f0
- * @ghidraAddress PAL: 0x008b3dd0
- */
-extern APalette *g_pDefaultPalette;
-
-/**
- * One row of indices, shared by every block copy that has to expand a row before writing it.
- *
- * ACanvasLin4 unpacks a four-bit row into it, both four-bit layout classes decode a run length
- * encoded row into it, and several ACanvas block copies use it the same way. Each writes the row
- * and consumes it before returning, so the buffer carries nothing between calls.
- *
- * The bound is not recovered and no definition is written for it. The buffer is a plain static with
- * no allocation to read a size from, and the nearest referenced address sits more than 0x400 bytes
- * above it, which limits the space it could occupy without establishing what it does occupy. Which
- * translation unit defines it is also unsettled. It is therefore declared without a bound rather
- * than defined with an invented one.
- *
- * @ghidraAddress NTSC-U/C: 0x008f09f0
- * @ghidraAddress PAL: 0x00935a00
- */
-extern unsigned char g_abCanvasRowScratch[];
 
 /**
  * Pack an 8888 colour into 1555.

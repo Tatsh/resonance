@@ -17,7 +17,7 @@ DeleteFileOp::~DeleteFileOp() {
 }
 
 // NTSC-U/C: 0x0055ef68, PAL: 0x005a0238
-void DeleteFileOp::Issue() {
+void DeleteFileOp::Execute() {
     sceMcDelete(mPortSlot >> kMemcardPortShift,
                 mPortSlot & kMemcardSlotMask,
                 mPath.mStr != nullptr ? mPath.mStr : g_szEmptyString);
@@ -25,7 +25,7 @@ void DeleteFileOp::Issue() {
 }
 
 // NTSC-U/C: 0x0055e060, PAL: 0x0059f308
-void DeleteFileOp::Complete() {
+void DeleteFileOp::NotifyDone() {
     InterpretResult();
     mHandler->OnDeleteFile(this);
 }

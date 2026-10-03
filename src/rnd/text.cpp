@@ -86,10 +86,10 @@ void PrintObjectRef(Dbg &sink, const Object *pObject) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 // NTSC-U/C: 0x004d0450, PAL: 0x0050e888
@@ -165,7 +165,7 @@ void Text::RemoveObjectRefs() {
 }
 
 // NTSC-U/C: 0x004cf9b8, PAL: 0x0050dd30
-void Text::AddObjectRefs() {
+void Text::AddRefObjects() {
     if (mFont != nullptr) {
         mFont->AddRef(this);
     }
@@ -265,7 +265,7 @@ void Text::SetHighlight(int nHighlight) {
 }
 
 // NTSC-U/C: 0x004d02f8, PAL: 0x0050e730
-int Text::DrawSelf() {
+int Text::DrawShowing() {
     if (mMesh != nullptr) {
         mMesh->Draw();
     }
@@ -290,7 +290,7 @@ int Text::UpdateWorldXfm(Transformable *pParent, int nForce) {
 }
 
 // NTSC-U/C: 0x004c7ef8, PAL: 0x005060d0
-void Text::Collide(const Ray &ray, HitSink &sink) {
+void Text::FindCollisions(const Ray &ray, HitSink &sink) {
     if (mShowing == 0) {
         return;
     }
@@ -299,13 +299,13 @@ void Text::Collide(const Ray &ray, HitSink &sink) {
         // The hits the mesh is about to append start after whatever the collector already stored.
         std::list<Hit>::iterator itLast = sink.mHits.end();
         --itLast;
-        mMesh->Collide(ray, sink);
+        mMesh->FindCollisions(ray, sink);
         for (std::list<Hit>::iterator it = ++itLast; it != sink.mHits.end(); ++it) {
             it->mObject = this;
         }
     }
 
-    Collideable::Collide(ray, sink);
+    Collideable::FindCollisions(ray, sink);
 }
 
 // NTSC-U/C: 0x004c7fc0, PAL: 0x00506198
@@ -359,26 +359,26 @@ void Text::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x004c8330, PAL: 0x00506508
 void Text::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
 
     Drawable::Save(stream);
     Collideable::Save(stream);
     Transformable::Save(stream);
 
     WriteObjectRef(stream, mFont);
-    stream.Write(&mAlign, sizeof(mAlign));
-    stream.WriteBytes(StringText(mPreWrapText), mPreWrapText.mLen + 1);
-    stream.Write(&mColor.r, sizeof(mColor.r));
-    stream.Write(&mColor.g, sizeof(mColor.g));
-    stream.Write(&mColor.b, sizeof(mColor.b));
-    stream.Write(&mColor.a, sizeof(mColor.a));
+    stream.WriteLE(&mAlign, sizeof(mAlign));
+    stream.Write(StringText(mPreWrapText), mPreWrapText.mLen + 1);
+    stream.WriteLE(&mColor.r, sizeof(mColor.r));
+    stream.WriteLE(&mColor.g, sizeof(mColor.g));
+    stream.WriteLE(&mColor.b, sizeof(mColor.b));
+    stream.WriteLE(&mColor.a, sizeof(mColor.a));
 
     const char chWordWrap = static_cast<char>(mWordWrap);
-    stream.WriteBytes(&chWordWrap, sizeof(chWordWrap));
-    stream.Write(&mWrapWidth, sizeof(mWrapWidth));
+    stream.Write(&chWordWrap, sizeof(chWordWrap));
+    stream.WriteLE(&mWrapWidth, sizeof(mWrapWidth));
 
     const char chZTest = static_cast<char>(mZTest);
-    stream.WriteBytes(&chZTest, sizeof(chZTest));
+    stream.Write(&chZTest, sizeof(chZTest));
 }
 
 // NTSC-U/C: 0x004cf888, PAL: 0x0050dc00
@@ -421,15 +421,15 @@ void Text::Copy(const Object *pSource, unsigned nFlags) {
     mWrapWidth = pText->mWrapWidth;
     mZTest = pText->mZTest;
 
-    AddObjectRefs();
+    AddRefObjects();
 }
 
 // NTSC-U/C: 0x004c8560, PAL: 0x00506738
 void Text::Load(Stream &stream) {
     int nVersion = 0;
-    stream.Read(&nVersion, sizeof(nVersion));
+    stream.ReadLE(&nVersion, sizeof(nVersion));
     if (nVersion > kSerialVersion) {
-        g_failSink.Report("Can't load new Text\n");
+        Rnd::TheDbg.Notify("Can't load new Text\n");
         return;
     }
 
@@ -443,15 +443,15 @@ void Text::Load(Stream &stream) {
 
     HxStr fontName(nullptr);
     stream.ReadString(fontName);
-    mFont = dynamic_cast<Font *>(g_manager.Find(fontName));
+    mFont = dynamic_cast<Font *>(TheManager.Find(fontName));
 
     if (nVersion < 3) {
         int nLegacyAlign = 0;
-        stream.Read(&nLegacyAlign, sizeof(nLegacyAlign));
+        stream.ReadLE(&nLegacyAlign, sizeof(nLegacyAlign));
         mAlign = kLegacyAlignMap[nLegacyAlign];
     } else {
         int nAlign = 0;
-        stream.Read(&nAlign, sizeof(nAlign));
+        stream.ReadLE(&nAlign, sizeof(nAlign));
         mAlign = nAlign;
     }
 
@@ -460,8 +460,8 @@ void Text::Load(Stream &stream) {
         // component becomes the z row of the local transform, negated and scaled.
         float flX = 0.0f;
         float flY = 0.0f;
-        stream.Read(&flX, sizeof(flX));
-        stream.Read(&flY, sizeof(flY));
+        stream.ReadLE(&flX, sizeof(flX));
+        stream.ReadLE(&flY, sizeof(flY));
         mLocalXfm[3][0] = flX;
         mLocalXfm[3][1] = 0.0f;
         mLocalXfm[3][2] = -flY * kLegacyPositionYScale;
@@ -472,17 +472,17 @@ void Text::Load(Stream &stream) {
     stream.ReadString(mPreWrapText);
 
     if (nVersion > 0) {
-        stream.Read(&mColor.r, sizeof(mColor.r));
-        stream.Read(&mColor.g, sizeof(mColor.g));
-        stream.Read(&mColor.b, sizeof(mColor.b));
-        stream.Read(&mColor.a, sizeof(mColor.a));
+        stream.ReadLE(&mColor.r, sizeof(mColor.r));
+        stream.ReadLE(&mColor.g, sizeof(mColor.g));
+        stream.ReadLE(&mColor.b, sizeof(mColor.b));
+        stream.ReadLE(&mColor.a, sizeof(mColor.a));
     }
 
     if (nVersion >= 4) {
         char chWordWrap = '\0';
-        stream.ReadBytes(&chWordWrap, sizeof(chWordWrap));
+        stream.Read(&chWordWrap, sizeof(chWordWrap));
         mWordWrap = chWordWrap != '\0';
-        stream.Read(&mWrapWidth, sizeof(mWrapWidth));
+        stream.ReadLE(&mWrapWidth, sizeof(mWrapWidth));
         if (nVersion < 5) {
             if (mWrapWidth < 0.0f) {
                 mWrapWidth = kDefaultWrapWidth;
@@ -496,18 +496,18 @@ void Text::Load(Stream &stream) {
     }
 
     if (nVersion == 5) {
-        // Revision 5 alone stored the wrapped text. AddObjectRefs() derives it again immediately,
+        // Revision 5 alone stored the wrapped text. AddRefObjects() derives it again immediately,
         // so what the file supplies is overwritten unread.
         stream.ReadString(mText);
     }
 
     if (nVersion >= 5) {
         char chZTest = '\0';
-        stream.ReadBytes(&chZTest, sizeof(chZTest));
+        stream.Read(&chZTest, sizeof(chZTest));
         mZTest = chZTest != '\0';
     }
 
-    AddObjectRefs();
+    AddRefObjects();
 }
 
 float Text::MeasureRun(const char *pText, int nCount) {
@@ -523,7 +523,7 @@ float Text::MeasureRun(const char *pText, int nCount) {
 }
 
 // NTSC-U/C: 0x004d0010, PAL: 0x0050e428
-float Text::MeasureText(const char *pText, int nCount) {
+float Text::GetFontWidth(const char *pText, int nCount) {
     float flWidth = 0.0f;
     if (mFont == nullptr) {
         return flWidth;
@@ -567,7 +567,7 @@ int Text::CountLines() {
 }
 
 // NTSC-U/C: 0x004c9278, PAL: 0x00507490
-int Text::FindLineBreak(const char *pText) {
+int Text::HowManyFit(const char *pText) {
     if (*pText == '\n') {
         return 0;
     }
@@ -629,7 +629,7 @@ HxStr Text::ApplyWordWrap(const HxStr &text) {
     char szLine[kWrapBufferSize];
     strcpy(szLine, StringText(text));
 
-    int nFit = FindLineBreak(szLine);
+    int nFit = HowManyFit(szLine);
     if (static_cast<unsigned>(nFit) == text.mLen) {
         return text;
     }
@@ -638,7 +638,7 @@ HxStr Text::ApplyWordWrap(const HxStr &text) {
         char szTail[kWrapBufferSize];
         char *pPos = szLine;
         do {
-            nFit = FindLineBreak(pPos);
+            nFit = HowManyFit(pPos);
             if (nFit != 0) {
                 char *pBreak = pPos + nFit;
                 strcpy(szTail, pBreak);
@@ -738,14 +738,14 @@ void Text::BuildGlyphMesh() {
         const HxStr meshName(FormatString("[%s_mesh]", NameText(this)));
         // The binary's handler covers only the factory call and returns null.
         try {
-            mMesh = g_pfnNewMesh(meshName);
+            mMesh = Mesh::sNew(meshName);
         } catch (...) {
             mMesh = nullptr;
         }
     }
     mMesh->SetBillboard(mBillboard);
     mMesh->mInternal = 1;
-    mMesh->SetMaterial(mFont->mMat);
+    mMesh->SetMat(mFont->mMat);
 
     int nLines = 0;
     int nPos = 0;
@@ -845,12 +845,12 @@ Text *NewText(const HxStr &name) {
 }
 
 // NTSC-U/C: 0x006feca8, PAL: 0x007426a8
-Text *(*g_pfnNewText)(const HxStr &name) = NewText;
+Text *(*Text::sNew)(const HxStr &name) = NewText;
 
 // NTSC-U/C: 0x004cf1d0, PAL: 0x0050d530
 Text *NewTextThroughHook(const HxStr &name) {
     try {
-        return g_pfnNewText(name);
+        return Text::sNew(name);
     } catch (...) {
         return nullptr;
     }
@@ -859,7 +859,7 @@ Text *NewTextThroughHook(const HxStr &name) {
 // NTSC-U/C: 0x004cf770, PAL: 0x0050dae8
 Object *CreateRegisteredText(const HxStr &name) {
     try {
-        return g_pfnNewText(name);
+        return Text::sNew(name);
     } catch (...) {
         return nullptr;
     }
@@ -867,8 +867,8 @@ Object *CreateRegisteredText(const HxStr &name) {
 
 // NTSC-U/C: 0x004cf190, PAL: 0x0050d4f0
 void RegisterTextClass() {
-    g_pfnNewText = NewText;
-    g_manager.RegisterClass(g_textClassName, CreateRegisteredText);
+    Text::sNew = NewText;
+    TheManager.RegisterClass(g_textClassName, CreateRegisteredText);
 }
 
 // NTSC-U/C: 0x006feca0, PAL: 0x007426a0

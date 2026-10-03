@@ -8,11 +8,11 @@
 #include "os/log.h"
 
 // The upstream names resolve to the gzip state the loader defines.
-#define inbuf g_bGzipInputBuffer
-#define insize g_nGzipInputLength
-#define inptr g_nGzipInputPosition
-#define outcnt g_nGzipWindowPosition
-#define window g_bGzipWindow
+#define inbuf gzipInbuf
+#define insize gzipInsize
+#define inptr gzipInptr
+#define outcnt gzipOutcnt
+#define window gzipWindow
 #define fill_inbuf GzipRefillInputBuffer
 #define flush_window GzipFlushWindow
 
@@ -27,29 +27,29 @@ enum {
 };
 
 // NTSC-U/C: 0x008ea930, PAL: 0x0092f930
-static struct huft g_aGzipHuftPool[kHuftPoolSize];
+static struct huft huftTable[kHuftPoolSize];
 
 // NTSC-U/C: 0x007c3a90, PAL: 0x00807790
-static struct huft *g_pGzipHuftPoolNext = g_aGzipHuftPool;
+static struct huft *pHuftNext = huftTable;
 
 // NTSC-U/C: 0x007c3a94, PAL: 0x00807794
 // The most pool entries one block has used. Only HuftReset() reads the count.
-static int g_nGzipHuftPeak = 0;
+static int highWater = 0;
 
 // NTSC-U/C: 0x0063e1a8, PAL: 0x0067ed38
 void HuftReset(void) {
-    const int nUsed = (int)(g_pGzipHuftPoolNext - g_aGzipHuftPool);
-    if (g_nGzipHuftPeak < nUsed) {
-        g_nGzipHuftPeak = nUsed;
+    const int nUsed = (int)(pHuftNext - huftTable);
+    if (highWater < nUsed) {
+        highWater = nUsed;
     }
-    g_pGzipHuftPoolNext = g_aGzipHuftPool;
+    pHuftNext = huftTable;
 }
 
 // NTSC-U/C: 0x0063e1e0, PAL: 0x0067ed70
 struct huft *HuftAlloc(unsigned nEntries) {
-    struct huft *pTable = g_pGzipHuftPoolNext;
-    g_pGzipHuftPoolNext = pTable + nEntries;
-    if (g_pGzipHuftPoolNext < g_aGzipHuftPool + kHuftPoolSize) {
+    struct huft *pTable = pHuftNext;
+    pHuftNext = pTable + nEntries;
+    if (pHuftNext < huftTable + kHuftPoolSize) {
         return pTable;
     }
     LogPrintf("HUFT MEMORY EXCEEDED!!\n");

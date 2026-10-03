@@ -185,7 +185,7 @@ void MetLoadFreqScreen::OnEnterFinished() {
 // NTSC-U/C: 0x002976f8, PAL: 0x002b5878
 void MetLoadFreqScreen::UpdateNameLabel() {
     HxStr username((*mIdentityList)[mSelectedIdentity]->mAppearance.mUserName);
-    mButtonList->ButtonAt(kNameButtonIndex)->mText->SetText(username);
+    mButtonList->GetButton(kNameButtonIndex)->mText->SetText(username);
 
 #ifdef VIDEO_STANDARD_PAL
     HxStr format = GetMetString(kMetStrLfEdit);
@@ -195,7 +195,7 @@ void MetLoadFreqScreen::UpdateNameLabel() {
     HxStr editLabelWithName(editLabel);
     HxStr editText(editLabelWithName += username);
 #endif
-    mButtonList->ButtonAt(kEditButtonIndex)->mText->SetText(editText);
+    mButtonList->GetButton(kEditButtonIndex)->mText->SetText(editText);
 }
 
 // NTSC-U/C: 0x002978d0, PAL: 0x002b5a68

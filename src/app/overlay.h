@@ -22,7 +22,7 @@ class Renderer;
  *
  * The table at `0x008194a8` has four entries, the same length as MsgSink's table at `0x007ccc40`,
  * and the class therefore introduces no virtual. It overrides the destructor at slot 1 and
- * HandleMessage() at slot 3, and inherits MsgSink::Handle() at slot 2.
+ * DispatchPriv() at slot 3, and inherits MsgSink::Dispatch() at slot 2.
  *
  * The object is 0x5c bytes, the size Renderer's constructor requests under the MsgSink tag at
  * `0x0042c8cc`. The destructor frees every badge with the scalar free and deletes every track
@@ -71,7 +71,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004206e0
      * @ghidraAddress PAL: 0x0045ba00
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Advance the display to one song position.
@@ -127,7 +127,7 @@ public:
     void OnLeaderChanged(Player *pOldLeader, Player *pNewLeader);
 
 private:
-    // HandleMessage() runs one of the handlers below per message identity. Each handler written
+    // DispatchPriv() runs one of the handlers below per message identity. Each handler written
     // "inlined" is expanded in place there, and its out-of-line copy has no caller. Most handlers
     // act on the track display of the message's player, which FindTrack() looks up, and show text
     // through HudTextMessage::Show() at scale 1 for 1500 unless noted.
@@ -158,7 +158,7 @@ private:
 
     // NTSC-U/C: 0x0041eba0, PAL: 0x00459d40
     // CaughtPowerbarMsg. Shows `<kind>\nCAPTURED` in the player's text message for
-    // 1500. HandleMessage() ignores a PowerupCountMsg outright.
+    // 1500. DispatchPriv() ignores a PowerupCountMsg outright.
     void OnCaughtPowerbar(Message *pMsg);
 
     // NTSC-U/C: 0x0041eda8, PAL: 0x00459ff8

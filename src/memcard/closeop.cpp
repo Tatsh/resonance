@@ -14,13 +14,13 @@ CloseOp::~CloseOp() {
 }
 
 // NTSC-U/C: 0x0055ee50, PAL: 0x005a0120
-void CloseOp::Issue() {
+void CloseOp::Execute() {
     sceMcClose(mFile);
     mIssued = kMemcardOpInFlight;
 }
 
 // NTSC-U/C: 0x0055df30, PAL: 0x0059f1c8
-void CloseOp::Complete() {
+void CloseOp::NotifyDone() {
     InterpretResult();
     mHandler->OnClose(this);
 }

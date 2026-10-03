@@ -13,7 +13,7 @@ class Player;
  *
  * Its RTTI descriptor is at `0x00901f20`. It is built over MsgSource at offset 0 and MsgSink at
  * offset 20. The primary table is at `0x007e1f98`. The MsgSink table at `0x007e1f70` adjusts `this`
- * by `-20` and fills slot 3 with HandleMessage(). No routine in the image calls the
+ * by `-20` and fills slot 3 with DispatchPriv(). No routine in the image calls the
  * constructor, so the class is compiled but never built. The last member read or written is at
  * `+0x38`, and no allocation measures the object.
  *
@@ -49,10 +49,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001b9ad0
      * @ghidraAddress PAL: 0x001bf8a8
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // The out-of-line copy of the EraseMsg branch HandleMessage() expands inline. Marks the eraser
+    // The out-of-line copy of the EraseMsg branch DispatchPriv() expands inline. Marks the eraser
     // active, records the erased bar twice and the player, and passes the bar to EraseBar().
     // NTSC-U/C: 0x001b9a60, PAL: 0x001bf838
     void OnEraseMsg(EraseMsg *pMsg);

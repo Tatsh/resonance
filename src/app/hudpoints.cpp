@@ -44,29 +44,29 @@ HudPoints::HudPoints(int nIndex)
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mExitBlur = dynamic_cast<Rnd::Blur *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s pts_exit%d.blur", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s pts_exit%d.blur", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mExitView = dynamic_cast<Rnd::View *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s pts_exit%d.view", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s pts_exit%d.view", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mExitText = dynamic_cast<Rnd::Text *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s pts_exit%d.txt", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s pts_exit%d.txt", pszLayout, nIndex))));
 
     mExit.SetAnim(mExitView);
     mExit.Play(kExitRestFrame, kExitRestFrame);
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mPointsText = dynamic_cast<Rnd::Text *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s pts%d.txt", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s pts%d.txt", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mMultiplierText = dynamic_cast<Rnd::Text *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s ptsmult%d.txt", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s ptsmult%d.txt", pszLayout, nIndex))));
 
-    mPlainMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD ptstmp.mat")));
-    mHotMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("HUD ptstmphot.mat")));
+    mPlainMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("HUD ptstmp.mat")));
+    mHotMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("HUD ptstmphot.mat")));
 
     mPointsText->SetShowing(0);
     mMultiplierText->SetShowing(0);

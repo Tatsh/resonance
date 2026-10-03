@@ -18,9 +18,9 @@ namespace Rnd {
  *
  * The class is not polymorphic and has no RTTI. Its name comes from the debugging symbols of the
  * North American demo release. The demo's Notify() and SetNotify() have the same instructions as
- * Report() and SetReportHandler().
+ * this class's Notify() and SetNotify().
  *
- * Only Report() reaches the outside world in the shipped build. Print() returns without doing
+ * Only Notify() reaches the outside world in the shipped build. Print() returns without doing
  * anything, and Format() writes into a static buffer that nothing then reads. The roughly four
  * hundred call sites of each are the object dump routines across the whole engine, every
  * `DumpText` among them, so a reconstructed `DumpText` produces no output on this target. The
@@ -28,7 +28,7 @@ namespace Rnd {
  * names come from. Reconstruct those calls as written rather than omitting them.
  *
  * The sink can also own a log file, opened by OpenLog(). No routine in the shipped image calls
- * OpenLog(), and neither Report() nor Format() writes to the log.
+ * OpenLog(), and neither Notify() nor Format() writes to the log.
  */
 class Dbg {
 public:
@@ -79,7 +79,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004ddf90
      * @ghidraAddress PAL: 0x0051c548
      */
-    void SetReportHandler(FailReportProc pfnReport);
+    void SetNotify(FailReportProc pfnReport);
 
     /**
      * Format a failure message and pass it to the installed report handler.
@@ -90,7 +90,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004dde28
      * @ghidraAddress PAL: 0x0051c3e0
      */
-    void Report(const char *pszFormat, ...);
+    void Notify(const char *pszFormat, ...);
 
     /**
      * Format text into the secondary buffer without dispatching it.
@@ -143,12 +143,12 @@ private:
     Stream *mLogStream; // +0x10
 };
 
-} // namespace Rnd
-
 /**
  * Engine-wide failure sink.
  *
  * @ghidraAddress NTSC-U/C: 0x00702470
  * @ghidraAddress PAL: 0x00745ec0
  */
-extern Rnd::Dbg g_failSink;
+extern Dbg TheDbg;
+
+} // namespace Rnd

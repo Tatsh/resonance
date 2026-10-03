@@ -159,7 +159,7 @@ int Task::State() {
 }
 
 // NTSC-U/C: 0x004b65e8, PAL: 0x004f48f8
-int Task::IsActive() {
+int Task::InProgress() {
     return static_cast<unsigned>(State() - kTaskStateRunning) < 2;
 }
 
@@ -169,7 +169,7 @@ float Task::GetProgress() {
 }
 
 // NTSC-U/C: 0x004b6638, PAL: 0x004f4948
-HxStr Task::GetName() {
+HxStr Task::GetStatus() {
     return Name();
 }
 

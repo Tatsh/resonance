@@ -53,8 +53,8 @@ constexpr float kUntimedSeconds = 0.0f;
 
 // Writes one trace line to the file log while it is open.
 inline void TraceFileOp(const char *pszTrace) {
-    if (g_bFileLogOpen != 0) {
-        g_fileLog << pszTrace << std::endl;
+    if (bFileLogging != 0) {
+        gFileIOLog << pszTrace << std::endl;
     }
 }
 
@@ -106,13 +106,13 @@ inline void BuildHostPath(char *pszDest, const char *pszPath) {
 } // namespace
 
 // NTSC-U/C: 0x006ee280, PAL: 0x00731ca0
-std::fstream g_fileLog;
+std::fstream gFileIOLog;
 
 // NTSC-U/C: 0x006ee320, PAL: 0x00731d40
-int g_bFileLogOpen = 0;
+int bFileLogging = 0;
 
 // NTSC-U/C: 0x006ee378, PAL: 0x00731d98
-char g_szFileLogPath[kFileLogPathSize] = {};
+char logfilename[kFileLogPathSize] = {};
 
 // NTSC-U/C: 0x0047c9c0, PAL: 0x004ba650
 int FileOpen(const char *pszPath, int nFlags, ...) {
@@ -121,7 +121,7 @@ int FileOpen(const char *pszPath, int nFlags, ...) {
     // The log's own file is opened without a trace line.
     char szTrace[kFileTraceSize];
     bool bQuiet = true;
-    if (strcmp(pszPath, g_szFileLogPath) != 0) {
+    if (strcmp(pszPath, logfilename) != 0) {
         bQuiet = false;
         sprintf(szTrace, "open(%s) at t:%f", pszPath, kUntimedSeconds);
     }
@@ -191,24 +191,24 @@ int FileOpen(const char *pszPath, int nFlags, ...) {
 
 // NTSC-U/C: 0x0047ddf0, PAL: 0x004bbac8
 void FileLogStart(const char *pszPath) {
-    strcpy(g_szFileLogPath, pszPath);
+    strcpy(logfilename, pszPath);
     // The image passes the default protection 0664 alongside the mode.
-    g_fileLog.open(g_szFileLogPath, std::ios::out);
-    g_bFileLogOpen = 1;
+    gFileIOLog.open(logfilename, std::ios::out);
+    bFileLogging = 1;
 }
 
 // NTSC-U/C: 0x0047de48, PAL: 0x004bbb20
 void FileLogStop() {
-    if (g_bFileLogOpen != 0) {
-        g_fileLog.close();
-        g_bFileLogOpen = 0;
+    if (bFileLogging != 0) {
+        gFileIOLog.close();
+        bFileLogging = 0;
     }
 }
 
 // NTSC-U/C: 0x0047de88, PAL: 0x004bbb60
 void FileLogAppend(const char *pszText) {
-    if (g_bFileLogOpen != 0) {
-        g_fileLog << pszText << std::endl;
+    if (bFileLogging != 0) {
+        gFileIOLog << pszText << std::endl;
     }
 }
 

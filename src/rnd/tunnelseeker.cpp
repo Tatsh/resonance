@@ -24,18 +24,18 @@ constexpr int kFrameOffsetRevision = 34;
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
     const char *pszName = pObject->mName.mStr != nullptr ? pObject->mName.mStr : g_szEmptyString;
-    stream.WriteBytes(pszName, pObject->mName.mLen + 1);
+    stream.Write(pszName, pObject->mName.mLen + 1);
 }
 
 template <class T>
 void ReadObjectRef(Stream &stream, T *&refOut) {
     HxStr name(nullptr);
     stream.ReadString(name);
-    refOut = dynamic_cast<T *>(g_manager.Find(name));
+    refOut = dynamic_cast<T *>(TheManager.Find(name));
 }
 
 } // namespace
@@ -206,46 +206,46 @@ void TunnelSeeker::Replace(Object *pFrom, Object *pTo, Object *pReferrer) {
 // NTSC-U/C: 0x0046df88, PAL: 0x004abaf8
 void TunnelSeeker::Save(Stream &stream) const {
     WriteObjectRef(stream, mTrans);
-    stream.Write(&mTargetRing, sizeof(mTargetRing));
+    stream.WriteLE(&mTargetRing, sizeof(mTargetRing));
     WriteObjectRef(stream, mMesh);
     const char chSavedFlag = mSavedFlag;
-    stream.WriteBytes(&chSavedFlag, 1)
-        .Write(&mLane, sizeof(mLane))
-        .Write(&mMeshFrameOffset, sizeof(mMeshFrameOffset))
-        .Write(&mTransFrameOffset, sizeof(mTransFrameOffset))
-        .Write(&mLookFrameOffset, sizeof(mLookFrameOffset));
-    stream.Write(&mStrip.mFirstSlice, sizeof(mStrip.mFirstSlice))
-        .Write(&mStrip.mSliceCount, sizeof(mStrip.mSliceCount))
-        .Write(&mStrip.mRing, sizeof(mStrip.mRing));
+    stream.Write(&chSavedFlag, 1)
+        .WriteLE(&mLane, sizeof(mLane))
+        .WriteLE(&mMeshFrameOffset, sizeof(mMeshFrameOffset))
+        .WriteLE(&mTransFrameOffset, sizeof(mTransFrameOffset))
+        .WriteLE(&mLookFrameOffset, sizeof(mLookFrameOffset));
+    stream.WriteLE(&mStrip.mFirstSlice, sizeof(mStrip.mFirstSlice))
+        .WriteLE(&mStrip.mSliceCount, sizeof(mStrip.mSliceCount))
+        .WriteLE(&mStrip.mRing, sizeof(mStrip.mRing));
     WriteObjectRef(stream, mStrip.mMat);
-    stream.Write(&mStrip.mColor.r, sizeof(mStrip.mColor.r))
-        .Write(&mStrip.mColor.g, sizeof(mStrip.mColor.g))
-        .Write(&mStrip.mColor.b, sizeof(mStrip.mColor.b))
-        .Write(&mStrip.mColor.a, sizeof(mStrip.mColor.a));
+    stream.WriteLE(&mStrip.mColor.r, sizeof(mStrip.mColor.r))
+        .WriteLE(&mStrip.mColor.g, sizeof(mStrip.mColor.g))
+        .WriteLE(&mStrip.mColor.b, sizeof(mStrip.mColor.b))
+        .WriteLE(&mStrip.mColor.a, sizeof(mStrip.mColor.a));
 }
 
 // NTSC-U/C: 0x0046e2d8, PAL: 0x004abe48
 void TunnelSeeker::Load(Stream &stream) {
     ReadObjectRef(stream, mTrans);
-    stream.Read(&mTargetRing, sizeof(mTargetRing));
+    stream.ReadLE(&mTargetRing, sizeof(mTargetRing));
     ReadObjectRef(stream, mMesh);
     unsigned char chSavedFlag;
-    stream.ReadBytes(&chSavedFlag, 1);
+    stream.Read(&chSavedFlag, 1);
     mSavedFlag = chSavedFlag != 0;
-    stream.Read(&mLane, sizeof(mLane));
+    stream.ReadLE(&mLane, sizeof(mLane));
     if (g_nTunnelLoadVersion >= kFrameOffsetRevision) {
-        stream.Read(&mMeshFrameOffset, sizeof(mMeshFrameOffset))
-            .Read(&mTransFrameOffset, sizeof(mTransFrameOffset))
-            .Read(&mLookFrameOffset, sizeof(mLookFrameOffset));
+        stream.ReadLE(&mMeshFrameOffset, sizeof(mMeshFrameOffset))
+            .ReadLE(&mTransFrameOffset, sizeof(mTransFrameOffset))
+            .ReadLE(&mLookFrameOffset, sizeof(mLookFrameOffset));
     }
-    stream.Read(&mStrip.mFirstSlice, sizeof(mStrip.mFirstSlice))
-        .Read(&mStrip.mSliceCount, sizeof(mStrip.mSliceCount))
-        .Read(&mStrip.mRing, sizeof(mStrip.mRing));
+    stream.ReadLE(&mStrip.mFirstSlice, sizeof(mStrip.mFirstSlice))
+        .ReadLE(&mStrip.mSliceCount, sizeof(mStrip.mSliceCount))
+        .ReadLE(&mStrip.mRing, sizeof(mStrip.mRing));
     ReadObjectRef(stream, mStrip.mMat);
-    stream.Read(&mStrip.mColor.r, sizeof(mStrip.mColor.r))
-        .Read(&mStrip.mColor.g, sizeof(mStrip.mColor.g))
-        .Read(&mStrip.mColor.b, sizeof(mStrip.mColor.b))
-        .Read(&mStrip.mColor.a, sizeof(mStrip.mColor.a));
+    stream.ReadLE(&mStrip.mColor.r, sizeof(mStrip.mColor.r))
+        .ReadLE(&mStrip.mColor.g, sizeof(mStrip.mColor.g))
+        .ReadLE(&mStrip.mColor.b, sizeof(mStrip.mColor.b))
+        .ReadLE(&mStrip.mColor.a, sizeof(mStrip.mColor.a));
 }
 
 } // namespace Rnd

@@ -47,7 +47,7 @@ constexpr int kArkIndexAny = 100;
 /**
  * One entry of the archive's file table.
  *
- * The member titles come from the labels OpenArkObject::DumpFiles() writes: "nameHash", "flags",
+ * The member titles come from the labels OpenArkObject::PrintFiles() writes: "nameHash", "flags",
  * "nameOffset", "relPathIndex", "sectorOffset", "sector", and "length". The dump does not write
  * mSize, and its title comes from the one reader, the asynchronous loader, which takes it as the
  * inflated size. The name offset is rebased at mount time from an archive-relative offset to an
@@ -67,7 +67,7 @@ struct ArkFileEntry {
 /**
  * One entry of the archive's relative path table, which lists the directories the files are in.
  *
- * The member titles come from the labels OpenArkObject::DumpRelativePaths() writes: "pathHash",
+ * The member titles come from the labels OpenArkObject::PrintRelPaths() writes: "pathHash",
  * "flags", and "pathOffset". The path offset is rebased at mount time in the same way as a file
  * entry's name offset.
  */
@@ -115,7 +115,7 @@ struct ArkStream {
  * into that block. The header's own path is lowercased in place and must include a `run`
  * component, which is what fixes the archive's mount point.
  *
- * The header member titles come from the labels DumpHeader() writes. The data members are public
+ * The header member titles come from the labels PrintHeader() writes. The data members are public
  * because the stream and sector routines of this unit (ArkStream::FindArk(), SeekArkStream(),
  * ArkfileGetBaseSector(), and ArkfileLogicalToPhysicalSector()) read them directly as free
  * functions.
@@ -188,7 +188,7 @@ public:
     /**
      * Open a stream on one file of this archive.
      *
-     * The stream starts at the file's first byte, and its record is appended to g_aArkStreams.
+     * The stream starts at the file's first byte, and its record is appended to gOpenArkFileTable.
      *
      * @param pEntry The file to read, one of this archive's file entries.
      * @return The new stream handle, without kFileHandleArkStream.
@@ -205,7 +205,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055aa38
      * @ghidraAddress PAL: 0x0059bc58
      */
-    void DumpHeader() const;
+    void PrintHeader() const;
 
     /**
      * Write every entry of the relative path table to standard output.
@@ -215,7 +215,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055ac30
      * @ghidraAddress PAL: 0x0059be50
      */
-    void DumpRelativePaths() const;
+    void PrintRelPaths() const;
 
     /**
      * Write every entry of the file table to standard output.
@@ -225,7 +225,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055ada0
      * @ghidraAddress PAL: 0x0059bfc0
      */
-    void DumpFiles() const;
+    void PrintFiles() const;
 
     /**
      * Write every file name and every relative path to standard output.
@@ -245,7 +245,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0055c3a0
      * @ghidraAddress PAL: 0x0059d5c0
      */
-    void Dump() const;
+    void PrintAll() const;
 
 private:
     /**
@@ -534,7 +534,7 @@ extern std::vector<OpenArkObject *> g_apMountedArks;
  * @ghidraAddress NTSC-U/C: 0x00725ea0
  * @ghidraAddress PAL: 0x00769b40
  */
-extern std::vector<ArkStream> g_aArkStreams;
+extern std::vector<ArkStream> gOpenArkFileTable;
 
 /**
  * Handle OpenArkObject::OpenStream() gives the next stream, incremented after every open.
@@ -542,4 +542,4 @@ extern std::vector<ArkStream> g_aArkStreams;
  * @ghidraAddress NTSC-U/C: 0x00725e88
  * @ghidraAddress PAL: 0x00769b28
  */
-extern int g_nNextArkStreamHandle;
+extern int gOpenFileIndex;

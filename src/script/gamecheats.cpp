@@ -29,7 +29,7 @@
 
 namespace {
 
-// Tracks the enable-all-tracks cheat frees, one SetFreeUntil() each.
+// Tracks the enable-all-tracks cheat frees, one ForceEnabled() each.
 constexpr int kCheatTrackCount = 8;
 
 // Template the powerup cheat runs.
@@ -83,7 +83,7 @@ Py::Object ScriptEnableAllTracksCheat([[maybe_unused]] const Py::Tuple &args) {
     if (pWorld != nullptr && Application::shared()->GetPlayMode() != kPlayModeJam) {
         if (pWorld->mGamer->mEnableMgr != nullptr) {
             for (int nTrack = 0; nTrack < kCheatTrackCount; ++nTrack) {
-                pWorld->mGamer->mEnableMgr->SetFreeUntil(nTrack, 0, -1);
+                pWorld->mGamer->mEnableMgr->ForceEnabled(nTrack, 0, -1);
             }
             pWorld->mGamer->mCheated = 1;
         }
@@ -109,7 +109,7 @@ Py::Object ScriptActivateListenMode([[maybe_unused]] const Py::Tuple &args) {
 // NTSC-U/C: 0x00146590, PAL: 0x001470a8
 Py::Object ScriptSaveRnd([[maybe_unused]] const Py::Tuple &args) {
     Rnd::FilePath::SetRoot(MakeFreqPath(HxStr("tunnel")));
-    Rnd::g_manager.SaveFile(MakeFreqPath(HxStr("tunnel/livegame.rnd")));
+    Rnd::TheManager.SaveFile(MakeFreqPath(HxStr("tunnel/livegame.rnd")));
     return Py::Object();
 }
 

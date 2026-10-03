@@ -37,7 +37,7 @@ constexpr long long kFadeEpochNow = 0;
  * The synthesiser that discards every message, for a build with no sound hardware.
  *
  * File-local to Synth::Setup() in the RTTI, with Synth as its one base. The vtable at
- * `0x007d2e50` fills the pure SendMidi() with an empty body and inherits every other slot. The
+ * `0x007d2e50` fills the pure PlayMidi() with an empty body and inherits every other slot. The
  * object is Synth's four bytes.
  */
 class NullSynth : public Synth {
@@ -61,7 +61,7 @@ public:
      * @ghidraAddress PAL: 0x0013adc0
      */
     // NTSC-U/C: 0x0013a478, PAL: 0x0013adc0
-    virtual void SendMidi(unsigned char, unsigned char, unsigned char) {
+    virtual void PlayMidi(unsigned char, unsigned char, unsigned char) {
     }
 };
 
@@ -107,16 +107,16 @@ public:
     virtual int Tick(long long nElapsedNs) {
         const int nElapsedMs = static_cast<int>((nElapsedNs + kNsRounding) / kNsPerMs);
         float flLevel;
-        const int bContinue = mSource->Sample(static_cast<float>(nElapsedMs), &flLevel);
+        const int bContinue = mSource->GetValue(static_cast<float>(nElapsedMs), &flLevel);
         const int nVolume = static_cast<int>(flLevel * kFadeVolumeScale);
         for (unsigned char nChannel = 0; nChannel < kChannelCount; ++nChannel) {
-            mSynth->SendMidi(kStatusControlChange | nChannel,
+            mSynth->PlayMidi(kStatusControlChange | nChannel,
                              kControllerChannelVolume,
                              static_cast<unsigned char>(nVolume));
         }
         if (nVolume == 0) {
             for (int nChannel = 0; nChannel < kChannelCount; ++nChannel) {
-                mSynth->SendMidi(kStatusControlChange | nChannel, kControllerAllNotesOff, 0);
+                mSynth->PlayMidi(kStatusControlChange | nChannel, kControllerAllNotesOff, 0);
             }
         }
         return bContinue;
@@ -132,11 +132,11 @@ private:
 // NTSC-U/C: 0x00139fd0, PAL: 0x0013a918
 void Synth::Setup() {
     for (unsigned char nChannel = 0; nChannel < kChannelCount; ++nChannel) {
-        SendMidi(kStatusPitchBend | nChannel, 0, kPitchBendCentre);
-        SendMidi(kStatusControlChange | nChannel, kControllerResetAll, 0);
-        SendMidi(kStatusControlChange | nChannel, kControllerAllNotesOff, 0);
-        SendMidi(kStatusControlChange | nChannel, kControllerChannelVolume, kSetupVolume);
-        SendMidi(kStatusControlChange | nChannel, kControllerExpression, kSetupExpression);
+        PlayMidi(kStatusPitchBend | nChannel, 0, kPitchBendCentre);
+        PlayMidi(kStatusControlChange | nChannel, kControllerResetAll, 0);
+        PlayMidi(kStatusControlChange | nChannel, kControllerAllNotesOff, 0);
+        PlayMidi(kStatusControlChange | nChannel, kControllerChannelVolume, kSetupVolume);
+        PlayMidi(kStatusControlChange | nChannel, kControllerExpression, kSetupExpression);
     }
 }
 
@@ -197,33 +197,33 @@ void Synth::SetPaused([[maybe_unused]] int bPaused) {
 // NTSC-U/C: 0x0013a220, PAL: 0x0013ab68
 void Synth::AllNotesOff() {
     for (unsigned char nChannel = 0; nChannel < kChannelCount; ++nChannel) {
-        SendMidi(kStatusControlChange | nChannel, kControllerAllNotesOff, 0);
+        PlayMidi(kStatusControlChange | nChannel, kControllerAllNotesOff, 0);
     }
 }
 
 // NTSC-U/C: 0x0013a288, PAL: 0x0013abd0
 void Synth::AllNotesOffExceptSfxChannel() {
     for (unsigned char nChannel = 0; nChannel < kSfxChannel; ++nChannel) {
-        SendMidi(kStatusControlChange | nChannel, kControllerAllNotesOff, 0);
+        PlayMidi(kStatusControlChange | nChannel, kControllerAllNotesOff, 0);
     }
 }
 
 // NTSC-U/C: 0x0013a2f0, PAL: 0x0013ac38
 void Synth::SetChannelVolume(unsigned char nVolume) {
     for (unsigned char nChannel = 0; nChannel < kChannelCount; ++nChannel) {
-        SendMidi(kStatusControlChange | nChannel, kControllerChannelVolume, nVolume);
+        PlayMidi(kStatusControlChange | nChannel, kControllerChannelVolume, nVolume);
     }
 }
 
 // The address below is the out-of-line copy.
 // NTSC-U/C: 0x0013a360, PAL: 0x0013aca8
 inline void Synth::OnStdMidi(StdMidiMsg *pMsg) {
-    SendMidi(pMsg->mStatus, pMsg->mData1, pMsg->mData2);
+    PlayMidi(pMsg->mStatus, pMsg->mData1, pMsg->mData2);
 }
 
 // NTSC-U/C: 0x0013a570, PAL: 0x0013aeb8
-void Synth::HandleMessage(Message *pMsg) {
-    if (pMsg->Type() != static_cast<int>(g_dwStdMidiMsgType)) {
+void Synth::DispatchPriv(Message *pMsg) {
+    if (pMsg->Type() != static_cast<int>(StdMidiMsg::sID)) {
         return;
     }
 

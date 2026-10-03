@@ -33,7 +33,7 @@ inline APalette *ResolvePalette(const ABitmap &source, const ABitmap &canvas) {
     if (canvas.mPalette != nullptr) {
         return canvas.mPalette;
     }
-    return g_pDefaultPalette;
+    return ACanvas::palDefault;
 }
 
 } // namespace
@@ -143,8 +143,8 @@ void ACanvasLin32::DrawBitmapLin4U(const ABitmap &source, int nX, int nY) {
     const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
     unsigned char *pDestRow = ByteAt(mBitmap, nX, nY);
     for (int nRemainingRows = source.mHeight; nRemainingRows > 0; --nRemainingRows) {
-        Unpack4(pSourceRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
-        const unsigned char *pIndex = g_abCanvasRowScratch;
+        Unpack4(pSourceRow, ACanvas::tempBuff, source.mWidth, source.mOddNibbleStart);
+        const unsigned char *pIndex = ACanvas::tempBuff;
         unsigned int *pDest = reinterpret_cast<unsigned int *>(pDestRow);
         for (int nRemaining = source.mWidth; nRemaining > 0; --nRemaining) {
             if (source.mHasTransparentColor == 0 ||

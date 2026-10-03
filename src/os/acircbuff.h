@@ -34,7 +34,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0060e930
      * @ghidraAddress PAL: 0x0064f5a0
      */
-    int FreeSpace();
+    int Avail();
 
     /**
      * Report whether nBytes fit in one contiguous write. The routine has no caller.
@@ -44,7 +44,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0060e998
      * @ghidraAddress PAL: 0x0064f608
      */
-    int HasSpace(int nBytes);
+    int IsRoom(int nBytes);
 
     /**
      * Move the write pointer back to mBuff once it has reached mWrap, unless the read pointer is
@@ -53,7 +53,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0060ea20
      * @ghidraAddress PAL: 0x0064f690
      */
-    void WrapWrite();
+    void WrapWriteIfOk();
 
     /**
      * Consume nBytes, wrapping the read pointer past mWrap.
@@ -76,7 +76,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0060ea80
      * @ghidraAddress PAL: 0x0064f6f0
      */
-    int IsClearOfWrite(const char *pStart, int nBytes) const;
+    int FullyRead(const char *pStart, int nBytes) const;
 
     /**
      * Clamp nBytes to the space between the write pointer and mWrap.
@@ -86,7 +86,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0060eaf0
      * @ghidraAddress PAL: 0x0064f760
      */
-    int ContiguousWriteSize(int nBytes) const;
+    int WillWriteWrap(int nBytes) const;
 
     /**
      * Commit nBytes written at the write pointer.
@@ -118,8 +118,8 @@ public:
     /**
      * Read nBytes from a file into the buffer in one piece. The routine has no caller.
      *
-     * The placement rule is the one Write() uses. The count FileRead() returns is ignored, and the
-     * write pointer advances by nBytes regardless.
+     * The placement rule is the one the other Write() uses. The count FileRead() returns is
+     * ignored, and the write pointer advances by nBytes regardless.
      *
      * @param nFile The file to read.
      * @param nBytes The number of bytes.
@@ -127,7 +127,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0060ec08
      * @ghidraAddress PAL: 0x0064f878
      */
-    int ReadFromFile(int nFile, int nBytes);
+    int Write(int nFile, int nBytes);
 
     /**
      * Log the pointers and the size under a label.

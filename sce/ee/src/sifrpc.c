@@ -115,7 +115,7 @@ static RpcPacket g_aRpcReplies[kRpcPacketCount] __attribute__((aligned(64)));
 static RpcPacket g_aRpcClientPackets[kRpcPacketCount] __attribute__((aligned(64)));
 
 // NTSC-U/C: 0x008e0140, PAL: 0x00925100
-static RpcState g_rpcState;
+static RpcState _data_table;
 
 // NTSC-U/C: 0x00564c50, PAL: 0x005a33c0
 static RpcPacket *getPacket(RpcState *pState) {
@@ -283,20 +283,20 @@ void sceSifInitRpc(unsigned int mode) {
     sceSifInitCmd();
 
     DIntr();
-    g_rpcState.nPacketId = 1;
-    g_rpcState.pPackets = UNCACHED_SEG(g_aRpcPackets);
-    g_rpcState.nPacketCount = kRpcPacketCount;
-    g_rpcState.nUnusedFirst = 0;
-    g_rpcState.nUnusedSecond = 0;
-    g_rpcState.pReplies = UNCACHED_SEG(g_aRpcReplies);
-    g_rpcState.nReplyCount = kRpcPacketCount;
-    g_rpcState.pClientPackets = UNCACHED_SEG(g_aRpcClientPackets);
-    g_rpcState.nClientPacketCount = kRpcPacketCount;
-    g_rpcState.nNextReply = 0;
-    sceSifAddCmdHandler(SIF_CMDC_RPC_END, _request_end, &g_rpcState);
-    sceSifAddCmdHandler(SIF_CMDC_RPC_BIND, _request_bind, &g_rpcState);
-    sceSifAddCmdHandler(SIF_CMDC_RPC_CALL, _request_call, &g_rpcState);
-    sceSifAddCmdHandler(SIF_CMDC_RPC_RDATA, _request_rdata, &g_rpcState);
+    _data_table.nPacketId = 1;
+    _data_table.pPackets = UNCACHED_SEG(g_aRpcPackets);
+    _data_table.nPacketCount = kRpcPacketCount;
+    _data_table.nUnusedFirst = 0;
+    _data_table.nUnusedSecond = 0;
+    _data_table.pReplies = UNCACHED_SEG(g_aRpcReplies);
+    _data_table.nReplyCount = kRpcPacketCount;
+    _data_table.pClientPackets = UNCACHED_SEG(g_aRpcClientPackets);
+    _data_table.nClientPacketCount = kRpcPacketCount;
+    _data_table.nNextReply = 0;
+    sceSifAddCmdHandler(SIF_CMDC_RPC_END, _request_end, &_data_table);
+    sceSifAddCmdHandler(SIF_CMDC_RPC_BIND, _request_bind, &_data_table);
+    sceSifAddCmdHandler(SIF_CMDC_RPC_CALL, _request_call, &_data_table);
+    sceSifAddCmdHandler(SIF_CMDC_RPC_RDATA, _request_rdata, &_data_table);
     EIntr();
 
     if (sceSifGetReg(SIF_SYSREG_RPCINIT) != 0) {
@@ -320,7 +320,7 @@ void sceSifExitRpc(void) {
 // NTSC-U/C: 0x00564ea0, PAL: 0x005a3610
 int sceSifGetOtherData(sceSifReceiveData *rd, void *src, void *dest, int size, unsigned int mode) {
     struct SemaParam sema = {0};
-    RpcPacket *pPacket = getPacket(&g_rpcState);
+    RpcPacket *pPacket = getPacket(&_data_table);
 
     if (pPacket == NULL) {
         return kRpcErrorNoPacket;
@@ -363,7 +363,7 @@ int sceSifBindRpc(sceSifClientData *bd, unsigned int command, unsigned int mode)
 
     bd->command = 0;
     bd->serve = NULL;
-    pPacket = getPacket(&g_rpcState);
+    pPacket = getPacket(&_data_table);
     if (pPacket == NULL) {
         return kRpcErrorNoPacket;
     }
@@ -407,7 +407,7 @@ int sceSifCallRpc(sceSifClientData *bd,
                   sceSifEndFunc end,
                   void *endpara) {
     struct SemaParam sema = {0};
-    RpcPacket *pPacket = getPacket(&g_rpcState);
+    RpcPacket *pPacket = getPacket(&_data_table);
 
     if (pPacket == NULL) {
         return kRpcErrorNoPacket;
@@ -483,10 +483,10 @@ void sceSifSetRpcQueue(sceSifQueueData *qd, int key) {
     qd->start = NULL;
     qd->end = NULL;
     qd->next = NULL;
-    if (g_rpcState.pQueues == NULL) {
-        g_rpcState.pQueues = qd;
+    if (_data_table.pQueues == NULL) {
+        _data_table.pQueues = qd;
     } else {
-        for (pLast = g_rpcState.pQueues; pLast->next != NULL; pLast = pLast->next) {
+        for (pLast = _data_table.pQueues; pLast->next != NULL; pLast = pLast->next) {
         }
         pLast->next = qd;
     }
@@ -547,9 +547,9 @@ sceSifQueueData *sceSifRemoveRpcQueue(sceSifQueueData *qd) {
     sceSifQueueData *pQueue;
 
     DIntr();
-    pQueue = g_rpcState.pQueues;
+    pQueue = _data_table.pQueues;
     if (pQueue == qd) {
-        g_rpcState.pQueues = pQueue->next;
+        _data_table.pQueues = pQueue->next;
     } else {
         while (pQueue != NULL && pQueue->next != qd) {
             pQueue = pQueue->next;
@@ -602,9 +602,9 @@ void sceSifExecRequest(sceSifServeData *sd) {
 
     DIntr();
     if ((sd->rid & kRecordIndexed) != 0) {
-        pReply = _sceRpcGetFPacket2(&g_rpcState, (int)(sd->rid >> kRecordIndexShift));
+        pReply = _sceRpcGetFPacket2(&_data_table, (int)(sd->rid >> kRecordIndexShift));
     } else {
-        pReply = nextReplyPacket(&g_rpcState);
+        pReply = nextReplyPacket(&_data_table);
     }
     EIntr();
 

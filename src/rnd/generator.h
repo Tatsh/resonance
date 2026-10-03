@@ -63,7 +63,7 @@ constexpr int kPathVarAxisCount = 3;
  *
  * Four vtables belong to the class, each identified by a GetTypeInfo slot addressing `0x0045db10`
  * and by an adjustment matching its subobject offset. The Drawable table at `0x0081c508` adjusts
- * by `-0xd0` and overrides only DrawSelf(). The Transformable table at `0x0081c530` adjusts by
+ * by `-0xd0` and overrides only DrawShowing(). The Transformable table at `0x0081c530` adjusts by
  * `-0x20` and overrides nothing. The Animatable table at `0x0081c550` has a zero adjustment and
  * overrides only SetFrameSelf(). The Object subobject table at `0x0081c578` adjusts by `-0x140`
  * and stores the seven Object virtuals. Every table ends in an all-zero entry, which is the
@@ -85,7 +85,7 @@ constexpr int kPathVarAxisCount = 3;
  * SetFrameSelf() expires the instances whose age passed the path span, then spawns instances while
  * the next spawn frame has not passed the current one, culling against mBirthCam and
  * mBirthSquareDist first and giving each instance a random rotation drawn from mPathVarMax and a
- * random uniform scale drawn from mScaleGenLow and mScaleGenHigh. DrawSelf() selects one of four
+ * random uniform scale drawn from mScaleGenLow and mScaleGenHigh. DrawShowing() selects one of four
  * draw paths from the table of pointers to member functions at `0x0081c448`, DrawInstanceView(),
  * DrawInstanceMesh(), DrawInstanceMultiMesh(), and DrawInstanceParticle(), preferring mView, then
  * mMesh, then mMultiMesh, then mParticleSys.
@@ -225,7 +225,7 @@ public:
     std::list<Instance> &Instances();
 
     /**
-     * Register the class with Rnd::g_manager under the key "Generator".
+     * Register the class with Rnd::TheManager under the key "Generator".
      *
      * The class installs no creator hook, unlike Rnd::Blur and Rnd::Tex, so the thunk the registry
      * stores calls the constructor directly.
@@ -323,14 +323,14 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0045ea18
      * @ghidraAddress PAL: 0x0049c0c0
      */
-    void SetBirthCam(Cam *pCam);
+    void SetBirthCamera(Cam *pCam);
 
     /**
      * Replace the path and set the frame span the instances travel.
      *
      * Moves the reference from the previous path to the new one. A bound of -1 takes the matching
-     * end of the path's keyframe range, from TransAnim::StartFrame() or TransAnim::EndFrame(), and
-     * any other value is stored as given. AppTunnel calls it.
+     * end of the path's keyframe range, from TransAnim::StartFrame() or
+     * TransAnim::FilteredFrameEnd(), and any other value is stored as given. AppTunnel calls it.
      *
      * @param pPath The path, or null.
      * @param flStartFrame The path frame an instance starts at, or -1.
@@ -603,7 +603,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0045dca0
      * @ghidraAddress PAL: 0x0049b348
      */
-    void GetPathVarMax(float &flX, float &flY, float &flZ) const {
+    void GetGenPathVarMax(float &flX, float &flY, float &flZ) const {
         flX = mPathVarMax[0];
         flY = mPathVarMax[1];
         flZ = mPathVarMax[2];
@@ -621,7 +621,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x0045b040
      * @ghidraAddress PAL: 0x004986b0
      */
-    virtual int DrawSelf();
+    virtual int DrawShowing();
 
     /**
      * Expire and spawn instances for a frame.
@@ -646,7 +646,7 @@ private:
     // invokes it, and the title is inferred.
     void AcquireRefs();
 
-    // The four draw paths DrawSelf() selects from the table at 0x0081c448. Each receives the
+    // The four draw paths DrawShowing() selects from the table at 0x0081c448. Each receives the
     // composed transform of one instance and the age of that instance in frames.
 
     // NTSC-U/C: 0x0045ea70, PAL: 0x0049c118
@@ -709,7 +709,7 @@ private:
     // allocated and SetFrameSelf() advances it through Rnd::Particle::mNext. The dump omits it, so
     // the title is inferred from those two routines.
     Particle *mParticleCursor; // +0x138
-    // Entry of the transform list of mMultiMesh the multi-mesh draw path writes next. DrawSelf()
+    // Entry of the transform list of mMultiMesh the multi-mesh draw path writes next. DrawShowing()
     // rewinds it to the head of the list, and only the multi-mesh draw path reads it. The title is
     // inferred.
     std::list<Transform>::iterator mMultiMeshCursor; // +0x13c

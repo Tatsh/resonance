@@ -18,9 +18,7 @@ class Recorder;
  * Scheduler that runs queued commands when their due time arrives.
  *
  * The class is not polymorphic and has no RTTI, and no literal in the retail images identifies it.
- * Its name comes from the debugging symbols of the North American demo release. The demo's
- * constructor, StopRecOrPlayback(), and ResetTimes() have the same instructions as this class's
- * constructor, Close(), and RestartClock().
+ * Its name comes from the debugging symbols of the North American demo release.
  *
  * What the class does is measured rather than inferred. The member at `+0x00` is the one pointer of
  * a red-black tree of Sch::TimedCommand pointers, whose header node the constructor takes from the
@@ -189,13 +187,12 @@ public:
     /**
      * Reset the clock to zero and the current time with it.
      *
-     * Sch::Playbacker's start routine calls this before queueing a recording. The title is
-     * inferred.
+     * Sch::Playbacker::Play() calls this before queueing a recording.
      *
      * @ghidraAddress NTSC-U/C: 0x004aca30
      * @ghidraAddress PAL: 0x004eabd0
      */
-    void RestartClock();
+    void ResetTimes();
 
     /**
      * Release the recorder and the playback and leave both stream modes.
@@ -205,7 +202,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004ac9e8
      * @ghidraAddress PAL: 0x004eab88
      */
-    void Close();
+    void StopRecOrPlayback();
 
     /**
      * Start replaying a recorded command stream.
@@ -271,11 +268,11 @@ private:
     // Every queued wrapper, each holding one reference the queue gives back when it runs or is
     // withdrawn.
     std::multiset<Sch::TimedCommand *, QueueOrder> mQueue; // +0x00
-    // +0x0c 1 while recording, 2 while playing back; released by Close().
+    // +0x0c 1 while recording, 2 while playing back; released by StopRecOrPlayback().
     int mStreamMode;
-    // The recording BeginRecording() installs, released by Close().
+    // The recording BeginRecording() installs, released by StopRecOrPlayback().
     Recorder *mRecorder; // +0x10
-    // The replay StartPlayback() installs, released by Close().
+    // The replay StartPlayback() installs, released by StopRecOrPlayback().
     Playbacker *mPlayback; // +0x14
     long long mNowNs;      // +0x18 the due tick of the command most recently run
     int mBlocked;          // +0x48 blocks every queueing path while set

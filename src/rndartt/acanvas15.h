@@ -52,7 +52,7 @@ public:
     /**
      * Set the pen colour from a palette index.
      *
-     * Returns with no change when neither the bitmap nor g_pDefaultPalette supplies a palette.
+     * Returns with no change when neither the bitmap nor ACanvas::palDefault supplies a palette.
      * The index is truncated to eight bits, and the 8888 entry is packed to 1555.
      *
      * @param nIndex The palette index.

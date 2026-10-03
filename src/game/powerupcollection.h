@@ -50,7 +50,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x001cc9b0
          * @ghidraAddress PAL: 0x001d2868
          */
-        bool IsType(int nType) const {
+        bool operator==(int nType) const {
             return mPowerup->Type() == nType;
         }
 
@@ -91,7 +91,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001cb230
      * @ghidraAddress PAL: 0x001d10e8
      */
-    virtual void AddPowerup(int nType);
+    virtual void Add(int nType);
 
     /**
      * Move the selection by nDelta, wrapping, and stop at the first entry with a count above zero.
@@ -144,7 +144,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001cb620
      * @ghidraAddress PAL: 0x001d14d8
      */
-    virtual void AnnounceState();
+    virtual void SendState();
 
 private:
     std::vector<Entry> mEntries; // +0x14

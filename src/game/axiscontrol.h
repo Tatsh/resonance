@@ -50,7 +50,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0019ed80
      * @ghidraAddress PAL: 0x001a4ae8
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 private:
     // Records the stick position. A new coarse position (the value times 1024, divided by 8)
@@ -68,14 +68,14 @@ private:
     // NTSC-U/C: 0x0019ecf0, PAL: 0x001a4a58
     void SendPitchBend(int nTick, int nValue);
 
-    // The out-of-line copy of the StdMidiMsg branch HandleMessage() expands inline. A note-on at
+    // The out-of-line copy of the StdMidiMsg branch DispatchPriv() expands inline. A note-on at
     // mSustainTick starts a bend from the stick position, snapped to the centre within 50, and
     // any other note-on ends a bend in progress with a centred pitch bend. The image has no
     // caller of this copy.
     // NTSC-U/C: 0x0019fab0, PAL: 0x001a5818
     void OnStdMidi(StdMidiMsg *pMsg);
 
-    // The out-of-line copy of the AllNotesOffMsg branch HandleMessage() expands inline. A bend in
+    // The out-of-line copy of the AllNotesOffMsg branch DispatchPriv() expands inline. A bend in
     // progress ends with a centred pitch bend at the message's tick.
     // NTSC-U/C: 0x0019fb40, PAL: 0x001a58a8
     void OnAllNotesOff(AllNotesOffMsg *pMsg);
@@ -87,5 +87,5 @@ private:
     int mBending;          // +0x28
     int mBendOrigin;       // +0x2c, the stick position the bend started from
     Mid::MBT mSustainTick; // +0x30
-    Player *mPlayer;       // +0x34, g_nullPlayer until a TrackSelectMsg
+    Player *mPlayer;       // +0x34, NullPlayer::sInstance until a TrackSelectMsg
 };

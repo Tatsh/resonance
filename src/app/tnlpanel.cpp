@@ -32,11 +32,11 @@ constexpr float kAnimFrames = 480.0f;
 constexpr float kFxFrames = 200.0f;
 
 inline Rnd::Mat *FindMat(const char *pszName) {
-    return dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 inline Rnd::MeshAnim *FindMeshAnim(const char *pszName) {
-    return dynamic_cast<Rnd::MeshAnim *>(Rnd::g_manager.Find(HxStr(pszName)));
+    return dynamic_cast<Rnd::MeshAnim *>(Rnd::TheManager.Find(HxStr(pszName)));
 }
 
 } // namespace

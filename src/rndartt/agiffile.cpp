@@ -78,16 +78,16 @@ const char *const kSignature = "GIF";
 signed char s_cByte;
 
 // NTSC-U/C: 0x008e8170, PAL: 0x0092d170
-APalette s_palette;
+APalette pal;
 
 // NTSC-U/C: 0x008e8578, PAL: 0x0092d578
-GifImageDescriptor s_image;
+GifImageDescriptor imageBlock;
 
 // NTSC-U/C: 0x008e8588, PAL: 0x0092d588
-GifGraphicControl s_graphicControl;
+GifGraphicControl gce;
 
 // NTSC-U/C: 0x008e8590, PAL: 0x0092d590
-GifScreenDescriptor s_screen;
+GifScreenDescriptor gifHeader;
 
 // NTSC-U/C: 0x007b35e8, PAL: 0x007f72e8
 // the low n bits for each code size n.
@@ -116,16 +116,16 @@ const int kInterlaceStep[] = {8, 8, 4, 2, 0, 0};
 const int kInterlaceStart[] = {0, 4, 2, 1, 0, 0};
 
 // NTSC-U/C: 0x007b3638, PAL: 0x007f7338
-unsigned char s_abStack[kMaxCodeCount];
+unsigned char firstcodestack[kMaxCodeCount];
 
 // NTSC-U/C: 0x007b4638, PAL: 0x007f8338
-unsigned char s_abSuffix[kMaxCodeCount];
+unsigned char lastcodestack[kMaxCodeCount];
 
 // NTSC-U/C: 0x007b5638, PAL: 0x007f9338
-short s_anPrefix[kMaxCodeCount];
+short codestack[kMaxCodeCount];
 
 // NTSC-U/C: 0x007b7638, PAL: 0x007fb338
-unsigned char s_abLine[kLineBufferSize];
+unsigned char linebuffer[kLineBufferSize];
 
 // Step to the next data byte, reading the next sub-block when the current one is used up. A zero
 // length block or a short read fails.
@@ -154,26 +154,26 @@ NextDataByte(FILE *pFile, unsigned char *pBlock, unsigned char **ppByte, unsigne
 int AGifFile::StartRead() {
     GifScreenDescriptor screen;
     fread(&screen, 1, kScreenDescriptorSize, mFile);
-    s_screen = screen;
-    if (memcmp(s_screen.mSignature, kSignature, kSignatureCompareLength) != 0) {
+    gifHeader = screen;
+    if (memcmp(gifHeader.mSignature, kSignature, kSignatureCompareLength) != 0) {
         return kAGfxFileBadFormat;
     }
-    memset(&s_graphicControl, 0, sizeof(s_graphicControl));
-    if ((s_screen.mFlags & kColorTableFlag) != 0) {
+    memset(&gce, 0, sizeof(gce));
+    if ((gifHeader.mFlags & kColorTableFlag) != 0) {
         unsigned char abColors[kMaxColorCount * kRGBByteCount];
         memset(abColors, 0, sizeof(abColors));
-        const int nCount = 1 << ((s_screen.mFlags & kColorTableSizeMask) + 1);
+        const int nCount = 1 << ((gifHeader.mFlags & kColorTableSizeMask) + 1);
         if (nCount > kMaxColorCount) {
             return kAGfxFileBadFormat;
         }
         fread(abColors, 1, nCount * kRGBByteCount, mFile);
-        s_palette.SetEntriesRGB(abColors, 0, nCount);
+        pal.SetEntriesRGB(abColors, 0, nCount);
     }
     return kAGfxFileOk;
 }
 
 // NTSC-U/C: 0x0062aaf8, PAL: 0x0066b688
-int AGifFile::ReadImage(ABitmap *pImage, int *pbEnd) {
+int AGifFile::ReadFrame(ABitmap *pImage, int *pbEnd) {
     *pbEnd = 0;
     for (;;) {
         fread(&s_cByte, 1, 1, mFile);
@@ -188,27 +188,27 @@ int AGifFile::ReadImage(ABitmap *pImage, int *pbEnd) {
         if (cIntroducer == kIntroducerImage) {
             GifImageDescriptor image;
             fread(&image, 1, kImageDescriptorSize, mFile);
-            s_image = image;
+            imageBlock = image;
             *pImage = ABitmap(nullptr,
                               kABitmapFormatLinear8,
                               false,
-                              s_image.mWidth,
-                              s_image.mHeight,
-                              s_image.mWidth);
-            mBounds.mLeft = static_cast<short>(s_image.mLeft);
-            mBounds.mTop = static_cast<short>(s_image.mTop);
-            mBounds.mRight = static_cast<short>(s_image.mLeft + s_image.mWidth);
-            mBounds.mBottom = static_cast<short>(s_image.mTop + s_image.mHeight);
-            if ((s_image.mFlags & kColorTableFlag) != 0) {
-                const int nCount = 1 << ((s_image.mFlags & kColorTableSizeMask) + 1);
+                              imageBlock.mWidth,
+                              imageBlock.mHeight,
+                              imageBlock.mWidth);
+            mBounds.mLeft = static_cast<short>(imageBlock.mLeft);
+            mBounds.mTop = static_cast<short>(imageBlock.mTop);
+            mBounds.mRight = static_cast<short>(imageBlock.mLeft + imageBlock.mWidth);
+            mBounds.mBottom = static_cast<short>(imageBlock.mTop + imageBlock.mHeight);
+            if ((imageBlock.mFlags & kColorTableFlag) != 0) {
+                const int nCount = 1 << ((imageBlock.mFlags & kColorTableSizeMask) + 1);
                 if (nCount > kMaxColorCount) {
                     return kAGfxFileBadFormat;
                 }
                 unsigned char abColors[kMaxColorCount * kRGBByteCount];
                 fread(abColors, 1, nCount * kRGBByteCount, mFile);
-                s_palette.SetEntriesRGB(abColors, 0, nCount);
+                pal.SetEntriesRGB(abColors, 0, nCount);
             }
-            pImage->mPalette = new APalette(s_palette.mEntries, s_palette.mEnd);
+            pImage->mPalette = new APalette(pal.mEntries, pal.mEnd);
             fread(&s_cByte, 1, 1, mFile);
             if (s_cByte == kEndOfFile) {
                 return kAGfxFileBadFormat;
@@ -217,9 +217,9 @@ int AGifFile::ReadImage(ABitmap *pImage, int *pbEnd) {
                 0) {
                 return kAGfxFileBadFormat;
             }
-            if ((s_graphicControl.mFlags & kTransparentFlag) != 0) {
+            if ((gce.mFlags & kTransparentFlag) != 0) {
                 pImage->mHasTransparentColor = 1;
-                pImage->mTransparentColor = s_graphicControl.mTransparentIndex;
+                pImage->mTransparentColor = gce.mTransparentIndex;
             }
             return kAGfxFileOk;
         }
@@ -240,7 +240,7 @@ int AGifFile::ReadImage(ABitmap *pImage, int *pbEnd) {
                 return kAGfxFileBadFormat;
             }
         }
-        ReadExtensionBlock();
+        ReadExtension();
     }
 }
 
@@ -250,7 +250,7 @@ int AGifFile::Write([[maybe_unused]] const ABitmap &bitmap) {
 }
 
 // NTSC-U/C: 0x0062ae10, PAL: 0x0066b9a0
-void AGifFile::ReadExtensionBlock() {
+void AGifFile::ReadExtension() {
     unsigned char nLabel;
     fread(&nLabel, 1, 1, mFile);
     int nSkip;
@@ -260,12 +260,12 @@ void AGifFile::ReadExtensionBlock() {
     case kLabelGraphicControl: {
         GifGraphicControl control;
         fread(&control, 1, kGraphicControlSize, mFile);
-        s_graphicControl.mBlockSize = control.mBlockSize;
-        s_graphicControl.mFlags = control.mFlags;
-        s_graphicControl.mDelay = control.mDelay;
-        s_graphicControl.mTransparentIndex = control.mTransparentIndex;
+        gce.mBlockSize = control.mBlockSize;
+        gce.mFlags = control.mFlags;
+        gce.mDelay = control.mDelay;
+        gce.mTransparentIndex = control.mTransparentIndex;
         fread(&nDiscard, 1, 1, mFile);
-        mDuration += s_graphicControl.mDelay * kMsPerDelayUnit;
+        mDuration += gce.mDelay * kMsPerDelayUnit;
         return;
     }
     case kLabelPlainText:
@@ -321,7 +321,7 @@ int AGifFile::DecodeLzwImage(FILE *pFile, int nCodeSize, unsigned char *pDest) {
     const short nClear = static_cast<short>(1 << nCodeSize);
     short nCurrentSize = static_cast<short>(nInitialSize);
     short nMaxCode = static_cast<short>(1 << nCurrentSize);
-    int nRowsLeft = s_image.mHeight;
+    int nRowsLeft = imageBlock.mHeight;
     short nNextCode = static_cast<short>(nClear + 2);
     short nFirstChar = kNoCode;
     short nOldCode = kNoCode;
@@ -372,7 +372,7 @@ int AGifFile::DecodeLzwImage(FILE *pFile, int nCodeSize, unsigned char *pDest) {
             continue;
         }
 
-        unsigned char *pStack = s_abStack;
+        unsigned char *pStack = firstcodestack;
         short nChar = nCode;
         if (nCode == nNextCode) {
             if (nOldCode == kNoCode) {
@@ -382,24 +382,24 @@ int AGifFile::DecodeLzwImage(FILE *pFile, int nCodeSize, unsigned char *pDest) {
             nChar = nOldCode;
         }
         while (nChar >= nClear) {
-            *pStack++ = s_abSuffix[nChar];
-            nChar = s_anPrefix[nChar];
+            *pStack++ = lastcodestack[nChar];
+            nChar = codestack[nChar];
         }
         nFirstChar = nChar;
 
         for (;;) {
-            s_abLine[nColumn] = static_cast<unsigned char>(nChar);
+            linebuffer[nColumn] = static_cast<unsigned char>(nChar);
             nColumn = static_cast<short>(nColumn + 1);
-            if (nColumn >= s_image.mWidth) {
-                if (nRow < s_image.mHeight) {
-                    memcpy(pDest + static_cast<long long>(nRow) * s_image.mWidth,
-                           s_abLine,
-                           s_image.mWidth);
+            if (nColumn >= imageBlock.mWidth) {
+                if (nRow < imageBlock.mHeight) {
+                    memcpy(pDest + static_cast<long long>(nRow) * imageBlock.mWidth,
+                           linebuffer,
+                           imageBlock.mWidth);
                 }
                 nColumn = 0;
-                if ((s_image.mFlags & kInterlaceFlag) != 0) {
+                if ((imageBlock.mFlags & kInterlaceFlag) != 0) {
                     nRow = static_cast<short>(nRow + kInterlaceStep[nPass]);
-                    if (nRow >= s_image.mHeight) {
+                    if (nRow >= imageBlock.mHeight) {
                         ++nPass;
                         nRow = static_cast<short>(kInterlaceStart[nPass]);
                     }
@@ -410,15 +410,15 @@ int AGifFile::DecodeLzwImage(FILE *pFile, int nCodeSize, unsigned char *pDest) {
                     return 1;
                 }
             }
-            if (pStack <= s_abStack) {
+            if (pStack <= firstcodestack) {
                 break;
             }
             nChar = *--pStack;
         }
 
         if (nNextCode < kMaxCodeCount && nOldCode != kNoCode) {
-            s_anPrefix[nNextCode] = nOldCode;
-            s_abSuffix[nNextCode] = static_cast<unsigned char>(nFirstChar);
+            codestack[nNextCode] = nOldCode;
+            lastcodestack[nNextCode] = static_cast<unsigned char>(nFirstChar);
             nNextCode = static_cast<short>(nNextCode + 1);
             if (nNextCode >= nMaxCode && nCurrentSize < kMaxCodeSize) {
                 nCurrentSize = static_cast<short>(nCurrentSize + 1);

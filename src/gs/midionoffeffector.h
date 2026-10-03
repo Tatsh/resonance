@@ -47,7 +47,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001a0860
      * @ghidraAddress PAL: 0x001a65c8
      */
-    virtual void Enable(int bEnabled);
+    virtual void SetEnabled(int bEnabled);
 
 private:
     int mType;                 // +0x14

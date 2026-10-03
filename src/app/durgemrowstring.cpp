@@ -46,7 +46,7 @@ inline void BlendVector(const Vector3 &a, float flA, const Vector3 &b, float flB
 // NTSC-U/C: 0x00432830, PAL: 0x0046e520
 DurGemRowString::DurGemRowString(int nLane, Rnd::Mat *pMat, Rnd::View *pView, float flWidth)
     : mString(nullptr), mLane(nLane), mRow(kUnplacedRow), mCount(0) {
-    mString = Rnd::String::NewString(DurGemTrails::NewStringName());
+    mString = Rnd::String::New(DurGemTrails::NewStringName());
     mString->SetLinePairs(1);
     mString->SetMat(pMat);
     mString->SetWidth(flWidth);
@@ -96,7 +96,7 @@ void DurGemRowString::Clear() {
 int DurGemRowString::Show(int nRow) {
     if (nRow == mRow) {
         mString->SetShowing(1);
-        return mString->GetNumPoints();
+        return mString->NumPoints();
     }
     mString->SetShowing(0);
     return 0;

@@ -81,13 +81,13 @@ public:
      * The value joins the reserved set, and the set's cursor returns to its first entry.
      * Sch::Playbacker::Load() calls this for every wrapper it reads back. The handles of a
      * replayed recording therefore remain unique. The handle arrives by value, as a copy the
-     * caller builds. The title is inferred.
+     * caller builds.
      *
      * @param id The handle to reserve.
      * @ghidraAddress NTSC-U/C: 0x005e5908
      * @ghidraAddress PAL: 0x00627ac8
      */
-    static void Reserve(CmdID id);
+    static void ReserveID(CmdID id);
 
     /**
      * The value, or -2 while no value has been allocated.

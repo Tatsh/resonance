@@ -27,7 +27,7 @@ class View;
  * container. It zeroes the two button lists, default-constructs the label vector and the three
  * strings, and sets mChoice and mOwnerPad to -1 and mExitTime and mShowing to zero.
  *
- * It and MetLogoScreen are the only two classes that override slot 3, MsgSink::HandleMessage, with
+ * It and MetLogoScreen are the only two classes that override slot 3, MsgSink::DispatchPriv, with
  * a body.
  *
  * The object is 0xe0 bytes, which the factory at `0x002f02c0` fixes by requesting exactly that
@@ -202,7 +202,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x002f0640
      * @ghidraAddress PAL: 0x00313ff0
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Clear the showing flag, refresh the dialogue, and show the screen. Slot 5.
@@ -327,9 +327,9 @@ public:
 
 private:
     // NTSC-U/C: 0x002f0610, PAL: 0x00313fc0
-    // Inline, and HandleMessage() expands it. The address is its uncalled out-of-line copy.
+    // Inline, and DispatchPriv() expands it. The address is its uncalled out-of-line copy.
     void ForwardToOwner(Message *pMsg) {
-        mOwner->Handle(pMsg);
+        mOwner->Dispatch(pMsg);
     }
 
     MetButtonList *mOneButtonList; // +0x8c

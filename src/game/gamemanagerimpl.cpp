@@ -46,7 +46,7 @@ constexpr int kScriptTemplateArenaName = 635;
 // Configuration code of the container name CreateWorld() hands the world.
 constexpr int kContainerConfigCode = 910;
 
-// The diagnostics StartRecording() and StartPlayback() trip.
+// The diagnostics StartRecording() and Recreate() trip.
 constexpr char kRecordingInProgress[] = "Recording already in progress";
 constexpr char kCannotStartRecording[] = "Cannot start recording from this state";
 constexpr char kCannotRecreateGame[] = "Cannot recreate game from this state";
@@ -254,7 +254,7 @@ void GameManagerImpl::SetDrawEnabled(int nEnabled) {
 }
 
 // NTSC-U/C: 0x00107540, PAL: 0x00107610
-void GameManagerImpl::HandleMessage(Message *pMsg) {
+void GameManagerImpl::DispatchPriv(Message *pMsg) {
     int nType = pMsg->Type();
     if (nType == g_nBeginGameLocalMsgType) {
         OnBeginGameLocal(pMsg);
@@ -327,7 +327,7 @@ void GameManagerImpl::OnPauseGameSystem(Message *) {
     }
     mpPoller->SetController(mpMetaWorld);
     mpPoller->SetPaused(1);
-    Application::shared()->GetSynth()->SendMidi(
+    Application::shared()->GetSynth()->PlayMidi(
         kStatusControlChangeChannel16, kControllerAllNotesOff, 0);
     Application::shared()->GetSynth()->SetPaused(1);
     if (mpWorld != nullptr) {
@@ -335,7 +335,7 @@ void GameManagerImpl::OnPauseGameSystem(Message *) {
     }
 
     MetStartPauseMsg pause;
-    mpMetaWorld->GetRenderer()->Handle(&pause);
+    mpMetaWorld->GetRenderer()->Dispatch(&pause);
 }
 
 // NTSC-U/C: 0x0010c148, PAL: 0x0010c300
@@ -371,7 +371,7 @@ void GameManagerImpl::EndGame(int bRestart) {
         mFrontEndActive = 1;
         MetFreqEndedMsg ended;
         ended.mStopJukebox = nWorldExitFlag == 0;
-        mpMetaWorld->GetRenderer()->Handle(&ended);
+        mpMetaWorld->GetRenderer()->Dispatch(&ended);
     }
     CheckState(); // Yes, the binary discards this call's result.
 }
@@ -432,13 +432,13 @@ void GameManagerImpl::DrawFrame() {
         return;
     }
 
-    g_gfxDevice.BeginFrame();
-    g_gfxDevice.EnterVu1Path();
+    Rnd::ThePs.BeginFrame();
+    Rnd::ThePs.EnterVu1Path();
     for (int i = 0; i < nRootCount; ++i) {
         roots[i]->Draw();
     }
-    g_gfxDevice.LeaveVu1Path();
-    g_gfxDevice.PresentFrame(kNoBufferSwap);
+    Rnd::ThePs.LeaveVu1Path();
+    Rnd::ThePs.PresentFrame(kNoBufferSwap);
 }
 
 // NTSC-U/C: 0x0010bfa0, PAL: 0x0010c158
@@ -447,11 +447,11 @@ void GameManagerImpl::DrawFrameSimple() {
         return;
     }
     mpMetaWorld->GetRenderer()->UpdateSimple();
-    g_gfxDevice.BeginFrame();
-    g_gfxDevice.EnterVu1Path();
+    Rnd::ThePs.BeginFrame();
+    Rnd::ThePs.EnterVu1Path();
     mpMetaWorld->GetRenderer()->DrawSimple();
-    g_gfxDevice.LeaveVu1Path();
-    g_gfxDevice.PresentFrame(kNoBufferSwap);
+    Rnd::ThePs.LeaveVu1Path();
+    Rnd::ThePs.PresentFrame(kNoBufferSwap);
 }
 
 // NTSC-U/C: 0x00106e28, PAL: 0x00106eb8
@@ -477,7 +477,7 @@ void GameManagerImpl::OnBeginGameLocal(Message *) {
     {
         IsRecordingMsg recording;
         recording.mIsRecording = 0;
-        mpMetaWorld->GetRenderer()->Handle(&recording);
+        mpMetaWorld->GetRenderer()->Dispatch(&recording);
     }
 
     CreateWorld();
@@ -523,7 +523,7 @@ void GameManagerImpl::Load(IBStream *pStream) {
     {
         IsRecordingMsg recording;
         recording.mIsRecording = 1;
-        mpMetaWorld->GetRenderer()->Handle(&recording);
+        mpMetaWorld->GetRenderer()->Dispatch(&recording);
     }
 
     Renderer::LoadLevel(mParams);
@@ -572,7 +572,7 @@ void GameManagerImpl::StartRecording() {
 }
 
 // NTSC-U/C: 0x0010c4b8, PAL: 0x0010c670
-void GameManagerImpl::StartPlayback(const HxStr &file, int nUnusedFlag) {
+void GameManagerImpl::Recreate(const HxStr &file, int nUnusedFlag) {
     if (mState != 0) {
         Fatal(kCannotRecreateGame);
     }
@@ -590,11 +590,11 @@ void GameManagerImpl::StartPlayback(const HxStr &file, int nUnusedFlag) {
 // NTSC-U/C: 0x0010bee0, PAL: 0x0010c078
 void GameManagerImpl::QueueMessage(Message *pMsg) {
     MsgSink *pQueueSink = &mQueue;
-    pQueueSink->HandleMessage(pMsg);
+    pQueueSink->DispatchPriv(pMsg);
 }
 
 // NTSC-U/C: 0x0010bf10, PAL: 0x0010c0a8
 void GameManagerImpl::OnDoPlayback(Message *) {
     HxStr file = QueryConfigString(kPlaybackFileConfigCode);
-    StartPlayback(file, 0);
+    Recreate(file, 0);
 }

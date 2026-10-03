@@ -51,9 +51,9 @@ TnlSabreTrail::TnlSabreTrail(int nIndex, HxStr colorName)
     : mString(nullptr), mIndex(nIndex), mStartFrame(0.0f), mAmplitude(0.0f), mStrength(0.0f),
       mPulseFrame(0.0f), mPhase(0.0f), mGlowFloor(0.0f), mGlowSize(0.0f), mGlow(nullptr) {
     mString = dynamic_cast<Rnd::String *>(
-        Rnd::g_manager.Find(HxStr(FormatString("sabre_%c.str", colorName[0]))));
+        Rnd::TheManager.Find(HxStr(FormatString("sabre_%c.str", colorName[0]))));
     mGlow = dynamic_cast<Rnd::ParticleSys *>(
-        Rnd::g_manager.Find(HxStr(FormatString("gem_glow%d.ps", nIndex))));
+        Rnd::TheManager.Find(HxStr(FormatString("gem_glow%d.ps", nIndex))));
     SetShowing(1);
     Clear();
 }
@@ -190,7 +190,7 @@ void TnlSabreTrail::Update(float flFrame) {
         if (nPointCount < nVisible) {
             nVisible = nPointCount;
         }
-        if (mString->GetNumPoints() != nVisible) {
+        if (mString->NumPoints() != nVisible) {
             mString->SetNumPoints(nVisible);
         }
         for (; mRevealed < nVisible; ++mRevealed) {

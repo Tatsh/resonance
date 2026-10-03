@@ -24,6 +24,14 @@
 class RawControllerMsg : public Message {
 public:
     /**
+     * Identity that Type() reports.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006d0118
+     * @ghidraAddress PAL: 0x007138b0
+     */
+    static int sID;
+
+    /**
      * Produce a default-constructed message on the heap.
      *
      * The translation unit at `0x003d9818` registers this factory. Only the position is
@@ -47,7 +55,7 @@ public:
     /**
      * Report this message's registered identity.
      *
-     * @return g_nRawControllerMsgType.
+     * @return sID.
      * @ghidraAddress NTSC-U/C: 0x003da268
      * @ghidraAddress PAL: 0x004126a0
      */
@@ -74,15 +82,3 @@ public:
     MetControllerReading mReading; /*!< The reading. +0x04 */
     Mid::MBT mPosition;            /*!< Song position, kMBTInfinity until set. +0x14 */
 };
-
-/**
- * Identity that RawControllerMsg::Type() reports.
- *
- * This word belongs to RawControllerMsg because RawControllerMsg::Type() at `0x003da268` returns
- * it. Several handlers elsewhere read the same word to compare against it, which is the expected
- * shape for a registered identity and does not make the word theirs.
- *
- * @ghidraAddress NTSC-U/C: 0x006d0118
- * @ghidraAddress PAL: 0x007138b0
- */
-extern int g_nRawControllerMsgType;

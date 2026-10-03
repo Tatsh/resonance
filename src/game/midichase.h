@@ -47,10 +47,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001a6660
      * @ghidraAddress PAL: 0x001ac3c8
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
-     * Pass every message of a range to MsgSink::Handle().
+     * Pass every message of a range to MsgSink::Dispatch().
      *
      * The title is inferred.
      *

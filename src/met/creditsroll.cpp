@@ -201,9 +201,9 @@ void CreditsRoll::Build() {
     for (int nIndex = firstIndex_;; ++nIndex, ++nCount) {
         char szName[kNameBufferSize];
         sprintf(szName, kNameFormat, NameOrEmpty(picturePrefix_), nIndex);
-        Rnd::Mesh *pPicture = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr(szName)));
+        Rnd::Mesh *pPicture = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(szName)));
         sprintf(szName, kNameFormat, NameOrEmpty(textPrefix_), nIndex);
-        Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(szName)));
+        Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(szName)));
         if (pPicture == nullptr && pText == nullptr) {
             break;
         }
@@ -375,7 +375,7 @@ float CreditsRoll::AddLeadingCredit(const HxStr &text, const unsigned char *pTex
 
     Rnd::Mesh *pPicture = Rnd::NewMeshThroughHook(HxStr(kLeadingPictureName));
     pPicture->Copy(pTemplatePicture, Rnd::Mesh::kCopyShareVerts | Rnd::Mesh::kCopyShareFaces);
-    pPicture->SetMaterial(pMat);
+    pPicture->SetMat(pMat);
     Translate(pPicture, afStep, flSteps);
 
     // Every other credit moves one step further along the roll.

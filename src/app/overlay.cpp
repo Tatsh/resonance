@@ -175,19 +175,19 @@ Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
     SetLayoutName(nLayout);
     mMsPerTick = static_cast<float>(Application::shared()->GetTempo()) / kTempoToMsPerTick;
 
-    Rnd::View *pHud = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("hud.view")));
-    pHud->RemoveView(dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("hud1.view"))));
-    pHud->RemoveView(dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("hud2.view"))));
-    pHud->RemoveView(dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("hud4.view"))));
+    Rnd::View *pHud = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("hud.view")));
+    pHud->RemoveView(dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("hud1.view"))));
+    pHud->RemoveView(dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("hud2.view"))));
+    pHud->RemoveView(dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("hud4.view"))));
     Rnd::View *pLayout =
-        dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr(FormatString("hud%d.view", nLayout))));
+        dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(FormatString("hud%d.view", nLayout))));
     pHud->AddView(pLayout);
     pLayout->SetRate(mMsPerTick);
 
     const char *pszLayoutName =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     pLayout->RemoveView(dynamic_cast<Rnd::View *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s test.anim", pszLayoutName)))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s test.anim", pszLayoutName)))));
     for (std::list<Rnd::Drawable *>::iterator it = pLayout->GetDraws().begin();
          it != pLayout->GetDraws().end();
          ++it) {
@@ -251,10 +251,10 @@ Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
         HxStr caption =
             QueryConfigString(kJukeboxCaptionConfigCode,
                               levelName.mStr != nullptr ? levelName.mStr : g_szEmptyString);
-        Rnd::Text *pLine = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr("HUD juke1.txt")));
+        Rnd::Text *pLine = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr("HUD juke1.txt")));
         pLine->SetText(songName);
         pLine->SetShowing(1);
-        pLine = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr("HUD juke2.txt")));
+        pLine = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr("HUD juke2.txt")));
         pLine->SetText(caption);
         pLine->SetShowing(1);
     } else {
@@ -281,7 +281,7 @@ Overlay::~Overlay() {
         delete *it;
     }
     delete mPanel;
-    g_gfxDevice.mFeedbackEnabled = 0;
+    Rnd::ThePs.mFeedbackEnabled = 0;
 }
 
 // NTSC-U/C: 0x0041dd20, PAL: 0x00458bf0
@@ -333,7 +333,7 @@ inline HudTrack *Overlay::FindTrack(Player *pPlayer) {
 }
 
 // NTSC-U/C: 0x004206e0, PAL: 0x0045ba00
-void Overlay::HandleMessage(Message *pMsg) {
+void Overlay::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
         OnTrackSelect(pMsg);
@@ -367,7 +367,7 @@ void Overlay::HandleMessage(Message *pMsg) {
         OnPlaybackToggle(pMsg);
     } else if (nType == g_nToggleGhostMsgType) {
         OnToggleGhost(pMsg);
-    } else if (nType == g_nJamEffectMsgType) {
+    } else if (nType == JamEffectMsg::sID) {
         OnJamEffect();
     } else if (nType == g_nCatchMsgType) {
         OnCatch(pMsg);

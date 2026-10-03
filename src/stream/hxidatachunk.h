@@ -12,8 +12,9 @@ struct HxChunkHeader;
  * sizes are relative to the payload. The payload lies in another stream between mStart and mEnd.
  * Both constructors set mFatalOnEnd and copy HxStream::mSwapBytes from that stream.
  *
- * Seek() sets HxStream::kStatusRange for an offset outside the payload and then overwrites the
- * status with HxStream::kStatusOk on every path. Tell() and Seek() still test the range flag.
+ * SetMarker() sets HxStream::failbit for an offset outside the payload and then overwrites the
+ * status with HxStream::goodbit on every path. GetMarker() and SetMarker() still test the range
+ * flag.
  */
 class HxIDataChunk : public HxStream {
 public:
@@ -50,24 +51,24 @@ public:
     /**
      * Move the read position within the payload.
      *
-     * Does nothing while HxStream::kStatusRange or HxStream::kStatusFailed is set.
+     * Does nothing while HxStream::failbit or HxStream::badbit is set.
      *
      * @param nOffset The signed distance to move.
      * @param nWhence The origin, one of the HxStreamSeekOrigin values.
      * @ghidraAddress NTSC-U/C: 0x00145b20
      * @ghidraAddress PAL: 0x00146638
      */
-    void Seek(int nOffset, int nWhence) override;
+    void SetMarker(int nOffset, int nWhence) override;
 
     /**
      * Report the read position within the payload.
      *
-     * @return The position from the start of the payload, or -1 while HxStream::kStatusRange or
-     * HxStream::kStatusFailed is set.
+     * @return The position from the start of the payload, or -1 while HxStream::failbit or
+     * HxStream::badbit is set.
      * @ghidraAddress NTSC-U/C: 0x001460f0
      * @ghidraAddress PAL: 0x00146c08
      */
-    int Tell() override;
+    int GetMarker() override;
 
     /**
      * Report the payload size from the chunk header.
@@ -81,7 +82,7 @@ public:
     /**
      * Move up to nSize bytes of the payload into pDest.
      *
-     * Does nothing unless the status is HxStream::kStatusOk. A read that would cross the end of
+     * Does nothing unless the status is HxStream::goodbit. A read that would cross the end of
      * the payload moves only the bytes before it and sets HxStream::kStatusEnd.
      *
      * @param pDest The destination buffer.
@@ -90,7 +91,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00146160
      * @ghidraAddress PAL: 0x00146c78
      */
-    HxStream &Read(void *pDest, int nSize) override;
+    HxStream &ReadData(void *pDest, int nSize) override;
 
     /**
      * Report the stream the payload lies in.

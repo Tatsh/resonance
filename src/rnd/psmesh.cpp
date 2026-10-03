@@ -166,8 +166,8 @@ inline unsigned long long PackWordPair(unsigned nLow, unsigned nHigh) {
 
 // Take the next quadword of the packet buffer.
 inline GifQuadword *TakeQuadword() {
-    GifQuadword *pQuad = g_gfxDevice.mpWrite;
-    g_gfxDevice.mpWrite = pQuad + 1;
+    GifQuadword *pQuad = Rnd::ThePs.mpWrite;
+    Rnd::ThePs.mpWrite = pQuad + 1;
     return pQuad;
 }
 
@@ -187,9 +187,9 @@ inline void AppendIndexData(const unsigned short *pIndices, int nIndexCount) {
     const int nQuadwords =
         (nIndexCount + kIndexHalfwordsPerQuadword - 1) / kIndexHalfwordsPerQuadword;
     for (int i = 0; i < nQuadwords; ++i) {
-        GifQuadword *pDest = g_gfxDevice.mpWrite;
+        GifQuadword *pDest = Rnd::ThePs.mpWrite;
         *pDest = pSource[i];
-        g_gfxDevice.mpWrite = pDest + 1;
+        Rnd::ThePs.mpWrite = pDest + 1;
     }
 }
 
@@ -207,9 +207,9 @@ inline GifQuadword *AppendVert(GifQuadword *pWrite, const MeshVert &vert, int nQ
 inline void AppendDrawVert(const DrawVert &vert, int nFirstQuadword, int nQuadwords) {
     const GifQuadword *pSource = AsQuadwords(&vert) + nFirstQuadword;
     for (int i = 0; i < nQuadwords; ++i) {
-        GifQuadword *pDest = g_gfxDevice.mpWrite;
+        GifQuadword *pDest = Rnd::ThePs.mpWrite;
         *pDest = pSource[i];
-        g_gfxDevice.mpWrite = pDest + 1;
+        Rnd::ThePs.mpWrite = pDest + 1;
     }
 }
 
@@ -242,7 +242,7 @@ void EmitTriangle(unsigned nIdx0, unsigned nIdx1, unsigned nIdx2, int bClip) {
                 const unsigned nFanIndex = static_cast<unsigned>(nNextIndex);
                 EmitTriangle(
                     kClipScratchBase, (nFanIndex - 2) & 0xffff, (nFanIndex - 1) & 0xffff, 0);
-                g_gfxDevice.FlushGifPacket(1, 1);
+                Rnd::ThePs.FlushGifPacket(1, 1);
                 --nNextIndex;
             }
             return;
@@ -273,9 +273,9 @@ inline int DrawVertCount(int nMaxVerts, int nVerts) {
 
 // 0x006022e8 and 0x006024bc both expand this.
 inline void SelectDepthRegs(int nZMask, int nZTest) {
-    g_gfxDevice.SetGsReg(
+    Rnd::ThePs.SetGsReg(
         kGsRegZbuf1, static_cast<unsigned long long>(nZMask) << kZbufZMaskShift, kZbufZMaskField);
-    g_gfxDevice.SetGsReg(
+    Rnd::ThePs.SetGsReg(
         kGsRegTest1, static_cast<unsigned long long>(nZTest) << kTestZTestShift, kTestZTestField);
 }
 
@@ -283,7 +283,7 @@ inline void SelectDepthRegs(int nZMask, int nZTest) {
 
 // NTSC-U/C: 0x00606d38, PAL: 0x00647990
 void PsMesh::SelectDepthRegsForPass(const Mesh &mesh, int nPass) {
-    if (g_pCurrentCam->mpTargetTex != nullptr || nPass >= kDepthProgramPassLimit) {
+    if (Cam::sCurrent->mpTargetTex != nullptr || nPass >= kDepthProgramPassLimit) {
         return;
     }
 
@@ -311,7 +311,7 @@ PsMesh::~PsMesh() {
 }
 
 // NTSC-U/C: 0x00602128, PAL: 0x00642d18
-int PsMesh::DrawSelf() {
+int PsMesh::DrawShowing() {
     ++g_renderStats.mnMeshDraws;
 
     Sphere worldSphere;
@@ -322,11 +322,11 @@ int PsMesh::DrawSelf() {
         return mFacesOwner->mFaces.size() == 0 && mFacesOwner->mEdges.size() == 0;
     }
 
-    const int nUseVu1 = g_gfxDevice.mnUseVu1;
+    const int nUseVu1 = Rnd::ThePs.mnUseVu1;
     if (nUseVu1 == 0 && mVertsOwner->mVerts.size() > kMaxSoftwareVerts) {
-        g_failSink.Report("DrawShowing vert buffer overflow... %d\n", mVertsOwner->mVerts.size());
-        if (g_failSink.mAbortProc != nullptr) {
-            g_failSink.mAbortProc();
+        Rnd::TheDbg.Notify("DrawShowing vert buffer overflow... %d\n", mVertsOwner->mVerts.size());
+        if (Rnd::TheDbg.mAbortProc != nullptr) {
+            Rnd::TheDbg.mAbortProc();
         } else {
             throw; // With no handler the binary rethrows the exception in flight.
         }
@@ -343,8 +343,8 @@ int PsMesh::DrawSelf() {
     int nMorePasses = 0;
     if (mFacesOwner->mFaces.size() != 0) {
         do {
-            g_gfxDevice.ReserveGifSpace(kGifReserveQuadwords);
-            if (g_pCurrentCam->mpTargetTex == nullptr && nPass < kDepthProgramPassLimit) {
+            Rnd::ThePs.ReserveGifSpace(kGifReserveQuadwords);
+            if (Cam::sCurrent->mpTargetTex == nullptr && nPass < kDepthProgramPassLimit) {
                 int nZMask = 0;
                 if (nPass != 0 || mZMode == kZModeDisable || mZMode == kZModeZReadOnly ||
                     mZMode == kZModeWReadOnly) {
@@ -389,8 +389,8 @@ int PsMesh::DrawSelf() {
         return 1;
     }
 
-    g_gfxDevice.ReserveGifSpace(kGifReserveQuadwords);
-    if (g_pCurrentCam->mpTargetTex == nullptr) {
+    Rnd::ThePs.ReserveGifSpace(kGifReserveQuadwords);
+    if (Cam::sCurrent->mpTargetTex == nullptr) {
         int nZTest = kGsZTestGEqual;
         if (mZMode == kZModeDisable || mZFunc == kZFuncAlways) {
             nZTest = kGsZTestAlways;
@@ -430,8 +430,8 @@ void PsMesh::Refresh() {
 // NTSC-U/C: 0x006019e0, PAL: 0x006425d0
 void PsMesh::DrawFacesVU1(const float *pXfm, int nClip) {
     g_renderStats.mnTriangles += static_cast<int>(mFacesOwner->mFaces.size());
-    g_gfxDevice.CloseGifTag(1);
-    g_gfxDevice.SwapGifWrite();
+    Rnd::ThePs.CloseGifTag(1);
+    Rnd::ThePs.SwapGifWrite();
     const int nSetup = EmitFaceVu1Setup(pXfm, mSphere);
     const int nTextured = g_nStageTextureBound;
 
@@ -451,7 +451,7 @@ void PsMesh::DrawFacesVU1(const float *pXfm, int nClip) {
         pParam->mLo = PackWordPair(nVertCount, nPrimCount);
         pParam->mHi = PackWordPair(nSetup, nClip);
 
-        GifQuadword *pWrite = g_gfxDevice.mpWrite;
+        GifQuadword *pWrite = Rnd::ThePs.mpWrite;
         int nVuAddr = kVu1FaceParamAddr;
         int nBatchQuadwords = 1;
         if (nTextured != 0) {
@@ -498,7 +498,7 @@ void PsMesh::DrawFacesVU1(const float *pXfm, int nClip) {
             }
         }
         nVuAddr += nBatchQuadwords;
-        g_gfxDevice.mpWrite = pWrite;
+        Rnd::ThePs.mpWrite = pWrite;
 
         GifQuadword *pIndexCode = TakeQuadword();
         pIndexCode->mLo = 0;
@@ -508,7 +508,7 @@ void PsMesh::DrawFacesVU1(const float *pXfm, int nClip) {
                                                    kVifUnpackFlg | static_cast<unsigned>(nVuAddr)));
         AppendIndexData(run.mIndices, run.mIndexCount);
 
-        g_gfxDevice.FlushReservedGif();
+        Rnd::ThePs.FlushReservedGif();
         GifQuadword *pEntry = TakeQuadword();
         pEntry->mHi = 0;
         if (&run == &pOwner->mFaceRuns.front()) {
@@ -520,15 +520,15 @@ void PsMesh::DrawFacesVU1(const float *pXfm, int nClip) {
         } else {
             pEntry->mLo = MakeVifCode(kVifCmdMsCnt, 0, 0);
         }
-        g_gfxDevice.FlushGifPacket(0, 0);
+        Rnd::ThePs.FlushGifPacket(0, 0);
     }
 }
 
 // NTSC-U/C: 0x00601de0, PAL: 0x006429d0
 void PsMesh::DrawEdgesVU1(const float *pXfm) {
     g_renderStats.mnLines += static_cast<int>(mFacesOwner->mEdges.size());
-    g_gfxDevice.CloseGifTag(1);
-    g_gfxDevice.SwapGifWrite();
+    Rnd::ThePs.CloseGifTag(1);
+    Rnd::ThePs.SwapGifWrite();
 
     Color edgeColor;
     if (mMat != nullptr) {
@@ -562,11 +562,11 @@ void PsMesh::DrawEdgesVU1(const float *pXfm) {
             MakeVifCode(kVifCmdStCycl, 0, kVifStCyclWl1Cl2),
             MakeVifCode(kVifCmdUnpackV4_32, nVertCount, kVifUnpackFlg | kVu1EdgeVertAddr));
 
-        GifQuadword *pWrite = g_gfxDevice.mpWrite;
+        GifQuadword *pWrite = Rnd::ThePs.mpWrite;
         for (auto nIndex : run.mVertIndices) {
             pWrite = AppendVert(pWrite, mVertsOwner->mVerts[nIndex], kVertQuadwordsEdge);
         }
-        g_gfxDevice.mpWrite = pWrite;
+        Rnd::ThePs.mpWrite = pWrite;
 
         GifQuadword *pIndexCode = TakeQuadword();
         pIndexCode->mLo = 0;
@@ -578,7 +578,7 @@ void PsMesh::DrawEdgesVU1(const float *pXfm) {
                 static_cast<unsigned>(nVertCount * kVu1EdgeVertStride + kVu1EdgeVertAddr));
         AppendIndexData(run.mIndices, run.mIndexCount);
 
-        g_gfxDevice.FlushReservedGif();
+        Rnd::ThePs.FlushReservedGif();
         GifQuadword *pEntry = TakeQuadword();
         pEntry->mHi = 0;
         if (&run == &pOwner->mEdgeRuns.front()) {
@@ -586,7 +586,7 @@ void PsMesh::DrawEdgesVU1(const float *pXfm) {
         } else {
             pEntry->mLo = MakeVifCode(kVifCmdMsCnt, 0, 0);
         }
-        g_gfxDevice.FlushGifPacket(0, 0);
+        Rnd::ThePs.FlushGifPacket(0, 0);
     }
 }
 
@@ -599,7 +599,7 @@ void PsMesh::DrawFacesSoftware(int nClip) {
         (static_cast<unsigned long long>(nTextured) << kGsPrimTmeShift) |
         (static_cast<unsigned long long>(g_nFogEnabled) << kGsPrimFgeShift) |
         (static_cast<unsigned long long>(g_nAlphaBlendEnabled) << kGsPrimAbeShift);
-    g_gfxDevice.SetGsReg(kGsRegPrim, qwPrim, kGsPrimFieldMask);
+    Rnd::ThePs.SetGsReg(kGsRegPrim, qwPrim, kGsPrimFieldMask);
 
     GifQuadword tag;
     if (nTextured != 0) {
@@ -609,11 +609,11 @@ void PsMesh::DrawFacesSoftware(int nClip) {
         tag.mLo = static_cast<unsigned long long>(kGifNRegUntexturedTri) << kGifTagNRegShift;
         tag.mHi = kGifRegsUntexturedTri;
     }
-    g_gfxDevice.WriteGifTag(&tag);
+    Rnd::ThePs.WriteGifTag(&tag);
 
     for (auto &face : mFacesOwner->mFaces) {
         EmitTriangle(face.mV1, face.mV2, face.mV3, nClip);
-        g_gfxDevice.FlushGifPacket(1, 1);
+        Rnd::ThePs.FlushGifPacket(1, 1);
     }
 }
 
@@ -622,12 +622,12 @@ void PsMesh::DrawEdgesSoftware(int nClip) {
     const unsigned long long qwPrim =
         kGsPrimLine | kGsPrimAa1 |
         (static_cast<unsigned long long>(g_nFogEnabled) << kGsPrimFgeShift);
-    g_gfxDevice.SetGsReg(kGsRegPrim, qwPrim, kGsPrimFieldMask);
+    Rnd::ThePs.SetGsReg(kGsRegPrim, qwPrim, kGsPrimFieldMask);
 
     GifQuadword tag;
     tag.mLo = static_cast<unsigned long long>(kGifNRegLine) << kGifTagNRegShift;
     tag.mHi = kGifRegsLine;
-    g_gfxDevice.WriteGifTag(&tag);
+    Rnd::ThePs.WriteGifTag(&tag);
 
     // Every edge of the mesh draws in one colour, so the packed RGBAQ quadword is built once.
     Color edgeColor;
@@ -653,7 +653,7 @@ void PsMesh::DrawEdgesSoftware(int nClip) {
                 // An edge is dropped rather than clipped, which is why a long edge crossing the
                 // view plane disappears instead of being shortened.
                 ++g_renderStats.mnEdgesClipped;
-                g_gfxDevice.FlushGifPacket(1, 1);
+                Rnd::ThePs.FlushGifPacket(1, 1);
                 continue;
             }
         }
@@ -662,7 +662,7 @@ void PsMesh::DrawEdgesSoftware(int nClip) {
         AppendDrawVert(g_aDrawVerts[edge.mV1], 2, kDrawVertQuadwordsLine);
         AppendDrawVert(g_aDrawVerts[edge.mV2], 2, kDrawVertQuadwordsLine);
         ++g_renderStats.mnLines;
-        g_gfxDevice.FlushGifPacket(1, 1);
+        Rnd::ThePs.FlushGifPacket(1, 1);
     }
 }
 

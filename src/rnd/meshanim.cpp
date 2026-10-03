@@ -38,17 +38,17 @@ void PrintObjectRef(Dbg &sink, const Object *pObject) {
 void WriteObjectRef(Stream &stream, const Object *pObject) {
     if (pObject == nullptr) {
         const char chTerminator = '\0';
-        stream.WriteBytes(&chTerminator, 1);
+        stream.Write(&chTerminator, 1);
         return;
     }
-    stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+    stream.Write(NameText(pObject), pObject->mName.mLen + 1);
 }
 
 template <class T>
 void ReadObjectRef(Stream &stream, T *&refOut) {
     HxStr name(nullptr);
     stream.ReadString(name);
-    refOut = dynamic_cast<T *>(g_manager.Find(name));
+    refOut = dynamic_cast<T *>(TheManager.Find(name));
 }
 
 void PrintVectorHeader(Dbg &sink, unsigned nCount) {
@@ -165,11 +165,11 @@ Dbg &DumpColorsKeys(Dbg &sink, const std::list<MeshAnim::ColorsKey> &keys) {
 // NTSC-U/C: 0x00490ff8, PAL: 0x004cee80
 Stream &WritePointsVector(Stream &stream, const std::vector<Vector3> &values) {
     const int nCount = static_cast<int>(values.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &value : values) {
-        stream.Write(&value.x, sizeof(float));
-        stream.Write(&value.y, sizeof(float));
-        stream.Write(&value.z, sizeof(float));
+        stream.WriteLE(&value.x, sizeof(float));
+        stream.WriteLE(&value.y, sizeof(float));
+        stream.WriteLE(&value.z, sizeof(float));
     }
     return stream;
 }
@@ -179,24 +179,24 @@ Stream &WritePointsVector(Stream &stream, const std::vector<Vector3> &values) {
 // WriteTexsKeys().
 Stream &WriteTexsKey(Stream &stream, const MeshAnim::TexsKey &key) {
     const int nCount = static_cast<int>(key.mValues.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &value : key.mValues) {
-        stream.Write(&value.x, sizeof(float));
-        stream.Write(&value.y, sizeof(float));
+        stream.WriteLE(&value.x, sizeof(float));
+        stream.WriteLE(&value.y, sizeof(float));
     }
-    stream.Write(&key.mFrame, sizeof(key.mFrame));
+    stream.WriteLE(&key.mFrame, sizeof(key.mFrame));
     return stream;
 }
 
 // NTSC-U/C: 0x00491390, PAL: 0x004cf218
 Stream &WriteColorsVector(Stream &stream, const std::vector<Color> &values) {
     const int nCount = static_cast<int>(values.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &value : values) {
-        stream.Write(&value.r, sizeof(float));
-        stream.Write(&value.g, sizeof(float));
-        stream.Write(&value.b, sizeof(float));
-        stream.Write(&value.a, sizeof(float));
+        stream.WriteLE(&value.r, sizeof(float));
+        stream.WriteLE(&value.g, sizeof(float));
+        stream.WriteLE(&value.b, sizeof(float));
+        stream.WriteLE(&value.a, sizeof(float));
     }
     return stream;
 }
@@ -204,10 +204,10 @@ Stream &WriteColorsVector(Stream &stream, const std::vector<Color> &values) {
 // NTSC-U/C: 0x004910f0, PAL: 0x004cef78
 Stream &WritePointsKeys(Stream &stream, const std::list<MeshAnim::PointsKey> &keys) {
     const int nCount = static_cast<int>(keys.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &key : keys) {
         WritePointsVector(stream, key.mValues);
-        stream.Write(&key.mFrame, sizeof(key.mFrame));
+        stream.WriteLE(&key.mFrame, sizeof(key.mFrame));
     }
     return stream;
 }
@@ -215,7 +215,7 @@ Stream &WritePointsKeys(Stream &stream, const std::list<MeshAnim::PointsKey> &ke
 // NTSC-U/C: 0x004912d8, PAL: 0x004cf160
 Stream &WriteTexsKeys(Stream &stream, const std::list<MeshAnim::TexsKey> &keys) {
     const int nCount = static_cast<int>(keys.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &key : keys) {
         WriteTexsKey(stream, key);
     }
@@ -225,10 +225,10 @@ Stream &WriteTexsKeys(Stream &stream, const std::list<MeshAnim::TexsKey> &keys) 
 // NTSC-U/C: 0x004914a8, PAL: 0x004cf330
 Stream &WriteColorsKeys(Stream &stream, const std::list<MeshAnim::ColorsKey> &keys) {
     const int nCount = static_cast<int>(keys.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &key : keys) {
         WriteColorsVector(stream, key.mValues);
-        stream.Write(&key.mFrame, sizeof(key.mFrame));
+        stream.WriteLE(&key.mFrame, sizeof(key.mFrame));
     }
     return stream;
 }
@@ -236,12 +236,12 @@ Stream &WriteColorsKeys(Stream &stream, const std::list<MeshAnim::ColorsKey> &ke
 // NTSC-U/C: 0x00491678, PAL: 0x004cf500
 Stream &ReadPointsVector(Stream &stream, std::vector<Vector3> &values) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     values.resize(nCount);
     for (auto &value : values) {
-        stream.Read(&value.x, sizeof(float));
-        stream.Read(&value.y, sizeof(float));
-        stream.Read(&value.z, sizeof(float));
+        stream.ReadLE(&value.x, sizeof(float));
+        stream.ReadLE(&value.y, sizeof(float));
+        stream.ReadLE(&value.z, sizeof(float));
     }
     return stream;
 }
@@ -249,11 +249,11 @@ Stream &ReadPointsVector(Stream &stream, std::vector<Vector3> &values) {
 // NTSC-U/C: 0x00491b10, PAL: 0x004cf998
 Stream &ReadTexsVector(Stream &stream, std::vector<Vector2> &values) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     values.resize(nCount);
     for (auto &value : values) {
-        stream.Read(&value.x, sizeof(float));
-        stream.Read(&value.y, sizeof(float));
+        stream.ReadLE(&value.x, sizeof(float));
+        stream.ReadLE(&value.y, sizeof(float));
     }
     return stream;
 }
@@ -261,13 +261,13 @@ Stream &ReadTexsVector(Stream &stream, std::vector<Vector2> &values) {
 // NTSC-U/C: 0x00491f80, PAL: 0x004cfe08
 Stream &ReadColorsVector(Stream &stream, std::vector<Color> &values) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     values.resize(nCount);
     for (auto &value : values) {
-        stream.Read(&value.r, sizeof(float));
-        stream.Read(&value.g, sizeof(float));
-        stream.Read(&value.b, sizeof(float));
-        stream.Read(&value.a, sizeof(float));
+        stream.ReadLE(&value.r, sizeof(float));
+        stream.ReadLE(&value.g, sizeof(float));
+        stream.ReadLE(&value.b, sizeof(float));
+        stream.ReadLE(&value.a, sizeof(float));
     }
     return stream;
 }
@@ -275,11 +275,11 @@ Stream &ReadColorsVector(Stream &stream, std::vector<Color> &values) {
 // NTSC-U/C: 0x004917b0, PAL: 0x004cf638
 Stream &ReadPointsKeys(Stream &stream, std::list<MeshAnim::PointsKey> &keys) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     keys.resize(nCount);
     for (auto &key : keys) {
         ReadPointsVector(stream, key.mValues);
-        stream.Read(&key.mFrame, sizeof(key.mFrame));
+        stream.ReadLE(&key.mFrame, sizeof(key.mFrame));
     }
     return stream;
 }
@@ -287,11 +287,11 @@ Stream &ReadPointsKeys(Stream &stream, std::list<MeshAnim::PointsKey> &keys) {
 // NTSC-U/C: 0x00491c20, PAL: 0x004cfaa8
 Stream &ReadTexsKeys(Stream &stream, std::list<MeshAnim::TexsKey> &keys) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     keys.resize(nCount);
     for (auto &key : keys) {
         ReadTexsVector(stream, key.mValues);
-        stream.Read(&key.mFrame, sizeof(key.mFrame));
+        stream.ReadLE(&key.mFrame, sizeof(key.mFrame));
     }
     return stream;
 }
@@ -299,11 +299,11 @@ Stream &ReadTexsKeys(Stream &stream, std::list<MeshAnim::TexsKey> &keys) {
 // NTSC-U/C: 0x004920c8, PAL: 0x004cff50
 Stream &ReadColorsKeys(Stream &stream, std::list<MeshAnim::ColorsKey> &keys) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     keys.resize(nCount);
     for (auto &key : keys) {
         ReadColorsVector(stream, key.mValues);
-        stream.Read(&key.mFrame, sizeof(key.mFrame));
+        stream.ReadLE(&key.mFrame, sizeof(key.mFrame));
     }
     return stream;
 }
@@ -461,7 +461,7 @@ MeshAnim::~MeshAnim() {
 }
 
 // NTSC-U/C: 0x004873b0, PAL: 0x004c51d0
-float MeshAnim::EndFrame() {
+float MeshAnim::FilteredFrameEnd() {
     const float flPoints = ChannelEndFrame(mKeysOwner->mVertPointsKeys);
     const float flTexs = ChannelEndFrame(mKeysOwner->mVertTexsKeys);
     const float flColors = ChannelEndFrame(mKeysOwner->mVertColorsKeys);
@@ -497,7 +497,7 @@ void MeshAnim::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x00486e50, PAL: 0x004c4c20
 void MeshAnim::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
 
     Animatable::Save(stream);
 
@@ -570,9 +570,9 @@ void MeshAnim::Copy(const Object *pSource, unsigned nFlags) {
 // NTSC-U/C: 0x00486fa8, PAL: 0x004c4d78
 void MeshAnim::Load(Stream &stream) {
     int nVersion = 0;
-    stream.Read(&nVersion, sizeof(nVersion));
+    stream.ReadLE(&nVersion, sizeof(nVersion));
     if (nVersion > kSerialVersion) {
-        g_failSink.Report("Can't load new MeshAnim\n");
+        Rnd::TheDbg.Notify("Can't load new MeshAnim\n");
         return;
     }
 

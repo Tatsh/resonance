@@ -99,17 +99,17 @@ Dbg &operator<<(Dbg &sink, const std::list<Movie::TrackTexture> &textures) {
 // NTSC-U/C: 0x005d1790, PAL: 0x00613780
 Stream &operator<<(Stream &stream, const std::list<Movie::TrackTexture> &textures) {
     const int nCount = textures.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
 
     for (const auto &entry : textures) {
         const int nTrackId = entry.mTrackId;
-        stream.Write(&nTrackId, sizeof(nTrackId));
+        stream.WriteLE(&nTrackId, sizeof(nTrackId));
         if (entry.mTex != nullptr) {
             const Object *pTex = entry.mTex;
-            stream.WriteBytes(NameText(pTex), pTex->mName.mLen + 1);
+            stream.Write(NameText(pTex), pTex->mName.mLen + 1);
         } else {
             const char chTerminator = '\0';
-            stream.WriteBytes(&chTerminator, 1);
+            stream.Write(&chTerminator, 1);
         }
     }
     return stream;
@@ -143,7 +143,7 @@ void Movie::OpenMovieFile() {
     strcpy(szPath, TextOf(mFilename));
     BuildBitmapCacheFileName(szPath, kMovieExtension);
     if (GetUncompressedFileLength(szPath) == 0) {
-        g_failSink.Report("Couldn't load movie file: %s\n", szPath);
+        Rnd::TheDbg.Notify("Couldn't load movie file: %s\n", szPath);
         return;
     }
 
@@ -151,7 +151,7 @@ void Movie::OpenMovieFile() {
     int nError;
     mStream = new AMovieSet(szPath, 0, &nError);
     if (nError != 0) {
-        g_failSink.Report(
+        Rnd::TheDbg.Notify(
             "Couldn't load movie file %s: %s\n", szPath, g_apszMovieStreamErrors[-nError]);
         delete mStream;
         mStream = nullptr;
@@ -192,7 +192,7 @@ void Movie::Replace(Object *pFrom, Object *pTo) {
             }
         } else if (it->mTex == pFrom && mStream != nullptr) {
             // Yes, without an open stream the entry retains the departing texture.
-            mStream->SetTrackHandler(it->mTrackId, nullptr, nullptr);
+            mStream->AssignHandler(it->mTrackId, nullptr, nullptr);
             it->mTex = nullptr;
         }
 
@@ -248,14 +248,14 @@ void Movie::SetFrameSelf(float flFrame) {
 // NTSC-U/C: 0x005d24d8, PAL: 0x00614508
 void Movie::AttachTrack(int nTrackId) {
     if (mStream != nullptr) {
-        mStream->SetTrackHandler(nTrackId, ChunkHandler, this);
+        mStream->AssignHandler(nTrackId, MasterTrackCallback, this);
     }
 }
 
 // NTSC-U/C: 0x005d2508, PAL: 0x00614538
 void Movie::DetachTrack(int nTrackId) {
     if (mStream != nullptr) {
-        mStream->SetTrackHandler(nTrackId, nullptr, nullptr);
+        mStream->AssignHandler(nTrackId, nullptr, nullptr);
     }
 }
 
@@ -330,22 +330,22 @@ void Movie::OnChunk(AMovieSet::ChunkHeader *pHeader, void *pPayload) {
 }
 
 // NTSC-U/C: 0x005d2530, PAL: 0x00614560
-void Movie::ChunkHandler(AMovieSet::ChunkHeader *pHeader, void *pPayload, void *pData) {
+void Movie::MasterTrackCallback(AMovieSet::ChunkHeader *pHeader, void *pPayload, void *pData) {
     static_cast<Movie *>(pData)->OnChunk(pHeader, pPayload);
 }
 
 // NTSC-U/C: 0x005d1a90, PAL: 0x00613a80
 void Movie::ReadTrackTextures(Stream &stream, std::list<TrackTexture> &textures) {
     int nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     textures.resize(nCount);
 
     for (auto &entry : textures) {
-        stream.Read(&entry.mTrackId, sizeof(entry.mTrackId));
+        stream.ReadLE(&entry.mTrackId, sizeof(entry.mTrackId));
 
         HxStr name;
         stream.ReadString(name);
-        entry.mTex = dynamic_cast<Tex *>(g_manager.Find(name));
+        entry.mTex = dynamic_cast<Tex *>(TheManager.Find(name));
     }
 }
 
@@ -372,7 +372,7 @@ void Movie::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x005d2280, PAL: 0x006142b0
 void Movie::Save(Stream &stream) {
     const int nRevision = kMovieRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
     Animatable::Save(stream);
     mFilename.Save(stream);
     stream << mTrackTextures;
@@ -381,9 +381,9 @@ void Movie::Save(Stream &stream) {
 // NTSC-U/C: 0x005d22f8, PAL: 0x00614328
 void Movie::Load(Stream &stream) {
     int nRevision;
-    stream.Read(&nRevision, sizeof(nRevision));
+    stream.ReadLE(&nRevision, sizeof(nRevision));
     if (nRevision >= kMovieRejectedRevision) {
-        g_failSink.Report("Can't load new Movie\n");
+        Rnd::TheDbg.Notify("Can't load new Movie\n");
         return;
     }
 
@@ -392,7 +392,7 @@ void Movie::Load(Stream &stream) {
     mFilename.Load(stream);
     if (nRevision < kMoviePaddedRevision) {
         char chDiscarded;
-        stream.ReadBytes(&chDiscarded, 1);
+        stream.Read(&chDiscarded, 1);
     }
     ReadTrackTextures(stream, mTrackTextures);
     OpenMovieFile();

@@ -10,7 +10,7 @@
 struct RenderStats {
     /** Point particles submitted, advanced by the point path by the whole vertex count. */
     int mnPoints;
-    /** Meshes submitted, incremented by Rnd::PsMesh::DrawSelf(). */
+    /** Meshes submitted, incremented by Rnd::PsMesh::DrawShowing(). */
     int mnMeshDraws;
     /** Triangles with at least one vertex outside a plane, counted before the drop tests. */
     int mnFacesClipped;

@@ -12,7 +12,7 @@ struct Sphere;
 
 namespace Rnd {
 
-/** Vertices a single draw may submit, from the overflow guard in Rnd::PsMesh::DrawSelf(). */
+/** Vertices a single draw may submit, from the overflow guard in Rnd::PsMesh::DrawShowing(). */
 constexpr int kDrawVertCapacity = 2500;
 
 /**
@@ -86,7 +86,7 @@ extern DrawVert g_aDrawVerts[];
 /**
  * World-space frustum IsSphereInsideFrustum() tests against.
  *
- * Rnd::PsCam::DrawSelf() rebuilds it for each camera, with the side planes widened by the guard
+ * Rnd::PsCam::DrawShowing() rebuilds it for each camera, with the side planes widened by the guard
  * band. Rnd::Cam retains a second, per-camera set that Rnd::Mesh::PrepareDraw() uses instead. The
  * two tests do not share a plane set.
  *
@@ -271,7 +271,7 @@ int PackParticleQuads(DrawVert *pOutVerts, int nMode, const Particle *pFirst, in
  * Non-zero while fog is enabled.
  *
  * Both software draw paths shift it into the GS PRIM fog-enable bit, which is what identifies it
- * as fog rather than a general flag. Rnd::PsEnviron::DrawSelf() is the one writer.
+ * as fog rather than a general flag. Rnd::PsEnviron::DrawShowing() is the one writer.
  *
  * @ghidraAddress NTSC-U/C: 0x00776118
  * @ghidraAddress PAL: 0x007b9ff0

@@ -35,7 +35,7 @@ void DurGemCurve::Init(Rnd::View *pView,
                        float flWidth) {
     mLane = nLane;
     mRow = nRow;
-    mString = Rnd::String::NewString(DurGemTrails::NewStringName());
+    mString = Rnd::String::New(DurGemTrails::NewStringName());
     mString->SetLinePairs(0);
     mString->SetWidth(flWidth);
     mString->SetMat(pMat);
@@ -58,7 +58,7 @@ void DurGemCurve::Init(Rnd::View *pView,
 // NTSC-U/C: 0x00437610, PAL: 0x004733a8
 int DurGemCurve::Show() {
     mString->SetShowing(1);
-    return mString->GetNumPoints();
+    return mString->NumPoints();
 }
 
 // NTSC-U/C: 0x00437670, PAL: 0x00473408
@@ -68,7 +68,7 @@ void DurGemCurve::Hide() {
 
 // NTSC-U/C: 0x004376a0, PAL: 0x00473438
 bool DurGemCurve::FindCrossing(const Plane &plane, Vector3 *pOut) {
-    for (int i = 0; i < mString->GetNumPoints() - 1; ++i) {
+    for (int i = 0; i < mString->NumPoints() - 1; ++i) {
         const Vector3 segment[] = {*mString->GetPointPos(i), *mString->GetPointPos(i + 1)};
         float flT;
         if (IntersectSegmentWithPlane(segment, plane, &flT)) {

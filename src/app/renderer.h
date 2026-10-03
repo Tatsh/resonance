@@ -44,13 +44,13 @@ class TickClock;
  *
  * The constructor records the object in g_pRenderer and the destructor clears it. The three
  * objects the renderer builds (AppTunnel, Overlay, and TnlArena) are also its three message sinks.
- * MsgSource::Send() delivers every message HandleMessage() does not consume to all three.
+ * MsgSource::Send() delivers every message DispatchPriv() does not consume to all three.
  *
  * The translation unit also defines seven static routines over five async loaders and two cached
  * names, all file-scope globals. The front end starts the loads and the constructor waits for them.
  *
  * The unreferenced forwarder at `0x00432440` in this unit, byte-identical to
- * MsgJoiner::HandleMessage() at `0x00195b70`, has its unwind record at `0x006e32b8` as its only
+ * MsgJoiner::DispatchPriv() at `0x00195b70`, has its unwind record at `0x006e32b8` as its only
  * reference and is recorded here rather than declared.
  */
 class Renderer : public MsgSource, public RendererBase {
@@ -108,7 +108,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0042d3b8
      * @ghidraAddress PAL: 0x00468f70
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Sample the song clock, then deliver every queued message.
@@ -242,7 +242,7 @@ public:
 
 private:
     // NTSC-U/C: 0x004322f8, PAL: 0x0046dfd0
-    // Runs script template 1000. HandleMessage() inlines the body, and this copy has
+    // Runs script template 1000. DispatchPriv() inlines the body, and this copy has
     // no caller.
     void OnMsg(const GameBeginMsg &msg);
 
@@ -255,7 +255,7 @@ private:
     // NTSC-U/C: 0x00432318, PAL: 0x0046dff0
     // Sends the message on, then outside game mode 1 and play mode 2 finds the one
     // world player with the highest score and reports a change of leader to the tunnel and the
-    // overlay. A tie for the top score produces no leader. HandleMessage() inlines the body, and
+    // overlay. A tie for the top score produces no leader. DispatchPriv() inlines the body, and
     // this copy has no caller.
     void OnPointAmount(Message *pMsg);
 

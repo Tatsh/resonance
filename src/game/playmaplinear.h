@@ -95,7 +95,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0012ae38
      * @ghidraAddress PAL: 0x0012b570
      */
-    virtual int GetExtent();
+    virtual int GetLength() const;
 
     /**
      * @return The window end RecordPattern() recorded.
@@ -109,7 +109,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0012aa68
      * @ghidraAddress PAL: 0x0012b1a0
      */
-    virtual int GetSectionCount();
+    virtual int GetNumSections() const;
 
     /**
      * @param nIndex The index into the recorded pattern.
@@ -261,13 +261,13 @@ protected:
     void LoadStepRings();
 
     /**
-     * Advance the window until GetExtent() passes the limit, then drop what it has passed.
+     * Advance the window until GetLength() passes the limit, then drop what it has passed.
      *
      * Every one of MapBar(), FindBarsPlaying(), GetPatternIndex(), GetAbsoluteSectionIndex(),
      * IsLooping(), EndLoop(), and StartLoop() calls it with its own argument before doing anything
-     * else. The growth half appends one start to mWindowStarts from the result of GetExtent() and
+     * else. The growth half appends one start to mWindowStarts from the result of GetLength() and
      * one Entry to mWindow per section of the pattern. The test is at the top of the loop, and
-     * the body can run zero times. GetExtent() is dispatched through the table rather than called
+     * the body can run zero times. GetLength() is dispatched through the table rather than called
      * directly.
      *
      * The trim half drops as many leading elements from mWindow and mWindowStarts as the pattern
@@ -275,7 +275,7 @@ protected:
      * element count. The trim therefore fires only once mWindow is more than eight times the length
      * of the pattern.
      *
-     * @param nLimit The value GetExtent() must exceed for the growth to stop.
+     * @param nLimit The value GetLength() must exceed for the growth to stop.
      * @ghidraAddress NTSC-U/C: 0x00129150
      * @ghidraAddress PAL: 0x00129880
      */

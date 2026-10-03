@@ -96,7 +96,7 @@ constexpr long long kNoActivity = -1;
 // Resolve one named object of the renderer as T.
 template <class T>
 inline T *FindObject(const HxStr &name) {
-    return dynamic_cast<T *>(Rnd::g_manager.Find(name));
+    return dynamic_cast<T *>(Rnd::TheManager.Find(name));
 }
 
 // The watchdog time in nanoseconds.
@@ -149,7 +149,7 @@ void MetLogoScreen::UpdateBlink(float flTime) {
 void MetLogoScreen::ResolveContainerViews() {
     ResolveAnimationViews();
     mView = FindObject<Rnd::View>(HxStr(kLogoView));
-    mView->ReleaseAnimsRefs();
+    mView->RemoveAllAnims();
     mViewsUnresolved = 0;
     mStartText = FindObject<Rnd::Text>(HxStr(kStartText));
 #ifdef VIDEO_STANDARD_PAL
@@ -264,7 +264,7 @@ void MetLogoScreen::UpdateIdleAnimation(float flTime) {
 }
 
 // NTSC-U/C: 0x002be6a0, PAL: 0x002de3c8
-void MetLogoScreen::HandleMessage(Message *pMsg) {
+void MetLogoScreen::DispatchPriv(Message *pMsg) {
     if (pMsg->Type() == g_nMetUnlockStagesMsgType) {
         RecordUnlock();
     }

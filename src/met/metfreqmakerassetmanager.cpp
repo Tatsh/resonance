@@ -226,8 +226,8 @@ bool MetFreqMakerAssetManager::PollLoad() {
         return false;
     }
 
-    mMaterialTemplate = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(g_prototypeMaterialName));
-    mMeshTemplate = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(g_prototypeMeshName));
+    mMaterialTemplate = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(g_prototypeMaterialName));
+    mMeshTemplate = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(g_prototypeMeshName));
     std::list<Rnd::Object *> objects = mAssetLoader->mObjects;
     HxStr unused; // Yes, the binary builds an empty string it never reads.
 
@@ -494,7 +494,7 @@ void MetFreqMakerAssetManager::ApplyPartScale(Rnd::Mesh *pMesh,
 // NTSC-U/C: 0x00254f30, PAL: 0x0026a5f8
 Color *MetFreqMakerAssetManager::ColorAt(const Vector2 &position) {
     if (mPaletteTex == nullptr) {
-        mPaletteTex = dynamic_cast<Rnd::Tex *>(Rnd::g_manager.Find(g_spectrumTextureName));
+        mPaletteTex = dynamic_cast<Rnd::Tex *>(Rnd::TheManager.Find(g_spectrumTextureName));
     }
     return SampleTexture(mPaletteTex, position.x, position.y);
 }

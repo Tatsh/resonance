@@ -20,7 +20,7 @@
  * sends the note-off early and withdraws the command.
  *
  * The note-on and note-off are StdMidiMsg objects built on the stack and delivered through
- * MsgSink::Handle() on mSink.
+ * MsgSink::Dispatch() on mSink.
  */
 class NotePlayer : public MusePlayer {
 public:
@@ -95,7 +95,7 @@ private:
     // Sends the note-on (status 0x90 ORed with mChannel, mNote, mVelocity) at a song position to
     // mSink.
     // NTSC-U/C: 0x001b3fb8, PAL: 0x001b9d90
-    void PostStdMidiMsg(int nTick);
+    void NoteOn(int nTick);
 
     unsigned char mNote;     // +0x08
     unsigned char mVelocity; // +0x09

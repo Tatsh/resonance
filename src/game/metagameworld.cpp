@@ -24,7 +24,7 @@ MetaGameWorld::MetaGameWorld() : mRenderer(nullptr), mCheatDetector(nullptr) {
 // NTSC-U/C: 0x003d4790, PAL: 0x0040c680
 MetaGameWorld::~MetaGameWorld() {
     delete mCheatDetector;
-    DestroyRenderer();
+    KillRenderer();
 }
 
 // NTSC-U/C: 0x003d3288, PAL: 0x0040b108
@@ -40,7 +40,7 @@ void MetaGameWorld::OnControllerReading(int nTag, int nPadIndex, int nButton, fl
     RawControllerMsg message;
     message.mReading = reading;
     message.mPosition = Mid::MBT(0);
-    mRenderer->Handle(&message);
+    mRenderer->Dispatch(&message);
 }
 
 // NTSC-U/C: 0x003d31c0, PAL: 0x0040b040
@@ -53,7 +53,7 @@ void MetaGameWorld::CreateRenderer() {
 }
 
 // NTSC-U/C: 0x003d4810, PAL: 0x0040c700
-void MetaGameWorld::DestroyRenderer() {
+void MetaGameWorld::KillRenderer() {
     delete mRenderer;
     mRenderer = nullptr;
 }

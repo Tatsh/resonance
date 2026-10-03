@@ -48,7 +48,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001c2928
      * @ghidraAddress PAL: 0x001c8770
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
     /**
      * Play the phrase of one bar.

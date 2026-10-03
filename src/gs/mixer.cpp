@@ -44,7 +44,7 @@ constexpr unsigned char kCompletedGain = 115;
 
 // NTSC-U/C: 0x001a7110, PAL: 0x001ace78
 Mixer::Mixer(int nTrack, unsigned char nChannel)
-    : mChannel(nChannel), mTrack(nTrack), mLastSection(0), mSelection(&g_nullPlayer),
+    : mChannel(nChannel), mTrack(nTrack), mLastSection(0), mSelection(&NullPlayer::sInstance),
       mZeroedBytes(), mLevelIndex(0), mTracksOnBar(kNoValue) {
     mOwnsPan = QueryConfigFlag(kOwnsPanConfigCode);
     mBoostVolume = static_cast<unsigned char>(QueryConfigValue(kBoostVolumeConfigCode));
@@ -73,7 +73,7 @@ void Mixer::SendPan() {
     msg.mStatus = kStatusControlChange | mChannel;
     msg.mData1 = kControllerPan;
     msg.mData2 = nPan;
-    mOutput->Handle(&msg);
+    mOutput->Dispatch(&msg);
 }
 
 // NTSC-U/C: 0x001a73a8, PAL: 0x001ad110
@@ -95,7 +95,7 @@ void Mixer::SetGainFactor(int nIndex, unsigned char nFactor) {
     msg.mStatus = kStatusControlChange | mChannel;
     msg.mData1 = kControllerExpression;
     msg.mData2 = mLevel;
-    mOutput->Handle(&msg);
+    mOutput->Dispatch(&msg);
 }
 
 // NTSC-U/C: 0x001a7490, PAL: 0x001ad1f8
@@ -109,7 +109,7 @@ void Mixer::SetMuted(int bMuted) {
             msg.mStatus = kStatusControlChange | mChannel;
             msg.mData1 = kControllerExpression;
             msg.mData2 = mLevel;
-            mOutput->Handle(&msg);
+            mOutput->Dispatch(&msg);
         }
         return;
     }
@@ -122,7 +122,7 @@ void Mixer::SetMuted(int bMuted) {
     msg.mStatus = kStatusControlChange | mChannel;
     msg.mData1 = kControllerExpression;
     msg.mData2 = 0;
-    mOutput->Handle(&msg);
+    mOutput->Dispatch(&msg);
 }
 
 // NTSC-U/C: 0x001a75d8, PAL: 0x001ad340
@@ -177,19 +177,19 @@ void Mixer::ApplyControlChange(StdMidiMsg *pMsg) {
     if (nController == kControllerPan && mOwnsPan != 0) {
         return;
     }
-    mOutput->Handle(pMsg);
+    mOutput->Dispatch(pMsg);
 }
 
 // NTSC-U/C: 0x001a7780, PAL: 0x001ad4e8
-void Mixer::HandleMessage(Message *pMsg) {
+void Mixer::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
-    if (nType == static_cast<int>(g_dwStdMidiMsgType)) {
+    if (nType == static_cast<int>(StdMidiMsg::sID)) {
         StdMidiMsg *pMidi = static_cast<StdMidiMsg *>(pMsg);
         if ((pMidi->mStatus & 0xf0) == kStatusControlChange) {
             ApplyControlChange(pMidi);
             return;
         }
-        mOutput->Handle(pMsg);
+        mOutput->Dispatch(pMsg);
         return;
     }
     if (nType == static_cast<int>(g_dwTracksOnMsgType)) {

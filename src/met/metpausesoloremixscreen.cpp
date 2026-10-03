@@ -56,7 +56,7 @@ void MetPauseSoloRemixScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     for (int i = 1; i <= kOptionCount; ++i) {
         Rnd::Text *pOption = dynamic_cast<Rnd::Text *>(
-            Rnd::g_manager.Find(HxStr(FormatString(kOptionTextFormat, i))));
+            Rnd::TheManager.Find(HxStr(FormatString(kOptionTextFormat, i))));
         mOptionTexts.push_back(pOption);
     }
 }
@@ -89,7 +89,7 @@ void MetPauseSoloRemixScreen::HandleCommand(const MetScreenCommand *pCommand) {
 void MetPauseSoloRemixScreen::EnterAndShow() {
     // Yes, the binary copies the settings and never reads the copy.
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
-    Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kPausedText)));
+    Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kPausedText)));
 
     HxStr heading = MetConfigText(kMetStrPauseRemix, kPromptConfigCode, kHeadingKey);
     pPaused->SetText(heading);

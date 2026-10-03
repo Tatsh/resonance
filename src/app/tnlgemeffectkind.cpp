@@ -15,7 +15,7 @@ constexpr float kParticleCost = 2.0f;
 // NTSC-U/C: 0x004121d0, PAL: 0x0044bcb0
 TnlGemEffectKind::TnlGemEffectKind(const char *pszName) {
     mParticleSys = dynamic_cast<Rnd::ParticleSys *>(
-        Rnd::g_manager.Find(HxStr(FormatString("%s.ps", pszName))));
+        Rnd::TheManager.Find(HxStr(FormatString("%s.ps", pszName))));
     mParticleSys->FreeAllParticles();
     mCost = kParticleCost;
 }

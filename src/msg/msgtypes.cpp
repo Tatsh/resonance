@@ -123,17 +123,17 @@ unsigned int g_dwAllNotesOffMsgType = 203;
 // NTSC-U/C: 0x006d01dc, PAL: 0x00713974
 unsigned int g_dwMultiMuseMsgType = 204;
 // NTSC-U/C: 0x006d01cc, PAL: 0x00713964
-unsigned int g_dwNoteMsgType = 202;
+unsigned int NoteMsg::sID = 202;
 // NTSC-U/C: 0x006d01c4, PAL: 0x0071395c
-unsigned int g_dwStdMidiMsgType = 201;
+unsigned int StdMidiMsg::sID = 201;
 // NTSC-U/C: 0x006d01e4, PAL: 0x0071397c
-unsigned int g_dwSustainNoteMsgType = 205;
+unsigned int SustainNoteMsg::sID = 205;
 // NTSC-U/C: 0x006d01ec, PAL: 0x00713984
 unsigned int g_dwTrackSelectMsgType = 300;
 // NTSC-U/C: 0x006d0294, PAL: 0x00713a2c
 unsigned int g_dwTracksOnMsgType = 321;
 // NTSC-U/C: 0x006d0184, PAL: 0x0071391c
-int g_nAdvanceSectionMsgType = 113;
+int AdvanceSectionMsg::sID = 113;
 // NTSC-U/C: 0x006d025c, PAL: 0x007139f4
 int g_nAdvanceSectionToggleMsgType = 314;
 // NTSC-U/C: 0x006d03cc, PAL: 0x00713b64
@@ -185,7 +185,7 @@ int g_nClearGemsMsgType = 403;
 // NTSC-U/C: 0x006d02f4, PAL: 0x00713a8c
 int g_nContCtrlMsgType = 410;
 // NTSC-U/C: 0x006d03d4, PAL: 0x00713b6c
-int g_nCrippleMsgType = 501;
+int CrippleMsg::sID = 501;
 // NTSC-U/C: 0x006d73fc, PAL: 0x0071ab9c
 int g_nCripplePacketType = 619;
 // NTSC-U/C: 0x006d021c, PAL: 0x007139b4
@@ -201,7 +201,7 @@ int g_nEndGameMsgType = 433;
 // NTSC-U/C: 0x006d01c0, PAL: 0x00713958
 int g_nEndMuseMsgType = 206;
 // NTSC-U/C: 0x006d0174, PAL: 0x0071390c
-int g_nEraseMsgType = 111;
+int EraseMsg::sID = 111;
 // NTSC-U/C: 0x006d017c, PAL: 0x00713914
 int g_nEraseOffMsgType = 112;
 // NTSC-U/C: 0x006d0364, PAL: 0x00713afc
@@ -229,13 +229,13 @@ int g_nGemMsgType = 405;
 // NTSC-U/C: 0x006d73cc, PAL: 0x0071ab6c
 int g_nGemPacketType = 612;
 // NTSC-U/C: 0x006d0274, PAL: 0x00713a0c
-int g_nInvalidateSeekerMsgType = 317;
+int InvalidateSeekerMsg::sID = 317;
 // NTSC-U/C: 0x006d027c, PAL: 0x00713a14
 int g_nInvalidateTrackMsgType = 318;
 // NTSC-U/C: 0x006d03ec, PAL: 0x00713b84
 int g_nIsRecordingMsgType = 504;
 // NTSC-U/C: 0x006d032c, PAL: 0x00713ac4
-int g_nJamEffectMsgType = 417;
+int JamEffectMsg::sID = 417;
 // NTSC-U/C: 0x006d0334, PAL: 0x00713acc
 int g_nJuiceAmountMsgType = 418;
 // NTSC-U/C: 0x006d035c, PAL: 0x00713af4
@@ -261,7 +261,7 @@ int g_nMultiplierStateMsgType = 117;
 // NTSC-U/C: 0x006d0234, PAL: 0x007139cc
 int g_nNearestTrackMsgType = 309;
 // NTSC-U/C: 0x006d031c, PAL: 0x00713ab4
-int g_nNeutralizeMsgType = 415;
+int NeutralizeMsg::sID = 415;
 // NTSC-U/C: 0x006d02fc, PAL: 0x00713a94
 int g_nNowBarMsgType = 411;
 // NTSC-U/C: 0x006d7368, PAL: 0x0071ab08
@@ -271,7 +271,7 @@ int g_nPauseGameSystemMsgType = 434;
 // NTSC-U/C: 0x006d02a4, PAL: 0x00713a3c
 int g_nPhraseCapturedMsgType = 400;
 // NTSC-U/C: 0x006d036c, PAL: 0x00713b04
-int g_nPhraseMsgType = 425;
+int PhraseMsg::sID = 425;
 // NTSC-U/C: 0x006d030c, PAL: 0x00713aa4
 int g_nPhraseMuffedMsgType = 413;
 // NTSC-U/C: 0x006d73d4, PAL: 0x0071ab74
@@ -279,9 +279,9 @@ int g_nPhrasePacketType = 613;
 // NTSC-U/C: 0x006d02ec, PAL: 0x00713a84
 int g_nPitchMsgType = 409;
 // NTSC-U/C: 0x006d0134, PAL: 0x007138cc
-int g_nPitchRiffMsgType = 103;
+int PitchRiffMsg::sID = 103;
 // NTSC-U/C: 0x006d0144, PAL: 0x007138dc
-int g_nPlaybackModeMsgType = 105;
+int PlaybackModeMsg::sID = 105;
 // NTSC-U/C: 0x006d026c, PAL: 0x00713a04
 int g_nPlaybackToggleMsgType = 316;
 // NTSC-U/C: 0x006d039c, PAL: 0x00713b34
@@ -295,7 +295,7 @@ int g_nPowerupCountMsgType = 305;
 // NTSC-U/C: 0x006d0224, PAL: 0x007139bc
 int g_nPowerupFailedMsgType = 307;
 // NTSC-U/C: 0x006d0118, PAL: 0x007138b0
-int g_nRawControllerMsgType = 100;
+int RawControllerMsg::sID = 100;
 // NTSC-U/C: 0x006d0284, PAL: 0x00713a1c
 int g_nRefreshNetMsgType = 319;
 // NTSC-U/C: 0x006d022c, PAL: 0x007139c4
@@ -331,7 +331,7 @@ int g_nSeekerMsgType = 302;
 // NTSC-U/C: 0x006d0264, PAL: 0x007139fc
 int g_nShowEraseEffectMsgType = 315;
 // NTSC-U/C: 0x006d013c, PAL: 0x007138d4
-int g_nStopRiffMsgType = 104;
+int StopRiffMsg::sID = 104;
 // NTSC-U/C: 0x006d01ac, PAL: 0x00713944
 int g_nStreakOverMsgType = 118;
 // NTSC-U/C: 0x006d02dc, PAL: 0x00713a74
@@ -355,17 +355,17 @@ namespace {
 
 // The static initialiser at 0x003d9818 constructs the message registrars in this order.
 // NTSC-U/C: 0x006d0120, PAL: 0x007138b8
-const MessageFactory kRawControllerMsgFactory(g_nRawControllerMsgType, RawControllerMsg::New);
+const MessageFactory kRawControllerMsgFactory(RawControllerMsg::sID, RawControllerMsg::New);
 // NTSC-U/C: 0x006d0128, PAL: 0x007138c0
 const MessageFactory kRotLeftMsgFactory(g_nRotLeftMsgType, RotLeftMsg::New);
 // NTSC-U/C: 0x006d0130, PAL: 0x007138c8
 const MessageFactory kRotRightMsgFactory(g_nRotRightMsgType, RotRightMsg::New);
 // NTSC-U/C: 0x006d0138, PAL: 0x007138d0
-const MessageFactory kPitchRiffMsgFactory(g_nPitchRiffMsgType, PitchRiffMsg::New);
+const MessageFactory kPitchRiffMsgFactory(PitchRiffMsg::sID, PitchRiffMsg::New);
 // NTSC-U/C: 0x006d0140, PAL: 0x007138d8
-const MessageFactory kStopRiffMsgFactory(g_nStopRiffMsgType, StopRiffMsg::New);
+const MessageFactory kStopRiffMsgFactory(StopRiffMsg::sID, StopRiffMsg::New);
 // NTSC-U/C: 0x006d0148, PAL: 0x007138e0
-const MessageFactory kPlaybackModeMsgFactory(g_nPlaybackModeMsgType, PlaybackModeMsg::New);
+const MessageFactory kPlaybackModeMsgFactory(PlaybackModeMsg::sID, PlaybackModeMsg::New);
 // NTSC-U/C: 0x006d0150, PAL: 0x007138e8
 const MessageFactory kAxisRegisterMsgFactory(g_nAxisRegisterMsgType, AxisRegisterMsg::New);
 // NTSC-U/C: 0x006d0158, PAL: 0x007138f0
@@ -377,11 +377,11 @@ const MessageFactory kAxisXPowMsgFactory(g_nAxisXPowMsgType, AxisXPowMsg::New);
 // NTSC-U/C: 0x006d0170, PAL: 0x00713908
 const MessageFactory kButtonPowMsgFactory(g_nButtonPowMsgType, ButtonPowMsg::New);
 // NTSC-U/C: 0x006d0178, PAL: 0x00713910
-const MessageFactory kEraseMsgFactory(g_nEraseMsgType, EraseMsg::New);
+const MessageFactory kEraseMsgFactory(EraseMsg::sID, EraseMsg::New);
 // NTSC-U/C: 0x006d0180, PAL: 0x00713918
 const MessageFactory kEraseOffMsgFactory(g_nEraseOffMsgType, EraseOffMsg::New);
 // NTSC-U/C: 0x006d0188, PAL: 0x00713920
-const MessageFactory kAdvanceSectionMsgFactory(g_nAdvanceSectionMsgType, AdvanceSectionMsg::New);
+const MessageFactory kAdvanceSectionMsgFactory(AdvanceSectionMsg::sID, AdvanceSectionMsg::New);
 // NTSC-U/C: 0x006d0190, PAL: 0x00713928
 const MessageFactory kLoopToolMsgFactory(g_nLoopToolMsgType, LoopToolMsg::New);
 // NTSC-U/C: 0x006d0198, PAL: 0x00713930
@@ -395,15 +395,15 @@ const MessageFactory kStreakOverMsgFactory(g_nStreakOverMsgType, StreakOverMsg::
 // NTSC-U/C: 0x006d01b8, PAL: 0x00713950
 const MessageFactory kCaughtBarMsgFactory(g_nCaughtBarMsgType, CaughtBarMsg::New);
 // NTSC-U/C: 0x006d01c8, PAL: 0x00713960
-const MessageFactory kStdMidiMsgFactory(g_dwStdMidiMsgType, StdMidiMsg::New);
+const MessageFactory kStdMidiMsgFactory(StdMidiMsg::sID, StdMidiMsg::New);
 // NTSC-U/C: 0x006d01d0, PAL: 0x00713968
-const MessageFactory kNoteMsgFactory(g_dwNoteMsgType, NoteMsg::New);
+const MessageFactory kNoteMsgFactory(NoteMsg::sID, NoteMsg::New);
 // NTSC-U/C: 0x006d01d8, PAL: 0x00713970
 const MessageFactory kAllNotesOffMsgFactory(g_dwAllNotesOffMsgType, AllNotesOffMsg::New);
 // NTSC-U/C: 0x006d01e0, PAL: 0x00713978
 const MessageFactory kMultiMuseMsgFactory(g_dwMultiMuseMsgType, MultiMuseMsg::New);
 // NTSC-U/C: 0x006d01e8, PAL: 0x00713980
-const MessageFactory kSustainNoteMsgFactory(g_dwSustainNoteMsgType, SustainNoteMsg::New);
+const MessageFactory kSustainNoteMsgFactory(SustainNoteMsg::sID, SustainNoteMsg::New);
 // NTSC-U/C: 0x006d01f0, PAL: 0x00713988
 const MessageFactory kTrackSelectMsgFactory(g_dwTrackSelectMsgType, TrackSelectMsg::New);
 // NTSC-U/C: 0x006d01f8, PAL: 0x00713990
@@ -441,7 +441,7 @@ const MessageFactory kShowEraseEffectMsgFactory(g_nShowEraseEffectMsgType, ShowE
 // NTSC-U/C: 0x006d0270, PAL: 0x00713a08
 const MessageFactory kPlaybackToggleMsgFactory(g_nPlaybackToggleMsgType, PlaybackToggleMsg::New);
 // NTSC-U/C: 0x006d0278, PAL: 0x00713a10
-const MessageFactory kInvalidateSeekerMsgFactory(g_nInvalidateSeekerMsgType,
+const MessageFactory kInvalidateSeekerMsgFactory(InvalidateSeekerMsg::sID,
                                                  InvalidateSeekerMsg::New);
 // NTSC-U/C: 0x006d0280, PAL: 0x00713a18
 const MessageFactory kInvalidateTrackMsgFactory(g_nInvalidateTrackMsgType, InvalidateTrackMsg::New);
@@ -485,12 +485,12 @@ const MessageFactory kPhraseMuffedMsgFactory(g_nPhraseMuffedMsgType, PhraseMuffe
 // NTSC-U/C: 0x006d0318, PAL: 0x00713ab0
 const MessageFactory kEnableFreestyleMsgFactory(g_nEnableFreestyleMsgType, EnableFreestyleMsg::New);
 // NTSC-U/C: 0x006d0320, PAL: 0x00713ab8
-const MessageFactory kNeutralizeMsgFactory(g_nNeutralizeMsgType, NeutralizeMsg::New);
+const MessageFactory kNeutralizeMsgFactory(NeutralizeMsg::sID, NeutralizeMsg::New);
 // NTSC-U/C: 0x006d0328, PAL: 0x00713ac0
 const MessageFactory kPlayersTrackNeutralizedMsgFactory(g_nPlayersTrackNeutralizedMsgType,
                                                         PlayersTrackNeutralizedMsg::New);
 // NTSC-U/C: 0x006d0330, PAL: 0x00713ac8
-const MessageFactory kJamEffectMsgFactory(g_nJamEffectMsgType, JamEffectMsg::New);
+const MessageFactory kJamEffectMsgFactory(JamEffectMsg::sID, JamEffectMsg::New);
 // NTSC-U/C: 0x006d0338, PAL: 0x00713ad0
 const MessageFactory kJuiceAmountMsgFactory(g_nJuiceAmountMsgType, JuiceAmountMsg::New);
 // NTSC-U/C: 0x006d0340, PAL: 0x00713ad8
@@ -506,7 +506,7 @@ const MessageFactory kLeaveGameMsgFactory(g_nLeaveGameMsgType, LeaveGameMsg::New
 // NTSC-U/C: 0x006d0368, PAL: 0x00713b00
 const MessageFactory kFadeGameMsgFactory(g_nFadeGameMsgType, FadeGameMsg::New);
 // NTSC-U/C: 0x006d0370, PAL: 0x00713b08
-const MessageFactory kPhraseMsgFactory(g_nPhraseMsgType, PhraseMsg::New);
+const MessageFactory kPhraseMsgFactory(PhraseMsg::sID, PhraseMsg::New);
 // NTSC-U/C: 0x006d0378, PAL: 0x00713b10
 const MessageFactory kBumpMsgFactory(g_nBumpMsgType, BumpMsg::New);
 // NTSC-U/C: 0x006d0380, PAL: 0x00713b18
@@ -538,7 +538,7 @@ const MessageFactory kGameManagerDoPlaybackMsgFactory(g_nGameManagerDoPlaybackMs
 // NTSC-U/C: 0x006d03d0, PAL: 0x00713b68
 const MessageFactory kAutoCatchMsgFactory(g_nAutoCatchMsgType, AutoCatchMsg::New);
 // NTSC-U/C: 0x006d03d8, PAL: 0x00713b70
-const MessageFactory kCrippleMsgFactory(g_nCrippleMsgType, CrippleMsg::New);
+const MessageFactory kCrippleMsgFactory(CrippleMsg::sID, CrippleMsg::New);
 // NTSC-U/C: 0x006d03e0, PAL: 0x00713b78
 const MessageFactory kMetStartNetLaunchMsgFactory(g_nMetStartNetLaunchMsgType,
                                                   MetStartNetLaunchMsg::New);

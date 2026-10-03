@@ -56,7 +56,7 @@ int g_nDurGemStringCount = 1;
 DurGemTrails::DurGemTrails(AppTunnel *pTunnel, int nMaxPoints)
     : mLaneCount(kLaneCount), mRowCount(kRowCount), mMaxPoints(nMaxPoints), mTunnel(pTunnel) {
     mRows.resize(mLaneCount * mRowCount, nullptr);
-    mView = dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("tnl strings")));
+    mView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("tnl strings")));
     mStrips.resize(kStripCount, nullptr);
     for (DurGemStrip *&pStrip : mStrips) {
         pStrip = new DurGemStrip(mView);

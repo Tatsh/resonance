@@ -41,7 +41,7 @@ void NetPlayer::OnTrackSelectPacket(TrackSelectPacket *pPacket) {
 }
 
 // NTSC-U/C: 0x00125f70, PAL: 0x00126608
-void NetPlayer::HandleMessage(Message *message) {
+void NetPlayer::DispatchPriv(Message *message) {
     const int nType = message->Type();
     if (nType == g_nTrackSelectPacketType) {
         OnTrackSelectPacket(static_cast<TrackSelectPacket *>(message));
@@ -52,6 +52,6 @@ void NetPlayer::HandleMessage(Message *message) {
             mPlace = pSelect->mPlace;
         }
     } else {
-        Player::HandleMessage(message);
+        Player::DispatchPriv(message);
     }
 }

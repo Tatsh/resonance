@@ -13,10 +13,9 @@ class TimedCommand;
  * Replay of a recorded command stream that Sch::Scheduler::StartPlayback() installs.
  *
  * The class is not polymorphic and emits no RTTI. Its name comes from the debugging symbols of the
- * North American demo release. The demo's constructor and Play() have the same instructions as this
- * class's constructor and Start(). The object is 0x14 bytes and is allocated with the untagged
+ * North American demo release. The object is 0x14 bytes and is allocated with the untagged
  * allocator. Load() reads the recorded wrappers into mCommands, stopping at the EndRecordingCmd
- * that ends a recording, and Start() rewinds the scheduler's clock and queues every wrapper on the
+ * that ends a recording, and Play() rewinds the scheduler's clock and queues every wrapper on the
  * scheduler.
  */
 class Playbacker {
@@ -42,7 +41,7 @@ public:
      * Empties mCommands, then reads one Sch::TimedCommand after another until the stream reaches
      * its end or a wrapper holds a command whose CmdID() is 6, the identifier of EndRecordingCmd.
      * The wrapper that stops the loop is deleted. Each wrapper kept has its handle reserved
-     * through Sch::CmdID::Reserve(). mCursor is left at the first wrapper. The title is inferred.
+     * through Sch::CmdID::ReserveID(). mCursor is left at the first wrapper. The title is inferred.
      *
      * @param stream The recording.
      * @ghidraAddress NTSC-U/C: 0x00594a78
@@ -54,12 +53,12 @@ public:
      * Rewind the scheduler's clock and queue every loaded wrapper.
      *
      * Pauses the clock, restarts it at zero, queues each wrapper from mCursor on, and resumes the
-     * clock. The title is inferred.
+     * clock.
      *
      * @ghidraAddress NTSC-U/C: 0x005962e8
      * @ghidraAddress PAL: 0x005d96f0
      */
-    void Start();
+    void Play();
 
 private:
     // Hands every wrapper from mCursor to the end to Scheduler::QueueReplayed().

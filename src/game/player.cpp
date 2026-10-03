@@ -225,14 +225,14 @@ inline HxStr Player::GetUsername() {
 
 // NTSC-U/C: 0x00132cd0, PAL: 0x00133510
 // The out-of-line copy.
-int Player::CallAnnounceState() {
+int Player::StartMF() {
     AnnounceState();
     return 0;
 }
 
 // NTSC-U/C: 0x00132d00, PAL: 0x00133540
 // The out-of-line copy.
-int Player::CallDeactivatePlacer() {
+int Player::StopMF() {
     DeactivatePlacer();
     return 0;
 }
@@ -246,7 +246,7 @@ inline void Player::OnUpdateScore(UpdateScorePacket *pPacket) {
 }
 
 // NTSC-U/C: 0x00133240, PAL: 0x00133a90
-void Player::HandleMessage(Message *pMsg) {
+void Player::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nUpdateScorePacketType) {
         OnUpdateScore(static_cast<UpdateScorePacket *>(pMsg));

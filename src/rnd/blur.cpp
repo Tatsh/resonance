@@ -54,10 +54,10 @@ void PrintObjectName(Dbg *pSink, const Object *pObject) {
 // byte, which is the empty name a reader resolves to nothing.
 void WriteObjectName(Stream &stream, const Object *pObject) {
     if (pObject != nullptr) {
-        stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+        stream.Write(NameText(pObject), pObject->mName.mLen + 1);
     } else {
         const char cEmpty = 0;
-        stream.WriteBytes(&cEmpty, sizeof(cEmpty));
+        stream.Write(&cEmpty, sizeof(cEmpty));
     }
 }
 
@@ -221,22 +221,22 @@ void Blur::DumpText(Dbg &sink) {
 // NTSC-U/C: 0x004c00b0, PAL: 0x004fe150
 void Blur::Save(Stream &stream) {
     const int nRevision = kBlurRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
 
     Drawable::Save(stream);
 
     WriteObjectName(stream, mpMesh);
-    Stream &tail = stream.Write(&mLength, sizeof(mLength))
-                       .Write(&mRate, sizeof(mRate))
-                       .Write(&mFalloff, sizeof(mFalloff));
+    Stream &tail = stream.WriteLE(&mLength, sizeof(mLength))
+                       .WriteLE(&mRate, sizeof(mRate))
+                       .WriteLE(&mFalloff, sizeof(mFalloff));
     WriteObjectName(tail, mpText);
 }
 
 // NTSC-U/C: 0x004c0258, PAL: 0x004fe2f8
 void Blur::Load(Stream &stream) {
-    stream.Read(&g_nRndBlurLoadRevision, sizeof(g_nRndBlurLoadRevision));
+    stream.ReadLE(&g_nRndBlurLoadRevision, sizeof(g_nRndBlurLoadRevision));
     if (g_nRndBlurLoadRevision >= kBlurRejectedRevision) {
-        g_failSink.Report("Can't load new Blur\n");
+        Rnd::TheDbg.Notify("Can't load new Blur\n");
         return;
     }
 
@@ -245,17 +245,17 @@ void Blur::Load(Stream &stream) {
 
     HxStr meshName;
     stream.ReadString(meshName);
-    mpMesh = dynamic_cast<Mesh *>(g_manager.Find(meshName));
+    mpMesh = dynamic_cast<Mesh *>(TheManager.Find(meshName));
 
-    stream.Read(&mLength, sizeof(mLength)).Read(&mRate, sizeof(mRate));
+    stream.ReadLE(&mLength, sizeof(mLength)).ReadLE(&mRate, sizeof(mRate));
     if (g_nRndBlurLoadRevision >= kBlurFalloffRevision) {
-        stream.Read(&mFalloff, sizeof(mFalloff));
+        stream.ReadLE(&mFalloff, sizeof(mFalloff));
     }
 
     if (g_nRndBlurLoadRevision >= kBlurTextRevision) {
         HxStr textName;
         stream.ReadString(textName);
-        mpText = dynamic_cast<Text *>(g_manager.Find(textName));
+        mpText = dynamic_cast<Text *>(TheManager.Find(textName));
     }
 
     AcquireObjectRefs();
@@ -291,7 +291,7 @@ static inline bool SameXfm(const float aflLeft[kXfmRowCount][kXfmRowFloatCount],
 }
 
 // NTSC-U/C: 0x004c0638, PAL: 0x004fe728
-int Blur::DrawSelf() {
+int Blur::DrawShowing() {
     Drawable *pSubject = mpText != nullptr ? static_cast<Drawable *>(mpText) : mpMesh;
     if (pSubject == nullptr) {
         return 1;
@@ -415,13 +415,13 @@ Blur *Blur::NewBlur(const HxStr &name) {
 
 // NTSC-U/C: 0x004c3418, PAL: 0x00501540
 Blur *Blur::Find(const HxStr &name) {
-    return dynamic_cast<Blur *>(g_manager.Find(name));
+    return dynamic_cast<Blur *>(TheManager.Find(name));
 }
 
 // NTSC-U/C: 0x004c3358, PAL: 0x00501480
 void Blur::Init() {
     g_pfnNewBlur = NewBlur;
-    g_manager.RegisterClass(g_blurClassName, NewBlurObject);
+    TheManager.RegisterClass(g_blurClassName, NewBlurObject);
 }
 
 } // namespace Rnd

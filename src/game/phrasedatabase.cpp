@@ -105,7 +105,7 @@ void PhraseDatabase::ClearOwners() {
     std::cout << "PhraseDatabase::ClearOwners\n";
     for (std::vector<Phrase *>::iterator it = mPhrases.begin(); it != mPhrases.end(); ++it) {
         if (*it != nullptr) {
-            (*it)->mPlayer = &g_nullPlayer;
+            (*it)->mPlayer = &NullPlayer::sInstance;
         }
     }
     std::cout << "PhraseDatabase::ClearOwners done\n";
@@ -167,7 +167,7 @@ void PhraseDatabase::SetOwner(Player *pPlayer, int nIndex) {
 Player *PhraseDatabase::GetOwner(int nIndex) {
     Phrase *pPhrase = mPhrases[nIndex];
     if (pPhrase == nullptr) {
-        return &g_nullPlayer;
+        return &NullPlayer::sInstance;
     }
     return pPhrase->mPlayer;
 }

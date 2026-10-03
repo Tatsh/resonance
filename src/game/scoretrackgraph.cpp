@@ -71,7 +71,7 @@ void ScoreTrackGraph::Stop() {
 }
 
 // NTSC-U/C: 0x001cf750, PAL: 0x001d5608
-void ScoreTrackGraph::AddMixerToSource(MsgSource *) {
+void ScoreTrackGraph::ConnectGamer(MsgSource *) {
 }
 
 // NTSC-U/C: 0x001cf758, PAL: 0x001d5610

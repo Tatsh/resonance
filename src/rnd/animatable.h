@@ -38,7 +38,7 @@ namespace Rnd {
  * registers this object as a referrer through Rnd::Object::AddRef(). mFilters stores a chain of
  * value filters this object owns outright and deletes in its destructor. SetFrame() maps the
  * incoming frame forward through that chain before handing it to the SetFrameSelf() hook and to
- * the children, and InverseFilters() maps a child frame back the other way.
+ * the children, and UnfilterFrame() maps a child frame back the other way.
  */
 class Animatable : public virtual Object {
     // CollectChildren() in rnd/collectchildren.h walks mAnims directly, and the image has no
@@ -106,7 +106,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x0049a560
          * @ghidraAddress PAL: 0x004d84c8
          */
-        virtual float Inverse(float flValue);
+        virtual float Unapply(float flValue);
 
         /**
          * Write this stage's parameters to sink.
@@ -116,7 +116,7 @@ public:
          *
          * @param sink The diagnostic sink to write to.
          */
-        virtual void Dump(Dbg &sink) = 0;
+        virtual void Print(Dbg &sink) const = 0;
 
         /**
          * Write this stage's parameters to stream.
@@ -203,7 +203,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x00498f08
          * @ghidraAddress PAL: 0x004d6e68
          */
-        virtual float Inverse(float flValue);
+        virtual float Unapply(float flValue);
 
         /**
          * Write "(scale:%.2f offset:%.2f)" to sink.
@@ -212,7 +212,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x00498f20
          * @ghidraAddress PAL: 0x004d6e80
          */
-        virtual void Dump(Dbg &sink);
+        virtual void Print(Dbg &sink) const;
 
         /**
          * Write both parameters to stream.
@@ -306,7 +306,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x004990f0
          * @ghidraAddress PAL: 0x004d7050
          */
-        virtual void Dump(Dbg &sink);
+        virtual void Print(Dbg &sink) const;
 
         /**
          * Write the two ends as floats and mLoop as a single byte.
@@ -399,7 +399,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x0049a5b8
          * @ghidraAddress PAL: 0x004d8520
          */
-        virtual float Inverse(float flValue);
+        virtual float Unapply(float flValue);
 
         /**
          * Write "(level:%.2f maxDelta:%.2f)" to sink.
@@ -408,7 +408,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x00499348
          * @ghidraAddress PAL: 0x004d72a8
          */
-        virtual void Dump(Dbg &sink);
+        virtual void Print(Dbg &sink) const;
 
         /**
          * Write both parameters to stream.
@@ -494,7 +494,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x00499500
          * @ghidraAddress PAL: 0x004d7460
          */
-        virtual float Inverse(float flValue);
+        virtual float Unapply(float flValue);
 
         /**
          * Write "(level:%.2f ratio:%.2f)" to sink.
@@ -503,7 +503,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x00499528
          * @ghidraAddress PAL: 0x004d7488
          */
-        virtual void Dump(Dbg &sink);
+        virtual void Print(Dbg &sink) const;
 
         /**
          * Write both parameters to stream.
@@ -597,7 +597,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x0049a630
          * @ghidraAddress PAL: 0x004d8598
          */
-        virtual float Inverse(float flValue);
+        virtual float Unapply(float flValue);
 
         /**
          * Write "(level:%.2f spring:%.2f damper:)%.2f vel%.2f" to sink.
@@ -610,7 +610,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x00499700
          * @ghidraAddress PAL: 0x004d7660
          */
-        virtual void Dump(Dbg &sink);
+        virtual void Print(Dbg &sink) const;
 
         /**
          * Write the three spring parameters to stream, the velocity excluded.
@@ -727,16 +727,16 @@ public:
     /**
      * Map a value back through mFilters.
      *
-     * Walks mFilters from back to front and applies Filter::Inverse() at each stage. That undoes
-     * what SetFrame() does on the way in. EndFrame() uses it to bring a child's end frame into
-     * this object's frame numbering.
+     * Walks mFilters from back to front and applies Filter::Unapply() at each stage. That undoes
+     * what SetFrame() does on the way in. FilteredFrameEnd() uses it to bring a child's end frame
+     * into this object's frame numbering.
      *
      * @param flValue The value to map.
      * @return The value in this object's incoming frame numbering.
      * @ghidraAddress NTSC-U/C: 0x00495050
      * @ghidraAddress PAL: 0x004d2f18
      */
-    float InverseFilters(float flValue);
+    float UnfilterFrame(float flValue);
 
     /**
      * Append an already-built filter to mFilters.
@@ -870,7 +870,7 @@ public:
      * Build one default-constructed filter for a type tag.
      *
      * The reader and Copy() both use this to turn a stored tag back into an object. A tag outside
-     * the FilterType range produces the report path of g_failSink and a null result.
+     * the FilterType range produces the report path of Rnd::TheDbg and a null result.
      *
      * @param nType One of the FilterType constants.
      * @return The new filter, or null for an unrecognised tag.
@@ -891,7 +891,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00494b50
      * @ghidraAddress PAL: 0x004d2a18
      */
-    virtual float EndFrame();
+    virtual float FilteredFrameEnd();
 
     /**
      * Restart the animation of this object and its whole subtree.
@@ -952,7 +952,7 @@ public:
      * Replace the filter chain and the child list from stream.
      *
      * A revision above the one this build writes produces the report "Can't load new Animatable"
-     * followed by the abort handler of g_failSink.
+     * followed by the abort handler of Rnd::TheDbg.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x00494d68
@@ -965,7 +965,7 @@ public:
      *
      * Every derived destructor invokes this before its own teardown. The tail at `0x0049a9c0`
      * passes the address of mAnims to the list clear at `0x0045edc8`, whose body returns every
-     * node to the pool and re-self-links the dummy node. ReleaseAnimsAndFilters() at `0x00494cb0`
+     * node to the pool and re-self-links the dummy node. ReleaseObjects() at `0x00494cb0`
      * is the routine that walks mAnims without emptying it, and the two bodies are otherwise alike.
      *
      * Public because Rnd::MetScreen::ResolveContainerViews() calls it at `0x0038b294` on the
@@ -975,7 +975,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0049a960
      * @ghidraAddress PAL: 0x004d88c8
      */
-    void ReleaseAnimsRefs();
+    void RemoveAllAnims();
 
 protected:
     /**
@@ -983,7 +983,7 @@ protected:
      *
      * Animatable vtable slot 3. The base implementation animates nothing. Every animation subclass
      * overrides it to interpolate its keyframes at the frame SetFrame() has already filtered. Only
-     * SetFrame() invokes it. The arrangement matches Rnd::Drawable::DrawSelf().
+     * SetFrame() invokes it. The arrangement matches Rnd::Drawable::DrawShowing().
      *
      * @param flFrame The filtered frame to animate to.
      * @ghidraAddress NTSC-U/C: 0x0049a100
@@ -995,11 +995,11 @@ private:
     // NTSC-U/C: 0x00494cb0, PAL: 0x004d2b78
     // Drops this object's reference on every mAnims entry, deletes every filter, and
     // then empties mFilters. The destructor, Copy(), and Load() all invoke it. That shared use is
-    // what makes it a member rather than the destructor body alone. The title is inferred.
-    void ReleaseAnimsAndFilters();
+    // what makes it a member rather than the destructor body alone.
+    void ReleaseObjects();
     // NTSC-U/C: 0x0049a7c0, PAL: 0x004d8728
     // Only SetFrame() invokes this.
-    float ApplyFilters(float flValue);
+    float FilterFrame(float flValue);
     // NTSC-U/C: 0x0049a750, PAL: 0x004d86b8
     // Only Copy() and Load() invoke this, and both inline it.
     void AcquireAnimsRefs();

@@ -60,21 +60,22 @@ constexpr int kXfmRowTranslation = 3;
 
 // NTSC-U/C: 0x0043e6a0, PAL: 0x0047af90
 TnlSnake::TnlSnake()
-    : mStartFrame(kNoFrame), mString(Rnd::String::NewString(NextAppTunnelName())),
+    : mStartFrame(kNoFrame), mString(Rnd::String::New(NextAppTunnelName())),
       mHead(Rnd::NewMeshThroughHook(NextAppTunnelName())),
-      mView(dynamic_cast<Rnd::View *>(Rnd::g_manager.Find(HxStr("tnl transparent")))) {
+      mView(dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("tnl transparent")))) {
     // The binary releases the name before SetMat(), so the lookup is its own statement.
-    Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("snake.mat")));
+    Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("snake.mat")));
     mString->SetMat(pMat);
     mString->SetNumPoints(kPointCount);
     mString->SetWidth(kRibbonWidth);
     mString->SetShowing(0);
     mView->AddDraw(mString, nullptr);
 
-    mGlow.resize(mString->GetNumPoints(), 0.0f);
-    mPointFrames.resize(mString->GetNumPoints(), 0);
+    mGlow.resize(mString->NumPoints(), 0.0f);
+    mPointFrames.resize(mString->NumPoints(), 0);
 
-    Rnd::Mesh *pTemplate = dynamic_cast<Rnd::Mesh *>(Rnd::g_manager.Find(HxStr("snake head.mesh")));
+    Rnd::Mesh *pTemplate =
+        dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr("snake head.mesh")));
     mHead->Copy(pTemplate, 0);
     mString->AddDraw(mHead, nullptr);
 }
@@ -97,7 +98,7 @@ void TnlSnake::Start(
     mColor = color;
     mPhase = flPhase;
     mAmplitude = flAmplitude;
-    const int nPoints = mString->GetNumPoints();
+    const int nPoints = mString->NumPoints();
     for (int i = 0; i < nPoints; ++i) {
         mString->SetPointColor(i, mColor);
     }
@@ -116,7 +117,7 @@ void TnlSnake::Update(float flFrame) {
         mString->SetShowing(0);
     }
 
-    const int nPoints = mString->GetNumPoints();
+    const int nPoints = mString->NumPoints();
     int nFrame = (nHeadFrame / kPointSpacing - (nPoints - 1)) * kPointSpacing;
     for (int i = nPoints - 1; i >= 0; --i, nFrame += kPointSpacing) {
         SetPointFrame(nFrame, i);

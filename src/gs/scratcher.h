@@ -146,14 +146,14 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x001d0980
      * @ghidraAddress PAL: 0x001d6838
      */
-    virtual void HandleMessage(Message *pMsg);
+    virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // The out-of-line copy of the PitchRiffMsg branch HandleMessage() expands inline.
+    // The out-of-line copy of the PitchRiffMsg branch DispatchPriv() expands inline.
     // NTSC-U/C: 0x001d1cc8, PAL: 0x001d7b80
     void OnPitchRiffMsg(PitchRiffMsg *pMsg);
 
-    // The out-of-line copy of the InvalidateSeekerMsg branch HandleMessage() expands inline.
+    // The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
     // NTSC-U/C: 0x001d1d18, PAL: 0x001d7bd0
     void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
 
@@ -180,12 +180,12 @@ private:
     // The track description's MIDI channel byte, and the argument Tick() hands to the synthesiser
     // slot.
     int mChannel; // +0x58
-    // Starts at g_nullPlayer. Matched against a PitchRiffMsg's `+0x08`, which msg/pitchriffmsg.h
-    // types as an int.
+    // Starts at NullPlayer::sInstance. Matched against a PitchRiffMsg's `+0x08`, which
+    // msg/pitchriffmsg.h types as an int.
     Player *mPlayer; // +0x5c
     // The position of the last scratch, kMBTInfinity at first.
     Mid::MBT mLastScratchPosition; // +0x60
-    // The player of the last scratch, g_nullPlayer at first.
+    // The player of the last scratch, NullPlayer::sInstance at first.
     Player *mLastScratchPlayer; // +0x64
     // The gem of the last PitchRiffMsg. PostNowBarMsg() replays it.
     int mLastGem;          // +0x68

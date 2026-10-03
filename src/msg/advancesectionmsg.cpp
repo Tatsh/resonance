@@ -14,7 +14,7 @@ Message *AdvanceSectionMsg::Clone() {
 
 // NTSC-U/C: 0x0011d6f0, PAL: 0x0011dc78
 int AdvanceSectionMsg::Type() {
-    return g_nAdvanceSectionMsgType;
+    return sID;
 }
 
 // NTSC-U/C: 0x0011d700, PAL: 0x0011dc88

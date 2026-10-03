@@ -54,9 +54,9 @@ inline void PrintColor(Dbg &sink, const Color &color) {
 } // namespace
 
 // NTSC-U/C: 0x00718d18, PAL: 0x0075cc08
-HxStr g_environClassName("Environ");
+HxStr Environ::sClassName("Environ");
 
-Environ *g_pCurrentEnviron;
+Environ *Environ::sCurrent;
 
 Environ *(*g_pfnNewEnviron)(const HxStr &name);
 
@@ -68,8 +68,8 @@ Environ::Environ(const HxStr &name)
 
 // NTSC-U/C: 0x00518fe0, PAL: 0x00559378
 Environ::~Environ() {
-    if (g_pCurrentEnviron == this) {
-        g_pCurrentEnviron = nullptr;
+    if (Environ::sCurrent == this) {
+        Environ::sCurrent = nullptr;
     }
     ReleaseLightsRefs();
     ReleaseAllRefs();
@@ -77,7 +77,7 @@ Environ::~Environ() {
 
 // NTSC-U/C: 0x00519258, PAL: 0x005595f0
 const HxStr &Environ::ClassName() const {
-    return g_environClassName;
+    return Environ::sClassName;
 }
 
 // NTSC-U/C: 0x00519470, PAL: 0x00559808
@@ -130,15 +130,15 @@ Dbg &operator<<(Dbg &sink, const std::list<Light *> &lights) {
 // writes one zero byte.
 static Stream &operator<<(Stream &stream, const std::list<Light *> &lights) {
     int nCount = lights.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
 
     for (std::list<Light *>::const_iterator it = lights.begin(); it != lights.end(); ++it) {
         const Object *pObject = *it;
         if (pObject != nullptr) {
-            stream.WriteBytes(NameText(pObject), pObject->mName.mLen + 1);
+            stream.Write(NameText(pObject), pObject->mName.mLen + 1);
         } else {
             const char cEmpty = 0;
-            stream.WriteBytes(&cEmpty, sizeof(cEmpty));
+            stream.Write(&cEmpty, sizeof(cEmpty));
         }
     }
     return stream;
@@ -147,13 +147,13 @@ static Stream &operator<<(Stream &stream, const std::list<Light *> &lights) {
 // NTSC-U/C: 0x005189f0, PAL: 0x00558d48
 static Stream &operator>>(Stream &stream, std::list<Light *> &lights) {
     int nCount = 0;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     lights.resize(nCount, nullptr);
 
     for (std::list<Light *>::iterator it = lights.begin(); it != lights.end(); ++it) {
         HxStr name(nullptr);
         stream.ReadString(name);
-        *it = dynamic_cast<Light *>(g_manager.Find(name));
+        *it = dynamic_cast<Light *>(TheManager.Find(name));
     }
     return stream;
 }
@@ -188,8 +188,8 @@ void Environ::DumpText(Dbg &sink) {
 }
 
 // NTSC-U/C: 0x00518e60, PAL: 0x005591f8
-int Environ::DrawSelf() {
-    g_pCurrentEnviron = this;
+int Environ::DrawShowing() {
+    Environ::sCurrent = this;
     return 1;
 }
 
@@ -216,34 +216,34 @@ void Environ::ReleaseLightsRefs() {
 // NTSC-U/C: 0x00516028, PAL: 0x00556358
 void Environ::Save(Stream &stream) {
     const int nRevision = kEnvironRevision;
-    stream.Write(&nRevision, sizeof(nRevision));
+    stream.WriteLE(&nRevision, sizeof(nRevision));
 
     Drawable::Save(stream);
     stream << mLights;
 
-    stream.Write(&mAmbient.r, sizeof(mAmbient.r));
-    stream.Write(&mAmbient.g, sizeof(mAmbient.g));
-    stream.Write(&mAmbient.b, sizeof(mAmbient.b));
-    stream.Write(&mAmbient.a, sizeof(mAmbient.a));
+    stream.WriteLE(&mAmbient.r, sizeof(mAmbient.r));
+    stream.WriteLE(&mAmbient.g, sizeof(mAmbient.g));
+    stream.WriteLE(&mAmbient.b, sizeof(mAmbient.b));
+    stream.WriteLE(&mAmbient.a, sizeof(mAmbient.a));
 
-    stream.Write(&mFogStart, sizeof(mFogStart));
-    stream.Write(&mFogEnd, sizeof(mFogEnd));
-    stream.Write(&mFogDensity, sizeof(mFogDensity));
+    stream.WriteLE(&mFogStart, sizeof(mFogStart));
+    stream.WriteLE(&mFogEnd, sizeof(mFogEnd));
+    stream.WriteLE(&mFogDensity, sizeof(mFogDensity));
 
-    stream.Write(&mFogColor.r, sizeof(mFogColor.r));
-    stream.Write(&mFogColor.g, sizeof(mFogColor.g));
-    stream.Write(&mFogColor.b, sizeof(mFogColor.b));
-    stream.Write(&mFogColor.a, sizeof(mFogColor.a));
+    stream.WriteLE(&mFogColor.r, sizeof(mFogColor.r));
+    stream.WriteLE(&mFogColor.g, sizeof(mFogColor.g));
+    stream.WriteLE(&mFogColor.b, sizeof(mFogColor.b));
+    stream.WriteLE(&mFogColor.a, sizeof(mFogColor.a));
 
-    stream.Write(&mFogMode, sizeof(mFogMode));
+    stream.WriteLE(&mFogMode, sizeof(mFogMode));
 }
 
 // NTSC-U/C: 0x00516260, PAL: 0x00556590
 void Environ::Load(Stream &stream) {
     int nRevision = 0;
-    stream.Read(&nRevision, sizeof(nRevision));
+    stream.ReadLE(&nRevision, sizeof(nRevision));
     if (nRevision > kEnvironRevision) {
-        g_failSink.Report("Can't load new Environ\n");
+        Rnd::TheDbg.Notify("Can't load new Environ\n");
         return;
     }
 
@@ -252,22 +252,22 @@ void Environ::Load(Stream &stream) {
 
     stream >> mLights;
 
-    stream.Read(&mAmbient.r, sizeof(mAmbient.r));
-    stream.Read(&mAmbient.g, sizeof(mAmbient.g));
-    stream.Read(&mAmbient.b, sizeof(mAmbient.b));
-    stream.Read(&mAmbient.a, sizeof(mAmbient.a));
+    stream.ReadLE(&mAmbient.r, sizeof(mAmbient.r));
+    stream.ReadLE(&mAmbient.g, sizeof(mAmbient.g));
+    stream.ReadLE(&mAmbient.b, sizeof(mAmbient.b));
+    stream.ReadLE(&mAmbient.a, sizeof(mAmbient.a));
 
-    stream.Read(&mFogStart, sizeof(mFogStart));
-    stream.Read(&mFogEnd, sizeof(mFogEnd));
-    stream.Read(&mFogDensity, sizeof(mFogDensity));
+    stream.ReadLE(&mFogStart, sizeof(mFogStart));
+    stream.ReadLE(&mFogEnd, sizeof(mFogEnd));
+    stream.ReadLE(&mFogDensity, sizeof(mFogDensity));
 
-    stream.Read(&mFogColor.r, sizeof(mFogColor.r));
-    stream.Read(&mFogColor.g, sizeof(mFogColor.g));
-    stream.Read(&mFogColor.b, sizeof(mFogColor.b));
-    stream.Read(&mFogColor.a, sizeof(mFogColor.a));
+    stream.ReadLE(&mFogColor.r, sizeof(mFogColor.r));
+    stream.ReadLE(&mFogColor.g, sizeof(mFogColor.g));
+    stream.ReadLE(&mFogColor.b, sizeof(mFogColor.b));
+    stream.ReadLE(&mFogColor.a, sizeof(mFogColor.a));
 
     int nFogMode = 0;
-    stream.Read(&nFogMode, sizeof(nFogMode));
+    stream.ReadLE(&nFogMode, sizeof(nFogMode));
     mFogMode = static_cast<FogMode>(nFogMode);
 
     AcquireLightsRefs();
@@ -300,7 +300,7 @@ void Environ::Replace(Object *pFrom, Object *pTo) {
 
     for (std::list<Light *>::iterator it = mLights.begin(); it != mLights.end();) {
         if (*it == pTo) {
-            g_failSink.Report(kAlreadyInFormat, NameText(pTo), NameText(this));
+            Rnd::TheDbg.Notify(kAlreadyInFormat, NameText(pTo), NameText(this));
         }
 
         if (*it == pFrom) {
@@ -341,7 +341,7 @@ void Environ::operator delete(void *pBlock) {
 // NTSC-U/C: 0x005166d0, PAL: 0x00556a00
 void Environ::AddLight(Light *pLight) {
     if (std::find(mLights.begin(), mLights.end(), pLight) != mLights.end()) {
-        g_failSink.Report(kAlreadyInFormat, NameText(pLight), NameText(this));
+        Rnd::TheDbg.Notify(kAlreadyInFormat, NameText(pLight), NameText(this));
         return;
     }
     if (pLight != nullptr) {
@@ -381,7 +381,7 @@ Object *CreateRegisteredEnviron(const HxStr &name) {
 }
 
 // NTSC-U/C: 0x00519568, PAL: 0x00559900
-void Environ::ClearLights() {
+void Environ::RemoveAllLights() {
     ReleaseLightsRefs();
     mLights.clear();
 }
