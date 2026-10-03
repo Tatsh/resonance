@@ -412,7 +412,7 @@ bool Tex::LoadMipFiles() {
         char szPath[kMaxPathLength];
         sprintf(szSuffix, kMipSuffixFormat, nMip);
         strcpy(szPath, szBase);
-        ReplaceFileNameExtension(szPath, szSuffix);
+        AppendName(szPath, szSuffix);
         if (LoadBitmapFileFromPath(szPath) == 0) {
             return true;
         }
@@ -426,7 +426,7 @@ bool Tex::LoadMipFiles() {
 int Tex::QueueMipRead(const char *pszPath) {
     char szCache[kMaxPathLength];
     strcpy(szCache, pszPath);
-    BuildBitmapCacheFileName(szCache, kCacheExtension);
+    ConvertNameToGenerated(szCache, kCacheExtension);
     char szFile[kMaxPathLength];
     strcpy(szFile, szCache);
     strcat(szFile, kCompressedSuffix);
@@ -540,7 +540,7 @@ void *Tex::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x004e73a8, PAL: 0x00525e48
 void Tex::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kTexTag);
+    OperatorDeleteOverride(pBlock, kTexTag);
 }
 
 // NTSC-U/C: 0x004e7448, PAL: 0x00525ee8

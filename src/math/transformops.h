@@ -62,6 +62,8 @@ void sceVu0MulAffineMatrixXyz(float *pDst, const float *pA, const float *pB);
  */
 void XfmConcat(const float *pA, const float *pB, float *pOut);
 
+namespace Rnd {
+
 /**
  * Build a rotation matrix from three Euler angles.
  *
@@ -75,7 +77,9 @@ void XfmConcat(const float *pA, const float *pB, float *pOut);
  * @ghidraAddress NTSC-U/C: 0x004f0430
  * @ghidraAddress PAL: 0x0052f020
  */
-void EulerAnglesToMatrix3x3(const float *pAngles, float *pMat3Rows);
+void MakeRotMatrix(const float *pAngles, float *pMat3Rows);
+
+} // namespace Rnd
 
 /**
  * Build an orthonormal basis around one axis and a reference direction.
@@ -120,8 +124,8 @@ void Mat33OrthonormalizeAroundY(const float *pSrc, float *pDst);
  * Each scale is the length of the matching row. The Z scale is negated when the three rows are
  * left handed. Negating it is the only way the remaining rotation can stay a pure rotation.
  * The angles are then extracted from the rows divided by their scales, and the extraction
- * inverts EulerAnglesToMatrix3x3(). A basis at the gimbal lock limit yields a Y angle of zero
- * and folds the whole remaining rotation into the Z angle.
+ * inverts Rnd::MakeRotMatrix() from three angles. A basis at the gimbal lock limit yields a Y
+ * angle of zero and folds the whole remaining rotation into the Z angle.
  *
  * @param pMat3Rows The basis, three rows of four floats.
  * @param pAngles Receives the three angles in radians, ordered X, Y, and Z.
@@ -148,6 +152,8 @@ void Mat34DecomposeEulerScale(const float *pMat3Rows, float *pAngles, float *pSc
  */
 void MultiplyMat3VU0(const float *pMatA, const float *pMatB, float *pOut);
 
+namespace Rnd {
+
 /**
  * Scale each row of a rotation matrix by one component of a vector.
  *
@@ -161,7 +167,9 @@ void MultiplyMat3VU0(const float *pMatA, const float *pMatB, float *pOut);
  * @ghidraAddress NTSC-U/C: 0x0045da58
  * @ghidraAddress PAL: 0x0049b100
  */
-void ScaleRows3x3(const float *pScale, const float *pMat3Rows, float *pOut);
+void Scale(const float *pScale, const float *pMat3Rows, float *pOut);
+
+} // namespace Rnd
 
 /**
  * Transform a three-component vector by a rotation matrix on VU0.

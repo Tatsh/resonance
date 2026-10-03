@@ -43,12 +43,12 @@ void GemPacket::saveGuts(OBStream &stream) const {
 
     int tr = mTr;
     int clientId = mClientId;
-    stream.Write(&tr, sizeof(tr)).Write(&clientId, sizeof(clientId));
+    stream.WriteLE(&tr, sizeof(tr)).WriteLE(&clientId, sizeof(clientId));
 }
 
 // NTSC-U/C: 0x003e8368, PAL: 0x00420648
 void GemPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
     mFields.restoreGuts(stream);
-    stream.Read(&mTr, sizeof(mTr)).Read(&mClientId, sizeof(mClientId));
+    stream.ReadLE(&mTr, sizeof(mTr)).ReadLE(&mClientId, sizeof(mClientId));
 }

@@ -36,33 +36,33 @@ const char *PSJoinRequestPacket::GetName() const {
 // NTSC-U/C: 0x003e5538, PAL: 0x0041d7e0
 void PSJoinRequestPacket::saveGuts(OBStream &stream) const {
     int destination = mDestination;
-    stream.Write(&destination, sizeof(destination));
+    stream.WriteLE(&destination, sizeof(destination));
 
     int destinationSystem = mDestinationSystem;
-    stream.Write(&destinationSystem, sizeof(destinationSystem));
+    stream.WriteLE(&destinationSystem, sizeof(destinationSystem));
 
     int clientId = mClientId;
-    stream.Write(&clientId, sizeof(clientId));
+    stream.WriteLE(&clientId, sizeof(clientId));
 
     int targetClientId = mTargetClientId;
-    stream.Write(&targetClientId, sizeof(targetClientId));
+    stream.WriteLE(&targetClientId, sizeof(targetClientId));
 
     mAppearance.Save(stream);
 
     // Yes, the binary writes the client identifier a second time.
     int clientIdAgain = mClientId;
-    stream.Write(&clientIdAgain, sizeof(clientIdAgain));
+    stream.WriteLE(&clientIdAgain, sizeof(clientIdAgain));
 }
 
 // NTSC-U/C: 0x003e5638, PAL: 0x0041d8e0
 void PSJoinRequestPacket::restoreGuts(IBStream &stream) {
-    stream.Read(&mDestination, sizeof(mDestination));
-    stream.Read(&mDestinationSystem, sizeof(mDestinationSystem));
-    stream.Read(&mClientId, sizeof(mClientId));
-    stream.Read(&mTargetClientId, sizeof(mTargetClientId));
+    stream.ReadLE(&mDestination, sizeof(mDestination));
+    stream.ReadLE(&mDestinationSystem, sizeof(mDestinationSystem));
+    stream.ReadLE(&mClientId, sizeof(mClientId));
+    stream.ReadLE(&mTargetClientId, sizeof(mTargetClientId));
 
     mAppearance.Load(stream);
 
     // Yes, the binary reads the client identifier a second time.
-    stream.Read(&mClientId, sizeof(mClientId));
+    stream.ReadLE(&mClientId, sizeof(mClientId));
 }

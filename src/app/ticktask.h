@@ -106,7 +106,7 @@ public:
 
 private:
     Sch::TickClock *mClock; // +0x08 the clock the task is posted against
-    CmdID mCommand;         // +0x0c the handle of the queued command, -2 while none is queued
+    Sch::CmdID mCommand;    // +0x0c the handle of the queued command, -2 while none is queued
     int mPeriod;            // +0x10 ticks between one run and the next
     // Tick the next run is due at, both read and advanced by Run(). Defaults to Mid::MBT's
     // positive infinity sentinel.

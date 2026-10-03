@@ -46,13 +46,13 @@ void PhrasePacket::saveGuts(OBStream &stream) const {
     unsigned int tr = mTr;
     int b = mB;
     int clientId = mClientId;
-    (stream.Write(&tr, sizeof(tr)).Write(&b, sizeof(b)) << mPhrase)
-        .Write(&clientId, sizeof(clientId));
+    (stream.WriteLE(&tr, sizeof(tr)).WriteLE(&b, sizeof(b)) << mPhrase)
+        .WriteLE(&clientId, sizeof(clientId));
 }
 
 // NTSC-U/C: 0x003e6ca8, PAL: 0x0041ef88
 void PhrasePacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
-    (stream.Read(&mTr, sizeof(mTr)).Read(&mB, sizeof(mB)) >> mPhrase)
-        .Read(&mClientId, sizeof(mClientId));
+    (stream.ReadLE(&mTr, sizeof(mTr)).ReadLE(&mB, sizeof(mB)) >> mPhrase)
+        .ReadLE(&mClientId, sizeof(mClientId));
 }

@@ -456,10 +456,10 @@ void Arena::SetSectionLoop(Section &section, int nLoop) {
     Vector3 offset{0.0f, 0.0f, 0.0f, 1.0f};
     if (section.mLoop < nLoop) {
         Vec3Scale(&mLoopDist.x, static_cast<float>(nLoop - section.mLoop), &offset.x);
-        AddVec3(&position.x, &offset.x, &position.x);
+        Rnd::Add(&position.x, &offset.x, &position.x);
     } else if (nLoop < section.mLoop) {
         Vec3Scale(&mLoopDist.x, static_cast<float>(section.mLoop - nLoop), &offset.x);
-        Vec3Sub(&position.x, &offset.x, &position.x);
+        Rnd::Subtract(&position.x, &offset.x, &position.x);
     }
     section.mLoop = nLoop;
     if (section.mTeleport != 0) {
@@ -508,10 +508,10 @@ int Arena::DrawShowing() {
 }
 
 // NTSC-U/C: 0x005bc090, PAL: 0x005fe758
-void Arena::FindCollisions(const Ray &ray, HitSink &sink) {
+void Arena::FindCollisions(const Segment &ray, std::list<Collision> &collisions) {
     for (Section &section : mSections) {
         if ((section.mView != nullptr) && section.mView->GetShowing()) {
-            section.mView->FindCollisions(ray, sink);
+            section.mView->FindCollisions(ray, collisions);
         }
     }
 }
@@ -527,7 +527,7 @@ void Arena::SetSectionTeleport(int nIndex, int nTeleport) {
         // The sum is built in a temporary whose padding float is 1.0, and the whole quadword is
         // stored back over the translation row.
         Vector3 position{0.0f, 0.0f, 0.0f, 1.0f};
-        AddVec3(pflTranslation, &offset.x, &position.x);
+        Rnd::Add(pflTranslation, &offset.x, &position.x);
         pflTranslation[0] = position.x;
         pflTranslation[1] = position.y;
         pflTranslation[2] = position.z;
@@ -544,7 +544,7 @@ void *Arena::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x005bb890, PAL: 0x005fdf58
 void Arena::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kArenaTag);
+    OperatorDeleteOverride(pBlock, kArenaTag);
 }
 
 // NTSC-U/C: 0x005bbb28, PAL: 0x005fe1f0

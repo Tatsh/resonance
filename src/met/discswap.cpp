@@ -38,7 +38,7 @@ int DiscSwap::ReleaseDisc() {
     int nPending;
     int nCompleted;
     int nFreeJobs;
-    CountAsyncQueues(&nPending, &nCompleted, &nFreeJobs);
+    AsyncStatus(nPending, nCompleted, nFreeJobs);
     if (nPending > 0) {
         AsyncPumpCompletedRequests();
         return 0;

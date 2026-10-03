@@ -69,7 +69,7 @@ constexpr int kStartUpConfigCode = 0x193;
 // The zone every front-end container loader allocates from.
 constexpr char kLoaderZone[] = "rndglobal";
 
-// The metagame, fonts, and shared-texture loaders whose progress PollCommonLoaders() averages.
+// The metagame, fonts, and shared-texture loaders whose progress ProgressMetGlobal() averages.
 constexpr float kCommonLoaderCount = 3.0f;
 
 // The tag of a joystick reading, `joy `.
@@ -187,22 +187,24 @@ static const char *const kJukeboxStopArgument = "0";
 constexpr float kClearBlue = 0.15f;
 constexpr float kOpaque = 1.0f;
 
+// The metagame container, `MetaGame/metagame.rnd`.
+// NTSC-U/C: 0x006c3600, PAL: 0x00706670
+RndAsyncLoader *gTopViewLoader;
+
+// NTSC-U/C: 0x006c3608, PAL: 0x00706678
+RndAsyncLoader *gFontLoader;
+
+// The shared texture container, `metagame/shared/shared_tex.rnd`.
+// NTSC-U/C: 0x006c360c, PAL: 0x0070667c
+RndAsyncLoader *gButtonLoader;
+
+// NTSC-U/C: 0x006c3610, PAL: 0x00706680
+RndAsyncLoader *gArenaLoader;
+
 } // namespace
 
 // NTSC-U/C: 0x006c3598, PAL: 0x00706608
 MetRenderer *MetRenderer::sInstance;
-
-// NTSC-U/C: 0x006c3600, PAL: 0x00706670
-RndAsyncLoader *MetRenderer::sMetagameLoader;
-
-// NTSC-U/C: 0x006c3608, PAL: 0x00706678
-RndAsyncLoader *MetRenderer::sFontsLoader;
-
-// NTSC-U/C: 0x006c360c, PAL: 0x0070667c
-RndAsyncLoader *MetRenderer::sSharedTexLoader;
-
-// NTSC-U/C: 0x006c3610, PAL: 0x00706680
-RndAsyncLoader *MetRenderer::sArenaLoader;
 
 // NTSC-U/C: 0x0036a900, PAL: 0x00398de0
 void MetRenderer::Start() {
@@ -241,7 +243,7 @@ MetRenderer::MetRenderer()
     MetPersonaData::ClearLoadList();
     CreateCommonLoaders();
     mBootLoadPending = 1;
-    EnqueueCommonLoaders();
+    LoadMetGlobal();
     mShowTimingGraph = QueryConfigFlag(kTimingGraphConfigCode);
     mShowRenderStats = QueryConfigFlag(kRenderStatsConfigCode);
     const Color black{0.0f, 0.0f, 0.0f, kOpaque};
@@ -258,7 +260,7 @@ MetRenderer::~MetRenderer() {
     delete mFade;
     mFade = nullptr;
     Stop();
-    UnloadCommonLoaders();
+    ReleaseMetGlobal();
     UnloadArenaLoader();
     sInstance = nullptr;
     MetFrontEndState::Destroy();
@@ -535,22 +537,21 @@ MetScreen *MetRenderer::SelectEndScreen() {
 // NTSC-U/C: 0x00369b08, PAL: 0x00397d88
 void MetRenderer::CreateCommonLoaders() {
     const int nZone = FindZoneByName(kLoaderZone);
-    sMetagameLoader = new RndAsyncLoader(HxStr("MetaGame/"), HxStr("metagame.rnd"), nZone);
+    gTopViewLoader = new RndAsyncLoader(HxStr("MetaGame/"), HxStr("metagame.rnd"), nZone);
 #ifdef VIDEO_STANDARD_PAL
-    sFontsLoader = new RndAsyncLoader(HxStr("metagame/fonts/"),
-                                      HxStr(FormatString("fonts%s.rnd", GetFontLanguageSuffix())),
-                                      nZone);
+    gFontLoader = new RndAsyncLoader(HxStr("metagame/fonts/"),
+                                     HxStr(Rnd::MakeString("fonts%s.rnd", GetFontLanguageSuffix())),
+                                     nZone);
 #else
-    sFontsLoader = new RndAsyncLoader(HxStr("metagame/fonts/"), HxStr("fonts.rnd"), nZone);
+    gFontLoader = new RndAsyncLoader(HxStr("metagame/fonts/"), HxStr("fonts.rnd"), nZone);
 #endif
-    sSharedTexLoader =
-        new RndAsyncLoader(HxStr("metagame/shared/"), HxStr("shared_tex.rnd"), nZone);
+    gButtonLoader = new RndAsyncLoader(HxStr("metagame/shared/"), HxStr("shared_tex.rnd"), nZone);
 }
 
 // NTSC-U/C: 0x00369e50, PAL: 0x00398288
 void MetRenderer::CreateArenaLoader() {
     const int nZone = FindZoneByName(kLoaderZone);
-    sArenaLoader = new RndAsyncLoader(HxStr("MetaGame/Arena/"), HxStr("meta_arena.rnd"), nZone);
+    gArenaLoader = new RndAsyncLoader(HxStr("MetaGame/Arena/"), HxStr("meta_arena.rnd"), nZone);
     MetScreen::CreateMainMenuScreens(sInstance);
     StartArenaLoad();
 }
@@ -561,56 +562,56 @@ void MetRenderer::StartArenaLoad() {
 }
 
 // NTSC-U/C: 0x00371270, PAL: 0x0039fd68
-void MetRenderer::EnqueueCommonLoaders() {
-    if (sMetagameLoader->mPending != 0) {
-        sMetagameLoader->Enqueue();
+void LoadMetGlobal() {
+    if (gTopViewLoader->mPending != 0) {
+        gTopViewLoader->Enqueue();
     }
-    if (sFontsLoader->mPending != 0) {
-        sFontsLoader->Enqueue();
+    if (gFontLoader->mPending != 0) {
+        gFontLoader->Enqueue();
     }
-    if (sSharedTexLoader->mPending != 0) {
-        sSharedTexLoader->Enqueue();
+    if (gButtonLoader->mPending != 0) {
+        gButtonLoader->Enqueue();
     }
 }
 
 // NTSC-U/C: 0x00371438, PAL: 0x0039ff30
 void MetRenderer::EnqueueArenaLoader() {
-    if (sArenaLoader->mPending != 0) {
-        sArenaLoader->Enqueue();
+    if (gArenaLoader->mPending != 0) {
+        gArenaLoader->Enqueue();
     }
 }
 
 // NTSC-U/C: 0x003712f8, PAL: 0x0039fdf0
-void MetRenderer::UnloadCommonLoaders() {
-    sMetagameLoader->Unload();
-    sFontsLoader->Unload();
-    sSharedTexLoader->Unload();
+void ReleaseMetGlobal() {
+    gTopViewLoader->Unload();
+    gFontLoader->Unload();
+    gButtonLoader->Unload();
 }
 
 // NTSC-U/C: 0x00371490, PAL: 0x0039ff88
 void MetRenderer::UnloadArenaLoader() {
-    sArenaLoader->Unload();
+    gArenaLoader->Unload();
 }
 
 // NTSC-U/C: 0x00371338, PAL: 0x0039fe30
-int MetRenderer::PollCommonLoaders(float *pfProgress) {
-    *pfProgress = 0.0f;
-    float flProgress;
-    int bDone = sMetagameLoader->Poll(&flProgress);
-    *pfProgress += flProgress;
-    const int bFonts = sFontsLoader->Poll(&flProgress);
-    *pfProgress += flProgress;
+int ProgressMetGlobal(float &flProgress) {
+    flProgress = 0.0f;
+    float flLoad;
+    int bDone = gTopViewLoader->Poll(&flLoad);
+    flProgress += flLoad;
+    const int bFonts = gFontLoader->Poll(&flLoad);
+    flProgress += flLoad;
     bDone = bDone && bFonts;
-    const int bSharedTex = sSharedTexLoader->Poll(&flProgress);
-    *pfProgress = (*pfProgress + flProgress) / kCommonLoaderCount;
-    return bDone && bSharedTex;
+    const int bButtons = gButtonLoader->Poll(&flLoad);
+    flProgress = (flProgress + flLoad) / kCommonLoaderCount;
+    return bDone && bButtons;
 }
 
 // NTSC-U/C: 0x003713f0, PAL: 0x0039fee8
 int MetRenderer::PollArenaLoader(float *pfProgress) {
     *pfProgress = 0.0f;
     float flProgress;
-    const int bDone = sArenaLoader->Poll(&flProgress);
+    const int bDone = gArenaLoader->Poll(&flProgress);
     *pfProgress += flProgress;
     return bDone;
 }
@@ -620,7 +621,7 @@ void MetRenderer::ResolveArenaView(int nSkipResolve) {
     Rnd::View *pView = nullptr;
     if (nSkipResolve == 0) {
         float flProgress;
-        sArenaLoader->Poll(&flProgress); // Yes, the binary discards the result.
+        gArenaLoader->Poll(&flProgress); // Yes, the binary discards the result.
         pView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kArenaView)));
     }
     if (pView != nullptr) {
@@ -791,9 +792,9 @@ void MetRenderer::OnFreqEnded(Message *pMsg) {
 void MetRenderer::ResolveSceneViews() {
     // Yes, the binary polls the three boot loaders again and discards every result.
     float flProgress;
-    sMetagameLoader->Poll(&flProgress);
-    sFontsLoader->Poll(&flProgress);
-    sSharedTexLoader->Poll(&flProgress);
+    gTopViewLoader->Poll(&flProgress);
+    gFontLoader->Poll(&flProgress);
+    gButtonLoader->Poll(&flProgress);
     mTopView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kTopView)));
     mBackgroundScene = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kBackgroundView)));
     mScreenScene = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kScreensView)));
@@ -805,9 +806,9 @@ void MetRenderer::ResolveSceneViews() {
 void MetRenderer::Update() {
     if (mBootLoadPending != 0) {
         float flProgress;
-        const int bMetagame = sMetagameLoader->Poll(&flProgress);
-        const int bFonts = sFontsLoader->Poll(&flProgress);
-        const int bSharedTex = sSharedTexLoader->Poll(&flProgress);
+        const int bMetagame = gTopViewLoader->Poll(&flProgress);
+        const int bFonts = gFontLoader->Poll(&flProgress);
+        const int bSharedTex = gButtonLoader->Poll(&flProgress);
         if (bMetagame != 0 && bFonts != 0 && bSharedTex != 0) {
             mBootLoadPending = 0;
             ResolveSceneViews();

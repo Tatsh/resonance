@@ -72,7 +72,7 @@ ActiveFilter::ActiveFilter(Sch::TickClock *pClock, FilterLover *pLover)
 
 // NTSC-U/C: 0x00100100, PAL: 0x00100100
 ActiveFilter::~ActiveFilter() {
-    const CmdID command = mCommand;
+    const Sch::CmdID command = mCommand;
     mClock->Withdraw(command);
     if (mStepCommand != nullptr) {
         mStepCommand->Release();

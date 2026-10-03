@@ -26,7 +26,7 @@ void CallbackXferBdToIop::Done([[maybe_unused]] int nHandle,
                                [[maybe_unused]] int nLength,
                                int nStatus) {
     if (nStatus > 0) {
-        LogPrintf("BD bank loading returned async error %d\n", nStatus);
+        printf("BD bank loading returned async error %d\n", nStatus);
     }
     mBusy = 1;
     if (g_nHdXferInFlight != 0) {
@@ -55,7 +55,7 @@ inline void CallbackXferBdToIop::XferChunk() {
     g_chunkCommand.mDest = mDest;
     g_chunkCommand.mTag = g_nSynthXferTag;
     memset(g_chunkCommand.mPayload, 0, kSoundDriverCommandPayloadSize);
-    XferToIop(g_chunkCommand.mStagingAddress, mpReadBuffer, mChunkLength);
+    ezTransToIOP(g_chunkCommand.mStagingAddress, mpReadBuffer, mChunkLength);
     SubmitSoundDriverRequest(kSoundSelectorXferChunk, reinterpret_cast<uintptr_t>(&g_chunkCommand));
     if (g_pfnBankLoadProgress != nullptr) {
         g_pfnBankLoadProgress();
@@ -75,7 +75,7 @@ inline void CallbackXferBdToIop::XferChunk() {
     }
     // Yes, the binary finishes with the transfer still marked busy.
     MemFreeTagged(g_pBdXferBuffer, __FILE__, __LINE__);
-    FileClose(mFile);
+    close(mFile);
     SubmitSoundDriverRequest(kSoundSelectorBankComplete,
                              reinterpret_cast<uintptr_t>(&g_bankCommand));
     if (g_pfnBankLoadProgress != nullptr) {

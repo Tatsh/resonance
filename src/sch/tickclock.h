@@ -4,8 +4,8 @@
 #include "mid/mbt.h"
 #include "sch/tick.h"
 
-class CmdID;
 namespace Sch {
+class CmdID;
 class Command;
 class TempoMap;
 } // namespace Sch

@@ -42,7 +42,7 @@ struct Harmony {
      * @param pBlock The block.
      */
     void operator delete(void *pBlock) {
-        FreeTaggedMemory(pBlock, "Harmony");
+        OperatorDeleteOverride(pBlock, "Harmony");
     }
 
     /**

@@ -54,13 +54,13 @@ public:
      * without releasing the palette already read, and a failed read releases the pixel rectangle
      * through the single-object path although the allocation came from the tagged allocator.
      *
-     * @param pImage Receives the image and its palette.
+     * @param image Receives the image and its palette.
      * @param pbEnd Set to one on a second call.
      * @return An AGfxFileResult code.
      * @ghidraAddress NTSC-U/C: 0x0061c860
      * @ghidraAddress PAL: 0x0065d3f0
      */
-    virtual int ReadFrame(ABitmap *pImage, int *pbEnd);
+    virtual int ReadFrame(ABitmap &image, int *pbEnd);
 
     /**
      * Slot 5. Write a bitmap as an uncompressed file.
@@ -121,18 +121,6 @@ private:
      */
     int ReadBitmapCompressed(ABitmap *pImage);
 
-    /**
-     * Widen a row of three byte pixels to four bytes in place, with full alpha.
-     *
-     * Walks from the last pixel back to the first, so the widened row can overlap the source.
-     *
-     * @param pPixels The row.
-     * @param nCount The number of pixels.
-     * @ghidraAddress NTSC-U/C: 0x0061d620
-     * @ghidraAddress PAL: 0x0065e1b0
-     */
-    static void ExpandRow24To32(unsigned char *pPixels, int nCount);
-
     int mPixelOffset;         // +0x18 File offset of the pixels.
     int mPaletteOffset;       // +0x1c File offset of the colour table.
     int mCompression;         // +0x20 Zero for uncompressed rows.
@@ -143,3 +131,15 @@ private:
     int mColorCount;          // +0x34 Colour table entries, zero above eight bits per pixel.
     int mImageRead;           // +0x38 Set once ReadFrame() has returned the image.
 };
+
+/**
+ * Widen a row of three-byte pixels to four bytes in place, with full alpha.
+ *
+ * Walks from the last pixel back to the first. The widened row can therefore overlap the source.
+ *
+ * @param pPixels The row.
+ * @param nCount The number of pixels.
+ * @ghidraAddress NTSC-U/C: 0x0061d620
+ * @ghidraAddress PAL: 0x0065e1b0
+ */
+void Convert24To32InPlace(unsigned char *pPixels, int nCount);

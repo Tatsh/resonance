@@ -68,7 +68,7 @@ public:
      */
     virtual void PrintExtra(std::ostream &stream) const;
 
-    HudItemKind mKind; /*!< The captured item. +0x04 */
+    PowerupType mKind; /*!< The captured item. +0x04 */
     Player *mPlayer;   /*!< The capturing player. +0x08 */
 };
 

@@ -335,7 +335,7 @@ void sceGsSetDefDispEnv(
     } else if (output == kGsPal) {
         pDisp->display = MakeDisplayWord(state, nWidth, nHeight, nDx, nDy, 0x290, 0x48, 0x24);
     } else {
-        LogPrintf("sceGsDefDispEnv:Not support displaymode for %d!!\n", output);
+        printf("sceGsDefDispEnv:Not support displaymode for %d!!\n", output);
     }
     pDisp->bgcolor = 0ULL;
 }
@@ -499,7 +499,7 @@ int sceGsPutDrawEnv(sceGifTag *pGifTag) {
         spins = 0U;
         while ((GIF_CHCR & 0x100U) != 0U) {
             if (kChannelSpinLimit < spins) {
-                LogPrintf("sceGsPutDrawEnv: DMA Ch.2 does not terminate\r\n");
+                printf("sceGsPutDrawEnv: DMA Ch.2 does not terminate\r\n");
                 return -1;
             }
             spins++;
@@ -566,7 +566,7 @@ int sceGsSetDefLoadImage(sceGsLoadImage *pLoadImage,
         }
     }
     if (0x7FFF < count) {
-        LogPrintf("sceGsSetDefLoadImage: too big size\r\n");
+        printf("sceGsSetDefLoadImage: too big size\r\n");
         return 0;
     }
     // The hardware clears both tag slots before the masked words go in.
@@ -607,7 +607,7 @@ int sceGsExecLoadImage(sceGsLoadImage *pLoadImage, const void *pSource) {
     if ((GIF_CHCR & 0x100U) != 0U) {
         while ((GIF_CHCR & 0x100U) != 0U) {
             if (kChannelSpinLimit < spins) {
-                LogPrintf("sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n");
+                printf("sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n");
                 return -1;
             }
             spins++;
@@ -623,7 +623,7 @@ int sceGsExecLoadImage(sceGsLoadImage *pLoadImage, const void *pSource) {
     GIF_CHCR = 0x101U;
     while ((GIF_CHCR & 0x100U) != 0U) {
         if (kChannelSpinLimit < spins) {
-            LogPrintf("sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n");
+            printf("sceGsExecLoadImage: DMA Ch.2 does not terminate\r\n");
             return -1;
         }
         spins++;
@@ -690,7 +690,7 @@ int sceGsSetDefStoreImage(sceGsStoreImage *pStoreImage,
 static inline int StoreImageWaitFifo(int *pSpins) {
     while ((VIF1_STAT & 0x1F000000U) == 0U) {
         if ((unsigned int)kChannelSpinLimit < (unsigned int)*pSpins) {
-            LogPrintf("sceGsExecStoreImage: Enough data does not reach VIF1\n");
+            printf("sceGsExecStoreImage: Enough data does not reach VIF1\n");
             GS_CSR = 0x100ULL;
             GS_BUSDIR = 0ULL;
             GIF_CTRL = 1U;
@@ -810,7 +810,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     if ((VIF1_CHCR & 0x100U) != 0U) {
         while ((VIF1_CHCR & 0x100U) != 0U) {
             if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                LogPrintf("sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n");
+                printf("sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n");
                 return -1;
             }
             spins++;
@@ -828,7 +828,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     VIF1_CHCR = 0x101U;
     while ((VIF1_CHCR & 0x100U) != 0U) {
         if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-            LogPrintf("sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n");
+            printf("sceGsExecStoreImage: DMA Ch.1 does not terminate\r\n");
             return -1;
         }
         spins++;
@@ -836,7 +836,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     if ((GS_CSR & 2ULL) == 0ULL) {
         while ((GS_CSR & 2ULL) == 0ULL) {
             if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                LogPrintf("sceGsExecStoreImage: GS does not terminate\r\n");
+                printf("sceGsExecStoreImage: GS does not terminate\r\n");
                 ee_store_quadword(VIF1_FIFO, init_mp3);
                 return -1;
             }
@@ -855,7 +855,7 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
         VIF1_CHCR = 0x100U;
         while ((VIF1_CHCR & 0x100U) != 0U) {
             if ((unsigned int)kChannelSpinLimit < (unsigned int)spins) {
-                LogPrintf("sceGsExecStoreImage: DMA Ch.1 (GS->MEM) does not terminate\r\n");
+                printf("sceGsExecStoreImage: DMA Ch.1 (GS->MEM) does not terminate\r\n");
                 GS_CSR = 0x100ULL;
                 GS_BUSDIR = 0ULL;
                 GIF_CTRL = 1U;
@@ -972,17 +972,17 @@ int sceGsSyncPath(int nMode, unsigned short nTimeout) {
     return 0;
 
 timeout:
-    LogPrintf(stage);
-    LogPrintf("\t<D1_CHCR=%08x:", VIF1_CHCR);
-    LogPrintf("D1_TADR=%08x:", VIF1_TADR);
-    LogPrintf("D1_MADR=%08x:", VIF1_MADR);
-    LogPrintf("D1_QWC=%08x>\r\n", VIF1_QWC);
-    LogPrintf("\t<D2_CHCR=%08x:", GIF_CHCR);
-    LogPrintf("D2_TADR=%08x:", GIF_TADR);
-    LogPrintf("D2_MADR=%08x:", GIF_MADR);
-    LogPrintf("D2_QWC=%08x>\r\n", GIF_QWC);
-    LogPrintf("\t<VIF1_STAT=%08x:", VIF1_STAT);
-    LogPrintf("GIF_STAT=%08x>\r\n", GIF_STAT);
+    printf(stage);
+    printf("\t<D1_CHCR=%08x:", VIF1_CHCR);
+    printf("D1_TADR=%08x:", VIF1_TADR);
+    printf("D1_MADR=%08x:", VIF1_MADR);
+    printf("D1_QWC=%08x>\r\n", VIF1_QWC);
+    printf("\t<D2_CHCR=%08x:", GIF_CHCR);
+    printf("D2_TADR=%08x:", GIF_TADR);
+    printf("D2_MADR=%08x:", GIF_MADR);
+    printf("D2_QWC=%08x>\r\n", GIF_QWC);
+    printf("\t<VIF1_STAT=%08x:", VIF1_STAT);
+    printf("GIF_STAT=%08x>\r\n", GIF_STAT);
     return -1;
 }
 

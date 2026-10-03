@@ -25,6 +25,6 @@ void RegisterScriptTemplate(int nTemplate, const HxStr &text) {
 }
 
 // NTSC-U/C: 0x00466438, PAL: 0x004a3e68
-HxStr GetScriptTemplate(int nTemplate) {
-    return g_scriptTemplates.Find(nTemplate);
+HxStr Resid2Str(unsigned int nResid) {
+    return g_scriptTemplates.Find(nResid);
 }

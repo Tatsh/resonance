@@ -2,10 +2,12 @@
 
 #include <math.h>
 
+#include "math/ray.h"
+
 // NTSC-U/C: 0x00169818, PAL: 0x0016ba00
-void AddVec2(const float *pA, const float *pB, float *pOut) {
-    pOut[1] = pA[1] + pB[1];
-    pOut[0] = pA[0] + pB[0];
+void Rnd::Add(const Vector2 &a, const Vector2 &b, Vector2 &out) {
+    out.y = a.y + b.y;
+    out.x = a.x + b.x;
 }
 
 // NTSC-U/C: 0x004bec40, PAL: 0x004fccc8
@@ -15,40 +17,40 @@ void SubVec2(const float *pA, const float *pB, float *pOut) {
 }
 
 // NTSC-U/C: 0x00169840, PAL: 0x0016ba28
-void ScaleVec2(const float *pSrc, float flScale, float *pOut) {
-    pOut[1] = pSrc[1] * flScale;
-    pOut[0] = pSrc[0] * flScale;
+void Rnd::Multiply(const Vector2 &v, float flScale, Vector2 &out) {
+    out.y = v.y * flScale;
+    out.x = v.x * flScale;
 }
 
 // NTSC-U/C: 0x004bec88, PAL: 0x004fcd10
-void NegateVec2(const float *pSrc, float *pOut) {
-    pOut[1] = -pSrc[1];
-    pOut[0] = -pSrc[0];
+void Rnd::Negate(const Vector2 &v, Vector2 &out) {
+    out.y = -v.y;
+    out.x = -v.x;
 }
 
 // NTSC-U/C: 0x004beca8, PAL: 0x004fcd30
-void NormalizeVec2(const float *pSrc, float *pOut) {
-    if (pSrc[0] == 0.0f && pSrc[1] == 0.0f) {
-        pOut[1] = 0.0f;
-        pOut[0] = 0.0f;
+void Rnd::Normalize(const Vector2 &v, Vector2 &out) {
+    if (v.x == 0.0f && v.y == 0.0f) {
+        out.y = 0.0f;
+        out.x = 0.0f;
         return;
     }
-    const float flInvLength = 1.0f / Vec2Length(pSrc);
-    pOut[1] = pSrc[1] * flInvLength;
-    pOut[0] = pSrc[0] * flInvLength;
+    const float flInvLength = 1.0f / Length(v);
+    out.y = v.y * flInvLength;
+    out.x = v.x * flInvLength;
 }
 
 // NTSC-U/C: 0x004bfcc0, PAL: 0x004fdd60
-float Vec2Length(const float *pSrc) {
-    return sqrtf(pSrc[0] * pSrc[0] + pSrc[1] * pSrc[1]);
+float Rnd::Length(const Vector2 &v) {
+    return sqrtf(v.x * v.x + v.y * v.y);
 }
 
 // NTSC-U/C: 0x00551190, PAL: 0x005917d0
-Vector2 IntersectLines(const Vector2 first[2], const Vector2 second[2]) {
-    const Vector2 &firstPoint = first[0];
-    const Vector2 &firstDirection = first[1];
-    const Vector2 &secondPoint = second[0];
-    const Vector2 &secondDirection = second[1];
+Vector2 Rnd::Intersect(const Ray &first, const Ray &second) {
+    const Vector2 &firstPoint = first.mPoint;
+    const Vector2 &firstDirection = first.mDirection;
+    const Vector2 &secondPoint = second.mPoint;
+    const Vector2 &secondDirection = second.mDirection;
 
     const float flDenominator =
         (secondDirection.x * firstDirection.y) - (firstDirection.x * secondDirection.y);

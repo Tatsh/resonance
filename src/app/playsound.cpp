@@ -380,7 +380,7 @@ void StopSoundByName(const char *pszName) {
 // The jump table at `0x007d1bd0` maps kinds 0 through 4 to sounds 0x3f, 0x3d, 0x3e, 0x3c, and
 // 0x40, kinds 5 through 11 to no sound, and kind 12 to 0x41, which is what the cases below
 // encode. Kinds past 12 return without playing.
-void PlayPowerupSound(HudItemKind kind) {
+void PlayPowerupSound(PowerupType kind) {
     int nSound;
     switch (kind) {
     case kHudItemNeutralizer:

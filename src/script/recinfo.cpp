@@ -22,14 +22,14 @@ Py::Object ScriptRecInfo(Py::Tuple args) {
     IBFileStream stream(path);
     int nFirstLen = 0;
     int nSecondLen = 0;
-    stream.Read(&nFirstLen, 4);
-    stream.Read(&nSecondLen, 4);
+    stream.ReadLE(&nFirstLen, 4);
+    stream.ReadLE(&nSecondLen, 4);
     HxStr first;
     first.Alloc(nFirstLen);
-    stream.Read(first.mStr, nFirstLen);
+    stream.ReadLE(first.mStr, nFirstLen);
     HxStr second;
     second.Alloc(nSecondLen);
-    stream.Read(second.mStr, nSecondLen);
+    stream.ReadLE(second.mStr, nSecondLen);
     HxStr result(first);
     result += "\n";
     result += second;

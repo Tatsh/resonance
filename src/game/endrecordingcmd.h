@@ -14,15 +14,15 @@ class OBStream;
  * has nine entries: it overrides saveGuts() with an empty body of its own, inherits
  * Sch::Command::restoreGuts() at `0x00539f28`, and adds one virtual of its own at slot 8, which is
  * empty. GameRecorder::ScheduleEnd() allocates the 0x10-byte object with the untagged allocator and
- * expands the constructor. The static initialiser of the unit registers New() under identifier 6
- * with the factory registrar.
+ * expands the constructor. The static initialiser of the unit registers NewEndRecordingCmd() under
+ * identifier 6 with the factory registrar.
  *
  * The destructor at `0x0010ef30` is implicitly declared.
  */
 class EndRecordingCmd : public Sch::Command {
 public:
     /**
-     * Construct a command with no recorder, as New() does.
+     * Construct a command with no recorder, as NewEndRecordingCmd() does.
      */
     EndRecordingCmd() {
     }
@@ -34,15 +34,6 @@ public:
      */
     explicit EndRecordingCmd(GameRecorder *pRecorder) : mRecorder(pRecorder) {
     }
-
-    /**
-     * Produce a command on the heap.
-     *
-     * @return The command.
-     * @ghidraAddress NTSC-U/C: 0x0010c8d0
-     * @ghidraAddress PAL: 0x0010caa0
-     */
-    static Sch::Command *New();
 
     /**
      * Report sCmdID.
@@ -100,3 +91,12 @@ public:
 private:
     GameRecorder *mRecorder; // +0x0c
 };
+
+/**
+ * Produce an EndRecordingCmd on the heap.
+ *
+ * @return The command.
+ * @ghidraAddress NTSC-U/C: 0x0010c8d0
+ * @ghidraAddress PAL: 0x0010caa0
+ */
+Sch::Command *NewEndRecordingCmd();

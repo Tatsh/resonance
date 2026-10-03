@@ -183,7 +183,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004afe00
      * @ghidraAddress PAL: 0x004edff0
      */
-    Ray ScreenToRay(const Vector2 &ptScreen, float flLength);
+    Segment ScreenToRay(const Vector2 &ptScreen, float flLength);
 
     /**
      * Place a world point in the unit square of the projected image.
@@ -502,20 +502,18 @@ public:
 
 protected:
     /**
-     * Report whether a ray starts inside the screen rectangle.
+     * Report whether a screen point lies inside the screen rectangle.
      *
-     * Vtable slot 2 of the Rnd::Collideable table. The camera tests the start point of the ray
-     * against mScreenRect rather than against geometry, which makes the second collision query of
-     * Rnd::Collideable a screen space test here. A showing camera whose rectangle strictly
-     * contains the start point appends itself at distance zero. The Rnd::Collideable query runs
+     * Vtable slot 2 of the Rnd::Collideable table. A showing camera whose rectangle strictly
+     * encloses the point appends itself at distance zero. The Rnd::Collideable query runs
      * afterwards either way.
      *
-     * @param ray The ray to test.
-     * @param sink The collector to append an intersection to.
+     * @param point The screen point.
+     * @param collisions The list to append an intersection to.
      * @ghidraAddress NTSC-U/C: 0x004ad820
      * @ghidraAddress PAL: 0x004eb9e0
      */
-    virtual void CollideScreen(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Vector2 &point, std::list<Collision> &collisions);
 
     /**
      * Make this camera the one the frame is drawn through.
@@ -575,9 +573,9 @@ inline Vector2 Cam::ProjectToUnit(const Vector3 &pt) {
     }
     const Vector2 one{1.0f, 1.0f};
     Vector2 ptShifted;
-    AddVec2(&ptNdc.x, &one.x, &ptShifted.x);
+    Rnd::Add(ptNdc, one, ptShifted);
     Vector2 ptUnit;
-    ScaleVec2(&ptShifted.x, 0.5f, &ptUnit.x);
+    Rnd::Multiply(ptShifted, 0.5f, ptUnit);
     return ptUnit;
 }
 

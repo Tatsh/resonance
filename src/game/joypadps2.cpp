@@ -32,7 +32,8 @@ int JoypadPS2::Poll(unsigned int *pButtons,
                     unsigned char *pAxis1,
                     unsigned char *pAxis2,
                     unsigned char *pAxis3) {
-    return sRecords[mIndex].Read(pButtons, pAxis0, pAxis1, pAxis2, pAxis3, nullptr, nullptr);
+    return BreugPadRead(
+        &sRecords[mIndex], pButtons, pAxis0, pAxis1, pAxis2, pAxis3, nullptr, nullptr);
 }
 
 // NTSC-U/C: 0x004ecb30, PAL: 0x0052b6d8
@@ -43,7 +44,7 @@ void JoypadPS2::Reset() {
 
 // NTSC-U/C: 0x004ecb60, PAL: 0x0052b708
 void JoypadPS2::Open(int nPort, int nSlot, int nDeadZone) {
-    sRecords[mIndex].Open(nPort, nSlot, nDeadZone);
+    BreugPadInit(&sRecords[mIndex], nPort, nSlot, nDeadZone);
 }
 
 // NTSC-U/C: 0x004ecb90, PAL: 0x0052b738
@@ -54,7 +55,7 @@ void JoypadPS2::DeInitPadData() {
 
 // NTSC-U/C: 0x004ecbc8, PAL: 0x0052b770
 void JoypadPS2::SetVibration(int nSmallMotor, int nBigMotor) {
-    sRecords[mIndex].SetVibration(nSmallMotor, nBigMotor);
+    BreugPadSetMotors(&sRecords[mIndex], nSmallMotor, nBigMotor);
 }
 
 // NTSC-U/C: 0x004ecbf8, PAL: 0x0052b7a0

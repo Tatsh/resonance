@@ -26,8 +26,8 @@ enum StreamSeekOrigin {
  * below, so the recovery is complete rather than partial. IBFileStream's table ends at slot 8,
  * which is what fixes the count.
  *
- * Read() is the one slot with a shared base body. All three implementations retain it, and it
- * does nothing beyond dispatching ReadBytes(), so the two entry points are interchangeable on
+ * ReadLE() is the one slot with a shared base body. All three implementations retain it, and it
+ * does nothing beyond dispatching Read(). The two entry points are therefore interchangeable on
  * this target.
  *
  * Fail() is declared with the same signature on OBStream. A class deriving from both therefore
@@ -44,7 +44,7 @@ public:
      * @param nSize The number of bytes to move.
      * @return This stream.
      */
-    virtual IBStream &ReadBytes(void *pDest, int nSize) = 0;
+    virtual IBStream &Read(void *pDest, int nSize) = 0;
 
     /**
      * Move the read position.
@@ -85,9 +85,10 @@ public:
     virtual int Fail() = 0;
 
     /**
-     * Move nSize bytes into pDest through the virtual ReadBytes().
+     * Move nSize bytes into pDest through the virtual Read().
      *
-     * Vtable slot 6. One shared body serves all three implementations and none overrides it.
+     * Vtable slot 6. One shared body serves all three implementations and none overrides it. The
+     * body does not swap bytes.
      *
      * @param pDest The destination buffer.
      * @param nSize The number of bytes to move.
@@ -95,7 +96,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004ed838
      * @ghidraAddress PAL: 0x0052c3e0
      */
-    virtual IBStream &Read(void *pDest, int nSize);
+    virtual IBStream &ReadLE(void *pDest, int nSize);
 
     /**
      * Service the underlying transport.
@@ -123,7 +124,7 @@ public:
 /**
  * Read a truth value from one byte.
  *
- * One byte arrives through ReadBytes() and the stored result is normalised to zero or one with an
+ * One byte arrives through Read() and the stored result is normalised to zero or one with an
  * unsigned comparison against zero. The store is four bytes wide, which is what fixes the
  * parameter's width; see the counterpart in `stream/obstream.h` for why the type is written as an
  * int.
@@ -139,9 +140,9 @@ IBStream &operator>>(IBStream &stream, int &bValue);
 /**
  * Read a 64-bit integer from four bytes, extending the sign.
  *
- * Four bytes arrive through Read() and the full 64-bit register is stored. This is the reader for
- * the `operator<<(OBStream &, long)` counterpart in `stream/obstream.h`. No call site survives in
- * the shipped program.
+ * Four bytes arrive through ReadLE() and the full 64-bit register is stored. The routine is the
+ * reader for the `operator<<(OBStream &, long)` counterpart in `stream/obstream.h`. No call site
+ * remains in the shipped program.
  *
  * @param stream The stream to read from.
  * @param nValue Receives the value.

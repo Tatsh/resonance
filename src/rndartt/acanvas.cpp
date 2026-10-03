@@ -11,7 +11,7 @@
 #include "rndartt/acanvaslin4.h"
 #include "rndartt/acanvaslin8.h"
 #include "rndartt/aclipspan.h"
-#include "rndartt/afixed.h"
+#include "rndartt/afix.h"
 #include "rndartt/afont.h"
 #include "rndartt/apalette.h"
 #include "rndartt/apoint.h"
@@ -287,14 +287,14 @@ int ACanvas::ClipLine(int *pnX0, int *pnY0, int *pnX1, int *pnY1) const {
         if ((nCode1 & (kACanvasClipLeft | kACanvasClipRight)) != 0) {
             const int nEdge = (nCode1 & kACanvasClipLeft) != 0 ?
                                   mClip.mLeft << kACanvasFractionBits :
-                                  (mClip.mRight << kACanvasFractionBits) - g_nFixedEpsilon;
+                                  (mClip.mRight << kACanvasFractionBits) - AFix::epsilon;
             const int nSlope = ((*pnY1 - *pnY0) << kACanvasFractionBits) / (*pnX1 - *pnX0);
             *pnY1 = *pnY0 + ((nSlope * (nEdge - *pnX0)) >> kACanvasFractionBits);
             *pnX1 = nEdge;
         } else {
             const int nEdge = (nCode1 & kACanvasClipAbove) != 0 ?
                                   mClip.mTop << kACanvasFractionBits :
-                                  (mClip.mBottom << kACanvasFractionBits) - g_nFixedEpsilon;
+                                  (mClip.mBottom << kACanvasFractionBits) - AFix::epsilon;
             const int nSlope = ((*pnX1 - *pnX0) << kACanvasFractionBits) / (*pnY1 - *pnY0);
             *pnX1 = *pnX0 + ((nSlope * (nEdge - *pnY0)) >> kACanvasFractionBits);
             *pnY1 = nEdge;
@@ -548,8 +548,8 @@ void ACanvas::DrawFlatConvexPolygon(const APolygon &polygon) {
         }
         if (nY >= mClip.mTop) {
             DrawHorzLine(nY,
-                         (left.mX + g_nFixedHalf) >> kACanvasFractionBits,
-                         (right.mX + g_nFixedHalf) >> kACanvasFractionBits);
+                         (left.mX + AFix::onehalf) >> kACanvasFractionBits,
+                         (right.mX + AFix::onehalf) >> kACanvasFractionBits);
         }
         ++nY;
         left.mX += left.mStepX;
@@ -590,8 +590,8 @@ void ACanvas::DrawTmappedConvexPolygon(const APolygon &polygon) {
             polygon.SetupTexturedEdge(&right, right.mTo, kEdgeBackward, polygon.mTexture);
         }
         if (nY >= mClip.mTop) {
-            int nLeft = (left.mX + g_nFixedHalf) >> kACanvasFractionBits;
-            const int nRight = (right.mX + g_nFixedHalf) >> kACanvasFractionBits;
+            int nLeft = (left.mX + AFix::onehalf) >> kACanvasFractionBits;
+            const int nRight = (right.mX + AFix::onehalf) >> kACanvasFractionBits;
             const int nColumns = nRight - nLeft;
             if (nColumns > 0) {
                 APoint position = left.mTexCoord;

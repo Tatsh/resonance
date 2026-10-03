@@ -32,8 +32,8 @@ void LodMesh::Build(const HxStr &name, int nCount, bool bInternal) {
     const char *pszName = name.mStr != nullptr ? name.mStr : g_szEmptyString;
     Mesh *pCoarser = nullptr;
     for (int nLevel = nCount - 1; nLevel >= 0; --nLevel) {
-        Mesh *pMesh = NewMeshThroughHook(
-            HxStr(FormatString(bInternal ? kInternalLevelFormat : kLevelFormat, pszName, nLevel)));
+        Mesh *pMesh = NewMeshThroughHook(HxStr(
+            Rnd::MakeString(bInternal ? kInternalLevelFormat : kLevelFormat, pszName, nLevel)));
         (*this)[nLevel] = pMesh;
         pMesh->mInternal = bInternal;
         pMesh->mZMode = Mesh::kZModeZReadWrite;
@@ -91,9 +91,9 @@ void LodMesh::Sync() {
 }
 
 // NTSC-U/C: 0x00476ec0, PAL: 0x004b4b38
-void LodMesh::FindCollisions(const Ray &ray, Collideable::HitSink &sink) {
+void LodMesh::FindCollisions(const Segment &ray, std::list<Collideable::Collision> &collisions) {
     for (Mesh *pMesh : *this) {
-        pMesh->FindCollisions(ray, sink);
+        pMesh->FindCollisions(ray, collisions);
     }
 }
 

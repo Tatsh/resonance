@@ -20,12 +20,14 @@ TransportAddress::~TransportAddress() {
 // NTSC-U/C: 0x003f4078, PAL: 0x0042c658
 void TransportAddress::Save(OBStream &stream) {
     int nPort = mPort; // The binary writes a stack copy of the word.
-    SaveHxStr(SaveHxStr(SaveHxStr(stream, mHost), mAddress), mService).Write(&nPort, sizeof(nPort));
+    SaveHxStr(SaveHxStr(SaveHxStr(stream, mHost), mAddress), mService)
+        .WriteLE(&nPort, sizeof(nPort));
 }
 
 // NTSC-U/C: 0x003f41d0, PAL: 0x0042c7b0
 void TransportAddress::Load(IBStream &stream) {
-    LoadHxStr(LoadHxStr(LoadHxStr(stream, mHost), mAddress), mService).Read(&mPort, sizeof(mPort));
+    LoadHxStr(LoadHxStr(LoadHxStr(stream, mHost), mAddress), mService)
+        .ReadLE(&mPort, sizeof(mPort));
 }
 
 // NTSC-U/C: 0x003f4500, PAL: 0x0042cb38

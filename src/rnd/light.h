@@ -13,15 +13,6 @@ class Stream;
 namespace Rnd {
 
 /**
- * Which lighting model a light applies.
- *
- * The three names come from the routine at `0x005454a0`, which writes "Point", "Directional", and
- * "Spot" for the values below. Rnd::PsEnviron::DrawShowing() handles the first two and skips a spot
- * light entirely.
- */
-enum LightType { kLightTypePoint = 0, kLightTypeDirectional = 1, kLightTypeSpot = 2 };
-
-/**
  * Light in a scene.
  *
  * Its RTTI descriptor is at `0x008efe60`. It has `Rnd::Transformable` as its only public
@@ -49,6 +40,15 @@ enum LightType { kLightTypePoint = 0, kLightTypeDirectional = 1, kLightTypeSpot 
  */
 class Light : public Transformable {
 public:
+    /**
+     * Which lighting model a light applies.
+     *
+     * The three names come from the routine at `0x005454a0`. The routine writes 'Point',
+     * 'Directional', and 'Spot' for the values below. Rnd::PsEnviron::DrawShowing() handles the
+     * first two and skips a spot light entirely.
+     */
+    enum Type { kLightTypePoint = 0, kLightTypeDirectional = 1, kLightTypeSpot = 2 };
+
     /**
      * Construct a white directional light.
      *
@@ -111,7 +111,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00544420
      * @ghidraAddress PAL: 0x00584198
      */
-    virtual void SetType(LightType type);
+    virtual void SetType(Type type);
 
     /**
      * Set the distance a point light illuminates over.
@@ -277,7 +277,7 @@ private:
 
 public:
     /** Which lighting model this light applies. +0xf8 */
-    LightType mType;
+    Type mType;
 
 private:
     // A reserved run records a span that has not been recovered and is not a field. This one is

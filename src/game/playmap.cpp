@@ -21,7 +21,7 @@ void *PlayMap::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x00127138, PAL: 0x00127840
 void PlayMap::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, "PlayMap");
+    OperatorDeleteOverride(pBlock, "PlayMap");
 }
 
 // NTSC-U/C: 0x001263c0, PAL: 0x00126a70

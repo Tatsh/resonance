@@ -50,7 +50,7 @@ public:
      * @ghidraAddress PAL: 0x0063aa08
      */
     static void operator delete(void *pBlock) {
-        FreeTaggedMemory(pBlock, "APalette");
+        OperatorDeleteOverride(pBlock, "APalette");
     }
 
     /**

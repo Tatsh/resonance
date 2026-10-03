@@ -97,7 +97,7 @@ public:
 
 private:
     Sch::TimeClock *mClock; // +0x08 the clock the task is posted against
-    CmdID mCommand;         // +0x0c the handle of the queued command, -2 while none is queued
+    Sch::CmdID mCommand;    // +0x0c the handle of the queued command, -2 while none is queued
     long long mPeriodNs;    // +0x10
     long long mNextNs;      // +0x18 the time the next run is due at
     long long mEpochNs;     // +0x20 the time the elapsed count is measured from

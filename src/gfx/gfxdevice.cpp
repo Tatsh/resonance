@@ -396,7 +396,7 @@ void GfxDevice::Terminate() {
 }
 
 // NTSC-U/C: 0x0049fea0, PAL: 0x004ddf28
-int GfxDevice::VblankHandler([[maybe_unused]] int nCause) {
+int DrawVSyncCB([[maybe_unused]] int nCause) {
     ++gVCount;
     ExitHandler();
     return 0;
@@ -428,7 +428,7 @@ inline void GfxDevice::SendPacket() {
 
 // NTSC-U/C: 0x004a0388, PAL: 0x004de410
 void GfxDevice::FlipFrameBuffer() {
-    mpDisplayBuffers->PutDrawEnv(mnDrawBuffer, 1);
+    PutDrawBufferSmall(mpDisplayBuffers, mnDrawBuffer, 1);
     SwapBuffers();
 }
 
@@ -531,7 +531,7 @@ void GfxDevice::InitDisplayMode() {
                                   kClearOnSwap);
     SetClearColor(mClearColor);
     mnSwapVblank = gVCount + 1;
-    sceGsSyncVCallback(VblankHandler); // The previous handler it returns is discarded.
+    sceGsSyncVCallback(DrawVSyncCB); // The previous handler it returns is discarded.
     FlipFrameBuffer();
     RestorePacket();
 
@@ -568,10 +568,10 @@ inline void GfxDevice::SwapBuffers() {
     while (gVCount < mnSwapVblank) {
     }
     mnSwapVblank = gVCount + 1;
-    mpDisplayBuffers->PutDispEnv(mnDrawBuffer, 1);
+    PutDispBuffer(mpDisplayBuffers, mnDrawBuffer, 1);
     sceGsSyncPath(0, 0);
     mnDrawBuffer = mnDrawBuffer == 0;
-    mpDisplayBuffers->PutDrawEnv(mnDrawBuffer, 1);
+    PutDrawBufferSmall(mpDisplayBuffers, mnDrawBuffer, 1);
     sceGsSyncPath(0, 0);
 
     const sceGsDrawEnv1 &draw =
@@ -936,42 +936,42 @@ void GfxDevice::DrawRenderStatsOverlay() {
 
     const float flFrameMs = TimerMilliseconds(g_lastFrameProfileTimers[kProfileTimerFrame]);
     const int nFps = flFrameMs == 0.0f ? 0 : static_cast<int>(kMillisecondsPerSecond / flFrameMs);
-    DrawDebugText(FormatString("fps %d", nFps), rect, white);
+    DrawDebugText(Rnd::MakeString("fps %d", nFps), rect, white);
 
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("points %d", g_renderStats.mnPoints), rect, white);
+    DrawDebugText(Rnd::MakeString("points %d", g_renderStats.mnPoints), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("draws %d", g_renderStats.mnMeshDraws), rect, white);
+    DrawDebugText(Rnd::MakeString("draws %d", g_renderStats.mnMeshDraws), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("clippedtris %d", g_renderStats.mnFacesClipped), rect, white);
+    DrawDebugText(Rnd::MakeString("clippedtris %d", g_renderStats.mnFacesClipped), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("tris %d", g_renderStats.mnTriangles), rect, white);
+    DrawDebugText(Rnd::MakeString("tris %d", g_renderStats.mnTriangles), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("splittris %d", g_renderStats.mnSplitTriangles), rect, white);
+    DrawDebugText(Rnd::MakeString("splittris %d", g_renderStats.mnSplitTriangles), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("clippedlines %d", g_renderStats.mnEdgesClipped), rect, white);
+    DrawDebugText(Rnd::MakeString("clippedlines %d", g_renderStats.mnEdgesClipped), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("lines %d", g_renderStats.mnLines), rect, white);
+    DrawDebugText(Rnd::MakeString("lines %d", g_renderStats.mnLines), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("clippedsprites %d", g_renderStats.mnSpritesCulled), rect, white);
+    DrawDebugText(Rnd::MakeString("clippedsprites %d", g_renderStats.mnSpritesCulled), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("sprites %d", g_renderStats.mnSpritesDrawn), rect, white);
+    DrawDebugText(Rnd::MakeString("sprites %d", g_renderStats.mnSpritesDrawn), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("verts %d", g_renderStats.mnVertsTransformed), rect, white);
+    DrawDebugText(Rnd::MakeString("verts %d", g_renderStats.mnVertsTransformed), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("tags %d", g_renderStats.mnGifTags), rect, white);
+    DrawDebugText(Rnd::MakeString("tags %d", g_renderStats.mnGifTags), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("packets %d", g_renderStats.mnGifPackets), rect, white);
+    DrawDebugText(Rnd::MakeString("packets %d", g_renderStats.mnGifPackets), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("mats %d", g_renderStats.mnMatSelects), rect, white);
+    DrawDebugText(Rnd::MakeString("mats %d", g_renderStats.mnMatSelects), rect, white);
     rect.y += kOverlayLineSpacing;
-    DrawDebugText(FormatString("litverts %d", g_renderStats.mnLitVerts), rect, white);
+    DrawDebugText(Rnd::MakeString("litverts %d", g_renderStats.mnLitVerts), rect, white);
 
     int nLoads;
     int nBlocks;
     rect.y += kOverlayLineSpacing;
     Rnd::TheVRAM.GetLastFrameLoads(&nLoads, &nBlocks);
-    DrawDebugText(FormatString("vramk %d", nBlocks >> 2), rect, white);
+    DrawDebugText(Rnd::MakeString("vramk %d", nBlocks >> 2), rect, white);
 }
 
 // NTSC-U/C: 0x0049c388, PAL: 0x004da3a8
@@ -1002,7 +1002,7 @@ void GfxDevice::DrawFpsReadout() {
     rect.w = kOverlayTextCell;
     rect.h = kOverlayTextCell;
     const Color white = kOverlayWhite;
-    DrawDebugText(FormatString("fps %d sync %d", mnFps, mnSyncMsAverage), rect, white);
+    DrawDebugText(Rnd::MakeString("fps %d sync %d", mnFps, mnSyncMsAverage), rect, white);
 }
 
 // NTSC-U/C: 0x0049c778, PAL: 0x004da798
@@ -1055,7 +1055,7 @@ void GfxDevice::DrawSubsystemTimingGraph(int nFullScaleMs) {
         const HxStr &name = g_profileTimers[i].mName;
         const char *pszName = name.mStr != nullptr ? name.mStr : g_szEmptyString;
         if (kTimingLabelMinimumMs <= flMs) {
-            DrawDebugText(FormatString("%s %.1f", pszName, flMs), rect, white);
+            DrawDebugText(Rnd::MakeString("%s %.1f", pszName, flMs), rect, white);
         } else {
             DrawDebugText(pszName, rect, white);
         }

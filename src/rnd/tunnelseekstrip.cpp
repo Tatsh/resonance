@@ -62,7 +62,7 @@ void TunnelSeekStrip::Build(Tunnel *pTunnel, TunnelSeeker *pOwner, int nIndex) {
     const HxStr &tunnelName = pTunnel->mName;
     for (unsigned i = 0; i < mSections.size(); ++i) {
         const char *pszTunnelName = tunnelName.mStr != nullptr ? tunnelName.mStr : g_szEmptyString;
-        mSections[i].Build(HxStr(FormatString(kSectionNameFormat, pszTunnelName, nIndex, i)),
+        mSections[i].Build(HxStr(Rnd::MakeString(kSectionNameFormat, pszTunnelName, nIndex, i)),
                            pTunnel->mCellChains.front());
         mSections[i].mMeshes.front()->SetMaterialChain(mMat);
     }

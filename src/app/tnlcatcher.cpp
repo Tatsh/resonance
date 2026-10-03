@@ -40,7 +40,7 @@ TnlCatcher::TnlCatcher(const HxStr &colorName)
     mView = FindObject<Rnd::View>(HxStr("catcher_") + letter);
     for (int i = 0; i < kTargetCount; ++i) {
         mTargets[i] =
-            FindObject<Rnd::Mesh>(HxStr(FormatString(kTargetMeshFormat, colorName[0], i)));
+            FindObject<Rnd::Mesh>(HxStr(Rnd::MakeString(kTargetMeshFormat, colorName[0], i)));
     }
     mUpMat = FindObject<Rnd::Mat>(HxStr("act_") + letter + " tar up.mat");
     mDownMat = FindObject<Rnd::Mat>(HxStr("act_") + letter + " tar dn.mat");

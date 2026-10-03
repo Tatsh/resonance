@@ -3,14 +3,14 @@
 #include <math.h>
 
 // NTSC-U/C: 0x0028c218, PAL: 0x002a7ea8
-void AddVec3(const float *pA, const float *pB, float *pOut) {
+void Rnd::Add(const float *pA, const float *pB, float *pOut) {
     pOut[0] = pA[0] + pB[0];
     pOut[1] = pA[1] + pB[1];
     pOut[2] = pA[2] + pB[2];
 }
 
 // NTSC-U/C: 0x00317160, PAL: 0x0033d418
-void Vec3Sub(const float *pA, const float *pB, float *pOut) {
+void Rnd::Subtract(const float *pA, const float *pB, float *pOut) {
     pOut[0] = pA[0] - pB[0];
     pOut[1] = pA[1] - pB[1];
     pOut[2] = pA[2] - pB[2];

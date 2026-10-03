@@ -62,13 +62,13 @@ TnlCameraRig::TnlCameraRig(int nPlayerCount, int nSkipIntro)
     mLocalViews.resize(kSlotCount, nullptr);
     for (int i = 0; i < nPlayerCount; ++i) {
         mOuterCams[i] = dynamic_cast<Rnd::Cam *>(
-            Rnd::TheManager.Find(HxStr(FormatString("outer cam%d", i + 1))));
+            Rnd::TheManager.Find(HxStr(Rnd::MakeString("outer cam%d", i + 1))));
         mLocalViews[i] = dynamic_cast<Rnd::View *>(
-            Rnd::TheManager.Find(HxStr(FormatString("tnl local%d.view", i + 1))));
+            Rnd::TheManager.Find(HxStr(Rnd::MakeString("tnl local%d.view", i + 1))));
     }
 
     Rnd::TransAnim *pIntro = dynamic_cast<Rnd::TransAnim *>(
-        Rnd::TheManager.Find(HxStr(FormatString("tnl cam intro%d.tnm", mPlayerCount))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("tnl cam intro%d.tnm", mPlayerCount))));
     Transform xfm;
     Vector3 angles;
     Vector3 scale;
@@ -139,7 +139,7 @@ void TnlCameraRig::SetFrame(float flTime) {
     for (Vector3 &row : basis) {
         row.w = 1.0f;
     }
-    EulerAnglesToMatrix3x3(&pitchAngles.x, &basis[0].x);
+    Rnd::MakeRotMatrix(&pitchAngles.x, &basis[0].x);
 
     Rnd::Cam *pCam = mMainCams[kMainCamNormal];
     std::memcpy(pCam->mLocalXfm, basis, sizeof(basis));

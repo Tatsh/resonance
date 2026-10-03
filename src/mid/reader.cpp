@@ -9,6 +9,7 @@
 #include "stream/hxidatachunk.h"
 #include "stream/hxilistchunk.h"
 #include "stream/hxstream.h"
+#include "stream/hxvarlennumber.h"
 
 namespace {
 
@@ -114,9 +115,9 @@ void Mid::Reader::ReadTrack(HxStream &stream) {
 
 // NTSC-U/C: 0x003d4c10, PAL: 0x0040cb00
 void Mid::Reader::ReadEvent(HxStream &stream) {
-    int nDelta;
-    ReadVarLen(nDelta, stream);
-    mTick += nDelta;
+    HxVarLenNumber delta;
+    delta.Read(stream);
+    mTick += delta;
     MBT tick(mTick * mTargetDivision / mDivision);
 
     unsigned char nData1;
@@ -165,9 +166,9 @@ void Mid::Reader::ReadSystemEvent(HxStream &stream) {
     switch (mRunningStatus) {
     case kStatusSysEx:
     case kStatusSysExContinue: {
-        int nLength;
-        ReadVarLen(nLength, stream);
-        stream.SetMarker(nLength, kHxSeekCur);
+        HxVarLenNumber length;
+        length.Read(stream);
+        stream.SetMarker(length, kHxSeekCur);
         break;
     }
     case kStatusMeta: {
@@ -181,8 +182,8 @@ void Mid::Reader::ReadSystemEvent(HxStream &stream) {
 
 // NTSC-U/C: 0x003d4f00, PAL: 0x0040cdf0
 void Mid::Reader::ReadMeta(unsigned char nType, HxStream &stream) {
-    int nLength;
-    ReadVarLen(nLength, stream);
+    HxVarLenNumber length;
+    length.Read(stream);
     int nStart = stream.GetMarker();
     MBT tick(mTick * mTargetDivision / mDivision);
 
@@ -211,15 +212,15 @@ void Mid::Reader::ReadMeta(unsigned char nType, HxStream &stream) {
     }
     default:
         if (nType >= kMetaFirstText && nType <= kMetaLastText) {
-            char *pszText = new char[nLength + 1];
-            stream.ReadData(pszText, nLength);
-            pszText[nLength] = '\0';
+            char *pszText = new char[length + 1];
+            stream.ReadData(pszText, length);
+            pszText[length] = '\0';
             mReceiver->TextEvent(tick.mTick, pszText, nType);
             delete[] pszText;
         }
         break;
     }
-    stream.SetMarker(nStart + nLength, kHxSeekSet);
+    stream.SetMarker(nStart + length, kHxSeekSet);
 }
 
 // NTSC-U/C: 0x003d5260, PAL: 0x0040d150
@@ -261,7 +262,7 @@ void Mid::Reader::QueueEvent(MBT tick,
         Flush();
         mPendingTick = tick;
     }
-    Event event;
+    Midi event;
     memset(&event, 0, sizeof(event));
     event.mStatus = nStatus;
     event.mData1 = nData1;

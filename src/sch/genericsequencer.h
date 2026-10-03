@@ -59,7 +59,7 @@ public:
      * @ghidraAddress PAL: 0x001b0180
      */
     void Withdraw() {
-        const CmdID id = mCmdId;
+        const Sch::CmdID id = mCmdId;
         mClock->Withdraw(id);
     }
 
@@ -68,7 +68,7 @@ protected:
     enum { kUnallocatedCommand = -2 };
 
     // The handle SequencerCmd is queued under.
-    CmdID mCmdId;
+    Sch::CmdID mCmdId;
     // The command that runs Dispatch(), created by the first post.
     SequencerCmd *mCommand;
     // The clock Post() queues against.

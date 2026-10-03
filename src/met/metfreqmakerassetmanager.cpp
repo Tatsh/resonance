@@ -460,7 +460,7 @@ FreqPartTemplate *MetFreqMakerAssetManager::GetPart(int nId) {
 
 // NTSC-U/C: 0x00254e50, PAL: 0x0026a518
 HxStr MetFreqMakerAssetManager::NextMeshName() {
-    return HxStr(FormatString(kMeshNameFormat, mMeshCount++));
+    return HxStr(Rnd::MakeString(kMeshNameFormat, mMeshCount++));
 }
 
 // NTSC-U/C: 0x00254a58, PAL: 0x0026a120

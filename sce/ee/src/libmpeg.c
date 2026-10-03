@@ -1351,7 +1351,7 @@ void sceMpegRaiseError(const char *pFormat) {
 
 // NTSC-U/C: 0x0060de90, PAL: 0x0064eb00
 void sceMpegPrintErrorLine(const char *pMessage) {
-    LogPrintf("[MPEG ERROR]%s\n", pMessage);
+    printf("[MPEG ERROR]%s\n", pMessage);
 }
 
 // NTSC-U/C: 0x0060dea0, PAL: 0x0064eb10

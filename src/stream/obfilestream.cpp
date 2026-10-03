@@ -18,7 +18,7 @@ OBFileStream::~OBFileStream() {
 }
 
 // NTSC-U/C: 0x004edf88, PAL: 0x0052cb30
-OBStream &OBFileStream::WriteBytes(const void *pSrc, int nSize) {
+OBStream &OBFileStream::Write(const void *pSrc, int nSize) {
     fwrite(pSrc, 1, nSize, mFile);
     return *this;
 }

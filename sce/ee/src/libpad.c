@@ -173,7 +173,7 @@ static void _send_to_iop(int nPort, int nSlot) {
 
     if (sceSifDmaStat(pState->nDmaId) >= 0) {
         if (isWarning) {
-            LogPrintf("libpad: tPadDma Structure Invalid\n");
+            printf("libpad: tPadDma Structure Invalid\n");
         }
         return;
     }
@@ -185,7 +185,7 @@ static void _send_to_iop(int nPort, int nSlot) {
     dma.mode = 0;
     nDmaId = sceSifSetDma(&dma, 1);
     if (nDmaId == 0 && isWarning) {
-        LogPrintf("libpad: tPadDma Structure Invalid\n");
+        printf("libpad: tPadDma Structure Invalid\n");
     }
     pState->nDmaId = nDmaId;
 }
@@ -212,8 +212,8 @@ int scePadInit(int nMode) {
     nVersion = scePadGetModVersion();
     if ((nVersion >> kPadVersionShift) != kPadModVersionMajor) {
         if (isWarning) {
-            LogPrintf("libpad: Module version mismatch ");
-            LogPrintf("[libpad.a = %d.%d, padman.irx = %d.%d]\n",
+            printf("libpad: Module version mismatch ");
+            printf("[libpad.a = %d.%d, padman.irx = %d.%d]\n",
                    kPadModVersionMajor,
                    kPadModVersionMinor,
                    nVersion >> kPadVersionShift,
@@ -264,7 +264,7 @@ int scePadPortOpen(int nPort, int nSlot, scePadDmaFrame *pFrames) {
 
     if (((uintptr_t)pFrames & kPadFrameAlignMask) != 0) {
         if (isWarning) {
-            LogPrintf("libpad: buffer addr is not 64 byte align. %08x\n",
+            printf("libpad: buffer addr is not 64 byte align. %08x\n",
                    (unsigned int)(uintptr_t)pFrames);
         }
         return 0;
@@ -272,7 +272,7 @@ int scePadPortOpen(int nPort, int nSlot, scePadDmaFrame *pFrames) {
     pState = &g_aaPadPorts[nPort][nSlot];
     if (pState->nOpen == 1) {
         if (isWarning) {
-            LogPrintf("libpad: pad port is already open [%d][%d]\n", nPort, nSlot);
+            printf("libpad: pad port is already open [%d][%d]\n", nPort, nSlot);
         }
         return 0;
     }

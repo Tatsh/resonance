@@ -61,10 +61,10 @@ CampaignStats::~CampaignStats() {
 // NTSC-U/C: 0x00145110, PAL: 0x00145c28
 void CampaignStats::Save(OBStream &stream) {
     int nVersion = kRecordVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
 
     int nLevelCount = mLevels.size();
-    stream.Write(&nLevelCount, sizeof(nLevelCount));
+    stream.WriteLE(&nLevelCount, sizeof(nLevelCount));
 
     for (std::vector<LevelStats>::iterator it = mLevels.begin(); it != mLevels.end(); ++it) {
         it->Save(stream);
@@ -73,10 +73,10 @@ void CampaignStats::Save(OBStream &stream) {
 
 // NTSC-U/C: 0x00141ed8, PAL: 0x001429c8
 void CampaignStats::Load(IBStream &stream) {
-    stream.Read(&g_nStatsRecordVersion, sizeof(g_nStatsRecordVersion));
+    stream.ReadLE(&g_nStatsRecordVersion, sizeof(g_nStatsRecordVersion));
 
     int nLevelCount;
-    stream.Read(&nLevelCount, sizeof(nLevelCount));
+    stream.ReadLE(&nLevelCount, sizeof(nLevelCount));
     mLevels.resize(nLevelCount);
 
     for (std::vector<LevelStats>::iterator it = mLevels.begin(); it != mLevels.end(); ++it) {

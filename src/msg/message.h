@@ -66,15 +66,15 @@ public:
      * @ghidraAddress PAL: 0x00412618
      */
     void operator delete(void *pBlock) {
-        FreeTaggedMemory(pBlock, "MSG");
+        OperatorDeleteOverride(pBlock, "MSG");
     }
 
     /**
      * Vtable slot 1. The body is empty.
      *
      * A second emission at `0x003da2f0`, with forty copies in other units, is the same destructor
-     * releasing through the class operator delete, FreeTaggedMemory() under the tag `MSG`, where
-     * `0x001051c0` releases through the scalar free. It has no source of its own.
+     * releasing through the class operator delete, OperatorDeleteOverride() under the tag `MSG`,
+     * where `0x001051c0` releases through the scalar free. It has no source of its own.
      *
      * @ghidraAddress NTSC-U/C: 0x001051c0
      * @ghidraAddress PAL: 0x001051c0
@@ -131,9 +131,9 @@ public:
      * Write this message's payload to an output stream.
      *
      * Vtable slot 6. The default does nothing. An override copies each field into a temporary and
-     * hands the temporary to OBStream::Write(), chaining on the stream the call returns, which is
-     * how PSJoinRequestPacket's override at `0x003e5538` writes its four words and then delegates
-     * its FreqAppearance member to that class's own slot 2.
+     * hands the temporary to OBStream::WriteLE(), chaining on the stream the call returns.
+     * PSJoinRequestPacket's override at `0x003e5538` writes its four words this way and then
+     * delegates its FreqAppearance member to slot 2 of FreqAppearance.
      *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x001051f8
@@ -145,11 +145,11 @@ public:
      * Read this message's payload from an input stream.
      *
      * Vtable slot 7. The default does nothing. An override passes the address of each field
-     * straight to IBStream::Read() so that the transfer fills the field in place, which is how
-     * PSJoinRequestPacket's override at `0x003e5638` reads its four words and then delegates its
-     * FreqAppearance member to that class's own slot 3. Twenty-two of the classes that override
-     * this pair are packets and four are MIDI messages, so the pair is the wire format rather
-     * than a diagnostic.
+     * straight to IBStream::ReadLE() for the transfer to fill the field in place.
+     * PSJoinRequestPacket's override at `0x003e5638` reads its four words this way and then
+     * delegates its FreqAppearance member to slot 3 of FreqAppearance. Twenty-two of the classes
+     * that override this pair are packets and four are MIDI messages. The pair is therefore the
+     * wire format rather than a diagnostic.
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x00105200
@@ -160,8 +160,8 @@ public:
     /**
      * Write this message to a diagnostic stream as `{GetName() PrintExtra()}`.
      *
-     * The payload comes from PrintExtra(). PrintMuseEntry() is the one caller, and it discards the
-     * result.
+     * The payload comes from PrintExtra(). PrintMuseMsgTickObj() is the one caller, and it discards
+     * the result.
      *
      * @param stream The stream to write to.
      * @return The stream.
@@ -175,7 +175,7 @@ public:
      *
      * The list is searched with a binary search on the identity, and a hit calls the factory a
      * MessageFactory registered. The shipped program does not call it, and
-     * ReadMessagePointerFromStream() expands the same search inline.
+     * `operator>>(IBStream &, Message *&)` expands the same search inline.
      *
      * @param nType The identity to construct for.
      * @return The new message, or null when the identity is unregistered.

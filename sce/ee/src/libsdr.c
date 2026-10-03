@@ -44,24 +44,36 @@ typedef struct {
     unsigned char mReserved1C[0x24]; // +0x1C
 } SdrPacket;
 
-// The handlers and their arguments that the interrupt-handler commands record.
-typedef struct {
-    int mTransHandler0; // The transfer handler of DMA channel 0.
-    int mTransHandler1; // The transfer handler of DMA channel 1.
-    int mSpu2Handler; // The SPU2 interrupt handler.
-    int mTransArgument0; // The argument of the channel 0 transfer handler.
-    int mTransArgument1; // The argument of the channel 1 transfer handler.
-    int mSpu2Argument; // The argument of the SPU2 interrupt handler.
-} SdrCallbackTable;
-
 // NTSC-U/C: 0x008e3e00, PAL: 0x00929180
 static SdrPacket g_sdrPacket __attribute__((aligned(64)));
 
 // NTSC-U/C: 0x008e3e40, PAL: 0x009291c0
 static sceSifClientData g_sdrClient __attribute__((aligned(64)));
 
+// The transfer handler of DMA channel 0. The interrupt-handler commands record it and the five
+// words below.
 // NTSC-U/C: 0x007b2754, PAL: 0x007f6454
-static SdrCallbackTable g_sdrCallbackTable;
+static int _sce_sdr_transIntr0Hdr;
+
+// The transfer handler of DMA channel 1.
+// NTSC-U/C: 0x007b2758, PAL: 0x007f6458
+static int _sce_sdr_transIntr1Hdr;
+
+// The SPU2 interrupt handler.
+// NTSC-U/C: 0x007b275c, PAL: 0x007f645c
+static int _sce_sdr_spu2IntrHdr;
+
+// The argument of the channel 0 transfer handler.
+// NTSC-U/C: 0x007b2760, PAL: 0x007f6460
+static int _sce_sdr_transIntr0Arg;
+
+// The argument of the channel 1 transfer handler.
+// NTSC-U/C: 0x007b2764, PAL: 0x007f6464
+static int _sce_sdr_transIntr1Arg;
+
+// The argument of the SPU2 interrupt handler.
+// NTSC-U/C: 0x007b2768, PAL: 0x007f6468
+static int _sce_sdr_spu2IntrArg;
 
 // The completion callback of a call made with a zero control word. The image never writes it.
 // NTSC-U/C: 0x00765d38, PAL: 0x007a8cd0
@@ -78,7 +90,7 @@ int sceSdRemoteInit(void) {
     for (;;) {
         nBind = sceSifBindRpc(pClient, kSdrRpcServer, 0);
         if (nBind < 0) {
-            LogPrintf("sceSdRemoteInit() RPC bind error!\n");
+            printf("sceSdRemoteInit() RPC bind error!\n");
             return -1;
         }
         nDelay = kSdrBindDelay;
@@ -98,7 +110,6 @@ int sceSdRemoteInit(void) {
 int sceSdRemote(int nControl, ...) {
     SdrPacket *pPacket = &g_sdrPacket;
     sceSifClientData *pClient = &g_sdrClient;
-    SdrCallbackTable *pTable = &g_sdrCallbackTable;
     va_list oArguments;
     int nCommand;
     int nFlag;
@@ -127,16 +138,16 @@ int sceSdRemote(int nControl, ...) {
 
     if (nCommand == kSdrCommandSetTransIntrHandler) {
         if (pPacket->mArgument0 == 0) {
-            pTable->mTransArgument0 = pPacket->mArgument2;
-            pTable->mTransHandler0 = pPacket->mArgument1;
+            _sce_sdr_transIntr0Arg = pPacket->mArgument2;
+            _sce_sdr_transIntr0Hdr = pPacket->mArgument1;
         } else {
-            pTable->mTransArgument1 = pPacket->mArgument2;
-            pTable->mTransHandler1 = pPacket->mArgument1;
+            _sce_sdr_transIntr1Arg = pPacket->mArgument2;
+            _sce_sdr_transIntr1Hdr = pPacket->mArgument1;
         }
     }
     if (nCommand == kSdrCommandSetSpu2IntrHandler) {
-        pTable->mSpu2Argument = pPacket->mArgument1;
-        pTable->mSpu2Handler = pPacket->mArgument0;
+        _sce_sdr_spu2IntrArg = pPacket->mArgument1;
+        _sce_sdr_spu2IntrHdr = pPacket->mArgument0;
     }
     if (nCommand == kSdrCommandSetEffectAttr) {
         sceSifCallRpc(pClient,

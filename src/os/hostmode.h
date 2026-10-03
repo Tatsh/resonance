@@ -113,7 +113,7 @@ HxStr GetFreqRoot();
  * Compose a data path against GetFreqRoot().
  *
  * The routine sits in the same translation unit as GetFreqRoot(). Its callers include the
- * asynchronous loader, the `save_rnd` script command, and GamePlayback, each of which opens the
+ * asynchronous loader, the `save_rnd` script command, and GamePlaybacker, each of which opens the
  * returned path. The title is inferred.
  *
  * @param name The path below the root.
@@ -140,7 +140,7 @@ int DebugKeysEnabled();
  * Whether the asynchronous loader brackets each load with memory accounting.
  *
  * The boot-option word at 0x0070bf2c. RndAsyncLoader::PollAsyncLoads() calls
- * MemBeginAccounting() before reading a completed load and reports the accounting afterwards
+ * MemLogBeginCount() before reading a completed load and reports the accounting afterwards
  * while it is non-zero. ConfigureRetailBoot() clears it. The name is inferred.
  *
  * @return Non-zero when loads are accounted.
@@ -224,15 +224,14 @@ HxStr GetVersionString();
 /**
  * Report whether a file can be opened for reading through the file service.
  *
- * The file is opened read-only and closed again at once. The shipped program has no call site,
- * and the name is inferred.
+ * The file is opened read-only and closed again at once. The shipped program has no call site.
  *
  * @param pszPath The path to test.
  * @return True when the open succeeded.
  * @ghidraAddress NTSC-U/C: 0x0050f0c8
  * @ghidraAddress PAL: 0x0054e670
  */
-bool FileExists(const char *pszPath);
+bool CheckCDFile(const char *pszPath);
 
 /**
  * Release every zone, the counterpart of InitBootConfig().

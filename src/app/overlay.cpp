@@ -179,15 +179,15 @@ Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
     pHud->RemoveView(dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("hud1.view"))));
     pHud->RemoveView(dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("hud2.view"))));
     pHud->RemoveView(dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("hud4.view"))));
-    Rnd::View *pLayout =
-        dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(FormatString("hud%d.view", nLayout))));
+    Rnd::View *pLayout = dynamic_cast<Rnd::View *>(
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("hud%d.view", nLayout))));
     pHud->AddView(pLayout);
     pLayout->SetRate(mMsPerTick);
 
     const char *pszLayoutName =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     pLayout->RemoveView(dynamic_cast<Rnd::View *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s test.anim", pszLayoutName)))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s test.anim", pszLayoutName)))));
     for (std::list<Rnd::Drawable *>::iterator it = pLayout->GetDraws().begin();
          it != pLayout->GetDraws().end();
          ++it) {
@@ -773,7 +773,7 @@ void Overlay::OnPlayersTrackNeutralized(Message *pMsg) {
     // Yes, the binary does not test the display for null.
     FindTrack(pNeutralized->mPlayer)
         ->mTextMessage.Show(
-            HxStr(FormatString(pszFormat, pNeutralized->mPoints)), kMessageScale, kMessageHold);
+            HxStr(Rnd::MakeString(pszFormat, pNeutralized->mPoints)), kMessageScale, kMessageHold);
 }
 
 // NTSC-U/C: 0x00420408, PAL: 0x004666e0
@@ -872,5 +872,5 @@ HudBadge *Overlay::FindBadge(Player *pPlayer) {
 
 // NTSC-U/C: 0x00429938, PAL: 0x00464f78
 void Overlay::SetLayoutName(int nLayout) {
-    g_hudLayoutName = FormatString("HUD%d", nLayout);
+    g_hudLayoutName = Rnd::MakeString("HUD%d", nLayout);
 }

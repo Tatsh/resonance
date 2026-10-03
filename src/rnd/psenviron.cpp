@@ -73,7 +73,7 @@ inline Vector3 TransformByRows(const float aflRows[kXfmRowCount][kXfmRowFloatCou
 inline float LightDistanceToSphere(const PointLightRecord &light, const Sphere &sphere) {
     Vector3 offset;
     offset.w = 1.0f;
-    Vec3Sub(&light.mTransformedPosition.x, &sphere.mCenter.x, &offset.x);
+    Rnd::Subtract(&light.mTransformedPosition.x, &sphere.mCenter.x, &offset.x);
     return sqrtf(offset.x * offset.x + offset.y * offset.y + offset.z * offset.z);
 }
 
@@ -262,7 +262,7 @@ int PsEnviron::DrawShowing() {
     PsEnviron::sPointLights.resize(0);
 
     for (Light *pLight : mLights) {
-        if (pLight->mType == kLightTypeDirectional) {
+        if (pLight->mType == Light::kLightTypeDirectional) {
             PsEnviron::sDirLights.resize(PsEnviron::sDirLights.size() + 1);
             DirectionalLightRecord &record = PsEnviron::sDirLights.back();
             Vector3 direction;
@@ -271,7 +271,7 @@ int PsEnviron::DrawShowing() {
             record.mDirection = direction;
             record.mAmbient = pLight->mAmbient;
             record.mDiffuse = pLight->mDiffuse;
-        } else if (pLight->mType == kLightTypePoint) {
+        } else if (pLight->mType == Light::kLightTypePoint) {
             PsEnviron::sPointLights.resize(PsEnviron::sPointLights.size() + 1);
             PointLightRecord &record = PsEnviron::sPointLights.back();
             const float *pTranslation = pLight->mWorldXfm[kXfmRowTranslation];

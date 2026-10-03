@@ -1,7 +1,7 @@
 #pragma once
 
 namespace Rnd {
-struct Ray;
+struct Segment;
 }
 struct Sphere;
 
@@ -31,7 +31,7 @@ struct TriangleTest {
  * @ghidraAddress NTSC-U/C: 0x005501b0
  * @ghidraAddress PAL: 0x005907f0
  */
-int TestRayAgainstSphere(const Ray &ray, const Sphere &sphere, float *pflDistance);
+int TestRayAgainstSphere(const Segment &ray, const Sphere &sphere, float *pflDistance);
 
 /**
  * Test a ray against one triangle.
@@ -47,6 +47,9 @@ int TestRayAgainstSphere(const Ray &ray, const Sphere &sphere, float *pflDistanc
  * @ghidraAddress NTSC-U/C: 0x0054fe98
  * @ghidraAddress PAL: 0x005904d8
  */
-int TestRayAgainstTriangle(const Ray &ray, const TriangleTest &tri, int nCull, float *pflDistance);
+int TestRayAgainstTriangle(const Segment &ray,
+                           const TriangleTest &tri,
+                           int nCull,
+                           float *pflDistance);
 
 } // namespace Rnd

@@ -20,22 +20,6 @@ class Stream;
 namespace Rnd {
 
 /**
- * Bits of the Rnd::Text alignment word.
- *
- * The six titles and the six bit values come from the printer at `0x004d0450`, which tests the
- * three vertical bits first and then the three horizontal ones, writing at most one of each.
- * Nothing enforces that a word has one bit from each group.
- */
-enum TextAlign {
-    kTextAlignLeft = 0x01,   /*!< Lines start at the origin. */
-    kTextAlignCenter = 0x02, /*!< Lines are centred on the origin. */
-    kTextAlignRight = 0x04,  /*!< Lines end at the origin. */
-    kTextAlignTop = 0x10,    /*!< The first line sits at the origin. */
-    kTextAlignMiddle = 0x20, /*!< The block is centred on the origin. */
-    kTextAlignBottom = 0x40  /*!< The last line sits at the origin. */
-};
-
-/**
  * Run of text drawn as a quad per glyph.
  *
  * Its RTTI descriptor is at `0x008ef4d0`. It has three public non-virtual bases whose offsets the
@@ -72,6 +56,22 @@ enum TextAlign {
  */
 class Text : public Drawable, public Collideable, public Transformable {
 public:
+    /**
+     * Bits of the alignment word.
+     *
+     * The six titles and the six bit values come from the printer at `0x004d0450`. The printer
+     * tests the three vertical bits first and then the three horizontal ones, writing at most one
+     * of each. A word is not required to have one bit from each group.
+     */
+    enum Alignment {
+        kTextAlignLeft = 0x01,   /*!< Lines start at the origin. */
+        kTextAlignCenter = 0x02, /*!< Lines are centred on the origin. */
+        kTextAlignRight = 0x04,  /*!< Lines end at the origin. */
+        kTextAlignTop = 0x10,    /*!< The first line sits at the origin. */
+        kTextAlignMiddle = 0x20, /*!< The block is centred on the origin. */
+        kTextAlignBottom = 0x40  /*!< The last line sits at the origin. */
+    };
+
     /**
      * Creator the registered "Text" class builds through.
      *
@@ -137,7 +137,7 @@ public:
      *
      * Rnd::Drawable vtable slot 5.
      *
-     * @param nAlign A set of the TextAlign bits.
+     * @param nAlign A set of the Alignment bits.
      * @ghidraAddress NTSC-U/C: 0x004cff48
      * @ghidraAddress PAL: 0x0050e340
      */
@@ -285,11 +285,11 @@ public:
      * that is not showing is not tested at all.
      *
      * @param ray The segment to test along.
-     * @param sink The collector to append intersections to.
+     * @param collisions The list to append intersections to.
      * @ghidraAddress NTSC-U/C: 0x004c7ef8
      * @ghidraAddress PAL: 0x005060d0
      */
-    virtual void FindCollisions(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Segment &ray, std::list<Collision> &collisions);
 
     /**
      * Set the billboard mode of this object and of its glyph mesh.
@@ -495,7 +495,7 @@ private:
 
     // Drop the reference on the font and release the glyph mesh. The destructor is its only
     // out-of-line caller, and Copy() and BuildGlyphMesh() inline the same body. 0x004cf958.
-    void RemoveObjectRefs();
+    void ReleaseObjects();
 
     // Take a reference on the font and rebuild. Copy() and Load() inline the same body.
     // NTSC-U/C: 0x004cf9b8, PAL: 0x0050dd30

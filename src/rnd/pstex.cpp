@@ -197,30 +197,33 @@ inline bool
 CheckPalEqual(const APalette *pPalMip0, const APalette *pPalMip, const char *pszName, int nMip) {
     if (pPalMip0 == nullptr) {
         if (pPalMip != nullptr) {
-            LogPrintf("CheckPalEqual(%s): Mipmap 0 has NULL palette!\n", pszName);
+            printf("CheckPalEqual(%s): Mipmap 0 has NULL palette!\n", pszName);
             return false;
         }
         return true;
     }
     if (pPalMip == nullptr) {
-        LogPrintf("CheckPalEqual(%s): mipmap %d has NULL palette!\n", pszName, nMip);
+        printf("CheckPalEqual(%s): mipmap %d has NULL palette!\n", pszName, nMip);
         return false;
     }
     if (pPalMip0->mEnd != pPalMip->mEnd) {
         // The binary passes no fourth data argument, so the trailing entry count reads
         // indeterminate stack data.
-        LogPrintf("CheckPalEqual(%s): Mipmap 0 pal is %d entries, mipmap %d is %d entries\n",
-                  pszName,
-                  pPalMip0->mEnd,
-                  nMip);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+        printf("CheckPalEqual(%s): Mipmap 0 pal is %d entries, mipmap %d is %d entries\n",
+               pszName,
+               pPalMip0->mEnd,
+               nMip);
+#pragma GCC diagnostic pop
         return false;
     }
     for (int nEntry = 0; nEntry < pPalMip0->mEnd; ++nEntry) {
         if (pPalMip0->mEntries[nEntry] != pPalMip->mEntries[nEntry]) {
-            LogPrintf("CheckPalEqual(%s): mipmap 0 and %d unequal starting at index: %d\n",
-                      pszName,
-                      nMip,
-                      nEntry);
+            printf("CheckPalEqual(%s): mipmap 0 and %d unequal starting at index: %d\n",
+                   pszName,
+                   nMip,
+                   nEntry);
             return false;
         }
     }
@@ -229,7 +232,7 @@ CheckPalEqual(const APalette *pPalMip0, const APalette *pPalMip, const char *psz
 
 // NTSC-U/C: 0x0059a9e8, PAL: 0x005dde68
 // Blank a level that failed validation. A run-length level is not modified.
-inline void ClearBitmapPixels(ABitmap *pBitmap) {
+inline void ReplaceTextureWithBadBoy(ABitmap *pBitmap) {
     if (pBitmap->mFormat == kABitmapFormatRle8) {
         return;
     }
@@ -364,7 +367,7 @@ void PsTex::RestoreSurfaces() {
 
         ABitmap *pBitmap = mLoadedBitmaps[nMip];
         if (pBitmap == nullptr) {
-            LogPrintf("ERROR - RestoreSurfaces(%s), mipmap %d has no bm!\n", pszName, nMip);
+            printf("ERROR - RestoreSurfaces(%s), mipmap %d has no bm!\n", pszName, nMip);
             continue;
         }
 
@@ -386,7 +389,7 @@ void PsTex::RestoreSurfaces() {
                                pszWhy,
                                pBitmap->mWidth,
                                pBitmap->mHeight);
-            ClearBitmapPixels(pBitmap);
+            ReplaceTextureWithBadBoy(pBitmap);
             bValid = false;
         }
 
@@ -397,7 +400,7 @@ void PsTex::RestoreSurfaces() {
                 pszName,
                 pszPath,
                 nMip);
-            ClearBitmapPixels(pBitmap);
+            ReplaceTextureWithBadBoy(pBitmap);
             bValid = false;
         }
         if (nMip != 0 && bValid &&
@@ -406,7 +409,7 @@ void PsTex::RestoreSurfaces() {
                                pszName,
                                pszPath,
                                nMip);
-            ClearBitmapPixels(pBitmap);
+            ReplaceTextureWithBadBoy(pBitmap);
         }
 
         const unsigned long long qwTbw =
@@ -572,7 +575,7 @@ void PsTex::UploadPendingMips() {
                 static_cast<unsigned long long>(UploadPaletteClut()) & kGsTbpMask;
             mTex0 = (mTex0 & ~(kGsTbpMask << kTex0CbpShift)) | (qwCbp << kTex0CbpShift);
         } else {
-            LogPrintf("Dirty Palette bit, but no pPaletteVram.. rgba %p\n", &mClut);
+            printf("Dirty Palette bit, but no pPaletteVram.. rgba %p\n", &mClut);
         }
     } else if (mPaletteVram != nullptr) {
         unsigned long long qwCbp =
@@ -817,7 +820,7 @@ void PsTex::AllocPaletteVram() {
     if (mPaletteVram != nullptr) {
         mPaletteVram->ClearLockMask();
     } else {
-        LogPrintf("Got NULL Palette in RestoreSurfaces\n");
+        printf("Got NULL Palette in RestoreSurfaces\n");
     }
 }
 

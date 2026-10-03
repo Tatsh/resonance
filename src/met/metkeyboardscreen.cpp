@@ -556,7 +556,7 @@ void MetKeyboardScreen::LocalizeKeyLabels() {
         const Vector3 after = pLabel->CharPosition(pLabel->mPreWrapText.mLen);
         pLabel->SetShowing(0);
         Vector3 shift;
-        Vec3Sub(&after.x, &before.x, &shift.x);
+        Rnd::Subtract(&after.x, &before.x, &shift.x);
 
         Rnd::Text *pCaption = FindText(entry.pszCaption);
         Vector3 position;
@@ -837,7 +837,7 @@ inline void MetKeyboardScreen::UpdateCursor() {
     Vector3 position = mpTextEntryWindow->CharPosition(mCaret);
     Vector3 cursor;
     cursor.w = kVectorPadding;
-    AddVec3(&mCursorOffset.x, &position.x, &cursor.x);
+    Rnd::Add(&mCursorOffset.x, &position.x, &cursor.x);
     memcpy(mpCursor->mLocalXfm[kTranslationRow], &cursor, sizeof(cursor));
     mpCursor->mDirty = 1;
 }
@@ -977,7 +977,7 @@ void MetKeyboardScreen::ShowMacro(const HxStr &key) {
         Vector3 position = mpTextEntryWindow->CharPosition(mText.mLen);
         Vector3 caption;
         caption.w = kVectorPadding;
-        AddVec3(&mMacroOffset.x, &position.x, &caption.x);
+        Rnd::Add(&mMacroOffset.x, &position.x, &caption.x);
         memcpy(mpMacroDisplay->mLocalXfm[kTranslationRow], &caption, sizeof(caption));
         mpMacroDisplay->mDirty = 1;
         mpMacroDisplay->SetText(macro);
@@ -1307,7 +1307,7 @@ HxStr MetKeyboardScreen::DefaultMacro(int nIndex) {
 #ifdef VIDEO_STANDARD_PAL
     HxStr text = GetMetString(kMetStrKbMacroF1 + nIndex);
 #else
-    HxStr text = QueryConfigString(kMacroConfigCode, FormatString(kMacroKeyFormat, nIndex + 1));
+    HxStr text = QueryConfigString(kMacroConfigCode, Rnd::MakeString(kMacroKeyFormat, nIndex + 1));
 #endif
     return text;
 }

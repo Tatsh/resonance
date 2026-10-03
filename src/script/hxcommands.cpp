@@ -26,7 +26,7 @@
 #include "os/log.h"
 #include "os/mem.h"
 #include "os/seccache.h"
-#include "os/spew.h"
+#include "os/spewtable.h"
 #include "os/zone.h"
 #include "sch/cmdid.h"
 #include "sch/command.h"
@@ -102,14 +102,14 @@ PyObject *PyInvokeKillSch(PyObject *, PyObject *pArgs) {
 // file log, and writes the Python heap's statistics and contents to heapdump.txt.
 // NTSC-U/C: 0x00155dc0, PAL: 0x00157980
 Py::Object ScriptMemlogTerm([[maybe_unused]] Py::Tuple args) {
-    DumpSectorCache();
+    SectorCacheDump();
     DumpHeapMemoryLog(g_nMemlogTermCalls);
     ++g_nMemlogTermCalls;
-    LogPrintf("Shutting down memory/heap/fileio loggers...\n");
+    printf("Shutting down memory/heap/fileio loggers...\n");
     MemLogCloseAndContinue();
-    FileLogStop();
-    gpPythonHeap->DumpStats();
-    gpPythonHeap->DumpToFile("heapdump.txt");
+    CloseFileIOLog();
+    HHeapLogBasicStats(gpPythonHeap);
+    HHeapDump(gpPythonHeap, "heapdump.txt");
     return Py::Object();
 }
 
@@ -306,7 +306,7 @@ Py::Object ScriptCancelCmd(const Py::Tuple &args) {
         throw Py::TypeError(HxStr("requres 1 arg: cmdId"));
     }
     const int nId = Py::Int(args.getItem(0));
-    CmdID id;
+    Sch::CmdID id;
     id.mValue = static_cast<int>(nId);
     Application::shared()->GetSongClock()->Withdraw(id);
     return Py::Object();
@@ -469,7 +469,7 @@ Py::Object ScriptPostScript(const Py::Tuple &args) {
     HxStr script = text;
     IsFiniteMBT(static_cast<int>(nTick));
     Sch::Command *pCommand = NewScriptCmd(script);
-    CmdID id;
+    Sch::CmdID id;
     Application::shared()->GetSongClock()->PostAtSongTick(pCommand, nTick, id);
     Attachment::ReleaseIfSet(pCommand);
     return Py::Int(static_cast<long long>(id.mValue));
@@ -685,7 +685,7 @@ PyObject *PyInvokeTest(PyObject *, PyObject *pArgs) {
 // The report is built before the arguments are checked.
 // NTSC-U/C: 0x0015d950, PAL: 0x0015f750
 Py::Object ScriptSpew(const Py::Tuple &args) {
-    Spew &shared = Spew::shared();
+    SpewTable &shared = SpewTable::shared();
     std::ostringstream report;
     report << "Spew Connections:\n";
     shared.PrintConnections(report);

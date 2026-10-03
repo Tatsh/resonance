@@ -68,7 +68,7 @@ HudPosition::HudPosition(PlayMap *pPlayMap)
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mView = dynamic_cast<Rnd::View *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s pos.view", pszLayout))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s pos.view", pszLayout))));
     mView->RemoveAllTranses();
     mView->RemoveAllDraws();
 

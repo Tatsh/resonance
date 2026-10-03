@@ -301,8 +301,8 @@ protected:
     const TrackData *mTrackData;  // +0x20
     Player *mPlayer;              // +0x24, the file-scope NullPlayer until one is assigned
     Sch::TickClock *mClock;       // +0x28
-    CmdID mPostGemCommand;        // +0x2c
-    CmdID mGemCommand;            // +0x30
+    Sch::CmdID mPostGemCommand;   // +0x2c
+    Sch::CmdID mGemCommand;       // +0x30
     Mid::MBT mTicksPerBar;        // +0x34, copied from the phrase manager and used as a divisor
     int mSeekerBarCount;          // +0x38, the constructor's int parameter
     int mCatchWindow;             // +0x3c, the low word of the constructor's Sch::Tick parameter

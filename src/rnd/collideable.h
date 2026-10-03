@@ -2,6 +2,7 @@
 
 #include <list>
 
+#include "math/vector2.h"
 #include "rnd/object.h"
 
 namespace Rnd {
@@ -14,11 +15,11 @@ namespace Rnd {
 /**
  * Line segment a collision query is run along.
  *
- * The title is inferred; the type is a plain record with no RTTI and no allocation tag of its own.
- * It is 0x20 bytes, two 16-byte vectors whose fourth float is padding. The ray and sphere test at
- * `0x005501b0` proves the layout by subtracting `+0x00` from `+0x10` to obtain the direction.
+ * The type is a plain record with no RTTI and no allocation tag of its own. It is 0x20 bytes,
+ * two 16-byte vectors whose fourth float is padding. The ray and sphere test at `0x005501b0`
+ * proves the layout by subtracting `+0x00` from `+0x10` to obtain the direction.
  */
-struct Ray {
+struct Segment {
     float mStart[4]; /*!< Origin. The fourth float is padding. +0x00 */
     float mEnd[4];   /*!< Far end. The fourth float is padding. +0x10 */
 };
@@ -54,24 +55,13 @@ public:
     /**
      * One recorded intersection.
      *
-     * The title is inferred. Only the two fields `Rnd::Mesh::FindCollisions` fills are recovered,
-     * from the record it builds at `0x0047fd74` after a successful face test. It is nested because
-     * it refers back to the enclosing class, the way `Rnd::Animatable::Filter` is nested.
+     * Only the two fields `Rnd::Mesh::FindCollisions` fills are recovered, from the record it
+     * builds at `0x0047fd74` after a successful face test. It is nested because it refers back to
+     * the enclosing class, the way `Rnd::Animatable::Filter` is nested.
      */
-    struct Hit {
+    struct Collision {
         Collideable *mObject; /*!< The collideable that was struck. +0x00 */
         float mDistance;      /*!< Distance along the ray. +0x04 */
-    };
-
-    /**
-     * Collector a collision query appends its intersections to.
-     *
-     * The title is inferred. The only recovered field is the list at `+0x00`, which
-     * `Rnd::Mesh::FindCollisions` appends to through the generic `stl_list` allocation tag. Nothing
-     * identifies the type. Whether the collector has further fields is not recovered.
-     */
-    struct HitSink {
-        std::list<Hit> mHits; // +0x00
     };
 
     /**
@@ -132,35 +122,33 @@ public:
     void RemoveCollide(Collideable *pCollide);
 
     /**
-     * Test a ray against this object and append what it strikes to sink.
+     * Test a segment against this object and append what it strikes to collisions.
      *
      * Vtable slot 1. The base implementation tests nothing of its own and forwards the pair to
      * every mCollides entry. `Rnd::Mesh::FindCollisions` at `0x0047f950` ends by chaining here so
      * that its children are tested after its own faces.
      *
      * @param ray The segment to test along.
-     * @param sink The collector to append intersections to.
+     * @param collisions The list to append intersections to.
      * @ghidraAddress NTSC-U/C: 0x00502a28
      * @ghidraAddress PAL: 0x00541838
      */
-    virtual void FindCollisions(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Segment &ray, std::list<Collision> &collisions);
 
     /**
-     * Second collision query, a screen-space pick.
+     * Test a screen point against this object and append what it strikes to collisions.
      *
-     * Vtable slot 2. It has the same signature as FindCollisions() and the same forwarding base
-     * implementation. Only the overrides can distinguish the two. Slot 1 is overridden by
-     * `Rnd::Mesh`, `Rnd::Tunnel`, and `Rnd::Arena`. Every derived table examined so far stores this
-     * base implementation in slot 2, with one exception. Rnd::Cam overrides it at `0x004ad820`
-     * with a routine that tests the ray start point against its screen rectangle. The title is
-     * inferred from that override.
+     * Vtable slot 2. The base implementation forwards the pair to every mCollides entry. Slot 1 is
+     * overridden by `Rnd::Mesh`, `Rnd::Tunnel`, and `Rnd::Arena`. Every derived table examined so
+     * far stores this base implementation in slot 2, with one exception. Rnd::Cam overrides it at
+     * `0x004ad820` with a routine that tests the point against its screen rectangle.
      *
-     * @param ray The segment to test along.
-     * @param sink The collector to append intersections to.
+     * @param point The screen point.
+     * @param collisions The list to append intersections to.
      * @ghidraAddress NTSC-U/C: 0x00502ab8
      * @ghidraAddress PAL: 0x005418c8
      */
-    virtual void CollideScreen(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Vector2 &point, std::list<Collision> &collisions);
 
     /**
      * Write a description of this object to sink.

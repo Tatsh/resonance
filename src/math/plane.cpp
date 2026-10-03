@@ -23,9 +23,9 @@ inline void Vec3Cross(const float *pLeft, const float *pRight, float *pOut) {
 // The point a segment test places at its fraction along a segment.
 inline Vector3 PointAlongSegment(const Segment &segment, float flT) {
     Vector3 point = ConstructVector3();
-    Vec3Sub(&segment.mEnds[1].x, &segment.mEnds[0].x, &point.x);
+    Rnd::Subtract(&segment.mEnds[1].x, &segment.mEnds[0].x, &point.x);
     Vec3Scale(&point.x, flT, &point.x);
-    AddVec3(&segment.mEnds[0].x, &point.x, &point.x);
+    Rnd::Add(&segment.mEnds[0].x, &point.x, &point.x);
     return point;
 }
 
@@ -78,7 +78,7 @@ Segment IntersectPlanes(const Plane &first, const Plane &second) {
     Segment line;
     line.mEnds[0] = PointAlongSegment(probe, flT);
     line.mEnds[1] = ConstructVector3();
-    AddVec3(&line.mEnds[0].x, &direction.x, &line.mEnds[1].x);
+    Rnd::Add(&line.mEnds[0].x, &direction.x, &line.mEnds[1].x);
     return line;
 }
 

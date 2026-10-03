@@ -18,15 +18,14 @@ JukeboxPlayList::~JukeboxPlayList() {
 // NTSC-U/C: 0x001e1e38, PAL: 0x001e7f20
 void JukeboxPlayList::save(OBStream *pStream) {
     int version = kPlayListVersion;
-    pStream->Write(&version, sizeof(version));
+    pStream->WriteLE(&version, sizeof(version));
     int count = entries.size();
-    pStream->Write(&count, sizeof(count));
+    pStream->WriteLE(&count, sizeof(count));
     for (int i = 0; i < count; ++i) {
         const JukeboxPlayListEntry *pEntry = entries[i];
         unsigned length = pEntry->name.mLen;
-        pStream->Write(&length, sizeof(length));
-        pStream->WriteBytes(pEntry->name.mStr != nullptr ? pEntry->name.mStr : g_szEmptyString,
-                            length);
+        pStream->WriteLE(&length, sizeof(length));
+        pStream->Write(pEntry->name.mStr != nullptr ? pEntry->name.mStr : g_szEmptyString, length);
         *pStream << entries[i]->factory;
     }
 }
@@ -34,22 +33,22 @@ void JukeboxPlayList::save(OBStream *pStream) {
 // NTSC-U/C: 0x001e1f70, PAL: 0x001e8058
 void JukeboxPlayList::load(IBStream *pStream) {
     int version;
-    pStream->Read(&version, sizeof(version));
+    pStream->ReadLE(&version, sizeof(version));
     if (version <= 0) {
         return;
     }
     int count;
-    pStream->Read(&count, sizeof(count));
+    pStream->ReadLE(&count, sizeof(count));
     // Yes, the entries the list held are dropped without being released.
     entries.resize(count, nullptr);
     for (int i = 0; i < count; ++i) {
         JukeboxPlayListEntry *pEntry = new JukeboxPlayListEntry;
         unsigned length;
-        pStream->Read(&length, sizeof(length));
+        pStream->ReadLE(&length, sizeof(length));
         pEntry->name.Alloc(length);
-        pStream->ReadBytes(pEntry->name.mStr != nullptr ? pEntry->name.mStr :
-                                                          const_cast<char *>(g_szEmptyString),
-                           length);
+        pStream->Read(pEntry->name.mStr != nullptr ? pEntry->name.mStr :
+                                                     const_cast<char *>(g_szEmptyString),
+                      length);
         *pStream >> pEntry->factory;
         entries[i] = pEntry;
     }

@@ -52,7 +52,7 @@ void SingleCatcher::CapturePhrase(int nBar, int nRun, int nAutoCatch) {
                                mTrack,
                                mPlayer,
                                nPoints * nMultiplier,
-                               mTrackData->GetCatchPoints(nStepStart),
+                               mTrackData->GetJuice(nStepStart),
                                nAutoCatch ^ 1);
     Send(&captured);
 
@@ -68,7 +68,7 @@ void SingleCatcher::ReportCaughtPowerbar(int nBar) {
     }
 
     CaughtPowerbarMsg msg;
-    msg.mKind = static_cast<HudItemKind>(nPowerbar);
+    msg.mKind = static_cast<PowerupType>(nPowerbar);
     msg.mPlayer = mPlayer;
     Send(&msg);
     mPlayer->Dispatch(&msg);

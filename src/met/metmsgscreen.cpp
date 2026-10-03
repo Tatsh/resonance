@@ -158,7 +158,7 @@ void MetMsgScreen::SetButtons(const std::vector<HxStr> &buttons) {
 // NTSC-U/C: 0x002ecd10, PAL: 0x00310640
 void MetMsgScreen::Refresh() {
     mButtonView->RemoveAllDraws();
-    Rnd::View *pButtons = FindView(HxStr(FormatString(kButtonViewFormat, mButtonCount)));
+    Rnd::View *pButtons = FindView(HxStr(Rnd::MakeString(kButtonViewFormat, mButtonCount)));
     mButtonView->AddDraw(pButtons);
     mTitleText->SetText(mTitle);
     mMessageText->SetText(mText);

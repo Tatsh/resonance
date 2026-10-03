@@ -183,7 +183,7 @@ void MetSaveRemix::OnConnectState(MemcardConnectState state, int nStatus) {
         } else {
             format = ConfigText(kMetStrSaveFailFormat, kSaveFailFormatText);
         }
-        text = FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName));
+        text = Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName));
         MetMsgScreen::Show(HxStr(kFormatCheckDialogue),
                            MetText(kMetStrMsgWARNING, kWarningTitle),
                            text,
@@ -206,7 +206,7 @@ void MetSaveRemix::OnConnectState(MemcardConnectState state, int nStatus) {
         buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
         format = ConfigText(kMetStrSaveFailNocard, kSaveFailNoCardText);
     }
-    text = FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName));
+    text = Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName));
     MetMsgScreen::Show(HxStr(kMemCheckDialogue),
                        MetText(kMetStrMsgERROR, kErrorTitle),
                        text,
@@ -223,7 +223,7 @@ void MetSaveRemix::OnCardFormatted([[maybe_unused]] int nPortSlot, int nStatus) 
         std::vector<HxStr> buttons;
         buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
         const HxStr format(ConfigText(kMetStrFormatSuccess, kFormatSuccessText));
-        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
         MetMsgScreen::ShowActive(HxStr(kFormatDoneDialogue),
                                  MetText(kMetStrMsgWARNING, kWarningTitle),
                                  text,
@@ -238,7 +238,7 @@ void MetSaveRemix::OnCardFormatted([[maybe_unused]] int nPortSlot, int nStatus) 
         std::vector<HxStr> buttons;
         buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
         const HxStr format(ConfigText(kMetStrFormatAlready, kFormatAlreadyText));
-        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
         MetMsgScreen::ShowActive(HxStr(kFormatAlreadyDialogue),
                                  MetText(kMetStrMsgWARNING, kWarningTitle),
                                  text,
@@ -293,9 +293,9 @@ void MetSaveRemix::OnRemixSaved([[maybe_unused]] int nPortSlot, int nStatus) {
             buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
             buttons.push_back(MetText(kMetStrMsgCANCEL, kCancelButton));
             const HxStr format(ConfigText(kMetStrCopyFailNospace, kCopyNoSpaceText));
-            const HxStr text(FormatString(TextOrEmpty(format),
-                                          TextOrEmpty(mTargetSlot.mSlotName),
-                                          GlobalSettings::shared()->mMinimumFreeClusters));
+            const HxStr text(Rnd::MakeString(TextOrEmpty(format),
+                                             TextOrEmpty(mTargetSlot.mSlotName),
+                                             GlobalSettings::shared()->mMinimumFreeClusters));
             MetMsgScreen::ShowActive(HxStr(kCopyNoSpaceDialogue),
                                      MetText(kMetStrMsgERROR, kErrorTitle),
                                      text,
@@ -308,10 +308,11 @@ void MetSaveRemix::OnRemixSaved([[maybe_unused]] int nPortSlot, int nStatus) {
             buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
             const HxStr format(ConfigText(kMetStrSaveFailNospace, kSaveNoSpaceText));
 #ifdef VIDEO_STANDARD_PAL
-            const HxStr text(
-                FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName), nKilobytes));
+            const HxStr text(Rnd::MakeString(
+                TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName), nKilobytes));
 #else
-            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
+            const HxStr text(
+                Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
 #endif
             MetMsgScreen::ShowActive(HxStr(kSaveNoSpaceDialogue),
                                      MetText(kMetStrMsgERROR, kErrorTitle),
@@ -356,7 +357,7 @@ void MetSaveRemix::OnRemixesListed([[maybe_unused]] int nPortSlot, [[maybe_unuse
         std::vector<HxStr> buttons;
         buttons.push_back(MetText(kMetStrMsgNO, kNoButton));
         buttons.push_back(MetText(kMetStrMsgYES, kYesButton));
-        const HxStr question(FormatString(kQuestionFormat, TextOrEmpty(mRemixName)));
+        const HxStr question(Rnd::MakeString(kQuestionFormat, TextOrEmpty(mRemixName)));
         const HxStr text(ConfigText(kMetStrMemRemixDupe, kRemixDupeDialogue) + question);
         MetMsgScreen::ShowActive(HxStr(kRemixDupeDialogue),
                                  MetText(kMetStrMsgWARNING, kWarningTitle),
@@ -371,7 +372,7 @@ void MetSaveRemix::OnRemixesListed([[maybe_unused]] int nPortSlot, [[maybe_unuse
         buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
         const HxStr format(ConfigText(kMetStrMemRemix2many, kTooManyRemixesDialogue));
         const HxStr text(
-            FormatString(TextOrEmpty(format), kMaxRemixes, TextOrEmpty(mTargetSlot.mSlotName)));
+            Rnd::MakeString(TextOrEmpty(format), kMaxRemixes, TextOrEmpty(mTargetSlot.mSlotName)));
         MetMsgScreen::ShowActive(HxStr(kTooManyRemixesDialogue),
                                  MetText(kMetStrMsgERROR, kErrorTitle),
                                  text,
@@ -398,7 +399,8 @@ void MetSaveRemix::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
             MemcardManager::shared()->CreateFormatTask(mTargetSlot.mPortSlot);
             const std::vector<HxStr> buttons;
             const HxStr format(ConfigText(kMetStrMemFormatGo, kFormatGoDialogue));
-            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
+            const HxStr text(
+                Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
             MetMsgScreen::Show(HxStr(kFormatGoDialogue),
                                MetText(kMetStrMsgWARNING, kWarningTitle),
                                text,
@@ -474,13 +476,13 @@ void MetSaveRemix::BeginSave() {
     if (mCopying != 0) {
         title = ConfigText(kMetStrCopyTitle, kCopyTitleKey);
         const HxStr format(ConfigText(kMetStrMemCopy12, kCopyText));
-        text = FormatString(TextOrEmpty(format),
-                            TextOrEmpty(NextCardSlot(mTargetSlot).mSlotName),
-                            TextOrEmpty(mTargetSlot.mSlotName));
+        text = Rnd::MakeString(TextOrEmpty(format),
+                               TextOrEmpty(NextCardSlot(mTargetSlot).mSlotName),
+                               TextOrEmpty(mTargetSlot.mSlotName));
     } else {
         title = ConfigText(kMetStrSaveTitle, kSaveTitleKey);
         const HxStr format(ConfigText(kMetStrMemSave, kSaveText));
-        text = FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName));
+        text = Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName));
     }
     MetMsgScreen::Show(HxStr(kSaveRemixDialogue), title, text, kNoButtons, buttons, this);
     MetMsgScreen::SetOwnerPad(mOwnerPad);

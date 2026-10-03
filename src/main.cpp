@@ -66,7 +66,7 @@ void HaltOnFailure() {
 // ShowLoadingScreen expands this inline; the out-of-line copy has no caller.
 inline void PrintLoadingDot() {
     ++g_nLoadingDots;
-    LogPrintf(".%s", (g_nLoadingDots & (kLoadingDotsPerLine - 1)) == 0 ? "\n" : "");
+    printf(".%s", (g_nLoadingDots & (kLoadingDotsPerLine - 1)) == 0 ? "\n" : "");
 }
 
 #ifdef VIDEO_STANDARD_PAL
@@ -131,11 +131,11 @@ void ShowLoadingScreen() {
 
 // NTSC-U/C: 0x001ef870, PAL: 0x001f5fb0
 int main() {
-    LogPrintf("\n\n**********************\n");
-    LogPrintf("FREQ session beginning\n");
-    LogPrintf("**********************\n");
+    printf("\n\n**********************\n");
+    printf("FREQ session beginning\n");
+    printf("**********************\n");
 
-    SetZonesEnabled(1);
+    ZoneInit(1);
     InitIop();
     InitAsync();
 

@@ -47,7 +47,7 @@ void HuftReset(void);
  * @ghidraAddress NTSC-U/C: 0x0063e1e0
  * @ghidraAddress PAL: 0x0067ed70
  */
-struct huft *HuftAlloc(unsigned nEntries);
+struct huft *HuftMalloc(unsigned nEntries);
 
 #ifdef __cplusplus
 }

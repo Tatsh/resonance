@@ -127,7 +127,7 @@ private:
     Riff *mCurrentRiff;          // +0x10
     int mLevelHeld[4];           // +0x14, one flag per difficulty level, cleared with memset
     Sch::TickClock *mClock;      // +0x24
-    CmdID mCommand;              // +0x28, the handle the file-local Cmd is queued under
+    Sch::CmdID mCommand;         // +0x28, the handle the file-local Cmd is queued under
 
 public:
     /**

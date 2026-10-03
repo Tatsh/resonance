@@ -73,7 +73,7 @@ void TnlGridMarkers::Marker::Place(int nTrack, int nFrame) {
 // NTSC-U/C: 0x00439150, PAL: 0x00474fa0
 TnlGridMarkers::TnlGridMarkers(AppTunnel *pTunnel, int nPlayerNum) : mTrack(0), mTunnel(pTunnel) {
     Rnd::View *pView = dynamic_cast<Rnd::View *>(
-        Rnd::TheManager.Find(HxStr(FormatString("grid%d.view", nPlayerNum))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("grid%d.view", nPlayerNum))));
     if (!pView) {
         return;
     }

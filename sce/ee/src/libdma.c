@@ -274,7 +274,7 @@ void sceDmaSend(sceDmaChan *pChannel, void *pTag) {
         timeout = kBusySpin;
         do {
             if (timeout < 0) {
-                LogPrintf("libdma: sync timeout\n");
+                printf("libdma: sync timeout\n");
                 if (((channel->mChcr >> 8) & 1U) != 0U) {
                     channel->mChcr &= 0xFFFFFEFFU;
                 }
@@ -303,7 +303,7 @@ void sceDmaSendN(sceDmaChan *pChannel, void *pAddress, int nQuadwords) {
         timeout = kBusySpin;
         do {
             if (timeout < 0) {
-                LogPrintf("libdma: sync timeout\n");
+                printf("libdma: sync timeout\n");
                 if (((channel->mChcr >> 8) & 1U) != 0U) {
                     channel->mChcr &= 0xFFFFFEFFU;
                 }
@@ -338,7 +338,7 @@ int sceDmaSync(sceDmaChan *pChannel, int nMode, int nTimeout) {
     while ((word & 0x100U) != 0U) {
         timeout--;
         if (timeout < 0) {
-            LogPrintf("libdma: sync timeout\n");
+            printf("libdma: sync timeout\n");
             if (((channel->mChcr >> 8) & 1U) != 0U) {
                 channel->mChcr &= 0xFFFFFEFFU;
             }

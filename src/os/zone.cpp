@@ -53,7 +53,7 @@ int ZoneCreate(const char *pszName, int nSize) {
     (void)strlen(pszName); // Yes, the binary discards this call's result.
 
     if (FindZoneByName(pszName) != kNoZone) {
-        LogPrintf("ZoneCreate: %s is duplicate zone name!\n", pszName);
+        printf("ZoneCreate: %s is duplicate zone name!\n", pszName);
         return kNoZone;
     }
 
@@ -67,13 +67,13 @@ int ZoneCreate(const char *pszName, int nSize) {
         }
     }
     if (pZone == nullptr) {
-        LogPrintf("ZoneCreate: no free zone descriptor slots for zone: %s\n", pszName);
+        printf("ZoneCreate: no free zone descriptor slots for zone: %s\n", pszName);
         return kNoZone;
     }
 
     void *pBlock = MemAllocTagged(nSize + kZoneStartAlignment - 1, __FILE__, __LINE__);
     if (pBlock == nullptr) {
-        LogPrintf("ZoneCreate: can't alloc %d bytes for zone: %s\n", nSize, pszName);
+        printf("ZoneCreate: can't alloc %d bytes for zone: %s\n", nSize, pszName);
         return kNoZone;
     }
 
@@ -98,7 +98,7 @@ void *ZoneAlloc(unsigned nSize) {
     Zone *pZone = &zoneDescs[zhCurr];
     if (pZone->mBlock == nullptr) {
         // The shipped message identifies the wrong routine.
-        LogPrintf("ZoneReset: zone %d is not allocated!\n", zhCurr);
+        printf("ZoneReset: zone %d is not allocated!\n", zhCurr);
         return nullptr;
     }
 
@@ -151,7 +151,7 @@ void *ZoneGrabTemp([[maybe_unused]] int nSize) {
 }
 
 // NTSC-U/C: 0x00461518, PAL: 0x0049ebd8
-void SetZonesEnabled(int nEnabled) {
+void ZoneInit(int nEnabled) {
     if (bZonesInUse != 0) {
         FreeAllZones();
     }
@@ -184,7 +184,7 @@ void ZoneDelete(int nZone) {
 
     Zone *pZone = &zoneDescs[nZone];
     if (pZone->mBlock == nullptr) {
-        LogPrintf("ZoneDelete: zone %d can't be deleted because it doesn't exist!\n", nZone);
+        printf("ZoneDelete: zone %d can't be deleted because it doesn't exist!\n", nZone);
         return;
     }
 
@@ -243,7 +243,7 @@ void ZoneResetZone(int nZone) {
 
     Zone *pZone = &zoneDescs[nZone];
     if (pZone->mBlock == nullptr) {
-        LogPrintf("ZoneResetZone: zone %d is not allocated!\n", nZone);
+        printf("ZoneResetZone: zone %d is not allocated!\n", nZone);
         return;
     }
     pZone->mCur = pZone->mStart;
@@ -299,19 +299,19 @@ void ZoneDump() {
         return;
     }
 
-    LogPrintf("ZONE DUMP:\n");
+    printf("ZONE DUMP:\n");
     for (int i = 0; i < kZoneCount; ++i) {
         Zone *pZone = &zoneDescs[i];
         if (pZone->mBlock == nullptr) {
             continue;
         }
-        LogPrintf("  zone %d (%s):  size: %d, avail: %d (range: %p to %p)\n",
-                  i,
-                  pZone->mName,
-                  pZone->mSize,
-                  pZone->mSize - (pZone->mCur - pZone->mStart),
-                  pZone->mStart,
-                  pZone->mStart + pZone->mSize);
+        printf("  zone %d (%s):  size: %d, avail: %d (range: %p to %p)\n",
+               i,
+               pZone->mName,
+               pZone->mSize,
+               pZone->mSize - (pZone->mCur - pZone->mStart),
+               pZone->mStart,
+               pZone->mStart + pZone->mSize);
     }
 }
 

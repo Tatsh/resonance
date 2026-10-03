@@ -12,7 +12,7 @@ PowerupCollectionI::~PowerupCollectionI() {
 }
 
 // NTSC-U/C: 0x001ccb40, PAL: 0x001d29f8
-void PowerupCollectionI::Add(int) {
+void PowerupCollectionI::Add(PowerupType) {
 }
 
 // NTSC-U/C: 0x001ccb48, PAL: 0x001d2a00
@@ -28,11 +28,11 @@ void PowerupCollectionI::Deploy(int, int) {
 }
 
 // NTSC-U/C: 0x001ccb60, PAL: 0x001d2a18
-int PowerupCollectionI::HasSelection() {
+int PowerupCollectionI::HasSelection() const {
     // The image leaves the return register untouched here, so the value is indeterminate.
     return 0;
 }
 
 // NTSC-U/C: 0x001ccb68, PAL: 0x001d2a20
-void PowerupCollectionI::SendState() {
+void PowerupCollectionI::SendState() const {
 }

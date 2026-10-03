@@ -27,8 +27,8 @@ constexpr int kDifficultyMedium = 1;
 // The length-prefixed string form the recording header uses. The binary expands it at each use.
 inline void WriteText(OBStream &stream, const HxStr &text) {
     unsigned length = text.mLen;
-    stream.Write(&length, sizeof(length));
-    stream.WriteBytes(text.mStr != nullptr ? text.mStr : g_szEmptyString, length);
+    stream.WriteLE(&length, sizeof(length));
+    stream.Write(text.mStr != nullptr ? text.mStr : g_szEmptyString, length);
 }
 
 } // namespace
@@ -91,7 +91,7 @@ GameRecorder::~GameRecorder() {
 // NTSC-U/C: 0x0010cea0, PAL: 0x0010d178
 void GameRecorder::ScheduleEnd() {
     EndRecordingCmd *pCommand = new EndRecordingCmd(this);
-    CmdID id;
+    Sch::CmdID id;
     id.mValue = kUnallocatedCommand;
     const Sch::Tick now{0};
     Application::shared()->GetWatchdogTimer()->PostIn(pCommand, now, id, kRecordable);

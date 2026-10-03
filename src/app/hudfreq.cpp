@@ -38,17 +38,17 @@ HudFreq::HudFreq(Player *pPlayer, int nIndex) : mPulsing(0), mPulseLoop(kNoPulse
 
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-    mAnim = dynamic_cast<Rnd::TransAnim *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s freq%d.tnm", pszLayout, pPlayer->mPlayerId))));
+    mAnim = dynamic_cast<Rnd::TransAnim *>(Rnd::TheManager.Find(
+        HxStr(Rnd::MakeString("%s freq%d.tnm", pszLayout, pPlayer->mPlayerId))));
 
     mMat = dynamic_cast<Rnd::Mat *>(
-        Rnd::TheManager.Find(HxStr(FormatString("HUD freq%d.mat", pPlayer->mPlayerId))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("HUD freq%d.mat", pPlayer->mPlayerId))));
     mMat->SetEmissive(HudColorFromName(pPlayer->mColorName));
     mMat->mStages[kBurnStage].SetTex(pBurn);
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mMesh = dynamic_cast<Rnd::Mesh *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s freq%d.mesh", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s freq%d.mesh", pszLayout, nIndex))));
     mMesh->SetMat(mMat);
     mMesh->SetShowing(1);
     if (Application::shared()->IsJukeboxMode()) {

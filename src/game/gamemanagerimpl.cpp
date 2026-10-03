@@ -10,7 +10,7 @@
 #include "app/timeclock.h"
 #include "game/dogamesystemplaycmd.h"
 #include "game/forcefeedbackmgr.h"
-#include "game/gameplayback.h"
+#include "game/gameplaybacker.h"
 #include "game/gamerecorder.h"
 #include "game/inputmap.h"
 #include "gfx/gfxdevice.h"
@@ -150,9 +150,9 @@ GameStats *GameManagerImpl::GetStats() {
 
 // NTSC-U/C: 0x0010c588, PAL: 0x0010c740
 void GameManagerImpl::Save(OBStream *pStream) {
-    pStream->Write(&mState, sizeof(mState))
-        .Write(&mSavedWord, sizeof(mSavedWord))
-        .Write(&mGameMode, sizeof(mGameMode));
+    pStream->WriteLE(&mState, sizeof(mState))
+        .WriteLE(&mSavedWord, sizeof(mSavedWord))
+        .WriteLE(&mGameMode, sizeof(mGameMode));
     mParams.Save(pStream);
 }
 
@@ -490,7 +490,7 @@ void GameManagerImpl::OnBeginGameLocal(Message *) {
     Application::shared()->GetWatchdog()->Flush();
 
     DoGameSystemPlayCmd *pCommand = new DoGameSystemPlayCmd;
-    CmdID id;
+    Sch::CmdID id;
     id.mValue = kUnallocatedCommand;
     const Sch::Tick now{0};
     Application::shared()->GetWatchdogTimer()->PostIn(pCommand, now, id, kRecordable);
@@ -503,11 +503,11 @@ void GameManagerImpl::OnBeginGameLocal(Message *) {
 // NTSC-U/C: 0x001072b0, PAL: 0x00107360
 void GameManagerImpl::Load(IBStream *pStream) {
     int nState;
-    pStream->Read(&nState, sizeof(nState));
+    pStream->ReadLE(&nState, sizeof(nState));
     int nSavedWord;
-    pStream->Read(&nSavedWord, sizeof(nSavedWord));
+    pStream->ReadLE(&nSavedWord, sizeof(nSavedWord));
     int nGameMode;
-    pStream->Read(&nGameMode, sizeof(nGameMode));
+    pStream->ReadLE(&nGameMode, sizeof(nGameMode));
     mParams.Load(pStream);
     mState = nState;
     mSavedWord = nSavedWord;
@@ -584,7 +584,7 @@ void GameManagerImpl::Recreate(const HxStr &file, int nUnusedFlag) {
     }
     mpRecorder = nullptr;
     mpMetaWorld->StopFrontEnd();
-    mpPlayback = new GamePlayback(file, this, nUnusedFlag);
+    mpPlayback = new GamePlaybacker(file, this, nUnusedFlag);
 }
 
 // NTSC-U/C: 0x0010bee0, PAL: 0x0010c078

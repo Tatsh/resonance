@@ -117,8 +117,8 @@ public:
     /**
      * Write the three bytes and the low sixteen bits of the second position to a stream.
      *
-     * The bytes go one at a time through OBStream::WriteBytes() and the position through
-     * OBStream::Write(). The song position MuseMsg provides is not written.
+     * The bytes go one at a time through OBStream::Write() and the position through
+     * OBStream::WriteLE(). The song position MuseMsg provides is not written.
      *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x003d80c0

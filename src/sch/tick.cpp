@@ -22,7 +22,7 @@ OBStream &Tick::Save(OBStream &stream) {
     // The binary loads each half with its own word load rather than shifting the doubleword.
     const int nLow = static_cast<int>(mValue);
     const int nHigh = static_cast<int>(mValue >> kTickWordBits);
-    return stream.Write(&nLow, sizeof(nLow)).Write(&nHigh, sizeof(nHigh));
+    return stream.WriteLE(&nLow, sizeof(nLow)).WriteLE(&nHigh, sizeof(nHigh));
 }
 
 // NTSC-U/C: 0x00610118, PAL: 0x00650d88
@@ -30,7 +30,7 @@ IBStream &Tick::Load(IBStream &stream) {
     // The binary reads each half straight into its own word of the member.
     int nLow;
     int nHigh;
-    IBStream &result = stream.Read(&nLow, sizeof(nLow)).Read(&nHigh, sizeof(nHigh));
+    IBStream &result = stream.ReadLE(&nLow, sizeof(nLow)).ReadLE(&nHigh, sizeof(nHigh));
     mValue = (static_cast<long long>(nHigh) << kTickWordBits) |
              (static_cast<unsigned long long>(static_cast<unsigned>(nLow)) & kTickLowWordMask);
     return result;

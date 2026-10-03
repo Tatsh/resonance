@@ -87,11 +87,11 @@ char *sceScfReadRomVersion(void) {
     }
     fd = sceOpen("rom0:ROMVER", SCE_RDONLY);
     if (fd == -1) {
-        LogPrintf("Can't open rom0:ROMVER\n");
+        printf("Can't open rom0:ROMVER\n");
     }
     // The binary reads even when the open failed.
     if (sceRead(fd, g_szScfRomVersion, kRomVersionReadSize) == -1) {
-        LogPrintf("Can't read rom error\n");
+        printf("Can't read rom error\n");
     }
     sceClose(fd);
     return g_szScfRomVersion;
@@ -238,7 +238,7 @@ int sceScfGetTimezone(void) {
         return kTokyoMinutes;
     }
     nTimezone = (int)nConfig >> kTimezoneShift;
-    LogPrintf("Timezone=%d\n", nTimezone);
+    printf("Timezone=%d\n", nTimezone);
     return nTimezone;
 }
 
@@ -276,7 +276,7 @@ int sceScfGetSummerTime(void) {
     }
     GetOsdConfigParam2(&nDetail, 1, 1);
     nSummer = (nDetail >> kDaylightShift) & 1;
-    LogPrintf("SummerTime=%d\n", nSummer);
+    printf("SummerTime=%d\n", nSummer);
     return nSummer;
 }
 

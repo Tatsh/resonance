@@ -16,7 +16,7 @@
 
 namespace {
 
-// The button bits of the word PadRecord::Read() reports, one per control. The word has the report's
+// The button bits of the word BreugPadRead() reports, one per control. The word has the report's
 // first button byte in its high half, the reverse of the pad library's own button constants.
 constexpr unsigned int kPadButtonL2 = 0x0001;
 constexpr unsigned int kPadButtonR2 = 0x0002;

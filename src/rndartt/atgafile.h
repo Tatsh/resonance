@@ -42,13 +42,13 @@ public:
      * again from the current file position. A failed read releases the pixel rectangle through
      * the single-object path.
      *
-     * @param pImage Receives the image.
+     * @param image Receives the image.
      * @param pbEnd Set to one when mImageRead is set.
      * @return An AGfxFileResult code.
      * @ghidraAddress NTSC-U/C: 0x00620508
      * @ghidraAddress PAL: 0x00661098
      */
-    virtual int ReadFrame(ABitmap *pImage, int *pbEnd);
+    virtual int ReadFrame(ABitmap &image, int *pbEnd);
 
     /**
      * Slot 5. Writing is not implemented.

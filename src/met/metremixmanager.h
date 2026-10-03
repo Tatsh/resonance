@@ -47,7 +47,7 @@ struct MemcardConnectState;
  * `0x00358310`. All six are declared below with the spelling their base gives them.
  *
  * One of those spellings is now contradicted by the image. The MemcardUser slot 12 override opens
- * with a LogPrintf() of the literal at `0x00807a88`. The literal reads
+ * with a printf() of the literal at `0x00807a88`. The literal reads
  * ` in MetRemixManager::LoadRemixCB(). Return code `. The method is therefore named `LoadRemixCB`,
  * and MemcardUser declares slot 12 as `OnRemixLoaded`, a title that header records as inferred
  * from the task that reports through the slot rather than from any string. The declaration below

@@ -66,7 +66,7 @@ void MetMultiTipsBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
 // NTSC-U/C: 0x003070f0, PAL: 0x0032bbc8
 void MetMultiTipsBaseScreen::EnterAndShow() {
     HxStr title = MetConfigText(kMetStrTMultiTips, kTitleConfigCode, kTitleKey) +
-                  FormatString(kPageFormat, mPage);
+                  Rnd::MakeString(kPageFormat, mPage);
     MetScreenTitleScreen::SetTitle(title);
     MetScreen::EnterAndShow();
     MetHelpScreen::SelectPreset(MetText(kMetStrHMultiTipsTab, kHelpLayout));

@@ -59,7 +59,7 @@ void MetPauseSoloGameScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     for (int i = 1; i <= kOptionCount; ++i) {
         Rnd::Text *pOption = dynamic_cast<Rnd::Text *>(
-            Rnd::TheManager.Find(HxStr(FormatString(kOptionTextFormat, i))));
+            Rnd::TheManager.Find(HxStr(Rnd::MakeString(kOptionTextFormat, i))));
         mOptionTexts.push_back(pOption);
     }
 }

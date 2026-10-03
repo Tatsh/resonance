@@ -82,7 +82,7 @@ void ReadStreamChunk(int nFile, int nSector, void *pBuffer, unsigned nLength);
  * @ghidraAddress NTSC-U/C: 0x0047dec0
  * @ghidraAddress PAL: 0x004bbb98
  */
-void AppendPathComponent(const char *pszComponent, char *pszPath);
+void FilenameToISO9660(const char *pszComponent, char *pszPath);
 
 /**
  * Close an open file, whether it is an ark stream or a loose file.
@@ -108,7 +108,7 @@ void CloseLoadFile(int nFile);
  * @ghidraAddress NTSC-U/C: 0x0055bf88
  * @ghidraAddress PAL: 0x0059d1a8
  */
-int GetArkStreamInflatedSize(int nStream);
+int FindOpenFileInArkTrueSize(int nStream);
 
 /**
  * Report the decompressed size of a compressed loose file.
@@ -126,7 +126,7 @@ unsigned GetGzFileSize(int nFile);
  * Vendored gzip glue, declared by title only. The body stores the file in the bundled gzip code's
  * input-descriptor global at `0x00761488`, copies `unknown` into its input-name global at
  * `0x00761490`, and drives the gzip routines at `0x006125b8`, `0x00612468`, `0x00562f88`,
- * `0x0061d778`, and `0x006125d0`. Both exits close the file with FileClose() unless the descriptor
+ * `0x0061d778`, and `0x006125d0`. Both exits close the file with close() unless the descriptor
  * reads -1. The failure exit puts -1 in the result register. LoadGzFile(), the one caller, ignores
  * the result.
  *
@@ -135,7 +135,7 @@ unsigned GetGzFileSize(int nFile);
  * @ghidraAddress NTSC-U/C: 0x005635b8
  * @ghidraAddress PAL: 0x005a1d28
  */
-extern "C" void InflateGzFileWhole(int nFile, void *pBuffer);
+extern "C" void GzipDecompressFdToRam(int nFile, void *pBuffer);
 
 /**
  * Inflate a gzip member that is already in memory.
@@ -144,8 +144,6 @@ extern "C" void InflateGzFileWhole(int nFile, void *pBuffer);
  * the overlap. The stored bytes sit against the end of the destination, and the inflate runs
  * forward over the whole destination.
  *
- * The name is inferred from its arguments and from the gzip state it writes.
- *
  * @param pSource The stored bytes.
  * @param nSourceLength The number of stored bytes.
  * @param pDest The destination.
@@ -153,20 +151,20 @@ extern "C" void InflateGzFileWhole(int nFile, void *pBuffer);
  * @ghidraAddress NTSC-U/C: 0x005636a0
  * @ghidraAddress PAL: 0x005a1e10
  */
-int InflateGzBuffer(const void *pSource, int nSourceLength, void *pDest);
+int GzipDecompressRamToRam(const void *pSource, int nSourceLength, void *pDest);
 
 /**
  * Report the stored length of a file.
  *
  * The path is opened, measured by seeking to its end, rewound, and closed. A gzip file reports its
- * compressed size, unlike GetUncompressedFileLength(). The name is inferred.
+ * compressed size, unlike FileTrueSize().
  *
  * @param pszPath The file to measure.
  * @return The length in bytes, or 0 when the file could not be opened.
  * @ghidraAddress NTSC-U/C: 0x00555790
  * @ghidraAddress PAL: 0x00595e18
  */
-int GetStoredFileLength(const char *pszPath);
+int FileSize(const char *pszPath);
 
 /**
  * Report the uncompressed length of a file.
@@ -179,7 +177,7 @@ int GetStoredFileLength(const char *pszPath);
  * @ghidraAddress NTSC-U/C: 0x00555800
  * @ghidraAddress PAL: 0x00595e88
  */
-int GetUncompressedFileLength(const char *pszPath);
+int FileTrueSize(const char *pszPath);
 
 /** The window length the decompressor fills before each flush. */
 constexpr unsigned kGzipWindowSize = 0x8000;

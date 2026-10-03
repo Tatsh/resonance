@@ -314,11 +314,11 @@ public:
      * children.
      *
      * @param ray The segment to test along.
-     * @param sink The collector to append intersections to.
+     * @param collisions The list to append intersections to.
      * @ghidraAddress NTSC-U/C: 0x004bf570
      * @ghidraAddress PAL: 0x004fd5f8
      */
-    virtual void FindCollisions(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Segment &ray, std::list<Collision> &collisions);
 
     /**
      * Write a description of this ribbon to sink.

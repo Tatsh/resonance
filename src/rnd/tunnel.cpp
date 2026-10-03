@@ -289,9 +289,9 @@ void LoadChainMaterials(Stream &stream, std::vector<LodMesh> &chains, int nCount
 } // namespace
 
 // NTSC-U/C: 0x00476a10, PAL: 0x004b4688
-void Tunnel::FindCollisions(const Ray &ray, HitSink &sink) {
+void Tunnel::FindCollisions(const Segment &ray, std::list<Collision> &collisions) {
     for (LodMesh &chain : mCellChains) {
-        chain.FindCollisions(ray, sink);
+        chain.FindCollisions(ray, collisions);
     }
 }
 
@@ -585,7 +585,7 @@ void *Tunnel::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x00476238, PAL: 0x004b3eb0
 void Tunnel::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kTunnelTag);
+    OperatorDeleteOverride(pBlock, kTunnelTag);
 }
 
 // NTSC-U/C: 0x0046da40, PAL: 0x004ab580
@@ -704,7 +704,7 @@ void Tunnel::SetFrameSelf(float flFrame) {
         XfmPoint(aim, lanePoint, aim.mTranslation);
         Vector3 direction;
         direction.w = 1.0f;
-        Vec3Sub(&aim.mTranslation.x, &trans.mTranslation.x, &direction.x);
+        Rnd::Subtract(&aim.mTranslation.x, &trans.mTranslation.x, &direction.x);
         Mat33BuildOrthonormal(&direction.x, &aim.mBasisZ.x, &aim.mBasisX.x);
         aim.mTranslation = trans.mTranslation;
         seeker.SetTransXfm(aim);
@@ -796,7 +796,7 @@ void Tunnel::BuildMesh() {
         for (int nSegment = 0; nSegment < kLaneSegmentCount; ++nSegment) {
             Vector3 delta;
             delta.w = 1.0f;
-            Vec3Sub(&profile.mPoints[nSegment + 1].x, &profile.mPoints[nSegment].x, &delta.x);
+            Rnd::Subtract(&profile.mPoints[nSegment + 1].x, &profile.mPoints[nSegment].x, &delta.x);
             Vector3 &normal = profile.mNormals[nSegment];
             normal.x = -delta.z;
             normal.y = 0.0f;
@@ -842,7 +842,8 @@ void Tunnel::BuildSliceMeshes() {
     for (unsigned nSlice = 0; nSlice < mSliceChains.size(); ++nSlice) {
         RunLongOperationDrawProc();
         LodMesh &chain = mSliceChains[nSlice];
-        chain.Build(HxStr(FormatString(kSliceNameFormat, NameText(this), nSlice)), mLodCount, true);
+        chain.Build(
+            HxStr(Rnd::MakeString(kSliceNameFormat, NameText(this), nSlice)), mLodCount, true);
         chain.SetVertexCount(nBlockVerts * mRingCount);
         Mesh *pMesh = chain.front();
         std::vector<MeshVert> &verts = pMesh->mVertsOwner->mVerts;
@@ -904,7 +905,8 @@ void Tunnel::BuildLaneMeshes() {
     const Color white{1.0f, 1.0f, 1.0f, 1.0f};
     for (unsigned nLane = 0; nLane < mSliceChains.size(); ++nLane) {
         LodMesh &chain = mSliceChains[nLane];
-        chain.Build(HxStr(FormatString(kSliceNameFormat, NameText(this), nLane)), mLodCount, true);
+        chain.Build(
+            HxStr(Rnd::MakeString(kSliceNameFormat, NameText(this), nLane)), mLodCount, true);
         chain.SetVertexCount(nBlockVerts);
         Mesh *pMesh = chain.front();
         std::vector<MeshVert> &verts = pMesh->mVertsOwner->mVerts;
@@ -951,7 +953,8 @@ void Tunnel::BuildCellMeshes() {
     for (unsigned nCell = 0; nCell < mCellChains.size(); ++nCell) {
         RunLongOperationDrawProc();
         LodMesh &chain = mCellChains[nCell];
-        chain.Build(HxStr(FormatString(kCellNameFormat, NameText(this), nCell)), mLodCount, true);
+        chain.Build(
+            HxStr(Rnd::MakeString(kCellNameFormat, NameText(this), nCell)), mLodCount, true);
         chain.SetVertexCount(kPanelRows * nColumns);
         Mesh *pMesh = chain.front();
         SetGridTexCoords(pMesh->mVertsOwner->mVerts, 0, kPanelRows, nColumns, 1.0f);

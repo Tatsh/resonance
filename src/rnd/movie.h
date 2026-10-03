@@ -314,7 +314,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005cf4c0
      * @ghidraAddress PAL: 0x00611488
      */
-    void OnChunk(AMovieSet::ChunkHeader *pHeader, void *pPayload);
+    void OnChunk(AMovieChunkHdr *pHeader, void *pPayload);
 
     /**
      * The AMovieSet handler AttachTrack() installs, which passes the chunk to pData's OnChunk().
@@ -327,7 +327,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005d2530
      * @ghidraAddress PAL: 0x00614560
      */
-    static void MasterTrackCallback(AMovieSet::ChunkHeader *pHeader, void *pPayload, void *pData);
+    static void MasterTrackCallback(AMovieChunkHdr *pHeader, void *pPayload, void *pData);
 
     /**
      * Read a track texture list from stream.

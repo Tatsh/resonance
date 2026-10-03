@@ -13,11 +13,11 @@ HudLoop::HudLoop(int nIndex) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mWires = dynamic_cast<Rnd::Mesh *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s loopwires%d.mesh", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s loopwires%d.mesh", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mIndicator = dynamic_cast<Rnd::Mesh *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s loop%d.mesh", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s loop%d.mesh", pszLayout, nIndex))));
 
     mWires->SetShowing(Application::shared()->GetPlayMode() == kPlayModeJam);
     SetShowing(1);

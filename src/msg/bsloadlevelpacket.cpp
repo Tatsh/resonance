@@ -48,14 +48,14 @@ void BSLoadLevelPacket::saveGuts(OBStream &stream) const {
     mParams.Save(&stream);
 
     int clientId = mClientId;
-    stream.Write(&clientId, sizeof(clientId));
+    stream.WriteLE(&clientId, sizeof(clientId));
 }
 
 // NTSC-U/C: 0x003e80a0, PAL: 0x00420380
 void BSLoadLevelPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
     mParams.Load(&stream);
-    stream.Read(&mClientId, sizeof(mClientId));
+    stream.ReadLE(&mClientId, sizeof(mClientId));
 }
 
 // NTSC-U/C: 0x003f1290, PAL: 0x004297f8

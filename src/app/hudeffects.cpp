@@ -25,7 +25,7 @@ HudEffects::HudEffects(int nIndex) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mWires = dynamic_cast<Rnd::Mesh *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s fxwires%d.mesh", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s fxwires%d.mesh", pszLayout, nIndex))));
     mLitMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("HUD fx_on.mat")));
     mUnlitMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("HUD fx_off.mat")));
     mSelectedFont = dynamic_cast<Rnd::Font *>(Rnd::TheManager.Find(HxStr("HUD fx_on.font")));
@@ -39,12 +39,12 @@ HudEffects::HudEffects(int nIndex) {
         lamp.mKind = *it;
 
         pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-        lamp.mMesh = dynamic_cast<Rnd::Mesh *>(
-            Rnd::TheManager.Find(HxStr(FormatString("%s fx%d%d.mesh", pszLayout, nIndex, nLamp))));
+        lamp.mMesh = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(
+            HxStr(Rnd::MakeString("%s fx%d%d.mesh", pszLayout, nIndex, nLamp))));
 
         pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
-        lamp.mText = dynamic_cast<Rnd::Text *>(
-            Rnd::TheManager.Find(HxStr(FormatString("%s fx%d%d.txt", pszLayout, nIndex, nLamp))));
+        lamp.mText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(
+            HxStr(Rnd::MakeString("%s fx%d%d.txt", pszLayout, nIndex, nLamp))));
 
         lamp.mText->SetText(HudPowerupName(lamp.mKind));
         mLamps.push_back(lamp);

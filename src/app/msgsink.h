@@ -62,7 +62,7 @@ public:
      * @param pBlock The block.
      */
     void operator delete(void *pBlock) {
-        FreeTaggedMemory(pBlock, "MsgSink");
+        OperatorDeleteOverride(pBlock, "MsgSink");
     }
 
     /**

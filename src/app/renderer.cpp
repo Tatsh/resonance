@@ -126,7 +126,7 @@ Renderer::Renderer()
     const int nLocalViews = Application::shared()->GetWorld()->mLocalPlayers.size();
     for (int i = 0; i < nLocalViews; ++i) {
         Rnd::View *pView = dynamic_cast<Rnd::View *>(
-            Rnd::TheManager.Find(HxStr(FormatString("tnl local%d.view", i + 1))));
+            Rnd::TheManager.Find(HxStr(Rnd::MakeString("tnl local%d.view", i + 1))));
         mLocalViews.push_back(pView);
     }
 
@@ -251,7 +251,7 @@ void Renderer::LoadCommon() {
     g_pLaunchLoader = new RndAsyncLoader(HxStr("tunnel/"), HxStr("launch.rnd"), nZone);
 #ifdef VIDEO_STANDARD_PAL
     g_pGameFontsLoader = new RndAsyncLoader(
-        HxStr("hud/"), HxStr(FormatString("game_fonts%s.rnd", GetFontLanguageSuffix())), nZone);
+        HxStr("hud/"), HxStr(Rnd::MakeString("game_fonts%s.rnd", GetFontLanguageSuffix())), nZone);
 #endif
     g_pHudLoader = new RndAsyncLoader(HxStr("hud/"), HxStr("hud.rnd"), nZone);
 #ifdef VIDEO_STANDARD_PAL

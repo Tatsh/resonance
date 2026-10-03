@@ -48,7 +48,7 @@ char TnlGemManager::AddMeshKind(const char *pszName, float flLodOffset, float fl
     TnlGemMeshKind *pPrevious = nullptr;
     for (int i = 0;; ++i) {
         auto *pMesh = dynamic_cast<Rnd::MultiMesh *>(
-            Rnd::TheManager.Find(HxStr(FormatString("%s%d.mm", pszName, i))));
+            Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s%d.mm", pszName, i))));
         if (!pMesh) {
             break;
         }
@@ -186,5 +186,5 @@ std::list<TnlGem>::iterator TnlGemManager::FindFirstAt(std::list<TnlGem> &gems, 
 
 // NTSC-U/C: 0x00415668, PAL: 0x0044f1b8
 HxStr NextTnlMeshName() {
-    return HxStr(FormatString("<tnlmesh%04d>", ++g_nTnlMeshNameCounter));
+    return HxStr(Rnd::MakeString("<tnlmesh%04d>", ++g_nTnlMeshNameCounter));
 }

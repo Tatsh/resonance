@@ -15,9 +15,9 @@ void CallbackXferHdToIop::Done([[maybe_unused]] int nHandle,
                                int nLength,
                                int nStatus) {
     if (nStatus > 0) {
-        LogPrintf("HD bank loading returned async error %d\n", nStatus);
+        printf("HD bank loading returned async error %d\n", nStatus);
     } else {
-        XferToIop(g_nBankIopAddress, pBuffer, nLength);
+        ezTransToIOP(g_nBankIopAddress, pBuffer, nLength);
     }
     MemFreeTagged(g_pHdXferBuffer, __FILE__, __LINE__);
     g_nHdXferInFlight = 0;

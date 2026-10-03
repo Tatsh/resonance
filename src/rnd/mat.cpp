@@ -67,7 +67,7 @@ Dbg &PrintBlendMode(Dbg &sink, Mat::BlendMode nBlend) {
 }
 
 // NTSC-U/C: 0x004dd0f0, PAL: 0x0051b690
-Dbg &PrintCullMode(Dbg &sink, Mat::CullMode nCull) {
+Dbg &operator<<(Dbg &sink, Mat::Cull nCull) {
     switch (nCull) {
     case Mat::kCullModeCw:
         sink.Print("CW");
@@ -83,21 +83,21 @@ Dbg &PrintCullMode(Dbg &sink, Mat::CullMode nCull) {
 }
 
 // NTSC-U/C: 0x004dd188, PAL: 0x0051b728
-Dbg &PrintGenMode(Dbg &sink, Mat::Stage::GenMode nGenMode) {
+Dbg &operator<<(Dbg &sink, Mat::TexGen nGenMode) {
     switch (nGenMode) {
-    case Mat::Stage::kGenModeFixed:
+    case Mat::kGenModeFixed:
         sink.Print("Fixed");
         break;
-    case Mat::Stage::kGenModeSphere:
+    case Mat::kGenModeSphere:
         sink.Print("Sphere");
         break;
-    case Mat::Stage::kGenModePlanar:
+    case Mat::kGenModePlanar:
         sink.Print("Planar");
         break;
-    case Mat::Stage::kGenModeOrthoCube:
+    case Mat::kGenModeOrthoCube:
         sink.Print("OrthoCube");
         break;
-    case Mat::Stage::kGenModeLocalCube:
+    case Mat::kGenModeLocalCube:
         sink.Print("LocalCube");
         break;
     }
@@ -105,15 +105,15 @@ Dbg &PrintGenMode(Dbg &sink, Mat::Stage::GenMode nGenMode) {
 }
 
 // NTSC-U/C: 0x004dd240, PAL: 0x0051b7e0
-Dbg &PrintWrapMode(Dbg &sink, Mat::Stage::WrapMode nWrap) {
+Dbg &operator<<(Dbg &sink, Mat::TexWrap nWrap) {
     switch (nWrap) {
-    case Mat::Stage::kWrapModeClamp:
+    case Mat::kWrapModeClamp:
         sink.Print("Clamp");
         break;
-    case Mat::Stage::kWrapModeRepeat:
+    case Mat::kWrapModeRepeat:
         sink.Print("Repeat");
         break;
-    case Mat::Stage::kWrapModeMirror:
+    case Mat::kWrapModeMirror:
         sink.Print("Mirror");
         break;
     }
@@ -359,7 +359,7 @@ void Mat::Stage::Dump(Dbg &sink) const {
     sink.Print(" coordIndex:");
     sink.Format("%d", mCoordIndex);
     sink.Print(" genMode:");
-    PrintGenMode(sink, mGenMode);
+    sink << mGenMode;
     sink.Print(" xfm:");
     PrintVector3(sink, mXfm.mBasisX);
     PrintVector3(sink, mXfm.mBasisY);
@@ -369,7 +369,7 @@ void Mat::Stage::Dump(Dbg &sink) const {
     sink.Print("useXfm:");
     PrintBool(sink, mUseXfm);
     sink.Print(" wrap:");
-    PrintWrapMode(sink, mWrap);
+    sink << mWrap;
     // Yes, the dump writes the material reference before the texture reference even though the
     // texture is the earlier member.
     sink.Print(" mat:");
@@ -448,7 +448,7 @@ void *Mat::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x004db920, PAL: 0x00519ec0
 void Mat::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kMatTag);
+    OperatorDeleteOverride(pBlock, kMatTag);
 }
 
 // NTSC-U/C: 0x004d2198, PAL: 0x005105e8
@@ -540,7 +540,7 @@ void Mat::DumpText(Dbg &sink) {
     sink.Print("\n");
 
     sink.Print("cull:");
-    PrintCullMode(sink, mCull);
+    sink << mCull;
     sink.Print(" multiPass:");
     sink.Format("%d", mMultiPass);
     sink.Print(" normalize:");

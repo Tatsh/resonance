@@ -119,9 +119,9 @@ void MetLoadFreqScreen::OnCreateButton() {
         buttons.push_back(HxStr(kOkButton));
         const HxStr format(ConfigText(kFreqLimitMessage));
         const HxStr text(
-            FormatString(TextOrEmpty(format),
-                         kMaxIdentities,
-                         TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName)));
+            Rnd::MakeString(TextOrEmpty(format),
+                            kMaxIdentities,
+                            TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName)));
         MetMsgScreen::Show(
             HxStr(kFreqLimitMessage), HxStr(kErrorTitle), text, kOneButton, buttons, this);
         return;
@@ -133,9 +133,9 @@ void MetLoadFreqScreen::OnCreateButton() {
         buttons.push_back(HxStr(kOkButton));
         const HxStr format(ConfigText(kNoSpaceText));
         const HxStr text(
-            FormatString(TextOrEmpty(format),
-                         TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName),
-                         GlobalSettings::shared()->mPersonaMinimumFreeClusters));
+            Rnd::MakeString(TextOrEmpty(format),
+                            TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName),
+                            GlobalSettings::shared()->mPersonaMinimumFreeClusters));
         MetMsgScreen::Show(
             HxStr(kFreqLimitMessage), HxStr(kErrorTitle), text, kOneButton, buttons, this);
         return;
@@ -189,7 +189,7 @@ void MetLoadFreqScreen::UpdateNameLabel() {
 
 #ifdef VIDEO_STANDARD_PAL
     HxStr format = GetMetString(kMetStrLfEdit);
-    HxStr editText(FormatString(TextOrEmpty(format), TextOrEmpty(username)));
+    HxStr editText(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(username)));
 #else
     HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
     HxStr editLabelWithName(editLabel);

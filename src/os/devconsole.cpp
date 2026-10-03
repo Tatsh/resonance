@@ -75,7 +75,7 @@ int gConsole = 0;
 sceGsDBuff g_debugDoubleBuffer;
 
 // NTSC-U/C: 0x005e5d08, PAL: 0x00627ec8
-int InitDebugGs() {
+int Gs_Initialize() {
     sceGifTag adTag;
     adTag.mWords[0] = kAdGifTagLo;
     adTag.mWords[1] = kAdGifTagHi;
@@ -140,15 +140,15 @@ void ShowScreenMessage([[maybe_unused]] const char *pszText, [[maybe_unused]] in
 }
 
 // NTSC-U/C: 0x005e5ed8, PAL: 0x00628098
-void OpenDebugConsole() {
+void InitDevConsole() {
     sceDevConsInit();
     gConsole = sceDevConsOpen(kConsoleGsX, kConsoleGsY, kConsoleColumns, kConsoleRows);
     sceDevConsClear(gConsole);
 }
 
 // NTSC-U/C: 0x005e5f18, PAL: 0x006280d8
-void InitDebugConsole() {
-    (void)InitDebugGs(); // Yes, the binary discards the result.
+void InitDebugPrinting() {
+    (void)Gs_Initialize(); // Yes, the binary discards the result.
     sceDevConsInit();
     gConsole = sceDevConsOpen(kConsoleGsX, kConsoleGsY, kConsoleColumns, kConsoleRows);
     sceDevConsClear(gConsole);

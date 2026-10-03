@@ -13,7 +13,7 @@
  * registers for read circuit 1 beside the SDK's pair for read circuit 2.
  *
  * The two read circuits show the same buffer one line apart, and PMODE blends them at half
- * strength. SetDispEnvs() builds both pairs.
+ * strength. SetDispBuffers() builds both pairs.
  *
  * The class is not polymorphic and has no RTTI, and no literal in the image identifies it. Its
  * name and the names of its members are inferred from what the routines below do with it.
@@ -24,7 +24,7 @@ class GsDoubleBuffer {
 public:
     /** One display environment, 0x40 bytes. */
     struct DispEnv {
-        /** The SDK environment, which PutDispEnv() writes to read circuit 2. +0x00 */
+        /** The SDK environment PutDispBuffer() writes to read circuit 2. +0x00 */
         sceGsDispEnv mEnv;
         /** DISPFB1, the circuit 1 frame buffer. +0x28 */
         unsigned long long mDispFb1;
@@ -36,7 +36,10 @@ public:
 
     /** One draw environment preceded by its GIFtag and followed by its clear, 0xf0 bytes. */
     struct DrawHalf {
-        /** A+D tag whose loop count PutDrawEnv() sets to include or exclude the clear. +0x00 */
+        /**
+         * A+D tag whose loop count PutDrawBufferSmall() sets to include or exclude the clear.
+         * +0x00
+         */
         sceGifTag mGifTag;
         /** FRAME_1, ZBUF_1, XYOFFSET_1, and the rest of the context 1 registers. +0x10 */
         sceGsDrawEnv1 mDraw;
@@ -56,80 +59,12 @@ public:
      * @param nPsm Pixel storage format of the frame buffers.
      * @param nZTest Depth test, where zero also masks depth writes.
      * @param nZPsm Pixel storage format of the depth buffer.
-     * @param nClear Passed through to SetDrawEnvs(), which never reads it.
+     * @param nClear Passed through to SetDrawBuffersSmall() and never read.
      * @ghidraAddress NTSC-U/C: 0x0058e9b0
      * @ghidraAddress PAL: 0x005d1d08
      */
     void
     SetDefaults(short nWidth, short nHeight, short nPsm, short nZTest, short nZPsm, short nClear);
-
-    /**
-     * Build both display environments.
-     *
-     * Each takes the SDK defaults with PMODE blending at 0x80 and both circuits enabled. Circuit
-     * 1 shows the buffer as the SDK set it, and circuit 2 starts one line lower, one line shorter,
-     * and two units to the right.
-     *
-     * @param nWidth Width in pixels.
-     * @param nHeight Height in pixels.
-     * @param nPsm Pixel storage format.
-     * @param nFbp0 Page of buffer 0.
-     * @param nFbp1 Page of buffer 1.
-     * @ghidraAddress NTSC-U/C: 0x0058e330
-     * @ghidraAddress PAL: 0x005d1688
-     */
-    void SetDispEnvs(short nWidth, short nHeight, short nPsm, short nFbp0, short nFbp1);
-
-    /**
-     * Build both draw environments, their GIFtags, and their clears.
-     *
-     * @param nWidth Width in pixels.
-     * @param nHeight Height in pixels.
-     * @param nPsm Pixel storage format of the frame buffers.
-     * @param nFbp0 Page of buffer 0.
-     * @param nFbp1 Page of buffer 1.
-     * @param nZbp Page of the depth buffer.
-     * @param nZTest Depth test, where zero also masks depth writes.
-     * @param nZPsm Pixel storage format of the depth buffer.
-     * @param nClear Never read. The caller passes it in the tenth argument slot on the stack.
-     * @ghidraAddress NTSC-U/C: 0x0058e538
-     * @ghidraAddress PAL: 0x005d1890
-     */
-    void SetDrawEnvs(short nWidth,
-                     short nHeight,
-                     short nPsm,
-                     short nFbp0,
-                     short nFbp1,
-                     short nZbp,
-                     short nZTest,
-                     short nZPsm,
-                     short nClear);
-
-    /**
-     * Send one draw environment to the GS through the SDK.
-     *
-     * Both GIFtags receive the loop count first. The choice of clear therefore persists into the
-     * other half.
-     *
-     * @param nHalf Zero for half 0, anything else for half 1.
-     * @param bClear Non-zero to send the clear with the environment.
-     * @ghidraAddress NTSC-U/C: 0x0058e7e8
-     * @ghidraAddress PAL: 0x005d1b40
-     */
-    void PutDrawEnv(int nHalf, int bClear);
-
-    /**
-     * Write one display environment to the privileged GS registers.
-     *
-     * Read circuit 2 is always enabled. Circuit 1 is enabled or disabled by bEnableCircuit1, and
-     * the choice is stored back into the environment.
-     *
-     * @param nHalf Zero for half 0, anything else for half 1.
-     * @param bEnableCircuit1 Non-zero to enable read circuit 1.
-     * @ghidraAddress NTSC-U/C: 0x0058e860
-     * @ghidraAddress PAL: 0x005d1bb8
-     */
-    void PutDispEnv(int nHalf, int bEnableCircuit1);
 
     /** Display environments of the two halves. +0x000 */
     DispEnv mDisp[2];
@@ -156,3 +91,77 @@ public:
      */
     short mZbp;
 };
+
+/**
+ * Build both display environments.
+ *
+ * Each takes the SDK defaults with PMODE blending at 0x80 and both circuits enabled. Circuit 1
+ * shows the buffer as the SDK set it, and circuit 2 starts one line lower, one line shorter, and
+ * two units to the right.
+ *
+ * @param pBuffers The double buffer.
+ * @param nWidth Width in pixels.
+ * @param nHeight Height in pixels.
+ * @param nPsm Pixel storage format.
+ * @param nFbp0 Page of buffer 0.
+ * @param nFbp1 Page of buffer 1.
+ * @ghidraAddress NTSC-U/C: 0x0058e330
+ * @ghidraAddress PAL: 0x005d1688
+ */
+void SetDispBuffers(
+    GsDoubleBuffer *pBuffers, short nWidth, short nHeight, short nPsm, short nFbp0, short nFbp1);
+
+/**
+ * Build both draw environments, their GIFtags, and their clears.
+ *
+ * @param pBuffers The double buffer.
+ * @param nWidth Width in pixels.
+ * @param nHeight Height in pixels.
+ * @param nPsm Pixel storage format of the frame buffers.
+ * @param nFbp0 Page of buffer 0.
+ * @param nFbp1 Page of buffer 1.
+ * @param nZbp Page of the depth buffer.
+ * @param nZTest Depth test, where zero also masks depth writes.
+ * @param nZPsm Pixel storage format of the depth buffer.
+ * @param nClear Never read. The caller passes it in the tenth argument slot on the stack.
+ * @ghidraAddress NTSC-U/C: 0x0058e538
+ * @ghidraAddress PAL: 0x005d1890
+ */
+void SetDrawBuffersSmall(GsDoubleBuffer *pBuffers,
+                         short nWidth,
+                         short nHeight,
+                         short nPsm,
+                         short nFbp0,
+                         short nFbp1,
+                         short nZbp,
+                         short nZTest,
+                         short nZPsm,
+                         short nClear);
+
+/**
+ * Send one draw environment to the GS through the SDK.
+ *
+ * Both GIFtags receive the loop count first. The choice of clear therefore persists into the other
+ * half.
+ *
+ * @param pBuffers The double buffer.
+ * @param nHalf Zero for half 0, anything else for half 1.
+ * @param bClear Non-zero to send the clear with the environment.
+ * @ghidraAddress NTSC-U/C: 0x0058e7e8
+ * @ghidraAddress PAL: 0x005d1b40
+ */
+void PutDrawBufferSmall(GsDoubleBuffer *pBuffers, int nHalf, int bClear);
+
+/**
+ * Write one display environment to the privileged GS registers.
+ *
+ * Read circuit 2 is always enabled. Circuit 1 is enabled or disabled by bEnableCircuit1, and the
+ * choice is stored back into the environment.
+ *
+ * @param pBuffers The double buffer.
+ * @param nHalf Zero for half 0, anything else for half 1.
+ * @param bEnableCircuit1 Non-zero to enable read circuit 1.
+ * @ghidraAddress NTSC-U/C: 0x0058e860
+ * @ghidraAddress PAL: 0x005d1bb8
+ */
+void PutDispBuffer(GsDoubleBuffer *pBuffers, int nHalf, int bEnableCircuit1);

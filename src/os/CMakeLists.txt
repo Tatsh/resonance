@@ -24,8 +24,9 @@ set(RESONANCE_OS_SRCS
     r250.cpp
     random.cpp
     seccache.cpp
-    spew.cpp
-    spewregistrar.cpp
+    spewregister.cpp
+    spewtable.cpp
+    timer.cpp
     zone.cpp)
 
 add_library(resonance_os STATIC ${RESONANCE_OS_SRCS})

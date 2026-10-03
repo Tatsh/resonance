@@ -27,75 +27,75 @@ GameParams::~GameParams() {
 // NTSC-U/C: 0x001871b8, PAL: 0x0018c9b0
 void GameParams::Save(OBStream *pStream) const {
     unsigned nLevelNameLength = mLevelName.mLen;
-    pStream->Write(&nLevelNameLength, sizeof(nLevelNameLength));
+    pStream->WriteLE(&nLevelNameLength, sizeof(nLevelNameLength));
     // An empty string has no buffer, and the stream receives the shared empty string in place of a
     // null pointer.
-    pStream->WriteBytes(mLevelName.mStr != nullptr ? mLevelName.mStr : g_szEmptyString,
-                        nLevelNameLength);
+    pStream->Write(mLevelName.mStr != nullptr ? mLevelName.mStr : g_szEmptyString,
+                   nLevelNameLength);
 
     unsigned nArenaNameLength = mArenaName.mLen;
-    pStream->Write(&nArenaNameLength, sizeof(nArenaNameLength));
-    pStream->WriteBytes(mArenaName.mStr != nullptr ? mArenaName.mStr : g_szEmptyString,
-                        nArenaNameLength);
+    pStream->WriteLE(&nArenaNameLength, sizeof(nArenaNameLength));
+    pStream->Write(mArenaName.mStr != nullptr ? mArenaName.mStr : g_szEmptyString,
+                   nArenaNameLength);
 
     int nFriends = mFriends;
-    pStream->Write(&nFriends, sizeof(nFriends));
+    pStream->WriteLE(&nFriends, sizeof(nFriends));
 
     int nPlayMode = mPlayMode;
-    pStream->Write(&nPlayMode, sizeof(nPlayMode));
+    pStream->WriteLE(&nPlayMode, sizeof(nPlayMode));
 
     int difficulty = mDifficulty;
-    pStream->Write(&difficulty, sizeof(difficulty));
+    pStream->WriteLE(&difficulty, sizeof(difficulty));
 
     int nConstrainJam = mConstrainJam;
-    pStream->Write(&nConstrainJam, sizeof(nConstrainJam));
+    pStream->WriteLE(&nConstrainJam, sizeof(nConstrainJam));
 
     int nNetGame = mNetGame;
-    pStream->Write(&nNetGame, sizeof(nNetGame));
+    pStream->WriteLE(&nNetGame, sizeof(nNetGame));
 
     int nLoadingGame = mLoadingGame;
-    pStream->Write(&nLoadingGame, sizeof(nLoadingGame));
+    pStream->WriteLE(&nLoadingGame, sizeof(nLoadingGame));
 
     int nJukeboxMode = mJukeboxMode;
-    pStream->Write(&nJukeboxMode, sizeof(nJukeboxMode));
+    pStream->WriteLE(&nJukeboxMode, sizeof(nJukeboxMode));
 }
 
 // NTSC-U/C: 0x00187390, PAL: 0x0018cb88
 void GameParams::Load(IBStream *pStream) {
     unsigned nLevelNameLength;
-    pStream->Read(&nLevelNameLength, sizeof(nLevelNameLength));
+    pStream->ReadLE(&nLevelNameLength, sizeof(nLevelNameLength));
     mLevelName.Alloc(nLevelNameLength);
-    pStream->ReadBytes(mLevelName.mStr != nullptr ? mLevelName.mStr :
-                                                    const_cast<char *>(g_szEmptyString),
-                       nLevelNameLength);
+    pStream->Read(mLevelName.mStr != nullptr ? mLevelName.mStr :
+                                               const_cast<char *>(g_szEmptyString),
+                  nLevelNameLength);
 
     unsigned nArenaNameLength;
-    pStream->Read(&nArenaNameLength, sizeof(nArenaNameLength));
+    pStream->ReadLE(&nArenaNameLength, sizeof(nArenaNameLength));
     mArenaName.Alloc(nArenaNameLength);
-    pStream->ReadBytes(mArenaName.mStr != nullptr ? mArenaName.mStr :
-                                                    const_cast<char *>(g_szEmptyString),
-                       nArenaNameLength);
+    pStream->Read(mArenaName.mStr != nullptr ? mArenaName.mStr :
+                                               const_cast<char *>(g_szEmptyString),
+                  nArenaNameLength);
 
-    pStream->Read(&mFriends, sizeof(mFriends));
+    pStream->ReadLE(&mFriends, sizeof(mFriends));
 
     // mPlayMode arrives in a local and is copied across afterwards, where mFriends and
     // mDifficulty are filled in place. Both are plain words, and the asymmetry matches the binary.
     int nPlayMode;
-    pStream->Read(&nPlayMode, sizeof(nPlayMode));
+    pStream->ReadLE(&nPlayMode, sizeof(nPlayMode));
 
-    pStream->Read(&mDifficulty, sizeof(mDifficulty));
+    pStream->ReadLE(&mDifficulty, sizeof(mDifficulty));
 
     int nConstrainJam;
-    pStream->Read(&nConstrainJam, sizeof(nConstrainJam));
+    pStream->ReadLE(&nConstrainJam, sizeof(nConstrainJam));
 
     int nNetGame;
-    pStream->Read(&nNetGame, sizeof(nNetGame));
+    pStream->ReadLE(&nNetGame, sizeof(nNetGame));
 
     int nLoadingGame;
-    pStream->Read(&nLoadingGame, sizeof(nLoadingGame));
+    pStream->ReadLE(&nLoadingGame, sizeof(nLoadingGame));
 
     int nJukeboxMode;
-    pStream->Read(&nJukeboxMode, sizeof(nJukeboxMode));
+    pStream->ReadLE(&nJukeboxMode, sizeof(nJukeboxMode));
 
     mPlayMode = nPlayMode;
     mConstrainJam = nConstrainJam != 0;

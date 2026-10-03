@@ -245,7 +245,7 @@ void MetMemCardLoadScreen::EnterAndShow() {
         buttons.push_back(GetMetString(kMetStrMsgCANCEL));
         buttons.push_back(GetMetString(kMetStrMsgOK));
         const HxStr format(GetMetString(kMetStrMemCardLoadWarning));
-        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(FirstCardSlotName())));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(FirstCardSlotName())));
         MetMsgScreen::Show(HxStr(kNewCardMessage),
                            GetMetString(kMetStrMsgWARNING),
                            text,
@@ -285,9 +285,10 @@ void MetMemCardLoadScreen::ShowSelection() {
         mSlotNumberText->SetText(mCards[mSelected].mSlotName);
 #ifdef VIDEO_STANDARD_PAL
         const HxStr format(GetMetString(kMetStrMcSpaceAvail));
-        mAvailableText->SetText(HxStr(FormatString(TextOrEmpty(format), mCards[mSelected].mFree)));
+        mAvailableText->SetText(
+            HxStr(Rnd::MakeString(TextOrEmpty(format), mCards[mSelected].mFree)));
 #else
-        mAvailableText->SetText(HxStr(FormatString(kAvailableFormat, mCards[mSelected].mFree)));
+        mAvailableText->SetText(HxStr(Rnd::MakeString(kAvailableFormat, mCards[mSelected].mFree)));
 #endif
         pInstructions->SetText(
             MetConfigText(kMetStrMcSelCard, kDialogueConfigCode, kCardSelectedKey));
@@ -352,7 +353,7 @@ void MetMemCardLoadScreen::OnNoCard() {
 
     const MemcardConnectState next(NextCardSlot(slot));
     const HxStr format(MetConfigText(kMetStrMemDetectSpecial, kDialogueConfigCode, kOtherCardKey));
-    const HxStr text(FormatString(
+    const HxStr text(Rnd::MakeString(
         TextOrEmpty(format), TextOrEmpty(next.mSlotName), TextOrEmpty(slot.mSlotName)));
     std::vector<HxStr> buttons;
     buttons.push_back(MetText(kMetStrMsgOK, kOkButton));

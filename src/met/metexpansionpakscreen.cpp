@@ -179,8 +179,8 @@ void MetExpansionPakScreen::UpdateIdle(float flTime) {
     HxStr before = ConfigText(kMetStrExpansionDone1, kPromptConfigCode, kDoneTextBefore);
     HxStr title = QueryConfigString(kExpansionTitleConfigCode);
     HxStr after = ConfigText(kMetStrExpansionDone2, kPromptConfigCode, kDoneTextAfter);
-    HxStr text(
-        FormatString(kDoneTextFormat, TextOrEmpty(before), TextOrEmpty(title), TextOrEmpty(after)));
+    HxStr text(Rnd::MakeString(
+        kDoneTextFormat, TextOrEmpty(before), TextOrEmpty(title), TextOrEmpty(after)));
     std::vector<HxStr> buttons;
     buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
     MetMsgScreen::ShowActive(HxStr(kDoneMessage),

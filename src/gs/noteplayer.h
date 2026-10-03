@@ -104,5 +104,5 @@ private:
     MsgSink *mSink;          // +0x10, set by Start() and cleared when the note ends
     MuseParent *mParent;     // +0x14
     Sch::TickClock *mClock;  // +0x18
-    CmdID mCommand;          // +0x1c
+    Sch::CmdID mCommand;     // +0x1c
 };

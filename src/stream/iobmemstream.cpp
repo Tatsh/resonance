@@ -23,7 +23,7 @@ IOBMemStream::IOBMemStream(const void *pData, int nSize) {
     mFail = 0;
     mEof = 0;
     mPos = 0;
-    WriteBytes(pData, nSize);
+    Write(pData, nSize);
 }
 
 // NTSC-U/C: 0x004ed978, PAL: 0x0052c520
@@ -31,7 +31,7 @@ IOBMemStream::~IOBMemStream() {
 }
 
 // NTSC-U/C: 0x004ee0e8, PAL: 0x0052cc90
-IBStream &IOBMemStream::ReadBytes(void *pDest, int nSize) {
+IBStream &IOBMemStream::Read(void *pDest, int nSize) {
     const int nAvailable = static_cast<int>(mBuffer.size());
     if (static_cast<unsigned>(nAvailable) < static_cast<unsigned>(mPos + nSize)) {
         nSize = nAvailable - mPos;
@@ -109,7 +109,7 @@ void IOBMemStream::Compact() {
 }
 
 // NTSC-U/C: 0x004ed068, PAL: 0x0052bc10
-OBStream &IOBMemStream::WriteBytes(const void *pSrc, int nSize) {
+OBStream &IOBMemStream::Write(const void *pSrc, int nSize) {
     if (mBuffer.capacity() < static_cast<unsigned int>(mPos + nSize)) {
         mBuffer.reserve(mBuffer.capacity() + kMemStreamGrowStep);
     }

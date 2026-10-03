@@ -371,24 +371,24 @@ void MetSaveRemixScreen::EnterAndShow() {
     mButtonList->SetSelected(kFirstButtonIndex);
 
     const HxStr playerFormat(MetConfigText(kMetStrRemixPlayer, kDialogueConfigCode, kPlayerKey));
-    const HxStr player(FormatString(kPlayerFormat, TextOrEmpty(playerFormat), mOwnerPad));
+    const HxStr player(Rnd::MakeString(kPlayerFormat, TextOrEmpty(playerFormat), mOwnerPad));
     FindText(kPlayerPanelObject)->SetText(player);
 
     if (mPersona == nullptr) {
         mPersona = MetFrontEndState::shared()->GetFirstPersona();
     }
     mFreqNameText->SetText(
-        HxStr(FormatString(kPersonaFormat, TextOrEmpty(mPersona->mAppearance.mUserName))));
+        HxStr(Rnd::MakeString(kPersonaFormat, TextOrEmpty(mPersona->mAppearance.mUserName))));
 
 #ifdef VIDEO_STANDARD_PAL
     // The text is a format with the card's name in place of `%s`.
     const HxStr command(GetMetString(kMetStrSaveRemixCommand));
     const HxStr instructions(
-        FormatString(TextOrEmpty(command), TextOrEmpty(mTargetSlot.mSlotName)));
+        Rnd::MakeString(TextOrEmpty(command), TextOrEmpty(mTargetSlot.mSlotName)));
 #else
     const HxStr command(ConfigText(kDialogueConfigCode, kCommandKey));
     const HxStr instructions(
-        FormatString(kCommandFormat, TextOrEmpty(command), TextOrEmpty(mTargetSlot.mSlotName)));
+        Rnd::MakeString(kCommandFormat, TextOrEmpty(command), TextOrEmpty(mTargetSlot.mSlotName)));
 #endif
     mInstructionsText->SetText(instructions);
 
@@ -403,11 +403,11 @@ void MetSaveRemixScreen::EnterAndShow() {
     } else {
         HxStr numbered;
         name = ConfigText(kDefaultNameConfigCode, TextOrEmpty(params.mLevelName));
-        numbered = FormatString(kNumberedNameFormat, TextOrEmpty(name));
+        numbered = Rnd::MakeString(kNumberedNameFormat, TextOrEmpty(name));
         const float flWrapWidth = mRemixNameText->mWrapWidth;
         if (flWrapWidth < mRemixNameText->GetFontWidth(TextOrEmpty(numbered), numbered.mLen)) {
             name = ConfigText(kShortNameConfigCode, TextOrEmpty(params.mLevelName));
-            numbered = FormatString(kNumberedNameFormat, TextOrEmpty(name));
+            numbered = Rnd::MakeString(kNumberedNameFormat, TextOrEmpty(name));
             if (flWrapWidth < mRemixNameText->GetFontWidth(TextOrEmpty(numbered), numbered.mLen)) {
                 Fatal(kNameTooLongFormat, TextOrEmpty(numbered));
             }

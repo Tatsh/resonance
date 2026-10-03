@@ -117,7 +117,7 @@ void *ZoneGrabTemp(int nSize);
  * @ghidraAddress NTSC-U/C: 0x00461518
  * @ghidraAddress PAL: 0x0049ebd8
  */
-void SetZonesEnabled(int nEnabled);
+void ZoneInit(int nEnabled);
 
 /**
  * Release every zone and clear the table.

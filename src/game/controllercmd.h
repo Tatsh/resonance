@@ -32,7 +32,7 @@ public:
     /**
      * Start with the reading unset.
      *
-     * Inline. NewCmd() expands it for restoreGuts() to fill.
+     * Inline. NewControllerCmd() expands it for restoreGuts() to fill.
      */
     ControllerCmd() {
     }
@@ -93,18 +93,6 @@ public:
     virtual void restoreGuts(IBStream &stream);
 
     /**
-     * Produce a command with the reading unset, for the stream to load into.
-     *
-     * The factory the GrooveWorld unit's static initialiser registers. The expanded default
-     * constructor writes only the base's words.
-     *
-     * @return The command.
-     * @ghidraAddress NTSC-U/C: 0x0018be70
-     * @ghidraAddress PAL: 0x00191918
-     */
-    static Sch::Command *NewCmd();
-
-    /**
      * Identifier the class streams itself under. The word at `0x0067f238` starts as 2.
      *
      * @ghidraAddress NTSC-U/C: 0x0067f238
@@ -115,3 +103,15 @@ public:
 private:
     MetControllerReading mReading; // +0x0c
 };
+
+/**
+ * Produce a ControllerCmd with the reading unset, for the stream to load into.
+ *
+ * The factory the GrooveWorld unit's static initialiser registers. The expanded default constructor
+ * writes only the base's words.
+ *
+ * @return The command.
+ * @ghidraAddress NTSC-U/C: 0x0018be70
+ * @ghidraAddress PAL: 0x00191918
+ */
+Sch::Command *NewControllerCmd();

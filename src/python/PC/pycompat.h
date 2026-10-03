@@ -14,11 +14,11 @@
 
 #include "os/log.h"
 
-/* The port's failed assertion logs a fixed line through the game's log and aborts, without the
-   expression, file, or line. getarrayitem's check, inlined into array_tolist at 0x006564a0, calls
-   LogPrintf (0x0053dde0) with "Assertion failed\n" and then abort (0x005e64c8). The C library's
-   assert macro is redefined at every inclusion of its header, but it identifies its failure
-   routine at each use. The routine is therefore redirected instead of the macro. */
+/* The port's failed assertion prints a fixed line and aborts, without the expression, file, or
+   line. getarrayitem's check, inlined into array_tolist at 0x006564a0, calls printf (0x0053dde0)
+   with "Assertion failed\n" and then abort (0x005e64c8). The C library's assert macro is
+   redefined at every inclusion of its header, but it identifies its failure routine at each use.
+   The routine is therefore redirected instead of the macro. */
 #ifndef __cplusplus
 #define __assert_func py_assert_failed
 static void py_assert_failed(const char *file, int line, const char *function,
@@ -29,16 +29,9 @@ static void py_assert_failed(const char *file, int line, const char *function,
     (void)line;
     (void)function;
     (void)expression;
-    LogPrintf("Assertion failed\n");
+    printf("Assertion failed\n");
     abort();
 }
-#endif
-
-/* The port's printf is the game's log. fixstate passes "XXX too many states!" and "XXX too high
-   nonterminal number!" to LogPrintf at 0x005d9fb0 and 0x005da014, and the Parser assertion in
-   PyGrammar_FindDFA calls LogPrintf at 0x00629b64 before abort. fprintf is unchanged (0x0061c1fc). */
-#ifndef __cplusplus
-#define printf LogPrintf
 #endif
 
 /* The port's module search default is empty (0x0082c9f0). A dot entry would arrive at the archive

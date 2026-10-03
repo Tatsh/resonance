@@ -73,8 +73,8 @@ constexpr int kGzInflatedSizeFieldLength = 4;
  * baseSector: %d)`. Only the second count the dump prints has no title of its
  * own, and it is the attempt counter the fatal report is raised from.
  *
- * mId is the resolved file rather than a request identifier, which
- * AsyncQueueCachedSector proves by passing it straight to SectorCacheGetLru().
+ * mId is the resolved file rather than a request identifier. AsyncQueueCachedSector passes it
+ * straight to SectorCacheGetLRU().
  */
 struct AsyncOp {
     int mId;         // +0x00
@@ -126,7 +126,7 @@ long long g_llAsyncOpDeadline;
 long long g_llAsyncOpStartTime;
 
 // NTSC-U/C: 0x006e91d0, PAL: 0x0072cb68
-AsyncJob *pHeadJobInfo = nullptr;
+AsyncJobInfo *pHeadJobInfo = nullptr;
 
 // NTSC-U/C: 0x006e91d4, PAL: 0x0072cb6c
 int g_nAsyncCallbackThread = 0;
@@ -165,10 +165,10 @@ void InitAsync() {
     g_asyncCurrentOp.mStatus = kAsyncOpIdle;
     g_asyncCurrentOp.mRetry = 0;
 
-    pHeadJobInfo = static_cast<AsyncJob *>(
-        MemAllocTagged(kAsyncJobCount * sizeof(AsyncJob), __FILE__, __LINE__));
+    pHeadJobInfo = static_cast<AsyncJobInfo *>(
+        MemAllocTagged(kAsyncJobCount * sizeof(AsyncJobInfo), __FILE__, __LINE__));
 
-    AsyncJob *pJob = pHeadJobInfo;
+    AsyncJobInfo *pJob = pHeadJobInfo;
     for (int i = 0; i < kAsyncJobCount; ++i) {
         pJob->mPrev = (i != 0) ? pJob - 1 : nullptr;
         pJob->mNext = (i != kAsyncJobCount - 1) ? pJob + 1 : nullptr;
@@ -190,17 +190,17 @@ void InitAsync() {
 // NTSC-U/C: 0x0045fc90, PAL: 0x0049d350
 void AsyncQueueRequest(AsyncRequest request) {
     if (g_nAsyncHostMedia != 0) {
-        const int nRead = FileRead(request.mFile, request.mReadBuffer, request.mReadLength);
+        const int nRead = read(request.mFile, request.mReadBuffer, request.mReadLength);
         AsyncJobComplete(&request, (nRead > 0) ? kAsyncStatusOk : kAsyncStatusReadFailed);
         if ((request.mFlags & kAsyncRequestCloseFile) != 0) {
             // AsyncJobComplete has already closed the file for the same flag.
-            FileClose(request.mFile);
+            close(request.mFile);
         }
         return;
     }
 
     const int nOffset = ((request.mFile & kFileHandleArkStream) != 0) ?
-                            GetArkStreamPosition(request.mFile) :
+                            ArkfileGetCurrAbsOffset(request.mFile) :
                             FileSeek(request.mFile, 0, kFileSeekCur);
 
     const int nFirstChunk = nOffset / kSectorCacheRowSize;
@@ -213,7 +213,7 @@ void AsyncQueueRequest(AsyncRequest request) {
 
     char *pDest = static_cast<char *>(request.mReadBuffer);
     int nRemaining = request.mReadLength;
-    AsyncJob *pPrev = nullptr;
+    AsyncJobInfo *pPrev = nullptr;
 
     for (int i = 0; i < nChunkCount; ++i) {
         int nChunkOffset;
@@ -242,7 +242,7 @@ void AsyncQueueRequest(AsyncRequest request) {
         }
 
         if (bNeedJob) {
-            AsyncJob *pJob = AsyncGetFreeJobChain();
+            AsyncJobInfo *pJob = AsyncGetFreeJobChain();
             if (request.mJobs == nullptr) {
                 request.mJobs = pJob;
             } else {
@@ -305,7 +305,7 @@ int AsyncSubmitRequest(int nFile,
         InitAsync();
     }
 
-    const int nStreamFile = ResolveAsyncStreamFile(nFile);
+    const int nStreamFile = AsyncGetIdFromFd(nFile);
 
     AsyncRequest request;
     // mJobs is the one field the clear alone establishes.
@@ -333,9 +333,9 @@ int AsyncSubmitRequest(int nFile,
 }
 
 // NTSC-U/C: 0x00460d90, PAL: 0x0049e450
-AsyncJob *AsyncGetFreeJobChain() {
-    AsyncJob *pJob = pHeadJobInfo;
-    AsyncJob *pNext = pJob->mNext;
+AsyncJobInfo *AsyncGetFreeJobChain() {
+    AsyncJobInfo *pJob = pHeadJobInfo;
+    AsyncJobInfo *pNext = pJob->mNext;
     // The head is advanced before the check, so an exhausted list leaves a null
     // head behind.
     pHeadJobInfo = pNext;
@@ -346,12 +346,12 @@ AsyncJob *AsyncGetFreeJobChain() {
 }
 
 // NTSC-U/C: 0x00460dd8, PAL: 0x0049e498
-void AsyncReleaseJobChain(AsyncJob *pChain) {
+void AsyncReturnJobChain(AsyncJobInfo *pChain) {
     if (pChain == nullptr) {
         return;
     }
 
-    AsyncJob *pTail = pChain;
+    AsyncJobInfo *pTail = pChain;
     while (pTail->mNext != nullptr) {
         pTail = pTail->mNext;
     }
@@ -382,7 +382,7 @@ void AsyncIssueOp() {
             g_nAsyncOpLsn, kAsyncJobChunkSectors, g_asyncCurrentOp.mBuffer, &g_asyncOpReadMode);
         break;
     default:
-        LogPrintf("AsyncIssueOp: unexpected op status: %d\n", g_asyncCurrentOp.mStatus);
+        printf("AsyncIssueOp: unexpected op status: %d\n", g_asyncCurrentOp.mStatus);
         return;
     }
 
@@ -511,7 +511,7 @@ int TakeFinishedAsyncOp(int *pnFile, int *pnSector, void **ppBuffer) {
 }
 
 // Take one finished job out of its request's chain and put it back on the free list.
-inline void UnlinkAsyncJob(AsyncRequest *pRequest, AsyncJob *pJob) {
+inline void UnlinkAsyncJob(AsyncRequest *pRequest, AsyncJobInfo *pJob) {
     if (pJob->mNext != nullptr) {
         pJob->mNext->mPrev = pJob->mPrev;
     }
@@ -535,9 +535,9 @@ inline void UnlinkAsyncJob(AsyncRequest *pRequest, AsyncJob *pJob) {
 // This is the path a request on a loose file takes. The cache is keyed by 64 KiB chunks of an
 // archive, and a loose file has no archive to key it by. The job therefore reads straight from the
 // file through the SDK primitives.
-void DeliverAsyncJobData(AsyncRequest *pRequest, AsyncJob *pJob) {
+void DeliverAsyncJobData(AsyncRequest *pRequest, AsyncJobInfo *pJob) {
     const int nFile = ((pRequest->mFile & kFileHandleArkStream) != 0) ?
-                          GetArkStreamArkId(pRequest->mFile & ~kFileHandleArkStream) :
+                          GetArkfileIdFromFileFd(pRequest->mFile & ~kFileHandleArkStream) :
                           pRequest->mFile;
 
     sceLseek(nFile, pJob->mSector * kSectorCacheRowSize + pJob->mSectorOffset, SCE_SEEK_SET);
@@ -579,9 +579,9 @@ void DistributeAsyncSectorData(int nFile, int nSector, const void *pSectorData) 
             continue;
         }
 
-        AsyncJob *pJob = it->mJobs;
+        AsyncJobInfo *pJob = it->mJobs;
         while (pJob != nullptr) {
-            AsyncJob *pNext = pJob->mNext;
+            AsyncJobInfo *pNext = pJob->mNext;
             if (pJob->mSector == nSector) {
                 memcpy(pJob->mBuffer,
                        static_cast<const char *>(pSectorData) + pJob->mSectorOffset,
@@ -608,7 +608,7 @@ void DistributeAsyncSectorData(int nFile, int nSector, const void *pSectorData) 
 // the whole of it, which is what stops AsyncQueueRequest() copying a half-filled row out. The
 // result is the constant 1 and the one caller discards it.
 int AsyncQueueCachedSector(int nFile, int nSector, int nBaseSector) {
-    SectorCacheRow *pRow = SectorCacheGetLru(nFile, nSector);
+    SectorCacheRow *pRow = SectorCacheGetLRU(nFile, nSector);
     if (pRow == nullptr) {
         Fatal("AsyncQueueCachedSector: internal error!!\n");
     }
@@ -656,19 +656,19 @@ void AsyncPumpCompletedRequests() {
         }
         it->mCallback->Done(it->mId, it->mFile, it->mBuffer, it->mLength, it->mStatus);
         if (it->mJobs != nullptr) {
-            AsyncReleaseJobChain(it->mJobs);
+            AsyncReturnJobChain(it->mJobs);
         }
         it = completedJobList.erase(it);
     }
 }
 
 // NTSC-U/C: 0x00460d58, PAL: 0x0049e418
-int ResolveAsyncStreamFile(int nFile) {
+int AsyncGetIdFromFd(int nFile) {
     if ((nFile & kFileHandleArkStream) == 0) {
         return nFile;
     }
 
-    return GetArkStreamArkId(nFile & ~kFileHandleArkStream);
+    return GetArkfileIdFromFileFd(nFile & ~kFileHandleArkStream);
 }
 
 // NTSC-U/C: 0x00460f78, PAL: 0x0049e638
@@ -683,15 +683,16 @@ int MatchesCurrentAsyncOp(int nFile, int nSector) {
 // NTSC-U/C: 0x0045ffa8, PAL: 0x0049d668
 void AsyncJobComplete(AsyncRequest *pRequest, int nStatus) {
     if (nStatus > 0) {
-        LogPrintf("AsyncJobComplete: job %d has error: %d\n", pRequest->mId, nStatus);
+        printf("AsyncJobComplete: job %d has error: %d\n", pRequest->mId, nStatus);
     } else if ((pRequest->mFlags & kAsyncRequestInflate) != 0) {
-        if (InflateGzBuffer(pRequest->mReadBuffer, pRequest->mReadLength, pRequest->mBuffer) <= 0) {
+        if (GzipDecompressRamToRam(
+                pRequest->mReadBuffer, pRequest->mReadLength, pRequest->mBuffer) <= 0) {
             nStatus = kAsyncStatusInflateFailed;
         }
     }
 
     if ((pRequest->mFlags & kAsyncRequestCloseFile) != 0) {
-        FileClose(pRequest->mFile);
+        close(pRequest->mFile);
     }
     pRequest->mStatus = nStatus;
     completedJobList.push_back(*pRequest);
@@ -712,7 +713,7 @@ int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength) {
             *pnLength = it->mLength;
         }
         if (it->mJobs != nullptr) {
-            AsyncReleaseJobChain(it->mJobs);
+            AsyncReturnJobChain(it->mJobs);
         }
         completedJobList.erase(it);
         return nStatus;
@@ -732,10 +733,10 @@ void AsyncCancelRequest(int nHandle) {
             MemFreeTagged(it->mBuffer, __FILE__, __LINE__);
         }
         if ((it->mFlags & kAsyncRequestCloseFile) != 0) {
-            FileClose(it->mFile);
+            close(it->mFile);
         }
         if (it->mJobs != nullptr) {
-            AsyncReleaseJobChain(it->mJobs);
+            AsyncReturnJobChain(it->mJobs);
         }
         pendingJobList.erase(it);
         return;
@@ -752,7 +753,7 @@ void AsyncCancelRequest(int nHandle) {
         // A finished request's file is not closed here, unlike the pending case above. Nothing
         // reopens it either.
         if (it->mJobs != nullptr) {
-            AsyncReleaseJobChain(it->mJobs);
+            AsyncReturnJobChain(it->mJobs);
         }
         completedJobList.erase(it);
         return;
@@ -761,30 +762,30 @@ void AsyncCancelRequest(int nHandle) {
 
 // NTSC-U/C: 0x0045faf0, PAL: 0x0049d1b0
 void AsyncDump() {
-    LogPrintf("\nASYNC DUMP\n\n");
-    LogPrintf("current op:  id: %d, sector: %d, buffer: %p, status: %d, retry: %d (%d)\n",
-              g_asyncCurrentOp.mId,
-              g_asyncCurrentOp.mSector,
-              g_asyncCurrentOp.mBuffer,
-              g_asyncCurrentOp.mStatus,
-              g_asyncCurrentOp.mRetry,
-              g_asyncCurrentOp.mRetryCount);
+    printf("\nASYNC DUMP\n\n");
+    printf("current op:  id: %d, sector: %d, buffer: %p, status: %d, retry: %d (%d)\n",
+           g_asyncCurrentOp.mId,
+           g_asyncCurrentOp.mSector,
+           g_asyncCurrentOp.mBuffer,
+           g_asyncCurrentOp.mStatus,
+           g_asyncCurrentOp.mRetry,
+           g_asyncCurrentOp.mRetryCount);
 
-    LogPrintf("num Pending Jobs: %d\n", static_cast<int>(pendingJobList.size()));
+    printf("num Pending Jobs: %d\n", static_cast<int>(pendingJobList.size()));
     for (auto it = pendingJobList.begin(); it != pendingJobList.end(); ++it) {
-        LogPrintf("   h: %d\n", it->mId);
+        printf("   h: %d\n", it->mId);
     }
 
-    LogPrintf("num Completed Jobs: %d\n", static_cast<int>(completedJobList.size()));
+    printf("num Completed Jobs: %d\n", static_cast<int>(completedJobList.size()));
     for (auto it = completedJobList.begin(); it != completedJobList.end(); ++it) {
-        LogPrintf("   h: %d\n", it->mId);
+        printf("   h: %d\n", it->mId);
     }
 
     int nFreeJobs = 0;
-    for (const AsyncJob *pJob = pHeadJobInfo; pJob != nullptr; pJob = pJob->mNext) {
+    for (const AsyncJobInfo *pJob = pHeadJobInfo; pJob != nullptr; pJob = pJob->mNext) {
         ++nFreeJobs;
     }
-    LogPrintf("num Free Job Chains: %d\n", nFreeJobs);
+    printf("num Free Job Chains: %d\n", nFreeJobs);
 }
 
 // NTSC-U/C: 0x0045f148, PAL: 0x0049c808
@@ -819,7 +820,7 @@ int AsyncLoadFileByPath(const char *pszPath,
     int nStoredLength;
     int nInflatedLength;
     if (bArkStream != 0) {
-        const ArkFileEntry *pEntry = GetArkStreamFileEntry(nFile & ~kFileHandleArkStream);
+        const ArkFileEntry *pEntry = FindOpenFileInArk(nFile & ~kFileHandleArkStream);
         nStoredLength = pEntry->mLength;
         nInflatedLength = pEntry->mSize;
     } else {
@@ -827,7 +828,7 @@ int AsyncLoadFileByPath(const char *pszPath,
         if (bGzipped != 0) {
             // The inflated size is the last four bytes of a gzip member.
             FileSeek(nFile, -kGzInflatedSizeFieldLength, kFileSeekEnd);
-            FileRead(nFile, &nInflatedLength, kGzInflatedSizeFieldLength);
+            read(nFile, &nInflatedLength, kGzInflatedSizeFieldLength);
         } else {
             nInflatedLength = nStoredLength;
         }
@@ -868,7 +869,7 @@ int AsyncLoadFileByPath(const char *pszPath,
         request.mReadBuffer = static_cast<char *>(pBuffer) + (nBufferLength - nStoredLength);
         request.mReadLength = nStoredLength;
         request.mLength = nBufferLength;
-        request.mStreamFile = ResolveAsyncStreamFile(nFile);
+        request.mStreamFile = AsyncGetIdFromFd(nFile);
         request.mFlags = kAsyncRequestCloseFile | kAsyncRequestInflate;
         request.mCallback = pCallback;
         request.mStatus = kAsyncStatusPending;
@@ -891,7 +892,7 @@ int AsyncLoadFileByPath(const char *pszPath,
     request.mReadBuffer = pBuffer;
     request.mReadLength = nLength;
     request.mLength = nLength;
-    request.mStreamFile = ResolveAsyncStreamFile(nFile);
+    request.mStreamFile = AsyncGetIdFromFd(nFile);
     request.mFlags = kAsyncRequestCloseFile;
     request.mCallback = pCallback;
     request.mStatus = kAsyncStatusPending;
@@ -904,17 +905,17 @@ int AsyncLoadFileByPath(const char *pszPath,
     ++g_nAsyncNextJobId;
     // The file is closed here and kAsyncRequestCloseFile closes it a second time once the request
     // completes. On disc media that first close lands while the read is still queued.
-    FileClose(nFile);
+    close(nFile);
     return request.mId;
 }
 
 // NTSC-U/C: 0x0045fa38, PAL: 0x0049d0f8
-void CountAsyncQueues(int *pnPending, int *pnCompleted, int *pnFreeJobs) {
-    *pnPending = static_cast<int>(pendingJobList.size());
-    *pnCompleted = static_cast<int>(completedJobList.size());
+void AsyncStatus(int &nPending, int &nCompleted, int &nFreeJobs) {
+    nPending = static_cast<int>(pendingJobList.size());
+    nCompleted = static_cast<int>(completedJobList.size());
 
-    *pnFreeJobs = 0;
-    for (const AsyncJob *pJob = pHeadJobInfo; pJob != nullptr; pJob = pJob->mNext) {
-        ++*pnFreeJobs;
+    nFreeJobs = 0;
+    for (const AsyncJobInfo *pJob = pHeadJobInfo; pJob != nullptr; pJob = pJob->mNext) {
+        ++nFreeJobs;
     }
 }

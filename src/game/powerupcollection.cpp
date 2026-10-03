@@ -19,21 +19,6 @@ constexpr int kMaximumCount = 9;
 // The fourth argument Deploy() passes to Powerup::Deploy().
 constexpr int kDeployUnused = 0;
 
-// Predicate std::find_if runs over the entries. The name is a placeholder: the class is
-// file-private, non-polymorphic, and four bytes, so no descriptor, allocation tag, or literal in
-// the image supplies one. The body appears inside the instantiation at 0x001cc628, which dispatches
-// Powerup::Type() on each entry and compares the result against the stored kind.
-struct MatchesType {
-    explicit MatchesType(int nType) : mType(nType) {
-    }
-
-    bool operator()(const PowerupCollection::Entry &entry) const {
-        return entry == mType;
-    }
-
-    int mType;
-};
-
 } // namespace
 
 // NTSC-U/C: 0x001cad70, PAL: 0x001d0c28
@@ -42,7 +27,7 @@ PowerupCollection::PowerupCollection(LocalPlayer *pOwner, int bUnlimited)
     std::vector<int> types;
     QueryConfigVector(&types, kPowerupKindsConfigCode);
     for (std::vector<int>::iterator it = types.begin(); it != types.end(); ++it) {
-        Entry entry;
+        PowCount entry;
         entry.mPowerup = Powerup::CreateForType(*it);
         entry.mCount = 0;
         mEntries.push_back(entry);
@@ -56,15 +41,14 @@ PowerupCollection::PowerupCollection(LocalPlayer *pOwner, int bUnlimited)
 // NTSC-U/C: 0x001cb090, PAL: 0x001d0f48
 // The vector release and the base destructor after it are both compiler expansions.
 PowerupCollection::~PowerupCollection() {
-    for (std::vector<Entry>::iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
+    for (std::vector<PowCount>::iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
         delete it->mPowerup;
     }
 }
 
 // NTSC-U/C: 0x001cb230, PAL: 0x001d10e8
-void PowerupCollection::Add(int nType) {
-    std::vector<Entry>::iterator it =
-        std::find_if(mEntries.begin(), mEntries.end(), MatchesType(nType));
+void PowerupCollection::Add(PowerupType type) {
+    std::vector<PowCount>::iterator it = std::find(mEntries.begin(), mEntries.end(), type);
     if (it == mEntries.end()) {
         return;
     }
@@ -140,13 +124,13 @@ void PowerupCollection::Deploy(int nTrack, int nBar) {
 }
 
 // NTSC-U/C: 0x001cc9a0, PAL: 0x001d2858
-int PowerupCollection::HasSelection() {
+int PowerupCollection::HasSelection() const {
     return mSelected != -1;
 }
 
 // NTSC-U/C: 0x001cb620, PAL: 0x001d14d8
-void PowerupCollection::SendState() {
-    for (std::vector<Entry>::iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
+void PowerupCollection::SendState() const {
+    for (std::vector<PowCount>::const_iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
         if (it->mCount != 0) {
             PowerupCountMsg msg(it - mEntries.begin(), it->mCount, mOwner);
             Send(&msg);

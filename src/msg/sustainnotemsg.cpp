@@ -40,10 +40,10 @@ void SustainNoteMsg::PrintExtra(std::ostream &stream) const {
 // NTSC-U/C: 0x003e3a70, PAL: 0x0041be10
 void SustainNoteMsg::saveGuts(OBStream &stream) const {
     unsigned char note = mNote;
-    stream.WriteBytes(&note, sizeof(note));
+    stream.Write(&note, sizeof(note));
 }
 
 // NTSC-U/C: 0x003e3ab0, PAL: 0x0041be50
 void SustainNoteMsg::restoreGuts(IBStream &stream) {
-    stream.ReadBytes(&mNote, sizeof(mNote));
+    stream.Read(&mNote, sizeof(mNote));
 }

@@ -17,7 +17,7 @@
 #define flush_window GzipFlushWindow
 
 // Tables come from the fixed pool, and releasing one does nothing. inflate() rewinds the pool.
-#define malloc(size) HuftAlloc((size) / sizeof(struct huft))
+#define malloc(size) HuftMalloc((size) / sizeof(struct huft))
 #define free(p) ((void)(p))
 
 #include "gzip-1.2.4/inflate.c"
@@ -46,12 +46,12 @@ void HuftReset(void) {
 }
 
 // NTSC-U/C: 0x0063e1e0, PAL: 0x0067ed70
-struct huft *HuftAlloc(unsigned nEntries) {
+struct huft *HuftMalloc(unsigned nEntries) {
     struct huft *pTable = pHuftNext;
     pHuftNext = pTable + nEntries;
     if (pHuftNext < huftTable + kHuftPoolSize) {
         return pTable;
     }
-    LogPrintf("HUFT MEMORY EXCEEDED!!\n");
+    printf("HUFT MEMORY EXCEEDED!!\n");
     return NULL;
 }

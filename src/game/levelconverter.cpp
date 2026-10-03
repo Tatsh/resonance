@@ -165,7 +165,7 @@ inline int StatusRank(unsigned char nStatus) {
 }
 
 // NTSC-U/C: 0x001e6450, PAL: 0x001ec620
-bool CompareEventStatus(const Mid::Reader::Event &left, const Mid::Reader::Event &right) {
+bool MidiLess(const Mid::Reader::Midi &left, const Mid::Reader::Midi &right) {
     const int nLeft = StatusRank(left.mStatus);
     const int nRight = StatusRank(right.mStatus);
     if (nLeft == nRight) {
@@ -274,7 +274,7 @@ void LevelConverter::Convert(const char *pszPath,
     stream.mSwapBytes = 1;
     HxIListChunk chunks(&stream, false);
     Mid::Reader reader(&chunks, this);
-    reader.mCompare = CompareEventStatus;
+    reader.mCompare = MidiLess;
     reader.ReadAllTracks();
     mBuilder->DoneLoading();
     FinishErrorLog();

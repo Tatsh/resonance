@@ -35,12 +35,12 @@ HxStr FormatHxStr(const char *pszFormat, ...) {
 HxStr FormatScriptTemplate(int nTemplate, ...) {
     va_list args;
     va_start(args, nTemplate);
-    HxStr message = FormatMessage(GetScriptTemplate(nTemplate), args, kFormatUnusedWord);
+    HxStr message = FormatMessage(Resid2Str(nTemplate), args, kFormatUnusedWord);
     va_end(args);
     return message;
 }
 
 // NTSC-U/C: 0x005e4148, PAL: 0x00626308
-HxStr FormatMessage(const HxStr &format, va_list args) {
+HxStr FmtImp(const HxStr &format, va_list args) {
     return FormatMessage(format, args, kFormatUnusedWord);
 }

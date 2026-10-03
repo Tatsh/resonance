@@ -23,7 +23,7 @@ std::set<int>::iterator sIter = sReserved.end();
 } // namespace
 
 // NTSC-U/C: 0x005e4dc8, PAL: 0x00626f88
-int CmdID::AllocateValue() {
+int Sch::CmdID::AllocateValue() {
     while (sIter != sReserved.end()) {
         if (*sIter != g_nNextCmdIdValue) {
             break;
@@ -35,23 +35,23 @@ int CmdID::AllocateValue() {
 }
 
 // NTSC-U/C: 0x005e5908, PAL: 0x00627ac8
-void CmdID::ReserveID(CmdID id) {
+void Sch::CmdID::ReserveID(CmdID id) {
     sReserved.insert(id.mValue);
     sIter = sReserved.begin();
 }
 
 // NTSC-U/C: 0x005e59a0, PAL: 0x00627b60
-OBStream &CmdID::Save(OBStream &stream) {
+OBStream &Sch::CmdID::Save(OBStream &stream) {
     int nValue = mValue;
-    return stream.Write(&nValue, sizeof(nValue));
+    return stream.WriteLE(&nValue, sizeof(nValue));
 }
 
 // NTSC-U/C: 0x005e59e0, PAL: 0x00627ba0
-IBStream &CmdID::Load(IBStream &stream) {
-    return stream.Read(&mValue, sizeof(mValue));
+IBStream &Sch::CmdID::Load(IBStream &stream) {
+    return stream.ReadLE(&mValue, sizeof(mValue));
 }
 
 // NTSC-U/C: 0x005e5958, PAL: 0x00627b18
-void CmdID::Print(std::ostream &stream) {
+void Sch::CmdID::Print(std::ostream &stream) {
     stream << "{cmdID " << mValue << '}';
 }

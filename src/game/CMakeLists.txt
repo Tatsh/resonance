@@ -32,7 +32,7 @@ set(RESONANCE_GAME_SRCS
     gameinfo.cpp
     gamemanagerimpl.cpp
     gameparams.cpp
-    gameplayback.cpp
+    gameplaybacker.cpp
     gamepowerbarmgr.cpp
     gamepowerupplacer.cpp
     gamer.cpp

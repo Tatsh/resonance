@@ -37,11 +37,11 @@ void CSClientStatusPacket::saveGuts(OBStream &stream) const {
     Packet::saveGuts(stream);
 
     int status = mStatus;
-    stream.Write(&status, sizeof(status));
+    stream.WriteLE(&status, sizeof(status));
 
     // Yes, the binary moves the client identifier a second time.
     int clientIdAgain = mClientId;
-    stream.Write(&clientIdAgain, sizeof(clientIdAgain));
+    stream.WriteLE(&clientIdAgain, sizeof(clientIdAgain));
 }
 
 // NTSC-U/C: 0x003e6198, PAL: 0x0041e478
@@ -49,10 +49,10 @@ void CSClientStatusPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
 
     int status = 0;
-    stream.Read(&status, sizeof(status));
+    stream.ReadLE(&status, sizeof(status));
 
     // Yes, the binary moves the client identifier a second time.
-    stream.Read(&mClientId, sizeof(mClientId));
+    stream.ReadLE(&mClientId, sizeof(mClientId));
 
     mStatus = status;
 }

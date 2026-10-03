@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stddef.h>
+#include <sys/types.h>
+
 class AsyncCallback;
 
 /** The number of job records the ring is built from. */
@@ -50,24 +53,23 @@ constexpr int kAsyncStatusInflateFailed = 5;
 /**
  * One queued asynchronous read.
  *
- * The type name comes from the log strings, which write of pending jobs,
- * completed jobs, and free job chains. A job is 28 bytes and lives in one
- * preallocated ring, so no job is ever allocated on its own. `mNext` threads a
- * job onto exactly one of three lists at a time, which are the free list, a
- * stream's pending list, and the completed list.
+ * Its name comes from the debugging symbols of the North American demo release. A job is 28 bytes
+ * and is stored in one preallocated ring. No job is ever allocated separately. `mNext` threads a
+ * job onto exactly one of three lists at a time (the free list, a stream's pending list, and the
+ * completed list).
  *
  * A job covers one chunk of kSectorCacheRowSize bytes. `mSector` therefore indexes 64 KiB chunks
  * of the file rather than drive sectors, and DeliverAsyncJobData() reconstructs the byte offset as
  * `mSector * kSectorCacheRowSize + mSectorOffset`.
  */
-struct AsyncJob {
-    AsyncJob *mNext;   /*!< The next job, null at the end of a chain. +0x00 */
-    AsyncJob *mPrev;   /*!< The previous job, null at the head of a chain. +0x04 */
-    int mSector;       /*!< The 64 KiB chunk of the file the job transfers. +0x08 */
-    int mSectorCount;  /*!< Always 32, the drive sectors a chunk occupies. No reader. +0x0c */
-    void *mBuffer;     /*!< The destination the copy writes to. +0x10 */
-    int mSectorOffset; /*!< Byte offset inside the chunk the transfer starts at. +0x14 */
-    int mLength;       /*!< Bytes to copy. +0x18 */
+struct AsyncJobInfo {
+    AsyncJobInfo *mNext; /*!< The next job, null at the end of a chain. +0x00 */
+    AsyncJobInfo *mPrev; /*!< The previous job, null at the head of a chain. +0x04 */
+    int mSector;         /*!< The 64 KiB chunk of the file the job transfers. +0x08 */
+    int mSectorCount;    /*!< Always 32, the drive sectors a chunk occupies. No reader. +0x0c */
+    void *mBuffer;       /*!< The destination the copy writes to. +0x10 */
+    int mSectorOffset;   /*!< Byte offset inside the chunk the transfer starts at. +0x14 */
+    int mLength;         /*!< Bytes to copy. +0x18 */
 };
 
 /**
@@ -95,7 +97,7 @@ struct AsyncRequest {
     int mLength;              /*!< Bytes the caller receives. +0x14 */
     int mStreamFile;          /*!< mFile resolved to the file the sector cache is keyed by. +0x18 */
     unsigned mFlags;          /*!< kAsyncRequestCloseFile and kAsyncRequestInflate. +0x1c */
-    AsyncJob *mJobs;          /*!< Job chain, released whenever the request exits a list. +0x20 */
+    AsyncJobInfo *mJobs;      /*!< Job chain, released whenever the request exits a list. +0x20 */
     AsyncCallback *mCallback; /*!< Receiver the pump reports completion to, or null. +0x24 */
     int mStatus;              /*!< What AsyncPollComplete() reports. +0x28 */
     int mOwnsBuffer;          /*!< Non-zero when cancel must release mBuffer. +0x2c */
@@ -186,7 +188,7 @@ int AsyncLoadFileByPath(const char *pszPath,
  * The request is passed by value, which is what the image does. Every caller copies the 48-byte
  * record into its outgoing argument area and passes the address of the copy.
  *
- * On host media the read runs at once through FileRead() and the request completes in place. On
+ * On host media the read runs at once through read() and the request completes in place. On
  * disc media the file position is taken, the transfer is divided at kSectorCacheRowSize boundaries,
  * and for an ark stream every chunk the sector cache already buffers is copied straight out of its
  * row. Each remaining chunk takes a job off the free chain. A request with no job at all completes
@@ -223,7 +225,7 @@ void AsyncJobComplete(AsyncRequest *pRequest, int nStatus);
  * @ghidraAddress NTSC-U/C: 0x00460d58
  * @ghidraAddress PAL: 0x0049e418
  */
-int ResolveAsyncStreamFile(int nFile);
+int AsyncGetIdFromFd(int nFile);
 
 /**
  * Report whether the operation the drive is servicing right now covers a chunk.
@@ -350,13 +352,13 @@ void AsyncDump();
  * its own copies of these loops rather than through this routine, and the names here come from the
  * messages it prints them with. The one caller is a debug reader outside this subsystem.
  *
- * @param pnPending Receives the number of queued requests.
- * @param pnCompleted Receives the number of finished requests no caller has taken yet.
- * @param pnFreeJobs Receives the number of job records still free.
+ * @param nPending Receives the number of queued requests.
+ * @param nCompleted Receives the number of finished requests no caller has taken yet.
+ * @param nFreeJobs Receives the number of job records still free.
  * @ghidraAddress NTSC-U/C: 0x0045fa38
  * @ghidraAddress PAL: 0x0049d0f8
  */
-void CountAsyncQueues(int *pnPending, int *pnCompleted, int *pnFreeJobs);
+void AsyncStatus(int &nPending, int &nCompleted, int &nFreeJobs);
 
 /**
  * Take the next job off the free list.
@@ -367,7 +369,7 @@ void CountAsyncQueues(int *pnPending, int *pnCompleted, int *pnFreeJobs);
  * @ghidraAddress NTSC-U/C: 0x00460d90
  * @ghidraAddress PAL: 0x0049e450
  */
-AsyncJob *AsyncGetFreeJobChain();
+AsyncJobInfo *AsyncGetFreeJobChain();
 
 /**
  * Put a whole chain of jobs back on the free list.
@@ -380,7 +382,7 @@ AsyncJob *AsyncGetFreeJobChain();
  * @ghidraAddress NTSC-U/C: 0x00460dd8
  * @ghidraAddress PAL: 0x0049e498
  */
-void AsyncReleaseJobChain(AsyncJob *pChain);
+void AsyncReturnJobChain(AsyncJobInfo *pChain);
 
 /**
  * Open a file by path.
@@ -395,7 +397,7 @@ void AsyncReleaseJobChain(AsyncJob *pChain);
  * A read first tries a mounted archive when UsingArkFiles() reports ark use, which yields an ark
  * stream with kFileHandleArkStream set. Otherwise, and on a CD-only boot for a path that is not
  * `.py`, `.pyc`, or `.gz`, the path is opened on the disc as `cdrom0:` plus
- * AppendPathComponent() for either CD boot mode, or on `host0:` for a host-only boot. A disc open
+ * FilenameToISO9660() for either CD boot mode, or on `host0:` for a host-only boot. A disc open
  * that fails falls back to `host0:` when the boot mode permits both media. A file-service handle
  * has kFileHandleSceFile set.
  *
@@ -412,10 +414,10 @@ int FileOpen(const char *pszPath, int nFlags, ...);
 /**
  * Read one run of bytes from a file.
  *
- * The game's replacement for the C library's `read()`, which its trace line names. An ark stream
- * goes to ReadArkStreamThroughCache(). A file-service handle waits for the async layer and the
- * drive and goes to `sceRead()` with kFileHandleSceFile cleared. Any other handle goes to the
- * console reader. Every read is traced to the file log.
+ * The game's own `read()`, in place of the C library's. An ark stream goes to
+ * ReadArkStreamThroughCache(). A file-service handle waits for the async layer and the drive and
+ * goes to `sceRead()` with kFileHandleSceFile cleared. Any other handle goes to the console reader.
+ * Every read is traced to the file log.
  *
  * @param nFile The file to read.
  * @param pBuffer The destination.
@@ -424,14 +426,14 @@ int FileOpen(const char *pszPath, int nFlags, ...);
  * @ghidraAddress NTSC-U/C: 0x0047e060
  * @ghidraAddress PAL: 0x004bbd38
  */
-int FileRead(int nFile, void *pBuffer, int nLength);
+extern "C" ssize_t read(int nFile, void *pBuffer, size_t nLength);
 
 /**
  * Move a file's read position.
  *
- * The game's replacement for the C library's `lseek()`, which its trace line names. It dispatches
- * on the handle in the same way as FileRead(), to SeekArkStream(), to `sceLseek()`, or to the
- * console stub, which reports -1. Every seek is traced to the file log.
+ * The game's replacement for the C library's `lseek()`, the routine its trace line identifies. It
+ * dispatches on the handle in the same way as read(), to SeekArkStream(), to `sceLseek()`, or to
+ * the console stub. The console stub reports -1. Every seek is traced to the file log.
  *
  * @param nFile The file to move.
  * @param nOffset The offset to move by.
@@ -445,24 +447,25 @@ int FileSeek(int nFile, int nOffset, int nOrigin);
 /**
  * Close a file.
  *
- * The game's replacement for the C library's `close()`, which its trace line names. The close is
- * traced to the file log first. An ark stream's record is erased, a file-service handle goes to
- * `sceClose()`, and any other handle goes to the console stub, which reports -1.
+ * The game's own `close()`, in place of the C library's. The close is traced to the file log
+ * first. An ark stream's record is erased, a file-service handle goes to `sceClose()`, and
+ * any other handle goes to the console stub. The console stub reports -1.
  *
  * @param nFile The file to close.
  * @return The result of the close.
  * @ghidraAddress NTSC-U/C: 0x0047dfb0
  * @ghidraAddress PAL: 0x004bbc88
  */
-int FileClose(int nFile);
+extern "C" int close(int nFile);
 
 /**
  * Write to a file.
  *
- * The game's replacement for the C library's `write()`. An ark stream, kFileHandleArkStream,
- * cannot be written and reports -1. A file-service handle goes to `sceWrite()` with
- * kFileHandleSceFile cleared, and any other handle goes to the console writer. Writes are not
- * traced. The C library's write path and the embedded interpreter's `posix.write` call it.
+ * The game's own `write()`, in place of the C library's. An ark stream,
+ * kFileHandleArkStream, cannot be written and reports -1. A file-service handle goes to
+ * `sceWrite()` with kFileHandleSceFile cleared, and any other handle goes to the console writer.
+ * Writes are not traced. The C library's write path and the embedded interpreter's `posix.write`
+ * call it.
  *
  * @param nFile The file to write.
  * @param pBuffer The source.
@@ -471,22 +474,21 @@ int FileClose(int nFile);
  * @ghidraAddress NTSC-U/C: 0x0047e178
  * @ghidraAddress PAL: 0x004bbe50
  */
-int FileWrite(int nFile, const void *pBuffer, int nLength);
+extern "C" ssize_t write(int nFile, const void *pBuffer, size_t nLength);
 
 /**
  * Report whether a file is an interactive terminal.
  *
- * The game's replacement for the C library's `isatty()`. An ark stream or a file-service handle is
- * never a terminal, and any other handle goes to the console stub, which reports 1. The embedded
- * interpreter's `raw_input` and its interactive-input test call it. The title is inferred from
- * those callers.
+ * The game's own `isatty()`, in place of the C library's. An ark stream or a file-service handle
+ * is never a terminal, and any other handle goes to the console stub. The console stub reports 1.
+ * The embedded interpreter's `raw_input` and its interactive-input test call it.
  *
  * @param nFile The file to test.
  * @return Non-zero for a terminal.
  * @ghidraAddress NTSC-U/C: 0x0047e2f0
  * @ghidraAddress PAL: 0x004bbfc8
  */
-int FileIsatty(int nFile);
+extern "C" int isatty(int nFile);
 
 /**
  * Report an ark stream's read position.
@@ -499,7 +501,7 @@ int FileIsatty(int nFile);
  * @ghidraAddress NTSC-U/C: 0x0055c028
  * @ghidraAddress PAL: 0x0059d248
  */
-int GetArkStreamPosition(int nStream);
+int ArkfileGetCurrAbsOffset(int nStream);
 
 /**
  * Move an ark stream's read position.

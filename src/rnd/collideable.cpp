@@ -133,16 +133,16 @@ void Collideable::RemoveCollide(Collideable *pCollide) {
 }
 
 // NTSC-U/C: 0x00502a28, PAL: 0x00541838
-void Collideable::FindCollisions(const Ray &ray, HitSink &sink) {
+void Collideable::FindCollisions(const Segment &ray, std::list<Collision> &collisions) {
     for (std::list<Collideable *>::iterator it = mCollides.begin(); it != mCollides.end(); ++it) {
-        (*it)->FindCollisions(ray, sink);
+        (*it)->FindCollisions(ray, collisions);
     }
 }
 
 // NTSC-U/C: 0x00502ab8, PAL: 0x005418c8
-void Collideable::CollideScreen(const Ray &ray, HitSink &sink) {
+void Collideable::FindCollisions(const Vector2 &point, std::list<Collision> &collisions) {
     for (std::list<Collideable *>::iterator it = mCollides.begin(); it != mCollides.end(); ++it) {
-        (*it)->CollideScreen(ray, sink);
+        (*it)->FindCollisions(point, collisions);
     }
 }
 

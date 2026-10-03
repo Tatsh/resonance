@@ -30,7 +30,7 @@ constexpr int kLoopRangeArgCount = 3;
 void ScriptParseAnimatableArgs(Py::Tuple args, Rnd::Animatable **ppTarget, float *pflValue) {
     if (args.length() != kAnimatableArgCount) {
         throw Py::TypeError(
-            HxStr(FormatString("incorrect # of args; expected 2, got %d", args.length())));
+            HxStr(Rnd::MakeString("incorrect # of args; expected 2, got %d", args.length())));
     }
     Py::Object element = args.getItem(0);
     Py::String text(element);
@@ -38,7 +38,7 @@ void ScriptParseAnimatableArgs(Py::Tuple args, Rnd::Animatable **ppTarget, float
     Rnd::Animatable *pTarget = dynamic_cast<Rnd::Animatable *>(Rnd::TheManager.Find(name));
     *ppTarget = pTarget;
     if (pTarget == nullptr) {
-        throw Py::TypeError(HxStr(FormatString(
+        throw Py::TypeError(HxStr(Rnd::MakeString(
             "%s: not animatable", name.mStr != nullptr ? name.mStr : g_szEmptyString)));
     }
     Py::Float number(Py::FromAPI(PyNumber_Float(args.getItem(1).mPtr)).mPtr);
@@ -56,7 +56,7 @@ void ScriptParseAnimLoopRange(Py::Tuple args,
                               float *pflMax) {
     if (args.length() != kLoopRangeArgCount) {
         throw Py::TypeError(
-            HxStr(FormatString("incorrect # of args; expected 3, got %d", args.length())));
+            HxStr(Rnd::MakeString("incorrect # of args; expected 3, got %d", args.length())));
     }
     Py::Object element = args.getItem(0);
     Py::String text(element);
@@ -64,7 +64,7 @@ void ScriptParseAnimLoopRange(Py::Tuple args,
     Rnd::Animatable *pTarget = dynamic_cast<Rnd::Animatable *>(Rnd::TheManager.Find(name));
     *ppTarget = pTarget;
     if (pTarget == nullptr) {
-        throw Py::TypeError(HxStr(FormatString(
+        throw Py::TypeError(HxStr(Rnd::MakeString(
             "%s: not animatable", name.mStr != nullptr ? name.mStr : g_szEmptyString)));
     }
     Py::Float minNumber(Py::FromAPI(PyNumber_Float(args.getItem(1).mPtr)).mPtr);

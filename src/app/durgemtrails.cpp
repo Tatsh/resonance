@@ -187,9 +187,9 @@ bool DurGemTrails::NeedsSubdivision(int nLane,
 
     Vector3 offset;
     offset.w = 1.0f;
-    AddVec3(&start.x, &end.x, &offset.x);
+    Rnd::Add(&start.x, &end.x, &offset.x);
     Vec3Scale(&offset.x, 0.5f, &offset.x);
-    Vec3Sub(&offset.x, &pMidPoint->x, &offset.x);
+    Rnd::Subtract(&offset.x, &pMidPoint->x, &offset.x);
     return kMinOffsetSquared < offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
 }
 
@@ -293,7 +293,7 @@ void DurGemTrails::Update(float flFrame) {
 
 // NTSC-U/C: 0x00436e38, PAL: 0x00472bd0
 HxStr DurGemTrails::NewStringName() {
-    return HxStr(FormatString(kStringNameFormat, ++g_nDurGemStringCount));
+    return HxStr(Rnd::MakeString(kStringNameFormat, ++g_nDurGemStringCount));
 }
 
 // NTSC-U/C: 0x00437af8, PAL: 0x00473890

@@ -65,11 +65,11 @@ enum ACanvasClipCode {
  * native form a value in the canvas storage width. On a 32 bit canvas the 8888 and native forms
  * coincide, and ACanvas32 implements the native pair by forwarding to the 8888 pair.
  *
- * Both data members are public. Rnd::Font::ComputeCharUV() reads mBitmap.mWidth and
- * mBitmap.mHeight from outside the hierarchy and the image supplies no accessor, so the access
- * rule gives public. A friend declaration for Rnd::Font fits the image equally well. mClip has no
- * reader outside the hierarchy and would otherwise be protected, and it shares the public section
- * so that the recovered order of the two is preserved.
+ * Both data members are public. Rnd::Font::CharInfo::CharInfo() reads mBitmap.mWidth and
+ * mBitmap.mHeight from outside the hierarchy and the image supplies no accessor. The access rule
+ * therefore gives public. A friend declaration for Rnd::Font fits the image equally well. mClip has
+ * no reader outside the hierarchy and would otherwise be protected, and it shares the public
+ * section so that the recovered order of the two is preserved.
  */
 class ACanvas {
 public:
@@ -1186,7 +1186,7 @@ protected:
      * Every coordinate is 24.8 fixed point. The routine is a Cohen and Sutherland clip that only
      * ever moves the second endpoint. When the second endpoint is inside and the first is not, the
      * two are exchanged first, so the endpoints can return in the opposite order. An endpoint
-     * clipped to the right or bottom edge lands g_nFixedEpsilon inside the exclusive edge.
+     * clipped to the right or bottom edge lands AFix::epsilon inside the exclusive edge.
      *
      * The outcode of the first endpoint is computed once, before the loop, and after an exchange
      * it is taken as zero rather than recomputed.
@@ -1324,7 +1324,7 @@ protected:
      * Sets the pen colour through SetColorNative() from APolygon::mColor, then walks two edges
      * down from the top vertex, one forward and one backward through the vertex list, filling
      * each row between them with DrawHorzLine(). Each edge column is rounded to the nearest whole
-     * column with g_nFixedHalf. Rows above the clip rectangle advance the edges without drawing,
+     * column with AFix::onehalf. Rows above the clip rectangle advance the edges without drawing,
      * and the walk stops at the bottom of the clip rectangle or when the two edges meet.
      *
      * Non-virtual and orphaned.

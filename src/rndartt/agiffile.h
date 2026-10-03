@@ -48,13 +48,13 @@ public:
      * A block introducer of one is accepted when the next three bytes are 1, 0, and `!`, and an
      * extension follows.
      *
-     * @param pImage Receives the image.
+     * @param bitmap Receives the image.
      * @param pbEnd Set to one at the trailer, and also for a negative introducer byte.
      * @return An AGfxFileResult code.
      * @ghidraAddress NTSC-U/C: 0x0062aaf8
      * @ghidraAddress PAL: 0x0066b688
      */
-    virtual int ReadFrame(ABitmap *pImage, int *pbEnd);
+    virtual int ReadFrame(ABitmap &bitmap, int *pbEnd);
 
     /**
      * Slot 5. Writing is not implemented.

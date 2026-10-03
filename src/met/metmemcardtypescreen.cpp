@@ -106,7 +106,7 @@ void MetMemCardTypeScreen::EnterAndShow() {
         mButtonList->SetSelected(kRemixButtonIndex);
     }
     HxStr format = MetConfigText(kMetStrTMemDelType, kTitleConfigCode, kTitleFormatKey);
-    const HxStr title(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
+    const HxStr title(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
     MetScreenTitleScreen::SetTitle(title);
     MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kStandardTitlePreset));
     MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);

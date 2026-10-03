@@ -38,7 +38,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004edf88
      * @ghidraAddress PAL: 0x0052cb30
      */
-    virtual OBStream &WriteBytes(const void *pSrc, int nSize);
+    virtual OBStream &Write(const void *pSrc, int nSize);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x004edfc0

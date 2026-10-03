@@ -29,7 +29,7 @@ struct TunnelSortEntry {
         const std::vector<MeshVert> &verts = pMesh->mVertsOwner->mVerts;
         Vector3 sum;
         sum.w = 1.0f;
-        AddVec3(&verts[0].mPoint.x, &verts[1].mPoint.x, &sum.x);
+        Rnd::Add(&verts[0].mPoint.x, &verts[1].mPoint.x, &sum.x);
         Vector3 midpoint;
         midpoint.w = 1.0f;
         Vec3Scale(&sum.x, 0.5f, &midpoint.x);

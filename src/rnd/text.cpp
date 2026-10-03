@@ -30,7 +30,7 @@ constexpr char kNoObject[] = "no object";
 constexpr char kTextTag[] = "Rnd::Text";
 
 /** Alignment word the constructor starts with. */
-constexpr int kDefaultAlign = kTextAlignTop | kTextAlignLeft;
+constexpr int kDefaultAlign = Text::kTextAlignTop | Text::kTextAlignLeft;
 
 /** Wrap width the constructor starts with, and the one a file below revision 4 restores. */
 constexpr float kDefaultWrapWidth = 100.0f;
@@ -48,12 +48,12 @@ constexpr int kFacesPerGlyph = 2;
  * The table is the six words at `0x008222f8`, which Load() copies onto its own frame before
  * indexing. An index outside the six reads past the copy.
  */
-constexpr int kLegacyAlignMap[] = {kTextAlignTop | kTextAlignLeft,
-                                   kTextAlignTop | kTextAlignCenter,
-                                   kTextAlignTop | kTextAlignRight,
-                                   kTextAlignBottom | kTextAlignLeft,
-                                   kTextAlignBottom | kTextAlignCenter,
-                                   kTextAlignBottom | kTextAlignRight};
+constexpr int kLegacyAlignMap[] = {Text::kTextAlignTop | Text::kTextAlignLeft,
+                                   Text::kTextAlignTop | Text::kTextAlignCenter,
+                                   Text::kTextAlignTop | Text::kTextAlignRight,
+                                   Text::kTextAlignBottom | Text::kTextAlignLeft,
+                                   Text::kTextAlignBottom | Text::kTextAlignCenter,
+                                   Text::kTextAlignBottom | Text::kTextAlignRight};
 
 /** Scale a file below revision 2 applies to the y component of its position pair. */
 constexpr float kLegacyPositionYScale = 0.75f;
@@ -93,20 +93,20 @@ void WriteObjectRef(Stream &stream, const Object *pObject) {
 }
 
 // NTSC-U/C: 0x004d0450, PAL: 0x0050e888
-Dbg &PrintAlign(Dbg &sink, int nAlign) {
-    if ((nAlign & kTextAlignTop) != 0) {
+Dbg &operator<<(Dbg &sink, Text::Alignment nAlign) {
+    if ((nAlign & Text::kTextAlignTop) != 0) {
         sink.Print("Top");
-    } else if ((nAlign & kTextAlignMiddle) != 0) {
+    } else if ((nAlign & Text::kTextAlignMiddle) != 0) {
         sink.Print("Middle");
-    } else if ((nAlign & kTextAlignBottom) != 0) {
+    } else if ((nAlign & Text::kTextAlignBottom) != 0) {
         sink.Print("Bottom");
     }
 
-    if ((nAlign & kTextAlignLeft) != 0) {
+    if ((nAlign & Text::kTextAlignLeft) != 0) {
         sink.Print("Left");
-    } else if ((nAlign & kTextAlignCenter) != 0) {
+    } else if ((nAlign & Text::kTextAlignCenter) != 0) {
         sink.Print("Center");
-    } else if ((nAlign & kTextAlignRight) != 0) {
+    } else if ((nAlign & Text::kTextAlignRight) != 0) {
         sink.Print("Right");
     }
     return sink;
@@ -156,7 +156,7 @@ Text::Text(const HxStr &name)
 }
 
 // NTSC-U/C: 0x004cf958, PAL: 0x0050dcd0
-void Text::RemoveObjectRefs() {
+void Text::ReleaseObjects() {
     if (mFont != nullptr) {
         mFont->RemoveRef(this);
     }
@@ -174,7 +174,7 @@ void Text::AddRefObjects() {
 
 // NTSC-U/C: 0x004cf2b8, PAL: 0x0050d618
 Text::~Text() {
-    RemoveObjectRefs();
+    ReleaseObjects();
     ReleaseAllRefs();
 }
 
@@ -290,22 +290,22 @@ int Text::UpdateWorldXfm(Transformable *pParent, int nForce) {
 }
 
 // NTSC-U/C: 0x004c7ef8, PAL: 0x005060d0
-void Text::FindCollisions(const Ray &ray, HitSink &sink) {
+void Text::FindCollisions(const Segment &ray, std::list<Collision> &collisions) {
     if (mShowing == 0) {
         return;
     }
 
     if (mMesh != nullptr) {
-        // The hits the mesh is about to append start after whatever the collector already stored.
-        std::list<Hit>::iterator itLast = sink.mHits.end();
+        // The hits the mesh is about to append start after whatever the list already stored.
+        std::list<Collision>::iterator itLast = collisions.end();
         --itLast;
-        mMesh->FindCollisions(ray, sink);
-        for (std::list<Hit>::iterator it = ++itLast; it != sink.mHits.end(); ++it) {
+        mMesh->FindCollisions(ray, collisions);
+        for (std::list<Collision>::iterator it = ++itLast; it != collisions.end(); ++it) {
             it->mObject = this;
         }
     }
 
-    Collideable::FindCollisions(ray, sink);
+    Collideable::FindCollisions(ray, collisions);
 }
 
 // NTSC-U/C: 0x004c7fc0, PAL: 0x00506198
@@ -322,7 +322,7 @@ void Text::DumpText(Dbg &sink) {
     sink.Print("font:");
     PrintObjectRef(sink, mFont);
     sink.Print(" align:");
-    PrintAlign(sink, mAlign);
+    sink << static_cast<Alignment>(mAlign);
     sink.Print("\n");
 
     sink.Print("preWrapText:");
@@ -411,7 +411,7 @@ void Text::Copy(const Object *pSource, unsigned nFlags) {
     Collideable::Copy(pSource, nFlags);
     Transformable::Copy(pSource, nFlags);
 
-    RemoveObjectRefs();
+    ReleaseObjects();
 
     // mColor is not among the fields copied, so a copy retains whatever colour it already had.
     mFont = pText->mFont;
@@ -439,7 +439,7 @@ void Text::Load(Stream &stream) {
         Transformable::Load(stream);
     }
 
-    RemoveObjectRefs();
+    ReleaseObjects();
 
     HxStr fontName(nullptr);
     stream.ReadString(fontName);
@@ -730,12 +730,12 @@ void Text::BuildGlyphMesh() {
     delete mMesh;
     mMesh = nullptr;
 
-    if (mShowing == 0 || mFont == nullptr || mFont->mType != kFontTypeMaterial) {
+    if (mShowing == 0 || mFont == nullptr || mFont->mType != Font::kFontTypeMaterial) {
         return;
     }
 
     {
-        const HxStr meshName(FormatString("[%s_mesh]", NameText(this)));
+        const HxStr meshName(Rnd::MakeString("[%s_mesh]", NameText(this)));
         // The binary's handler covers only the factory call and returns null.
         try {
             mMesh = Mesh::sNew(meshName);
@@ -815,16 +815,16 @@ Vector3 Text::CharPosition(int nIndex) {
         const Vector3 advance{mFont->mSpace, 0.0f, 0.0f, 1.0f};
         Vector3 end;
         end.w = 1.0f;
-        AddVec3(&verts.back().mPoint.x, &advance.x, &end.x);
+        Rnd::Add(&verts.back().mPoint.x, &advance.x, &end.x);
         pos = end;
     }
 
     if ((mAlign & kTextAlignMiddle) != 0) {
         const Vector3 shift{0.0f, 0.0f, -mFont->mSize * 0.5f, 1.0f};
-        AddVec3(&pos.x, &shift.x, &pos.x);
+        Rnd::Add(&pos.x, &shift.x, &pos.x);
     } else if ((mAlign & kTextAlignBottom) != 0) {
         const Vector3 shift{0.0f, 0.0f, -mFont->mSize, 1.0f};
-        AddVec3(&pos.x, &shift.x, &pos.x);
+        Rnd::Add(&pos.x, &shift.x, &pos.x);
     }
     return pos;
 }
@@ -836,7 +836,7 @@ void *Text::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x004cf170, PAL: 0x0050d4d0
 void Text::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kTextTag);
+    OperatorDeleteOverride(pBlock, kTextTag);
 }
 
 // NTSC-U/C: 0x004cf800, PAL: 0x0050db78

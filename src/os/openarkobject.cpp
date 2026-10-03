@@ -20,8 +20,7 @@ namespace {
 // Chunk of the archive the header is read out of.
 constexpr int kArkHeaderSector = 0;
 
-// OpenArkObject::HashName() shifts each character by one more place than the last, wrapping
-// after 7.
+// HashArkString() shifts each character by one more place than the last, wrapping after 7.
 constexpr int kArkHashShiftMask = 7;
 
 // Line every dump closes with, one literal shared by all four.
@@ -34,8 +33,7 @@ constexpr char kBaseSectorMissingFormat[] =
 // The sceOpen() mode OpenStreamByPath() passes, which opens for reading only.
 constexpr int kOpenReadOnly = 1;
 
-// The stream table search that FindOpenArkStream() is, and that the two entry accessors expand in
-// place.
+// The stream table search LookupOpenFile() performs and the two entry accessors expand in place.
 inline ArkStream *FindStreamRecord(int nHandle) {
     nHandle &= ~kFileHandleArkStream;
     const int nStreams = gOpenArkFileTable.size();
@@ -55,7 +53,7 @@ int g_bArkSectorCacheReady;
 // the same one, so each build appears twice in the image.
 void BuildDiscPath(char *pszPath, const HxStr &name) {
     strcpy(pszPath, kArkDiscRoot);
-    AppendPathComponent(name.mStr != nullptr ? name.mStr : g_szEmptyString, pszPath);
+    FilenameToISO9660(name.mStr != nullptr ? name.mStr : g_szEmptyString, pszPath);
 }
 
 void BuildHostPath(char *pszPath, const char *pszArchive) {
@@ -98,7 +96,7 @@ int OpenArkObject::Open(const char *pszPath) {
     HxStr strPath(pszPath);
 
     if (g_bArkSectorCacheReady == 0) {
-        InitSectorCache(kArkSectorCacheRows);
+        SectorCacheInit(kArkSectorCacheRows);
         g_bArkSectorCacheReady = 1;
     }
     AsyncCheck(1);
@@ -136,7 +134,7 @@ int OpenArkObject::Open(const char *pszPath) {
     if (UsingCdMedia() != 0) {
         sceCdlFILE cdFile;
         if (sceCdSearchFile(&cdFile, strchr(szDevice, ':') + 1) == 0) {
-            LogPrintf("sceCdSearchFile failed on: %s\n", szDevice);
+            printf("sceCdSearchFile failed on: %s\n", szDevice);
             return 0;
         }
         pArk->mDiscLsn = cdFile.lsn;
@@ -147,17 +145,17 @@ int OpenArkObject::Open(const char *pszPath) {
 
     // Yes, the binary discards this lookup's result and claims a row unconditionally.
     SectorCacheFind(pArk->mFile, kArkHeaderSector);
-    SectorCacheRow *pRow = SectorCacheGetLru(pArk->mFile, kArkHeaderSector);
+    SectorCacheRow *pRow = SectorCacheGetLRU(pArk->mFile, kArkHeaderSector);
     ReadStreamChunk(pArk->mFile, kArkHeaderSector, pRow->mBuffer, kSectorCacheRowSize);
     memcpy(pArk->mSig, pRow->mBuffer, kArkHeaderSize);
 
     if (pArk->mVersion != kArkVersion) {
-        LogPrintf("ERROR - ARKFILE VERSION INCORRECT - PLEASE REGENERATE!\n");
+        printf("ERROR - ARKFILE VERSION INCORRECT - PLEASE REGENERATE!\n");
         return 0;
     }
 
     if (pArk->mOptimized != 0) {
-        LogPrintf("FOUND OPTIMIZED ARKFILE %s, optimized flag: %d\n", pszPath, pArk->mOptimized);
+        printf("FOUND OPTIMIZED ARKFILE %s, optimized flag: %d\n", pszPath, pArk->mOptimized);
         unsigned nOptimized = pArk->mOptimizedCount * sizeof(unsigned short);
         pArk->mOptimizedTable = MemAllocTagged(nOptimized, __FILE__, __LINE__);
         memcpy(pArk->mOptimizedTable,
@@ -195,7 +193,7 @@ int OpenArkObject::Open(const char *pszPath) {
 
     const char *pszRun = FindRunComponent(pArk->mHeaderPath);
     if (pszRun == nullptr) {
-        LogPrintf("ERROR - BAD PATH IN ARKFILE HEADER FOR ARKFILE: %s\n", pszPath);
+        printf("ERROR - BAD PATH IN ARKFILE HEADER FOR ARKFILE: %s\n", pszPath);
         return 0;
     }
 
@@ -231,7 +229,7 @@ int OpenArkObject::Close(const char *pszPath) {
     }
 
     CloseLoadFile(g_apMountedArks[nArk]->mFile);
-    InvalidateCachedSectors(g_apMountedArks[nArk]->mFile);
+    SectorCacheRemove(g_apMountedArks[nArk]->mFile);
     delete g_apMountedArks[nArk];
     g_apMountedArks.erase(g_apMountedArks.begin() + nArk);
     return 1;
@@ -252,18 +250,18 @@ int EraseArkStream(int nHandle) {
 int gOpenFileIndex = 1;
 
 // NTSC-U/C: 0x0055c158, PAL: 0x0059d378
-ArkStream *FindOpenArkStream(int nHandle) {
+ArkStream *LookupOpenFile(int nHandle) {
     return FindStreamRecord(nHandle);
 }
 
 // NTSC-U/C: 0x0055be80, PAL: 0x0059d0a0
-ArkFileEntry *GetArkStreamFileEntry(int nHandle) {
+ArkFileEntry *FindOpenFileInArk(int nHandle) {
     const ArkStream *pStream = FindStreamRecord(nHandle);
     return (pStream != nullptr) ? pStream->mEntry : nullptr;
 }
 
 // NTSC-U/C: 0x0055bf88, PAL: 0x0059d1a8
-int GetArkStreamInflatedSize(int nStream) {
+int FindOpenFileInArkTrueSize(int nStream) {
     const ArkStream *pStream = FindStreamRecord(nStream);
     const ArkFileEntry *pEntry = (pStream != nullptr) ? pStream->mEntry : nullptr;
     if (pEntry == nullptr) {
@@ -273,8 +271,8 @@ int GetArkStreamInflatedSize(int nStream) {
 }
 
 // NTSC-U/C: 0x0055c000, PAL: 0x0059d220
-int GetArkStreamArkId(int nHandle) {
-    const ArkStream *pStream = FindOpenArkStream(nHandle);
+int GetArkfileIdFromFileFd(int nHandle) {
+    const ArkStream *pStream = LookupOpenFile(nHandle);
     if (pStream == nullptr) {
         return -1;
     }
@@ -282,8 +280,8 @@ int GetArkStreamArkId(int nHandle) {
 }
 
 // NTSC-U/C: 0x0055c028, PAL: 0x0059d248
-int GetArkStreamPosition(int nStream) {
-    const ArkStream *pStream = FindOpenArkStream(nStream);
+int ArkfileGetCurrAbsOffset(int nStream) {
+    const ArkStream *pStream = LookupOpenFile(nStream);
     if (pStream == nullptr) {
         return -1;
     }
@@ -292,7 +290,7 @@ int GetArkStreamPosition(int nStream) {
 
 // NTSC-U/C: 0x0055bd38, PAL: 0x0059cf58
 int SeekArkStream(int nStream, int nOffset, int nOrigin) {
-    ArkStream *pStream = FindOpenArkStream(nStream);
+    ArkStream *pStream = LookupOpenFile(nStream);
     if (pStream == nullptr) {
         return -1;
     }
@@ -336,10 +334,10 @@ int ArkfileGetBaseSector(int nFile) {
         }
     }
 
-    LogPrintf(kBaseSectorMissingFormat, nFile);
-    LogPrintf("   (ark file table size: %d\n", g_apMountedArks.size());
+    printf(kBaseSectorMissingFormat, nFile);
+    printf("   (ark file table size: %d\n", g_apMountedArks.size());
     for (unsigned i = 0; i < g_apMountedArks.size(); ++i) {
-        LogPrintf("   (ark id at index %d: %d\n", i, g_apMountedArks[i]->mFile);
+        printf("   (ark id at index %d: %d\n", i, g_apMountedArks[i]->mFile);
     }
     Fatal(kBaseSectorMissingFormat, nFile);
     return 0;
@@ -364,7 +362,7 @@ int ArkfileLogicalToPhysicalSector(int nFile, int nSector) {
                 return nCursor;
             }
             if (nCursor < pArk->mOptimizedCount) {
-                LogPrintf("OPTIMIZED ARKFILE ORDERING FAILURE AT INDEX: %d\n", nCursor);
+                printf("OPTIMIZED ARKFILE ORDERING FAILURE AT INDEX: %d\n", nCursor);
             }
             pArk->mOptimizedCursor = -1;
         }
@@ -377,7 +375,7 @@ int ArkfileLogicalToPhysicalSector(int nFile, int nSector) {
         Fatal("ArkfileLogicalToPhysicalSector: can't find sector: %d\n", nSector);
     }
 
-    LogPrintf("HEY!!! ArkfileLogicalToPhysicalSector can't find arkId: %d\n", nFile);
+    printf("HEY!!! ArkfileLogicalToPhysicalSector can't find arkId: %d\n", nFile);
     return nSector;
 }
 
@@ -402,7 +400,7 @@ void ReadStreamChunk(int nFile, int nSector, void *pBuffer, unsigned nLength) {
 }
 
 // NTSC-U/C: 0x0055c340, PAL: 0x0059d560
-short OpenArkObject::HashName(const char *pszName) {
+short HashArkString(const char *pszName) {
     unsigned short nHash = 0;
     int nShift = 0;
     for (; *pszName != '\0'; ++pszName) {
@@ -492,8 +490,8 @@ ArkFileEntry *OpenArkObject::FindFileEntryByPath(const char *pszPath,
     if (*pnArk < 0) {
         return nullptr;
     }
-    const short nNameHash = HashName(pszName);
-    const short nRelPathHash = HashName(pszRelPath);
+    const short nNameHash = HashArkString(pszName);
+    const short nRelPathHash = HashArkString(pszRelPath);
 
     ArkFileEntry *pEntry;
     if (*pnArk == kArkIndexAny) {
@@ -537,7 +535,7 @@ OpenArkObject *ArkStream::FindArk() const {
 }
 
 // NTSC-U/C: 0x0055bce8, PAL: 0x0059cf08
-int LookupArkStreamForPath(const char *pszPath) {
+int OpenFileInArk(const char *pszPath) {
     char szName[kArkNameBufferSize];
     char szRelPath[kArkRelPathBufferSize];
     int nArk;
@@ -562,7 +560,7 @@ int GetArkFileLengthByPath(const char *pszPath) {
 
 // NTSC-U/C: 0x0055a280, PAL: 0x0059b4a0
 int ReadArkStreamThroughCache(int nHandle, void *pBuffer, unsigned nBytes) {
-    ArkStream *pStream = FindOpenArkStream(nHandle);
+    ArkStream *pStream = LookupOpenFile(nHandle);
     if (pStream == nullptr) {
         return -1;
     }
@@ -581,7 +579,7 @@ int ReadArkStreamThroughCache(int nHandle, void *pBuffer, unsigned nBytes) {
     for (int nLeft = nBytes; nLeft > 0;) {
         SectorCacheRow *pRow = SectorCacheFind(nFile, nChunk);
         if (pRow == nullptr) {
-            pRow = SectorCacheGetLru(nFile, nChunk);
+            pRow = SectorCacheGetLRU(nFile, nChunk);
             AsyncCheck(1);
             ReadStreamChunk(nFile,
                             ArkfileLogicalToPhysicalSector(nFile, nChunk),

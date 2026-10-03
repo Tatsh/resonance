@@ -15,9 +15,9 @@
  * slot 4. There is therefore no virtual destructor on this side of a stream, and a bidirectional
  * stream is destroyed through its IBStream subobject.
  *
- * Write() is the one slot with a shared base body. Both implementations of it retain the body, and
- * it does nothing beyond dispatching WriteBytes(), so the two entry points are interchangeable on
- * this target.
+ * WriteLE() is the one slot with a shared base body. Both implementations of it retain the body,
+ * and it does nothing beyond dispatching Write(). The two entry points are therefore
+ * interchangeable on this target.
  *
  * Fail() is declared with the same signature on IBStream. A class deriving from both therefore
  * overrides the two with one body, which is what IOBPreallocMemStream and IOBStream do.
@@ -33,7 +33,7 @@ public:
      * @param nSize The number of bytes to move.
      * @return This stream.
      */
-    virtual OBStream &WriteBytes(const void *pSrc, int nSize) = 0;
+    virtual OBStream &Write(const void *pSrc, int nSize) = 0;
 
     /**
      * Discard everything written so far.
@@ -58,9 +58,10 @@ public:
     virtual int Fail() = 0;
 
     /**
-     * Move nSize bytes out of pSrc through the virtual WriteBytes().
+     * Move nSize bytes out of pSrc through the virtual Write().
      *
-     * Vtable slot 4. One shared body serves both implementations and neither overrides it.
+     * Vtable slot 4. One shared body serves both implementations and neither overrides it. The
+     * body does not swap bytes.
      *
      * @param pSrc The source buffer.
      * @param nSize The number of bytes to move.
@@ -68,17 +69,17 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004ed860
      * @ghidraAddress PAL: 0x0052c408
      */
-    virtual OBStream &Write(const void *pSrc, int nSize);
+    virtual OBStream &WriteLE(const void *pSrc, int nSize);
 };
 
 /**
  * Write a truth value as one byte.
  *
  * The routine stores the low byte of its argument to the stack and moves a single byte through
- * WriteBytes(). Its counterpart reads that byte back and stores a four-byte word, so the value is
- * one byte on the wire and four bytes in memory. Whether the original declared the parameter as an
- * int or as a bool of the four-byte width some builds of this compiler used cannot be settled from
- * the transfer alone, and int is written here to match the width of the store.
+ * Write(). Its counterpart reads the byte back and stores a four-byte word. The value is
+ * therefore one byte on the wire and four bytes in memory. Whether the original declared the
+ * parameter as an int or as a bool of the four-byte width some builds of this compiler used cannot
+ * be settled from the transfer alone, and int is written here to match the width of the store.
  *
  * @param stream The stream to write to.
  * @param bValue The value, of which only the low byte reaches the stream.
@@ -92,7 +93,7 @@ OBStream &operator<<(OBStream &stream, int bValue);
  * Write a 64-bit integer as its low four bytes.
  *
  * The routine truncates the register to 32 bits with a sign extension and moves four bytes through
- * Write(). No call site survives in the shipped program.
+ * WriteLE(). No call site remains in the shipped program.
  *
  * @param stream The stream to write to.
  * @param nValue The value, of which only the low four bytes reach the stream.

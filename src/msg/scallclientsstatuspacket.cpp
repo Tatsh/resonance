@@ -39,11 +39,11 @@ void SCAllClientsStatusPacket::saveGuts(OBStream &stream) const {
     Packet::saveGuts(stream);
 
     int count = static_cast<int>(mClients.size());
-    stream.Write(&count, sizeof(count));
+    stream.WriteLE(&count, sizeof(count));
     for (const auto &entry : mClients) {
         int id = entry.mId;
         int status = entry.mStatus;
-        stream.Write(&id, sizeof(id)).Write(&status, sizeof(status));
+        stream.WriteLE(&id, sizeof(id)).WriteLE(&status, sizeof(status));
     }
 }
 
@@ -52,14 +52,17 @@ void SCAllClientsStatusPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
 
     int count;
-    stream.Read(&count, sizeof(count));
+    stream.ReadLE(&count, sizeof(count));
     mClients.resize(count);
     for (auto &entry : mClients) {
-        stream.Read(&entry.mId, sizeof(entry.mId)).Read(&entry.mStatus, sizeof(entry.mStatus));
+        stream.ReadLE(&entry.mId, sizeof(entry.mId)).ReadLE(&entry.mStatus, sizeof(entry.mStatus));
     }
 }
 
 // NTSC-U/C: 0x003f2218, PAL: 0x0042a760
-void SCAllClientsStatusPacket::AddClientStatus(ClientStatus entry) {
+void SCAllClientsStatusPacket::AddClientStatus(int nId, int nStatus) {
+    ClientInfoEntry entry;
+    entry.mId = nId;
+    entry.mStatus = nStatus;
     mClients.push_back(entry);
 }

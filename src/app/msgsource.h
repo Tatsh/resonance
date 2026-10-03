@@ -68,7 +68,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0054a370
      * @ghidraAddress PAL: 0x0058a8a0
      */
-    void Send(Message *pMsg);
+    void Send(Message *pMsg) const;
 
     /**
      * Unregister every sink.

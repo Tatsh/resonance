@@ -164,7 +164,7 @@ void MetStageFinishScreen::ResolveContainerViews() {
     }
 
     for (int i = kFirstCongratulationText; i <= kLastCongratulationText; ++i) {
-        Rnd::Text *pText = FindText(HxStr(FormatString(kCongratulationTextFormat, i)));
+        Rnd::Text *pText = FindText(HxStr(Rnd::MakeString(kCongratulationTextFormat, i)));
         HxStr text = MetConfigText(kMetStrEndGameCongrats, kPromptConfigCode, kContainerName);
         pText->SetText(text); // The binary does not test the lookup for null.
     }
@@ -329,7 +329,7 @@ void MetStageFinishScreen::AddArenaCompleteMessage(int nPreviousCompleted, int n
     HxStr format = MetConfigText(kMetStrEndGameArenaComplete, kPromptConfigCode, kArenaCompleteKey);
     const ArenaListEntry &arena = (*GetArenaList())[nCompleted - 1];
     HxStr arenaName = QueryConfigString(kArenaNameConfigCode, TextOf(arena.mName));
-    HxStr message(FormatString(TextOf(format), TextOf(arenaName)));
+    HxStr message(Rnd::MakeString(TextOf(format), TextOf(arenaName)));
     mMessages.push_back(message);
 }
 
@@ -347,11 +347,11 @@ void MetStageFinishScreen::AddStageCompleteMessage(int nWasComplete, int nIsComp
         (nStage == kExpertLastStage && nDifficulty == kDifficultyExpert)) {
         HxStr difficultyName = DifficultyName(nDifficulty);
         HxStr format = MetConfigText(kMetStrEndGameLastStage, kPromptConfigCode, kLastStageKey);
-        HxStr message(FormatString(TextOf(format), TextOf(difficultyName)));
+        HxStr message(Rnd::MakeString(TextOf(format), TextOf(difficultyName)));
         mMessages.push_back(message);
     } else {
         HxStr format = MetConfigText(kMetStrEndGameStage, kPromptConfigCode, kStageKey);
-        HxStr message(FormatString(TextOf(format), nStage + 1));
+        HxStr message(Rnd::MakeString(TextOf(format), nStage + 1));
         mMessages.push_back(message);
     }
 }
@@ -370,7 +370,7 @@ void MetStageFinishScreen::AddDifficultyUnlockMessage(int nWasUnlocked, int nIsU
         HxStr format =
             MetConfigText(kMetStrEndGameEasyNormal, kPromptConfigCode, kDifficultyUnlockKey);
         HxStr difficultyName = DifficultyName(params.mDifficulty + 1);
-        message = FormatString(TextOf(format), TextOf(difficultyName));
+        message = Rnd::MakeString(TextOf(format), TextOf(difficultyName));
         mMessages.push_back(message);
         mDifficultyUnlocked = 1;
     }
@@ -386,7 +386,7 @@ void MetStageFinishScreen::ShowMessages() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     QueryConfigValue(kStageConfigCode, TextOf(params.mLevelName)); // The stage is discarded.
 
-    HxStr linesName(FormatString(kLinesViewFormat, mMessages.size()));
+    HxStr linesName(Rnd::MakeString(kLinesViewFormat, mMessages.size()));
     Rnd::View *pCountLines = FindView(linesName);
     Rnd::View *pLines = FindView(HxStr(kLinesView));
     // The binary does not test the container view for null.
@@ -394,13 +394,13 @@ void MetStageFinishScreen::ShowMessages() {
     pLines->AddDraw(pCountLines, nullptr);
 
     for (int i = kFirstCongratulationText; i <= kLastCongratulationText; ++i) {
-        FindText(HxStr(FormatString(kCongratulationTextFormat, i)))->SetShowing(1);
+        FindText(HxStr(Rnd::MakeString(kCongratulationTextFormat, i)))->SetShowing(1);
     }
 
     mMessageDrawables.clear();
-    HxStr prefix(FormatString(kMessageTextPrefixFormat, mMessages.size()));
+    HxStr prefix(Rnd::MakeString(kMessageTextPrefixFormat, mMessages.size()));
     for (unsigned i = 0; i < mMessages.size(); ++i) {
-        HxStr name(FormatString(kMessageTextFormat, TextOf(prefix), i + 1));
+        HxStr name(Rnd::MakeString(kMessageTextFormat, TextOf(prefix), i + 1));
         Rnd::Text *pText = FindText(name);
         pText->SetText(mMessages[i]);
         pText->SetShowing(0);
@@ -423,7 +423,7 @@ void MetStageFinishScreen::OnExitFinished() {
     mContinueButtons->SetSelected(kNoButton);
     mMessages.clear();
     for (int i = kFirstCongratulationText; i <= kLastCongratulationText; ++i) {
-        FindText(HxStr(FormatString(kCongratulationTextFormat, i)))->SetShowing(0);
+        FindText(HxStr(Rnd::MakeString(kCongratulationTextFormat, i)))->SetShowing(0);
     }
 }
 

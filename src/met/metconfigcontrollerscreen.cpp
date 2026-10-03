@@ -413,8 +413,8 @@ void MetConfigControllerScreen::EnterAndShow() {
     HxStr player;
     player = MetConfigText(kMetStrConfigControllerPlayer, kPromptConfigCode, kPlayerKey);
     options = MetConfigText(kMetStrTConfigControllerOptions, kTitleConfigCode, kOptionsKey);
-    title =
-        FormatString(kTitleFormat, TextOrEmpty(player), mControllerIndex + 1, TextOrEmpty(options));
+    title = Rnd::MakeString(
+        kTitleFormat, TextOrEmpty(player), mControllerIndex + 1, TextOrEmpty(options));
     MetScreenTitleScreen::SetTitle(title);
 
     MetHelpScreen::SetText(mHelpKeys[mRows->mSelected], mRenderer->mAnimationFrame);

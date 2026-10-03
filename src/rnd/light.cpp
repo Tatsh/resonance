@@ -45,15 +45,15 @@ void PrintColor(Dbg &sink, const Color &color) {
 }
 
 // NTSC-U/C: 0x005454a0, PAL: 0x00585218
-Dbg &PrintLightType(Dbg &sink, LightType type) {
+Dbg &operator<<(Dbg &sink, Light::Type type) {
     switch (type) {
-    case kLightTypePoint:
+    case Light::kLightTypePoint:
         sink.Print("Point");
         break;
-    case kLightTypeDirectional:
+    case Light::kLightTypeDirectional:
         sink.Print("Directional");
         break;
-    case kLightTypeSpot:
+    case Light::kLightTypeSpot:
         sink.Print("Spot");
         break;
     }
@@ -92,7 +92,7 @@ void Light::SetColors(const Color &ambient, const Color &diffuse, const Color &s
 }
 
 // NTSC-U/C: 0x00544420, PAL: 0x00584198
-void Light::SetType(LightType type) {
+void Light::SetType(Type type) {
     mType = type;
 }
 
@@ -150,7 +150,7 @@ void Light::DumpText(Dbg &sink) {
     sink.Format("%.2f", mQuadraticAtten);
     sink.Print("\n");
     sink.Print("type:");
-    PrintLightType(sink, mType);
+    sink << mType;
     sink.Print("\n");
 }
 
@@ -242,7 +242,7 @@ void Light::Load(Stream &stream) {
     if (nRevision >= kLightTypeRevision) {
         int nType = 0;
         stream.ReadLE(&nType, sizeof(nType));
-        mType = static_cast<LightType>(nType);
+        mType = static_cast<Type>(nType);
     }
 
     SyncLight();
@@ -288,7 +288,7 @@ void *Light::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x005443e0, PAL: 0x00584158
 void Light::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kLightTag);
+    OperatorDeleteOverride(pBlock, kLightTag);
 }
 
 // NTSC-U/C: 0x00544490, PAL: 0x00584208

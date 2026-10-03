@@ -21,7 +21,7 @@ constexpr char kLowercaseOffset = 'a' - 'A';
 const char *dirpath = "gen/";
 
 // NTSC-U/C: 0x005585a8, PAL: 0x00599700
-char *BuildBitmapCacheFileName(char *pszPath, const char *pszExtension) {
+char *ConvertNameToGenerated(char *pszPath, const char *pszExtension) {
     char *pszName = strrchr(pszPath, '/');
     char *pszBackslash = strrchr(pszPath, '\\');
     if (pszBackslash != nullptr && pszName < pszBackslash) {
@@ -50,7 +50,7 @@ char *BuildBitmapCacheFileName(char *pszPath, const char *pszExtension) {
 int LoadBitmapFileFromPath(const char *pszPath) {
     char szPath[kMaxPathLength];
     strcpy(szPath, pszPath);
-    BuildBitmapCacheFileName(szPath, kGenBitmapExtension);
+    ConvertNameToGenerated(szPath, kGenBitmapExtension);
     strcat(szPath, kGzExtension);
     FILE *pFile = fopen(szPath, "rb");
     if (pFile != nullptr) {
@@ -60,7 +60,7 @@ int LoadBitmapFileFromPath(const char *pszPath) {
 }
 
 // NTSC-U/C: 0x005586b0, PAL: 0x00599808
-void ReplaceFileNameExtension(char *pszPath, const char *pszExtension) {
+void AppendName(char *pszPath, const char *pszExtension) {
     char *pszDot = strrchr(pszPath, '.');
     if (pszDot == nullptr) {
         strcat(pszPath, pszExtension);

@@ -44,26 +44,26 @@ HudPoints::HudPoints(int nIndex)
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mExitBlur = dynamic_cast<Rnd::Blur *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s pts_exit%d.blur", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s pts_exit%d.blur", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mExitView = dynamic_cast<Rnd::View *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s pts_exit%d.view", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s pts_exit%d.view", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mExitText = dynamic_cast<Rnd::Text *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s pts_exit%d.txt", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s pts_exit%d.txt", pszLayout, nIndex))));
 
     mExit.SetAnim(mExitView);
     mExit.Play(kExitRestFrame, kExitRestFrame);
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mPointsText = dynamic_cast<Rnd::Text *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s pts%d.txt", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s pts%d.txt", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mMultiplierText = dynamic_cast<Rnd::Text *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s ptsmult%d.txt", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s ptsmult%d.txt", pszLayout, nIndex))));
 
     mPlainMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("HUD ptstmp.mat")));
     mHotMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("HUD ptstmphot.mat")));
@@ -108,7 +108,7 @@ void HudPoints::ShowExit(int nPoints) {
     mShowing = 0;
     mFlash = 1.0f;
     mPulseRest = 0.0f;
-    mExitText->SetText(HxStr(FormatString("%d", nPoints)));
+    mExitText->SetText(HxStr(Rnd::MakeString("%d", nPoints)));
     mExit.Play(kShowExitFrom, kShowExitTo);
     if (mExitBlur != nullptr) {
         mExitBlur->mXfms.clear();
@@ -118,7 +118,7 @@ void HudPoints::ShowExit(int nPoints) {
 // NTSC-U/C: 0x004190a8, PAL: 0x00453510
 void HudPoints::Bank() {
     if (mShowing != 0) {
-        mExitText->SetText(HxStr(FormatString("%d", mPoints)));
+        mExitText->SetText(HxStr(Rnd::MakeString("%d", mPoints)));
         mExit.Play(kBankFrom, kBankTo);
         if (mExitBlur != nullptr) {
             mExitBlur->mXfms.clear();
@@ -132,7 +132,7 @@ void HudPoints::Bank() {
 // NTSC-U/C: 0x00429fe0, PAL: 0x00453150
 void HudPoints::SetPoints(int nPoints) {
     mPoints = nPoints;
-    mPointsText->SetText(HxStr(FormatString("%d", nPoints)));
+    mPointsText->SetText(HxStr(Rnd::MakeString("%d", nPoints)));
     mPointsText->SetShowing(1);
     mFlash = 0.0f;
     mShowing = 1;
@@ -144,10 +144,10 @@ void HudPoints::SetMultiplier(int nMultiplier) {
     mMultiplier = nMultiplier;
 #ifdef VIDEO_STANDARD_PAL
     const HxStr format = GetMetString(kMetStrIngMult);
-    mMultiplierText->SetText(
-        HxStr(FormatString(format.mStr != nullptr ? format.mStr : g_szEmptyString, mMultiplier)));
+    mMultiplierText->SetText(HxStr(
+        Rnd::MakeString(format.mStr != nullptr ? format.mStr : g_szEmptyString, mMultiplier)));
 #else
-    mMultiplierText->SetText(HxStr(FormatString("x%d", nMultiplier)));
+    mMultiplierText->SetText(HxStr(Rnd::MakeString("x%d", nMultiplier)));
 #endif
     mMultiplierText->SetShowing(mMultiplier > 1);
 }

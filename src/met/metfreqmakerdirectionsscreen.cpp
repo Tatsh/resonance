@@ -439,7 +439,7 @@ int MetFreqMakerDirectionsScreen::ProvideText(int nItem, int nColumn, Rnd::Text 
         const HxStr &cell = PageCell(nItem, nColumn, g_savePage);
         if (nItem == kSaveSlotRow) {
             HxStr slotName = FirstCardSlotName();
-            pText->SetText(HxStr(FormatString(TextOf(cell), TextOf(slotName))));
+            pText->SetText(HxStr(Rnd::MakeString(TextOf(cell), TextOf(slotName))));
         } else {
             pText->SetText(cell);
         }

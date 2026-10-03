@@ -2,10 +2,9 @@
 
 #include "sch/tick.h"
 
-class CmdID;
-
 namespace Sch {
 
+class CmdID;
 class Command;
 class Scheduler;
 

@@ -45,18 +45,18 @@ void NoteMsg::saveGuts(OBStream &stream) const {
     unsigned char note = mNote;
     unsigned char velocity = mVelocity;
     unsigned short length = static_cast<unsigned short>(mLength.mTick);
-    stream.WriteBytes(&channel, sizeof(channel))
-        .WriteBytes(&note, sizeof(note))
-        .WriteBytes(&velocity, sizeof(velocity))
-        .Write(&length, sizeof(length));
+    stream.Write(&channel, sizeof(channel))
+        .Write(&note, sizeof(note))
+        .Write(&velocity, sizeof(velocity))
+        .WriteLE(&length, sizeof(length));
 }
 
 // NTSC-U/C: 0x003e3808, PAL: 0x0041bba8
 void NoteMsg::restoreGuts(IBStream &stream) {
     unsigned short length;
-    stream.ReadBytes(&mChannel, sizeof(mChannel))
-        .ReadBytes(&mNote, sizeof(mNote))
-        .ReadBytes(&mVelocity, sizeof(mVelocity))
-        .Read(&length, sizeof(length));
+    stream.Read(&mChannel, sizeof(mChannel))
+        .Read(&mNote, sizeof(mNote))
+        .Read(&mVelocity, sizeof(mVelocity))
+        .ReadLE(&length, sizeof(length));
     mLength = Mid::MBT(length);
 }

@@ -41,13 +41,13 @@ void BumpPacket::saveGuts(OBStream &stream) const {
     int id = mPlayer.mId;
     int bar = mBar;
     int track = mTrack;
-    stream.Write(&id, sizeof(id)).Write(&bar, sizeof(bar)).Write(&track, sizeof(track));
+    stream.WriteLE(&id, sizeof(id)).WriteLE(&bar, sizeof(bar)).WriteLE(&track, sizeof(track));
 }
 
 // NTSC-U/C: 0x003e7eb0, PAL: 0x00420190
 void BumpPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
-    stream.Read(&mPlayer.mId, sizeof(mPlayer.mId))
-        .Read(&mBar, sizeof(mBar))
-        .Read(&mTrack, sizeof(mTrack));
+    stream.ReadLE(&mPlayer.mId, sizeof(mPlayer.mId))
+        .ReadLE(&mBar, sizeof(mBar))
+        .ReadLE(&mTrack, sizeof(mTrack));
 }

@@ -2,7 +2,7 @@
 
 #include "rndartt/abitmap.h"
 #include "rndartt/acanvas.h"
-#include "rndartt/afixed.h"
+#include "rndartt/afix.h"
 #include "rndartt/apoint.h"
 #include "rndartt/apolygonedge.h"
 
@@ -32,7 +32,7 @@ void APolygon::SetupEdge(APolygonEdge *pEdge, short nFrom, int nDirection) const
     pEdge->mTop = pEdge->mBottom;
     const APoint &from = mPoints[mIndices[pEdge->mFrom]];
     const APoint &to = mPoints[mIndices[pEdge->mTo]];
-    pEdge->mBottom = static_cast<short>((to.mY + g_nFixedHalf) >> kACanvasFractionBits);
+    pEdge->mBottom = static_cast<short>((to.mY + AFix::onehalf) >> kACanvasFractionBits);
     pEdge->mX = from.mX;
     const int nRows = pEdge->mBottom - pEdge->mTop;
     if (nRows > 0) {

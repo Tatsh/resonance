@@ -82,7 +82,7 @@ inline void PlayIntroMovie() {
         strcat(szPath, kIntroMovieName);
     } else {
         strcpy(szPath, kDiscPrefix);
-        AppendPathComponent(kIntroMovieName, szPath);
+        FilenameToISO9660(kIntroMovieName, szPath);
     }
     play_cutscene(szPath, kPlayWithAudio);
 }

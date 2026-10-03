@@ -104,8 +104,8 @@ void MetGameSkillScreen::EnterAndShow() {
         // The text is a format with the mode in place of `%s`.
         HxStr body = GetMetString(kMetStrTSkill);
         MetScreenTitleScreen::SetTitle(
-            HxStr(FormatString(body.mStr != nullptr ? body.mStr : g_szEmptyString,
-                               mode.mStr != nullptr ? mode.mStr : g_szEmptyString)));
+            HxStr(Rnd::MakeString(body.mStr != nullptr ? body.mStr : g_szEmptyString,
+                                  mode.mStr != nullptr ? mode.mStr : g_szEmptyString)));
 #else
         HxStr body = QueryConfigString(kTitleConfigCode, kTitleKey);
         MetScreenTitleScreen::SetTitle(mode + body);

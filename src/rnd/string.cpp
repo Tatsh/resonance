@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "math/color.h"
+#include "math/ray.h"
 #include "math/transformops.h"
 #include "math/vector2.h"
 #include "math/vector3.h"
@@ -259,20 +260,20 @@ void String::EmitRibbonVerts(Point *pFirst, Point *pLast) {
     for (pPoint = pFirst; pPoint != pLast; ++pPoint) {
         Vector2 dir;
         SubVec2(&pPoint[1].mScreen.x, &pPoint->mScreen.x, &dir.x);
-        NormalizeVec2(&dir.x, &dir.x);
+        Rnd::Normalize(dir, dir);
         pPoint->mDir = dir;
         pPoint->mNormal.x = -pPoint->mDir.y;
         pPoint->mNormal.y = pPoint->mDir.x;
-        ScaleVec2(&pPoint->mNormal.x, mWidth, &pPoint->mNormal.x);
+        Rnd::Multiply(pPoint->mNormal, mWidth, pPoint->mNormal);
     }
     pLast->mDir = pLast[-1].mDir;
     pLast->mNormal = pLast[-1].mNormal;
 
     // Each edge line is a point on the far edge and the segment direction. A turn sharper than
     // mFoldCos folds the ribbon over, and every later normal is negated until the next fold.
-    Vector2 line[2];
-    AddVec2(&pFirst->mScreen.x, &pFirst->mNormal.x, &line[0].x);
-    line[1] = pFirst->mDir;
+    Ray line;
+    Rnd::Add(pFirst->mScreen, pFirst->mNormal, line.mPoint);
+    line.mDirection = pFirst->mDir;
     int bFolded = 0;
     for (pPoint = pFirst + 1; pPoint != pLast; ++pPoint) {
         const float flTurn =
@@ -281,19 +282,19 @@ void String::EmitRibbonVerts(Point *pFirst, Point *pLast) {
             bFolded ^= 1;
         }
         if (bFolded != 0) {
-            NegateVec2(&pPoint->mNormal.x, &pPoint->mNormal.x);
+            Rnd::Negate(pPoint->mNormal, pPoint->mNormal);
         }
 
-        const Vector2 previous[] = {line[0], line[1]};
-        AddVec2(&pPoint->mScreen.x, &pPoint->mNormal.x, &line[0].x);
-        line[1] = pPoint->mDir;
+        const Ray previous = line;
+        Rnd::Add(pPoint->mScreen, pPoint->mNormal, line.mPoint);
+        line.mDirection = pPoint->mDir;
         if (flTurn < kStraightCos) {
-            const Vector2 corner = IntersectLines(line, previous);
+            const Vector2 corner = Rnd::Intersect(line, previous);
             SubVec2(&corner.x, &pPoint->mScreen.x, &pPoint->mNormal.x);
         }
     }
     if (bFolded != 0) {
-        NegateVec2(&pLast->mNormal.x, &pLast->mNormal.x);
+        Rnd::Negate(pLast->mNormal, pLast->mNormal);
     }
 
     VertexSlot slot;
@@ -621,24 +622,24 @@ void String::SetHighlight(int nHighlight) {
 }
 
 // NTSC-U/C: 0x004bf570, PAL: 0x004fd5f8
-void String::FindCollisions(const Ray &ray, HitSink &sink) {
+void String::FindCollisions(const Segment &ray, std::list<Collision> &collisions) {
     if (mShowing == 0) {
         return;
     }
 
     // The position is taken before the mesh is tested. The walk below therefore visits only the
-    // hits the mesh appended. On an empty sink it addresses the list sentinel, and the increment
+    // hits the mesh appended. On an empty list it addresses the list sentinel, and the increment
     // still arrives at the first new entry.
-    std::list<Hit>::iterator itBefore = sink.mHits.end();
+    std::list<Collision>::iterator itBefore = collisions.end();
     --itBefore;
 
-    mpMesh->FindCollisions(ray, sink);
+    mpMesh->FindCollisions(ray, collisions);
 
-    for (std::list<Hit>::iterator it = ++itBefore; it != sink.mHits.end(); ++it) {
+    for (std::list<Collision>::iterator it = ++itBefore; it != collisions.end(); ++it) {
         it->mObject = this;
     }
 
-    Collideable::FindCollisions(ray, sink);
+    Collideable::FindCollisions(ray, collisions);
 }
 
 // NTSC-U/C: 0x004ba038, PAL: 0x004f7fb0

@@ -350,7 +350,7 @@ void *Generator::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x0045db98, PAL: 0x0049b240
 void Generator::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kGeneratorTag);
+    OperatorDeleteOverride(pBlock, kGeneratorTag);
 }
 
 // NTSC-U/C: 0x0045e2a8, PAL: 0x0049b950
@@ -499,7 +499,7 @@ void Generator::SetFrameSelf(float flFrame) {
         if (mBirthCam != nullptr) {
             Vector3 offset;
             offset.w = 1.0f;
-            Vec3Sub(
+            Rnd::Subtract(
                 mWorldXfm[kXfmRowTranslation], mBirthCam->mWorldXfm[kXfmRowTranslation], &offset.x);
             if (mBirthFrontOnly != 0) {
                 const float *pAxis = mBirthCam->mWorldXfm[kXfmRowAxisY];
@@ -525,7 +525,7 @@ void Generator::SetFrameSelf(float flFrame) {
         angles.y = RandomDegreesToRadians(mPathVarMax[kPathVarAxisY]);
         angles.z = RandomDegreesToRadians(mPathVarMax[kPathVarAxisZ]);
         angles.w = 1.0f;
-        EulerAnglesToMatrix3x3(&angles.x, &instance.mXfmMod.mBasisX.x);
+        Rnd::MakeRotMatrix(&angles.x, &instance.mXfmMod.mBasisX.x);
         XfmConcat(&instance.mXfmMod.mBasisX.x, mWorldXfm[0], &instance.mXfmMod.mBasisX.x);
 
         float flScale = mScaleGenLow;
@@ -595,7 +595,7 @@ int Generator::DrawShowing() {
         xfm.mBasisZ.w = 1.0f;
         xfm.mTranslation.w = 1.0f;
         mPath->EvalFrame(flAge * flDirection + mPathStartFrame, &xfm.mBasisX.x, 1);
-        ScaleRows3x3(&instance.mScale.x, &xfm.mBasisX.x, &xfm.mBasisX.x);
+        Rnd::Scale(&instance.mScale.x, &xfm.mBasisX.x, &xfm.mBasisX.x);
         // Yes, the output is also the first input.
         XfmConcat(&xfm.mBasisX.x, &instance.mXfmMod.mBasisX.x, &xfm.mBasisX.x);
         (this->*pfnDraw)(xfm, flAge);

@@ -440,14 +440,14 @@ void MetSoloStagesScreen::BuildButtons() {
 
     for (int i = 0; i < kNumberedStageCount; ++i) {
         const int nStage = i + 1;
-        HxStr name(FormatString(kStageButtonFormat, nStage));
+        HxStr name(Rnd::MakeString(kStageButtonFormat, nStage));
 #ifdef VIDEO_STANDARD_PAL
         mStageList->Add(name, GetMetString(kMetStrStage1 + i));
 #else
         mStageList->Add(name,
-                        ConfigText(kLabelConfigCode, FormatString(kStageLabelFormat, nStage)));
+                        ConfigText(kLabelConfigCode, Rnd::MakeString(kStageLabelFormat, nStage)));
 #endif
-        Rnd::Mesh *pWire = FindObject<Rnd::Mesh>(FormatString(kStageWireFormat, nStage));
+        Rnd::Mesh *pWire = FindObject<Rnd::Mesh>(Rnd::MakeString(kStageWireFormat, nStage));
         mStageWires.push_back(pWire);
         pWire->SetShowing(0);
     }
@@ -461,8 +461,8 @@ void MetSoloStagesScreen::BuildButtons() {
 
     for (int i = 0; i < kIndicatorCount; ++i) {
         const int nIndicator = i + 1;
-        mIndicatorList->Add(HxStr(FormatString(kIndicatorFormat, nIndicator)), HxStr(kNoText));
-        Rnd::Mesh *pWire = FindObject<Rnd::Mesh>(FormatString(kIndicatorWireFormat, nIndicator));
+        mIndicatorList->Add(HxStr(Rnd::MakeString(kIndicatorFormat, nIndicator)), HxStr(kNoText));
+        Rnd::Mesh *pWire = FindObject<Rnd::Mesh>(Rnd::MakeString(kIndicatorWireFormat, nIndicator));
         mIndicatorWires.push_back(pWire);
         pWire->SetShowing(0);
     }
@@ -751,8 +751,8 @@ void MetSoloStagesScreen::ShowStageBonus(int nStage) {
         return;
     }
     mStageBonusGroup->SetShowing(1);
-    mStageBonusText->SetText(HxStr(FormatString(kCountFormat, nScore)));
-    mStageBeatText->SetText(HxStr(FormatString(kCountFormat, nAlbumValue)));
+    mStageBonusText->SetText(HxStr(Rnd::MakeString(kCountFormat, nScore)));
+    mStageBeatText->SetText(HxStr(Rnd::MakeString(kCountFormat, nAlbumValue)));
 }
 
 // NTSC-U/C: 0x003a2878, PAL: 0x003d5848
@@ -960,21 +960,22 @@ void MetSoloStagesScreen::ShowLevelDetails() {
 
     const HxStr artist(ConfigText(kArtistConfigCode, TextOf(level)));
     const HxStr title(ConfigText(kTitleConfigCode, TextOf(level)));
-    mLabelText->SetText(HxStr(FormatString(kLabelFormat, TextOf(artist), TextOf(title))));
+    mLabelText->SetText(HxStr(Rnd::MakeString(kLabelFormat, TextOf(artist), TextOf(title))));
 
     if (IsLevelLocked(nLevel) != 0) {
         const HxStr message(MetConfigText(kMetStrBonusMsg, kLabelConfigCode, kBonusMessage));
         const int nAlbumValue = GetAlbumLevelValue(
             nStage, Application::shared()->GetGameManager()->GetParams()->mDifficulty);
         const int nStageLevelCount = GetStageList(nStage + 1)->size();
-        mBioText->SetText(HxStr(FormatString(TextOf(message), nStageLevelCount - 1, nAlbumValue)));
+        mBioText->SetText(
+            HxStr(Rnd::MakeString(TextOf(message), nStageLevelCount - 1, nAlbumValue)));
     } else {
         mBioText->SetText(ConfigText(kBioConfigCode, TextOf(level)));
     }
 
     const HxStr genre(ConfigText(kGenreConfigCode, TextOf(level)));
     const HxStr bpm(ConfigText(kBpmConfigCode, TextOf(level)));
-    mGenreText->SetText(HxStr(FormatString(kGenreFormat, TextOf(genre), TextOf(bpm))));
+    mGenreText->SetText(HxStr(Rnd::MakeString(kGenreFormat, TextOf(genre), TextOf(bpm))));
 
     if ((mStageLocked[nStage] == 0) && (Application::shared()->GetPlayMode() == kPlayModeGame) &&
         (Application::shared()->GetGameMode() == kGameModeSolo)) {
@@ -982,9 +983,9 @@ void MetSoloStagesScreen::ShowLevelDetails() {
         const int nHighScore = FirstPersonaStats().GetLevelHighScore(params.mDifficulty, level);
 #ifdef VIDEO_STANDARD_PAL
         const HxStr format(GetMetString(kMetStrHighscore));
-        mScoreText->SetText(HxStr(FormatString(TextOf(format), nHighScore)));
+        mScoreText->SetText(HxStr(Rnd::MakeString(TextOf(format), nHighScore)));
 #else
-        mScoreText->SetText(HxStr(FormatString(kHighScoreFormat, nHighScore)));
+        mScoreText->SetText(HxStr(Rnd::MakeString(kHighScoreFormat, nHighScore)));
 #endif
     } else {
         mScoreText->SetText(HxStr(kNoText));
@@ -1003,8 +1004,8 @@ void MetSoloStagesScreen::UpdateArrows() {
     if (IsStageUnavailable(nStage) != 0) {
         return;
     }
-    mLeftArrow = FindObject<Rnd::Button>(FormatString(kLeftArrowFormat, nStage + 1));
-    mRightArrow = FindObject<Rnd::Button>(FormatString(kRightArrowFormat, nStage + 1));
+    mLeftArrow = FindObject<Rnd::Button>(Rnd::MakeString(kLeftArrowFormat, nStage + 1));
+    mRightArrow = FindObject<Rnd::Button>(Rnd::MakeString(kRightArrowFormat, nStage + 1));
     if (mLeftArrow != nullptr) {
         mLeftArrow->SetState(kButtonStateHighlighted);
     }
@@ -1116,23 +1117,23 @@ void MetSoloStagesScreen::EnterAndShow() {
     // first.
     if (params.mPlayMode == kPlayModeGame) {
         if ((GetLanguage() == SCE_SPANISH_LANGUAGE) || (GetLanguage() == SCE_FRENCH_LANGUAGE)) {
-            title =
-                FormatString(kRemixTitleFormat, TextOf(mode), TextOf(difficulty), TextOf(stages));
+            title = Rnd::MakeString(
+                kRemixTitleFormat, TextOf(mode), TextOf(difficulty), TextOf(stages));
         } else {
-            title = FormatString(
+            title = Rnd::MakeString(
                 kGameTitleFormat, TextOf(mode), TextOf(kind), TextOf(difficulty), TextOf(stages));
         }
     } else if (GetLanguage() == SCE_SPANISH_LANGUAGE) {
-        title = FormatString(kRemixTitleFormat, TextOf(kind), TextOf(mode), TextOf(stages));
+        title = Rnd::MakeString(kRemixTitleFormat, TextOf(kind), TextOf(mode), TextOf(stages));
     } else {
-        title = FormatString(kRemixTitleFormat, TextOf(mode), TextOf(kind), TextOf(stages));
+        title = Rnd::MakeString(kRemixTitleFormat, TextOf(mode), TextOf(kind), TextOf(stages));
     }
 #else
     if (params.mPlayMode == kPlayModeGame) {
-        title = FormatString(
+        title = Rnd::MakeString(
             kGameTitleFormat, TextOf(mode), TextOf(kind), TextOf(difficulty), TextOf(stages));
     } else {
-        title = FormatString(kRemixTitleFormat, TextOf(mode), TextOf(kind), TextOf(stages));
+        title = Rnd::MakeString(kRemixTitleFormat, TextOf(mode), TextOf(kind), TextOf(stages));
     }
 #endif
 
@@ -1167,8 +1168,8 @@ void MetSoloStagesScreen::EnterAndShow() {
     mStageButtonsView->AddDraw(pButtons, draws.empty() ? nullptr : draws.front());
 
     for (int i = 0; i < kStageButtonCount; ++i) {
-        Rnd::Button *pLeft = FindObject<Rnd::Button>(FormatString(kLeftArrowFormat, i + 1));
-        Rnd::Button *pRight = FindObject<Rnd::Button>(FormatString(kRightArrowFormat, i + 1));
+        Rnd::Button *pLeft = FindObject<Rnd::Button>(Rnd::MakeString(kLeftArrowFormat, i + 1));
+        Rnd::Button *pRight = FindObject<Rnd::Button>(Rnd::MakeString(kRightArrowFormat, i + 1));
         if (IsStageUnavailable(i) != 0) {
             pLeft->SetShowing(0);
             pRight->SetShowing(0);

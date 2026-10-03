@@ -106,7 +106,7 @@ AMovieSet::AMovieSet(const char *pszPath, int bStreaming, int *pnError) {
     memset(mHandlers, 0, sizeof(mHandlers));
     memset(mHandlerData, 0, sizeof(mHandlerData));
 
-    mFileLength = GetUncompressedFileLength(pszPath);
+    mFileLength = FileTrueSize(pszPath);
     if (mFileLength <= 0) {
         *pnError = kErrorNoFile;
         return;
@@ -150,15 +150,14 @@ AMovieSet::AMovieSet(const char *pszPath, int bStreaming, int *pnError) {
         *pnError = kErrorOutOfMemory;
         return;
     }
-    mAsyncHandle =
-        AsyncLoadFileByPath(pszPath, pBlock, GetStoredFileLength(pszPath), &g_movieAsyncCallback);
+    mAsyncHandle = AsyncLoadFileByPath(pszPath, pBlock, FileSize(pszPath), &g_movieAsyncCallback);
     g_pendingStreams.push_back(this);
 }
 
 // NTSC-U/C: 0x00580858, PAL: 0x005c3890
 AMovieSet::~AMovieSet() {
     if (mFile >= 0) {
-        FileClose(mFile);
+        close(mFile);
     }
     if (mAsyncHandle != 0) {
         AsyncCancelRequest(mAsyncHandle);
@@ -215,7 +214,7 @@ void AMovieSet::Update(int nTick, int nReadSize) {
             mCircBuff->mRead = mCircBuff->mBuff;
             FileSeek(mFile, mDataStart, kFileSeekSet);
             mFileOffset = mDataStart;
-            const int nRead = FileRead(mFile, mCircBuff->mWrite, kFirstReadBytes);
+            const int nRead = read(mFile, mCircBuff->mWrite, kFirstReadBytes);
             mFileOffset += nRead;
             mCircBuff->AdvanceWrite(nRead);
         }
@@ -229,23 +228,23 @@ void AMovieSet::Update(int nTick, int nReadSize) {
 
     bool bVideoDispatched = false;
     while (mCircBuff->mRead != mCircBuff->mWrite &&
-           mCircBuff->FullyRead(mCircBuff->mRead, sizeof(ChunkHeader))) {
+           mCircBuff->FullyRead(mCircBuff->mRead, sizeof(AMovieChunkHdr))) {
         char *pChunk = mCircBuff->mRead;
-        ChunkHeader *pHeader = reinterpret_cast<ChunkHeader *>(pChunk);
+        AMovieChunkHdr *pHeader = reinterpret_cast<AMovieChunkHdr *>(pChunk);
 
         // A header that straddles the end of the buffer is completed by copying the bytes that
         // wrapped to the far side of mWrap.
-        if (static_cast<unsigned>(mCircBuff->mWrap - pChunk) < sizeof(ChunkHeader)) {
-            memcpy(mCircBuff->mWrap, mCircBuff->mBuff, sizeof(ChunkHeader));
+        if (static_cast<unsigned>(mCircBuff->mWrap - pChunk) < sizeof(AMovieChunkHdr)) {
+            memcpy(mCircBuff->mWrap, mCircBuff->mBuff, sizeof(AMovieChunkHdr));
         }
-        if (!mCircBuff->FullyRead(pChunk, pHeader->mSize + sizeof(ChunkHeader))) {
+        if (!mCircBuff->FullyRead(pChunk, pHeader->mSize + sizeof(AMovieChunkHdr))) {
             return;
         }
         if (nTick < mLoopTicks + pHeader->mTicks) {
             return;
         }
 
-        const int nChunkBytes = pHeader->mSize + sizeof(ChunkHeader);
+        const int nChunkBytes = pHeader->mSize + sizeof(AMovieChunkHdr);
         if (pChunk + nChunkBytes > mCircBuff->mWrap) {
             memcpy(mCircBuff->mWrap, mCircBuff->mBuff, nChunkBytes - (mCircBuff->mWrap - pChunk));
         }
@@ -320,16 +319,16 @@ void AMovieSet::Update(int nTick, int nReadSize) {
 // NTSC-U/C: 0x0057ffd0, PAL: 0x005c3008
 int AMovieSet::ParseHeader(char *pBuffer, int nBytes) {
     mBuffer = pBuffer;
-    ChunkHeader *pHeader = reinterpret_cast<ChunkHeader *>(pBuffer);
+    AMovieChunkHdr *pHeader = reinterpret_cast<AMovieChunkHdr *>(pBuffer);
     if (pHeader->mTag != g_nMovsTag) {
         return kErrorBadHeader;
     }
-    char *pChunk = pBuffer + pHeader->mSize + sizeof(ChunkHeader);
-    for (pHeader = reinterpret_cast<ChunkHeader *>(pChunk); pHeader->mTag == g_nMovtTag;
-         pHeader = reinterpret_cast<ChunkHeader *>(pChunk)) {
+    char *pChunk = pBuffer + pHeader->mSize + sizeof(AMovieChunkHdr);
+    for (pHeader = reinterpret_cast<AMovieChunkHdr *>(pChunk); pHeader->mTag == g_nMovtTag;
+         pHeader = reinterpret_cast<AMovieChunkHdr *>(pChunk)) {
         // The payload is the track's bytes. The constructor only exists to match the image.
         memcpy(static_cast<void *>(&mTracks[pHeader->mTrackId]), pHeader + 1, sizeof(Track));
-        pChunk += pHeader->mSize + sizeof(ChunkHeader);
+        pChunk += pHeader->mSize + sizeof(AMovieChunkHdr);
     }
 
     mDataStart = pChunk - mBuffer;

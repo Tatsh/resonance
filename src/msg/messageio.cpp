@@ -64,10 +64,10 @@ std::ostream &Message::Print(std::ostream &stream) const {
 }
 
 // NTSC-U/C: 0x00555a18, PAL: 0x005960a0
-IBStream &ReadMessageBodyFromStream(IBStream &stream, Message &msg) {
+IBStream &operator>>(IBStream &stream, Message &msg) {
     char cPresent;
     unsigned short nType;
-    stream.ReadBytes(&cPresent, sizeof(cPresent)).Read(&nType, sizeof(nType));
+    stream.Read(&cPresent, sizeof(cPresent)).ReadLE(&nType, sizeof(nType));
     if (cPresent != '1') {
         Fatal("Stream error while reading in a Message object.");
     }
@@ -79,9 +79,9 @@ IBStream &ReadMessageBodyFromStream(IBStream &stream, Message &msg) {
 }
 
 // NTSC-U/C: 0x00555b10, PAL: 0x00596198
-IBStream &ReadMessagePointerFromStream(IBStream &stream, Message *&pMsg) {
+IBStream &operator>>(IBStream &stream, Message *&pMsg) {
     char cPresent;
-    stream.ReadBytes(&cPresent, sizeof(cPresent));
+    stream.Read(&cPresent, sizeof(cPresent));
     if (stream.Eof() || cPresent == '0') {
         pMsg = nullptr;
         return stream;
@@ -91,7 +91,7 @@ IBStream &ReadMessagePointerFromStream(IBStream &stream, Message *&pMsg) {
         return stream;
     }
     int nType;
-    stream.Read(&nType, sizeof(nType));
+    stream.ReadLE(&nType, sizeof(nType));
     Message *pNew = Message::NewMessage(nType);
     if (pNew == nullptr) {
         Fatal("Cannot find ID %ld in Message Factory List", nType);
@@ -103,26 +103,26 @@ IBStream &ReadMessagePointerFromStream(IBStream &stream, Message *&pMsg) {
 }
 
 // NTSC-U/C: 0x00556448, PAL: 0x00596ad0
-OBStream &WriteMessageBodyToStream(OBStream &stream, Message &msg) {
+OBStream &operator<<(OBStream &stream, Message &msg) {
     (void)msg.Type(); // Yes, the binary discards this call's result.
     const unsigned short nType = msg.Type();
     char cPresent = '1';
-    stream.WriteBytes(&cPresent, sizeof(cPresent)).Write(&nType, sizeof(nType));
+    stream.Write(&cPresent, sizeof(cPresent)).WriteLE(&nType, sizeof(nType));
     msg.saveGuts(stream);
     return stream;
 }
 
 // NTSC-U/C: 0x00556508, PAL: 0x00596b90
-OBStream &WriteMessagePointerToStream(OBStream &stream, Message *pMsg) {
+OBStream &operator<<(OBStream &stream, Message *pMsg) {
     if (pMsg == nullptr) {
         char cAbsent = '0';
-        stream.WriteBytes(&cAbsent, sizeof(cAbsent));
+        stream.Write(&cAbsent, sizeof(cAbsent));
         return stream;
     }
     char cPresent = '1';
-    OBStream &written = stream.WriteBytes(&cPresent, sizeof(cPresent));
+    OBStream &written = stream.Write(&cPresent, sizeof(cPresent));
     int nType = pMsg->Type();
-    written.Write(&nType, sizeof(nType));
+    written.WriteLE(&nType, sizeof(nType));
     pMsg->saveGuts(stream);
     return stream;
 }

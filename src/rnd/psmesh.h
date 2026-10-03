@@ -17,7 +17,7 @@ namespace Rnd {
  * lists below therefore occupy `+0x150` through `+0x15f`.
  *
  * The subclass supplies the drawing the base class omits. Its Sync() converts the face vector into
- * triangle strips, and Refresh() runs the base fix-up and then clamps every vertex colour.
+ * triangle strips, and AddRefObjects() runs the base fix-up and then clamps every vertex colour.
  * GfxDevice::Init() installs the creator at `0x00606928` over the mesh creator hook, so a mesh
  * loaded from a file is a PsMesh.
  *
@@ -162,7 +162,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x00606a00
      * @ghidraAddress PAL: 0x00647658
      */
-    virtual void Refresh();
+    virtual void AddRefObjects();
 
 private:
     /**

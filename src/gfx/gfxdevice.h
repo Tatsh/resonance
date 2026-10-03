@@ -121,21 +121,6 @@ public:
     void RestorePacket();
 
     /**
-     * Count one vertical blank in gVCount.
-     *
-     * InitDisplayMode() installs it through sceGsSyncVCallback(). The body increments the counter,
-     * runs the kernel's ExitHandler() sequence (`sync`, `ei`), and returns 0. ExitHandler() is MIPS
-     * inline assembly and assembles only with the PlayStation 2 toolchain. The routine was an
-     * orphan in the analysis, and its name is inferred.
-     *
-     * @param nCause The interrupt cause the kernel passes, unused.
-     * @return 0.
-     * @ghidraAddress NTSC-U/C: 0x0049fea0
-     * @ghidraAddress PAL: 0x004ddf28
-     */
-    static int VblankHandler(int nCause);
-
-    /**
      * Bring up the display and the drawing subsystems.
      *
      * Labels g_profileTimers records 8 to 13 "setup", "vram", "billboard", "vert", "prim", and
@@ -555,13 +540,26 @@ extern GfxDevice ThePs;
 /**
  * Vertical blanks counted since start-up.
  *
- * GfxDevice::VblankHandler() increments it. SwapBuffers() busy-waits on it, reloading it on every
- * pass.
+ * DrawVSyncCB() increments it. SwapBuffers() busy-waits on it, reloading it on every pass.
  *
  * @ghidraAddress NTSC-U/C: 0x006f2f20
  * @ghidraAddress PAL: 0x00736970
  */
 extern volatile int gVCount;
+
+/**
+ * Count one vertical blank in gVCount.
+ *
+ * GfxDevice::InitDisplayMode() installs it through sceGsSyncVCallback(). The body increments the
+ * counter, runs the kernel's ExitHandler() sequence (`sync`, `ei`), and returns 0. ExitHandler() is
+ * MIPS inline assembly and assembles only with the PlayStation 2 toolchain.
+ *
+ * @param nCause The interrupt cause the kernel passes, unused.
+ * @return 0.
+ * @ghidraAddress NTSC-U/C: 0x0049fea0
+ * @ghidraAddress PAL: 0x004ddf28
+ */
+int DrawVSyncCB(int nCause);
 
 extern "C" {
 

@@ -154,7 +154,7 @@ private:
     // Sends a SeekerMsg that turns mPlayer's seeker off, unless mPlayer is the stand-in. The bar
     // is not read.
     // NTSC-U/C: 0x0019c368, PAL: 0x001a20d0
-    void SendSeekerMsg(int nBar);
+    void SendSeekerMsg(int nBar) const;
 
     // The out-of-line copy of the TrackSelectMsg branch DispatchPriv() expands inline.
     // NTSC-U/C: 0x0019d860, PAL: 0x001a35c8

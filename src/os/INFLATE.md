@@ -35,21 +35,21 @@ The build options read from the image are these:
 
 These macros precede the include and do not modify the upstream file:
 
-| Upstream name  | Game definition                                         |
-| -------------- | ------------------------------------------------------- |
-| `inbuf`        | `gzipInbuf`                                             |
-| `insize`       | `gzipInsize`                                            |
-| `inptr`        | `gzipInptr`                                             |
-| `outcnt`       | `gzipOutcnt` (upstream `wp`)                            |
-| `window`       | `gzipWindow` (upstream `slide`)                         |
-| `fill_inbuf`   | `GzipRefillInputBuffer`                                 |
-| `flush_window` | `GzipFlushWindow`                                       |
-| `malloc`       | `HuftAlloc`, given the entry count rather than the size |
-| `free`         | Nothing                                                 |
+| Upstream name  | Game definition                                          |
+| -------------- | -------------------------------------------------------- |
+| `inbuf`        | `gzipInbuf`                                              |
+| `insize`       | `gzipInsize`                                             |
+| `inptr`        | `gzipInptr`                                              |
+| `outcnt`       | `gzipOutcnt` (upstream `wp`)                             |
+| `window`       | `gzipWindow` (upstream `slide`)                          |
+| `fill_inbuf`   | `GzipRefillInputBuffer`                                  |
+| `flush_window` | `GzipFlushWindow`                                        |
+| `malloc`       | `HuftMalloc`, given the entry count rather than the size |
+| `free`         | Nothing                                                  |
 
-`HuftAlloc` carves tables from a 2048-entry pool. It advances the cursor even when the allocation
+`HuftMalloc` carves tables from a 2048-entry pool. It advances the cursor even when the allocation
 fails, fails an allocation that ends exactly at the end of the pool, and logs
-`"HUFT MEMORY EXCEEDED!!\n"` through `LogPrintf` on failure. The image inlines it into
+`"HUFT MEMORY EXCEEDED!!\n"` through `printf` on failure. The image inlines it into
 `huft_build`.
 
 Retail `huft_free` is reduced to `return 0` and is inlined away in every caller after it. The
@@ -81,7 +81,7 @@ used and rewinds the pool. The image inlines it into `inflate()`. The peak is ne
 | `inflate_block`   | `0x0063def8` | `0x0067ea88` |
 | `inflate`         | `0x0063e0b0` | `0x0067ec40` |
 | `HuftReset`       | `0x0063e1a8` | `0x0067ed38` |
-| `HuftAlloc`       | `0x0063e1e0` | `0x0067ed70` |
+| `HuftMalloc`      | `0x0063e1e0` | `0x0067ed70` |
 | `huft_free`       | `0x0063e230` | `0x0067edc0` |
 
 | Global      | NTSC-U/C     | PAL          |

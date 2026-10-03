@@ -3,7 +3,7 @@
 /**
  * Directory the platform-converted copy of a file sits in, relative to the original: "gen/".
  *
- * BuildBitmapCacheFileName() inserts it in front of a file name. External linkage makes every use
+ * ConvertNameToGenerated() inserts it in front of a file name. External linkage makes every use
  * load the pointer, as the image does.
  *
  * @ghidraAddress NTSC-U/C: 0x00725840
@@ -18,7 +18,7 @@ extern const char *dirpath;
  * stop then becomes an underscore, and pszExtension is appended. "dir/name.bmp" with ".abm" becomes
  * "dir/gen/name_bmp.abm". Uppercase letters after the full stop are lowered, but the lowering
  * starts as many characters past the full stop as dirpath is long. A three-letter extension is
- * therefore never lowered. The name is inferred.
+ * therefore never lowered.
  *
  * @param pszPath The path, rewritten in place. The buffer must take the longer result.
  * @param pszExtension The extension to append.
@@ -26,7 +26,7 @@ extern const char *dirpath;
  * @ghidraAddress NTSC-U/C: 0x005585a8
  * @ghidraAddress PAL: 0x00599700
  */
-char *BuildBitmapCacheFileName(char *pszPath, const char *pszExtension);
+char *ConvertNameToGenerated(char *pszPath, const char *pszExtension);
 
 /**
  * Report whether a bitmap's compressed platform copy exists.
@@ -44,11 +44,11 @@ int LoadBitmapFileFromPath(const char *pszPath);
 /**
  * Insert an extension in front of a path's last full stop, or append it when there is none.
  *
- * "name.bmp" with ".abm" becomes "name.abm.bmp". The name is inferred.
+ * "name.bmp" with ".abm" becomes "name.abm.bmp".
  *
  * @param pszPath The path, rewritten in place. The buffer must take the longer result.
  * @param pszExtension The extension to insert.
  * @ghidraAddress NTSC-U/C: 0x005586b0
  * @ghidraAddress PAL: 0x00599808
  */
-void ReplaceFileNameExtension(char *pszPath, const char *pszExtension);
+void AppendName(char *pszPath, const char *pszExtension);

@@ -16,7 +16,7 @@
  * @ghidraAddress NTSC-U/C: 0x00556508
  * @ghidraAddress PAL: 0x00596b90
  */
-OBStream &WriteMessagePointerToStream(OBStream &stream, Message *pMsg);
+OBStream &operator<<(OBStream &stream, Message *pMsg);
 
 /**
  * Write a message that is known to exist through the stream, preceded by the byte `1`.
@@ -30,7 +30,7 @@ OBStream &WriteMessagePointerToStream(OBStream &stream, Message *pMsg);
  * @ghidraAddress NTSC-U/C: 0x00556448
  * @ghidraAddress PAL: 0x00596ad0
  */
-OBStream &WriteMessageBodyToStream(OBStream &stream, Message &msg);
+OBStream &operator<<(OBStream &stream, Message &msg);
 
 /**
  * Read a message's payload back into an existing message.
@@ -45,7 +45,7 @@ OBStream &WriteMessageBodyToStream(OBStream &stream, Message &msg);
  * @ghidraAddress NTSC-U/C: 0x00555a18
  * @ghidraAddress PAL: 0x005960a0
  */
-IBStream &ReadMessageBodyFromStream(IBStream &stream, Message &msg);
+IBStream &operator>>(IBStream &stream, Message &msg);
 
 /**
  * Read a message back through the stream and construct it from the factory list.
@@ -60,4 +60,4 @@ IBStream &ReadMessageBodyFromStream(IBStream &stream, Message &msg);
  * @ghidraAddress NTSC-U/C: 0x00555b10
  * @ghidraAddress PAL: 0x00596198
  */
-IBStream &ReadMessagePointerFromStream(IBStream &stream, Message *&pMsg);
+IBStream &operator>>(IBStream &stream, Message *&pMsg);

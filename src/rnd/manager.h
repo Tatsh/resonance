@@ -30,8 +30,8 @@ typedef Object *(*ClassFactory)(const HxStr &name);
  *
  * The class emits no RTTI descriptor, so it declares no virtual. Its title is settled all the same,
  * because the destructor at `0x00520348` passes the literal "Rnd::Manager" at `0x00826e98` to
- * FreeTaggedMemory() as the tag for its own storage. Every other tag the renderer frees under is a
- * class name the RTTI also carries, "Rnd::Button", "Rnd::Font", "Rnd::Mat", "Rnd::Mesh",
+ * OperatorDeleteOverride() as the tag for its own storage. Every other tag the renderer frees under
+ * is a class name the RTTI also includes, "Rnd::Button", "Rnd::Font", "Rnd::Mat", "Rnd::Mesh",
  * "Rnd::Movie", and eleven more, so the vocabulary is the class-name vocabulary and this entry
  * belongs to it. No embedded `__FILE__` corroborates it, because the whole image holds exactly one
  * source path, `C:/FREQ/src/rndartt/abitmap.h`.

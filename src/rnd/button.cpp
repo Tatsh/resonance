@@ -315,7 +315,7 @@ void *Button::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x005344d8, PAL: 0x00573d58
 void Button::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kButtonTag);
+    OperatorDeleteOverride(pBlock, kButtonTag);
 }
 
 // NTSC-U/C: 0x005349e0, PAL: 0x00574260

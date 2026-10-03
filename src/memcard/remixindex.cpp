@@ -44,34 +44,34 @@ void RemixIndexElement::Dump() {
 void RemixIndexElement::Save(OBStream &stream) {
     // Yes, the binary writes the format constant rather than Version.
     int nFormat = kRemixIndexElementFormat;
-    stream.Write(&nFormat, sizeof(nFormat));
-    stream.WriteBytes(LevelName, sizeof(LevelName));
-    stream.WriteBytes(RemixName, sizeof(RemixName));
-    stream.WriteBytes(FileName, sizeof(FileName));
+    stream.WriteLE(&nFormat, sizeof(nFormat));
+    stream.Write(LevelName, sizeof(LevelName));
+    stream.Write(RemixName, sizeof(RemixName));
+    stream.Write(FileName, sizeof(FileName));
     char gameOK = GameOK;
-    stream.WriteBytes(&gameOK, sizeof(gameOK));
+    stream.Write(&gameOK, sizeof(gameOK));
     SaveHxStr(stream, dateTime);
     int nCount = static_cast<int>(appearances.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (std::vector<FreqAppearance>::iterator it = appearances.begin(); it != appearances.end();
          ++it) {
         it->Save(stream);
     }
     int nAlbum = AlbumNum;
-    stream.Write(&nAlbum, sizeof(nAlbum));
+    stream.WriteLE(&nAlbum, sizeof(nAlbum));
 }
 
 // NTSC-U/C: 0x00136448, PAL: 0x00136d28
 void RemixIndexElement::Load(IBStream &stream) {
-    stream.Read(&Version, sizeof(Version));
+    stream.ReadLE(&Version, sizeof(Version));
     if (Version > kNamelessVersion) {
-        stream.ReadBytes(LevelName, sizeof(LevelName));
-        stream.ReadBytes(RemixName, sizeof(RemixName));
-        stream.ReadBytes(FileName, sizeof(FileName));
-        stream.ReadBytes(&GameOK, sizeof(GameOK));
+        stream.Read(LevelName, sizeof(LevelName));
+        stream.Read(RemixName, sizeof(RemixName));
+        stream.Read(FileName, sizeof(FileName));
+        stream.Read(&GameOK, sizeof(GameOK));
         LoadHxStr(stream, dateTime);
         int nCount;
-        stream.Read(&nCount, sizeof(nCount));
+        stream.ReadLE(&nCount, sizeof(nCount));
         appearances.resize(nCount, FreqAppearance());
         for (std::vector<FreqAppearance>::iterator it = appearances.begin();
              it != appearances.end();
@@ -80,15 +80,15 @@ void RemixIndexElement::Load(IBStream &stream) {
         }
     }
     if (Version >= kAlbumVersion) {
-        stream.Read(&AlbumNum, sizeof(AlbumNum));
+        stream.ReadLE(&AlbumNum, sizeof(AlbumNum));
     }
 }
 
 // NTSC-U/C: 0x001366e0, PAL: 0x00136fc0
 void RemixIndex::ReadFromStream(IBStream &stream) {
-    stream.Read(&version, sizeof(version));
+    stream.ReadLE(&version, sizeof(version));
     int nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     elements.clear();
     for (int nIndex = 0; nIndex < nCount; ++nIndex) {
         // Yes, the binary copies the fresh element's uninitialised names, GameOK, and Version
@@ -114,9 +114,9 @@ void RemixIndexElement::Reset() {
 // NTSC-U/C: 0x00139858, PAL: 0x0013a188
 void RemixIndex::WriteToStream(OBStream &stream) {
     int nVersion = version;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
     int nCount = static_cast<int>(elements.size());
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (std::vector<RemixIndexElement>::iterator it = elements.begin(); it != elements.end();
          ++it) {
         it->Save(stream);

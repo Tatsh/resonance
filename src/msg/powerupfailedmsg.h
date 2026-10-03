@@ -59,7 +59,7 @@ public:
      */
     virtual const char *GetName() const;
 
-    HudItemKind mKind; /*!< The powerup that failed. +0x04 */
+    PowerupType mKind; /*!< The powerup that failed. +0x04 */
     Player *mPlayer;   /*!< The player who deployed it. +0x08 */
 };
 

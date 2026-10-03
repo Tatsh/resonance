@@ -17,7 +17,7 @@ constexpr float kNoFrame = 1e9f;
 // NTSC-U/C: 0x0043ff10, PAL: 0x0047ca40
 TnlArrow::TnlArrow(int nIndex) {
     mMesh = dynamic_cast<Rnd::Mesh *>(
-        Rnd::TheManager.Find(HxStr(FormatString("arrow%d.mesh", nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("arrow%d.mesh", nIndex))));
     for (int i = 0; i < kSlotCount; ++i) {
         mViews[i] = nullptr;
         mExpireFrames[i] = kNoFrame;

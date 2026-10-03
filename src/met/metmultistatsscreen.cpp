@@ -98,20 +98,20 @@ void MetMultiStatsScreen::ResolveContainerViews() {
     FillText(kScoresPanel, kMetStrEgmGamePlayerLabel, kScoresPanelKey);
 
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
-        Rnd::Text *pScore = FindText(FormatString(kScoreTextFormat, nRow + 1));
+        Rnd::Text *pScore = FindText(Rnd::MakeString(kScoreTextFormat, nRow + 1));
         mScoreTexts.push_back(pScore);
         pScore->SetText(HxStr(kNoText));
 
-        Rnd::Text *pName = FindText(FormatString(kNameTextFormat, nRow + 1));
+        Rnd::Text *pName = FindText(Rnd::MakeString(kNameTextFormat, nRow + 1));
         mNameTexts.push_back(pName);
         pName->SetText(HxStr(kNoText));
 
         Rnd::Mat *pMaterial = dynamic_cast<Rnd::Mat *>(
-            Rnd::TheManager.Find(HxStr(FormatString(kPictureMaterialFormat, nRow + 1))));
+            Rnd::TheManager.Find(HxStr(Rnd::MakeString(kPictureMaterialFormat, nRow + 1))));
         mPictureMaterials.push_back(pMaterial);
 
         Rnd::Mesh *pMesh = dynamic_cast<Rnd::Mesh *>(
-            Rnd::TheManager.Find(HxStr(FormatString(kMeshFormat, nRow + 1))));
+            Rnd::TheManager.Find(HxStr(Rnd::MakeString(kMeshFormat, nRow + 1))));
         mPlayerMeshes.push_back(pMesh);
     }
 
@@ -182,7 +182,7 @@ void MetMultiStatsScreen::EnterAndShow() {
             const int nPlayer = mPlayerOrder[nRow];
             if (params.mPlayMode == kPlayModeGame) {
                 mScoreTexts[nRow]->SetText(
-                    HxStr(FormatString(kScoreFormat, pStats->GetScore(nPlayer))));
+                    HxStr(Rnd::MakeString(kScoreFormat, pStats->GetScore(nPlayer))));
             } else {
                 mScoreTexts[nRow]->SetText(HxStr(kNoText));
             }

@@ -158,9 +158,9 @@ Heap *Heap::Create(void *pBlock, unsigned nSize, unsigned nFlags) {
 }
 
 // NTSC-U/C: 0x00552108, PAL: 0x00592748
-void Heap::Destroy() {
-    if ((mFlags & kHeapFlagOwnsBlock) != 0) {
-        MemFreeTagged(this, __FILE__, __LINE__);
+void HHeapDelete(Heap *pHeap) {
+    if ((pHeap->mFlags & kHeapFlagOwnsBlock) != 0) {
+        MemFreeTagged(pHeap, __FILE__, __LINE__);
     }
 }
 
@@ -409,33 +409,33 @@ int Heap::Shrink(unsigned nSize) {
 }
 
 // NTSC-U/C: 0x00551ec8, PAL: 0x00592508
-void Heap::DumpToFile(const char *pszPath) {
+void HHeapDump(Heap *pHeap, const char *pszPath) {
     FILE *pFile = fopen(pszPath, "w");
     if (pFile == nullptr) {
         return;
     }
 
-    fprintf(pFile, "Heap Info: length: %d flags: %d\n", mLength, mFlags);
+    fprintf(pFile, "Heap Info: length: %d flags: %d\n", pHeap->mLength, pHeap->mFlags);
     fprintf(pFile,
             "HHeap Stats: nUsedNodes:%d nFreeNodes:%d nCalls:(M:%d R:%d F:%d) nBytes:%d\n",
-            mUsedNodes,
-            mFreeNodes,
-            mCallsAlloc,
-            mCallsRealloc,
-            mCallsFree,
-            mBytes);
-    LogPrintf("HHeap Stats: nUsedNodes:%d nFreeNodes:%d nCalls:(M:%d R:%d F:%d) nBytes:%d\n",
-              mUsedNodes,
-              mFreeNodes,
-              mCallsAlloc,
-              mCallsRealloc,
-              mCallsFree,
-              mBytes);
+            pHeap->mUsedNodes,
+            pHeap->mFreeNodes,
+            pHeap->mCallsAlloc,
+            pHeap->mCallsRealloc,
+            pHeap->mCallsFree,
+            pHeap->mBytes);
+    printf("HHeap Stats: nUsedNodes:%d nFreeNodes:%d nCalls:(M:%d R:%d F:%d) nBytes:%d\n",
+           pHeap->mUsedNodes,
+           pHeap->mFreeNodes,
+           pHeap->mCallsAlloc,
+           pHeap->mCallsRealloc,
+           pHeap->mCallsFree,
+           pHeap->mBytes);
     fprintf(pFile, "Timing:(M:%d R:%d F:%d)\n", tMalloc, tRealloc, tFree);
-    LogPrintf("Timing:(M:%d R:%d F:%d)\n", tMalloc, tRealloc, tFree);
+    printf("Timing:(M:%d R:%d F:%d)\n", tMalloc, tRealloc, tFree);
     fprintf(pFile, "ptr  len  isfree\n");
 
-    for (HeapNode *pNode = mStart; pNode != nullptr && pNode->mNext != nullptr;
+    for (HeapNode *pNode = pHeap->mStart; pNode != nullptr && pNode->mNext != nullptr;
          pNode = pNode->mNext) {
         fprintf(pFile, "0x%p %d %d\n", pNode, NodeExtent(pNode), NodeIsFree(pNode) ? 1 : 0);
     }
@@ -444,18 +444,18 @@ void Heap::DumpToFile(const char *pszPath) {
 }
 
 // NTSC-U/C: 0x00552218, PAL: 0x00592858
-void Heap::DumpStats() {
+void HHeapLogBasicStats(Heap *pHeap) {
     char szLine[0xa0];
     sprintf(szLine,
             "HHeap Stats: nUsedNodes:%d nFreeNodes:%d nCalls:(M:%d R:%d F:%d) nBytes:%d",
-            mUsedNodes,
-            mFreeNodes,
-            mCallsAlloc,
-            mCallsRealloc,
-            mCallsFree,
-            mBytes);
-    MemLogWrite(szLine);
-    LogPrintf("%s\n", szLine);
+            pHeap->mUsedNodes,
+            pHeap->mFreeNodes,
+            pHeap->mCallsAlloc,
+            pHeap->mCallsRealloc,
+            pHeap->mCallsFree,
+            pHeap->mBytes);
+    MemLogWriteMarker(szLine);
+    printf("%s\n", szLine);
 }
 
 // NTSC-U/C: 0x00723998, PAL: 0x00767588

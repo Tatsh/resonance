@@ -77,16 +77,16 @@ const char *StringText(const HxStr &text) {
 // NTSC-U/C: 0x004d07e0, PAL: 0x0050ec18
 // A value outside the three produces nothing at all. The sink comes back out so that the three
 // printers chain, which is how DumpText() reaches them.
-Dbg *PrintFontType(Dbg &sink, FontType type) {
+Dbg &operator<<(Dbg &sink, Font::Type type) {
     switch (type) {
-    case kFontTypeDefault:
-        return sink.Print("Default");
-    case kFontTypeBuiltin:
-        return sink.Print("Builtin");
-    case kFontTypeMaterial:
-        return sink.Print("Material");
+    case Font::kFontTypeDefault:
+        return *sink.Print("Default");
+    case Font::kFontTypeBuiltin:
+        return *sink.Print("Builtin");
+    case Font::kFontTypeMaterial:
+        return *sink.Print("Material");
     }
-    return &sink;
+    return sink;
 }
 
 // NTSC-U/C: 0x004d0858, PAL: 0x0050ec90
@@ -144,9 +144,9 @@ Stream &operator>>(Stream &stream, std::map<char, LegacyCharInfo> &charMap) {
 }
 
 // Walk x from nFrom toward nTo and report the first column with any pixel whose alpha byte is set,
-// yielding nTo when there is none. The compiler emitted this twice inside ComputeCharUV(), once
-// forwards across the cell and once backwards across it, which is why the direction is derived
-// from the two bounds rather than passed.
+// yielding nTo when there is none. The compiler emitted this twice inside CharInfo(), once
+// forwards across the cell and once backwards across it. The direction is therefore derived from
+// the two bounds rather than passed.
 inline int ScanForInkedColumn(ACanvas &canvas, int nFrom, int nTo, int nTop, int nBottom) {
     const bool bForward = nFrom < nTo;
     int x = nFrom;
@@ -220,7 +220,7 @@ void Font::DumpText(Dbg &sink) {
 
     sink.Print("[Font]\n");
     sink.Print("type:");
-    PrintFontType(sink, mType);
+    sink << mType;
 
     if (mType == kFontTypeBuiltin) {
         sink.Print(" height:");
@@ -380,11 +380,11 @@ void Font::Load(Stream &stream) {
 }
 
 // NTSC-U/C: 0x004ca050, PAL: 0x005082b8
-void Font::ComputeCharUV(int nRow, int nCol, CharInfo &infoOut) {
+Font::CharInfo::CharInfo(int nRow, int nCol, const Font *pFont) {
     ACanvas *pCanvas = nullptr;
     Tex *pTex = nullptr;
-    if (mMat != nullptr && !mMat->mStages.empty()) {
-        pTex = mMat->mStages[kAtlasStage].mTex;
+    if (pFont->mMat != nullptr && !pFont->mMat->mStages.empty()) {
+        pTex = pFont->mMat->mStages[kAtlasStage].mTex;
         if (pTex != nullptr) {
             pCanvas =
                 pTex->LockMipBitmap(kGlyphMipLevel, kGlyphMipLockReserved, kGlyphMipLockFlags);
@@ -392,11 +392,11 @@ void Font::ComputeCharUV(int nRow, int nCol, CharInfo &infoOut) {
     }
 
     if (pTex == nullptr) {
-        infoOut.mAdvance = 0.0f;
-        infoOut.mU0 = 0.0f;
-        infoOut.mV0 = 0.0f;
-        infoOut.mU1 = 0.0f;
-        infoOut.mV1 = 0.0f;
+        mAdvance = 0.0f;
+        mU0 = 0.0f;
+        mV0 = 0.0f;
+        mU1 = 0.0f;
+        mV1 = 0.0f;
         return;
     }
 
@@ -410,13 +410,15 @@ void Font::ComputeCharUV(int nRow, int nCol, CharInfo &infoOut) {
     if (pCanvas != nullptr) {
         // The cell bounds are derived in the surface's own pixels and truncated to integers, so a
         // grid that does not divide the surface evenly loses the remainder.
-        nCellLeft = static_cast<int>(static_cast<float>(nCol * pCanvas->mBitmap.mWidth) / mCols);
+        const float flCols = pFont->mCols;
+        const float flRows = pFont->mRows;
+        nCellLeft = static_cast<int>(static_cast<float>(nCol * pCanvas->mBitmap.mWidth) / flCols);
         nCellRight =
-            static_cast<int>(static_cast<float>((nCol + 1) * pCanvas->mBitmap.mWidth) / mCols);
+            static_cast<int>(static_cast<float>((nCol + 1) * pCanvas->mBitmap.mWidth) / flCols);
         const int nCellTop =
-            static_cast<int>(static_cast<float>(nRow * pCanvas->mBitmap.mHeight) / mRows);
+            static_cast<int>(static_cast<float>(nRow * pCanvas->mBitmap.mHeight) / flRows);
         const int nCellBottom =
-            static_cast<int>(static_cast<float>((nRow + 1) * pCanvas->mBitmap.mHeight) / mRows);
+            static_cast<int>(static_cast<float>((nRow + 1) * pCanvas->mBitmap.mHeight) / flRows);
 
         nInkFirst = ScanForInkedColumn(*pCanvas, nCellLeft, nCellRight, nCellTop, nCellBottom);
         nInkLast =
@@ -436,11 +438,11 @@ void Font::ComputeCharUV(int nRow, int nCol, CharInfo &infoOut) {
     const float flBearing = static_cast<float>(nInkFirst - nCellLeft);
     const float flInkFraction = flInkSpan / flCellSpan;
 
-    infoOut.mAdvance = (mSize * flInkSpan) / flCellSpan;
-    infoOut.mU0 = (static_cast<float>(nCol) + flBearing / flCellSpan) / mCols;
-    infoOut.mV0 = static_cast<float>(nRow) / mRows;
-    infoOut.mU1 = infoOut.mU0 + flInkFraction / mCols;
-    infoOut.mV1 = infoOut.mV0 + 1.0f / mRows;
+    mAdvance = (pFont->mSize * flInkSpan) / flCellSpan;
+    mU0 = (static_cast<float>(nCol) + flBearing / flCellSpan) / pFont->mCols;
+    mV0 = static_cast<float>(nRow) / pFont->mRows;
+    mU1 = mU0 + flInkFraction / pFont->mCols;
+    mV1 = mV0 + 1.0f / pFont->mRows;
 }
 
 // NTSC-U/C: 0x004ca978, PAL: 0x00508be0
@@ -448,7 +450,7 @@ void Font::BuildCharMap() {
     int nRow = 0;
     int nCol = 0;
     for (unsigned i = 0; i < mChars.mLen; ++i) {
-        ComputeCharUV(nRow, nCol, mCharMap[mChars.mStr[i]]);
+        mCharMap[mChars.mStr[i]] = CharInfo(nRow, nCol, this);
         ++nCol;
         if (nCol >= static_cast<int>(mCols)) {
             nCol = 0;
@@ -530,7 +532,7 @@ void *Font::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x004cece0, PAL: 0x0050d018
 void Font::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kFontTag);
+    OperatorDeleteOverride(pBlock, kFontTag);
 }
 
 // NTSC-U/C: 0x004cf060, PAL: 0x0050d3c0

@@ -11,7 +11,7 @@ set(RESONANCE_RNDARTT_SRCS
     acanvaslin32.cpp
     acanvaslin4.cpp
     acanvaslin8.cpp
-    afixed.cpp
+    afix.cpp
     agfxfile.cpp
     agiffile.cpp
     apalette.cpp

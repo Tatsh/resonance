@@ -128,7 +128,7 @@ void PhrasePlayer::PlayPhraseGems(Phrase *pPhrase, int nBar, Mid::MBT from, Mid:
 
         const Mid::MBT position = MakePosition(it->mPosition.mTick - elapsed.mTick);
         if (it->mTrans != 0) {
-            MultiMuse *pTransposed = TransposeMuse(pRiff, it->mTrans);
+            MultiMuse *pTransposed = CloneAndTranspose(*pRiff, it->mTrans);
             {
                 MultiMuseMsg msg(pTransposed);
                 pMuse->Add(&msg, position.mTick, kCheckLast);

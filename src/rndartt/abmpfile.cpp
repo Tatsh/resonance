@@ -137,7 +137,7 @@ int ABmpFile::StartRead() {
 }
 
 // NTSC-U/C: 0x0061c860, PAL: 0x0065d3f0
-int ABmpFile::ReadFrame(ABitmap *pImage, int *pbEnd) {
+int ABmpFile::ReadFrame(ABitmap &image, int *pbEnd) {
     if (mImageRead != 0) {
         *pbEnd = 1;
         return kAGfxFileOk;
@@ -148,55 +148,55 @@ int ABmpFile::ReadFrame(ABitmap *pImage, int *pbEnd) {
     }
     switch (mBitCount) {
     case kBitCount4:
-        *pImage = ABitmap(nullptr,
-                          kABitmapFormatLinear4,
-                          false,
-                          mWidth,
-                          mHeight,
-                          ((mWidth + 7) & kRow4Mask) >> 1);
+        image = ABitmap(nullptr,
+                        kABitmapFormatLinear4,
+                        false,
+                        mWidth,
+                        mHeight,
+                        ((mWidth + 7) & kRow4Mask) >> 1);
         break;
     case kBitCount8:
-        *pImage = ABitmap(
+        image = ABitmap(
             nullptr, kABitmapFormatLinear8, false, mWidth, mHeight, (mWidth + 3) & kRowWordMask);
         break;
     case kBitCount16:
-        *pImage = ABitmap(nullptr,
-                          kABitmapFormatLinear15,
-                          false,
-                          mWidth,
-                          mHeight,
-                          (mWidth * 2 + 3) & kRowWordMask);
+        image = ABitmap(nullptr,
+                        kABitmapFormatLinear15,
+                        false,
+                        mWidth,
+                        mHeight,
+                        (mWidth * 2 + 3) & kRowWordMask);
         break;
     case kBitCount24:
-        *pImage = ABitmap(nullptr,
-                          kABitmapFormatLinear32,
-                          false,
-                          mWidth,
-                          mHeight,
-                          (mWidth * kRGBAByteCount) & kRowWordMask);
+        image = ABitmap(nullptr,
+                        kABitmapFormatLinear32,
+                        false,
+                        mWidth,
+                        mHeight,
+                        (mWidth * kRGBAByteCount) & kRowWordMask);
         break;
     default:
         return kAGfxFileBadFormat; // Yes, the palette read above is not released.
     }
-    if (pImage->mPixels == nullptr) {
+    if (image.mPixels == nullptr) {
         if (pPalette != nullptr) {
             delete pPalette;
         }
         return kAGfxFileNoMemory;
     }
-    const int nResult = ReadBitsFromFile(pImage);
+    const int nResult = ReadBitsFromFile(&image);
     if (nResult != kAGfxFileOk) {
-        if (pImage->mPixels != nullptr) {
+        if (image.mPixels != nullptr) {
             // Yes, the single-object release, although the tagged allocator made the block.
-            delete static_cast<unsigned char *>(pImage->mPixels);
-            pImage->mPixels = nullptr;
+            delete static_cast<unsigned char *>(image.mPixels);
+            image.mPixels = nullptr;
         }
         if (pPalette != nullptr) {
             delete pPalette;
         }
         return nResult;
     }
-    pImage->mPalette = pPalette;
+    image.mPalette = pPalette;
     mImageRead = 1;
     return kAGfxFileOk;
 }
@@ -323,7 +323,7 @@ int ABmpFile::ReadBitmapNotCompressed(ABitmap *pImage) {
         } else if (pImage->mFormat == kABitmapFormatLinear32) {
             fread(pRow, 1, pImage->mWidth * kRGBByteCount, mFile);
             ABitmap::Reverse24(pRow, pImage->mWidth);
-            ExpandRow24To32(pRow, pImage->mWidth);
+            Convert24To32InPlace(pRow, pImage->mWidth);
         } else {
             fread(pRow, 1, pImage->mBytesPerRow, mFile);
             if (pImage->mFormat == kABitmapFormatLinear15) {
@@ -437,7 +437,7 @@ int ABmpFile::ReadBitmapCompressed(ABitmap *pImage) {
 }
 
 // NTSC-U/C: 0x0061d620, PAL: 0x0065e1b0
-void ABmpFile::ExpandRow24To32(unsigned char *pPixels, int nCount) {
+void Convert24To32InPlace(unsigned char *pPixels, int nCount) {
     const unsigned char *pSource = pPixels + (nCount - 1) * kRGBByteCount;
     unsigned char *pDest = pPixels + (nCount - 1) * kRGBAByteCount;
     while (pSource >= pPixels) {

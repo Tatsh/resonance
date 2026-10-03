@@ -93,9 +93,9 @@ void Rnd::VRAM::Clear(int bClearPalettes) {
 
     for (pEntry = mpListHead[kVramListUsed]; pEntry != nullptr; pEntry = pEntry->mpNext) {
         if ((pEntry->mLockMask & kVramLockGenerationMask) != 0) {
-            LogPrintf("%s() - resetting lock on entry %d\n",
-                      __func__,
-                      static_cast<int>(pEntry - g_vramEntries));
+            printf("%s() - resetting lock on entry %d\n",
+                   __func__,
+                   static_cast<int>(pEntry - g_vramEntries));
         }
         pEntry->mMemAddr = 0;
         pEntry->mLockMask =
@@ -186,9 +186,9 @@ void Rnd::VRAM::AdvanceLockCycle() {
     Entry **ppEntry = g_apVramLocked[nGeneration];
     for (int nLocked = g_anVramLockCount[nGeneration]; nLocked > 0; --nLocked) {
         if (((*ppEntry)->mLockMask & nBit) == 0) {
-            LogPrintf("VRAM should have lockmask %d set but instead has %d\n",
-                      nBit,
-                      (*ppEntry)->mLockMask);
+            printf("VRAM should have lockmask %d set but instead has %d\n",
+                   nBit,
+                   (*ppEntry)->mLockMask);
         }
         (*ppEntry)->mLockMask = static_cast<unsigned char>((*ppEntry)->mLockMask & ~nBit);
         ++ppEntry;
@@ -197,9 +197,9 @@ void Rnd::VRAM::AdvanceLockCycle() {
     VramPalEntry **ppPal = g_apVramPalLocked[nGeneration];
     for (int nPalLocked = g_anVramPalLockCount[nGeneration]; nPalLocked > 0; --nPalLocked) {
         if (((*ppPal)->mLockMask & nBit) == 0) {
-            LogPrintf("VRAM pal entry should have lockmask %d set but instead has %d\n",
-                      nBit,
-                      (*ppPal)->mLockMask);
+            printf("VRAM pal entry should have lockmask %d set but instead has %d\n",
+                   nBit,
+                   (*ppPal)->mLockMask);
         }
         (*ppPal)->mLockMask = static_cast<unsigned short>((*ppPal)->mLockMask & ~nBit);
         ++ppPal;
@@ -211,34 +211,34 @@ void Rnd::VRAM::AdvanceLockCycle() {
 
 // NTSC-U/C: 0x00513438, PAL: 0x00553720
 void Rnd::VRAM::PrintStats(const char *pszPrefix) {
-    LogPrintf("%sVRAM in use: %d blocks (%d bytes)\n",
-              pszPrefix,
-              mBlocksInUse,
-              mBlocksInUse * kVramBlockBytes);
+    printf("%sVRAM in use: %d blocks (%d bytes)\n",
+           pszPrefix,
+           mBlocksInUse,
+           mBlocksInUse * kVramBlockBytes);
 
     const int nRequests = (mRequests != 0) ? mRequests : 1;
     const int nMissPercent =
         static_cast<int>(static_cast<float>(mMisses) * 100.0f / static_cast<float>(nRequests));
     const int nSwapPercent =
         static_cast<int>(static_cast<float>(mSwaps) * 100.0f / static_cast<float>(nRequests));
-    LogPrintf("%sVRAM stats (frame):  loads: %d (%d blocks), misses: %d (%d%%), "
-              "swaps: %d (%d%%), freemerge: %d\n",
-              pszPrefix,
-              mLoads,
-              mLoadBlocks,
-              mMisses,
-              nMissPercent,
-              mSwaps,
-              nSwapPercent,
-              mFreeMerges);
-    LogPrintf("%sVRAM stats (accum):  loads: %d (%d blocks), misses: %d, swaps: %d, "
-              "freemerge: %d\n",
-              pszPrefix,
-              mAccumLoads,
-              mAccumLoadBlocks,
-              mAccumMisses,
-              mAccumSwaps,
-              mAccumFreeMerges);
+    printf("%sVRAM stats (frame):  loads: %d (%d blocks), misses: %d (%d%%), "
+           "swaps: %d (%d%%), freemerge: %d\n",
+           pszPrefix,
+           mLoads,
+           mLoadBlocks,
+           mMisses,
+           nMissPercent,
+           mSwaps,
+           nSwapPercent,
+           mFreeMerges);
+    printf("%sVRAM stats (accum):  loads: %d (%d blocks), misses: %d, swaps: %d, "
+           "freemerge: %d\n",
+           pszPrefix,
+           mAccumLoads,
+           mAccumLoadBlocks,
+           mAccumMisses,
+           mAccumSwaps,
+           mAccumFreeMerges);
 }
 
 // NTSC-U/C: 0x00514ce0, PAL: 0x00555010
@@ -251,7 +251,7 @@ void Rnd::VRAM::GetLastFrameLoads(int *pnLoads, int *pnBlocks) const {
 Rnd::VRAM::Entry *Rnd::VRAM::GetAvailEntry() {
     Entry *pEntry = mpListHead[kVramListPool];
     if (pEntry == nullptr) {
-        LogPrintf("Out of VRAM Table Entries!!!\n");
+        printf("Out of VRAM Table Entries!!!\n");
         return nullptr;
     }
 
@@ -446,7 +446,7 @@ void Rnd::VRAM::AllocBlock(Entry *pEntry, unsigned short nBlocks) {
         }
 
         if (nFreed == 0) {
-            LogPrintf("!!! VRAM ALLOCATION FAILURE - CALLING CLEAR() !!!\n");
+            printf("!!! VRAM ALLOCATION FAILURE - CALLING CLEAR() !!!\n");
             Clear(0);
             pTaken = mpListHead[kVramListFree];
             break; // Yes, the binary does not test the reloaded free head.
@@ -546,7 +546,7 @@ void Rnd::VRAM::WipeVram() {
         // destination walks past the end of video memory. Both match the binary.
         for (int nColumn = kVramWipeRows - kVramWipeTileTexels; nColumn >= 0;
              nColumn -= kVramWipeTileTexels) {
-            LogPrintf("Clearing vram at addr: %d ($%x)\n", nMemAddr, nMemAddr);
+            printf("Clearing vram at addr: %d ($%x)\n", nMemAddr, nMemAddr);
             sceGsSetDefLoadImage(&g_vramWipeLoadImage,
                                  static_cast<short>(nMemAddr),
                                  1,

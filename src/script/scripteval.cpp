@@ -22,7 +22,7 @@ Py::Object EvalScriptExpression(const HxStr &expression) {
 Py::Object EvalScriptTemplate(int nTemplate, ...) {
     va_list args;
     va_start(args, nTemplate);
-    const HxStr text = FormatMessage(GetScriptTemplate(nTemplate), args);
+    const HxStr text = FmtImp(Resid2Str(nTemplate), args);
     va_end(args);
     return g_pPyShell->Eval(text, Py_eval_input);
 }

@@ -14,23 +14,24 @@ void Gem::saveGuts(OBStream &stream) const {
     int trans = mTrans;
     int bar = mBar;
     OBStream &rest =
-        stream.Write(&gem, sizeof(gem)).Write(&trans, sizeof(trans)).Write(&bar, sizeof(bar));
+        stream.WriteLE(&gem, sizeof(gem)).WriteLE(&trans, sizeof(trans)).WriteLE(&bar, sizeof(bar));
     mLoc.Save(rest);
 
     int id = mPlayer->mPlayerId;
-    rest.Write(&id, sizeof(id));
+    rest.WriteLE(&id, sizeof(id));
 }
 
 // NTSC-U/C: 0x001a2630, PAL: 0x001a8398
 // The binary tests the local's cached pointer before the -1 case, and that pointer
 // is always null here, so the order does not change the result.
 void Gem::restoreGuts(IBStream &stream) {
-    IBStream &rest =
-        stream.Read(&mGem, sizeof(mGem)).Read(&mTrans, sizeof(mTrans)).Read(&mBar, sizeof(mBar));
+    IBStream &rest = stream.ReadLE(&mGem, sizeof(mGem))
+                         .ReadLE(&mTrans, sizeof(mTrans))
+                         .ReadLE(&mBar, sizeof(mBar));
     mLoc.Load(rest);
 
     IDablePtr<Player> player;
-    rest.Read(&player.mId, sizeof(player.mId));
+    rest.ReadLE(&player.mId, sizeof(player.mId));
     mPlayer = player.mId == -1 ? nullptr : static_cast<Player *>(player);
 }
 

@@ -63,7 +63,7 @@ void MetFreqLoader::ParseIdentities(const void *pBuffer, int nLength) {
     IOBMemStream stream;
     stream.Fill(pBuffer, nLength);
     int nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     for (int i = 0; i < nCount; ++i) {
         MetPersonaData *pPersona = new MetPersonaData();
         pPersona->Load(&stream);

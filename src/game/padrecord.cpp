@@ -12,7 +12,7 @@ constexpr int kPadStateDisconnected = 0;
 constexpr int kPadStateFindCtp1 = 2;
 constexpr int kPadStateStable = 6;
 
-// Terms scePadInfoMode() takes, and the identifiers Read() recognises.
+// Terms scePadInfoMode() takes, and the identifiers BreugPadRead() recognises.
 constexpr int kInfoModeCurrentId = 1;
 constexpr int kInfoModeCurrentExtendedId = 2;
 constexpr int kPadIdAnalog = 4;
@@ -23,7 +23,7 @@ constexpr int kReqStateComplete = 0;
 constexpr int kReqStateFailed = 1;
 constexpr int kReqStateBusy = 2;
 
-// The main mode Read() requests, analog and locked.
+// The main mode BreugPadRead() requests, analog and locked.
 constexpr int kMainModeAnalog = 1;
 constexpr int kMainModeLock = 3;
 
@@ -86,132 +86,97 @@ constexpr unsigned char kBigMotorByte = 1;
 // Actuator entries of the small and big motors.
 enum ActuatorIndex { kSmallMotor = 0, kBigMotor = 1 };
 
-// mReadyLevel from which SetVibration() drives the motors.
+// mReadyLevel from which BreugPadSetMotors() drives the motors.
 constexpr int kVibrationReady = 2;
 
-} // namespace
-
-int PadRecord::sPadLibraryStarted;
-
-// NTSC-U/C: 0x005bcf58, PAL: 0x00585f40
-void PadRecord::Open(int nPort, int nSlot, int nDeadZone) {
-    for (int i = 0; i < kActuatorByteCount; ++i) {
-        mActDirect[i] = 0;
-        mActAlign[i] = kActuatorUnused;
-    }
-    for (int i = kPressureByteCount - 1; i >= 0; --i) {
-        mPressureBaseline[i] = 0;
-    }
-    mActAlign[kSmallMotor] = kSmallMotorByte;
-    mActAlign[kBigMotor] = kBigMotorByte;
-    mPort = nPort;
-    mSlot = nSlot;
-    mPhase = 0;
-    mRawButtons = 0;
-    mReadCount = 0;
-    mReportMode = 0;
-    if (sPadLibraryStarted == 0) {
-        scePadInit(0);
-        sPadLibraryStarted = 1;
-    }
-    for (auto &byte : mLastAxes) {
-        byte = 0;
-    }
-    for (auto &value : mAxisDeltas) {
-        value = 0;
-    }
-    scePadPortOpen(nPort, nSlot, mDmaArea);
-    mDeadZone = nDeadZone;
-    mButtons = 0;
-    mHeldButtonsSeen = 0;
-    mToggledButtons = 0;
-    mPreviousButtons = 0;
-}
-
-// The setup step for the current phase.
-inline void PadRecord::AdvancePhase(int nState) {
-    switch (mPhase) {
+// The setup step for the current phase. BreugPadRead() expands it inline, and it has no separate
+// address.
+inline void AdvancePhase(PadRecord *pPad, int nState) {
+    switch (pPad->mPhase) {
     case kPhaseProbe: {
         if (nState != kPadStateStable && nState != kPadStateFindCtp1) {
             break;
         }
-        int nId = scePadInfoMode(mPort, mSlot, kInfoModeCurrentId, 0);
+        int nId = scePadInfoMode(pPad->mPort, pPad->mSlot, kInfoModeCurrentId, 0);
         if (nId == 0) {
             break;
         }
-        const int nExtendedId = scePadInfoMode(mPort, mSlot, kInfoModeCurrentExtendedId, 0);
+        const int nExtendedId =
+            scePadInfoMode(pPad->mPort, pPad->mSlot, kInfoModeCurrentExtendedId, 0);
         if (nExtendedId > 0) {
             nId = nExtendedId;
         }
         if (nId == kPadIdAnalog) {
-            mReadyLevel = kReadyDigital;
-            mPhase = kPhaseAnalogProbe;
+            pPad->mReadyLevel = kReadyDigital;
+            pPad->mPhase = kPhaseAnalogProbe;
         } else if (nId == kPadIdDualShock2) {
-            mPhase = kPhaseActuatorAlign;
+            pPad->mPhase = kPhaseActuatorAlign;
         } else {
-            mPhase = kPhaseDone;
+            pPad->mPhase = kPhaseDone;
         }
         break;
     }
     case kPhaseAnalogProbe:
-        if (scePadInfoMode(mPort, mSlot, kInfoModeCurrentExtendedId, 0) == 0) {
-            mPhase = kPhaseDone;
+        if (scePadInfoMode(pPad->mPort, pPad->mSlot, kInfoModeCurrentExtendedId, 0) == 0) {
+            pPad->mPhase = kPhaseDone;
             break;
         }
-        ++mPhase;
+        ++pPad->mPhase;
         [[fallthrough]];
     case kPhaseAnalogSetMode:
-        if (scePadSetMainMode(mPort, mSlot, kMainModeAnalog, kMainModeLock) == kPadCallSucceeded) {
-            ++mPhase;
+        if (scePadSetMainMode(pPad->mPort, pPad->mSlot, kMainModeAnalog, kMainModeLock) ==
+            kPadCallSucceeded) {
+            ++pPad->mPhase;
         }
         break;
     case kPhaseAnalogWait:
-        if (scePadGetReqState(mPort, mSlot) == kReqStateFailed) {
-            --mPhase;
+        if (scePadGetReqState(pPad->mPort, pPad->mSlot) == kReqStateFailed) {
+            --pPad->mPhase;
         }
-        if (scePadGetReqState(mPort, mSlot) == kReqStateComplete) {
-            mPhase = kPhaseProbe;
-            mReadyLevel = kReadyAnalog;
+        if (scePadGetReqState(pPad->mPort, pPad->mSlot) == kReqStateComplete) {
+            pPad->mPhase = kPhaseProbe;
+            pPad->mReadyLevel = kReadyAnalog;
         }
         break;
     case kPhaseActuatorAlign:
-        if (scePadInfoAct(mPort, mSlot, kInfoActCount, 0) == 0) {
-            mPhase = kPhaseDone;
+        if (scePadInfoAct(pPad->mPort, pPad->mSlot, kInfoActCount, 0) == 0) {
+            pPad->mPhase = kPhaseDone;
             break;
         }
-        if (scePadSetActAlign(mPort, mSlot, mActAlign) == 0) {
-            LogPrintf("BreugPad: Set actAlign failed!!!!!!!!!!!!\n");
+        if (scePadSetActAlign(pPad->mPort, pPad->mSlot, pPad->mActAlign) == 0) {
+            printf("BreugPad: Set actAlign failed!!!!!!!!!!!!\n");
             break;
         }
-        ++mPhase;
-        if (scePadGetReqState(mPort, mSlot) != kReqStateBusy) {
-            LogPrintf("BreugPad: Set actAlign warning!!!!!!!!!!!!\n");
+        ++pPad->mPhase;
+        if (scePadGetReqState(pPad->mPort, pPad->mSlot) != kReqStateBusy) {
+            printf("BreugPad: Set actAlign warning!!!!!!!!!!!!\n");
         }
         break;
     case kPhaseActuatorWait:
-        if (scePadGetReqState(mPort, mSlot) == kReqStateFailed) {
-            --mPhase;
+        if (scePadGetReqState(pPad->mPort, pPad->mSlot) == kReqStateFailed) {
+            --pPad->mPhase;
         }
-        if (scePadGetReqState(mPort, mSlot) == kReqStateComplete) {
-            ++mPhase;
+        if (scePadGetReqState(pPad->mPort, pPad->mSlot) == kReqStateComplete) {
+            ++pPad->mPhase;
         }
         break;
     case kPhasePressureProbe:
-        mPhase = scePadInfoPressMode(mPort, mSlot) == kPadCallSucceeded ? kPhasePressureEnter :
-                                                                          kPhaseDone;
+        pPad->mPhase = scePadInfoPressMode(pPad->mPort, pPad->mSlot) == kPadCallSucceeded ?
+                           kPhasePressureEnter :
+                           kPhaseDone;
         break;
     case kPhasePressureEnter:
-        if (scePadEnterPressMode(mPort, mSlot) == kPadCallSucceeded) {
-            ++mPhase;
+        if (scePadEnterPressMode(pPad->mPort, pPad->mSlot) == kPadCallSucceeded) {
+            ++pPad->mPhase;
         }
         break;
     case kPhasePressureWait:
-        if (scePadGetReqState(mPort, mSlot) == kReqStateFailed) {
-            --mPhase;
+        if (scePadGetReqState(pPad->mPort, pPad->mSlot) == kReqStateFailed) {
+            --pPad->mPhase;
         }
-        if (scePadGetReqState(mPort, mSlot) == kReqStateComplete) {
-            mPhase = kPhaseDone;
-            mReadyLevel = kReadyPressure;
+        if (scePadGetReqState(pPad->mPort, pPad->mSlot) == kReqStateComplete) {
+            pPad->mPhase = kPhaseDone;
+            pPad->mReadyLevel = kReadyPressure;
         }
         break;
     default:
@@ -219,31 +184,71 @@ inline void PadRecord::AdvancePhase(int nState) {
     }
 }
 
+} // namespace
+
+// NTSC-U/C: 0x005bcf58, PAL: 0x00585f40
+void BreugPadInit(PadRecord *pPad, int nPort, int nSlot, int nDeadZone) {
+    // NTSC-U/C: 0x00777fbc, PAL: 0x0076560c
+    static int firstPadStarted;
+    for (int i = 0; i < PadRecord::kActuatorByteCount; ++i) {
+        pPad->mActDirect[i] = 0;
+        pPad->mActAlign[i] = kActuatorUnused;
+    }
+    for (int i = PadRecord::kPressureByteCount - 1; i >= 0; --i) {
+        pPad->mPressureBaseline[i] = 0;
+    }
+    pPad->mActAlign[kSmallMotor] = kSmallMotorByte;
+    pPad->mActAlign[kBigMotor] = kBigMotorByte;
+    pPad->mPort = nPort;
+    pPad->mSlot = nSlot;
+    pPad->mPhase = 0;
+    pPad->mRawButtons = 0;
+    pPad->mReadCount = 0;
+    pPad->mReportMode = 0;
+    if (firstPadStarted == 0) {
+        scePadInit(0);
+        firstPadStarted = 1;
+    }
+    for (auto &byte : pPad->mLastAxes) {
+        byte = 0;
+    }
+    for (auto &value : pPad->mAxisDeltas) {
+        value = 0;
+    }
+    scePadPortOpen(nPort, nSlot, pPad->mDmaArea);
+    pPad->mDeadZone = nDeadZone;
+    pPad->mButtons = 0;
+    pPad->mHeldButtonsSeen = 0;
+    pPad->mToggledButtons = 0;
+    pPad->mPreviousButtons = 0;
+}
+
 // NTSC-U/C: 0x005bc998, PAL: 0x00585960
-int PadRecord::Read(unsigned int *pButtons,
-                    unsigned char *pAxis0,
-                    unsigned char *pAxis1,
-                    unsigned char *pAxis2,
-                    unsigned char *pAxis3,
-                    unsigned char *pPressures,
-                    short *pPressureDeltas) {
+int BreugPadRead(PadRecord *pPad,
+                 unsigned int *pButtons,
+                 unsigned char *pAxis0,
+                 unsigned char *pAxis1,
+                 unsigned char *pAxis2,
+                 unsigned char *pAxis3,
+                 unsigned char *pPressures,
+                 short *pPressureDeltas) {
     int nLeftX = 0;
     int nLeftY = 0;
     int nRightX = 0;
     int nRightY = 0;
-    ++mReadCount;
-    const int nState = scePadGetState(mPort, mSlot);
+    ++pPad->mReadCount;
+    const int nState = scePadGetState(pPad->mPort, pPad->mSlot);
     if (nState == kPadStateDisconnected) {
-        mPhase = kPhaseProbe;
-        mReadyLevel = 0;
+        pPad->mPhase = kPhaseProbe;
+        pPad->mReadyLevel = 0;
     }
-    if (static_cast<unsigned>(mPhase) < kPhaseTableSize) {
-        AdvancePhase(nState);
+    if (static_cast<unsigned>(pPad->mPhase) < kPhaseTableSize) {
+        AdvancePhase(pPad, nState);
     }
 
     if (nState != kPadStateStable && nState != kPadStateFindCtp1) {
         if (pButtons != nullptr) {
-            *pButtons = mButtons;
+            *pButtons = pPad->mButtons;
         }
         if (pAxis0 != nullptr) {
             *pAxis0 = static_cast<unsigned char>(nLeftX);
@@ -262,54 +267,54 @@ int PadRecord::Read(unsigned int *pButtons,
 
     // With mReadyLevel at zero the report is never read, and the tail below still reads it.
     unsigned char abReport[kReportSize];
-    if (mReadyLevel > 0) {
-        mPreviousButtons = mButtons;
-        if (scePadRead(mPort, mSlot, abReport) == 0) {
+    if (pPad->mReadyLevel > 0) {
+        pPad->mPreviousButtons = pPad->mButtons;
+        if (scePadRead(pPad->mPort, pPad->mSlot, abReport) == 0) {
             return 0;
         }
         const unsigned nNow =
             ~((abReport[kReportButtonsHigh] << kBitsPerByte) | abReport[kReportButtonsLow]) &
             kButtonMask;
-        const unsigned nPrevious = static_cast<unsigned short>(mRawButtons);
-        mRawButtons = static_cast<short>(nNow);
-        mToggledButtons ^= nNow & ~nPrevious;
-        mHeldButtonsSeen |= static_cast<unsigned short>(mRawButtons);
-        mButtons = static_cast<unsigned short>(mRawButtons);
+        const unsigned nPrevious = static_cast<unsigned short>(pPad->mRawButtons);
+        pPad->mRawButtons = static_cast<short>(nNow);
+        pPad->mToggledButtons ^= nNow & ~nPrevious;
+        pPad->mHeldButtonsSeen |= static_cast<unsigned short>(pPad->mRawButtons);
+        pPad->mButtons = static_cast<unsigned short>(pPad->mRawButtons);
     }
 
-    if (mReadyLevel >= kReadyAnalog) {
+    if (pPad->mReadyLevel >= kReadyAnalog) {
         nRightX = abReport[kReportRightX] - kAnalogCentre;
         nRightY = abReport[kReportRightY] - kAnalogCentre;
         nLeftX = abReport[kReportLeftX] - kAnalogCentre;
         nLeftY = abReport[kReportLeftY] - kAnalogCentre;
-        mAxisDeltas[kAxisLeftX] =
-            static_cast<short>(nLeftX - static_cast<signed char>(mLastAxes[kAxisLeftX]));
-        mAxisDeltas[kAxisLeftY] =
-            static_cast<short>(nLeftY - static_cast<signed char>(mLastAxes[kAxisLeftY]));
-        mAxisDeltas[kAxisRightX] =
-            static_cast<short>(nRightX - static_cast<signed char>(mLastAxes[kAxisRightX]));
-        mAxisDeltas[kAxisRightY] =
-            static_cast<short>(nRightY - static_cast<signed char>(mLastAxes[kAxisRightY]));
-        mLastAxes[kAxisLeftX] = static_cast<unsigned char>(nLeftX);
-        mLastAxes[kAxisLeftY] = static_cast<unsigned char>(nLeftY);
-        mLastAxes[kAxisRightX] = static_cast<unsigned char>(nRightX);
-        mLastAxes[kAxisRightY] = static_cast<unsigned char>(nRightY);
-        if (std::abs(nLeftX) < mDeadZone) {
+        pPad->mAxisDeltas[kAxisLeftX] =
+            static_cast<short>(nLeftX - static_cast<signed char>(pPad->mLastAxes[kAxisLeftX]));
+        pPad->mAxisDeltas[kAxisLeftY] =
+            static_cast<short>(nLeftY - static_cast<signed char>(pPad->mLastAxes[kAxisLeftY]));
+        pPad->mAxisDeltas[kAxisRightX] =
+            static_cast<short>(nRightX - static_cast<signed char>(pPad->mLastAxes[kAxisRightX]));
+        pPad->mAxisDeltas[kAxisRightY] =
+            static_cast<short>(nRightY - static_cast<signed char>(pPad->mLastAxes[kAxisRightY]));
+        pPad->mLastAxes[kAxisLeftX] = static_cast<unsigned char>(nLeftX);
+        pPad->mLastAxes[kAxisLeftY] = static_cast<unsigned char>(nLeftY);
+        pPad->mLastAxes[kAxisRightX] = static_cast<unsigned char>(nRightX);
+        pPad->mLastAxes[kAxisRightY] = static_cast<unsigned char>(nRightY);
+        if (std::abs(nLeftX) < pPad->mDeadZone) {
             nLeftX = 0;
         }
-        if (std::abs(nLeftY) < mDeadZone) {
+        if (std::abs(nLeftY) < pPad->mDeadZone) {
             nLeftY = 0;
         }
-        if (std::abs(nRightX) < mDeadZone) {
+        if (std::abs(nRightX) < pPad->mDeadZone) {
             nRightX = 0;
         }
-        if (std::abs(nRightY) < mDeadZone) {
+        if (std::abs(nRightY) < pPad->mDeadZone) {
             nRightY = 0;
         }
     }
 
     if (pButtons != nullptr) {
-        *pButtons = mButtons;
+        *pButtons = pPad->mButtons;
     }
     if (pAxis0 != nullptr) {
         *pAxis0 = static_cast<unsigned char>(nLeftX);
@@ -324,30 +329,30 @@ int PadRecord::Read(unsigned int *pButtons,
         *pAxis3 = static_cast<unsigned char>(nRightY);
     }
 
-    if (abReport[kReportStatus] == kReportOk && mReadyLevel == kReadyPressure) {
-        for (int i = 0; i < kPressureByteCount; ++i) {
+    if (abReport[kReportStatus] == kReportOk && pPad->mReadyLevel == kReadyPressure) {
+        for (int i = 0; i < PadRecord::kPressureByteCount; ++i) {
             const unsigned char nPressure = abReport[kReportPressures + i];
             if (pPressureDeltas != nullptr) {
-                pPressureDeltas[i] = static_cast<short>(nPressure - mPressureBaseline[i]);
+                pPressureDeltas[i] = static_cast<short>(nPressure - pPad->mPressureBaseline[i]);
             }
             if (pPressures != nullptr) {
                 pPressures[i] = nPressure;
             }
-            mPressureBaseline[i] = nPressure;
+            pPad->mPressureBaseline[i] = nPressure;
         }
     }
-    mReportMode = abReport[kReportMode];
-    return mReadyLevel;
+    pPad->mReportMode = abReport[kReportMode];
+    return pPad->mReadyLevel;
 }
 
 // NTSC-U/C: 0x005bd0b0, PAL: 0x00586098
-void PadRecord::SetVibration(int nSmallMotor, int nBigMotor) {
-    if (mReadyLevel < kVibrationReady) {
+void BreugPadSetMotors(PadRecord *pPad, int nSmallMotor, int nBigMotor) {
+    if (pPad->mReadyLevel < kVibrationReady) {
         return;
     }
-    mActDirect[kSmallMotor] = nSmallMotor > 0;
-    mActDirect[kBigMotor] = nBigMotor;
-    scePadSetActDirect(mPort, mSlot, mActDirect);
+    pPad->mActDirect[kSmallMotor] = nSmallMotor > 0;
+    pPad->mActDirect[kBigMotor] = nBigMotor;
+    scePadSetActDirect(pPad->mPort, pPad->mSlot, pPad->mActDirect);
 }
 
 #ifdef VIDEO_STANDARD_PAL

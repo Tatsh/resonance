@@ -47,7 +47,7 @@ constexpr unsigned kSpu2EffectAreaSize = 0x20000;
 // Stream frames in one bar, which SetSynthStreamBar() scales a bar by.
 constexpr int kSynthStreamFramesPerBar = 19200;
 
-// The game's own IOP sound driver, and the spin BindSoundDriverRpc() waits between binds.
+// The game's own IOP sound driver, and the spin ezMidiInit() waits between binds.
 constexpr int kSoundDriverRpcServer = 0x12346;
 constexpr int kSoundDriverBindSpin = 9999;
 
@@ -104,7 +104,7 @@ int g_bSoundRequestPending = 0;
 // NTSC-U/C: 0x008e5b80, PAL: 0x0092ab80
 alignas(64) unsigned int g_anSoundDriverReply[kSoundDriverReplyWords] = {};
 
-// The descriptor XferToIop() hands to the SIF DMA.
+// The descriptor ezTransToIOP() hands to the SIF DMA.
 // NTSC-U/C: 0x008e5be8, PAL: 0x0092abe8
 alignas(16) sceSifDmaData transData;
 
@@ -346,7 +346,7 @@ int XferBankFromMemory(const void *pData, int nLength) {
     g_bankCommand.mDest = g_nBankDestAddress;
     g_bankCommand.mTag = g_nSynthXferTag;
     memset(g_bankCommand.mPayload, 0, kSoundDriverCommandPayloadSize);
-    XferToIop(g_nBankIopAddress, pData, nLength);
+    ezTransToIOP(g_nBankIopAddress, pData, nLength);
     SubmitSoundDriverRequest(kSoundSelectorBankComplete,
                              reinterpret_cast<uintptr_t>(&g_bankCommand));
     return 0;
@@ -362,11 +362,11 @@ int StartBdBankXfer(const char *pszPath) {
     FlushCache(0);
     const char *pszColon = strchr(pszPath, ':');
     const char *pszName = (pszColon != nullptr) ? pszColon + 1 : pszPath;
-    const int nLength = GetUncompressedFileLength(pszName);
+    const int nLength = FileTrueSize(pszName);
     // The measured length reaches the block whether or not the measurement succeeded.
     g_bankCommand.mLength = nLength;
     if (nLength <= 0) {
-        LogPrintf("file open failed. %s \n", pszName);
+        printf("file open failed. %s \n", pszName);
         return -1;
     }
     const int nFile = FileOpen(pszName, 0);
@@ -389,9 +389,9 @@ int StartHdBankXfer(const char *pszPath, int nPlacement) {
     strcpy(g_szHdBankPath, pszPath);
     const char *pszColon = strchr(pszPath, ':');
     const char *pszName = (pszColon != nullptr) ? pszColon + 1 : pszPath;
-    const int nLength = GetUncompressedFileLength(pszName);
+    const int nLength = FileTrueSize(pszName);
     if (nLength <= 0) {
-        LogPrintf("file open failed. %s \n", pszName);
+        printf("file open failed. %s \n", pszName);
         return -1;
     }
     if (nPlacement >= 0 && nPlacement < kBankPlacementFirstBuffer) {
@@ -400,7 +400,7 @@ int StartHdBankXfer(const char *pszPath, int nPlacement) {
         RotateBankIopAddress();
     }
     if (g_nBankIopAddress < 0) {
-        LogPrintf("\nCan't alloc heap \n");
+        printf("\nCan't alloc heap \n");
         return -1;
     }
     g_pHdXferBuffer = MemAllocTagged(nLength + kBankBufferAlignment, __FILE__, __LINE__);
@@ -454,7 +454,7 @@ void SynthCommand(int nCommand) {
         SubmitSoundDriverRequest(kSoundSelectorInfo, 0);
         break;
     default:
-        LogPrintf("Unrecognized synth cmd %d\n", nCommand);
+        printf("Unrecognized synth cmd %d\n", nCommand);
         break;
     }
 }
@@ -471,15 +471,15 @@ void DumpSynthVoices(int bActiveOnly) {
         const int nVMixR = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_S_VMIXR | nCore);
         const int nVMixER = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_S_VMIXER | nCore);
         const int nEndX = sceSdRemote(kSdRemoteBlocking, rSdGetSwitch, SD_S_ENDX | nCore);
-        LogPrintf("Core    %2.2d: MMix %x eff %d vmix L %x %x R %x %x end %x\n",
-                  nCore,
-                  nMMix,
-                  nEffect,
-                  nVMixL,
-                  nVMixEL,
-                  nVMixR,
-                  nVMixER,
-                  nEndX);
+        printf("Core    %2.2d: MMix %x eff %d vmix L %x %x R %x %x end %x\n",
+               nCore,
+               nMMix,
+               nEffect,
+               nVMixL,
+               nVMixEL,
+               nVMixR,
+               nVMixER,
+               nEndX);
         for (int nVoice = 0; nVoice < kSpu2VoicesPerCore; ++nVoice) {
             const int nEntry = SD_VOICE(nCore, nVoice);
             const int nStart = sceSdRemote(kSdRemoteBlocking, rSdGetAddr, SD_VA_SSA | nEntry);
@@ -492,19 +492,19 @@ void DumpSynthVoices(int bActiveOnly) {
             } else if (bActiveOnly) {
                 continue;
             }
-            LogPrintf("  Voice %2.2d at %x env %x - end %d mix %d %d %d %d\n",
-                      nVoice,
-                      nStart,
-                      nEnvX,
-                      (nEndX & nBit) != 0,
-                      (nVMixL & nBit) != 0,
-                      (nVMixEL & nBit) != 0,
-                      (nVMixR & nBit) != 0,
-                      (nVMixER & nBit) != 0);
+            printf("  Voice %2.2d at %x env %x - end %d mix %d %d %d %d\n",
+                   nVoice,
+                   nStart,
+                   nEnvX,
+                   (nEndX & nBit) != 0,
+                   (nVMixL & nBit) != 0,
+                   (nVMixEL & nBit) != 0,
+                   (nVMixR & nBit) != 0,
+                   (nVMixER & nBit) != 0);
         }
     }
     SubmitSoundDriverRequest(kSoundSelectorInfo, 0);
-    LogPrintf("Using %d voices total\n", nActive);
+    printf("Using %d voices total\n", nActive);
 }
 
 // Selector ConfigureSpu2Effects() submits its chorus block under.
@@ -620,7 +620,7 @@ void ConfigureSpu2Effects(int bEnable) {
             strcpy(g_szHardSynthErrorFilePath, szErrorFilePath);
             g_pHardSynthErrorFile = fopen(g_szHardSynthErrorFilePath, "w");
             if (g_pHardSynthErrorFile == nullptr) {
-                LogPrintf("Couldn't open runtime hsyn error file %s\n", g_szHardSynthErrorFilePath);
+                printf("Couldn't open runtime hsyn error file %s\n", g_szHardSynthErrorFilePath);
                 g_szHardSynthErrorFilePath[0] = '\0';
             } else {
                 fprintf(g_pHardSynthErrorFile,
@@ -707,7 +707,7 @@ int g_anChannelBank[kMidiChannelCount] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 // NTSC-U/C: 0x00462290, PAL: 0x0049fb28
-void InitSynthStreamInput() {
+void ps2_InitMSin() {
     msinBf.mBufferSize = kMidiStreamBufferSize;
     msinCtx.buffGrpNum = kMidiInputGroupCount;
     msinBfGrp[kMidiInputGroupUnused].buffNum = 0;
@@ -722,7 +722,7 @@ void InitSynthStreamInput() {
     msinCtx.buffGrp = msinBfGrp;
     msinBfGrp[kMidiInputGroupUnused].buffCtx = nullptr;
     if (sceMSIn_Init(&msinCtx) != 0) {
-        LogPrintf("sceMSIn_Init Error\n");
+        printf("sceMSIn_Init Error\n");
         return;
     }
     sceMSIn_PutMsg(&msinCtx, kMidiInputPort, kMidiProgramChange);
@@ -778,9 +778,9 @@ void PollSynthEvents() {
     if (msinBf.mValidSize != 0) {
         const int nBuffer = g_nMidiEventBufferIndex;
         g_nMidiEventBufferIndex = (nBuffer + 1) & (kMidiEventBufferCount - 1);
-        XferToIop(g_nMidiEventIopAddress + nBuffer * kMidiEventBufferSize,
-                  &msinBf,
-                  msinBf.mValidSize + kMidiStreamHeaderSize);
+        ezTransToIOP(g_nMidiEventIopAddress + nBuffer * kMidiEventBufferSize,
+                     &msinBf,
+                     msinBf.mValidSize + kMidiStreamHeaderSize);
         msinBf.mValidSize = 0;
     }
 #ifdef VIDEO_STANDARD_PAL
@@ -823,11 +823,11 @@ void InitSynthDriver() {
     if (g_bSynthDriverReady != 0) {
         return;
     }
-    BindSoundDriverRpc(); // Yes, the binary discards the result.
+    ezMidiInit(); // Yes, the binary discards the result.
     InitSpu2Cores();
     g_nMidiEventIopAddress =
         SubmitSoundDriverRequest(kSoundSelectorAllocEventBuffer, kMidiEventBufferRequest);
-    InitSynthStreamInput();
+    ps2_InitMSin();
     if (g_anIopStagingAddress[0] == 0) {
         for (int &nAddress : g_anIopStagingAddress) {
             nAddress = static_cast<int>(
@@ -874,7 +874,7 @@ constexpr int kSoundSelectorXferChunk = 0x1070;
 constexpr int kSoundBankMovieTrack = 15;
 
 // Payload of an SNDH chunk, a whole bank already in memory.
-struct SndhChunk : Rnd::AMovieSet::ChunkHeader {
+struct SndhChunk : Rnd::AMovieChunkHdr {
     int mLength;                  // +0x10
     int mTag;                     // +0x14 becomes g_nSynthXferTag
     unsigned char mReserved18[8]; // +0x18
@@ -882,7 +882,7 @@ struct SndhChunk : Rnd::AMovieSet::ChunkHeader {
 };
 
 // Payload of an SNDB chunk, one piece of a bank at an offset into the destination.
-struct SndbChunk : Rnd::AMovieSet::ChunkHeader {
+struct SndbChunk : Rnd::AMovieChunkHdr {
     int mOffset;                  // +0x10 bytes past g_nBankDestAddress
     int mLength;                  // +0x14
     unsigned char mReserved18[8]; // +0x18
@@ -900,14 +900,14 @@ inline int XferBankChunk(const void *pData, int nLength, int nOffset) {
     g_chunkCommand.mLength = nLength;
     memset(g_chunkCommand.mPayload, 0, kSoundDriverCommandPayloadSize);
     g_chunkCommand.mTag = g_nSynthXferTag;
-    XferToIop(g_chunkCommand.mStagingAddress, pData, nLength);
+    ezTransToIOP(g_chunkCommand.mStagingAddress, pData, nLength);
     SubmitSoundDriverRequest(kSoundSelectorXferChunk, reinterpret_cast<uintptr_t>(&g_chunkCommand));
     return 0;
 }
 
 // NTSC-U/C: 0x00462770, PAL: 0x004a01b8
 // The handler reads its chunk through the header rather than the payload argument.
-void OnSoundBankMovieChunk(Rnd::AMovieSet::ChunkHeader *pHeader,
+void OnSoundBankMovieChunk(Rnd::AMovieChunkHdr *pHeader,
                            [[maybe_unused]] void *pPayload,
                            [[maybe_unused]] void *pData) {
     (void)GetElapsedMilliseconds(); // Yes, the binary discards the time it reads.
@@ -922,7 +922,7 @@ void OnSoundBankMovieChunk(Rnd::AMovieSet::ChunkHeader *pHeader,
         g_nBankDestIndex = (g_nBankDestIndex + 1) & (kBankDestBufferCount - 1);
         g_nBankDestAddress = g_anBankDestAddress[g_nBankDestIndex];
     } else {
-        LogPrintf("BAD CHUNK HANDED OFF TO SNDBANK MOVIE HANDLER: %s\n", FourCcToString(pHeader));
+        printf("BAD CHUNK HANDED OFF TO SNDBANK MOVIE HANDLER: %s\n", FourCcToString(pHeader));
     }
 }
 
@@ -937,7 +937,7 @@ void StartSoundBankMovie(const char *pszPath) {
     int nError;
     g_pSynthStream = new Rnd::AMovieSet(pszPath, 1, &nError);
     if (nError != 0) {
-        LogPrintf("Problem starting sndbank movie: %s (errcode: %d)\n", pszPath, nError);
+        printf("Problem starting sndbank movie: %s (errcode: %d)\n", pszPath, nError);
     }
     g_pSynthStream->AssignHandler(kSoundBankMovieTrack, OnSoundBankMovieChunk, nullptr);
     const int nTick = Application::shared()->GetSongClock()->SongTick();
@@ -946,11 +946,11 @@ void StartSoundBankMovie(const char *pszPath) {
 }
 
 // NTSC-U/C: 0x005f9638, PAL: 0x0063a348
-int BindSoundDriverRpc() {
+int ezMidiInit() {
     sceSifInitRpc(0);
     do {
         if (sceSifBindRpc(&gCd, kSoundDriverRpcServer, 0) < 0) {
-            LogPrintf("error: sceSifBindRpc \n");
+            printf("error: sceSifBindRpc \n");
             while (true) {
             }
         }
@@ -1005,7 +1005,7 @@ int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
 }
 
 // NTSC-U/C: 0x005f97d0, PAL: 0x0063a4e0
-int XferToIop(int nIopAddress, const void *pSource, int nLength) {
+int ezTransToIOP(int nIopAddress, const void *pSource, int nLength) {
     transData.data = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(pSource));
     transData.addr = static_cast<unsigned int>(nIopAddress);
     transData.size = static_cast<unsigned int>(nLength);

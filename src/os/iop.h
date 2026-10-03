@@ -83,21 +83,18 @@ void ConfigureRetailBoot();
  * Bring up the graphics path and the on-screen debug console.
  *
  * The routine belongs to another translation unit and is declared here so that iop.cpp can call it.
- * That unit is devconsole.cpp. It initialises the GS through InitDebugGs() and then creates a
+ * The unit is devconsole.cpp. It initialises the GS through Gs_Initialize() and then creates a
  * console of 75 columns by 30 rows of 16-bit character cells, clearing every cell to 0x0720, a
- * space with attribute 7.
- *
- * The name is inferred from the console geometry and the cell fill. Nothing in the image attests
- * it, and InitIop() is the only caller.
+ * space with attribute 7. InitIop() is the only caller.
  *
  * @ghidraAddress NTSC-U/C: 0x005e5f18
  * @ghidraAddress PAL: 0x006280d8
  */
-void InitDebugConsole();
+void InitDebugPrinting();
 
 #ifdef VIDEO_STANDARD_PAL
 /**
- * Close the debug console InitDebugConsole() opened and release its cells.
+ * Close the debug console InitDebugPrinting() opened and release its cells.
  *
  * The routine belongs to devconsole.cpp and is declared here so that iop.cpp can call it.
  * ShutdownIop() is the only caller. The name is inferred.

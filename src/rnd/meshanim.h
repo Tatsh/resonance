@@ -249,7 +249,7 @@ protected:
 private:
     // Take a reference on the mesh and on the keys owner. Load() and Copy() inline it as their own
     // second half, and the standalone copy at 0x00494288 has no caller.
-    void AddObjectRefs();
+    void AddRefObjects();
 
     // Empty the three channels unless this animation owns its keys. SetKeysOwner() inlines it, and
     // the standalone copy at 0x00494178 has no caller.
@@ -257,7 +257,7 @@ private:
 
     // Drop the reference on the mesh and on the keys owner. 0x00494238. The destructor calls it and
     // Load(), Copy(), and Replace() inline it.
-    void RemoveObjectRefs();
+    void ReleaseObjects();
 
     // Data members follow the recovered offset order, and the access specifiers interleave.
 

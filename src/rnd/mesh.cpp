@@ -248,7 +248,7 @@ void TrimKeys(std::list<Key> &keys, int nRemoved, const Value &fill) {
 }
 
 // NTSC-U/C: 0x00493f00, PAL: 0x004d1db0
-Dbg &PrintZMode(Dbg &sink, Mesh::ZMode nZMode) {
+Dbg &operator<<(Dbg &sink, Mesh::ZMode nZMode) {
     switch (nZMode) {
     case Mesh::kZModeDisable:
         sink.Print("Disable");
@@ -270,7 +270,7 @@ Dbg &PrintZMode(Dbg &sink, Mesh::ZMode nZMode) {
 }
 
 // NTSC-U/C: 0x00482f18, PAL: 0x004c0ce8
-Dbg &PrintZFunc(Dbg &sink, Mesh::ZFunc nZFunc) {
+Dbg &operator<<(Dbg &sink, Mesh::ZFunc nZFunc) {
     switch (nZFunc) {
     case Mesh::kZFuncNever:
         sink.Print("Never");
@@ -505,7 +505,7 @@ Stream &ReadVertVector(Stream &stream, std::vector<MeshVert> &verts) {
 }
 
 // NTSC-U/C: 0x00482e28, PAL: 0x004c0bf8
-Stream &ReadFace(Stream &stream, MeshFace &face) {
+Stream &operator>>(Stream &stream, MeshFace &face) {
     stream.ReadLE(&face.mV1, sizeof(face.mV1))
         .ReadLE(&face.mV2, sizeof(face.mV2))
         .ReadLE(&face.mV3, sizeof(face.mV3));
@@ -526,7 +526,7 @@ Stream &ReadFaceVector(Stream &stream, std::vector<MeshFace> &faces) {
     stream.ReadLE(&nCount, sizeof(nCount));
     faces.resize(nCount);
     for (auto &face : faces) {
-        ReadFace(stream, face);
+        stream >> face;
     }
     return stream;
 }
@@ -644,7 +644,7 @@ void *Mesh::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x004925b0, PAL: 0x004d0460
 void Mesh::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kMeshAllocationTag);
+    OperatorDeleteOverride(pBlock, kMeshAllocationTag);
 }
 
 // NTSC-U/C: 0x006eed60, PAL: 0x00732780
@@ -705,9 +705,9 @@ void Mesh::DumpText(Dbg &sink) {
 
     sink.Print("[Mesh]\n");
     sink.Print("zMode:");
-    PrintZMode(sink, mZMode);
+    sink << mZMode;
     sink.Print(" zFunc:");
-    PrintZFunc(sink, mZFunc);
+    sink << mZFunc;
     sink.Print(" mat:");
     PrintObjectRef(sink, mMat);
     sink.Print("\n");
@@ -922,7 +922,7 @@ void Mesh::Copy(const Object *pSource, unsigned nFlags) {
         mTrans2Owner = pMesh->mTrans2Owner == pMesh ? this : pMesh->mTrans2Owner;
     }
 
-    Refresh();
+    AddRefObjects();
 }
 
 // NTSC-U/C: 0x004817d0, PAL: 0x004bf4c8
@@ -1012,7 +1012,7 @@ void Mesh::Load(Stream &stream) {
     }
 
     ClearSharedGeometry();
-    Refresh();
+    AddRefObjects();
 }
 
 // NTSC-U/C: 0x00492770, PAL: 0x004d0620
@@ -1029,14 +1029,14 @@ void Mesh::SyncAll() {
 }
 
 // NTSC-U/C: 0x00493e10, PAL: 0x004d1cc0
-void Mesh::Refresh() {
+void Mesh::AddRefObjects() {
     AddObjectRefs();
     SyncAll();
     Sync();
 }
 
 // NTSC-U/C: 0x0047f950, PAL: 0x004bd648
-void Mesh::FindCollisions(const Ray &ray, HitSink &sink) {
+void Mesh::FindCollisions(const Segment &ray, std::list<Collision> &collisions) {
     if (Drawable::mShowing == 0) {
         return;
     }
@@ -1056,13 +1056,13 @@ void Mesh::FindCollisions(const Ray &ray, HitSink &sink) {
     // being brought out.
     float aflInverse[kXfmRowCount][kXfmRowFloatCount];
     InvertXfm(mTransOwner->mWorldXfm, aflInverse);
-    Ray localRay;
+    Segment localRay;
     TransformPoint(aflInverse, ray.mStart, localRay.mStart);
     TransformPoint(aflInverse, ray.mEnd, localRay.mEnd);
 
     // Yes, a mesh with no material tests as though the winding were clockwise, because the
     // binary passes a zero cull mode rather than skipping the facing test.
-    const Mat::CullMode nCull = mMat != nullptr ? mMat->mCull : Mat::kCullModeCw;
+    const Mat::Cull nCull = mMat != nullptr ? mMat->mCull : Mat::kCullModeCw;
     const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
     for (const auto &face : mFacesOwner->mFaces) {
         // The first vertex moves as a whole quadword, padding word included.
@@ -1071,21 +1071,21 @@ void Mesh::FindCollisions(const Ray &ray, HitSink &sink) {
         tri.mVertex[1] = verts[face.mV1].mPoint.y;
         tri.mVertex[2] = verts[face.mV1].mPoint.z;
         tri.mVertex[3] = verts[face.mV1].mPoint.w;
-        Vec3Sub(&verts[face.mV2].mPoint.x, &verts[face.mV1].mPoint.x, tri.mEdge1);
-        Vec3Sub(&verts[face.mV3].mPoint.x, &verts[face.mV1].mPoint.x, tri.mEdge2);
+        Rnd::Subtract(&verts[face.mV2].mPoint.x, &verts[face.mV1].mPoint.x, tri.mEdge1);
+        Rnd::Subtract(&verts[face.mV3].mPoint.x, &verts[face.mV1].mPoint.x, tri.mEdge2);
         Vec3Cross(tri.mEdge1, tri.mEdge2, tri.mNormal);
 
         float flDistance = 0.0f;
         if (TestRayAgainstTriangle(localRay, tri, nCull, &flDistance)) {
-            Hit hit;
-            hit.mObject = this;
-            hit.mDistance = flDistance;
-            sink.mHits.push_back(hit);
+            Collision collision;
+            collision.mObject = this;
+            collision.mDistance = flDistance;
+            collisions.push_back(collision);
         }
     }
 
     // The children are tested after this mesh's own faces.
-    Collideable::FindCollisions(ray, sink);
+    Collideable::FindCollisions(ray, collisions);
 }
 
 // NTSC-U/C: 0x00493a78, PAL: 0x004d1928
@@ -1163,7 +1163,7 @@ Sphere Mesh::BoundingSphere() {
         box.GrowToContain(it->mPoint);
     }
     Vector3 sum;
-    AddVec3(&box.mMin.x, &box.mMax.x, &sum.x);
+    Rnd::Add(&box.mMin.x, &box.mMax.x, &sum.x);
     Vector3 center;
     Vec3Scale(&sum.x, kHalf, &center.x);
     sphere.mCenter = center;
@@ -1171,7 +1171,7 @@ Sphere Mesh::BoundingSphere() {
     float flRadiusSquared = 0.0f;
     for (auto it = mVertsOwner->mVerts.begin(); it != mVertsOwner->mVerts.end(); ++it) {
         Vector3 offset;
-        Vec3Sub(&it->mPoint.x, &sphere.mCenter.x, &offset.x);
+        Rnd::Subtract(&it->mPoint.x, &sphere.mCenter.x, &offset.x);
         const float flLengthSquared =
             offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
         flRadiusSquared = std::max(flRadiusSquared, flLengthSquared);
@@ -1187,10 +1187,10 @@ Sphere Mesh::BoundingSphere() {
 }
 
 // NTSC-U/C: 0x004832d0, PAL: 0x004c10a0
-bool Mesh::JoinFlatFace(FlatFace &primary, FlatFace &face) {
+bool JoinFaces(Mesh *pMesh, Mesh::FlatFace &primary, Mesh::FlatFace &face) {
     face.mPrimaryFace = primary.mFace;
-    const MeshFace &faceCorners = mFacesOwner->mFaces[face.mFace];
-    const MeshFace &primaryCorners = mFacesOwner->mFaces[primary.mFace];
+    const MeshFace &faceCorners = pMesh->mFacesOwner->mFaces[face.mFace];
+    const MeshFace &primaryCorners = pMesh->mFacesOwner->mFaces[primary.mFace];
     int nShared = kNoVert;
     int nSharedBefore = kNoVert;
     for (int nCorner = 0; nCorner < kFaceCornerCount; ++nCorner) {
@@ -1242,15 +1242,17 @@ void Mesh::AssignFlatVerts(std::list<MeshAnim *> &anims) {
         const std::vector<MeshVert> &verts = mVertsOwner->mVerts;
         Vector3 edge1{};
         Vector3 edge2{};
-        Vec3Sub(&verts[faces[nFace].mV2].mPoint.x, &verts[faces[nFace].mV1].mPoint.x, &edge1.x);
-        Vec3Sub(&verts[faces[nFace].mV3].mPoint.x, &verts[faces[nFace].mV1].mPoint.x, &edge2.x);
+        Rnd::Subtract(
+            &verts[faces[nFace].mV2].mPoint.x, &verts[faces[nFace].mV1].mPoint.x, &edge1.x);
+        Rnd::Subtract(
+            &verts[faces[nFace].mV3].mPoint.x, &verts[faces[nFace].mV1].mPoint.x, &edge2.x);
         Vector3 normal{};
         CrossVec3(&edge1.x, &edge2.x, &normal.x);
         NormalizeVec3Inline(normal, joined.back().mNormal);
 
         std::list<FlatFace>::iterator it = heads.begin();
         for (; it != heads.end(); ++it) {
-            if (JoinFlatFace(*it, joined.back())) {
+            if (JoinFaces(this, *it, joined.back())) {
                 break;
             }
         }
@@ -1265,9 +1267,9 @@ void Mesh::AssignFlatVerts(std::list<MeshAnim *> &anims) {
     }
 
     netflow_graph graph;
-    netflow_graph_init(&graph);
+    Init_U(&graph);
     netflow_v_side side;
-    netflow_v_side_init(&side);
+    Init_V(&side);
     graph.u_count = static_cast<int>(heads.size());
     side.v_count = static_cast<int>(mVertsOwner->mVerts.size());
     graph.edge_count = static_cast<int>(heads.size()) * kFaceCornerCount;
@@ -1276,18 +1278,18 @@ void Mesh::AssignFlatVerts(std::list<MeshAnim *> &anims) {
     for (const FlatFace &head : heads) {
         const MeshFace &corners = faces[head.mFace];
         if (head.mSharedEdges == 0) {
-            netflow_add_edge(nU, corners.mV1 + 1, &graph, &side);
-            netflow_add_edge(nU, corners.mV2 + 1, &graph, &side);
-            netflow_add_edge(nU, corners.mV3 + 1, &graph, &side);
+            AddEdge(nU, corners.mV1 + 1, &graph, &side);
+            AddEdge(nU, corners.mV2 + 1, &graph, &side);
+            AddEdge(nU, corners.mV3 + 1, &graph, &side);
         } else {
-            netflow_add_edge(nU, head.mPivot + 1, &graph, &side);
+            AddEdge(nU, head.mPivot + 1, &graph, &side);
             if (head.mPivotOther != kNoVert) {
-                netflow_add_edge(nU, head.mPivotOther + 1, &graph, &side);
+                AddEdge(nU, head.mPivotOther + 1, &graph, &side);
             }
         }
         ++nU;
     }
-    netflow_build_matching(&graph, &side);
+    Match(&graph, &side);
 
     nU = 1;
     for (const FlatFace &head : heads) {
@@ -1546,8 +1548,8 @@ void Mesh::ComputeNormals(bool bPositionOnly) {
             std::vector<MeshVert> &verts = mVertsOwner->mVerts;
             Vector3 edge1{};
             Vector3 edge2{};
-            Vec3Sub(&verts[it->mV2].mPoint.x, &verts[it->mV1].mPoint.x, &edge1.x);
-            Vec3Sub(&verts[it->mV3].mPoint.x, &verts[it->mV1].mPoint.x, &edge2.x);
+            Rnd::Subtract(&verts[it->mV2].mPoint.x, &verts[it->mV1].mPoint.x, &edge1.x);
+            Rnd::Subtract(&verts[it->mV3].mPoint.x, &verts[it->mV1].mPoint.x, &edge2.x);
             Vector3 normal{};
             CrossVec3(&edge1.x, &edge2.x, &normal.x);
             NormalizeVec3Inline(normal, mVertsOwner->mVerts[it->mV1].mNorm);
@@ -1597,8 +1599,8 @@ void Mesh::ComputeNormals(bool bPositionOnly) {
             const Vector3 &prev = verts[FaceCorner(face, (nCorner + 2) % kFaceCornerCount)].mPoint;
             Vector3 edge1{};
             Vector3 edge2{};
-            Vec3Sub(&next.x, &corner.x, &edge1.x);
-            Vec3Sub(&prev.x, &corner.x, &edge2.x);
+            Rnd::Subtract(&next.x, &corner.x, &edge1.x);
+            Rnd::Subtract(&prev.x, &corner.x, &edge2.x);
             Vector3 faceNormal{};
             CrossVec3(&edge1.x, &edge2.x, &faceNormal.x);
             Vec3Normalize(&faceNormal.x, &faceNormal.x);
@@ -1607,7 +1609,7 @@ void Mesh::ComputeNormals(bool bPositionOnly) {
             Vector3 weighted{};
             Vec3Scale(&faceNormal.x, std::acos(DotVec3(&edge1.x, &edge2.x)), &weighted.x);
             Vector3 &target = mVertsOwner->mVerts[i].mNorm;
-            AddVec3(&target.x, &weighted.x, &target.x);
+            Rnd::Add(&target.x, &weighted.x, &target.x);
         }
         Vector3 &target = mVertsOwner->mVerts[i].mNorm;
         Vec3Normalize(&target.x, &target.x);

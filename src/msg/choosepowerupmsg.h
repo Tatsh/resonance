@@ -97,7 +97,7 @@ private:
 
 public:
     Player *mOwner; /*!< The player whose selection changed. +0x08 */
-    int mType;      /*!< The selected HudItemKind value, or kHudItemNone. +0x0c */
+    int mType;      /*!< The selected PowerupType value, or kHudItemNone. +0x0c */
 };
 
 /**

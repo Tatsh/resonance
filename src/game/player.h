@@ -68,7 +68,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00132c20
      * @ghidraAddress PAL: 0x00133460
      */
-    virtual int GetInputSlot();
+    virtual int GetInputSlot() const;
 
     /**
      * Test whether this player is the stand-in for an absent one.
@@ -425,7 +425,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00132c30
      * @ghidraAddress PAL: 0x00133470
      */
-    int IsLocal() {
+    int IsLocal() const {
         return GetInputSlot() != kNoInputSlot;
     }
 

@@ -54,7 +54,7 @@ constexpr int kArkIndexAny = 100;
  * offset inside the string table.
  */
 struct ArkFileEntry {
-    unsigned short mNameHash;     /*!< OpenArkObject::HashName() of the file name. */
+    unsigned short mNameHash;     /*!< HashArkString() of the file name. */
     unsigned short mFlags;        /*!< Flags whose meaning is unrecovered. */
     int mNameOffset;              /*!< Offset of the file name inside the string table. */
     short mRelPathIndex;          /*!< Index of the directory in the relative path table. */
@@ -72,10 +72,23 @@ struct ArkFileEntry {
  * entry's name offset.
  */
 struct ArkRelPath {
-    unsigned short mPathHash; /*!< OpenArkObject::HashName() of the path. */
+    unsigned short mPathHash; /*!< HashArkString() of the path. */
     unsigned short mFlags;    /*!< Flags whose meaning is unrecovered. */
     int mPathOffset;          /*!< Offset of the path inside the string table. */
 };
+
+/**
+ * Hash a file name or a relative path for the table searches.
+ *
+ * Each character is shifted left by one more place than the character before it, the shift
+ * wrapping from 7 back to 0, and combined into a 16-bit accumulator with exclusive or.
+ *
+ * @param pszName The string to hash.
+ * @return The hash.
+ * @ghidraAddress NTSC-U/C: 0x0055c340
+ * @ghidraAddress PAL: 0x0059d560
+ */
+short HashArkString(const char *pszName);
 
 class OpenArkObject;
 
@@ -249,19 +262,6 @@ public:
 
 private:
     /**
-     * Hash a file name or a relative path for the table searches.
-     *
-     * Each character is shifted left by one more place than the character before it, the shift
-     * wrapping from 7 back to 0, and combined into a 16-bit accumulator with exclusive or.
-     *
-     * @param pszName The string to hash.
-     * @return The hash.
-     * @ghidraAddress NTSC-U/C: 0x0055c340
-     * @ghidraAddress PAL: 0x0059d560
-     */
-    static short HashName(const char *pszName);
-
-    /**
      * Split a path and select the mounted archive whose mount point starts its directory.
      *
      * A path starting with a slash maps to no archive, and one starting with a backslash or a full
@@ -286,10 +286,10 @@ private:
      *
      * The hashes are compared before the strings. Each hash argument is a sign-extended `short`
      * and each stored hash an `unsigned short`, which never matches a hash with its top bit set.
-     * HashName() cannot produce one for a string of 7-bit characters.
+     * HashArkString() cannot produce one for a string of 7-bit characters.
      *
-     * @param nNameHash HashName() of pszName.
-     * @param nRelPathHash HashName() of pszRelPath.
+     * @param nNameHash HashArkString() of pszName.
+     * @param nRelPathHash HashArkString() of pszRelPath.
      * @param pszName The file name.
      * @param pszRelPath The path relative to the mount point.
      * @return The file entry, or null when this archive does not list the file.
@@ -352,21 +352,21 @@ int EraseArkStream(int nHandle);
  * @ghidraAddress NTSC-U/C: 0x0055c158
  * @ghidraAddress PAL: 0x0059d378
  */
-ArkStream *FindOpenArkStream(int nHandle);
+ArkStream *LookupOpenFile(int nHandle);
 
 /**
  * Report the file entry a stream reads.
  *
  * The entry is what gives a caller the stream's stored and inflated sizes without a file table
  * search of its own. The search walks the stream vector here rather than through
- * FindOpenArkStream(), and it masks kFileHandleArkStream off the handle in the same way.
+ * LookupOpenFile(), and it masks kFileHandleArkStream off the handle in the same way.
  *
  * @param nHandle The stream handle, with the bit or without it.
  * @return The entry, or null when no record has that handle.
  * @ghidraAddress NTSC-U/C: 0x0055be80
  * @ghidraAddress PAL: 0x0059d0a0
  */
-ArkFileEntry *GetArkStreamFileEntry(int nHandle);
+ArkFileEntry *FindOpenFileInArk(int nHandle);
 
 /**
  * Open a stream on a file inside a mounted archive.
@@ -377,7 +377,7 @@ ArkFileEntry *GetArkStreamFileEntry(int nHandle);
  * @ghidraAddress NTSC-U/C: 0x0055bce8
  * @ghidraAddress PAL: 0x0059cf08
  */
-int LookupArkStreamForPath(const char *pszPath);
+int OpenFileInArk(const char *pszPath);
 
 /**
  * Report the stored length of a file inside a mounted archive.
@@ -443,7 +443,7 @@ void WaitForFileIdle(int nFile);
  * @ghidraAddress NTSC-U/C: 0x0055c000
  * @ghidraAddress PAL: 0x0059d220
  */
-int GetArkStreamArkId(int nHandle);
+int GetArkfileIdFromFileFd(int nHandle);
 
 /**
  * Report the disc sector a mounted archive starts at.

@@ -26,7 +26,7 @@ inline const char *ExpressionText(const HxStr &expression) {
 int QueryConfigValue(int nEventCode, ...) {
     va_list args;
     va_start(args, nEventCode);
-    const HxStr expression = FormatMessage(GetScriptTemplate(nEventCode), args);
+    const HxStr expression = FmtImp(Resid2Str(nEventCode), args);
     va_end(args);
 
     try {
@@ -42,7 +42,7 @@ int QueryConfigValue(int nEventCode, ...) {
 int QueryConfigFlag(int nEventCode, ...) {
     va_list args;
     va_start(args, nEventCode);
-    const HxStr expression = FormatMessage(GetScriptTemplate(nEventCode), args);
+    const HxStr expression = FmtImp(Resid2Str(nEventCode), args);
     va_end(args);
 
     try {
@@ -58,7 +58,7 @@ int QueryConfigFlag(int nEventCode, ...) {
 HxStr QueryConfigString(int nEventCode, ...) {
     va_list args;
     va_start(args, nEventCode);
-    const HxStr expression = FormatMessage(GetScriptTemplate(nEventCode), args);
+    const HxStr expression = FmtImp(Resid2Str(nEventCode), args);
     va_end(args);
 
     try {
@@ -74,7 +74,7 @@ HxStr QueryConfigString(int nEventCode, ...) {
 void QueryConfigStrings(std::vector<HxStr> *pResult, int nEventCode, ...) {
     va_list args;
     va_start(args, nEventCode);
-    const HxStr expression = FormatMessage(GetScriptTemplate(nEventCode), args);
+    const HxStr expression = FmtImp(Resid2Str(nEventCode), args);
     va_end(args);
 
     try {
@@ -93,7 +93,7 @@ void QueryConfigStrings(std::vector<HxStr> *pResult, int nEventCode, ...) {
 void QueryConfigVector(std::vector<int> *pResult, int nEventCode, ...) {
     va_list args;
     va_start(args, nEventCode);
-    const HxStr expression = FormatMessage(GetScriptTemplate(nEventCode), args);
+    const HxStr expression = FmtImp(Resid2Str(nEventCode), args);
     va_end(args);
 
     try {

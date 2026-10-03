@@ -65,11 +65,23 @@ public:
     };
 
     /** Face winding the rasteriser discards, as the text dump labels the values. */
-    enum CullMode {
+    enum Cull {
         kCullModeCw = 0,  /*!< Discard clockwise faces. */
         kCullModeCcw = 1, /*!< Discard counter-clockwise faces. */
         kCullModeNone = 2 /*!< Draw both windings. */
     };
+
+    /** How a texture stage produces its texture coordinates. */
+    enum TexGen {
+        kGenModeFixed = 0,     /*!< Use the vertex coordinates as they are. */
+        kGenModeSphere = 1,    /*!< Sphere map. */
+        kGenModePlanar = 2,    /*!< Planar projection. */
+        kGenModeOrthoCube = 3, /*!< Cube map in object space. */
+        kGenModeLocalCube = 4  /*!< Cube map in local space. */
+    };
+
+    /** How a texture coordinate outside the unit square resolves. */
+    enum TexWrap { kWrapModeClamp = 0, kWrapModeRepeat = 1, kWrapModeMirror = 2 };
 
     /**
      * One texture stage of a material.
@@ -80,24 +92,12 @@ public:
      * texture reference even though the texture is stored first.
      */
     struct Stage {
-        /** How the stage produces its texture coordinates. */
-        enum GenMode {
-            kGenModeFixed = 0,     /*!< Use the vertex coordinates as they are. */
-            kGenModeSphere = 1,    /*!< Sphere map. */
-            kGenModePlanar = 2,    /*!< Planar projection. */
-            kGenModeOrthoCube = 3, /*!< Cube map in object space. */
-            kGenModeLocalCube = 4  /*!< Cube map in local space. */
-        };
-
-        /** How a coordinate outside the unit square resolves. */
-        enum WrapMode { kWrapModeClamp = 0, kWrapModeRepeat = 1, kWrapModeMirror = 2 };
-
         BlendMode mBlend; // +0x00 Defaults to kBlendModeMultiply.
         int mCoordIndex;  // +0x04 Which of the two vertex texture coordinate sets to read.
-        GenMode mGenMode; // +0x08
+        TexGen mGenMode;  // +0x08
         Transform mXfm;   // +0x10 Identity until a file or an animation writes it.
         int mUseXfm;      // +0x50
-        WrapMode mWrap;   // +0x54 Defaults to kWrapModeRepeat.
+        TexWrap mWrap;    // +0x54 Defaults to kWrapModeRepeat.
         Tex *mTex;        // +0x58
         Mat *mMat;        // +0x5c
 
@@ -437,10 +437,10 @@ public:
      */
     void SetFlat(int nFlat);
 
-    // Rnd::Font::ComputeCharUV at 0x004ca050 reads the vector's bounds through a Rnd::Mat pointer
-    // from outside the hierarchy, divides the span by 96 to size it, and then reads the first
-    // stage's texture. The image supplies no accessor. That is the same evidence that makes
-    // mSpecular public. The assignment operator Copy() uses is instantiated out of line
+    // Rnd::Font::CharInfo::CharInfo at 0x004ca050 reads the vector's bounds through a Rnd::Mat
+    // pointer from outside the hierarchy, divides the span by 96 to size it, and then reads the
+    // first stage's texture. The image supplies no accessor. The same evidence makes mSpecular
+    // public. The assignment operator Copy() uses is instantiated out of line
     // at 0x004d77d8, which is library code and has no body in this tree.
     std::vector<Stage> mStages; // +0x1c
 
@@ -521,7 +521,7 @@ public:
     /*!< Winding the rasteriser discards. Public because Rnd::Mesh::FindCollisions() at 0x0047f950
          reads it directly to decide whether a back-facing hit counts, which is access from outside
          the hierarchy, and the image has no accessor for it. +0x8c */
-    CullMode mCull;
+    Cull mCull;
 
 protected:
     int mMultiPass; // +0x90

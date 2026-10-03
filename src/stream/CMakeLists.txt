@@ -5,6 +5,7 @@ set(RESONANCE_STREAM_SRCS
     hxilistchunk.cpp
     hxmemstream.cpp
     hxstream.cpp
+    hxvarlennumber.cpp
     ibfilestream.cpp
     ibstream.cpp
     iobmemstream.cpp

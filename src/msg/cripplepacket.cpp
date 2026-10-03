@@ -51,13 +51,13 @@ void CripplePacket::saveGuts(OBStream &stream) const {
     Packet::saveGuts(stream);
 
     int id = mAttacker.mId;
-    OBStream &rest = stream.Write(&id, sizeof(id));
+    OBStream &rest = stream.WriteLE(&id, sizeof(id));
 
     int count = static_cast<int>(mTargets.size());
-    rest.Write(&count, sizeof(count));
+    rest.WriteLE(&count, sizeof(count));
     for (const auto &player : mTargets) {
         int playerId = player.mId;
-        rest.Write(&playerId, sizeof(playerId));
+        rest.WriteLE(&playerId, sizeof(playerId));
     }
 }
 
@@ -65,12 +65,12 @@ void CripplePacket::saveGuts(OBStream &stream) const {
 void CripplePacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
 
-    IBStream &rest = stream.Read(&mAttacker.mId, sizeof(mAttacker.mId));
+    IBStream &rest = stream.ReadLE(&mAttacker.mId, sizeof(mAttacker.mId));
 
     int count;
-    rest.Read(&count, sizeof(count));
+    rest.ReadLE(&count, sizeof(count));
     mTargets.resize(count);
     for (auto &player : mTargets) {
-        rest.Read(&player.mId, sizeof(player.mId));
+        rest.ReadLE(&player.mId, sizeof(player.mId));
     }
 }

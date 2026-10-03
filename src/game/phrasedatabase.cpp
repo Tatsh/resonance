@@ -28,7 +28,7 @@ void *PhraseDatabase::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x001b8ce8, PAL: 0x001beac0
 void PhraseDatabase::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, "PhraseDatabase");
+    OperatorDeleteOverride(pBlock, "PhraseDatabase");
 }
 
 // NTSC-U/C: 0x001b72d8, PAL: 0x001bd0b0
@@ -56,16 +56,16 @@ void PhraseDatabase::SetOwners(Player *pPlayer) {
 // NTSC-U/C: 0x001b7898, PAL: 0x001bd670
 void PhraseDatabase::Save(OBStream &stream) {
     const char cVersion = kSaveVersion;
-    stream.WriteBytes(&cVersion, sizeof(cVersion));
+    stream.Write(&cVersion, sizeof(cVersion));
 
     const int nPhraseCount = mPhrases.size();
-    stream.Write(&nPhraseCount, sizeof(nPhraseCount));
+    stream.WriteLE(&nPhraseCount, sizeof(nPhraseCount));
     for (unsigned i = 0; i < mPhrases.size(); ++i) {
         stream << mPhrases[i];
     }
 
     const int nValueCount = mStepEffects.size();
-    stream.Write(&nValueCount, sizeof(nValueCount));
+    stream.WriteLE(&nValueCount, sizeof(nValueCount));
     for (unsigned i = 0; i < mStepEffects.size(); ++i) {
         // The unsigned long overload writes the low word.
         stream << static_cast<unsigned long>(mStepEffects[i]);
@@ -77,18 +77,18 @@ void PhraseDatabase::Load(IBStream &stream) {
     Clear();
 
     char cVersion;
-    stream.ReadBytes(&cVersion, sizeof(cVersion));
+    stream.Read(&cVersion, sizeof(cVersion));
 
     int nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     for (int i = 0; i < nCount; ++i) {
         stream >> mPhrases[i];
     }
 
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     for (int i = 0; i < nCount; ++i) {
         int nEffects;
-        stream.Read(&nEffects, sizeof(nEffects));
+        stream.ReadLE(&nEffects, sizeof(nEffects));
         mStepEffects[i] = nEffects;
     }
 }

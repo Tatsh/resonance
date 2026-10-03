@@ -47,7 +47,7 @@
 void SynthCommand(int nCommand);
 
 /**
- * Client of the game's sound driver on the IOP, bound by BindSoundDriverRpc().
+ * Client of the game's sound driver on the IOP, bound by ezMidiInit().
  *
  * SubmitSoundDriverRequest() calls through it.
  *
@@ -61,14 +61,13 @@ extern sceSifClientData gCd;
  *
  * Initialises the SIF RPC layer, then binds server 0x12346 until the server reports ready, spinning
  * 9999 iterations between attempts. A failed bind reports `error: sceSifBindRpc` and hangs. The
- * server is the game's own IOP driver rather than libsdr's. InitSynthDriver() is the one caller,
- * and the title is inferred.
+ * server is the game's own IOP driver rather than libsdr's. InitSynthDriver() is the one caller.
  *
  * @return Always 1. The caller discards it.
  * @ghidraAddress NTSC-U/C: 0x005f9638
  * @ghidraAddress PAL: 0x0063a348
  */
-int BindSoundDriverRpc();
+int ezMidiInit();
 
 /**
  * Submit one command to the sound driver.
@@ -111,7 +110,7 @@ int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument);
  * @ghidraAddress NTSC-U/C: 0x005f97d0
  * @ghidraAddress PAL: 0x0063a4e0
  */
-int XferToIop(int nIopAddress, const void *pSource, int nLength);
+int ezTransToIOP(int nIopAddress, const void *pSource, int nLength);
 
 /** Bytes of payload a command block has above its five-word header. */
 constexpr int kSoundDriverCommandPayloadSize = 0x6c;
@@ -728,7 +727,7 @@ void SubmitDriverAllNotesOff();
  * @ghidraAddress NTSC-U/C: 0x00462290
  * @ghidraAddress PAL: 0x0049fb28
  */
-void InitSynthStreamInput();
+void ps2_InitMSin();
 
 /**
  * Open the sound-bank movie and start feeding its chunks to the driver.

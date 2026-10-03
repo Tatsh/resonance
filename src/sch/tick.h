@@ -40,10 +40,10 @@ struct Tick {
     /**
      * Write the count.
      *
-     * The low word and then the high word each go through their own OBStream::Write(). The binary
-     * reads the two halves with separate four-byte loads at `0x006100c8` and `0x006100e0`, while
-     * Print() and the scheduler treat the member as one 64-bit value, so the member stays a
-     * `long long` and the body splits it.
+     * The low word and then the high word each go through a separate OBStream::WriteLE(). The
+     * binary reads the two halves with separate four-byte loads at `0x006100c8` and `0x006100e0`,
+     * while Print() and the scheduler treat the member as one 64-bit value. The member is therefore
+     * a `long long` and the body splits it.
      *
      * @param stream The stream to write to.
      * @return The stream, allowing calls to be chained.
@@ -55,8 +55,8 @@ struct Tick {
     /**
      * Read the count back.
      *
-     * The low word and then the high word arrive through two separate IBStream::Read() calls, the
-     * inverse of Save().
+     * The low word and then the high word arrive through two separate IBStream::ReadLE() calls,
+     * the inverse of Save().
      *
      * @param stream The stream to read from.
      * @return The stream, allowing calls to be chained.

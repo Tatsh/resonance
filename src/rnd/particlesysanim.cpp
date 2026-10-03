@@ -221,7 +221,7 @@ ParticleSysAnim::ParticleSysAnim(const HxStr &name)
 
 // NTSC-U/C: 0x0052b9c0, PAL: 0x0056c038
 ParticleSysAnim::~ParticleSysAnim() {
-    RemoveObjectRefs();
+    ReleaseObjects();
     ReleaseAllRefs();
 }
 
@@ -275,7 +275,7 @@ void ParticleSysAnim::Load(Stream &stream) {
     }
 
     Animatable::Load(stream);
-    RemoveObjectRefs();
+    ReleaseObjects();
     ReadTargetName(stream, mParticleSys);
     ReadFloatKeys(ReadColorKeys(ReadColorKeys(stream, mStartColorKeys), mEndColorKeys),
                   mEmitRateKeys);
@@ -286,7 +286,7 @@ void ParticleSysAnim::Load(Stream &stream) {
     if (nRevision < kFirstRevisionKeepingBorrowedKeys) {
         ClearKeys(); // Yes, every revision Load() accepts passes this test.
     }
-    AddObjectRefs();
+    AddRefObjects();
 }
 
 // NTSC-U/C: 0x0052c700, PAL: 0x0056cd78
@@ -323,7 +323,7 @@ void ParticleSysAnim::SetFramesOwner(ParticleSysAnim *pOwner) {
 }
 
 // NTSC-U/C: 0x0052c818, PAL: 0x0056ce90
-void ParticleSysAnim::RemoveObjectRefs() {
+void ParticleSysAnim::ReleaseObjects() {
     if (mParticleSys != nullptr) {
         mParticleSys->RemoveRef(this);
     }
@@ -333,7 +333,7 @@ void ParticleSysAnim::RemoveObjectRefs() {
 }
 
 // NTSC-U/C: 0x0052c868, PAL: 0x0056cee0
-void ParticleSysAnim::AddObjectRefs() {
+void ParticleSysAnim::AddRefObjects() {
     if (mParticleSys != nullptr) {
         mParticleSys->AddRef(this);
     }

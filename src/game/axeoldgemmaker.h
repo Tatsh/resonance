@@ -51,22 +51,6 @@ public:
     virtual void DispatchPriv(Message *pMsg);
 
     /**
-     * Issue the next sustain strip identity.
-     *
-     * Inline. AxeNewGemMaker::PostGemMessages() expands it, and Scratcher calls the out-of-line
-     * copy. The title is inferred.
-     *
-     * @return The identity, starting at zero.
-     * @ghidraAddress NTSC-U/C: 0x001a4560
-     * @ghidraAddress PAL: 0x001aa2c8
-     */
-    static int NextStripId() {
-        // NTSC-U/C: 0x00683f70, PAL: 0x006c51d8
-        static int sID;
-        return sID++;
-    }
-
-    /**
      * Report the gem blend for a pitch step.
      *
      * PhraseMgr::PostDurGemMsg() and Scratcher are the recovered callers. The title is inferred.
@@ -119,3 +103,18 @@ private:
     Phrase *mPhrase;        // +0x20, the phrase being replayed, or null
     Mid::MBT mSustainStart; // +0x24, zero while the pedal is not held
 };
+
+/**
+ * Issue the next sustain strip identity.
+ *
+ * Inline. AxeNewGemMaker::PostGemMessages() expands it, and Scratcher calls the out-of-line copy.
+ *
+ * @return The identity, starting at zero.
+ * @ghidraAddress NTSC-U/C: 0x001a4560
+ * @ghidraAddress PAL: 0x001aa2c8
+ */
+inline int GetNewGemID() {
+    // NTSC-U/C: 0x00683f70, PAL: 0x006c51d8
+    static int sID;
+    return sID++;
+}

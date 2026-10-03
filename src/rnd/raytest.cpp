@@ -17,24 +17,27 @@ inline float Dot3(const float *pA, const float *pB) {
 }
 
 // The ray's direction, its far end less its origin.
-inline void RayDirection(const Ray &ray, float *pDir) {
+inline void RayDirection(const Segment &ray, float *pDir) {
     pDir[kLaneW] = 1.0f;
-    Vec3Sub(ray.mEnd, ray.mStart, pDir);
+    Rnd::Subtract(ray.mEnd, ray.mStart, pDir);
 }
 
 // The point a fraction flT of the way along the ray.
-inline void PointAlongRay(const Ray &ray, const float *pDir, float flT, float *pPoint) {
+inline void PointAlongRay(const Segment &ray, const float *pDir, float flT, float *pPoint) {
     float step[kLaneCount];
     step[kLaneW] = 1.0f;
     Vec3Scale(pDir, flT, step);
     pPoint[kLaneW] = 1.0f;
-    AddVec3(ray.mStart, step, pPoint);
+    Rnd::Add(ray.mStart, step, pPoint);
 }
 
 } // namespace
 
 // NTSC-U/C: 0x0054fe98, PAL: 0x005904d8
-int TestRayAgainstTriangle(const Ray &ray, const TriangleTest &tri, int nCull, float *pflDistance) {
+int TestRayAgainstTriangle(const Segment &ray,
+                           const TriangleTest &tri,
+                           int nCull,
+                           float *pflDistance) {
     if (nCull != Mat::kCullModeNone) {
         float dir[kLaneCount];
         RayDirection(ray, dir);
@@ -52,7 +55,7 @@ int TestRayAgainstTriangle(const Ray &ray, const TriangleTest &tri, int nCull, f
     RayDirection(ray, dir);
     float toVertex[kLaneCount];
     toVertex[kLaneW] = 1.0f;
-    Vec3Sub(tri.mVertex, ray.mStart, toVertex);
+    Rnd::Subtract(tri.mVertex, ray.mStart, toVertex);
 
     const float flT = Dot3(toVertex, tri.mNormal) / Dot3(dir, tri.mNormal);
     *pflDistance = flT;
@@ -64,7 +67,7 @@ int TestRayAgainstTriangle(const Ray &ray, const TriangleTest &tri, int nCull, f
     PointAlongRay(ray, dir, flT, hit);
     float local[kLaneCount];
     local[kLaneW] = 1.0f;
-    Vec3Sub(hit, tri.mVertex, local);
+    Rnd::Subtract(hit, tri.mVertex, local);
 
     // Solve in the first coordinate plane where the two edges are not parallel, trying XY, then
     // XZ, then YZ.
@@ -102,12 +105,12 @@ int TestRayAgainstTriangle(const Ray &ray, const TriangleTest &tri, int nCull, f
 }
 
 // NTSC-U/C: 0x005501b0, PAL: 0x005907f0
-int TestRayAgainstSphere(const Ray &ray, const Sphere &sphere, float *pflDistance) {
+int TestRayAgainstSphere(const Segment &ray, const Sphere &sphere, float *pflDistance) {
     float dir[kLaneCount];
     RayDirection(ray, dir);
     float toCenter[kLaneCount];
     toCenter[kLaneW] = 1.0f;
-    Vec3Sub(&sphere.mCenter.x, ray.mStart, toCenter);
+    Rnd::Subtract(&sphere.mCenter.x, ray.mStart, toCenter);
 
     const float flT = Dot3(dir, toCenter) / Dot3(dir, dir);
     *pflDistance = flT;
@@ -116,7 +119,7 @@ int TestRayAgainstSphere(const Ray &ray, const Sphere &sphere, float *pflDistanc
     PointAlongRay(ray, dir, flT, closest);
     float offset[kLaneCount];
     offset[kLaneW] = 1.0f;
-    Vec3Sub(closest, &sphere.mCenter.x, offset);
+    Rnd::Subtract(closest, &sphere.mCenter.x, offset);
 
     return !(sphere.mRadius * sphere.mRadius < Dot3(offset, offset));
 }

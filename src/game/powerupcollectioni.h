@@ -1,5 +1,6 @@
 #pragma once
 
+#include "app/hudutil.h"
 #include "app/msgsource.h"
 
 /**
@@ -44,11 +45,11 @@ public:
      *
      * Slot 4, and an empty default.
      *
-     * @param nType The kind, as Powerup::Type() reports it.
+     * @param type The kind, as Powerup::Type() reports it.
      * @ghidraAddress NTSC-U/C: 0x001ccb40
      * @ghidraAddress PAL: 0x001d29f8
      */
-    virtual void Add(int nType);
+    virtual void Add(PowerupType type);
 
     /**
      * Move the selection by one step, skipping an empty entry.
@@ -99,7 +100,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ccb60
      * @ghidraAddress PAL: 0x001d2a18
      */
-    virtual int HasSelection();
+    virtual int HasSelection() const;
 
     /**
      * Send the whole state again, for a listener that has just registered.
@@ -109,5 +110,5 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001ccb68
      * @ghidraAddress PAL: 0x001d2a20
      */
-    virtual void SendState();
+    virtual void SendState() const;
 };

@@ -26,7 +26,7 @@ void *MetButtonList::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x001fece8, PAL: 0x002061b8
 void MetButtonList::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kAllocationTag);
+    OperatorDeleteOverride(pBlock, kAllocationTag);
 }
 
 // NTSC-U/C: 0x001fca30, PAL: 0x00203ed8
@@ -104,8 +104,7 @@ void MetButtonList::Clear() {
 void MetButtonList::Add(const HxStr &objectName, const HxStr &labelText) {
     Rnd::Button *pButton = dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(objectName));
     if (pButton == nullptr) {
-        LogPrintf("bad button is %s",
-                  objectName.mStr != nullptr ? objectName.mStr : g_szEmptyString);
+        printf("bad button is %s", objectName.mStr != nullptr ? objectName.mStr : g_szEmptyString);
     }
     Append(pButton, labelText);
 }

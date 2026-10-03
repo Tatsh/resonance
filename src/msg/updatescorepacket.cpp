@@ -37,15 +37,15 @@ void UpdateScorePacket::saveGuts(OBStream &stream) const {
     Packet::saveGuts(stream);
 
     int playerId = mPlayerId;
-    stream.Write(&playerId, sizeof(playerId));
+    stream.WriteLE(&playerId, sizeof(playerId));
 
     int scoreDelta = mScoreDelta;
-    stream.Write(&scoreDelta, sizeof(scoreDelta));
+    stream.WriteLE(&scoreDelta, sizeof(scoreDelta));
 }
 
 // NTSC-U/C: 0x003e7120, PAL: 0x0041f400
 void UpdateScorePacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
-    stream.Read(&mPlayerId, sizeof(mPlayerId));
-    stream.Read(&mScoreDelta, sizeof(mScoreDelta));
+    stream.ReadLE(&mPlayerId, sizeof(mPlayerId));
+    stream.ReadLE(&mScoreDelta, sizeof(mScoreDelta));
 }

@@ -18,7 +18,7 @@ class Player;
  * The two method names are inferred from the bodies of the subclasses and of the two collections
  * that use them. No method name survives anywhere in the image.
  *
- * Eight subclasses implement the thirteen kinds, which are the HudItemKind values. Seven kinds
+ * Eight subclasses implement the thirteen kinds (the PowerupType values). Seven kinds
  * each have their own class (NeutralizePowerup, CripplePowerup, FreestylePowerup,
  * AutocatchPowerup, BumpPowerup, GhostNotesPowerup, and MultiplierPowerup), and the factory's jump
  * table at `0x007e3f70` sends the six effect kinds to one shared arm that builds an EffectPowerup
@@ -46,7 +46,7 @@ public:
      * @param pBlock The block.
      */
     void operator delete(void *pBlock) {
-        FreeTaggedMemory(pBlock, "Powerup");
+        OperatorDeleteOverride(pBlock, "Powerup");
     }
 
     /**
@@ -94,7 +94,7 @@ public:
      * comparison rejects a negative kind too) returns a null pointer, and the two collections
      * both store the result with no test.
      *
-     * @param nType The kind, a HudItemKind.
+     * @param nType The kind, a PowerupType.
      * @return The powerup, or a null pointer for a kind outside 0 through 12.
      * @ghidraAddress NTSC-U/C: 0x001c65f0
      * @ghidraAddress PAL: 0x001cc438

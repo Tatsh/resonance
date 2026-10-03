@@ -36,14 +36,6 @@ char g_szFatalMessage[kFatalMessageSize];
 
 } // namespace
 
-// NTSC-U/C: 0x0053dde0, PAL: 0x0057da10
-void LogPrintf(const char *pszFormat, ...) {
-    va_list args;
-    va_start(args, pszFormat);
-    vfprintf(stdout, pszFormat, args);
-    va_end(args);
-}
-
 // NTSC-U/C: 0x0052e3e8, PAL: 0x0056da60
 void Warn(const char *pszFormat, ...) {
     if (WarningsEnabled() != 1) {
@@ -58,7 +50,7 @@ void Warn(const char *pszFormat, ...) {
 }
 
 // NTSC-U/C: 0x0052e510, PAL: 0x0056dbc0
-void ReportAssertion(const char *pszMessage, const char *pszFile, int nLine) {
+void SysAssert(const char *pszMessage, const char *pszFile, unsigned int nLine) {
     // The image builds the text in a pre-standard strstream, terminates it with ends, and never
     // releases the frozen buffer. A string stream produces the same text without the leak.
     std::ostringstream report;
@@ -69,7 +61,7 @@ void ReportAssertion(const char *pszMessage, const char *pszFile, int nLine) {
 
 // NTSC-U/C: 0x0052ea68, PAL: 0x0056e160
 void AlertScriptTemplate(int nTemplate, ...) {
-    const HxStr format = GetScriptTemplate(nTemplate);
+    const HxStr format = Resid2Str(nTemplate);
     va_list args;
     va_start(args, nTemplate);
     ShowAlertMessage(FormatMessage(format, args, kFormatMessageUnused));

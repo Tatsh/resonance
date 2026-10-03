@@ -135,7 +135,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x001d08e0
      * @ghidraAddress PAL: 0x001d6798
      */
-    void SendSeekerMsg(int nBar);
+    void SendSeekerMsg(int nBar) const;
 
     /**
      * Act on a message.

@@ -21,28 +21,27 @@ int g_nSectorCacheZone = kNoZone;
 
 } // namespace
 
-int g_nSectorCacheRows;
-SectorCacheRow *g_pSectorCacheRows;
+SectorCache gSectorCache;
 
 // NTSC-U/C: 0x00554fb8, PAL: 0x00595640
-void InitSectorCache(int nRows) {
+void SectorCacheInit(int nRows) {
     int nSaved = ZoneGetCurrent();
     int nZone = FindZoneByName(kSectorCacheZoneName);
     ZoneSetCurrent(nZone);
     ZoneReset();
 
     if (nZone == kNoZone) {
-        g_nSectorCacheRows = nRows;
+        gSectorCache.mRowCount = nRows;
     } else {
-        g_nSectorCacheRows = ZoneGetAvail(kSectorCacheFallbackSize) / kSectorCacheRowSize;
+        gSectorCache.mRowCount = ZoneGetAvail(kSectorCacheFallbackSize) / kSectorCacheRowSize;
     }
 
-    g_pSectorCacheRows = static_cast<SectorCacheRow *>(
-        MemAllocTagged(g_nSectorCacheRows * sizeof(SectorCacheRow), __FILE__, __LINE__));
+    gSectorCache.mRows = static_cast<SectorCacheRow *>(
+        MemAllocTagged(gSectorCache.mRowCount * sizeof(SectorCacheRow), __FILE__, __LINE__));
     gCurrTimestamp = 1;
 
-    SectorCacheRow *pRow = g_pSectorCacheRows;
-    for (int i = 0; i < g_nSectorCacheRows; ++i) {
+    SectorCacheRow *pRow = gSectorCache.mRows;
+    for (int i = 0; i < gSectorCache.mRowCount; ++i) {
         pRow->mFile = kSectorCacheRowEmpty;
         pRow->mSector = kSectorCacheRowEmpty;
         pRow->mStamp = 0;
@@ -54,9 +53,9 @@ void InitSectorCache(int nRows) {
 }
 
 // NTSC-U/C: 0x005550c8, PAL: 0x00595750
-void ShutdownSectorCache() {
-    SectorCacheRow *pRow = g_pSectorCacheRows;
-    for (int i = 0; i < g_nSectorCacheRows; ++i) {
+void SectorCacheTerm() {
+    SectorCacheRow *pRow = gSectorCache.mRows;
+    for (int i = 0; i < gSectorCache.mRowCount; ++i) {
         if (g_nSectorCacheZone != kNoZone) {
             // Unreachable. The word is never written, so this branch never runs even though the
             // buffers do come from a zone.
@@ -68,15 +67,15 @@ void ShutdownSectorCache() {
         ++pRow;
     }
 
-    MemFreeTagged(g_pSectorCacheRows, __FILE__, __LINE__);
-    g_pSectorCacheRows = nullptr;
-    g_nSectorCacheRows = 0;
+    MemFreeTagged(gSectorCache.mRows, __FILE__, __LINE__);
+    gSectorCache.mRows = nullptr;
+    gSectorCache.mRowCount = 0;
 }
 
 // NTSC-U/C: 0x00555298, PAL: 0x00595920
-void InvalidateCachedSectors(int nFile) {
-    for (int i = 0; i < g_nSectorCacheRows; ++i) {
-        SectorCacheRow *pRow = &g_pSectorCacheRows[i];
+void SectorCacheRemove(int nFile) {
+    for (int i = 0; i < gSectorCache.mRowCount; ++i) {
+        SectorCacheRow *pRow = &gSectorCache.mRows[i];
         if (pRow->mFile == nFile) {
             pRow->mFile = kSectorCacheRowEmpty;
             pRow->mSector = kSectorCacheRowEmpty;
@@ -87,8 +86,8 @@ void InvalidateCachedSectors(int nFile) {
 
 // NTSC-U/C: 0x00555190, PAL: 0x00595818
 SectorCacheRow *SectorCacheFind(int nFile, int nSector) {
-    for (int i = 0; i < g_nSectorCacheRows; ++i) {
-        SectorCacheRow *pRow = &g_pSectorCacheRows[i];
+    for (int i = 0; i < gSectorCache.mRowCount; ++i) {
+        SectorCacheRow *pRow = &gSectorCache.mRows[i];
         if (pRow->mFile != nFile || pRow->mSector != nSector) {
             continue;
         }
@@ -102,12 +101,12 @@ SectorCacheRow *SectorCacheFind(int nFile, int nSector) {
 }
 
 // NTSC-U/C: 0x005552f0, PAL: 0x00595978
-void LockCachedSector(int nFile, int nSector) {
+void SectorCacheLock(int nFile, int nSector) {
     // The inlined search advances the clock over the row it finds, and the sentinel below then
     // replaces the value it wrote. One clock tick is therefore spent for nothing.
     SectorCacheRow *pRow = SectorCacheFind(nFile, nSector);
     if (pRow == nullptr) {
-        LogPrintf("UNABLE TO LOCK SECTOR %d\n", nSector);
+        printf("UNABLE TO LOCK SECTOR %d\n", nSector);
         return;
     }
     pRow->mStamp = kSectorCacheLocked;
@@ -122,7 +121,7 @@ void SetSectorRowLocked(SectorCacheRow *pRow) {
 void UnlockCachedSector(int nFile, int nSector) {
     SectorCacheRow *pRow = SectorCacheFind(nFile, nSector);
     if (pRow == nullptr) {
-        LogPrintf("CAN'T FIND SECTOR IN CACHE TO UNLOCK!!!!\n");
+        printf("CAN'T FIND SECTOR IN CACHE TO UNLOCK!!!!\n");
         return;
     }
     pRow->mStamp = gCurrTimestamp;
@@ -130,25 +129,25 @@ void UnlockCachedSector(int nFile, int nSector) {
 }
 
 // NTSC-U/C: 0x005554a0, PAL: 0x00595b28
-void DumpSectorCache() {
-    LogPrintf("SECTOR CACHE:\n");
-    for (int i = 0; i < g_nSectorCacheRows; ++i) {
-        SectorCacheRow *pRow = &g_pSectorCacheRows[i];
-        LogPrintf("%d:  id:%d, sector:%d, timestamp:$%x, p:%p\n",
-                  i,
-                  pRow->mFile,
-                  pRow->mSector,
-                  pRow->mStamp,
-                  pRow->mBuffer);
+void SectorCacheDump() {
+    printf("SECTOR CACHE:\n");
+    for (int i = 0; i < gSectorCache.mRowCount; ++i) {
+        SectorCacheRow *pRow = &gSectorCache.mRows[i];
+        printf("%d:  id:%d, sector:%d, timestamp:$%x, p:%p\n",
+               i,
+               pRow->mFile,
+               pRow->mSector,
+               pRow->mStamp,
+               pRow->mBuffer);
     }
 }
 
 // NTSC-U/C: 0x00554e50, PAL: 0x005954d8
-SectorCacheRow *SectorCacheGetLru(int nFile, int nSector) {
+SectorCacheRow *SectorCacheGetLRU(int nFile, int nSector) {
     unsigned nOldest = kSectorCacheStampCeiling;
     SectorCacheRow *pChosen = nullptr;
-    SectorCacheRow *pRow = g_pSectorCacheRows;
-    for (int i = g_nSectorCacheRows; i > 0; --i) {
+    SectorCacheRow *pRow = gSectorCache.mRows;
+    for (int i = gSectorCache.mRowCount; i > 0; --i) {
         // The unsigned comparison already excludes a locked row, because the locked stamp sorts
         // above the ceiling. The second test is the shipped code's own belt and braces.
         if (pRow->mStamp < nOldest && pRow->mStamp != kSectorCacheLocked) {
@@ -164,8 +163,8 @@ SectorCacheRow *SectorCacheGetLru(int nFile, int nSector) {
     if (pChosen->mStamp > kSectorCacheStampHalfway && pChosen->mStamp != kSectorCacheStampCeiling) {
         // The clock has run far enough that stamps are rebased downward rather than allowed to
         // wrap, which preserves their order.
-        pRow = g_pSectorCacheRows;
-        for (int i = 0; i < g_nSectorCacheRows; ++i) {
+        pRow = gSectorCache.mRows;
+        for (int i = 0; i < gSectorCache.mRowCount; ++i) {
             if (pRow->mStamp > kSectorCacheStampHalfway && pRow->mStamp != kSectorCacheLocked) {
                 pRow->mStamp -= kSectorCacheStampRebase;
             }
@@ -180,7 +179,7 @@ SectorCacheRow *SectorCacheGetLru(int nFile, int nSector) {
     pChosen->mSector = nSector;
     if (pChosen->mStamp == kSectorCacheLocked) {
         // Unreachable, because the search above never chooses a locked row.
-        LogPrintf("ARRGHGHGHGH - SECTORCACHEGETLRU GOT LOCKED SECTOR\n");
+        printf("ARRGHGHGHGH - SECTORCACHEGETLRU GOT LOCKED SECTOR\n");
     }
     pChosen->mStamp = gCurrTimestamp;
     ++gCurrTimestamp;

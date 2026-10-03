@@ -147,7 +147,7 @@ int FileOpen(const char *pszPath, int nFlags, ...) {
     }
 
     if (UsingArkFiles() != 0) {
-        nFile = LookupArkStreamForPath(pszPath);
+        nFile = OpenFileInArk(pszPath);
         if (nFile >= 0) {
             nFile |= kFileHandleArkStream;
             if (!bQuiet) {
@@ -163,7 +163,7 @@ int FileOpen(const char *pszPath, int nFlags, ...) {
     const HostMode mode = GetHostMode();
     if (mode == kHostModeCdHost || mode == kHostModeCdOnly) {
         strcpy(szPath, kDiscDevice);
-        AppendPathComponent(pszPath, szPath);
+        FilenameToISO9660(pszPath, szPath);
     } else if (mode == kHostModeHostOnly) {
         BuildHostPath(szPath, pszPath);
     }
@@ -190,7 +190,7 @@ int FileOpen(const char *pszPath, int nFlags, ...) {
 }
 
 // NTSC-U/C: 0x0047ddf0, PAL: 0x004bbac8
-void FileLogStart(const char *pszPath) {
+void InitFileIOLog(char *pszPath) {
     strcpy(logfilename, pszPath);
     // The image passes the default protection 0664 alongside the mode.
     gFileIOLog.open(logfilename, std::ios::out);
@@ -198,7 +198,7 @@ void FileLogStart(const char *pszPath) {
 }
 
 // NTSC-U/C: 0x0047de48, PAL: 0x004bbb20
-void FileLogStop() {
+void CloseFileIOLog() {
     if (bFileLogging != 0) {
         gFileIOLog.close();
         bFileLogging = 0;
@@ -206,14 +206,14 @@ void FileLogStop() {
 }
 
 // NTSC-U/C: 0x0047de88, PAL: 0x004bbb60
-void FileLogAppend(const char *pszText) {
+void PrintToFileIOLog(const char *pszText) {
     if (bFileLogging != 0) {
         gFileIOLog << pszText << std::endl;
     }
 }
 
 // NTSC-U/C: 0x0047dec0, PAL: 0x004bbb98
-void AppendPathComponent(const char *pszComponent, char *pszPath) {
+void FilenameToISO9660(const char *pszComponent, char *pszPath) {
     if (*pszComponent != '\0') {
         strcat(pszPath, kDiscPathSeparator);
     }
@@ -231,7 +231,7 @@ void AppendPathComponent(const char *pszComponent, char *pszPath) {
 }
 
 // NTSC-U/C: 0x0047dfb0, PAL: 0x004bbc88
-int FileClose(int nFile) {
+extern "C" int close(int nFile) {
     char szTrace[kFileTraceSize];
     sprintf(szTrace, "close($%x) at t:%f", nFile, kUntimedSeconds);
     TraceFileOp(szTrace);
@@ -246,7 +246,7 @@ int FileClose(int nFile) {
 }
 
 // NTSC-U/C: 0x0047e060, PAL: 0x004bbd38
-int FileRead(int nFile, void *pBuffer, int nLength) {
+extern "C" ssize_t read(int nFile, void *pBuffer, size_t nLength) {
     int nRead;
     if ((nFile & kFileHandleArkStream) != 0) {
         nRead = ReadArkStreamThroughCache(nFile & ~kFileHandleArkStream, pBuffer, nLength);
@@ -262,7 +262,7 @@ int FileRead(int nFile, void *pBuffer, int nLength) {
     sprintf(szTrace,
             "  read($%x,len:%d) at t:%f tdone: %f",
             nFile,
-            nLength,
+            static_cast<int>(nLength),
             kUntimedSeconds,
             kUntimedSeconds);
     TraceFileOp(szTrace);
@@ -270,7 +270,7 @@ int FileRead(int nFile, void *pBuffer, int nLength) {
 }
 
 // NTSC-U/C: 0x0047e178, PAL: 0x004bbe50
-int FileWrite(int nFile, const void *pBuffer, int nLength) {
+extern "C" ssize_t write(int nFile, const void *pBuffer, size_t nLength) {
     if ((nFile & kFileHandleArkStream) != 0) {
         return -1;
     }
@@ -306,15 +306,16 @@ int FileSeek(int nFile, int nOffset, int nOrigin) {
 }
 
 // NTSC-U/C: 0x0047e2f0, PAL: 0x004bbfc8
-int FileIsatty(int nFile) {
+extern "C" int isatty(int nFile) {
     if ((nFile & kFileHandleArkStream) != 0 || (nFile & kFileHandleSceFile) != 0) {
         return 0;
     }
     return LibcConsoleIsatty(nFile);
 }
 
-// The C library's system calls. The original C library called the file layer through them, for
-// the standard descriptors as for every file the game opens with the C library.
+// The C library's system calls. The original C library called the file layer's open(), close(),
+// read(), write(), lseek(), and isatty() directly, for the standard descriptors as for every file
+// the game opens with the C library. This C library calls these underscored names instead.
 
 // NTSC-U/C: 0x005da840, PAL: 0x0061c8a8
 extern "C" int _open(const char *pszPath, int nFlags, ...) {
@@ -326,16 +327,16 @@ extern "C" int _open(const char *pszPath, int nFlags, ...) {
 }
 
 extern "C" int _close(int nFile) {
-    return FileClose(nFile);
+    return close(nFile);
 }
 
 // NTSC-U/C: 0x0062db94, PAL: 0x0066e724
 extern "C" int _read(int nFile, void *pBuffer, size_t nLength) {
-    return FileRead(nFile, pBuffer, static_cast<int>(nLength));
+    return read(nFile, pBuffer, nLength);
 }
 
 extern "C" int _write(int nFile, const void *pBuffer, size_t nLength) {
-    return FileWrite(nFile, pBuffer, static_cast<int>(nLength));
+    return write(nFile, pBuffer, nLength);
 }
 
 extern "C" off_t _lseek(int nFile, off_t nOffset, int nOrigin) {
@@ -343,7 +344,7 @@ extern "C" off_t _lseek(int nFile, off_t nOffset, int nOrigin) {
 }
 
 extern "C" int _isatty(int nFile) {
-    return FileIsatty(nFile);
+    return isatty(nFile);
 }
 
 // Every descriptor reports a character device. The C library then queries isatty() before it

@@ -20,7 +20,7 @@ adtl
 advancesectionmsg
 advancesectiontogglemsg
 advn
-afixed
+afix
 agfxfile
 agiffile
 albumcache
@@ -361,7 +361,7 @@ gamemanagerimpl
 gameoptions
 gameovermsg
 gameparams
-gameplayback
+gameplaybacker
 gamepowerbarmgr
 gamepowerupplacer
 gamercmd
@@ -461,6 +461,7 @@ hxmodule
 hxstr
 hxstream
 hxutl
+hxvarlennumber
 iadd
 iaddiu
 iand
@@ -1178,7 +1179,8 @@ songtitle
 sonylib
 sonylibs
 soundbank
-spewregistrar
+spewregister
+spewtable
 spindlctrl
 spjoinacceptpacket
 spjoindenypacket

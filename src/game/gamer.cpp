@@ -163,7 +163,7 @@ Gamer::~Gamer() {
 
 // NTSC-U/C: 0x00116c40, PAL: 0x001170f8
 void Gamer::Withdraw() {
-    const CmdID command = mCommand;
+    const Sch::CmdID command = mCommand;
     mGlobals->GetSongClock()->Withdraw(command);
 }
 
@@ -316,7 +316,7 @@ void Gamer::CreateEnableMgr(std::vector<ScoreTrackGraph *> *pGraphs) {
         for (int i = 0; i < kNetJamBucketCount; ++i) {
             openTracks.push_back(i);
         }
-        mEnableMgr = NetJamEnableMgr::Create(mTrackCount, nMaxOwned, &openTracks, this);
+        mEnableMgr = NewNetJamEnableMgr(mTrackCount, nMaxOwned, openTracks, this);
     }
 }
 
@@ -331,7 +331,7 @@ int Gamer::QueryBar(int nTrack, int nBar) {
 }
 
 // NTSC-U/C: 0x00116888, PAL: 0x00116d40
-bool Gamer::IsFreestyleTrack(int nTrack) {
+bool Gamer::IsFreestyleTrack(int nTrack) const {
     return GetTrack(nTrack)->mKind != kTrackModeCatch;
 }
 
@@ -341,7 +341,7 @@ PhraseDatabase *Gamer::GetPhraseDatabase(int nTrack) {
 }
 
 // NTSC-U/C: 0x001168e0, PAL: 0x00116d98
-TrackData *Gamer::GetTrack(int nTrack) {
+TrackData *Gamer::GetTrack(int nTrack) const {
     return mGlobals->GetLevel()->TrackAt(nTrack);
 }
 

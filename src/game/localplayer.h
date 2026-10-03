@@ -78,7 +78,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00121ea0
      * @ghidraAddress PAL: 0x001224a8
      */
-    virtual int GetInputSlot();
+    virtual int GetInputSlot() const;
 
     /**
      * @ghidraAddress NTSC-U/C: 0x00121e90
@@ -320,7 +320,7 @@ private:
     void OnCaughtPowerbar(CaughtPowerbarMsg *pMsg);
 
     Sch::TickClock *mClock; // +0x48
-    CmdID mCommand;         // +0x4c
+    Sch::CmdID mCommand;    // +0x4c
     int mInputSlot;         // +0x50
     int mTrack;             // +0x58
     int mPlace;             // +0x5c

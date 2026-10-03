@@ -554,11 +554,11 @@ public:
      * last, so the children are tested after this mesh's own faces.
      *
      * @param ray The segment to test along.
-     * @param sink The collector to append intersections to.
+     * @param collisions The list to append intersections to.
      * @ghidraAddress NTSC-U/C: 0x0047f950
      * @ghidraAddress PAL: 0x004bd648
      */
-    virtual void FindCollisions(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Segment &ray, std::list<Collision> &collisions);
 
     /**
      * Rebuild whatever the platform subclass derives from the geometry.
@@ -608,16 +608,16 @@ protected:
      * Restore the reference bookkeeping and resynchronise after a load or a copy.
      *
      * Adds a reference for each of the seven object references, then calls SyncAll() followed by
-     * Sync(). The name is inferred from the Rnd::Drawable vtable slot it fills.
+     * Sync().
      *
      * @ghidraAddress NTSC-U/C: 0x00493e10
      * @ghidraAddress PAL: 0x004d1cc0
      */
-    virtual void Refresh();
+    virtual void AddRefObjects();
 
 private:
     // Take a reference on each object this mesh points at. 0x00493e10 inlines it as its own first
-    // half, and Refresh() is its only caller.
+    // half, and AddRefObjects() is its only caller.
     void AddObjectRefs();
 
     // Drop the reference on each object this mesh points at. The destructor, Load(), and Copy()
@@ -643,10 +643,11 @@ private:
         Vector3 mNormal;
     };
 
-    // Add face to the fan that primary heads when the two share a vertex, their normals are within
-    // two degrees, and the shared vertices keep one pivot for the whole fan. Records primary in
-    // face.mPrimaryFace whether or not it joins. AssignFlatVerts() is the only caller. 0x004832d0.
-    bool JoinFlatFace(FlatFace &primary, FlatFace &face);
+    // Add face to the fan that primary heads when the two share a vertex of pMesh, their normals
+    // are within two degrees, and the shared vertices retain one pivot for the whole fan. Records
+    // primary in face.mPrimaryFace whether or not it joins. AssignFlatVerts() is the only caller.
+    // 0x004832d0.
+    friend bool JoinFaces(Mesh *pMesh, FlatFace &primary, FlatFace &face);
 
     // Give every face a first vertex of its own for flat shading, which reads the colour and the
     // normal of the first vertex only. Coplanar neighbours join one fan and share its vertex. A

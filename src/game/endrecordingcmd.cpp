@@ -10,7 +10,7 @@ namespace {
 constexpr int kEndRecordingCmdId = 6;
 
 // NTSC-U/C: 0x006693f0, PAL: 0x006a9f80
-const Sch::CommandFactory kEndRecordingCmdFactory(kEndRecordingCmdId, EndRecordingCmd::New);
+const Sch::CommandFactory kEndRecordingCmdFactory(kEndRecordingCmdId, NewEndRecordingCmd);
 
 constexpr char kDescription[] = "{EndRecordingCmd}";
 
@@ -20,7 +20,7 @@ constexpr char kDescription[] = "{EndRecordingCmd}";
 int EndRecordingCmd::sCmdID = kEndRecordingCmdId;
 
 // NTSC-U/C: 0x0010c8d0, PAL: 0x0010caa0
-Sch::Command *EndRecordingCmd::New() {
+Sch::Command *NewEndRecordingCmd() {
     return new EndRecordingCmd;
 }
 

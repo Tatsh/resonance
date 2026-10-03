@@ -173,7 +173,7 @@ int AGifFile::StartRead() {
 }
 
 // NTSC-U/C: 0x0062aaf8, PAL: 0x0066b688
-int AGifFile::ReadFrame(ABitmap *pImage, int *pbEnd) {
+int AGifFile::ReadFrame(ABitmap &bitmap, int *pbEnd) {
     *pbEnd = 0;
     for (;;) {
         fread(&s_cByte, 1, 1, mFile);
@@ -189,12 +189,12 @@ int AGifFile::ReadFrame(ABitmap *pImage, int *pbEnd) {
             GifImageDescriptor image;
             fread(&image, 1, kImageDescriptorSize, mFile);
             imageBlock = image;
-            *pImage = ABitmap(nullptr,
-                              kABitmapFormatLinear8,
-                              false,
-                              imageBlock.mWidth,
-                              imageBlock.mHeight,
-                              imageBlock.mWidth);
+            bitmap = ABitmap(nullptr,
+                             kABitmapFormatLinear8,
+                             false,
+                             imageBlock.mWidth,
+                             imageBlock.mHeight,
+                             imageBlock.mWidth);
             mBounds.mLeft = static_cast<short>(imageBlock.mLeft);
             mBounds.mTop = static_cast<short>(imageBlock.mTop);
             mBounds.mRight = static_cast<short>(imageBlock.mLeft + imageBlock.mWidth);
@@ -208,18 +208,17 @@ int AGifFile::ReadFrame(ABitmap *pImage, int *pbEnd) {
                 fread(abColors, 1, nCount * kRGBByteCount, mFile);
                 pal.SetEntriesRGB(abColors, 0, nCount);
             }
-            pImage->mPalette = new APalette(pal.mEntries, pal.mEnd);
+            bitmap.mPalette = new APalette(pal.mEntries, pal.mEnd);
             fread(&s_cByte, 1, 1, mFile);
             if (s_cByte == kEndOfFile) {
                 return kAGfxFileBadFormat;
             }
-            if (DecodeLzwImage(mFile, s_cByte, static_cast<unsigned char *>(pImage->mPixels)) ==
-                0) {
+            if (DecodeLzwImage(mFile, s_cByte, static_cast<unsigned char *>(bitmap.mPixels)) == 0) {
                 return kAGfxFileBadFormat;
             }
             if ((gce.mFlags & kTransparentFlag) != 0) {
-                pImage->mHasTransparentColor = 1;
-                pImage->mTransparentColor = gce.mTransparentIndex;
+                bitmap.mHasTransparentColor = 1;
+                bitmap.mTransparentColor = gce.mTransparentIndex;
             }
             return kAGfxFileOk;
         }

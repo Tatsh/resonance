@@ -1,5 +1,7 @@
 #pragma once
 
+#include "os/timer.h"
+
 /** EE clock in cycles per millisecond, which is the divisor the elapsed time is computed with. */
 constexpr unsigned kCyclesPerMillisecond = 294912;
 
@@ -17,68 +19,6 @@ constexpr int kMillisecondsPerSecond = 1000;
  * @return The counter, which wraps.
  */
 unsigned ReadCycleCount();
-
-/**
- * Cycles accumulated across every read.
- *
- * Accumulating differences rather than counter readings is what makes the total survive a wrap of
- * the 32-bit counter.
- *
- * @ghidraAddress NTSC-U/C: 0x007082c0
- * @ghidraAddress PAL: 0x0074bdf0
- */
-extern long long g_llTotalCycles;
-
-/**
- * The counter reading the last call took.
- *
- * @ghidraAddress NTSC-U/C: 0x007082c8
- * @ghidraAddress PAL: 0x0074bdf8
- */
-extern unsigned g_nLastCycleCount;
-
-/**
- * The difference the last call added to the total.
- *
- * Every caller writes this word and none reads it, so it exists for a debugger rather than for the
- * game.
- *
- * @ghidraAddress NTSC-U/C: 0x007082cc
- * @ghidraAddress PAL: 0x0074bdfc
- */
-extern unsigned g_nLastCycleDelta;
-
-/**
- * Milliseconds per EE cycle, the reciprocal of kCyclesPerMillisecond.
- *
- * ResetCycleCounter() writes it and no routine in the image reads it.
- *
- * @ghidraAddress NTSC-U/C: 0x007082b4
- * @ghidraAddress PAL: 0x0074bde4
- */
-extern float g_flMillisecondsPerCycle;
-
-/**
- * Word ResetCycleCounter() clears beside the cycle state. No routine in the image reads it, and its
- * purpose is undetermined.
- *
- * @ghidraAddress NTSC-U/C: 0x007082b8
- * @ghidraAddress PAL: 0x0074bde8
- */
-extern int g_nUnusedCycleCounter;
-
-/**
- * Start the cycle state from the current counter reading.
- *
- * The total and the last difference become zero and the last reading becomes the counter. The
- * counter is read twice and the first reading is discarded. The static initialiser at `0x004662d0`,
- * in the unit that defines the out-of-line GetElapsedMilliseconds(), is the one caller. The name is
- * inferred.
- *
- * @ghidraAddress NTSC-U/C: 0x004fefb0
- * @ghidraAddress PAL: 0x0053dd60
- */
-void ResetCycleCounter();
 
 /**
  * Report the milliseconds elapsed since the machine started.
@@ -99,10 +39,10 @@ void ResetCycleCounter();
  */
 inline int GetElapsedMilliseconds() {
     const unsigned nCount = ReadCycleCount();
-    g_nLastCycleDelta = nCount - g_nLastCycleCount;
-    g_nLastCycleCount = nCount;
-    g_llTotalCycles += g_nLastCycleDelta;
-    return static_cast<int>(g_llTotalCycles / kCyclesPerMillisecond);
+    Timer::sLastCycleDelta = nCount - Timer::sElapsedTimer;
+    Timer::sElapsedTimer = nCount;
+    Timer::sElapsedCycles += Timer::sLastCycleDelta;
+    return static_cast<int>(Timer::sElapsedCycles / kCyclesPerMillisecond);
 }
 
 /**

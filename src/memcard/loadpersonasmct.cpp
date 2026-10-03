@@ -26,7 +26,7 @@ void LoadPersonasMCT::Finish() {
         IOBPreallocMemStream stream(static_cast<char *>(mBuffer), kRemixStagingBufferSize);
         stream.SetSize(mBytesRead);
         int nCount;
-        stream.Read(&nCount, sizeof(nCount));
+        stream.ReadLE(&nCount, sizeof(nCount));
         for (int i = 0; i < nCount; ++i) {
             MetPersonaData *pPersona = new MetPersonaData;
             pPersona->Load(&stream);

@@ -40,14 +40,14 @@ public:
     /**
      * One channel event waiting in mPending. Three bytes, with no padding.
      */
-    struct Event {
+    struct Midi {
         unsigned char mStatus; /*!< The status byte, with the channel in its low four bits. */
         unsigned char mData1;  /*!< The first data byte. */
         unsigned char mData2;  /*!< The second data byte, or 0 for a one-byte event. */
     };
 
     /** Ordering mPending is sorted by. The result is non-zero when the first event sorts first. */
-    typedef bool (*EventCompare)(const Event &left, const Event &right);
+    typedef bool (*EventCompare)(const Midi &left, const Midi &right);
 
     /**
      * Build a reader over the chunks of a file.
@@ -194,7 +194,7 @@ public:
     unsigned char mRunningStatus; /*!< The last status byte, or 0 after a system event. */
     int mTrackDone;               /*!< Non-zero once the end-of-track event is read. */
     HxIListChunk *mReader;        /*!< The chunk reader over the file. */
-    std::vector<Event> mPending;  /*!< Events collected at mPendingTick. */
+    std::vector<Midi> mPending;   /*!< Events collected at mPendingTick. */
     MBT mPendingTick;             /*!< Position of every event in mPending. */
     EventCompare mCompare;        /*!< Ordering for mPending, or null to deliver directly. */
 };

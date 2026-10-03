@@ -249,7 +249,7 @@ public:
     // NTSC-U/C: 0x00194a50, PAL: 0x0019a6d0
     virtual void saveGuts(OBStream &stream) const {
         const int nMode = mMode;
-        stream.Write(&nMode, sizeof(nMode));
+        stream.WriteLE(&nMode, sizeof(nMode));
         stream << mContinueJukebox;
         stream << mRestart;
     }
@@ -257,7 +257,7 @@ public:
     // NTSC-U/C: 0x00194ab8, PAL: 0x0019a738
     virtual void restoreGuts(IBStream &stream) {
         int nMode;
-        stream.Read(&nMode, sizeof(nMode));
+        stream.ReadLE(&nMode, sizeof(nMode));
         mMode = nMode;
         stream >> mContinueJukebox;
         stream >> mRestart;
@@ -423,7 +423,7 @@ void GrooveWorld::OnControllerReading(int nTag, int nPadIndex, int nButton, floa
     }
     const MetControllerReading reading{nTag, nPadIndex, nButton, flValue};
     ControllerCmd *pCommand = new ControllerCmd(reading);
-    CmdID id;
+    Sch::CmdID id;
     id.mValue = kUnallocatedCommand;
     mApp->GetWatchdogTimer()->PostIn(pCommand, Sch::Tick{0}, id, kRecordable);
     Attachment::ReleaseIfSet(pCommand);
@@ -452,7 +452,7 @@ void GrooveWorld::PostExit(int nMode, int bContinueJukebox, int bRestart) {
         return;
     }
     ExitCmd *pCommand = new ExitCmd(nMode, bContinueJukebox, bRestart);
-    CmdID id;
+    Sch::CmdID id;
     id.mValue = kUnallocatedCommand;
     Application::shared()->GetWatchdogTimer()->PostIn(pCommand, Sch::Tick{0}, id, kRecordable);
     Attachment::ReleaseIfSet(pCommand);
@@ -495,7 +495,7 @@ void GrooveWorld::Exit(int nMode, int bContinueJukebox, int bRestart) {
     mForceFeedback->StopAll(Mid::MBT(0));
 
     FuncCmd *pFinish = new FuncCmd(this, &GrooveWorld::FinishSong);
-    [[maybe_unused]] CmdID id;
+    [[maybe_unused]] Sch::CmdID id;
     id.mValue = kUnallocatedCommand; // Yes, the binary prepares this handle and never passes it.
     mApp->GetWatchdogTimer()->PostIn(
         pFinish, Sch::Tick{static_cast<long long>(nFadeMs + kExitFinishDelayMs) * kNsPerMs});
@@ -723,10 +723,10 @@ void GrooveWorld::BuildGraphs() {
         int nSize;
         char bLeading;
         char bTrailing;
-        pLog->Read(&nSize, sizeof(nSize)).ReadBytes(&bLeading, sizeof(bLeading));
-        pLog->ReadBytes(szLevel, sizeof(szLevel));
-        pLog->ReadBytes(szTitle, sizeof(szTitle));
-        pLog->ReadBytes(&bTrailing, sizeof(bTrailing));
+        pLog->ReadLE(&nSize, sizeof(nSize)).Read(&bLeading, sizeof(bLeading));
+        pLog->Read(szLevel, sizeof(szLevel));
+        pLog->Read(szTitle, sizeof(szTitle));
+        pLog->Read(&bTrailing, sizeof(bTrailing));
         mSongName = HxStr(szTitle);
         LoadPhrases(*pLog, 0);
 
@@ -831,11 +831,11 @@ void GrooveWorld::FinishSong() {
         // The length word is written as a placeholder and patched once the phrases are in.
         const int nPlaceholder = nSize;
         const char bLeading = kLogMarker;
-        pLog->Write(&nPlaceholder, sizeof(nPlaceholder)).WriteBytes(&bLeading, sizeof(bLeading));
-        pLog->WriteBytes(szLevel, sizeof(szLevel));
-        pLog->WriteBytes(szTitle, sizeof(szTitle));
+        pLog->WriteLE(&nPlaceholder, sizeof(nPlaceholder)).Write(&bLeading, sizeof(bLeading));
+        pLog->Write(szLevel, sizeof(szLevel));
+        pLog->Write(szTitle, sizeof(szTitle));
         const char bTrailing = kLogMarker;
-        pLog->WriteBytes(&bTrailing, sizeof(bTrailing));
+        pLog->Write(&bTrailing, sizeof(bTrailing));
         for (std::vector<ScoreTrackGraph *>::iterator it = mTrackGraphs.begin();
              it != mTrackGraphs.end();
              ++it) {
@@ -952,7 +952,7 @@ void GrooveWorld::RemovePlayer(int nId) {
 }
 
 // NTSC-U/C: 0x00194f88, PAL: 0x0019ac08
-void GrooveWorld::DestroyRenderer() {
+void GrooveWorld::KillRenderer() {
     if (mDelayer != nullptr) {
         mDelayer->RemoveSink(GetRendererSink());
     }

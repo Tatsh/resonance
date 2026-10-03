@@ -126,7 +126,7 @@ void MetLoadPreFabScreen::UpdateNameLabel() {
 
 #ifdef VIDEO_STANDARD_PAL
     HxStr editLabel = GetMetString(kMetStrPfEdit);
-    HxStr editText(FormatString(TextOrEmpty(editLabel), TextOrEmpty(username)));
+    HxStr editText(Rnd::MakeString(TextOrEmpty(editLabel), TextOrEmpty(username)));
 #else
     HxStr editLabel = QueryConfigString(kLabelConfigCode, kEditLabelKey);
     HxStr editLabelWithName(editLabel);

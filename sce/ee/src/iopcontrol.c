@@ -69,7 +69,7 @@ int sceSifRebootIop(const char *imgname) {
     char szArg[SIF_CMD_RESET_ARG_MAX];
 
     if (strlen(imgname) + sizeof(kUdnlPrefix) > SIF_CMD_RESET_ARG_MAX) {
-        LogPrintf(kTooLongFormat, imgname);
+        printf(kTooLongFormat, imgname);
         return 0;
     }
     sceSifInitRpc(0);

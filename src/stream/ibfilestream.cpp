@@ -18,7 +18,7 @@ IBFileStream::~IBFileStream() {
 }
 
 // NTSC-U/C: 0x004edde0, PAL: 0x0052c988
-IBStream &IBFileStream::ReadBytes(void *pDest, int nSize) {
+IBStream &IBFileStream::Read(void *pDest, int nSize) {
     fread(pDest, 1, nSize, mFile);
     return *this;
 }

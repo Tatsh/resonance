@@ -44,7 +44,7 @@ void *Phrase::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x001b6a48, PAL: 0x001bc820
 void Phrase::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, "Phrase");
+    OperatorDeleteOverride(pBlock, "Phrase");
 }
 
 // NTSC-U/C: 0x001b4940, PAL: 0x001ba718
@@ -129,38 +129,38 @@ void Phrase::Print(std::ostream &stream) {
 // NTSC-U/C: 0x001b5018, PAL: 0x001badf0
 void Phrase::Save(OBStream &stream) {
     const char cVersion = kSaveVersion;
-    stream.WriteBytes(&cVersion, sizeof(cVersion));
+    stream.Write(&cVersion, sizeof(cVersion));
 
     const int nCount = mGems.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (std::vector<Gem>::iterator it = mGems.begin(); it != mGems.end(); ++it) {
         stream << *it;
     }
 
     const int nPlayer = mPlayer->mPlayerId;
-    stream.Write(&nPlayer, sizeof(nPlayer));
+    stream.WriteLE(&nPlayer, sizeof(nPlayer));
 
     if (mMuse != nullptr) {
         const char cPresent = kPresent;
-        mMuse->SaveFields(stream.WriteBytes(&cPresent, sizeof(cPresent)));
+        mMuse->SaveFields(stream.Write(&cPresent, sizeof(cPresent)));
         SaveValues(stream);
     } else {
         const char cAbsent = kAbsent;
-        stream.WriteBytes(&cAbsent, sizeof(cAbsent));
+        stream.Write(&cAbsent, sizeof(cAbsent));
     }
 }
 
 // NTSC-U/C: 0x001b51f8, PAL: 0x001bafd0
 void Phrase::Load(IBStream &stream) {
     char cVersion;
-    stream.ReadBytes(&cVersion, sizeof(cVersion));
+    stream.Read(&cVersion, sizeof(cVersion));
     if (cVersion == kUnsupportedVersion) {
         Fatal("need to write support for version 1 phrase gems");
     } else if (cVersion < kSaveVersion) {
         Fatal("Error reading phrase. Unknown version#");
     } else {
         int nCount;
-        stream.Read(&nCount, sizeof(nCount));
+        stream.ReadLE(&nCount, sizeof(nCount));
         mGems.resize(nCount);
         for (std::vector<Gem>::iterator it = mGems.begin(); it != mGems.end(); ++it) {
             stream >> *it;
@@ -171,7 +171,7 @@ void Phrase::Load(IBStream &stream) {
     // reference type of the original whose name does not survive.
     Player *pPlayer = nullptr;
     int nPlayer = kNoPlayer;
-    stream.Read(&nPlayer, sizeof(nPlayer));
+    stream.ReadLE(&nPlayer, sizeof(nPlayer));
     if (pPlayer == nullptr) {
         if (nPlayer == kNoPlayer) {
             pPlayer = nullptr;
@@ -187,7 +187,7 @@ void Phrase::Load(IBStream &stream) {
     }
 
     char cMuse;
-    stream.ReadBytes(&cMuse, sizeof(cMuse));
+    stream.Read(&cMuse, sizeof(cMuse));
     if (cMuse == kPresent) {
         delete mMuse;
         mMuse = new MultiMuse;
@@ -199,13 +199,13 @@ void Phrase::Load(IBStream &stream) {
 // NTSC-U/C: 0x001b5500, PAL: 0x001bb2d8
 void Phrase::SaveValues(OBStream &stream) {
     const short nCount = mValues.end() - mValues.begin();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
 
     std::vector<TickObj<float> >::iterator itEnd = mValues.end();
     for (std::vector<TickObj<float> >::iterator it = mValues.begin(); it < itEnd; ++it) {
         const short nTick = it->mPosition.mTick;
         const char cValue = static_cast<int>(it->mValue * kValueScale);
-        stream.Write(&nTick, sizeof(nTick)).WriteBytes(&cValue, sizeof(cValue));
+        stream.WriteLE(&nTick, sizeof(nTick)).Write(&cValue, sizeof(cValue));
     }
 }
 
@@ -214,13 +214,13 @@ void Phrase::LoadValues(IBStream &stream) {
     mValues.clear();
 
     short nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     mValues.reserve(nCount);
 
     for (int i = 0; i < nCount; ++i) {
         short nTick;
         unsigned char cValue;
-        stream.Read(&nTick, sizeof(nTick)).ReadBytes(&cValue, sizeof(cValue));
+        stream.ReadLE(&nTick, sizeof(nTick)).Read(&cValue, sizeof(cValue));
         const float flValue = cValue / kValueScaleDouble;
 
         TickObj<float> value;
@@ -253,9 +253,7 @@ OBStream &operator<<(OBStream &stream, const Phrase::Gem &gem) {
     const unsigned short nTick = gem.mPosition.mTick;
     const unsigned char cGem = gem.mGem;
     const unsigned char cTrans = gem.mTrans;
-    stream.Write(&nTick, sizeof(nTick))
-        .WriteBytes(&cGem, sizeof(cGem))
-        .WriteBytes(&cTrans, sizeof(cTrans));
+    stream.WriteLE(&nTick, sizeof(nTick)).Write(&cGem, sizeof(cGem)).Write(&cTrans, sizeof(cTrans));
     return stream;
 }
 
@@ -264,9 +262,9 @@ IBStream &operator>>(IBStream &stream, Phrase::Gem &gem) {
     unsigned short nTick;
     unsigned char cGem;
     signed char cTrans;
-    stream.Read(&nTick, sizeof(nTick));
-    stream.ReadBytes(&cGem, sizeof(cGem));
-    stream.ReadBytes(&cTrans, sizeof(cTrans));
+    stream.ReadLE(&nTick, sizeof(nTick));
+    stream.Read(&cGem, sizeof(cGem));
+    stream.Read(&cTrans, sizeof(cTrans));
 
     gem.mPosition = Mid::MBT(nTick);
     gem.mGem = cGem;
@@ -285,7 +283,7 @@ std::ostream &operator<<(std::ostream &stream, Phrase::Gem &gem) {
 // NTSC-U/C: 0x001b6e28, PAL: 0x001bcc00
 OBStream &operator<<(OBStream &stream, Phrase &phrase) {
     const char cPresent = kPresent;
-    stream.WriteBytes(&cPresent, sizeof(cPresent));
+    stream.Write(&cPresent, sizeof(cPresent));
     phrase.Save(stream);
     return stream;
 }
@@ -293,7 +291,7 @@ OBStream &operator<<(OBStream &stream, Phrase &phrase) {
 // NTSC-U/C: 0x001b6e88, PAL: 0x001bcc60
 IBStream &operator>>(IBStream &stream, Phrase &phrase) {
     char cPresent;
-    stream.ReadBytes(&cPresent, sizeof(cPresent));
+    stream.Read(&cPresent, sizeof(cPresent));
     phrase.Load(stream);
     return stream;
 }
@@ -302,11 +300,11 @@ IBStream &operator>>(IBStream &stream, Phrase &phrase) {
 OBStream &operator<<(OBStream &stream, Phrase *pPhrase) {
     if (pPhrase != nullptr) {
         const char cPresent = kPresent;
-        stream.WriteBytes(&cPresent, sizeof(cPresent));
+        stream.Write(&cPresent, sizeof(cPresent));
         pPhrase->Save(stream);
     } else {
         const char cAbsent = kAbsent;
-        stream.WriteBytes(&cAbsent, sizeof(cAbsent));
+        stream.Write(&cAbsent, sizeof(cAbsent));
     }
     return stream;
 }
@@ -314,7 +312,7 @@ OBStream &operator<<(OBStream &stream, Phrase *pPhrase) {
 // NTSC-U/C: 0x001b6f70, PAL: 0x001bcd48
 IBStream &operator>>(IBStream &stream, Phrase *&pPhrase) {
     char cPresent;
-    stream.ReadBytes(&cPresent, sizeof(cPresent));
+    stream.Read(&cPresent, sizeof(cPresent));
     if (cPresent == kAbsent) {
         pPhrase = nullptr;
     } else {

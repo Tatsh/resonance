@@ -15,7 +15,7 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-class GamePlayback;
+class GamePlaybacker;
 class GameRecorder;
 
 /**
@@ -96,9 +96,7 @@ enum PlayMode { kPlayModeNone = 0, kPlayModeGame = 1, kPlayModeJam = 2 };
  * makes the pairing certain. A type that matches none of the five trips
  * `FatalError("DISPATCH_CHECK: Unhandled Message: %s", pMsg->Name())`.
  *
- * StartRecording() installs a GameRecorder and Recreate() a GamePlayback. Neither class emits
- * RTTI, so both titles are inferred, from EndRecordingCmd, whose name the RTTI attests, running the
- * recorder's end.
+ * StartRecording() installs a GameRecorder and Recreate() a GamePlaybacker.
  *
  * Four slots read or write the embedded settings rather than a member of this class. The offsets
  * `+0x84`, `+0x88`, and `+0x90` all fall inside the 0x38-byte GameParams subobject at `+0x68`, so
@@ -193,7 +191,7 @@ public:
      * `Playback already in progress` when a playback already exists. Any recorder is destroyed
      * first, and the front-end world is then asked to tear its game down through `0x003d4890`.
      *
-     * The installed GamePlayback reopens the file, reads three words from it, and runs Load() on
+     * The installed GamePlaybacker reopens the file, reads three words from it, and runs Load() on
      * this manager, so a playback restores a saved session rather than feeding input back.
      *
      * @param file The recording to replay.
@@ -642,9 +640,9 @@ private:
     // Set by Start() and by EndGame() on a return to the front end, and cleared by
     // OnBeginGameLocal(). DrawFrame() runs MemcardManager::Update() while it is set, so memory-card
     // work advances only in the front end.
-    int mFrontEndActive;      // +0xa8
-    GameRecorder *mpRecorder; // +0xac the recorder StartRecording() installs
-    GamePlayback *mpPlayback; // +0xb0 the playback Recreate() installs
+    int mFrontEndActive;        // +0xa8
+    GameRecorder *mpRecorder;   // +0xac the recorder StartRecording() installs
+    GamePlaybacker *mpPlayback; // +0xb0 the playback Recreate() installs
     // The constructor clears both of its words and the destructor frees the buffer at +0xb8 only
     // when it is set, which is HxStr's own destruction. Nothing recovered writes it otherwise.
     HxStr mUnusedString; // +0xb4

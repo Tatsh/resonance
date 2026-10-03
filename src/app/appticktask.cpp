@@ -125,7 +125,7 @@ void TickTask::Run() {
 
 // NTSC-U/C: 0x0013ae10, PAL: 0x0013b758
 void TickTask::Stop() {
-    const CmdID command = mCommand;
+    const Sch::CmdID command = mCommand;
     mClock->Withdraw(command);
     mCommand.mValue = kUnallocatedCommand;
 }

@@ -9,7 +9,7 @@
 
 namespace {
 
-// Extensions as ExtensionCode() packs them, first character in the low byte.
+// Extensions as GrabExt() packs them, first character in the low byte.
 constexpr int kExtensionBmp = 0x504d42;
 constexpr int kExtensionDib = 0x424944;
 constexpr int kExtensionRle = 0x454c52;
@@ -36,7 +36,7 @@ AGfxFile *AGfxFile::Open(const char *pszPath, int *pnError, bool bRead) {
         return nullptr;
     }
     AGfxFile *pGfxFile = nullptr;
-    switch (ExtensionCode(pszPath)) {
+    switch (GrabExt(pszPath)) {
     case kExtensionRle:
     case kExtensionDib:
     case kExtensionBmp:
@@ -69,7 +69,7 @@ int AGfxFile::Write(const char *pszPath, const ABitmap &bitmap) {
 }
 
 // NTSC-U/C: 0x0062f560, PAL: 0x006700f0
-int AGfxFile::ExtensionCode(const char *pszPath) {
+int GrabExt(const char *pszPath) {
     const char *pExtension = strrchr(pszPath, kExtensionSeparator);
     if (pExtension == nullptr) {
         return 0;

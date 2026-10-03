@@ -45,14 +45,14 @@ void TrackSelectPacket::saveGuts(OBStream &stream) const {
     int id = mPlayer.mId;
     int track = mTrack;
     int place = mPlace;
-    stream.Write(&id, sizeof(id)).Write(&track, sizeof(track)).Write(&place, sizeof(place));
+    stream.WriteLE(&id, sizeof(id)).WriteLE(&track, sizeof(track)).WriteLE(&place, sizeof(place));
 }
 
 // NTSC-U/C: 0x003e7330, PAL: 0x0041f610
 void TrackSelectPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
     mPosition.Load(stream);
-    stream.Read(&mPlayer.mId, sizeof(mPlayer.mId))
-        .Read(&mTrack, sizeof(mTrack))
-        .Read(&mPlace, sizeof(mPlace));
+    stream.ReadLE(&mPlayer.mId, sizeof(mPlayer.mId))
+        .ReadLE(&mTrack, sizeof(mTrack))
+        .ReadLE(&mPlace, sizeof(mPlace));
 }

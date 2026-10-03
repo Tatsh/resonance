@@ -69,7 +69,7 @@ namespace Mid {
  * sentinel range.
  *
  * Sch::CmdID and Sch::Tick are both distinct from this class and are easy to confuse with it,
- * because all three transfer one four-byte lvalue through one Write() or one Read(). The three
+ * because all three transfer one four-byte lvalue through one WriteLE() or one ReadLE(). The three
  * Print() bodies separate them. CmdID::Print writes ` {cmdID `, Sch::Tick::Print divides by
  * 1000000000.0 and appends `s`, and this class writes the three-part form above. The transfer
  * alone cannot separate the three types. CatchProgressPacket and TrackSelectPacket each stream a

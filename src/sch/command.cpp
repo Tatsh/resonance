@@ -55,13 +55,13 @@ CommandFactory::CommandFactory(int nCmdID, CommandFactoryProc pfnCreate) {
 OBStream &operator<<(OBStream &stream, Command &command) {
     if (command.CmdID() == 0) {
         char cAbsent = '0';
-        stream.WriteBytes(&cAbsent, sizeof(cAbsent));
+        stream.Write(&cAbsent, sizeof(cAbsent));
         return stream;
     }
     char cPresent = '1';
-    OBStream &written = stream.WriteBytes(&cPresent, sizeof(cPresent));
+    OBStream &written = stream.Write(&cPresent, sizeof(cPresent));
     int nCmdID = command.CmdID(); // Yes, the binary dispatches this slot twice.
-    written.Write(&nCmdID, sizeof(nCmdID));
+    written.WriteLE(&nCmdID, sizeof(nCmdID));
     command.saveGuts(stream);
     return stream;
 }
@@ -70,7 +70,7 @@ OBStream &operator<<(OBStream &stream, Command &command) {
 IBStream &operator>>(IBStream &stream, Command &command) {
     char cPresent;
     int nCmdID;
-    stream.ReadBytes(&cPresent, sizeof(cPresent)).Read(&nCmdID, sizeof(nCmdID));
+    stream.Read(&cPresent, sizeof(cPresent)).ReadLE(&nCmdID, sizeof(nCmdID));
     if (cPresent != '1') {
         Fatal("Stream error while reading in a Command object.");
     }
@@ -119,9 +119,9 @@ OBStream &operator<<(OBStream &stream, Command *pCommand) {
     if (pCommand != nullptr) {
         if (pCommand->CmdID() != 0) {
             char cPresent = '1';
-            stream.WriteBytes(&cPresent, sizeof(cPresent));
+            stream.Write(&cPresent, sizeof(cPresent));
             int nCmdID = pCommand->CmdID(); // Yes, the binary dispatches this slot twice.
-            stream.Write(&nCmdID, sizeof(nCmdID));
+            stream.WriteLE(&nCmdID, sizeof(nCmdID));
             pCommand->saveGuts(stream);
             return stream;
         }
@@ -129,14 +129,14 @@ OBStream &operator<<(OBStream &stream, Command *pCommand) {
         Fatal(" Attempted to serialize a command that is non-serializable!");
     }
     char cAbsent = '0';
-    stream.WriteBytes(&cAbsent, sizeof(cAbsent));
+    stream.Write(&cAbsent, sizeof(cAbsent));
     return stream;
 }
 
 // NTSC-U/C: 0x005385f0, PAL: 0x00577eb0
 IBStream &operator>>(IBStream &stream, Command *&pCommand) {
     char cPresent;
-    stream.ReadBytes(&cPresent, sizeof(cPresent));
+    stream.Read(&cPresent, sizeof(cPresent));
     if (stream.Eof() || cPresent == '0') {
         pCommand = nullptr;
         return stream;
@@ -146,7 +146,7 @@ IBStream &operator>>(IBStream &stream, Command *&pCommand) {
         return stream;
     }
     int nCmdID;
-    stream.Read(&nCmdID, sizeof(nCmdID));
+    stream.ReadLE(&nCmdID, sizeof(nCmdID));
     Command *pNew = Command::NewCommand(nCmdID);
     if (pNew == nullptr) {
         Fatal("Cannot find ID %ld in Command Factory List", nCmdID);

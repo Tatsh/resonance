@@ -36,7 +36,7 @@ void *BarSequencer::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x00100c28, PAL: 0x00100c28
 void BarSequencer::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, "BarSequencer");
+    OperatorDeleteOverride(pBlock, "BarSequencer");
 }
 
 // NTSC-U/C: 0x00100c48, PAL: 0x00100c48

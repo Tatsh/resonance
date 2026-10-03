@@ -5,13 +5,14 @@
 class IBStream;
 class OBStream;
 
+namespace Sch {
+
 /**
  * Handle that identifies one batch of commands the scheduler has queued.
  *
- * The class is not polymorphic and emits no RTTI, and it has no embedded file name, so its title
- * is inferred from the literal ` {cmdID ` at `0x008379f0` that its own Print() writes. The same
- * evidence route produced Sch::Command::CmdID(); the two are unrelated, because that slot reports
- * the class a command streams itself under while this handle identifies a queueing request.
+ * The class is not polymorphic and emits no RTTI. Its Print() writes the literal ` {cmdID ` at
+ * `0x008379f0`. It is unrelated to Sch::Command::CmdID(). Sch::Command::CmdID() reports the class
+ * a command streams itself under, and this handle identifies a queueing request.
  *
  * The object is four bytes. Save() at `0x005e59a0` reads one four-byte word at offset 0 and writes
  * it, Load() at `0x005e59e0` reads four bytes back into the same word, and Print() at `0x005e5958`
@@ -96,3 +97,5 @@ public:
      */
     int mValue;
 };
+
+} // namespace Sch

@@ -138,7 +138,7 @@ public:
      *
      * The writing counterpart of ReadNum(). With mSwapBytes clear, or for a single byte, this is
      * one Write(). Otherwise it writes one byte at a time from the last position of pSrc to the
-     * first. The shipped program calls it only from WriteVarLen().
+     * first. The shipped program calls it only from HxVarLenNumber::Write().
      *
      * @param pSrc The source buffer.
      * @param nSize The number of bytes to move.
@@ -151,8 +151,8 @@ public:
     /**
      * Read a string with a variable-length size prefix into a fixed buffer.
      *
-     * The length comes from ReadVarLen(). A string shorter than nDestSize is read whole and
-     * terminated. A longer one is cut to `nDestSize - 1` bytes and terminated, and the read
+     * The length comes from HxVarLenNumber::Read(). A string shorter than nDestSize is read whole
+     * and terminated. A longer one is cut to `nDestSize - 1` bytes and terminated, and the read
      * position then skips the rest of the string. The shipped program does not call it.
      *
      * @param pszDest The destination buffer.
@@ -251,36 +251,3 @@ protected:
     // HxIDataChunk's constructors set it.
     int mFatalOnEnd;
 };
-
-/**
- * Read a variable-length quantity, seven bits per byte, most significant group first.
- *
- * The value is cleared and each byte read through HxStream::ReadNum() adds its low seven bits
- * after a seven-bit shift, until a byte with its top bit clear ends the quantity. That is the
- * Standard MIDI File encoding. Mid::Reader reads delta times and meta lengths through it, and
- * the two string readers in HxStream's translation unit read their length prefixes through it.
- * The title is inferred.
- *
- * @param nValue Receives the quantity.
- * @param stream The stream to read from.
- * @return The stream.
- * @ghidraAddress NTSC-U/C: 0x00405b70
- * @ghidraAddress PAL: 0x0043f460
- */
-HxStream &ReadVarLen(int &nValue, HxStream &stream);
-
-/**
- * Write a variable-length quantity, seven bits per byte, most significant group first.
- *
- * The encoding ReadVarLen() reads. The groups are packed into one word, lowest group in the lowest
- * byte and every higher group marked with the continuation bit, and the word's bytes are written
- * lowest first through HxStream::WriteNum(). The value is shifted arithmetically, so a
- * negative value never terminates. The shipped program does not call it. The title is inferred.
- *
- * @param nValue The quantity.
- * @param stream The stream to write to.
- * @return The stream.
- * @ghidraAddress NTSC-U/C: 0x00405ad8
- * @ghidraAddress PAL: 0x0043f3c8
- */
-HxStream &WriteVarLen(const int &nValue, HxStream &stream);

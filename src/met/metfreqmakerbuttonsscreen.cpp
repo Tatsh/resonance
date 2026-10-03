@@ -419,7 +419,7 @@ void MetFreqMakerButtonsScreen::OnExitFinished() {
             const HxStr freqName(*pCanvas->GetFreqName());
 #ifdef VIDEO_STANDARD_PAL
             const HxStr format = GetMetString(kMetStrFmConfirmSave);
-            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(freqName)));
+            const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(freqName)));
             MetMsgScreen::Show(HxStr(kCheckChangedDialogue),
                                GetMetString(kMetStrMsgWARNING),
                                text,

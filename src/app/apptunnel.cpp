@@ -336,16 +336,17 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
         pTunnelView->RemoveDraw(pTestCam);
     }
 
-    Rnd::Cam *pMainCam = FindObject<Rnd::Cam>(FormatString("tnl cam%d", nLocalPlayers));
+    Rnd::Cam *pMainCam = FindObject<Rnd::Cam>(Rnd::MakeString("tnl cam%d", nLocalPlayers));
     Rnd::Cam *pFirstOuterCam = FindObject<Rnd::Cam>("outer cam1");
     Rnd::View *pOuterView = FindObject<Rnd::View>("outer.view");
     int nView = 0;
     for (int i = 0; i < nLocalPlayers; ++i) {
         nView = i + 1;
-        Rnd::Cam *pCam = FindObject<Rnd::Cam>(FormatString("tnl cam%d", nView));
-        Rnd::Cam *pZoomCam = FindObject<Rnd::Cam>(FormatString("tnl cam%dz", nView));
-        Rnd::View *pLocalView = FindObject<Rnd::View>(FormatString("tnl local%d.view", nView));
-        Rnd::Cam *pSavedCam = Rnd::NewCamThroughHook(HxStr(FormatString("saved tnl cam%d", nView)));
+        Rnd::Cam *pCam = FindObject<Rnd::Cam>(Rnd::MakeString("tnl cam%d", nView));
+        Rnd::Cam *pZoomCam = FindObject<Rnd::Cam>(Rnd::MakeString("tnl cam%dz", nView));
+        Rnd::View *pLocalView = FindObject<Rnd::View>(Rnd::MakeString("tnl local%d.view", nView));
+        Rnd::Cam *pSavedCam =
+            Rnd::NewCamThroughHook(HxStr(Rnd::MakeString("saved tnl cam%d", nView)));
         pSavedCam->Copy(pCam, Rnd::kCopyChildLists);
         mSavedCams.push_back(pSavedCam);
         if (pCam != pMainCam) {
@@ -362,7 +363,7 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
         pZoomCam->SetFrustum(pCam->GetNearPlane(), pCam->GetFarPlane(), pCam->GetFov());
         pLocalView->SetShowing(1);
 
-        Rnd::Cam *pOuterCam = FindObject<Rnd::Cam>(FormatString("outer cam%d", nView));
+        Rnd::Cam *pOuterCam = FindObject<Rnd::Cam>(Rnd::MakeString("outer cam%d", nView));
         pOuterCam->Copy(pFirstOuterCam, Rnd::kCopyChildLists);
         pOuterCam->SetShowing(1);
         pOuterCam->mScreenRect = rect;
@@ -375,8 +376,8 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
     }
     while (nView < kMaxLocalPlayers) {
         ++nView;
-        FindObject<Rnd::View>(FormatString("tnl local%d.view", nView))->SetShowing(0);
-        FindObject<Rnd::Cam>(FormatString("outer cam%d", nView))->SetShowing(0);
+        FindObject<Rnd::View>(Rnd::MakeString("tnl local%d.view", nView))->SetShowing(0);
+        FindObject<Rnd::Cam>(Rnd::MakeString("outer cam%d", nView))->SetShowing(0);
     }
 
     int nTrailPoints = kSinglePlayerTrailPoints;
@@ -455,8 +456,9 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
         mGemManager->AddMeshKind("gem_mult", flPowerupGemLod, 1.0f);
     mGhostGemKinds.resize(mTrackCount);
     for (int i = 0; i < mTrackCount; ++i) {
-        mGhostGemKinds[i] = mGemManager->AddMeshKind(
-            FormatString("gem_ghost%d", i), flHexGemLod, 1.0f / static_cast<float>(nLocalPlayers));
+        mGhostGemKinds[i] = mGemManager->AddMeshKind(Rnd::MakeString("gem_ghost%d", i),
+                                                     flHexGemLod,
+                                                     1.0f / static_cast<float>(nLocalPlayers));
         mGemManager->SetKindShowing(mGhostGemKinds[i], 0);
     }
     mMissGemKind = mGemManager->AddMeshKind("gem_miss", 0.0f, 1.0f);
@@ -500,7 +502,7 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
 
     mGhostMats.resize(mTrackCount);
     for (int i = 0; i < mTrackCount; ++i) {
-        mGhostMats[i] = FindObject<Rnd::Mat>(FormatString("gem_ghost%d.mat", i));
+        mGhostMats[i] = FindObject<Rnd::Mat>(Rnd::MakeString("gem_ghost%d.mat", i));
     }
     mGhostFadeRates.resize(mTrackCount);
     for (unsigned i = 0; i < mGhostFadeRates.size(); ++i) {
@@ -527,13 +529,13 @@ AppTunnel::AppTunnel(Renderer *pRenderer)
     mMultFX = new TnlMultFX();
     mLattice = new TnlLattice();
     for (int i = 0; i < kFireCount; ++i) {
-        mFireFX.push_back(new TnlFireFX(HxStr(FormatString("fire%d", i)), kFireIndex));
+        mFireFX.push_back(new TnlFireFX(HxStr(Rnd::MakeString("fire%d", i)), kFireIndex));
     }
     for (int i = 0; i < kFireFsCount; ++i) {
-        mFireFX.push_back(new TnlFireFX(HxStr(FormatString("firefs%d", i)), kFireFsIndex));
+        mFireFX.push_back(new TnlFireFX(HxStr(Rnd::MakeString("firefs%d", i)), kFireFsIndex));
     }
     for (int i = 0; i < kFireMultCount; ++i) {
-        mFireFX.push_back(new TnlFireFX(HxStr(FormatString("firemult%d", i)), i));
+        mFireFX.push_back(new TnlFireFX(HxStr(Rnd::MakeString("firemult%d", i)), i));
     }
     for (int i = 0; i < kCrippleFXCount; ++i) {
         mCrippleFX.push_back(new TnlCrippleFX(i, mTempoRate));
@@ -604,7 +606,7 @@ AppTunnel::~AppTunnel() {
     delete mLattice;
     // The pending triggers are not deleted.
     for (unsigned i = 0; i < mSavedCams.size(); ++i) {
-        Rnd::Cam *pCam = FindObject<Rnd::Cam>(FormatString("tnl cam%d", i + 1));
+        Rnd::Cam *pCam = FindObject<Rnd::Cam>(Rnd::MakeString("tnl cam%d", i + 1));
         pCam->Copy(mSavedCams[i], Rnd::kCopyChildLists);
         delete mSavedCams[i];
     }

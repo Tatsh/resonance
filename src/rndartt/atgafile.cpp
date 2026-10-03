@@ -57,21 +57,21 @@ int ATgaFile::StartRead() {
 }
 
 // NTSC-U/C: 0x00620508, PAL: 0x00661098
-int ATgaFile::ReadFrame(ABitmap *pImage, int *pbEnd) {
+int ATgaFile::ReadFrame(ABitmap &image, int *pbEnd) {
     if (mImageRead != 0) {
         *pbEnd = 1;
         return kAGfxFileOk;
     }
-    *pImage =
+    image =
         ABitmap(nullptr, kABitmapFormatLinear32, false, mWidth, mHeight, mWidth * kRGBAByteCount);
-    if (pImage->mPixels == nullptr) {
+    if (image.mPixels == nullptr) {
         return kAGfxFileNoMemory;
     }
-    const int nResult = ReadPixels(pImage);
-    if (nResult != kAGfxFileOk && pImage->mPixels != nullptr) {
+    const int nResult = ReadPixels(&image);
+    if (nResult != kAGfxFileOk && image.mPixels != nullptr) {
         // Yes, the single-object release, although the tagged allocator made the block.
-        delete static_cast<unsigned char *>(pImage->mPixels);
-        pImage->mPixels = nullptr;
+        delete static_cast<unsigned char *>(image.mPixels);
+        image.mPixels = nullptr;
     }
     return nResult;
 }

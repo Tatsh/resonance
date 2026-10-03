@@ -16,16 +16,6 @@ struct Vector2;
 namespace Rnd {
 
 /**
- * Which of the two descriptions a font supplies.
- *
- * The three titles come from the printer at `0x004d07e0`, which writes "Default", "Builtin", and
- * "Material" for the values below. A Builtin font describes a host font by height, weight, italic
- * flag, family, and face name. A Material font is a glyph atlas inside a Rnd::Mat texture, and it
- * is the only kind Rnd::Text builds geometry for.
- */
-enum FontType { kFontTypeDefault = 0, kFontTypeBuiltin = 1, kFontTypeMaterial = 2 };
-
-/**
  * Stroke weight of a Builtin font.
  *
  * The three titles come from the table of pointers at `0x006fecc0`, which the printer at
@@ -69,6 +59,16 @@ enum FontFamily {
 class Font : public Object {
 public:
     /**
+     * Which of the two descriptions a font supplies.
+     *
+     * The three titles come from the printer at `0x004d07e0`. The printer writes 'Default',
+     * 'Builtin', and 'Material' for the values below. A Builtin font describes a host font by
+     * height, weight, italic flag, family, and face name. A Material font is a glyph atlas inside
+     * a Rnd::Mat texture, and it is the only kind Rnd::Text builds geometry for.
+     */
+    enum Type { kFontTypeDefault = 0, kFontTypeBuiltin = 1, kFontTypeMaterial = 2 };
+
+    /**
      * Allocate a font under the tag "Rnd::Font".
      *
      * @param nSize The object size the compiler supplies.
@@ -90,21 +90,44 @@ public:
     /**
      * Measured metrics of one glyph.
      *
-     * The title is inferred; the record is a plain value with no RTTI and no allocation tag of its
-     * own. It is 0x14 bytes of five floats, which the 0x28-byte red-black tree node of mCharMap
-     * pins (0x10 bytes of node header, a 4-byte key, then this record) and which the five words
-     * ComputeCharUV() zeroes for a font with no texture confirm independently.
+     * The record is a plain value with no RTTI and no allocation tag. It is 0x14 bytes of five
+     * floats. The 0x28-byte red-black tree node of mCharMap pins the size (0x10 bytes of node
+     * header, a 4-byte key, then this record), and the five words the measuring constructor zeroes
+     * for a font with no texture confirm it independently.
      *
-     * The two texture corners are stored rather than a corner and an extent. The tail of
-     * ComputeCharUV() adds the cell extent to the first corner through the two-component vector
-     * addition at `0x00169818` and stores the sum into the last two fields, and GetCharUV() hands
-     * the two pairs out unchanged as the two corners of the glyph quad.
+     * The two texture corners are stored rather than a corner and an extent. The tail of the
+     * measuring constructor adds the cell extent to the first corner through the two-component
+     * vector addition at `0x00169818` and stores the sum into the last two fields, and GetCharUV()
+     * hands the two pairs out unchanged as the two corners of the glyph quad.
      *
      * Every value is normalised. The corners are texture coordinates in the range 0 to 1, and the
      * advance is already scaled by mSize, so it arrives in the units Rnd::Text builds its mesh in
      * rather than in pixels.
      */
     struct CharInfo {
+        /** Construct zeroed metrics, the value a new mCharMap entry starts with. */
+        CharInfo() = default;
+
+        /**
+         * Measure the glyph occupying one cell of the atlas of pFont.
+         *
+         * Locks the first texture of the font's material, scans the cell column by column for the
+         * first and the last column with any pixel whose alpha byte is set, and derives the advance
+         * and the two corners from the span it finds. A cell that is entirely transparent yields a
+         * span of a quarter of the cell. A space character takes its width from the quarter-cell
+         * span.
+         *
+         * A font with no material, with an empty stage vector, or with no texture bitmap yields
+         * five zeroes instead.
+         *
+         * @param nRow The cell row.
+         * @param nCol The cell column.
+         * @param pFont The font whose atlas includes the cell.
+         * @ghidraAddress NTSC-U/C: 0x004ca050
+         * @ghidraAddress PAL: 0x005082b8
+         */
+        CharInfo(int nRow, int nCol, const Font *pFont);
+
         float mAdvance; /*!< Horizontal advance, mSize scaled by the measured glyph width as a
                              fraction of its cell. +0x00 */
         float mU0;      /*!< Left texture coordinate of the glyph. +0x04 */
@@ -342,25 +365,6 @@ private:
     // title is inferred. 0x004d0768.
     void OnChanged();
 
-    /**
-     * Measure the glyph occupying one cell of the atlas.
-     *
-     * Locks the first texture of mMat, scans the cell column by column for the first and the last
-     * column with any pixel whose alpha byte is set, and derives the advance and the two corners
-     * from the span it finds. A cell that is entirely transparent yields a span of a quarter of the
-     * cell, which is what gives a space character its width.
-     *
-     * A font with no material, with an empty stage vector, or with no texture bitmap yields five
-     * zeroes instead.
-     *
-     * @param nRow The cell row.
-     * @param nCol The cell column.
-     * @param infoOut Receives the metrics.
-     * @ghidraAddress NTSC-U/C: 0x004ca050
-     * @ghidraAddress PAL: 0x005082b8
-     */
-    void ComputeCharUV(int nRow, int nCol, CharInfo &infoOut);
-
     // Drop this object's reference on mMat. The destructor is its only out-of-line caller, and
     // Replace(), Load(), and Copy() inline the same body. 0x004d0738.
     void RemoveMatRef();
@@ -372,7 +376,7 @@ public:
         Rnd::Text::BuildGlyphMesh() at `0x004c9780` tests it through a Rnd::Font pointer from
         outside this hierarchy, refusing to build geometry for anything but a Material font, and
         the image exposes no accessor for it. +0x1c */
-    FontType mType;
+    Type mType;
 
 private:
     // Height, weight, italic flag, family, and face name of a Builtin font. Private because only

@@ -102,14 +102,14 @@ void MetRemixDataScreen::ResolveContainerViews() {
 #endif
 
     for (int nRow = 1; nRow <= kRowCount; ++nRow) {
-        Rnd::Text *pName = FindText(FormatString(kNameTextFormat, nRow));
+        Rnd::Text *pName = FindText(Rnd::MakeString(kNameTextFormat, nRow));
         mPlayerNames.push_back(pName);
         pName->SetText(HxStr(kNoText));
 
-        Rnd::Mat *pPicture = FindMaterial(FormatString(kPlayerMaterialFormat, nRow));
+        Rnd::Mat *pPicture = FindMaterial(Rnd::MakeString(kPlayerMaterialFormat, nRow));
         mPlayerPictures.push_back(pPicture);
 
-        Rnd::Mesh *pMesh = FindMesh(FormatString(kPlayerMeshFormat, nRow));
+        Rnd::Mesh *pMesh = FindMesh(Rnd::MakeString(kPlayerMeshFormat, nRow));
         mPlayerMeshes.push_back(pMesh);
     }
 }

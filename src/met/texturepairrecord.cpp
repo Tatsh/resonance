@@ -22,7 +22,7 @@ inline HxStr BuildBitmapPath(const HxStr &name, const char *pszRandomPath, const
         path = MakeFreqPath(HxStr(pszRandomPath));
     } else {
         const char *pszName = name.mStr != nullptr ? name.mStr : g_szEmptyString;
-        path = MakeFreqPath(HxStr(FormatString(pszFormat, pszName, pszName)));
+        path = MakeFreqPath(HxStr(Rnd::MakeString(pszFormat, pszName, pszName)));
     }
     return path;
 }

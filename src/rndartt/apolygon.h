@@ -32,7 +32,7 @@ struct APolygon {
      *
      * The neighbour is nFrom plus nDirection, wrapped to the vertex count at either end. The
      * previous mBottom of the edge becomes its mTop, and the new mBottom is the neighbour's row
-     * rounded to the nearest whole row with g_nFixedHalf. The column step is the column
+     * rounded to the nearest whole row with AFix::onehalf. The column step is the column
      * difference divided by the row count, or zero for an edge of no rows.
      *
      * @param pEdge The edge to fill.

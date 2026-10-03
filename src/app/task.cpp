@@ -154,12 +154,12 @@ int Task::Finish() {
 }
 
 // NTSC-U/C: 0x004b6958, PAL: 0x004f4c68
-int Task::State() {
+int Task::State() const {
     return mNode->mState;
 }
 
 // NTSC-U/C: 0x004b65e8, PAL: 0x004f48f8
-int Task::InProgress() {
+int Task::InProgress() const {
     return static_cast<unsigned>(State() - kTaskStateRunning) < 2;
 }
 
@@ -169,7 +169,7 @@ float Task::GetProgress() {
 }
 
 // NTSC-U/C: 0x004b6638, PAL: 0x004f4948
-HxStr Task::GetStatus() {
+HxStr Task::GetStatus() const {
     return Name();
 }
 

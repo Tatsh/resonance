@@ -143,4 +143,4 @@ void PlayActivateSound();
  * @ghidraAddress NTSC-U/C: 0x0012f520
  * @ghidraAddress PAL: 0x0012fcd8
  */
-void PlayPowerupSound(HudItemKind kind);
+void PlayPowerupSound(PowerupType kind);

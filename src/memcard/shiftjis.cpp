@@ -98,7 +98,7 @@ unsigned short EncodeShiftJisCharacter(unsigned char cAscii) {
     } else if (InRange(cAscii, '{', '~')) {
         nSymbol = cAscii - '{' + kSymbolsBeforeBrace;
     } else {
-        LogPrintf("bad ASCII code 0x%x\n", cAscii);
+        printf("bad ASCII code 0x%x\n", cAscii);
         return 0;
     }
 

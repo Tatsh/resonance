@@ -8,7 +8,7 @@
  * Read one configuration value as a flag through the embedded interpreter.
  *
  * Every query here works the same way. The code selects a registered script call template through
- * GetScriptTemplate(), the trailing arguments are formatted into it by FormatMessage(), and the
+ * Resid2Str(), the trailing arguments are formatted into it by FmtImp(), and the
  * text is evaluated as a Python expression through EvalScriptExpression(). A result the conversion
  * rejects raises a Py::Exception that the query catches, reports through Fatal() with the
  * expression text, and clears with PyErr_Clear().

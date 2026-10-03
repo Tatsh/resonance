@@ -69,5 +69,5 @@ Color HudColorFromName(HxStr name) {
 
 // NTSC-U/C: 0x004298e8, PAL: 0x00464f28
 HxStr NextHudName() {
-    return HxStr(FormatString("<hud%04d>", ++g_nHudNameCounter));
+    return HxStr(Rnd::MakeString("<hud%04d>", ++g_nHudNameCounter));
 }

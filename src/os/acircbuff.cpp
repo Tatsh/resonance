@@ -117,7 +117,7 @@ int ACircBuff::Write(int nFile, int nBytes) {
         if (nBytes >= mRead - mWrite) {
             return 0;
         }
-        FileRead(nFile, mWrite, nBytes); // Yes, the count read is discarded.
+        read(nFile, mWrite, nBytes); // Yes, the count read is discarded.
         mWrite += nBytes;
         return nBytes;
     }
@@ -126,22 +126,22 @@ int ACircBuff::Write(int nFile, int nBytes) {
             return 0;
         }
         // Yes, the binary reads to the old write position and only then wraps it to mBuff.
-        FileRead(nFile, mWrite, nBytes);
+        read(nFile, mWrite, nBytes);
         mWrite = mBuff + nBytes;
         return nBytes;
     }
-    FileRead(nFile, mWrite, nBytes);
+    read(nFile, mWrite, nBytes);
     mWrite += nBytes;
     return nBytes;
 }
 
 // NTSC-U/C: 0x0060ecd0, PAL: 0x0064f940
 void ACircBuff::Dump(const char *pszLabel) const {
-    LogPrintf("%s: circbuff: pRead: %p, pWrite: %p, pWrap: %p, pBuff: %p, buffsz: %d\n",
-              pszLabel,
-              mRead,
-              mWrite,
-              mWrap,
-              mBuff,
-              mBuffSize);
+    printf("%s: circbuff: pRead: %p, pWrite: %p, pWrap: %p, pBuff: %p, buffsz: %d\n",
+           pszLabel,
+           mRead,
+           mWrite,
+           mWrap,
+           mBuff,
+           mBuffSize);
 }

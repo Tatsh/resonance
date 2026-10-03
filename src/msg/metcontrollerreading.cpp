@@ -40,20 +40,20 @@ OBStream &operator<<(OBStream &stream, const MetControllerReading &reading) {
     int padIndex = reading.mPadIndex;
     int button = reading.mButton;
     float value = reading.mValue;
-    stream.Write(&tag, sizeof(tag))
-        .Write(&padIndex, sizeof(padIndex))
-        .Write(&button, sizeof(button))
-        .Write(&value, sizeof(value));
+    stream.WriteLE(&tag, sizeof(tag))
+        .WriteLE(&padIndex, sizeof(padIndex))
+        .WriteLE(&button, sizeof(button))
+        .WriteLE(&value, sizeof(value));
     return stream;
 }
 
 // NTSC-U/C: 0x00101120, PAL: 0x00101120
 IBStream &operator>>(IBStream &stream, MetControllerReading &reading) {
     int tag;
-    stream.Read(&tag, sizeof(tag))
-        .Read(&reading.mPadIndex, sizeof(reading.mPadIndex))
-        .Read(&reading.mButton, sizeof(reading.mButton))
-        .Read(&reading.mValue, sizeof(reading.mValue));
+    stream.ReadLE(&tag, sizeof(tag))
+        .ReadLE(&reading.mPadIndex, sizeof(reading.mPadIndex))
+        .ReadLE(&reading.mButton, sizeof(reading.mButton))
+        .ReadLE(&reading.mValue, sizeof(reading.mValue));
     reading.mTag = tag;
     return stream;
 }

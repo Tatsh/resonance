@@ -45,20 +45,19 @@ inline float RowLength(const float *pMat3Rows, int nRow) {
 } // namespace
 
 // NTSC-U/C: 0x004efd80, PAL: 0x0052e970
-Quat AxisAngleToQuat(const float *pAxis, float flAngle) {
+Quat &Quat::Set(const float *pAxis, float flAngle) {
     const float flHalf = flAngle * 0.5f;
     const float flSin = sinf(flHalf);
 
-    Quat out;
-    out.w = cosf(flHalf);
-    out.x = pAxis[0] * flSin;
-    out.y = pAxis[1] * flSin;
-    out.z = pAxis[2] * flSin;
-    return out;
+    w = cosf(flHalf);
+    x = pAxis[0] * flSin;
+    y = pAxis[1] * flSin;
+    z = pAxis[2] * flSin;
+    return *this;
 }
 
 // NTSC-U/C: 0x004f0350, PAL: 0x0052ef40
-void QuatDecomposeAxisAngle(const Quat &quat, float *pAxis, float *pflAngle) {
+void Rnd::MakeAxisAngle(const Quat &quat, float *pAxis, float *pflAngle) {
     *pflAngle = (quat.w > 1.0f) ? 0.0f : (2.0f * acosf(quat.w));
 
     if (*pflAngle == 0.0f) {
@@ -103,9 +102,9 @@ Quat EulerAnglesToQuat(const float *pAngles) {
 }
 
 // NTSC-U/C: 0x004ee9c0, PAL: 0x0052d568
-Quat Mat33ToQuat(const float *pMat3Rows) {
-    // The image writes the destination in place and indexes it by axis. Returning by value
-    // makes gathering the components into a local indistinguishable from that.
+Quat &Quat::Set(const float *pMat3Rows) {
+    // The image writes the destination in place and indexes it by axis. Gathering the components
+    // into a local first is indistinguishable from writing in place.
     float aflQuat[4];
 
     const float flTrace = pMat3Rows[0] + pMat3Rows[5] + pMat3Rows[10];
@@ -145,12 +144,11 @@ Quat Mat33ToQuat(const float *pMat3Rows) {
             flRoot;
     }
 
-    Quat out;
-    out.x = aflQuat[0];
-    out.y = aflQuat[1];
-    out.z = aflQuat[2];
-    out.w = aflQuat[3];
-    return out;
+    x = aflQuat[0];
+    y = aflQuat[1];
+    z = aflQuat[2];
+    w = aflQuat[3];
+    return *this;
 }
 
 // NTSC-U/C: 0x004f06a0, PAL: 0x0052f290
@@ -175,7 +173,8 @@ Quat QuatRotateByVector(const Quat &quat, const float *pRotVec) {
     axis.w = 1.0f;
     Vec3Scale(pRotVec, 1.0f / flAngle, &axis.x);
 
-    const Quat delta = AxisAngleToQuat(&axis.x, flAngle);
+    Quat delta;
+    delta.Set(&axis.x, flAngle);
     Quat out;
     QuatMultiply(quat, delta, out);
     return out;
@@ -222,7 +221,7 @@ void QuatSlerp(const Quat &from, const Quat &to, Quat &out, float flT) {
 }
 
 // NTSC-U/C: 0x004f0600, PAL: 0x0052f1f0
-void QuatToMat33(const Quat &quat, float *pMat3Rows) {
+void Rnd::MakeRotMatrix(const Quat &quat, float *pMat3Rows) {
     const float flX2 = quat.x + quat.x;
     const float flY2 = quat.y + quat.y;
     const float flZ2 = quat.z + quat.z;
@@ -251,7 +250,7 @@ void QuatToMat33(const Quat &quat, float *pMat3Rows) {
 }
 
 // NTSC-U/C: 0x004efe08, PAL: 0x0052e9f8
-void Mat33ToEulerAngles(const float *pMat3Rows, float *pAngles) {
+void Rnd::MakeEuler(const float *pMat3Rows, float *pAngles) {
     const float flYRowZ = MatAt(pMat3Rows, kRowY, kZ);
     if (fabsf(flYRowZ) > kGimbalLockLimit) {
         pAngles[kX] = (flYRowZ > 0.0f) ? kQuarterTurn : -kQuarterTurn;

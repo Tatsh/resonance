@@ -60,10 +60,10 @@ T *FindObject(const char *pszName) {
 
 // NTSC-U/C: 0x0043b3d8, PAL: 0x004778f8
 TnlActivator::TnlActivator(int nIndex, HxStr colorName, TnlPlayer *pOwner)
-    : mIndex(nIndex), mRotView(FindObject<Rnd::View>(FormatString("activator rot%d", nIndex))),
-      mMesh(FindObject<Rnd::Mesh>(FormatString("activator%d", nIndex))),
-      mIntroView(FindObject<Rnd::View>(FormatString("act_%c intro.view", colorName[0]))),
-      mFxView(FindObject<Rnd::View>(FormatString("activator fx%d", nIndex))), mOwner(pOwner),
+    : mIndex(nIndex), mRotView(FindObject<Rnd::View>(Rnd::MakeString("activator rot%d", nIndex))),
+      mMesh(FindObject<Rnd::Mesh>(Rnd::MakeString("activator%d", nIndex))),
+      mIntroView(FindObject<Rnd::View>(Rnd::MakeString("act_%c intro.view", colorName[0]))),
+      mFxView(FindObject<Rnd::View>(Rnd::MakeString("activator fx%d", nIndex))), mOwner(pOwner),
       mPointer(colorName), mCatcher(colorName), mIntroState(kIntroPlaying), mTurning(0),
       mTargetAngle(0.0f), mAngle(0.0f), mTrack(0), mLevel(0), mBlink(0), mGhost(0), mSuppressed(0),
       mGhostView(nullptr), mLeader(FindObject<Rnd::ParticleSys>("leader.ps")) {
@@ -76,7 +76,7 @@ TnlActivator::TnlActivator(int nIndex, HxStr colorName, TnlPlayer *pOwner)
         mOwner->mLocalView->AddDraw(mRotView, nullptr);
     }
     mMesh->SetShowing(0);
-    mGhostView = FindObject<Rnd::View>(FormatString("ghost%d.view", mOwner->mPlayerNum));
+    mGhostView = FindObject<Rnd::View>(Rnd::MakeString("ghost%d.view", mOwner->mPlayerNum));
     mGhostView->RemoveAllDraws();
     GetCachedTunnelObject()->GetSeeker(mIndex)->SetMesh(mMesh);
     mFxView->RemoveAllTranses();

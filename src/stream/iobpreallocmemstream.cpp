@@ -20,7 +20,7 @@ IOBPreallocMemStream::~IOBPreallocMemStream() {
 }
 
 // NTSC-U/C: 0x004ee330, PAL: 0x0052ced8
-IBStream &IOBPreallocMemStream::ReadBytes(void *pDest, int nSize) {
+IBStream &IOBPreallocMemStream::Read(void *pDest, int nSize) {
     if (mWritePos < (mReadPos + nSize)) {
         nSize = mWritePos - mReadPos;
         mEof = 1;
@@ -89,7 +89,7 @@ int IOBPreallocMemStream::Capacity() {
 }
 
 // NTSC-U/C: 0x004ee428, PAL: 0x0052cfd0
-OBStream &IOBPreallocMemStream::WriteBytes(const void *pSrc, int nSize) {
+OBStream &IOBPreallocMemStream::Write(const void *pSrc, int nSize) {
     if (mCapacity < (mWritePos + nSize)) {
         mFail = 1; // An overrun transfers nothing and does not set the end flag.
     } else {

@@ -51,7 +51,7 @@ void TimedCommand::Print(std::ostream &stream) {
 // NTSC-U/C: 0x005d3440, PAL: 0x006154a8
 void TimedCommand::Save(OBStream &stream) {
     mDueTick.Save(stream); // Yes, the binary discards this call's result.
-    stream.Write(&mOrder, sizeof(mOrder));
+    stream.WriteLE(&mOrder, sizeof(mOrder));
     mLocalTick.Save(stream);
     stream << mDelta;
     mCmdID.Save(stream);
@@ -61,7 +61,7 @@ void TimedCommand::Save(OBStream &stream) {
 // NTSC-U/C: 0x005d34d0, PAL: 0x00615538
 void TimedCommand::Load(IBStream &stream) {
     mDueTick.Load(stream); // Yes, the binary discards this call's result.
-    stream.Read(&mOrder, sizeof(mOrder));
+    stream.ReadLE(&mOrder, sizeof(mOrder));
     mLocalTick.Load(stream);
     stream >> mDelta;
     mCmdID.Load(stream);

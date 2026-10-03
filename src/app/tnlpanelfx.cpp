@@ -58,7 +58,7 @@ TnlPanelFX::TnlPanelFX(int nIndex) : mStateFrame(kNoFrame), mState(kStateIdle), 
     mMesh->SetShowing(0);
     mView->AddDraw(mMesh, nullptr);
 
-    const HxStr matName(FormatString("tunnel erase%d", nIndex));
+    const HxStr matName(Rnd::MakeString("tunnel erase%d", nIndex));
     mMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(matName));
     if (mMat == nullptr) {
         Rnd::Mat *pTemplate =
@@ -86,7 +86,7 @@ void TnlPanelFX::Start(int nRing, int nSlice, int nForward) {
     GetCachedTunnelObject()->GetRingXfm(nRing, &xfm, flFrame, kRingBlend);
     mOffset = xfm.mTranslation;
     GetCachedTunnelObject()->GetPathXfm(&xfm, flFrame);
-    Vec3Sub(&mOffset.x, &xfm.mTranslation.x, &mOffset.x);
+    Rnd::Subtract(&mOffset.x, &xfm.mTranslation.x, &mOffset.x);
 
     mMesh->SetShowing(1);
     mState = kStateRise;

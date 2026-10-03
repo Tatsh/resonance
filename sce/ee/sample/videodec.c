@@ -64,7 +64,7 @@ static int decode(VideoDec *pVideoDec) {
 
     while (sceMpegIsEnd(pVideoDec) == 0) {
         if (pVideoDec->state == VD_STATE_ABORT) {
-            LogPrintf("decode thread: aborted\n");
+            printf("decode thread: aborted\n");
             result = -1;
             break;
         }
@@ -263,7 +263,7 @@ static int mpegError(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     (void)pMpeg;
     (void)pData;
     pMessage = *(char **)((unsigned char *)pCallbackData + 4);
-    LogPrintf("%s\n", pMessage);
+    printf("%s\n", pMessage);
     return 1;
 }
 

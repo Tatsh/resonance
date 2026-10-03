@@ -113,7 +113,7 @@ LocalPlayer::~LocalPlayer() {
 }
 
 // NTSC-U/C: 0x00121ea0, PAL: 0x001224a8
-int LocalPlayer::GetInputSlot() {
+int LocalPlayer::GetInputSlot() const {
     return mInputSlot;
 }
 

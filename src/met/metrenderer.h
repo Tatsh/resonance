@@ -420,38 +420,6 @@ public:
     static int PollArenaLoader(float *pfProgress);
 
     /**
-     * Report how far the three common container loads have advanced together.
-     *
-     * The image records no caller. The title is inferred.
-     *
-     * @param pfProgress Receives the mean of the three loads' progress.
-     * @return Non-zero once all three are complete.
-     * @ghidraAddress NTSC-U/C: 0x00371338
-     * @ghidraAddress PAL: 0x0039fe30
-     */
-    static int PollCommonLoaders(float *pfProgress);
-
-    /**
-     * Enqueue each common container load that is still pending.
-     *
-     * The image records no caller. The title is inferred.
-     *
-     * @ghidraAddress NTSC-U/C: 0x00371270
-     * @ghidraAddress PAL: 0x0039fd68
-     */
-    static void EnqueueCommonLoaders();
-
-    /**
-     * Unload the three common containers.
-     *
-     * The image records no caller. The title is inferred.
-     *
-     * @ghidraAddress NTSC-U/C: 0x003712f8
-     * @ghidraAddress PAL: 0x0039fdf0
-     */
-    static void UnloadCommonLoaders();
-
-    /**
      * Unload the arena container.
      *
      * The image records no caller. The title is inferred.
@@ -546,17 +514,6 @@ public:
      */
     static MetRenderer *sInstance;
 
-private:
-    // NTSC-U/C: 0x006c3600, PAL: 0x00706670
-    static RndAsyncLoader *sMetagameLoader;
-    // NTSC-U/C: 0x006c3608, PAL: 0x00706678
-    static RndAsyncLoader *sFontsLoader;
-    // NTSC-U/C: 0x006c360c, PAL: 0x0070667c
-    static RndAsyncLoader *sSharedTexLoader;
-    // NTSC-U/C: 0x006c3610, PAL: 0x00706680
-    static RndAsyncLoader *sArenaLoader;
-
-public:
     /**
      * Zeroed by the constructor. MetaGameWorld::IsAwaitingStart() reads it. Public because
      * MetLogoScreen writes it directly, 1 in slot 33 at `0x002bae40` and 0 in slot 19 at
@@ -638,6 +595,38 @@ public:
      */
     int mMaxPadIndex;
 };
+
+/**
+ * Enqueue each common container load that is still pending.
+ *
+ * The MetRenderer constructor is the caller.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00371270
+ * @ghidraAddress PAL: 0x0039fd68
+ */
+void LoadMetGlobal();
+
+/**
+ * Unload the three common containers.
+ *
+ * The MetRenderer destructor is the caller.
+ *
+ * @ghidraAddress NTSC-U/C: 0x003712f8
+ * @ghidraAddress PAL: 0x0039fdf0
+ */
+void ReleaseMetGlobal();
+
+/**
+ * Report how far the three common container loads have advanced together.
+ *
+ * The image records no caller.
+ *
+ * @param flProgress Receives the mean of the three loads' progress.
+ * @return Non-zero once all three are complete.
+ * @ghidraAddress NTSC-U/C: 0x00371338
+ * @ghidraAddress PAL: 0x0039fe30
+ */
+int ProgressMetGlobal(float &flProgress);
 
 #ifdef VIDEO_STANDARD_PAL
 /**

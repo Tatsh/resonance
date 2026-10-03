@@ -49,18 +49,18 @@ MetPersonaData::MetPersonaData() {
 // NTSC-U/C: 0x0032b880, PAL: 0x00353d40
 void MetPersonaData::Save(OBStream *pStream) {
     const int nVersion = kRecordVersion;
-    OBStream &stream = pStream->Write(&nVersion, sizeof(nVersion));
+    OBStream &stream = pStream->WriteLE(&nVersion, sizeof(nVersion));
     mStats.Save(stream);
     mAppearance.Save(stream);
     const unsigned nLength = mBirthday.mLen;
-    stream.Write(&nLength, sizeof(nLength));
-    stream.WriteBytes(mBirthday.mStr != nullptr ? mBirthday.mStr : g_szEmptyString, nLength);
+    stream.WriteLE(&nLength, sizeof(nLength));
+    stream.Write(mBirthday.mStr != nullptr ? mBirthday.mStr : g_szEmptyString, nLength);
 }
 
 // NTSC-U/C: 0x0032b968, PAL: 0x00353e28
 void MetPersonaData::Load(IBStream *pStream) {
     int nVersion;
-    pStream->Read(&nVersion, sizeof(nVersion));
+    pStream->ReadLE(&nVersion, sizeof(nVersion));
     mStats.Load(*pStream);
     mAppearance.Load(*pStream);
     mSavedName = mAppearance.mUserName;
@@ -71,37 +71,37 @@ void MetPersonaData::Load(IBStream *pStream) {
         ControllerConfig controllerConfig;
         std::vector<int> buttons;
         int nButtonCount;
-        pStream->Read(&nButtonCount, sizeof(nButtonCount));
+        pStream->ReadLE(&nButtonCount, sizeof(nButtonCount));
         buttons.resize(nButtonCount);
         for (std::vector<int>::iterator it = buttons.begin(); it != buttons.end(); ++it) {
-            pStream->Read(&*it, sizeof(*it));
+            pStream->ReadLE(&*it, sizeof(*it));
         }
 
         GameOptions options;
         options.Load(*pStream);
 
         int nStringCount;
-        pStream->Read(&nStringCount, sizeof(nStringCount));
+        pStream->ReadLE(&nStringCount, sizeof(nStringCount));
         for (int i = 0; i < nStringCount; ++i) {
             int nUnused;
-            pStream->Read(&nUnused, sizeof(nUnused));
+            pStream->ReadLE(&nUnused, sizeof(nUnused));
             HxStr text;
             unsigned nLength;
-            pStream->Read(&nLength, sizeof(nLength));
+            pStream->ReadLE(&nLength, sizeof(nLength));
             text.Alloc(nLength);
-            pStream->ReadBytes(
-                text.mStr != nullptr ? text.mStr : const_cast<char *>(g_szEmptyString), nLength);
+            pStream->Read(text.mStr != nullptr ? text.mStr : const_cast<char *>(g_szEmptyString),
+                          nLength);
             text.Clear();
         }
     }
 
     if (nVersion >= kBirthdayVersion) {
         unsigned nLength;
-        pStream->Read(&nLength, sizeof(nLength));
+        pStream->ReadLE(&nLength, sizeof(nLength));
         mBirthday.Alloc(nLength);
-        pStream->ReadBytes(mBirthday.mStr != nullptr ? mBirthday.mStr :
-                                                       const_cast<char *>(g_szEmptyString),
-                           nLength);
+        pStream->Read(mBirthday.mStr != nullptr ? mBirthday.mStr :
+                                                  const_cast<char *>(g_szEmptyString),
+                      nLength);
     }
 
     UpdateSkillStatus();
@@ -114,7 +114,7 @@ void *MetPersonaData::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x0032e208, PAL: 0x00356710
 void MetPersonaData::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kAllocationTag);
+    OperatorDeleteOverride(pBlock, kAllocationTag);
 }
 
 // NTSC-U/C: 0x0032e230, PAL: 0x00356738

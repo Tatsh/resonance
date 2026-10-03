@@ -67,7 +67,7 @@ public:
      * printer has no case for the third value, so a sprite system dumps no mode at all. That gap
      * is in the shipped build rather than in this reconstruction.
      */
-    enum Mode {
+    enum Type {
         kModePoint = 0,  /*!< One GS point per particle. */
         kModeLine = 1,   /*!< One GS line from mPrevPos to mPos per particle. */
         kModeSprite = 2, /*!< One GS sprite per particle. */
@@ -456,7 +456,7 @@ public:
     Mat *mMat;
     /*!< Primitive each particle draws as. Public on the same evidence as mMat, the draw path
          switching on it directly. +0x1e4 */
-    Mode mMode;
+    Type mMode;
 
 private:
     int mBubble; // Non-zero to apply mBubblePeriod and mBubbleSize.

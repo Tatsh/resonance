@@ -73,6 +73,6 @@ private:
     int mOrigin;               // +0x00, from PhraseMaker::GetPeriodOrigin()
     int mPeriod;               // +0x04
     Sch::TickClock *mClock;    // +0x08
-    CmdID mCommand;            // +0x0c, starts -2
+    Sch::CmdID mCommand;       // +0x0c, starts -2
     PhraseMaker *mPhraseMaker; // +0x10
 };

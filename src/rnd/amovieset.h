@@ -1,5 +1,6 @@
 #pragma once
 
+#include "rnd/amoviechunkhdr.h"
 #include "rndartt/abitmap.h"
 
 class ACircBuff;
@@ -24,14 +25,6 @@ class AMovieSet {
 public:
     /** Tracks a file can describe, and so the handler slots. */
     static constexpr int kTrackCount = 16;
-
-    /** Header of every chunk in a movie file, followed by mSize payload bytes. */
-    struct ChunkHeader {
-        unsigned int mTag; /*!< Chunk type, a four character code such as FRAM. */
-        int mTrackId;      /*!< Track the chunk belongs to, an index into the handler slots. */
-        int mSize;         /*!< Payload bytes after the header. */
-        int mTicks;        /*!< Tick at which the chunk is due, relative to the last loop. */
-    };
 
     /**
      * Track description a MOVT chunk supplies, 0x2c bytes.
@@ -78,7 +71,7 @@ public:
      * @param pPayload The bytes after the header.
      * @param pData The value installed with the handler.
      */
-    typedef void (*ChunkHandler)(ChunkHeader *pHeader, void *pPayload, void *pData);
+    typedef void (*ChunkHandler)(AMovieChunkHdr *pHeader, void *pPayload, void *pData);
 
     /**
      * Open a movie file and queue its first read.

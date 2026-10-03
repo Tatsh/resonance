@@ -47,12 +47,12 @@ void MBT::Print(std::ostream &stream) const {
 // NTSC-U/C: 0x004acf28, PAL: 0x004eb0c8
 OBStream &MBT::Save(OBStream &stream) const {
     const int nTick = mTick;
-    return stream.Write(&nTick, sizeof(nTick));
+    return stream.WriteLE(&nTick, sizeof(nTick));
 }
 
 // NTSC-U/C: 0x004acf68, PAL: 0x004eb108
 IBStream &MBT::Load(IBStream &stream) {
-    return stream.Read(&mTick, sizeof(mTick));
+    return stream.ReadLE(&mTick, sizeof(mTick));
 }
 
 } // namespace Mid

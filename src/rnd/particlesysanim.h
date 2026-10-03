@@ -211,10 +211,10 @@ private:
 
     // Register this animation as a referrer of mParticleSys and mFramesOwner. Load() inlines it.
     // NTSC-U/C: 0x0052c868, PAL: 0x0056cee0
-    void AddObjectRefs();
+    void AddRefObjects();
 
-    // Drop the references AddObjectRefs() took. The destructor calls it. 0x0052c818.
-    void RemoveObjectRefs();
+    // Drop the references AddRefObjects() took. The destructor calls it. 0x0052c818.
+    void ReleaseObjects();
 
     // No class derives from Rnd::ParticleSysAnim and no access from outside it is recovered, so
     // every member is private. The order below is the recovered offset order, and each member is

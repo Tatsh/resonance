@@ -143,7 +143,7 @@ void TrackData::Bar::Print(std::ostream &stream) {
 
     stream << "midi: " << "(";
     for (auto &entry : mMidi) {
-        PrintMuseEntry(stream, entry.mPosition, entry.mValue);
+        PrintMuseMsgTickObj(stream, entry.mPosition, entry.mValue);
         stream << " ";
     }
     stream << ")" << std::endl;
@@ -530,7 +530,7 @@ int TrackData::GetPoints(int nBar) const {
 }
 
 // NTSC-U/C: 0x001d7aa0, PAL: 0x001dd980
-int TrackData::GetCatchPoints(int nBar) const {
+int TrackData::GetJuice(int nBar) const {
     const Bar *pBar;
     GetBar(nBar, pBar);
     return pBar->mCatchPoints;

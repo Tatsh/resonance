@@ -4,35 +4,52 @@
  * Rotation quaternion, stored as the vector part followed by the scalar part.
  *
  * The class is not polymorphic and emits no RTTI descriptor, and no text dump writes component
- * labels for it. The name is therefore inferred. The component order is recovered rather than
- * assumed, and three routines agree on it. Mat33ToQuat() writes half the square root of one plus
- * the matrix trace to the fourth word and the three antisymmetric differences of the off-diagonal
- * terms to the first three. AxisAngleToQuat() writes the cosine of the half angle to the fourth
- * word and the axis scaled by the sine of the half angle to the first three. QuatMultiply()
- * forms the Hamilton product with the fourth word as the real part.
+ * labels for it. The component order is recovered rather than assumed, and three routines agree
+ * on it. Set() from a matrix writes half the square root of one plus the matrix trace to the fourth
+ * word and the three antisymmetric differences of the off-diagonal terms to the first three. Set()
+ * from an axis and an angle writes the cosine of the half angle to the fourth word and the axis
+ * scaled by the sine of the half angle to the first three. QuatMultiply() forms the Hamilton
+ * product with the fourth word as the real part.
  *
  * The type is a full quadword of meaningful data rather than a padded triple. The four-term dot
  * product in QuatSlerp() proves that.
  */
 struct Quat {
+    /**
+     * Convert a rotation matrix to this quaternion.
+     *
+     * A positive trace takes the direct route. Otherwise the largest diagonal term selects which
+     * component of the vector part is recovered first, and the other two components and the
+     * scalar part follow from it. The routine is the Shoemake construction, including the cyclic
+     * successor table.
+     *
+     * @param pMat3Rows The rotation, three rows of four floats, treated as orthonormal.
+     * @return This quaternion.
+     * @ghidraAddress NTSC-U/C: 0x004ee9c0
+     * @ghidraAddress PAL: 0x0052d568
+     */
+    Quat &Set(const float *pMat3Rows);
+
+    /**
+     * Set this quaternion to a rotation about an axis.
+     *
+     * The axis is used as supplied and is not normalised.
+     *
+     * @param pAxis The rotation axis, three floats.
+     * @param flAngle The rotation angle in radians.
+     * @return This quaternion.
+     * @ghidraAddress NTSC-U/C: 0x004efd80
+     * @ghidraAddress PAL: 0x0052e970
+     */
+    Quat &Set(const float *pAxis, float flAngle);
+
     float x;
     float y;
     float z;
     float w;
 };
 
-/**
- * Build a rotation quaternion from an axis and an angle.
- *
- * The axis is used as supplied and is not normalised.
- *
- * @param pAxis The rotation axis, three floats.
- * @param flAngle The rotation angle in radians.
- * @return The quaternion.
- * @ghidraAddress NTSC-U/C: 0x004efd80
- * @ghidraAddress PAL: 0x0052e970
- */
-Quat AxisAngleToQuat(const float *pAxis, float flAngle);
+namespace Rnd {
 
 /**
  * Recover the axis and angle of a rotation quaternion.
@@ -46,13 +63,15 @@ Quat AxisAngleToQuat(const float *pAxis, float flAngle);
  * @ghidraAddress NTSC-U/C: 0x004f0350
  * @ghidraAddress PAL: 0x0052ef40
  */
-void QuatDecomposeAxisAngle(const Quat &quat, float *pAxis, float *pflAngle);
+void MakeAxisAngle(const Quat &quat, float *pAxis, float *pflAngle);
+
+} // namespace Rnd
 
 /**
  * Build a rotation quaternion from three Euler angles.
  *
- * The composition is the same one EulerAnglesToMatrix3x3() produces. That is, the product is
- * qz * qx * qy, with each factor a rotation about one axis by the matching component.
+ * The composition is the same one Rnd::MakeRotMatrix() produces from three angles. That is, the
+ * product is qz * qx * qy, with each factor a rotation about one axis by the matching component.
  *
  * @param pAngles The three angles in radians, ordered X, Y, and Z.
  * @return The quaternion.
@@ -60,21 +79,6 @@ void QuatDecomposeAxisAngle(const Quat &quat, float *pAxis, float *pflAngle);
  * @ghidraAddress PAL: 0x0052ee20
  */
 Quat EulerAnglesToQuat(const float *pAngles);
-
-/**
- * Convert a rotation matrix to a quaternion.
- *
- * A positive trace takes the direct route. Otherwise the largest diagonal term selects which
- * component of the vector part is recovered first, and the other two components and the scalar
- * part follow from it. The routine is the Shoemake construction, including the cyclic successor
- * table.
- *
- * @param pMat3Rows The rotation, three rows of four floats, treated as orthonormal.
- * @return The quaternion.
- * @ghidraAddress NTSC-U/C: 0x004ee9c0
- * @ghidraAddress PAL: 0x0052d568
- */
-Quat Mat33ToQuat(const float *pMat3Rows);
 
 /**
  * Compose two rotation quaternions.
@@ -127,6 +131,8 @@ Quat QuatRotateByVector(const Quat &quat, const float *pRotVec);
  */
 void QuatSlerp(const Quat &from, const Quat &to, Quat &out, float flT);
 
+namespace Rnd {
+
 /**
  * Convert a rotation quaternion to a rotation matrix.
  *
@@ -139,10 +145,10 @@ void QuatSlerp(const Quat &from, const Quat &to, Quat &out, float flT);
  * @ghidraAddress NTSC-U/C: 0x004f0600
  * @ghidraAddress PAL: 0x0052f1f0
  */
-void QuatToMat33(const Quat &quat, float *pMat3Rows);
+void MakeRotMatrix(const Quat &quat, float *pMat3Rows);
 
 /**
- * Extract Euler angles from a rotation matrix, inverting EulerAnglesToMatrix3x3().
+ * Extract Euler angles from a rotation matrix, inverting MakeRotMatrix() from three angles.
  *
  * The rows are taken as a pure rotation and are not normalised. When the Z component of the Y
  * row is beyond the gimbal lock limit, the X angle is a quarter turn with that component's sign,
@@ -155,7 +161,9 @@ void QuatToMat33(const Quat &quat, float *pMat3Rows);
  * @ghidraAddress NTSC-U/C: 0x004efe08
  * @ghidraAddress PAL: 0x0052e9f8
  */
-void Mat33ToEulerAngles(const float *pMat3Rows, float *pAngles);
+void MakeEuler(const float *pMat3Rows, float *pAngles);
+
+} // namespace Rnd
 
 /**
  * Report the scale each basis row carries.

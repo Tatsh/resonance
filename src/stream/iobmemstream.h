@@ -65,7 +65,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004ee0e8
      * @ghidraAddress PAL: 0x0052cc90
      */
-    virtual IBStream &ReadBytes(void *pDest, int nSize);
+    virtual IBStream &Read(void *pDest, int nSize);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x004ee168
@@ -153,7 +153,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004ed068
      * @ghidraAddress PAL: 0x0052bc10
      */
-    virtual OBStream &WriteBytes(const void *pSrc, int nSize);
+    virtual OBStream &Write(const void *pSrc, int nSize);
 
     /**
      * @ghidraAddress NTSC-U/C: 0x004eda30

@@ -67,9 +67,9 @@ void RegisterScriptTemplate(int nTemplate, const HxStr &text);
  * CallScriptTemplate(), the script evaluators, and the configuration queries read templates through
  * this routine.
  *
- * @param nTemplate The identifier.
+ * @param nResid The identifier.
  * @return A copy of the template, or an empty string when none is registered.
  * @ghidraAddress NTSC-U/C: 0x00466438
  * @ghidraAddress PAL: 0x004a3e68
  */
-HxStr GetScriptTemplate(int nTemplate);
+HxStr Resid2Str(unsigned int nResid);

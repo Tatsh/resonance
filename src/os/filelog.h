@@ -45,31 +45,30 @@ extern char logfilename[kFileLogPathSize];
  * Open the file log.
  *
  * The path is recorded in logfilename and the file is opened for output. No call site exists.
- * The title is inferred.
  *
  * @param pszPath The path of the log file.
  * @ghidraAddress NTSC-U/C: 0x0047ddf0
  * @ghidraAddress PAL: 0x004bbac8
  */
-void FileLogStart(const char *pszPath);
+void InitFileIOLog(char *pszPath);
 
 /**
  * Close the file log, if it is open.
  *
- * HxScript's `memlog_term` binding calls it at `0x00155e0c`. The title is inferred.
+ * HxScript's `memlog_term` binding calls it at `0x00155e0c`.
  *
  * @ghidraAddress NTSC-U/C: 0x0047de48
  * @ghidraAddress PAL: 0x004bbb20
  */
-void FileLogStop();
+void CloseFileIOLog();
 
 /**
  * Write one line to the file log, if it is open.
  *
- * No call site exists. FileOpen() expands the same body inline. The title is inferred.
+ * No call site exists. FileOpen() expands the same body inline.
  *
  * @param pszText The line, without its line break.
  * @ghidraAddress NTSC-U/C: 0x0047de88
  * @ghidraAddress PAL: 0x004bbb60
  */
-void FileLogAppend(const char *pszText);
+void PrintToFileIOLog(const char *pszText);

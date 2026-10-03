@@ -141,7 +141,7 @@ void FreqAppearanceDetail::unpack(const FreqPart::Packed *pRecords, int nCount) 
 // NTSC-U/C: 0x0024b160, PAL: 0x00260508
 void FreqAppearanceDetail::save(OBStream &stream) {
     int nCount = mParts.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (std::list<FreqPart *>::iterator it = mParts.begin(); it != mParts.end(); ++it) {
         FreqPart *pPart = *it;
         pPart->GetColor();                          // Yes, the binary discards this call's result.
@@ -149,17 +149,16 @@ void FreqAppearanceDetail::save(OBStream &stream) {
 
         const HxStr &name = pPart->mTemplate->mName;
         unsigned nLength = name.mLen;
-        stream.Write(&nLength, sizeof(nLength));
-        OBStream &out =
-            stream.WriteBytes(name.mStr != nullptr ? name.mStr : g_szEmptyString, nLength);
+        stream.WriteLE(&nLength, sizeof(nLength));
+        OBStream &out = stream.Write(name.mStr != nullptr ? name.mStr : g_szEmptyString, nLength);
         float flPaletteX = pPart->mPalettePosition.x;
         float flPaletteY = pPart->mPalettePosition.y;
         float flX = pPart->mPosition.x;
         float flZ = pPart->mPosition.z;
-        (out.Write(&flPaletteX, sizeof(flPaletteX)).Write(&flPaletteY, sizeof(flPaletteY))
+        (out.WriteLE(&flPaletteX, sizeof(flPaletteX)).WriteLE(&flPaletteY, sizeof(flPaletteY))
          << pPart->mMirrored)
-            .Write(&flX, sizeof(flX))
-            .Write(&flZ, sizeof(flZ));
+            .WriteLE(&flX, sizeof(flX))
+            .WriteLE(&flZ, sizeof(flZ));
     }
 }
 
@@ -167,23 +166,23 @@ void FreqAppearanceDetail::save(OBStream &stream) {
 void FreqAppearanceDetail::load(IBStream &stream) {
     MetFreqMakerAssetManager::shared()->PollLoad(); // Yes, the binary discards the result.
     int nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     for (int i = 0; i < nCount; ++i) {
         HxStr name;
         unsigned nLength;
-        stream.Read(&nLength, sizeof(nLength));
+        stream.ReadLE(&nLength, sizeof(nLength));
         name.Alloc(nLength);
-        stream.ReadBytes(name.mStr != nullptr ? name.mStr : const_cast<char *>(g_szEmptyString),
-                         nLength);
+        stream.Read(name.mStr != nullptr ? name.mStr : const_cast<char *>(g_szEmptyString),
+                    nLength);
         // Yes, the binary looks the name up as a texture and discards the result.
         (void)dynamic_cast<Rnd::Tex *>(Rnd::TheManager.Find(name));
 
         FreqPart *pPart = new FreqPart(MetFreqMakerAssetManager::shared()->FindPart(name));
-        stream.Read(&pPart->mPalettePosition.x, sizeof(pPart->mPalettePosition.x));
-        stream.Read(&pPart->mPalettePosition.y, sizeof(pPart->mPalettePosition.y));
+        stream.ReadLE(&pPart->mPalettePosition.x, sizeof(pPart->mPalettePosition.x));
+        stream.ReadLE(&pPart->mPalettePosition.y, sizeof(pPart->mPalettePosition.y));
         stream >> pPart->mMirrored;
-        stream.Read(&pPart->mPosition.x, sizeof(pPart->mPosition.x));
-        stream.Read(&pPart->mPosition.z, sizeof(pPart->mPosition.z));
+        stream.ReadLE(&pPart->mPosition.x, sizeof(pPart->mPosition.x));
+        stream.ReadLE(&pPart->mPosition.z, sizeof(pPart->mPosition.z));
         addLoadedPart(pPart);
     }
 }

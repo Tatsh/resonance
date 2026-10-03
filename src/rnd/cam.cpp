@@ -113,7 +113,7 @@ void *Cam::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x004b1eb0, PAL: 0x004f00d8
 void Cam::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kCamTag);
+    OperatorDeleteOverride(pBlock, kCamTag);
 }
 
 // NTSC-U/C: 0x004b1f20, PAL: 0x004f0148
@@ -177,14 +177,13 @@ void Cam::SetTargetTex(Tex *pTex) {
 }
 
 // NTSC-U/C: 0x004ad820, PAL: 0x004eb9e0
-void Cam::CollideScreen(const Ray &ray, HitSink &sink) {
-    if (mShowing != 0 && mScreenRect.x < ray.mStart[0] &&
-        ray.mStart[0] < mScreenRect.x + mScreenRect.w && mScreenRect.y < ray.mStart[1] &&
-        ray.mStart[1] < mScreenRect.y + mScreenRect.h) {
-        const Hit hit{this, 0.0f};
-        sink.mHits.push_back(hit);
+void Cam::FindCollisions(const Vector2 &point, std::list<Collision> &collisions) {
+    if (mShowing != 0 && mScreenRect.x < point.x && point.x < mScreenRect.x + mScreenRect.w &&
+        mScreenRect.y < point.y && point.y < mScreenRect.y + mScreenRect.h) {
+        const Collision collision{this, 0.0f};
+        collisions.push_back(collision);
     }
-    Collideable::CollideScreen(ray, sink);
+    Collideable::FindCollisions(point, collisions);
 }
 
 // NTSC-U/C: 0x004ad980, PAL: 0x004ebb40
@@ -495,8 +494,8 @@ void Cam::UpdateWorldProject() {
 }
 
 // NTSC-U/C: 0x004afe00, PAL: 0x004edff0
-Ray Cam::ScreenToRay(const Vector2 &ptScreen, float flLength) {
-    Ray ray;
+Segment Cam::ScreenToRay(const Vector2 &ptScreen, float flLength) {
+    Segment ray;
     ray.mStart[3] = 1.0f;
     ray.mEnd[3] = 1.0f;
     const Vector3 ptNdc = UnitToFarNdc((ptScreen.x - mScreenRect.x) / mScreenRect.w,
@@ -507,14 +506,14 @@ Ray Cam::ScreenToRay(const Vector2 &ptScreen, float flLength) {
     if (mFov != 0.0f) {
         std::copy(mWorldXfm[kXfmTranslationRow], mWorldXfm[kXfmTranslationRow] + 4, ray.mStart);
         Vector3 direction;
-        Vec3Sub(&ptFar.x, ray.mStart, &direction.x);
+        Rnd::Subtract(&ptFar.x, ray.mStart, &direction.x);
         Vec3Normalize(&direction.x, &direction.x);
         Vec3Scale(&direction.x, flLength, &extent.x);
-        AddVec3(&extent.x, ray.mStart, ray.mEnd);
+        Rnd::Add(&extent.x, ray.mStart, ray.mEnd);
     } else {
         std::copy(&ptFar.x, &ptFar.x + 4, ray.mStart);
         Vec3Scale(mWorldXfm[kXfmForwardRow], flLength, &extent.x);
-        AddVec3(ray.mStart, &extent.x, ray.mEnd);
+        Rnd::Add(ray.mStart, &extent.x, ray.mEnd);
     }
     return ray;
 }

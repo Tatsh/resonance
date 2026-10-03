@@ -229,7 +229,7 @@ void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
     if (pRiff == nullptr) {
         return;
     }
-    MultiMuse *pShifted = TransposeMuse(pRiff, nStep);
+    MultiMuse *pShifted = CloneAndTranspose(*pRiff, nStep);
     {
         MultiMuseMsg muse(pShifted);
         Send(&muse);
@@ -274,7 +274,7 @@ void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
     mLastGemEndBlend = AxeOldGemMaker::BlendForStep(nStep);
 
     if (nStep != 0) {
-        (void)AxeOldGemMaker::NextStripId(); // Yes, the binary discards the new identity.
+        (void)GetNewGemID(); // Yes, the binary discards the new identity.
         DurGemMsg gem;
         gem.mLane = mTrack;
         gem.mStartFrame = nStart;
@@ -308,7 +308,7 @@ void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
 }
 
 // NTSC-U/C: 0x001d08e0, PAL: 0x001d6798
-void Scratcher::SendSeekerMsg(int) {
+void Scratcher::SendSeekerMsg(int) const {
     if (mPlayer->IsNull() != 0) {
         return;
     }

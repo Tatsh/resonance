@@ -85,7 +85,7 @@ ScrollingList::~ScrollingList() {
     updateHighlight();
 
     for (int i = 0; i < mRowCount; ++i) {
-        HxStr prefix(FormatString(kRowNameFormat, i));
+        HxStr prefix(Rnd::MakeString(kRowNameFormat, i));
         HxStr name = prefix + templateName;
         Rnd::Object *pObject = Rnd::TheManager.Find(name);
         Rnd::View *pRow = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
@@ -106,7 +106,7 @@ ScrollingList::~ScrollingList() {
 
 // NTSC-U/C: 0x003fdec0, PAL: 0x00436948
 Rnd::View *ScrollingList::makeRow(int nIndex) {
-    HxStr prefix(FormatString(kRowNameFormat, nIndex));
+    HxStr prefix(Rnd::MakeString(kRowNameFormat, nIndex));
     Rnd::Object *pObject =
         Rnd::TheManager.ResolveAndLinkObject(mTemplate, prefix, kRowCloneFlags, 1, 1);
     return pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;

@@ -37,7 +37,7 @@ Py::Object ScriptAddPowerup(Py::Tuple args) {
              ++it) {
             if ((*it)->GetInputSlot() == static_cast<int>(nPlayer)) {
                 CaughtPowerbarMsg message;
-                message.mKind = static_cast<HudItemKind>(nKind);
+                message.mKind = static_cast<PowerupType>(nKind);
                 message.mPlayer = *it;
                 (*it)->Dispatch(&message);
                 break;

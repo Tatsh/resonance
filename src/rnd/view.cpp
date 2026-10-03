@@ -72,7 +72,7 @@ void *View::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x004e2068, PAL: 0x00520920
 void View::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kViewTag);
+    OperatorDeleteOverride(pBlock, kViewTag);
 }
 
 // NTSC-U/C: 0x004e2740, PAL: 0x00520ff8

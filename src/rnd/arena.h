@@ -393,11 +393,11 @@ protected:
      * Rnd::Collideable vtable slot 1. Forwards the ray to every section view that is showing.
      *
      * @param ray The segment to test along.
-     * @param sink The collector to append intersections to.
+     * @param collisions The list to append intersections to.
      * @ghidraAddress NTSC-U/C: 0x005bc090
      * @ghidraAddress PAL: 0x005fe758
      */
-    virtual void FindCollisions(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Segment &ray, std::list<Collision> &collisions);
 
     /**
      * Place every section and rebuild the draw order.

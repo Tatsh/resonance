@@ -26,16 +26,16 @@ LevelStats::~LevelStats() {
 // NTSC-U/C: 0x00142760, PAL: 0x00143260
 void LevelStats::Save(OBStream &stream) {
     char nVersion = kRecordVersion;
-    stream.WriteBytes(&nVersion, sizeof(nVersion));
+    stream.Write(&nVersion, sizeof(nVersion));
 
     unsigned nLength = mName.mLen;
-    stream.Write(&nLength, sizeof(nLength));
+    stream.WriteLE(&nLength, sizeof(nLength));
     // An empty name has no buffer, and the stream receives the shared empty string in place of a
     // null pointer.
-    stream.WriteBytes(mName.mStr != nullptr ? mName.mStr : g_szEmptyString, mName.mLen);
+    stream.Write(mName.mStr != nullptr ? mName.mStr : g_szEmptyString, mName.mLen);
 
     char nStage = mStage;
-    stream.WriteBytes(&nStage, sizeof(nStage));
+    stream.Write(&nStage, sizeof(nStage));
 
     mSkills[0].Save(stream);
     mSkills[1].Save(stream);
@@ -46,36 +46,36 @@ void LevelStats::Save(OBStream &stream) {
 void LevelStats::Load(IBStream &stream) {
     if (g_nStatsRecordVersion == kFirstRecordVersion) {
         int nUnused;
-        stream.Read(&nUnused, sizeof(nUnused));
+        stream.ReadLE(&nUnused, sizeof(nUnused));
 
         unsigned nLength;
-        stream.Read(&nLength, sizeof(nLength));
+        stream.ReadLE(&nLength, sizeof(nLength));
         mName.Alloc(nLength);
         // A zero-length name still arrives at the stream as the shared empty string, and the
         // transfer is zero bytes wide, so the stream never writes through it.
-        stream.ReadBytes(mName.mStr != nullptr ? mName.mStr : const_cast<char *>(g_szEmptyString),
-                         nLength);
+        stream.Read(mName.mStr != nullptr ? mName.mStr : const_cast<char *>(g_szEmptyString),
+                    nLength);
 
-        stream.Read(&mStage, sizeof(mStage));
+        stream.ReadLE(&mStage, sizeof(mStage));
 
         int nSkillCount;
-        stream.Read(&nSkillCount, sizeof(nSkillCount));
+        stream.ReadLE(&nSkillCount, sizeof(nSkillCount));
         mSkills.resize(nSkillCount);
         for (std::vector<SkillStats>::iterator it = mSkills.begin(); it != mSkills.end(); ++it) {
             it->Load(stream);
         }
     } else if (g_nStatsRecordVersion == kSecondRecordVersion) {
         char nVersion;
-        stream.ReadBytes(&nVersion, sizeof(nVersion));
+        stream.Read(&nVersion, sizeof(nVersion));
 
         unsigned nLength;
-        stream.Read(&nLength, sizeof(nLength));
+        stream.ReadLE(&nLength, sizeof(nLength));
         mName.Alloc(nLength);
-        stream.ReadBytes(mName.mStr != nullptr ? mName.mStr : const_cast<char *>(g_szEmptyString),
-                         nLength);
+        stream.Read(mName.mStr != nullptr ? mName.mStr : const_cast<char *>(g_szEmptyString),
+                    nLength);
 
         unsigned char nStage;
-        stream.ReadBytes(&nStage, sizeof(nStage));
+        stream.Read(&nStage, sizeof(nStage));
         mStage = nStage;
 
         mSkills.clear();

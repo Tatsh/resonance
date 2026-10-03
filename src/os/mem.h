@@ -7,9 +7,8 @@
 /**
  * The number of per-tag accounting records.
  *
- * Record 0 is the overflow bucket. It receives the byte count of every
- * allocation whose tag did not fit in records 1 through 23, and
- * MemBeginAccounting() labels it `Other_Sources`.
+ * Record 0 is the overflow bucket. It receives the byte count of every allocation whose tag did
+ * not fit in records 1 through 23, and MemLogBeginCount() labels it `Other_Sources`.
  */
 constexpr int kMemTagCount = 24;
 
@@ -95,7 +94,7 @@ void *AllocateTaggedMemory(size_t nSize, const char *pszClass);
  * @ghidraAddress NTSC-U/C: 0x004a91e0
  * @ghidraAddress PAL: 0x004e72f0
  */
-void FreeTaggedMemory(void *pBlock, const char *pszClass);
+void OperatorDeleteOverride(void *pBlock, const char *pszClass);
 
 /**
  * Address the buffer the STL allocator hook bills its allocations to.
@@ -226,13 +225,13 @@ void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine
 /**
  * Write a marker line into the memory report.
  *
- * Performs no work while logging is off. The frame loop and Heap::DumpStats() are the callers.
+ * Performs no work while logging is off. The frame loop and HHeapLogBasicStats() are the callers.
  *
  * @param pszText The text to mark.
  * @ghidraAddress NTSC-U/C: 0x004a8e18
  * @ghidraAddress PAL: 0x004e6f28
  */
-void MemLogWrite(const char *pszText);
+void MemLogWriteMarker(const char *pszText);
 
 /**
  * Close the memory report and print a summary of the heap.
@@ -291,27 +290,27 @@ void MemLogPrint(const char *pszText);
  * Clear the per-tag accounting table and start charging it.
  *
  * Record 0 is labelled `Other_Sources`. Rnd::AsyncLoader's poll brackets a load with this and
- * MemEndAccounting(). The name is inferred.
+ * MemLogEndCount().
  *
  * @ghidraAddress NTSC-U/C: 0x004a8e88
  * @ghidraAddress PAL: 0x004e6f98
  */
-void MemBeginAccounting();
+void MemLogBeginCount();
 
 /**
  * Stop charging the accounting table and format its totals.
  *
  * The report begins `Memory Allocated: %d` and adds one line per labelled record. Record 0 appears
  * only when it has been charged. A line that would leave less than 0x40 bytes of the buffer is
- * replaced by `...REPORT TOO LONG FOR BUFFER!` and ends the report. The name is inferred.
+ * replaced by `...REPORT TOO LONG FOR BUFFER!` and ends the report.
  *
  * @param pszReport Receives the report.
  * @param nReportSize The size of the buffer.
- * @return The total bytes charged since MemBeginAccounting().
+ * @return The total bytes charged since MemLogBeginCount().
  * @ghidraAddress NTSC-U/C: 0x004a8ef8
  * @ghidraAddress PAL: 0x004e7008
  */
-int MemEndAccounting(char *pszReport, int nReportSize);
+int MemLogEndCount(char *pszReport, int nReportSize);
 
 /**
  * Allocate the per-block tracking table and clear the per-source table.

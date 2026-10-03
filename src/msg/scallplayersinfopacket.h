@@ -30,7 +30,7 @@ public:
      * Public because AddPlayerInfo() takes one. The copy constructor at `0x0010a2e0` is the
      * compiler-generated one.
      */
-    struct PlayerEntry {
+    struct PlayerInfoEntry {
         int mPid; /*!< Labelled ` pid:`. +0x00 */
         /**
          * Transferred but not printed. +0x04
@@ -119,10 +119,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x003f23a8
      * @ghidraAddress PAL: 0x0042a8f0
      */
-    void AddPlayerInfo(const PlayerEntry &entry);
+    void AddPlayerInfo(const PlayerInfoEntry &entry);
 
 private:
-    std::vector<PlayerEntry> mPlayers; // +0x14
+    std::vector<PlayerInfoEntry> mPlayers; // +0x14
 };
 
 /**

@@ -87,14 +87,12 @@ void StdMidiMsg::saveGuts(OBStream &stream) const {
     unsigned char status = mStatus;
     unsigned char data1 = mData1;
     unsigned char data2 = mData2;
-    stream.WriteBytes(&status, sizeof(status))
-        .WriteBytes(&data1, sizeof(data1))
-        .WriteBytes(&data2, sizeof(data2));
+    stream.Write(&status, sizeof(status)).Write(&data1, sizeof(data1)).Write(&data2, sizeof(data2));
 }
 
 // NTSC-U/C: 0x003e36e8, PAL: 0x0041ba88
 void StdMidiMsg::restoreGuts(IBStream &stream) {
-    stream.ReadBytes(&mStatus, sizeof(mStatus))
-        .ReadBytes(&mData1, sizeof(mData1))
-        .ReadBytes(&mData2, sizeof(mData2));
+    stream.Read(&mStatus, sizeof(mStatus))
+        .Read(&mData1, sizeof(mData1))
+        .Read(&mData2, sizeof(mData2));
 }

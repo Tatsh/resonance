@@ -8,27 +8,3 @@ unsigned ReadCycleCount() {
     asm volatile("mfc0 %0, $9" : "=r"(nCount));
     return nCount;
 }
-
-// The clock state the inline reader in the header accumulates into. Around thirty routines across
-// the engine reach these three words directly, which is what makes them engine-wide rather than
-// private to this file.
-
-long long g_llTotalCycles;
-
-unsigned g_nLastCycleCount;
-
-unsigned g_nLastCycleDelta;
-
-float g_flMillisecondsPerCycle;
-
-int g_nUnusedCycleCounter;
-
-// NTSC-U/C: 0x004fefb0, PAL: 0x0053dd60
-void ResetCycleCounter() {
-    g_flMillisecondsPerCycle = 1.0f / kCyclesPerMillisecond;
-    (void)ReadCycleCount(); // Yes, the binary discards this reading.
-    g_nLastCycleDelta = 0;
-    g_nLastCycleCount = ReadCycleCount();
-    g_nUnusedCycleCounter = 0;
-    g_llTotalCycles = 0;
-}

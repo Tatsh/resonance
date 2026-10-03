@@ -63,8 +63,8 @@ TnlArena::TnlArena(Renderer *) {
 
     const int nPlain = QueryConfigFlag(kDisplayModeConfigCode);
     for (int i = 1; i <= kScreenCount; ++i) {
-        Rnd::Mat *pMat =
-            dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr(FormatString("screen0%d.mat", i))));
+        Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(
+            Rnd::TheManager.Find(HxStr(Rnd::MakeString("screen0%d.mat", i))));
         std::vector<Rnd::Mesh *> meshes;
         pMat->GetMeshReferrers(meshes);
         for (std::vector<Rnd::Mesh *>::iterator it = meshes.begin(); it != meshes.end(); ++it) {
@@ -98,7 +98,7 @@ TnlArena::TnlArena(Renderer *) {
 // NTSC-U/C: 0x00406120, PAL: 0x0043fa20
 TnlArena::PlayerMaterial::PlayerMaterial(Player *pPlayer) : mPlayer(pPlayer) {
     mMat = dynamic_cast<Rnd::Mat *>(
-        Rnd::TheManager.Find(HxStr(FormatString("HUD freq%d.mat", pPlayer->mPlayerId))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("HUD freq%d.mat", pPlayer->mPlayerId))));
 }
 
 // NTSC-U/C: 0x0040c938, PAL: 0x00446360

@@ -48,7 +48,7 @@ void MultiCatcher::CapturePhrase(int nBar, int nRun, int nAutoCatch) {
                                mTrack,
                                mPlayer,
                                nPoints,
-                               mTrackData->GetCatchPoints(nBar),
+                               mTrackData->GetJuice(nBar),
                                nAutoCatch ^ 1);
     Send(&captured);
 
@@ -58,7 +58,7 @@ void MultiCatcher::CapturePhrase(int nBar, int nRun, int nAutoCatch) {
 
     if (nPowerbar != kNoPowerbar && nAutoCatch == 0) {
         CaughtPowerbarMsg msg;
-        msg.mKind = static_cast<HudItemKind>(nPowerbar);
+        msg.mKind = static_cast<PowerupType>(nPowerbar);
         msg.mPlayer = mPlayer;
         Send(&msg);
         mPlayer->Dispatch(&msg);

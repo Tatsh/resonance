@@ -318,7 +318,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00194f88
      * @ghidraAddress PAL: 0x0019ac08
      */
-    void DestroyRenderer();
+    void KillRenderer();
 
     /**
      * Write the phrase database of every score track graph.
@@ -680,7 +680,7 @@ public:
      * Non-zero while the world plays back a recording. +0x8c
      *
      * GameManagerImpl::OnBeginGameLocal() clears it at `0x001067c4`, and GameManagerImpl::Load()
-     * (run by GamePlayback) sets it at `0x001074b8`. StartPlay() passes it to the force
+     * (run by GamePlaybacker) sets it at `0x001074b8`. StartPlay() passes it to the force
      * feedback manager. Public because both GameManagerImpl routines write it directly, and the
      * image has no accessor for it.
      */

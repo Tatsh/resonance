@@ -9,10 +9,10 @@
 extern "C" {
 
 // The edge builder requests eight byte records from this allocator.
-void *NetflowAllocChecked(unsigned nSize);
+void *Alloc(unsigned nSize);
 
 // Reports an empty edge pool.
-void NetflowReportOutOfSpace(const char *pszMessage);
+void Barf(const char *pszMessage);
 
 // The matcher runs this greedy pass first and reports the result.
 void NetflowReportInitialMatching(struct netflow_graph *graph, struct netflow_v_side *side);
@@ -54,7 +54,7 @@ unsigned char visited[NETFLOW_MAX_VERTICES];
 
 // NTSC-U/C: 0x005e6508, PAL: 0x006286f0
 // Clear every adjacency list and mate, and clear the U count.
-void netflow_graph_init(struct netflow_graph *graph) {
+void Init_U(struct netflow_graph *graph) {
     for (int i = 0; i < NETFLOW_MAX_VERTICES; ++i) {
         graph->u[i].edges = nullptr;
         graph->u[i].mate = 0;
@@ -64,7 +64,7 @@ void netflow_graph_init(struct netflow_graph *graph) {
 
 // NTSC-U/C: 0x005e64e8, PAL: 0x006286d0
 // Clear every mate, and clear the V count.
-void netflow_v_side_init(struct netflow_v_side *side) {
+void Init_V(struct netflow_v_side *side) {
     for (int i = 0; i < NETFLOW_MAX_VERTICES; ++i) {
         side->mate[i] = 0;
     }
@@ -73,10 +73,10 @@ void netflow_v_side_init(struct netflow_v_side *side) {
 
 // NTSC-U/C: 0x005e6538, PAL: 0x00628720
 // Prepend a record for the edge, and allocate a reverse record recording u.
-void netflow_add_edge(int u, int v, struct netflow_graph *graph, struct netflow_v_side *side) {
+void AddEdge(int u, int v, struct netflow_graph *graph, struct netflow_v_side *side) {
     (void)side;
-    struct netflow_edge *pForward = static_cast<struct netflow_edge *>(NetflowAllocChecked(8));
-    struct netflow_edge *pReverse = static_cast<struct netflow_edge *>(NetflowAllocChecked(8));
+    struct netflow_edge *pForward = static_cast<struct netflow_edge *>(Alloc(8));
+    struct netflow_edge *pReverse = static_cast<struct netflow_edge *>(Alloc(8));
     pForward->next = graph->u[u].edges;
     graph->u[u].edges = pForward;
     pForward->v = v;
@@ -85,7 +85,7 @@ void netflow_add_edge(int u, int v, struct netflow_graph *graph, struct netflow_
 
 // NTSC-U/C: 0x00569bf0, PAL: 0x005aa0b8
 // Seed a greedy matching, initialise the pool, and grow along augmenting paths.
-void netflow_build_matching(struct netflow_graph *graph, struct netflow_v_side *side) {
+void Match(struct netflow_graph *graph, struct netflow_v_side *side) {
     NetflowReportInitialMatching(graph, side);
     NetflowInitMatchingPool(graph, side);
     NetflowFindAugmentingPaths(graph, side);
@@ -93,17 +93,17 @@ void netflow_build_matching(struct netflow_graph *graph, struct netflow_v_side *
 
 // NTSC-U/C: 0x00610880, PAL: 0x006514f0
 // Reports an empty edge pool and returns.
-void NetflowReportOutOfSpace(const char *pszMessage) {
+void Barf(const char *pszMessage) {
     fprintf(stderr, "%s\n", pszMessage);
 }
 
 // NTSC-U/C: 0x00610840, PAL: 0x006514b0
 // Allocates an edge record, reporting an empty pool. The image routes the request through the
 // shared reentrancy allocator; the toolchain allocator serves the same pool here.
-void *NetflowAllocChecked(unsigned nSize) {
+void *Alloc(unsigned nSize) {
     void *pMemory = malloc(nSize);
     if (pMemory == nullptr) {
-        NetflowReportOutOfSpace("Out of space");
+        Barf("Out of space");
     }
     return pMemory;
 }
@@ -125,7 +125,7 @@ void NetflowReportInitialMatching(struct netflow_graph *graph, struct netflow_v_
     }
     const double dPercent = static_cast<double>(static_cast<float>(nMatched) * 100.0f /
                                                 static_cast<float>(graph->u_count));
-    LogPrintf("%d vertices in U were initially matched (%.1f%%).\n", nMatched, dPercent);
+    printf("%d vertices in U were initially matched (%.1f%%).\n", nMatched, dPercent);
 }
 
 // NTSC-U/C: 0x0062be30, PAL: 0x0066c9c0

@@ -105,11 +105,11 @@ void MetMultiEndRemixScreen::ResolveContainerViews() {
     mPhotoMat = FindObject<Rnd::Mat>(kPhotoMat);
 
     for (int nSlot = 1; nSlot <= kPlayerSlotCount; ++nSlot) {
-        Rnd::Text *pName = FindObject<Rnd::Text>(FormatString(kNameTextFormat, nSlot));
+        Rnd::Text *pName = FindObject<Rnd::Text>(Rnd::MakeString(kNameTextFormat, nSlot));
         mNameTexts.push_back(pName);
         pName->SetText(HxStr(kNoName));
-        mPlayerMats.push_back(FindObject<Rnd::Mat>(FormatString(kPlayerMatFormat, nSlot)));
-        mFreqMeshes.push_back(FindObject<Rnd::Mesh>(FormatString(kFreqMeshFormat, nSlot)));
+        mPlayerMats.push_back(FindObject<Rnd::Mat>(Rnd::MakeString(kPlayerMatFormat, nSlot)));
+        mFreqMeshes.push_back(FindObject<Rnd::Mesh>(Rnd::MakeString(kFreqMeshFormat, nSlot)));
     }
 }
 
@@ -126,8 +126,8 @@ void MetMultiEndRemixScreen::EnterAndShow() {
 
     HxStr genre = QueryConfigString(kGenreConfigCode, TextOf(params.mLevelName));
     HxStr bpm = QueryConfigString(kBpmConfigCode, TextOf(params.mLevelName));
-    mGenreText->SetText(HxStr(FormatString(kGenreFormat, TextOf(genre))));
-    mBpmText->SetText(HxStr(FormatString(kBpmFormat, TextOf(bpm))));
+    mGenreText->SetText(HxStr(Rnd::MakeString(kGenreFormat, TextOf(genre))));
+    mBpmText->SetText(HxStr(Rnd::MakeString(kBpmFormat, TextOf(bpm))));
 
     for (int nSlot = 0; nSlot < kPlayerSlotCount; ++nSlot) {
         if (static_cast<unsigned int>(nSlot) < MetFrontEndState::shared()->mPersonas.size()) {

@@ -143,7 +143,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00116888
      * @ghidraAddress PAL: 0x00116d40
      */
-    bool IsFreestyleTrack(int nTrack);
+    bool IsFreestyleTrack(int nTrack) const;
 
     /**
      * Report the phrase database of one track's graph.
@@ -163,7 +163,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001168e0
      * @ghidraAddress PAL: 0x00116d98
      */
-    TrackData *GetTrack(int nTrack);
+    TrackData *GetTrack(int nTrack) const;
 
     /**
      * Run the update of one bar and schedule the next.
@@ -352,7 +352,7 @@ private:
     GameStats *mStats;                        // +0x58
     Mid::MBT mBarLength;                      // +0x5c
     std::vector<Player *> mPlayers;           // +0x60
-    CmdID mCommand;                           // +0x6c
+    Sch::CmdID mCommand;                      // +0x6c
     std::vector<BGTrackGraph *> *mBackGraphs; // +0x70
     std::vector<ScoreTrackGraph *> *mGraphs;  // +0x74
 

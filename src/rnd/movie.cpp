@@ -70,7 +70,7 @@ inline void MatchTextureToTrack(Tex *pTex, const AMovieSet::Track &track, const 
         pTex->mBitsPerPixel == kMovieBitsPerPixel) {
         return;
     }
-    LogPrintf(
+    printf(
         pszMessage, pTex->mWidth, pTex->mHeight, pTex->mBitsPerPixel, track.mWidth, track.mHeight);
     pTex->SetBitmapConfig(
         track.mWidth, track.mHeight, kMovieBitsPerPixel, HxStr(""), pTex->mMipSelect, pTex->mFlags);
@@ -141,8 +141,8 @@ void Movie::OpenMovieFile() {
 
     char szPath[kMaxPathLength];
     strcpy(szPath, TextOf(mFilename));
-    BuildBitmapCacheFileName(szPath, kMovieExtension);
-    if (GetUncompressedFileLength(szPath) == 0) {
+    ConvertNameToGenerated(szPath, kMovieExtension);
+    if (FileTrueSize(szPath) == 0) {
         Rnd::TheDbg.Notify("Couldn't load movie file: %s\n", szPath);
         return;
     }
@@ -290,7 +290,7 @@ void Movie::RemoveTrackTexture(int nTrackId) {
 }
 
 // NTSC-U/C: 0x005cf4c0, PAL: 0x00611488
-void Movie::OnChunk(AMovieSet::ChunkHeader *pHeader, void *pPayload) {
+void Movie::OnChunk(AMovieChunkHdr *pHeader, void *pPayload) {
     Tex *pTex = nullptr;
     for (const auto &entry : mTrackTextures) {
         if (entry.mTrackId == pHeader->mTrackId) {
@@ -330,7 +330,7 @@ void Movie::OnChunk(AMovieSet::ChunkHeader *pHeader, void *pPayload) {
 }
 
 // NTSC-U/C: 0x005d2530, PAL: 0x00614560
-void Movie::MasterTrackCallback(AMovieSet::ChunkHeader *pHeader, void *pPayload, void *pData) {
+void Movie::MasterTrackCallback(AMovieChunkHdr *pHeader, void *pPayload, void *pData) {
     static_cast<Movie *>(pData)->OnChunk(pHeader, pPayload);
 }
 
@@ -420,7 +420,7 @@ void *Movie::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x005d1ed8, PAL: 0x00613f08
 void Movie::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kMovieTag);
+    OperatorDeleteOverride(pBlock, kMovieTag);
 }
 
 // NTSC-U/C: 0x005d2480, PAL: 0x006144b0

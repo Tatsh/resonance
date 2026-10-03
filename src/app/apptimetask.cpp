@@ -106,7 +106,7 @@ void TimeTask::Run() {
 
 // NTSC-U/C: 0x0013b1f0, PAL: 0x0013bb38
 void TimeTask::Stop() {
-    const CmdID command = mCommand;
+    const Sch::CmdID command = mCommand;
     mClock->Withdraw(command);
     mCommand.mValue = kUnallocatedCommand;
 }

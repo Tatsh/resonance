@@ -7,5 +7,5 @@ int g_nAppTunnelNameCounter = 1;
 
 // NTSC-U/C: 0x00454650, PAL: 0x00491b80
 HxStr NextAppTunnelName() {
-    return HxStr(FormatString("<apptnl%04d>", ++g_nAppTunnelNameCounter));
+    return HxStr(Rnd::MakeString("<apptnl%04d>", ++g_nAppTunnelNameCounter));
 }

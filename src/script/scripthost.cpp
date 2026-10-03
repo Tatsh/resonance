@@ -53,7 +53,7 @@ void RunScript(const HxStr &script) {
 void CallScriptTemplate(int nTemplate, ...) {
     va_list args;
     va_start(args, nTemplate);
-    const HxStr text = FormatMessage(GetScriptTemplate(nTemplate), args);
+    const HxStr text = FmtImp(Resid2Str(nTemplate), args);
     va_end(args);
     g_pPyShell->Eval(text, Py_file_input);
 }

@@ -136,19 +136,6 @@ public:
         Vector3 EvaluateSplineDerivative(const TransKey *pNext, float flT) const;
 
         /**
-         * Approximate the arc length of the segment EvaluateSpline() traces.
-         *
-         * A left Riemann sum of the derivative's length in parameter steps of 0.005, stopping once
-         * the accumulated parameter arrives at one.
-         *
-         * @param pNext The keyframe that ends the segment.
-         * @return The approximate length.
-         * @ghidraAddress NTSC-U/C: 0x00554d90
-         * @ghidraAddress PAL: 0x00595418
-         */
-        float SplineLength(const TransKey *pNext) const;
-
-        /**
          * Order keyframes by frame.
          *
          * The list sort the loader calls inlines it in its merge step.
@@ -476,11 +463,11 @@ private:
 
     // Take a reference on the target and on the frames owner. Load() and Copy() inline the same
     // body. 0x004fd168.
-    void AddObjectRefs();
+    void AddRefObjects();
 
-    // Drop the references AddObjectRefs() took. The destructor is the one out-of-line caller.
+    // Drop the references AddRefObjects() took. The destructor is the one out-of-line caller.
     // NTSC-U/C: 0x004fd118, PAL: 0x0053be00
-    void RemoveObjectRefs();
+    void ReleaseObjects();
 
     // Declared in recovered offset order. The transformable this animation drives.
     Transformable *mTrans; // +0x2c
@@ -506,6 +493,21 @@ private:
     int mRepeatTrans;        // +0x4c
     int mFollowPath;         // +0x50
 };
+
+/**
+ * Approximate the arc length of the segment TransAnim::TransKey::EvaluateSpline() traces from
+ * first to next.
+ *
+ * A left Riemann sum of the derivative's length in parameter steps of 0.005, stopping once the
+ * accumulated parameter arrives at one.
+ *
+ * @param first The keyframe that starts the segment.
+ * @param next The keyframe that ends the segment.
+ * @return The approximate length.
+ * @ghidraAddress NTSC-U/C: 0x00554d90
+ * @ghidraAddress PAL: 0x00595418
+ */
+float Length(const TransAnim::TransKey &first, const TransAnim::TransKey &next);
 
 /**
  * Allocate and construct a transform animation, the base creator of the "TransAnim" class.

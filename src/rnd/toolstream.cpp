@@ -24,7 +24,10 @@ ToolStream::ToolStream()
 // NTSC-U/C: 0x00510480, PAL: 0x0054fa68
 void ToolStream::Connect() {
     // Yes, the binary prints the four addresses through %u; they are 32 bits on the target.
-    LogPrintf("ToolStream connect: %u %u %u %u\n", &mFill, &mArrived, &mConsumed, mBuffer);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+    printf("ToolStream connect: %u %u %u %u\n", &mFill, &mArrived, &mConsumed, mBuffer);
+#pragma GCC diagnostic pop
 }
 
 // NTSC-U/C: 0x00510288, PAL: 0x0054f870

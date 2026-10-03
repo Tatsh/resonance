@@ -27,31 +27,15 @@ public:
      *
      * @param nTrackCount The level's track count.
      * @param nMaxOwned The tracks one player may own per section.
-     * @param pOpenTracks The tracks that may be caught while the list is incomplete.
+     * @param openTracks The tracks that may be caught while the list is incomplete.
      * @param pGamer The participant.
      * @ghidraAddress NTSC-U/C: 0x00102790
      * @ghidraAddress PAL: 0x00102790
      */
     NetJamEnableMgr(int nTrackCount,
                     int nMaxOwned,
-                    const std::vector<int> *pOpenTracks,
+                    const std::vector<int> &openTracks,
                     Gamer *pGamer);
-
-    /**
-     * Build the policy for a network jam.
-     *
-     * Gamer::CreateEnableMgr() is the caller. The title is inferred.
-     *
-     * @param nTrackCount The level's track count.
-     * @param nMaxOwned The tracks one player may own per section.
-     * @param pOpenTracks The tracks that may be caught while the list is incomplete.
-     * @param pGamer The participant.
-     * @return The new policy.
-     * @ghidraAddress NTSC-U/C: 0x00105958
-     * @ghidraAddress PAL: 0x00105958
-     */
-    static NetJamEnableMgr *
-    Create(int nTrackCount, int nMaxOwned, const std::vector<int> *pOpenTracks, Gamer *pGamer);
 
     /**
      * Record the owner of a bar's section and invalidate every track whose state it changes.
@@ -102,3 +86,21 @@ private:
     // Per section, the owner identifier of each track.
     std::vector<std::vector<int> > mOwners;
 };
+
+/**
+ * Build the policy for a network jam.
+ *
+ * Gamer::CreateEnableMgr() is the caller.
+ *
+ * @param nTrackCount The level's track count.
+ * @param nMaxOwned The tracks one player may own per section.
+ * @param openTracks The tracks that may be caught while the list is incomplete.
+ * @param pGamer The participant.
+ * @return The new policy.
+ * @ghidraAddress NTSC-U/C: 0x00105958
+ * @ghidraAddress PAL: 0x00105958
+ */
+NetJamEnableMgr *NewNetJamEnableMgr(int nTrackCount,
+                                    int nMaxOwned,
+                                    const std::vector<int> &openTracks,
+                                    Gamer *pGamer);

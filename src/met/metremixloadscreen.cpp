@@ -115,7 +115,7 @@ inline HxStr CardTitle(const GameParams &params, [[maybe_unused]] bool bPlainInF
     HxStr format = params.mPlayMode == kPlayModeJam ?
                        MetConfigText(kMetStrTMemLoadRemix, kTitleConfigCode, kCardRemixTitleKey) :
                        MetConfigText(kMetStrTMemLoadCustom, kTitleConfigCode, kCardCustomTitleKey);
-    HxStr title(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
+    HxStr title(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(slotName)));
 #ifdef VIDEO_STANDARD_PAL
     if (GetLanguage() == SCE_SPANISH_LANGUAGE ||
         (bPlainInFrench && GetLanguage() == SCE_FRENCH_LANGUAGE)) {

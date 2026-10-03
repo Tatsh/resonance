@@ -45,14 +45,14 @@ void SPJoinAcceptPacket::saveGuts(OBStream &stream) const {
 
     int playerId = mPlayerId;
     int destId = mDestId;
-    OBStream &rest = stream.Write(&playerId, sizeof(playerId)).Write(&destId, sizeof(destId));
+    OBStream &rest = stream.WriteLE(&playerId, sizeof(playerId)).WriteLE(&destId, sizeof(destId));
     mParams.Save(&rest);
 
     OBStream &tail = SaveHxStr(rest, mColorName);
     mAppearance.Save(tail);
 
     int count = static_cast<int>(mPlayers.size());
-    tail.Write(&count, sizeof(count));
+    tail.WriteLE(&count, sizeof(count));
     for (auto &info : mPlayers) {
         info.Save(tail);
     }
@@ -62,14 +62,14 @@ void SPJoinAcceptPacket::saveGuts(OBStream &stream) const {
 void SPJoinAcceptPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
 
-    IBStream &rest = stream.Read(&mPlayerId, sizeof(mPlayerId)).Read(&mDestId, sizeof(mDestId));
+    IBStream &rest = stream.ReadLE(&mPlayerId, sizeof(mPlayerId)).ReadLE(&mDestId, sizeof(mDestId));
     mParams.Load(&rest);
 
     IBStream &tail = LoadHxStr(rest, mColorName);
     mAppearance.Load(tail);
 
     int count;
-    tail.Read(&count, sizeof(count));
+    tail.ReadLE(&count, sizeof(count));
     mPlayers.resize(count);
     for (auto &info : mPlayers) {
         info.Load(tail);

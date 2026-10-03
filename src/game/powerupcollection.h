@@ -32,26 +32,25 @@ public:
     /**
      * One configured kind, with the number of them stored.
      *
-     * `Entry` is a placeholder for the name, which no descriptor, allocation tag, or literal in
-     * the image supplies. The record is eight bytes and the vector steps over it in eights.
+     * The record is eight bytes and the vector steps over it in eights.
      *
      * Both members are public, because the only code that reads either is a member of
      * PowerupCollection and the record has no behaviour of its own.
      */
-    struct Entry {
+    struct PowCount {
         /**
          * Report whether the entry holds a powerup of one kind.
          *
-         * Inline, with an unreferenced out-of-line copy. The std::find_if instantiation at
-         * `0x001cc628` expands it through the file-local predicate.
+         * Inline, with an unreferenced out-of-line copy. The std::find instantiation at
+         * `0x001cc628` expands it.
          *
-         * @param nType The kind.
-         * @return Non-zero when Powerup::Type() reports nType.
+         * @param type The kind.
+         * @return Non-zero when Powerup::Type() reports type.
          * @ghidraAddress NTSC-U/C: 0x001cc9b0
          * @ghidraAddress PAL: 0x001d2868
          */
-        bool operator==(int nType) const {
-            return mPowerup->Type() == nType;
+        bool operator==(PowerupType type) const {
+            return mPowerup->Type() == type;
         }
 
         Powerup *mPowerup; /*!< The powerup, which the collection deletes. +0x00 */
@@ -87,11 +86,11 @@ public:
      * An entry already storing nine is ignored, and a kind with no entry is ignored. A successful
      * increase sends a PowerupCountMsg. With nothing selected, SelectRelative(1) follows.
      *
-     * @param nType The kind.
+     * @param type The kind.
      * @ghidraAddress NTSC-U/C: 0x001cb230
      * @ghidraAddress PAL: 0x001d10e8
      */
-    virtual void Add(int nType);
+    virtual void Add(PowerupType type);
 
     /**
      * Move the selection by nDelta, wrapping, and stop at the first entry with a count above zero.
@@ -136,7 +135,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001cc9a0
      * @ghidraAddress PAL: 0x001d2858
      */
-    virtual int HasSelection();
+    virtual int HasSelection() const;
 
     /**
      * Send one PowerupCountMsg for every non-empty entry, then one ChoosePowerupMsg.
@@ -144,10 +143,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001cb620
      * @ghidraAddress PAL: 0x001d14d8
      */
-    virtual void SendState();
+    virtual void SendState() const;
 
 private:
-    std::vector<Entry> mEntries; // +0x14
+    std::vector<PowCount> mEntries; // +0x14
     // The selected entry, or -1 for none.
     int mSelected;       // +0x20
     LocalPlayer *mOwner; // +0x24

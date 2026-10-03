@@ -16,17 +16,17 @@ constexpr unsigned char kStatusNoteOn = 0x90;
 // MultiMuse::Add() tries to append before it searches, because the entries arrive in order.
 constexpr int kAppendFirst = 1;
 
-// `_GLOBAL_$N$GsMuseUtil.cpp::Shifter` in the RTTI, with MsgSink as its one base. TransposeMuse()
-// builds one on its stack and visits every entry of the sequence through it.
+// `_GLOBAL_$N$GsMuseUtil.cpp::Shifter` in the RTTI, with MsgSink as its one base.
+// CloneAndTranspose() builds one on its stack and visits every entry of the sequence through it.
 class Shifter : public MsgSink {
 public:
     // Builds a new sequence holding a copy of every entry, each transposed as DispatchPriv()
     // decides, and returns it with one reference.
     // NTSC-U/C: 0x001ab4c8, PAL: 0x001b1230
-    MultiMuse *Transpose(MultiMuse *pMuse, int nTrans) {
+    MultiMuse *GetShiftedMuse(const MultiMuse &muse, int nTrans) {
         mResult = new MultiMuse;
         mTrans = nTrans;
-        for (const auto &entry : pMuse->mEntries) {
+        for (const auto &entry : muse.mEntries) {
             mPosition = entry.mPosition;
             Dispatch(entry.mValue);
         }
@@ -80,7 +80,7 @@ private:
 } // namespace
 
 // NTSC-U/C: 0x001ab6d8, PAL: 0x001b1440
-MultiMuse *TransposeMuse(MultiMuse *pMuse, int nTrans) {
+MultiMuse *CloneAndTranspose(const MultiMuse &muse, int nTrans) {
     Shifter shifter;
-    return shifter.Transpose(pMuse, nTrans);
+    return shifter.GetShiftedMuse(muse, nTrans);
 }

@@ -118,7 +118,7 @@ public:
     /**
      * Read nBytes from a file into the buffer in one piece. The routine has no caller.
      *
-     * The placement rule is the one the other Write() uses. The count FileRead() returns is
+     * The placement rule is the one the other Write() uses. The count read() returns is
      * ignored, and the write pointer advances by nBytes regardless.
      *
      * @param nFile The file to read.

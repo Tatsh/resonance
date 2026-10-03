@@ -144,7 +144,7 @@ int sceMcInitLibrary(void) {
     sceSifInitRpc(0);
     for (;;) {
         if (sceSifBindRpc(&g_mcClient, kMcServerId, 0) < 0) {
-            LogPrintf("bind error libmc \n");
+            printf("bind error libmc \n");
             for (;;) {
             }
         }
@@ -171,12 +171,12 @@ int sceMcInitLibrary(void) {
         return nResult + kMcErrorRpcBias;
     }
     if (g_mcResult.nServerVersion < kMcMinimumServerVersion) {
-        LogPrintf("libmc: too old release of mcserv.irx\n");
+        printf("libmc: too old release of mcserv.irx\n");
         g_mcClient.serve = NULL;
         return kMcErrorOldServer;
     }
     if (g_mcResult.nManagerVersion < kMcMinimumManagerVersion) {
-        LogPrintf("libmc: too old release of mcman.irx\n");
+        printf("libmc: too old release of mcman.irx\n");
         g_mcClient.serve = NULL;
         return kMcErrorOldManager;
     }

@@ -240,7 +240,7 @@ static void ReciprocalVec3(const float *pSrc, float *pOut) {
 // The direction from the camera to the draw translation, with a padding float of 1.0.
 static inline void CameraToDrawTranslation(const Cam &cam, float *pOut) {
     pOut[kXfmPaddingFloat] = 1.0f;
-    Vec3Sub(g_drawXfm[kXfmTranslationRow], cam.mWorldXfm[kXfmTranslationRow], pOut);
+    Rnd::Subtract(g_drawXfm[kXfmTranslationRow], cam.mWorldXfm[kXfmTranslationRow], pOut);
 }
 
 // NTSC-U/C: 0x004f0cc0, PAL: 0x0052f8b0
@@ -326,7 +326,7 @@ float *Transformable::GetDrawXfm() {
     }
 
     if ((mBillboard & kBillboardScaleBit) != 0) {
-        ScaleRows3x3(&scale.x, g_drawXfm[0], g_drawXfm[0]);
+        Rnd::Scale(&scale.x, g_drawXfm[0], g_drawXfm[0]);
     }
 
     float afOffset[kXfmRowFloatCount];

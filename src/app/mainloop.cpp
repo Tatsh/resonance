@@ -154,7 +154,7 @@ float MainLoop::Progress() {
 }
 
 // NTSC-U/C: 0x001ef128, PAL: 0x001f54c8
-HxStr MainLoop::Name() {
+HxStr MainLoop::Name() const {
     return HxStr("");
 }
 
@@ -164,7 +164,7 @@ int MainLoop::Poll() {
 
     char szFrameLabel[kFrameLabelSize];
     sprintf(szFrameLabel, "Frame: %d\n", s_nFramesThisWindow);
-    MemLogWrite(szFrameLabel);
+    MemLogWriteMarker(szFrameLabel);
 
     RndAsyncLoader::PollAsyncLoads();
     PollSynthStream();

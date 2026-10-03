@@ -20,32 +20,32 @@ SkillStats::~SkillStats() {
 // NTSC-U/C: 0x00145338, PAL: 0x00145e50
 void SkillStats::Save(OBStream &stream) {
     char nVersion = kRecordVersion;
-    stream.WriteBytes(&nVersion, sizeof(nVersion));
+    stream.Write(&nVersion, sizeof(nVersion));
 
     char bBeaten = mBeaten != 0;
-    stream.WriteBytes(&bBeaten, sizeof(bBeaten));
+    stream.Write(&bBeaten, sizeof(bBeaten));
 
     short nHighScore = mHighScore;
-    stream.Write(&nHighScore, sizeof(nHighScore));
+    stream.WriteLE(&nHighScore, sizeof(nHighScore));
 }
 
 // NTSC-U/C: 0x00142f88, PAL: 0x00143a88
 void SkillStats::Load(IBStream &stream) {
     if (g_nStatsRecordVersion == kFirstRecordVersion) {
         int nUnused;
-        stream.Read(&nUnused, sizeof(nUnused));
+        stream.ReadLE(&nUnused, sizeof(nUnused));
         stream >> mBeaten;
-        stream.Read(&mHighScore, sizeof(mHighScore));
+        stream.ReadLE(&mHighScore, sizeof(mHighScore));
     } else if (g_nStatsRecordVersion == kSecondRecordVersion) {
         char nVersion;
-        stream.ReadBytes(&nVersion, sizeof(nVersion));
+        stream.Read(&nVersion, sizeof(nVersion));
 
         char bBeaten;
-        stream.ReadBytes(&bBeaten, sizeof(bBeaten));
+        stream.Read(&bBeaten, sizeof(bBeaten));
         mBeaten = bBeaten != 0;
 
         unsigned short nHighScore;
-        stream.Read(&nHighScore, sizeof(nHighScore));
+        stream.ReadLE(&nHighScore, sizeof(nHighScore));
         mHighScore = nHighScore;
     }
 }

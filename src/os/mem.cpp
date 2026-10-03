@@ -73,7 +73,7 @@ constexpr int kMemLogExtensionSize = 0x30;
 // Bytes of each report path, bounded by the next global rather than measured.
 constexpr int kMemLogPathSize = 0x40;
 
-// Room for one line of the report MemEndAccounting() builds, and the margin it keeps free.
+// Room for one line of the report MemLogEndCount() builds, and the margin it reserves.
 constexpr int kAccountingLineSize = 0x80;
 constexpr unsigned kAccountingReportMargin = 0x40;
 
@@ -154,7 +154,7 @@ char g_szMemLogBaseName[kMemLogPathSize] = {};
 // The address is an out-of-line copy with no caller. Reduces a tag to the text after its last path
 // separator. Both separators are tried, and a tag recorded on a Windows build host still logs as a
 // basename.
-inline const char *TagBasename(const char *pszTag) {
+inline const char *StripPath(const char *pszTag) {
     const char *pName = strrchr(pszTag, '/');
     pName = (pName == nullptr) ? pszTag : pName + 1;
     const char *pAfterBackslash = strrchr(pName, '\\');
@@ -254,16 +254,16 @@ inline struct mallinfo ReadMallinfo() {
 
 // The ten mallinfo lines MemCloseLogAndReport() and MemLogCloseAndContinue() share.
 inline void LogMallinfo(const struct mallinfo &info) {
-    LogPrintf("   arena:    %d   (total space allocated from system)\n", info.arena);
-    LogPrintf("   ordblks:  %d   (number of non-inuse chunks)\n", info.ordblks);
-    LogPrintf("   smblks:   %d   (unused)\n", info.smblks);
-    LogPrintf("   hblks:    %d   (number of mmapped regions)\n", info.hblks);
-    LogPrintf("   hblkhd:   %d   (total space in mmapped regions)\n", info.hblkhd);
-    LogPrintf("   usmblks:  %d   (unused)\n", info.usmblks);
-    LogPrintf("   fsmblks:  %d   (unused)\n", info.fsmblks);
-    LogPrintf("   uordblks: %d   (total allocated space)\n", info.uordblks);
-    LogPrintf("   fordblks: %d   (total non-inuse space)\n", info.fordblks);
-    LogPrintf("   keepcost: %d   (top-most, releaseable (via malloc_trim) space)\n", info.keepcost);
+    printf("   arena:    %d   (total space allocated from system)\n", info.arena);
+    printf("   ordblks:  %d   (number of non-inuse chunks)\n", info.ordblks);
+    printf("   smblks:   %d   (unused)\n", info.smblks);
+    printf("   hblks:    %d   (number of mmapped regions)\n", info.hblks);
+    printf("   hblkhd:   %d   (total space in mmapped regions)\n", info.hblkhd);
+    printf("   usmblks:  %d   (unused)\n", info.usmblks);
+    printf("   fsmblks:  %d   (unused)\n", info.fsmblks);
+    printf("   uordblks: %d   (total allocated space)\n", info.uordblks);
+    printf("   fordblks: %d   (total non-inuse space)\n", info.fordblks);
+    printf("   keepcost: %d   (top-most, releaseable (via malloc_trim) space)\n", info.keepcost);
 }
 
 // The stack depth both report routines log once MemOpenLog() has painted the stack. The deepest
@@ -278,8 +278,7 @@ inline void LogStackUse() {
     while (nUntouched < nPainted && _stack[nUntouched] == kStackPaintByte) {
         ++nUntouched;
     }
-    LogPrintf(
-        "STACK AREA USED IS %d BYTES of STACK SIZE %d\n", nStackSize - nUntouched, nStackSize);
+    printf("STACK AREA USED IS %d BYTES of STACK SIZE %d\n", nStackSize - nUntouched, nStackSize);
 }
 
 } // namespace
@@ -309,7 +308,7 @@ void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine) {
         ChargeTagTotal(pszTag, nSize);
     }
     if (bEnabled != 0) {
-        fprintf(fpLog, "malloc(%s_%d,%d,0x%p)\n", TagBasename(pszTag), nLine, nSize, pBlock);
+        fprintf(fpLog, "malloc(%s_%d,%d,0x%p)\n", StripPath(pszTag), nLine, nSize, pBlock);
         strcpy(stlName, kStlUnknownTag);
     }
     if (pBlock == nullptr) {
@@ -371,7 +370,7 @@ void operator delete(void *pBlock) noexcept {
 }
 
 // NTSC-U/C: 0x004a91e0, PAL: 0x004e72f0
-void FreeTaggedMemory(void *pBlock, const char *pszClass) {
+void OperatorDeleteOverride(void *pBlock, const char *pszClass) {
     if (bEnabled != 0) {
         fprintf(fpLog, "del(%s,%p)\n", pszClass, pBlock);
     }
@@ -386,7 +385,7 @@ void MemFreeTagged(void *pBlock, const char *pszTag, int nLine) {
     }
 
     if (bEnabled != 0) {
-        fprintf(fpLog, "free(%s_%d,0x%p)\n", TagBasename(pszTag), nLine, pBlock);
+        fprintf(fpLog, "free(%s_%d,0x%p)\n", StripPath(pszTag), nLine, pBlock);
     }
     HeapFree(pBlock);
 }
@@ -403,13 +402,8 @@ void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine
         // The log prints the released block's address and never dereferences it.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuse-after-free"
-        fprintf(fpLog,
-                "realloc(%s_%d,%d,0x%p,0x%p)\n",
-                TagBasename(pszTag),
-                nLine,
-                nSize,
-                pBlock,
-                pNew);
+        fprintf(
+            fpLog, "realloc(%s_%d,%d,0x%p,0x%p)\n", StripPath(pszTag), nLine, nSize, pBlock, pNew);
 #pragma GCC diagnostic pop
         strcpy(stlName, kStlUnknownTag);
     }
@@ -430,7 +424,7 @@ void MemSetStlTag(const char *pszKind, int nElemSize) {
 }
 
 // NTSC-U/C: 0x004a8e18, PAL: 0x004e6f28
-void MemLogWrite(const char *pszText) {
+void MemLogWriteMarker(const char *pszText) {
     if (bEnabled != 0) {
         fprintf(fpLog, "MARKER: %s\n", pszText);
     }
@@ -438,7 +432,7 @@ void MemLogWrite(const char *pszText) {
 
 // NTSC-U/C: 0x004a86c0, PAL: 0x004e67d0
 int MemLogFindSource(const char *pszName) {
-    const char *pName = TagBasename(pszName);
+    const char *pName = StripPath(pszName);
 
     int nRow = 0;
     if (g_aMemLogSources[0].mName[0] != '\0') {
@@ -483,7 +477,7 @@ void MemLogSourceTrackRealloc(const char *pszSource, void *pNew, void *pOld, int
     }
     MemLogBlock *pEntry = FindTrackedBlock(pOld);
     if (pEntry == nullptr) {
-        LogPrintf("%s(): can't find realloc for src: %s\n", __func__, pszSource);
+        printf("%s(): can't find realloc for src: %s\n", __func__, pszSource);
         TrackBlock(pszSource, pNew, nSize);
         return;
     }
@@ -555,7 +549,7 @@ void MemLogPrint(const char *pszText) {
 }
 
 // NTSC-U/C: 0x004a8e88, PAL: 0x004e6f98
-void MemBeginAccounting() {
+void MemLogBeginCount() {
     memCountAlloced = 0;
     memset(memCountSource, 0, sizeof(memCountSource));
     strcpy(memCountSource[0].mName, "Other_Sources");
@@ -563,7 +557,7 @@ void MemBeginAccounting() {
 }
 
 // NTSC-U/C: 0x004a8ef8, PAL: 0x004e7008
-int MemEndAccounting(char *pszReport, int nReportSize) {
+int MemLogEndCount(char *pszReport, int nReportSize) {
     sprintf(pszReport, "Memory Allocated: %d\n", memCountAlloced);
     for (int i = 0; i < kMemTagCount; ++i) {
         const MemTagTotal &record = memCountSource[i];
@@ -601,9 +595,9 @@ void MemOpenLog(const char *pszPath) {
             bEnabled = 1;
         }
     }
-    LogPrintf("_stack = $%x\n", LinkerAddress(_stack));
-    LogPrintf("_stack_size = $%x\n", LinkerAddress(_stack_size));
-    LogPrintf("_end = $%x\n", LinkerAddress(_end));
+    printf("_stack = $%x\n", LinkerAddress(_stack));
+    printf("_stack_size = $%x\n", LinkerAddress(_stack_size));
+    printf("_end = $%x\n", LinkerAddress(_end));
     if (static_cast<int>(LinkerAddress(_stack)) > 0) {
         g_bMemStackPainted = 1;
         memset(_stack, kStackPaintByte, LinkerAddress(_stack_size) - kStackPaintReserve);
@@ -619,7 +613,7 @@ void MemCloseLogAndReport() {
         bEnabled = 0;
     }
     const struct mallinfo info = ReadMallinfo();
-    LogPrintf("system heap info (mallinfo):\n");
+    printf("system heap info (mallinfo):\n");
     LogMallinfo(info);
     LogStackUse();
     DumpHeapMemoryLog(0);
@@ -627,7 +621,7 @@ void MemCloseLogAndReport() {
 
 // NTSC-U/C: 0x004a7ef8, PAL: 0x004e6008
 void MemLogCloseAndContinue() {
-    LogPrintf("MemLogCloseAndContinue:, fpLog: %p\n", fpLog);
+    printf("MemLogCloseAndContinue:, fpLog: %p\n", fpLog);
     if (fpLog != nullptr) {
         fclose(fpLog);
         FILE *pOld = fopen(g_szMemLogPath, "r");
@@ -641,7 +635,7 @@ void MemLogCloseAndContinue() {
         strcpy(szExtension, pszExtension);
         sprintf(pszExtension, "_%d%s", g_nMemLogReopenCount, szExtension);
         fpLog = fopen(g_szMemLogPath, "w");
-        LogPrintf("reopened %s at %p\n", g_szMemLogPath, fpLog);
+        printf("reopened %s at %p\n", g_szMemLogPath, fpLog);
         char szLine[kMemLogLineSize];
         while (fgets(szLine, kMemLogLineSize, pOld) != nullptr) {
             fputs(szLine, fpLog);
@@ -649,7 +643,7 @@ void MemLogCloseAndContinue() {
         fclose(pOld);
     }
     const struct mallinfo info = ReadMallinfo();
-    LogPrintf("system heap info (mallinfo) at dump %d:\n", g_nMemLogReopenCount);
+    printf("system heap info (mallinfo) at dump %d:\n", g_nMemLogReopenCount);
     LogMallinfo(info);
     LogStackUse();
 }
@@ -667,10 +661,10 @@ void ReportHeapCapacity() {
         blocks.push_back(pBlock);
         ++nBlocks;
     }
-    LogPrintf("Able to allocate %d blocks of size %d (%d bytes total)\n",
-              nBlocks,
-              kHeapProbeBlockSize,
-              nBlocks * kHeapProbeBlockSize);
+    printf("Able to allocate %d blocks of size %d (%d bytes total)\n",
+           nBlocks,
+           kHeapProbeBlockSize,
+           nBlocks * kHeapProbeBlockSize);
     for (void *pAllocated : blocks) {
         HeapFree(pAllocated);
     }
@@ -711,8 +705,8 @@ void DumpHeapMemoryLog(int nIndex) {
         --nSteps;
     }
     if (pLargest != nullptr) {
-        LogPrintf("Largest possible allocation: %f megabytes\n",
-                  static_cast<float>(nSteps) / kLargestProbeStepsPerMegabyte);
+        printf("Largest possible allocation: %f megabytes\n",
+               static_cast<float>(nSteps) / kLargestProbeStepsPerMegabyte);
         if (CanWriteReport(pFile)) {
             fprintf(pFile,
                     "Largest possible allocation: %f megabytes\n",
@@ -731,10 +725,10 @@ void DumpHeapMemoryLog(int nIndex) {
             }
             ++nCount;
         }
-        LogPrintf("Able to allocate %d blocks of size %d (%d bytes total)\n",
-                  nCount,
-                  nBlockSize,
-                  nCount * (nBlockSize + kProbeBlockOverhead));
+        printf("Able to allocate %d blocks of size %d (%d bytes total)\n",
+               nCount,
+               nBlockSize,
+               nCount * (nBlockSize + kProbeBlockOverhead));
         if (CanWriteReport(pFile)) {
             fprintf(pFile,
                     "Able to allocate %d blocks of size %d (%d bytes total)\n",

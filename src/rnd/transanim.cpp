@@ -206,10 +206,10 @@ static void RebuildTransTangents(std::list<TransAnim::TransKey> &keys) {
         TransAnim::TransKey &first = keys.front();
         TransAnim::TransKey &last = keys.back();
         float afChord[kXfmRowFloatCount];
-        Vec3Sub(last.mValue, first.mValue, afChord);
+        Rnd::Subtract(last.mValue, first.mValue, afChord);
         Vec3Scale(afChord, 1.0f - first.mShape[TransAnim::kShapeTension], first.mTangentOut);
         first.mTangentOut[kPaddingFloat] = 1.0f;
-        Vec3Sub(last.mValue, first.mValue, afChord);
+        Rnd::Subtract(last.mValue, first.mValue, afChord);
         Vec3Scale(afChord, 1.0f - last.mShape[TransAnim::kShapeTension], last.mTangentIn);
         last.mTangentIn[kPaddingFloat] = 1.0f;
         return;
@@ -732,7 +732,7 @@ static inline bool BuildFollowPathBasis(const std::list<TransAnim::TransKey> &pa
     }
     Vector3 direction;
     direction.w = 1.0f;
-    Vec3Sub(pNext->mValue, pPrev->mValue, &direction.x);
+    Rnd::Subtract(pNext->mValue, pPrev->mValue, &direction.x);
     Mat33BuildOrthonormal(&direction.x, &reference.x, pXfm);
     return true;
 }
@@ -764,7 +764,7 @@ void TransAnim::EvalFrame(float flFrame, float *pXfm, int nResetEmpty) {
                 flFrame -= flWraps * flSpan;
                 float afChord[kXfmRowFloatCount];
                 afChord[kPaddingFloat] = 1.0f;
-                Vec3Sub(last.mValue, first.mValue, afChord);
+                Rnd::Subtract(last.mValue, first.mValue, afChord);
                 offset.x = afChord[0] * flWraps;
                 offset.y = afChord[1] * flWraps;
                 offset.z = afChord[2] * flWraps;
@@ -786,7 +786,7 @@ void TransAnim::EvalFrame(float flFrame, float *pXfm, int nResetEmpty) {
             LerpKeyVector(pPrev->mValue, pNext->mValue, flT, pTranslation);
         }
         if (mRepeatTrans) {
-            AddVec3(pTranslation, &offset.x, pTranslation);
+            Rnd::Add(pTranslation, &offset.x, pTranslation);
         }
     } else if (nResetEmpty) {
         std::copy(std::begin(kIdentityTranslation), std::end(kIdentityTranslation), pTranslation);
@@ -807,7 +807,7 @@ void TransAnim::EvalFrame(float flFrame, float *pXfm, int nResetEmpty) {
         } else {
             QuatSlerp(pPrev->mQuat, pNext->mQuat, rotation, flT);
         }
-        QuatToMat33(rotation, pXfm);
+        Rnd::MakeRotMatrix(rotation, pXfm);
     } else if (nResetEmpty) {
         SetIdentityBasis(pXfm);
     }
@@ -873,36 +873,36 @@ void TransAnim::TransKey::ComputeSplineTangents(const TransKey *pPrev, const Tra
     if (pPrev != nullptr && pNext != nullptr) {
         float afToPrev[kXfmRowFloatCount];
         float afToNext[kXfmRowFloatCount];
-        Vec3Sub(mValue, pPrev->mValue, afToPrev);
+        Rnd::Subtract(mValue, pPrev->mValue, afToPrev);
         Vec3Scale(afToPrev, flBias + 1.0f, afToPrev);
-        Vec3Sub(pNext->mValue, mValue, afToNext);
+        Rnd::Subtract(pNext->mValue, mValue, afToNext);
         Vec3Scale(afToNext, 1.0f - flBias, afToNext);
 
-        Vec3Sub(afToNext, afToPrev, afTerm);
+        Rnd::Subtract(afToNext, afToPrev, afTerm);
         Vec3Scale(afTerm, kTangentHalf - flContinuity * kTangentHalf, afTerm);
-        AddVec3(afToPrev, afTerm, afWeighted);
+        Rnd::Add(afToPrev, afTerm, afWeighted);
         Vec3Scale(afWeighted, 1.0f - flTension, mTangentOut);
         mTangentOut[kPaddingFloat] = 1.0f;
 
-        Vec3Sub(afToNext, afToPrev, afTerm);
+        Rnd::Subtract(afToNext, afToPrev, afTerm);
         Vec3Scale(afTerm, flContinuity * kTangentHalf + kTangentHalf, afTerm);
-        AddVec3(afToPrev, afTerm, afWeighted);
+        Rnd::Add(afToPrev, afTerm, afWeighted);
         Vec3Scale(afWeighted, 1.0f - flTension, mTangentIn);
         mTangentIn[kPaddingFloat] = 1.0f;
     } else if (pNext != nullptr) {
-        Vec3Sub(pNext->mValue, mValue, afTerm);
+        Rnd::Subtract(pNext->mValue, mValue, afTerm);
         Vec3Scale(afTerm, kEndTangentChordWeight, afTerm);
         Vec3Scale(pNext->mTangentIn, kTangentHalf, afWeighted);
         Vec3Scale(afWeighted, flBias + 1.0f, afWeighted);
-        Vec3Sub(afTerm, afWeighted, afWeighted);
+        Rnd::Subtract(afTerm, afWeighted, afWeighted);
         Vec3Scale(afWeighted, 1.0f - flTension, mTangentOut);
         mTangentOut[kPaddingFloat] = 1.0f;
     } else if (pPrev != nullptr) {
-        Vec3Sub(mValue, pPrev->mValue, afTerm);
+        Rnd::Subtract(mValue, pPrev->mValue, afTerm);
         Vec3Scale(afTerm, kEndTangentChordWeight, afTerm);
         Vec3Scale(pPrev->mTangentOut, kTangentHalf, afWeighted);
         Vec3Scale(afWeighted, flBias + 1.0f, afWeighted);
-        Vec3Sub(afTerm, afWeighted, afWeighted);
+        Rnd::Subtract(afTerm, afWeighted, afWeighted);
         Vec3Scale(afWeighted, 1.0f - flTension, mTangentIn);
         mTangentIn[kPaddingFloat] = 1.0f;
     }
@@ -929,11 +929,11 @@ void TransAnim::TransKey::EvaluateSpline(const TransKey *pNext, float *pOut, flo
     afTerm[kPaddingFloat] = 1.0f;
     Vec3Scale(mValue, flT3 + flT3 - flThreeT2 + 1.0f, afSum);
     Vec3Scale(mTangentOut, flT3 - (flT2 + flT2) + flT, afTerm);
-    AddVec3(afSum, afTerm, afSum);
+    Rnd::Add(afSum, afTerm, afSum);
     Vec3Scale(pNext->mValue, flT3 * -2.0f + flThreeT2, afTerm);
-    AddVec3(afSum, afTerm, afSum);
+    Rnd::Add(afSum, afTerm, afSum);
     Vec3Scale(pNext->mTangentIn, flT3 - flT2, afTerm);
-    AddVec3(afSum, afTerm, afSum);
+    Rnd::Add(afSum, afTerm, afSum);
     std::copy(std::begin(afSum), std::end(afSum), pOut);
 }
 
@@ -948,15 +948,15 @@ Vector3 TransAnim::TransKey::EvaluateSplineDerivative(const TransKey *pNext, flo
     term.w = 1.0f;
     Vec3Scale(mValue, flT2 * 6.0f - flSixT, &sum.x);
     Vec3Scale(mTangentOut, flThreeT2 - flT * 4.0f + 1.0f, &term.x);
-    AddVec3(&sum.x, &term.x, &sum.x);
+    Rnd::Add(&sum.x, &term.x, &sum.x);
     Vec3Scale(pNext->mValue, flT2 * -6.0f + flSixT, &term.x);
-    AddVec3(&sum.x, &term.x, &sum.x);
+    Rnd::Add(&sum.x, &term.x, &sum.x);
     Vec3Scale(pNext->mTangentIn, flThreeT2 - (flT + flT), &term.x);
-    AddVec3(&sum.x, &term.x, &sum.x);
+    Rnd::Add(&sum.x, &term.x, &sum.x);
     return sum;
 }
 
-// Parameter step of the sum in SplineLength(), and the weight of each sample.
+// Parameter step of the sum in Length(), and the weight of each sample.
 constexpr float kSplineLengthStep = 0.005f;
 
 // The length of the first three floats, which VU0 takes with vsqrt.
@@ -965,11 +965,11 @@ static inline float KeyVectorLength(const float *pVec) {
 }
 
 // NTSC-U/C: 0x00554d90, PAL: 0x00595418
-float TransAnim::TransKey::SplineLength(const TransKey *pNext) const {
+float Length(const TransAnim::TransKey &first, const TransAnim::TransKey &next) {
     float flLength = 0.0f;
     float flT = 0.0f;
     do {
-        const Vector3 derivative = EvaluateSplineDerivative(pNext, flT);
+        const Vector3 derivative = first.EvaluateSplineDerivative(&next, flT);
         flT += kSplineLengthStep;
         flLength += KeyVectorLength(&derivative.x) * kSplineLengthStep;
     } while (flT < 1.0f);
@@ -1012,7 +1012,7 @@ static inline void SpreadFramesByChordLength(std::list<TransAnim::TransKey> &key
     for (auto it = std::next(prev); it != keys.end(); ++it) {
         float afChord[kXfmRowFloatCount];
         afChord[kPaddingFloat] = 1.0f;
-        Vec3Sub(it->mValue, prev->mValue, afChord);
+        Rnd::Subtract(it->mValue, prev->mValue, afChord);
         lengths.push_back(lengths.back() + KeyVectorLength(afChord));
         prev = it;
     }
@@ -1040,7 +1040,7 @@ void TransAnim::Normalize() {
     float flTotalLength = 0.0f;
     auto prev = keys.begin();
     for (auto it = std::next(prev); it != keys.end(); ++it) {
-        flTotalLength += prev->SplineLength(&*it);
+        flTotalLength += Rnd::Length(*prev, *it);
         prev = it;
     }
 
@@ -1116,7 +1116,7 @@ TransAnim::TransAnim(const HxStr &name)
 
 // NTSC-U/C: 0x004fbb78, PAL: 0x0053a860
 TransAnim::~TransAnim() {
-    RemoveObjectRefs();
+    ReleaseObjects();
     ReleaseAllRefs();
 }
 
@@ -1136,7 +1136,7 @@ void TransAnim::ClearKeys() {
 }
 
 // NTSC-U/C: 0x004fd168, PAL: 0x0053be50
-void TransAnim::AddObjectRefs() {
+void TransAnim::AddRefObjects() {
     if (mTrans != nullptr) {
         mTrans->AddRef(this);
     }
@@ -1146,7 +1146,7 @@ void TransAnim::AddObjectRefs() {
 }
 
 // NTSC-U/C: 0x004fd118, PAL: 0x0053be00
-void TransAnim::RemoveObjectRefs() {
+void TransAnim::ReleaseObjects() {
     if (mTrans != nullptr) {
         mTrans->RemoveRef(this);
     }
@@ -1217,7 +1217,7 @@ void TransAnim::Load(Stream &stream) {
 
     Animatable::Load(stream);
     Drawable::Load(stream);
-    RemoveObjectRefs();
+    ReleaseObjects();
     ReadTargetName(stream, mTrans);
 
     std::list<LegacyRotKey> legacyRotKeys;
@@ -1274,7 +1274,7 @@ void TransAnim::Load(Stream &stream) {
     if (nRevision <= kTransAnimRevision) { // Yes, the test cannot fail here.
         ClearKeys();
     }
-    AddObjectRefs();
+    AddRefObjects();
 }
 
 } // namespace Rnd

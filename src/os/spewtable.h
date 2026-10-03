@@ -8,16 +8,15 @@
 /**
  * Registry that routes each source file's diagnostic stream to a named output channel.
  *
- * The class emits no RTTI and the image records no name for it. The title comes from the heading
- * `Spew Connections:` that the script binding at `0x0015d950` writes above PrintConnections(), and
- * is inferred. The one instance is a function-local static of shared() at `0x00894df8`, 0x18
- * bytes, destroyed at exit through the thunk at `0x004b4660`.
+ * The class emits no RTTI. Its name comes from the debugging symbols of the North American demo
+ * release. The one instance is a function-local static of shared() at `0x00894df8`, 0x18 bytes,
+ * destroyed at exit through the thunk at `0x004b4660`.
  *
  * A source file registers the address of its stream pointer under its own base name through
- * SpewRegistrar. Connect() then points every registered stream of a file at a channel, creating the
+ * SpewRegister. Connect() then points every registered stream of a file at a channel, creating the
  * channel on first use. A channel is the console, nothing, or a file of that name.
  */
-class Spew {
+class SpewTable {
 public:
     /** Output channel, 0xc bytes, created by Connect() and destroyed by the destructor. */
     struct Channel {
@@ -58,7 +57,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004b32b8
      * @ghidraAddress PAL: 0x004f14f8
      */
-    Spew();
+    SpewTable();
 
     /**
      * Close every channel and release both lists.
@@ -66,20 +65,20 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004b32e8
      * @ghidraAddress PAL: 0x004f1528
      */
-    ~Spew();
+    ~SpewTable();
 
     /**
      * Report the one registry, constructing it on first use.
      *
-     * The body is inline. SpewRegistrar's constructor expands it, and the script binding calls the
+     * The body is inline. SpewRegister's constructor expands it, and the script binding calls the
      * out-of-line copy.
      *
      * @return The registry.
      * @ghidraAddress NTSC-U/C: 0x004b4470
      * @ghidraAddress PAL: 0x004f2780
      */
-    static Spew &shared() {
-        static Spew instance;
+    static SpewTable &shared() {
+        static SpewTable instance;
         return instance;
     }
 

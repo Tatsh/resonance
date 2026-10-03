@@ -72,7 +72,7 @@ void AxeNewGemMaker::PostGemMessages(StdMidiMsg *pMsg) {
 
     if (pMsg->mData2 == 0 && mStripId == 0) {
         SusGemMsg open;
-        open.mStripId = AxeOldGemMaker::NextStripId();
+        open.mStripId = GetNewGemID();
         open.mStop = kStripOpen;
         open.mLane = mTrack;
         open.mFrame = nTick;

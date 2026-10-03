@@ -197,7 +197,7 @@ public:
     /**
      * Release the recorder and the playback and leave both stream modes.
      *
-     * GameRecorder's end of recording and GamePlayback's destructor are the callers.
+     * GameRecorder's end of recording and GamePlaybacker's destructor are the callers.
      *
      * @ghidraAddress NTSC-U/C: 0x004ac9e8
      * @ghidraAddress PAL: 0x004eab88
@@ -208,7 +208,7 @@ public:
      * Start replaying a recorded command stream.
      *
      * Installs a Sch::Playbacker in mPlayback, has it read the stream, sets mStreamMode to 2,
-     * and starts it. GamePlayback's constructor is the caller. The title is inferred.
+     * and starts it. GamePlaybacker's constructor is the caller. The title is inferred.
      *
      * @param stream The recording, positioned after the session state.
      * @ghidraAddress NTSC-U/C: 0x004ac950

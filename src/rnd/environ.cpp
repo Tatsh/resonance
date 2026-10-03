@@ -335,7 +335,7 @@ void *Environ::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x00518e10, PAL: 0x005591a8
 void Environ::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kEnvironTag);
+    OperatorDeleteOverride(pBlock, kEnvironTag);
 }
 
 // NTSC-U/C: 0x005166d0, PAL: 0x00556a00

@@ -47,8 +47,8 @@ public:
 private:
     // A note-on sends a DurGemMsg for mPlayer from the note to 80 ticks after it, blended by
     // AxeOldGemMaker::BlendForAxis() of mValue. On controller 46, a zero value with no strip open
-    // opens one under AxeOldGemMaker::NextStripId(), and a non-zero value closes the open strip
-    // with a SusGemMsg whose mStop is 2.
+    // opens one under GetNewGemID(), and a non-zero value closes the open strip with a SusGemMsg
+    // whose mStop is 2.
     // NTSC-U/C: 0x001a2f18, PAL: 0x001a8c80
     void PostGemMessages(StdMidiMsg *pMsg);
 

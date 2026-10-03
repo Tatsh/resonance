@@ -35,7 +35,7 @@ public:
     /**
      * Open an image file and construct the reader for its extension.
      *
-     * The extension selects the class through ExtensionCode(): `BMP`, `DIB`, and `RLE` give
+     * The extension selects the class through GrabExt(): `BMP`, `DIB`, and `RLE` give
      * ABmpFile, `TGA` gives ATgaFile, and `GIF` gives AGifFile. Each is allocated through the
      * plain allocator and receives the open file.
      *
@@ -63,20 +63,6 @@ public:
      * @ghidraAddress PAL: 0x0063aa28
      */
     static int Write(const char *pszPath, const ABitmap &bitmap);
-
-    /**
-     * Return the first three characters after the last full stop of a path, packed into a word.
-     *
-     * Each character is converted to upper case through the ctype table, and the first
-     * character lands in the low byte. Zero results when the path has no full stop or when a path
-     * separator follows it, and a shorter extension leaves the remaining bytes zero.
-     *
-     * @param pszPath The path.
-     * @return The packed extension, `BMP` being 0x504d42.
-     * @ghidraAddress NTSC-U/C: 0x0062f560
-     * @ghidraAddress PAL: 0x006700f0
-     */
-    static int ExtensionCode(const char *pszPath);
 
     /**
      * Construct over an open file.
@@ -112,11 +98,11 @@ public:
     /**
      * Read the next image in the file.
      *
-     * @param pImage Receives the image, with a freshly allocated pixel rectangle.
+     * @param image Receives the image, with a freshly allocated pixel rectangle.
      * @param pbEnd Set to one when the file holds no further image.
      * @return An AGfxFileResult code.
      */
-    virtual int ReadFrame(ABitmap *pImage, int *pbEnd) = 0;
+    virtual int ReadFrame(ABitmap &image, int *pbEnd) = 0;
 
     /**
      * Close the file.
@@ -151,3 +137,17 @@ protected:
     ARect mBounds; // +0x08 The image rectangle the last header or image descriptor gave.
     int mDuration; // +0x10 Display time accumulated from GIF graphic control blocks, in ms.
 };
+
+/**
+ * Return the first three characters after the last full stop of a path, packed into a word.
+ *
+ * Each character is converted to upper case through the ctype table, and the first character
+ * lands in the low byte. Zero results when the path has no full stop or when a path separator
+ * follows it, and a shorter extension leaves the remaining bytes zero.
+ *
+ * @param pszPath The path.
+ * @return The packed extension, `BMP` being 0x504d42.
+ * @ghidraAddress NTSC-U/C: 0x0062f560
+ * @ghidraAddress PAL: 0x006700f0
+ */
+int GrabExt(const char *pszPath);

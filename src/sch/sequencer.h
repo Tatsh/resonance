@@ -68,7 +68,7 @@ public:
      * @param pBlock The block.
      */
     static void operator delete(void *pBlock) {
-        FreeTaggedMemory(pBlock, "Sequencer");
+        OperatorDeleteOverride(pBlock, "Sequencer");
     }
 
     /**

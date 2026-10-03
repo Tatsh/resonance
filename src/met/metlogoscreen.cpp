@@ -164,7 +164,7 @@ void MetLogoScreen::ResolveContainerViews() {
     }
 
     for (int i = 1; i <= kLegalTextCount; ++i) {
-        Rnd::Text *pLegal = FindObject<Rnd::Text>(HxStr(FormatString(kLegalTextFormat, i)));
+        Rnd::Text *pLegal = FindObject<Rnd::Text>(HxStr(Rnd::MakeString(kLegalTextFormat, i)));
         pLegal->SetShowing(0);
 #ifdef VIDEO_STANDARD_PAL
         pLegal->SetText(GetMetString(kMetStrLegal1 + i - 1));

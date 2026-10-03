@@ -31,7 +31,7 @@ public:
     struct Lamp {
         Rnd::Mesh *mMesh; /*!< `<layout> fx<n><i>.mesh`. +0x00 */
         Rnd::Text *mText; /*!< `<layout> fx<n><i>.txt`, showing HudPowerupName(). +0x04 */
-        int mKind;        /*!< The HudItemKind the lamp stands for. +0x08 */
+        int mKind;        /*!< The PowerupType the lamp stands for. +0x08 */
     };
 
     /**
@@ -62,7 +62,7 @@ public:
      *
      * The out-of-line copy has no caller. The title is inferred.
      *
-     * @param nKind The HudItemKind to select.
+     * @param nKind The PowerupType to select.
      * @ghidraAddress NTSC-U/C: 0x00429e98
      * @ghidraAddress PAL: 0x004654d8
      */
@@ -73,7 +73,7 @@ public:
      *
      * The title is inferred.
      *
-     * @param nKind The HudItemKind.
+     * @param nKind The PowerupType.
      * @param nLit Non-zero to light.
      * @ghidraAddress NTSC-U/C: 0x00429f28
      * @ghidraAddress PAL: 0x00465568

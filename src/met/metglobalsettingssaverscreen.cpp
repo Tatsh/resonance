@@ -177,7 +177,7 @@ inline void MetGlobalSettingsSaverScreen::ShowFormatCheck(const MemcardConnectSt
     buttons.push_back(MetText(kMetStrMsgYES, kYesButton));
     const HxStr format(
         MetConfigText(kMetStrMemFormatCheck, kDialogueConfigCode, kFormatCheckDialogue));
-    const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(state.mSlotName)));
+    const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(state.mSlotName)));
     MetMsgScreen::Show(HxStr(kFormatCheckDialogue),
                        MetText(kMetStrMsgSETTINGS, kSettingsTitle),
                        text,
@@ -195,7 +195,7 @@ void MetGlobalSettingsSaverScreen::OnConnectState(MemcardConnectState state, int
                                                                    GlobalSettings::shared());
             const std::vector<HxStr> buttons;
             const HxStr format(MetConfigText(kMetStrMemSave, kDialogueConfigCode, kSaveDialogue));
-            const HxStr text(FormatString(TextOrEmpty(format), RecordedCardName()));
+            const HxStr text(Rnd::MakeString(TextOrEmpty(format), RecordedCardName()));
             MetMsgScreen::Show(HxStr(kSaveDialogue),
                                MetText(kMetStrMsgSETTINGS, kSettingsTitle),
                                text,
@@ -236,7 +236,7 @@ void MetGlobalSettingsSaverScreen::OnCardFormatted([[maybe_unused]] int nPortSlo
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
         const HxStr format(
             MetConfigText(kMetStrFormatSuccess, kDialogueConfigCode, kFormatSuccessText));
-        const HxStr text(FormatString(TextOrEmpty(format), RecordedCardName()));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), RecordedCardName()));
         MetMsgScreen::ShowActive(HxStr(kFormatDoneDialogue),
                                  MetText(kMetStrMsgFORMAT, kFormatTitle),
                                  text,
@@ -252,7 +252,7 @@ void MetGlobalSettingsSaverScreen::OnCardFormatted([[maybe_unused]] int nPortSlo
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
         const HxStr format(
             MetConfigText(kMetStrFormatAlready, kDialogueConfigCode, kFormatAlreadyText));
-        const HxStr text(FormatString(TextOrEmpty(format), RecordedCardName()));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), RecordedCardName()));
         MetMsgScreen::ShowActive(HxStr(kFormatDoneDialogue),
                                  MetText(kMetStrMsgFORMAT, kFormatTitle),
                                  text,
@@ -292,7 +292,7 @@ void MetGlobalSettingsSaverScreen::OnMsgScreenDismissed(const HxStr &name, int n
             GlobalSettings::shared(); // Yes, the binary discards this call's result.
             const HxStr format(
                 MetConfigText(kMetStrMemFormatGo, kDialogueConfigCode, kFormatGoDialogue));
-            const HxStr text(FormatString(TextOrEmpty(format), RecordedCardName()));
+            const HxStr text(Rnd::MakeString(TextOrEmpty(format), RecordedCardName()));
             MetMsgScreen::Show(HxStr(kFormatGoDialogue),
                                MetText(kMetStrMsgWARNING, kWarningTitle),
                                text,
@@ -357,7 +357,7 @@ void MetGlobalSettingsSaverScreen::OnGlobalSettingsSaved([[maybe_unused]] int nP
     case kMemcardStatusUnknown:
         format = MetConfigText(kMetStrSaveFailNocard, kDialogueConfigCode, kSaveFailNoCardText);
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
-        text = FormatString(TextOrEmpty(format), RecordedCardName());
+        text = Rnd::MakeString(TextOrEmpty(format), RecordedCardName());
         MetMsgScreen::Show(HxStr(kMemCheckDialogue),
                            MetText(kMetStrMsgSETTINGS, kSettingsTitle),
                            text,
@@ -370,9 +370,9 @@ void MetGlobalSettingsSaverScreen::OnGlobalSettingsSaved([[maybe_unused]] int nP
         format = MetConfigText(kMetStrSaveFailNospace, kDialogueConfigCode, kSaveFailNoSpaceText);
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
 #ifdef VIDEO_STANDARD_PAL
-        text = FormatString(TextOrEmpty(format), RecordedCardName(), nKilobytes);
+        text = Rnd::MakeString(TextOrEmpty(format), RecordedCardName(), nKilobytes);
 #else
-        text = FormatString(TextOrEmpty(format), RecordedCardName());
+        text = Rnd::MakeString(TextOrEmpty(format), RecordedCardName());
 #endif
         MetMsgScreen::Show(HxStr(kMemCheckDialogue),
                            MetText(kMetStrMsgSETTINGS, kSettingsTitle),

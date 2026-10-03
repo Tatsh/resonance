@@ -256,10 +256,10 @@ and `Heap::Free` with the `pypcre.c` tag.
 rather than upstream's `out of memory`. Retail passes the string from `O_cwrite` at `0x00657834`,
 from `newOobject` at `0x00657ad8`, and from the inlined copies at `0x00656d08` and `0x00656ff8`.
 
-The interpreter's `printf` is the game's `LogPrintf`. `PC/pycompat.h` sets the redirect for C
-translation units. Retail `fixstate` passes `XXX too many states!` and
-`XXX too high nonterminal number!` to `LogPrintf` at `0x005d9fb0` and `0x005da014`, and the
-`Parser/assert.h` check in `PyGrammar_FindDFA` calls `LogPrintf` at `0x00629b64` before `abort`.
+The interpreter's `printf` is the C library's `printf`, as in retail. Retail `fixstate` passes
+`XXX too many states!` and `XXX too high nonterminal number!` to `printf` at `0x005d9fb0` and
+`0x005da014`, and the `Parser/assert.h` check in `PyGrammar_FindDFA` calls `printf` at
+`0x00629b64` before `abort`.
 `fprintf` is unchanged, as at `0x0061c1fc`.
 
 `PC/config.h` sets `DATE` and `TIME` to the port's build stamp. Retail `Py_GetBuildInfo` at

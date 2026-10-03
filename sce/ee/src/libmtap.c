@@ -92,8 +92,8 @@ int sceMtapInit(void) {
 
     nVersion = sceMtapGetModVersion();
     if ((nVersion >> kMtapVersionShift) != kMtapModVersionMajor) {
-        LogPrintf("libmtap: Module version mismatch ");
-        LogPrintf("[libmtap.a = %d.%d, mtapman.irx = %d.%d]\n",
+        printf("libmtap: Module version mismatch ");
+        printf("[libmtap.a = %d.%d, mtapman.irx = %d.%d]\n",
                kMtapModVersionMajor,
                kMtapModVersionMinor,
                nVersion >> kMtapVersionShift,

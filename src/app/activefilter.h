@@ -56,7 +56,7 @@ public:
      * @param pBlock The block.
      */
     static void operator delete(void *pBlock) {
-        FreeTaggedMemory(pBlock, "ActiveFilter");
+        OperatorDeleteOverride(pBlock, "ActiveFilter");
     }
 
     /**
@@ -91,7 +91,7 @@ private:
     FilterLover *mLover;
     Sch::TickClock *mClock;
     // The handle the command is queued under.
-    CmdID mCommand;
+    Sch::CmdID mCommand;
     // The file-local command, created by the first SetTarget().
     Sch::Command *mStepCommand;
 

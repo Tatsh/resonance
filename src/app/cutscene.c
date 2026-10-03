@@ -159,7 +159,7 @@ static void *g_cutscene_memory;
 
 // NTSC-U/C: 0x00510f20, PAL: 0x00551198
 void ErrMessage(char *message) {
-    LogPrintf("[ Error ] %s\n", message);
+    printf("[ Error ] %s\n", message);
 }
 
 // NTSC-U/C: 0x00510f48, PAL: 0x005511c0
@@ -261,7 +261,7 @@ static void prepare_playback(const char *name) {
     StartThread(g_decode_thread, &videoDec);
 
     while (strFileOpen(&g_in_file, name) == 0) {
-        LogPrintf("Can't Open file %s\n", name);
+        printf("Can't Open file %s\n", name);
     }
 
     videoDec.hid_vblank = AddIntcHandler(INTC_VBLANK_S, vblankHandler, 0);

@@ -6,7 +6,7 @@
 
 namespace {
 
-// GetDirectoryFromPath() buffer ends where the FormatString() buffer begins.
+// The GetDirectoryFromPath() buffer ends where the Rnd::MakeString() buffer begins.
 constexpr int kDirectoryBufferSize = 0x100;
 
 // NTSC-U/C: 0x008de290, PAL: 0x00923250
@@ -22,7 +22,7 @@ char g_szFormatStringBuffer[kFormatStringBufferSize] = {};
 } // namespace
 
 // NTSC-U/C: 0x0054f688, PAL: 0x0058fcc8
-const char *FormatString(const char *pszFormat, ...) {
+const char *Rnd::MakeString(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
     vsprintf(g_szFormatStringBuffer, pszFormat, args);

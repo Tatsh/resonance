@@ -260,7 +260,7 @@ ParticleSys *(*g_pfnNewParticleSys)(const HxStr &name) = NewParticleSys;
 // NTSC-U/C: 0x0052c6a8, PAL: 0x0056cd20
 // The printer has no case for kModeSprite, so a sprite system writes no mode at all. The gap is in
 // the shipped build.
-Dbg &PrintParticleMode(Dbg &sink, ParticleSys::Mode nMode) {
+Dbg &operator<<(Dbg &sink, ParticleSys::Type nMode) {
     if (nMode == ParticleSys::kModePoint) {
         sink.Print("Point");
     } else if (nMode == ParticleSys::kModeLine) {
@@ -519,7 +519,7 @@ void ParticleSys::DumpText(Dbg &sink) {
     sink.Print(" mat:");
     PrintObjectRef(sink, mMat);
     sink.Print(" mode:");
-    PrintParticleMode(sink, mMode);
+    sink << mMode;
     sink.Print("\n");
 
     sink.Print("numParticles:")->Format("%u", static_cast<unsigned>(mParticles.size()));
@@ -655,7 +655,7 @@ void ParticleSys::Load(Stream &stream) {
 
     int nMode = 0;
     stream.ReadLE(&nMode, sizeof(nMode));
-    mMode = static_cast<Mode>(nMode);
+    mMode = static_cast<Type>(nMode);
     int nParticles = 0;
     stream.ReadLE(&nParticles, sizeof(nParticles));
     mParticles.resize(nParticles);
@@ -752,7 +752,7 @@ void ParticleSys::UpdateParticles(float flDeltaFrames) {
         Vector3 step;
         step.w = 1.0f;
         Vec3Scale(&pParticle->mVel.x, flDeltaFrames, &step.x);
-        AddVec3(&pParticle->mPos.x, &step.x, &pParticle->mPos.x);
+        Rnd::Add(&pParticle->mPos.x, &step.x, &pParticle->mPos.x);
 
         if (mBubble != 0) {
             const float flRate =
@@ -760,7 +760,7 @@ void ParticleSys::UpdateParticles(float flDeltaFrames) {
                 pParticle->mBubbleFrequency;
             step.w = 1.0f;
             Vec3Scale(&pParticle->mBubbleSize.x, flRate * flDeltaFrames, &step.x);
-            AddVec3(&pParticle->mPos.x, &step.x, &pParticle->mPos.x);
+            Rnd::Add(&pParticle->mPos.x, &step.x, &pParticle->mPos.x);
         }
 
         // A particle that crosses the collision plane from its positive side this step reflects
@@ -779,12 +779,12 @@ void ParticleSys::UpdateParticles(float flDeltaFrames) {
             const Vector3 reflection = doubledNormal;
             Vector3 reflected;
             reflected.w = 1.0f;
-            Vec3Sub(&pParticle->mVel.x, &reflection.x, &reflected.x);
+            Rnd::Subtract(&pParticle->mVel.x, &reflection.x, &reflected.x);
             pParticle->mVel = reflected;
             pParticle->mPos = pParticle->mPrevPos;
         }
 
-        AddVec3(&pParticle->mVel.x, &forceStep.x, &pParticle->mVel.x);
+        Rnd::Add(&pParticle->mVel.x, &forceStep.x, &pParticle->mVel.x);
 
         Color colorStep;
         ScaleColor(pParticle->mColVel, flDeltaFrames, colorStep);
@@ -841,7 +841,7 @@ void ParticleSys::SpawnParticles(float flDeltaFrames) {
             Vector3 offset;
             offset.w = 1.0f;
             Vec3Scale(&pParticle->mBubbleSize.x, sinf(pParticle->mBubblePhase), &offset.x);
-            AddVec3(&pParticle->mPos.x, &offset.x, &pParticle->mPos.x);
+            Rnd::Add(&pParticle->mPos.x, &offset.x, &pParticle->mPos.x);
             pParticle->mBubblePhase -= mFilteredFrame * pParticle->mBubbleFrequency;
         }
 
@@ -892,7 +892,7 @@ void *ParticleSys::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x0052b360, PAL: 0x0056b9d8
 void ParticleSys::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kParticleSysTag);
+    OperatorDeleteOverride(pBlock, kParticleSysTag);
 }
 
 // NTSC-U/C: 0x0052b768, PAL: 0x0056bde0

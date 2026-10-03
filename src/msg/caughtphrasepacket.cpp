@@ -41,17 +41,17 @@ void CaughtPhrasePacket::saveGuts(OBStream &stream) const {
     unsigned int tr = mTr;
     int b = mB;
     int clientId = mClientId;
-    stream.Write(&id, sizeof(id))
-        .Write(&tr, sizeof(tr))
-        .Write(&b, sizeof(b))
-        .Write(&clientId, sizeof(clientId));
+    stream.WriteLE(&id, sizeof(id))
+        .WriteLE(&tr, sizeof(tr))
+        .WriteLE(&b, sizeof(b))
+        .WriteLE(&clientId, sizeof(clientId));
 }
 
 // NTSC-U/C: 0x003e6f00, PAL: 0x0041f1e0
 void CaughtPhrasePacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
-    stream.Read(&mPlayer.mId, sizeof(mPlayer.mId))
-        .Read(&mTr, sizeof(mTr))
-        .Read(&mB, sizeof(mB))
-        .Read(&mClientId, sizeof(mClientId));
+    stream.ReadLE(&mPlayer.mId, sizeof(mPlayer.mId))
+        .ReadLE(&mTr, sizeof(mTr))
+        .ReadLE(&mB, sizeof(mB))
+        .ReadLE(&mClientId, sizeof(mClientId));
 }

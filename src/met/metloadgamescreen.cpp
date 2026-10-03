@@ -137,7 +137,7 @@ void MetLoadGameScreen::LLEnter() {
         AssignBurnSlots();
     } else {
 #ifdef VIDEO_STANDARD_PAL
-        LogPrintf("MetLoadGameScreen::%s() - recognized JB mode.\n", __func__);
+        printf("MetLoadGameScreen::%s() - recognized JB mode.\n", __func__);
 #endif
         if (MetFrontEndState::shared()->mReturnScreen == kJukeboxDoneScreen) {
             MetFrontEndState::shared()->mReturnScreen = HxStr(kNoScreen);

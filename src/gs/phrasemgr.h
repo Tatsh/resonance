@@ -536,16 +536,16 @@ private:
     PowerbarMgr *mPowerbarMgr; // +0x2c
     // Copied from the track description's `+0x04`. The track this manager serves. A PhrasePacket's
     // `+0x14` is matched against it, and PostPhraseMsg() copies it into the message's `+0x08`.
-    int mTrack;             // +0x30
-    int mBarTicks;          // +0x34
-    int mConfig;            // +0x38
-    int mWindowStart;       // +0x3c, the first bar RefreshBar() posts
-    int mWindowEnd;         // +0x40, the bar RefreshBar() stops before
-    int mRefreshing;        // +0x44, set while RefreshAllBars() and OnExportCommand() post bars
-    Mid::MBT mExportLead;   // +0x48, from the start of a bar to its ExportCmd
-    Sch::TickClock *mClock; // +0x4c
-    CmdID mCommand;         // +0x50, the handle of the file-local Cmd
-    CmdID mExportCommand;   // +0x54, the handle of the file-local ExportCmd
-    int mTrackKind;         // +0x58, a TrackMode copied from TrackData::mKind
-    int mPlayMode;          // +0x5c, the play mode Globals reported at construction
+    int mTrack;                // +0x30
+    int mBarTicks;             // +0x34
+    int mConfig;               // +0x38
+    int mWindowStart;          // +0x3c, the first bar RefreshBar() posts
+    int mWindowEnd;            // +0x40, the bar RefreshBar() stops before
+    int mRefreshing;           // +0x44, set while RefreshAllBars() and OnExportCommand() post bars
+    Mid::MBT mExportLead;      // +0x48, from the start of a bar to its ExportCmd
+    Sch::TickClock *mClock;    // +0x4c
+    Sch::CmdID mCommand;       // +0x50, the handle of the file-local Cmd
+    Sch::CmdID mExportCommand; // +0x54, the handle of the file-local ExportCmd
+    int mTrackKind;            // +0x58, a TrackMode copied from TrackData::mKind
+    int mPlayMode;             // +0x5c, the play mode Globals reported at construction
 };

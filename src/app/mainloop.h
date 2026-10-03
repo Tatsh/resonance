@@ -129,7 +129,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x001ef128
      * @ghidraAddress PAL: 0x001f54c8
      */
-    virtual HxStr Name();
+    virtual HxStr Name() const;
 
     /**
      * Run one frame.

@@ -93,6 +93,6 @@ void GsPeriodical::Post() {
 
 // NTSC-U/C: 0x001b48f8, PAL: 0x001ba6d0
 void GsPeriodical::Withdraw() {
-    const CmdID command = mCommand;
+    const Sch::CmdID command = mCommand;
     mClock->Withdraw(command);
 }

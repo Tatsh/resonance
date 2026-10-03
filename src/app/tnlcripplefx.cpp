@@ -28,11 +28,11 @@ constexpr float kTurnBackLead = 6500.0f;
 // NTSC-U/C: 0x0043e1f0, PAL: 0x0047aa80
 TnlCrippleFX::TnlCrippleFX(int nIndex, float flRate)
     : mView(dynamic_cast<Rnd::View *>(
-          Rnd::TheManager.Find(HxStr(FormatString("cripfx%d.view", nIndex))))),
+          Rnd::TheManager.Find(HxStr(Rnd::MakeString("cripfx%d.view", nIndex))))),
       mPath(dynamic_cast<Rnd::TransAnim *>(
-          Rnd::TheManager.Find(HxStr(FormatString("cripfx%d.path", nIndex))))),
+          Rnd::TheManager.Find(HxStr(Rnd::MakeString("cripfx%d.path", nIndex))))),
       mParticleSys(dynamic_cast<Rnd::ParticleSys *>(
-          Rnd::TheManager.Find(HxStr(FormatString("cripfx%d.ps", nIndex))))),
+          Rnd::TheManager.Find(HxStr(Rnd::MakeString("cripfx%d.ps", nIndex))))),
       mState(kStateIdle), mHitFrame(0.0f), mRate(flRate) {
     mView->SetShowing(0);
 }

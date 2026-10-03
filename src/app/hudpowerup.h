@@ -33,7 +33,7 @@ public:
      * all three after showing it. For a kind with no view, the container stays empty. The title is
      * inferred.
      *
-     * @param nKind The HudItemKind to show, or kHudItemNone.
+     * @param nKind The PowerupType to show, or kHudItemNone.
      * @ghidraAddress NTSC-U/C: 0x004299a0
      * @ghidraAddress PAL: 0x00464fe0
      */

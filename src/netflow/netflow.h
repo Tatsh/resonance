@@ -53,7 +53,7 @@ struct netflow_v_side {
  * @ghidraAddress NTSC-U/C: 0x005e6508
  * @ghidraAddress PAL: 0x006286f0
  */
-void netflow_graph_init(struct netflow_graph *graph);
+void Init_U(struct netflow_graph *graph);
 
 /**
  * Clear every mate of a V set, and its V count.
@@ -62,7 +62,7 @@ void netflow_graph_init(struct netflow_graph *graph);
  * @ghidraAddress NTSC-U/C: 0x005e64e8
  * @ghidraAddress PAL: 0x006286d0
  */
-void netflow_v_side_init(struct netflow_v_side *side);
+void Init_V(struct netflow_v_side *side);
 
 /**
  * Add an edge from a U vertex to a V vertex.
@@ -77,7 +77,7 @@ void netflow_v_side_init(struct netflow_v_side *side);
  * @ghidraAddress NTSC-U/C: 0x005e6538
  * @ghidraAddress PAL: 0x00628720
  */
-void netflow_add_edge(int u, int v, struct netflow_graph *graph, struct netflow_v_side *side);
+void AddEdge(int u, int v, struct netflow_graph *graph, struct netflow_v_side *side);
 
 /**
  * Find a maximum matching of graph against side.
@@ -90,7 +90,7 @@ void netflow_add_edge(int u, int v, struct netflow_graph *graph, struct netflow_
  * @ghidraAddress NTSC-U/C: 0x00569bf0
  * @ghidraAddress PAL: 0x005aa0b8
  */
-void netflow_build_matching(struct netflow_graph *graph, struct netflow_v_side *side);
+void Match(struct netflow_graph *graph, struct netflow_v_side *side);
 
 #ifdef __cplusplus
 }

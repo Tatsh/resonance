@@ -35,7 +35,7 @@ public:
     ~JoypadPS2();
 
     /**
-     * Decode the slot's latest report through PadRecord::Read(), without the pressure outputs.
+     * Decode the slot's latest report through BreugPadRead(), without the pressure outputs.
      *
      * InputPoller::ReadControllers() is the caller.
      *
@@ -44,7 +44,7 @@ public:
      * @param pAxis1 Receives the second analog byte, or null.
      * @param pAxis2 Receives the third analog byte, or null.
      * @param pAxis3 Receives the fourth analog byte, or null.
-     * @return PadRecord::Read()'s result.
+     * @return BreugPadRead()'s result.
      * @ghidraAddress NTSC-U/C: 0x004ecaf8
      * @ghidraAddress PAL: 0x0052b680
      */
@@ -66,7 +66,7 @@ public:
     void Reset();
 
     /**
-     * Open the slot's pad through PadRecord::Open().
+     * Open the slot's pad through BreugPadInit().
      *
      * InputPoller::Setup() is the caller. The title is inferred.
      *
@@ -89,7 +89,7 @@ public:
     void DeInitPadData();
 
     /**
-     * Drive the slot's motors through PadRecord::SetVibration().
+     * Drive the slot's motors through BreugPadSetMotors().
      *
      * InputPoller::SetVibration() is the caller. The title is inferred.
      *

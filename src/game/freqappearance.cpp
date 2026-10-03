@@ -85,34 +85,34 @@ FreqAppearance::~FreqAppearance() {
 // NTSC-U/C: 0x00171060, PAL: 0x00173998
 void FreqAppearance::Save(OBStream &stream) const {
     int version = kRecordVersion;
-    stream.Write(&version, sizeof(version));
+    stream.WriteLE(&version, sizeof(version));
 
     unsigned length = mUserName.mLen;
-    stream.Write(&length, sizeof(length));
+    stream.WriteLE(&length, sizeof(length));
     // An empty username has no buffer, and the stream receives the shared empty string in place of
     // a null pointer.
-    stream.WriteBytes(mUserName.mStr != nullptr ? mUserName.mStr : g_szEmptyString, length);
+    stream.Write(mUserName.mStr != nullptr ? mUserName.mStr : g_szEmptyString, length);
 
     mDetail->save(stream);
 
     int skillStatus = mSkillStatus;
-    stream.Write(&skillStatus, sizeof(skillStatus));
+    stream.WriteLE(&skillStatus, sizeof(skillStatus));
 }
 
 // NTSC-U/C: 0x001747a8, PAL: 0x001771b0
 void FreqAppearance::Load(IBStream &stream) {
     int version;
-    stream.Read(&version, sizeof(version));
+    stream.ReadLE(&version, sizeof(version));
 
     unsigned length;
-    stream.Read(&length, sizeof(length));
+    stream.ReadLE(&length, sizeof(length));
     mUserName.Alloc(length);
-    stream.ReadBytes(
-        mUserName.mStr != nullptr ? mUserName.mStr : const_cast<char *>(g_szEmptyString), length);
+    stream.Read(mUserName.mStr != nullptr ? mUserName.mStr : const_cast<char *>(g_szEmptyString),
+                length);
 
     mDetail->load(stream);
 
-    stream.Read(&mSkillStatus, sizeof(mSkillStatus));
+    stream.ReadLE(&mSkillStatus, sizeof(mSkillStatus));
 }
 
 // NTSC-U/C: 0x00174878, PAL: 0x00177280
@@ -159,11 +159,11 @@ void FreqAppearance::InitBurnSlots() {
     g_hangpoints.resize(kBurnSlotCount);
     for (int i = 0; i < kBurnSlotCount; ++i) {
         g_burnCams[i] = dynamic_cast<Rnd::Cam *>(
-            Rnd::TheManager.Find(HxStr(FormatString(kBurnCamFormat, i + 1))));
+            Rnd::TheManager.Find(HxStr(Rnd::MakeString(kBurnCamFormat, i + 1))));
         g_burnCams[i]->SetShowing(0);
 
         g_hangpoints[i] = dynamic_cast<Rnd::View *>(
-            Rnd::TheManager.Find(HxStr(FormatString(kHangpointFormat, i))));
+            Rnd::TheManager.Find(HxStr(Rnd::MakeString(kHangpointFormat, i))));
         g_hangpoints[i]->SetShowing(1);
     }
     g_nBurnSlotsReady = 1;
@@ -208,7 +208,7 @@ void FreqAppearance::RenderBurnTextures() {
 // NTSC-U/C: 0x001712c0, PAL: 0x00173bf8
 Rnd::Tex *FreqAppearance::FindPersonaBurnTexture(int nIndex) {
     return dynamic_cast<Rnd::Tex *>(
-        Rnd::TheManager.Find(HxStr(FormatString(kBurnTextureFormat, nIndex + 1))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString(kBurnTextureFormat, nIndex + 1))));
 }
 
 // NTSC-U/C: 0x00174458, PAL: 0x00176e30

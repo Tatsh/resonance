@@ -41,7 +41,7 @@ struct RiffSet {
      * @param pBlock The block.
      */
     void operator delete(void *pBlock) {
-        FreeTaggedMemory(pBlock, "RiffSet");
+        OperatorDeleteOverride(pBlock, "RiffSet");
     }
 
     /**

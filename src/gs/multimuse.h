@@ -22,7 +22,7 @@
  * `Sequencer<TickObj<MuseMsg *> const *>` at `0x008eec48`, and MultiMusePlayer::Start() posts one
  * of those over this vector's start and finish. SaveFields() agrees with that shape independently:
  * it advances eight bytes per element and writes the first word through Mid::MBT::Save() and the
- * second through WriteMessagePointerToStream().
+ * second through `operator<<(OBStream &, Message *)`.
  *
  * MultiMuseMsg carries one of these and is how a sequence moves between a MsgSource and a
  * MsgSink, and MultiMusePlayer is what turns one into messages over time.
@@ -62,9 +62,9 @@ public:
      * Write the sequence to a diagnostic stream.
      *
      * Table slot 3. MultiMuseMsg::PrintExtra() is the one recovered caller. An empty sequence
-     * prints `[empty]`. Otherwise the entries print through PrintMuseEntry() inside one pair of
-     * brackets, one per line. When the stream's buffer is an nlfilebuf, each continuation line is
-     * padded with spaces to the column at which the previous entry began.
+     * prints `[empty]`. Otherwise the entries print through PrintMuseMsgTickObj() inside one pair
+     * of brackets, one per line. When the stream's buffer is an nlfilebuf, each continuation line
+     * is padded with spaces to the column at which the previous entry began.
      *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x001a8580
@@ -163,4 +163,4 @@ public:
  * @ghidraAddress NTSC-U/C: 0x001a97e8
  * @ghidraAddress PAL: 0x001af550
  */
-std::ostream &PrintMuseEntry(std::ostream &stream, Mid::MBT position, MuseMsg *pMsg);
+std::ostream &PrintMuseMsgTickObj(std::ostream &stream, Mid::MBT position, MuseMsg *pMsg);

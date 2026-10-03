@@ -33,7 +33,7 @@ Player::Player(int nId, const HxStr &colorName, const FreqAppearance *pAppearanc
 }
 
 // NTSC-U/C: 0x00132c20, PAL: 0x00133460
-int Player::GetInputSlot() {
+int Player::GetInputSlot() const {
     return -1;
 }
 

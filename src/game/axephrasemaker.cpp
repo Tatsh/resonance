@@ -212,7 +212,7 @@ void AxePhraseMaker::FinishPhrase() {
 }
 
 // NTSC-U/C: 0x0019c368, PAL: 0x001a20d0
-void AxePhraseMaker::SendSeekerMsg(int) {
+void AxePhraseMaker::SendSeekerMsg(int) const {
     if (mPlayer->IsNull()) {
         return;
     }

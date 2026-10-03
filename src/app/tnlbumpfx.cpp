@@ -31,11 +31,11 @@ constexpr float kTwoPi = 6.283185f;
 // NTSC-U/C: 0x0043dc20, PAL: 0x0047a450
 TnlBumpFX::TnlBumpFX(int nIndex) : mState(kStateIdle) {
     mGenerator = dynamic_cast<Rnd::Generator *>(
-        Rnd::TheManager.Find(HxStr(FormatString("bumpfx%d.mgen", nIndex))));
-    mMat =
-        dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr(FormatString("bumpfx%d.mat", nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("bumpfx%d.mgen", nIndex))));
+    mMat = dynamic_cast<Rnd::Mat *>(
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("bumpfx%d.mat", nIndex))));
     mTransAnim = dynamic_cast<Rnd::TransAnim *>(
-        Rnd::TheManager.Find(HxStr(FormatString("bumpfx%d.tnm", nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("bumpfx%d.tnm", nIndex))));
 
     float flHigh;
     mGenerator->GetRateGen(mSavedRateGen, flHigh);

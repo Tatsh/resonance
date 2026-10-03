@@ -103,7 +103,7 @@ inline void ShowNoSpaceWarning(MetScreen *pOwner, MetStringId nFormatId, int nCl
     buttons.push_back(GetMetString(kMetStrMsgCONTINUE));
     const HxStr format(GetMetString(nFormatId));
     const HxStr cardName(FirstCardSlotName());
-    const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(cardName), nClusters));
+    const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(cardName), nClusters));
     MetMsgScreen::ShowActive(
         HxStr(kNoSpaceMessage), GetMetString(kMetStrMsgERROR), text, kTwoButtons, buttons, pOwner);
 }
@@ -181,7 +181,7 @@ void MetMemDetectScreen::OnAllConnectStates() {
         buttons.push_back(HxStr(kYesButton));
         const HxStr format(
             MetConfigText(kMetStrMemFormatCheck, kDialogueConfigCode, kFormatCheckMessage));
-        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slot.mSlotName)));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(slot.mSlotName)));
         MetMsgScreen::ShowActive(
             HxStr(kFormatCheckMessage), HxStr(kWarningTitle), text, kTwoButtons, buttons, this);
 #endif
@@ -195,7 +195,7 @@ void MetMemDetectScreen::ShowFormatCheck(const MemcardConnectState &slot) {
     buttons.push_back(GetMetString(kMetStrMsgNO));
     buttons.push_back(GetMetString(kMetStrMsgYES));
     const HxStr format(GetMetString(kMetStrMemFormatCheck));
-    const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slot.mSlotName)));
+    const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(slot.mSlotName)));
     MetMsgScreen::ShowActive(HxStr(kFormatCheckMessage),
                              GetMetString(kMetStrMsgWARNING),
                              text,
@@ -215,7 +215,7 @@ void MetMemDetectScreen::OnCardFormatted(int, int nStatus) {
         const HxStr format(
             MetConfigText(kMetStrFormatSuccess, kDialogueConfigCode, kFormatSuccessMessage));
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
-        const HxStr text(FormatString(TextOrEmpty(format), RecordedCardName()));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), RecordedCardName()));
         MetMsgScreen::Show(HxStr(kFormatSuccessMessage),
                            MetText(kMetStrMsgFORMAT, kFormatTitle),
                            text,
@@ -231,7 +231,7 @@ void MetMemDetectScreen::OnCardFormatted(int, int nStatus) {
         const HxStr format(
             MetConfigText(kMetStrFormatAlready, kDialogueConfigCode, kFormatAlreadyMessage));
         GlobalSettings::shared(); // Yes, the binary discards this call's result.
-        const HxStr text(FormatString(TextOrEmpty(format), RecordedCardName()));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), RecordedCardName()));
         MetMsgScreen::Show(HxStr(kFormatAlreadyMessage),
                            MetText(kMetStrMsgFORMAT, kFormatTitle),
                            text,
@@ -274,7 +274,7 @@ void MetMemDetectScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
             const HxStr format(
                 MetConfigText(kMetStrMemFormatGo, kDialogueConfigCode, kFormatGoMessage));
             GlobalSettings::shared(); // Yes, the binary discards this call's result.
-            const HxStr text(FormatString(TextOrEmpty(format), RecordedCardName()));
+            const HxStr text(Rnd::MakeString(TextOrEmpty(format), RecordedCardName()));
             MetMsgScreen::Show(HxStr(kFormatGoMessage),
                                MetText(kMetStrMsgWARNING, kWarningTitle),
                                text,
@@ -365,7 +365,7 @@ void MetMemDetectScreen::OnMinimumSaveSpace(int, int nSpace) {
             buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
             const HxStr format(MetConfigText(kMetStrMemNospace, kDialogueConfigCode, kNoSpaceKey));
             const HxStr cardName(FirstCardSlotName());
-            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(cardName)));
+            const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(cardName)));
             MetMsgScreen::ShowActive(HxStr(kNoSpaceMessage),
                                      MetText(kMetStrMsgERROR, kErrorTitle),
                                      text,
@@ -378,9 +378,10 @@ void MetMemDetectScreen::OnMinimumSaveSpace(int, int nSpace) {
             const HxStr format(
                 MetConfigText(kMetStrMemNospaceForCampaign, kDialogueConfigCode, kNeedsSpaceKey));
             const HxStr cardName(FirstCardSlotName());
-            const HxStr text(FormatString(TextOrEmpty(format),
-                                          TextOrEmpty(cardName),
-                                          nSpace - GlobalSettings::shared()->mCardSlots[0].mFree));
+            const HxStr text(
+                Rnd::MakeString(TextOrEmpty(format),
+                                TextOrEmpty(cardName),
+                                nSpace - GlobalSettings::shared()->mCardSlots[0].mFree));
             MetMsgScreen::ShowActive(HxStr(kNeedsSpaceMessage),
                                      MetText(kMetStrMsgERROR, kErrorTitle),
                                      text,
@@ -408,7 +409,7 @@ void MetMemDetectScreen::StartLoadPersonas() {
     MetPersonaData::ClearLoadList();
     const HxStr format(MetConfigText(kMetStrMemLoad, kDialogueConfigCode, kLoadKey));
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
-    const HxStr text(FormatString(TextOrEmpty(format), RecordedCardName()));
+    const HxStr text(Rnd::MakeString(TextOrEmpty(format), RecordedCardName()));
     MetMsgScreen::Show(HxStr(kLoadMessage),
                        MetText(kMetStrMsgLOADING, kLoadingTitle),
                        text,

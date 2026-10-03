@@ -43,7 +43,7 @@ void *Riff::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x001ceb90, PAL: 0x001d4a48
 void Riff::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, "Riff");
+    OperatorDeleteOverride(pBlock, "Riff");
 }
 
 // NTSC-U/C: 0x001cebb0, PAL: 0x001d4a68

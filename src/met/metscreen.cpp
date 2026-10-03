@@ -312,14 +312,16 @@ int MetScreen::PollContainerLoad() {
 // NTSC-U/C: 0x0038bd60, PAL: 0x003bd538
 void MetScreen::ResolveAnimationViews() {
     {
-        HxStr name(FormatString(kEnterAnimationFormat,
-                                mScreenName.mStr != nullptr ? mScreenName.mStr : g_szEmptyString));
+        HxStr name(
+            Rnd::MakeString(kEnterAnimationFormat,
+                            mScreenName.mStr != nullptr ? mScreenName.mStr : g_szEmptyString));
         Rnd::Object *pObject = Rnd::TheManager.Find(name);
         mEnterAnim = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
     }
     {
-        HxStr name(FormatString(kExitAnimationFormat,
-                                mScreenName.mStr != nullptr ? mScreenName.mStr : g_szEmptyString));
+        HxStr name(
+            Rnd::MakeString(kExitAnimationFormat,
+                            mScreenName.mStr != nullptr ? mScreenName.mStr : g_szEmptyString));
         Rnd::Object *pObject = Rnd::TheManager.Find(name);
         mBackAnim = pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
     }
@@ -393,7 +395,7 @@ void MetScreen::ActivateNamedPanel(const HxStr &name) {
 void MetScreen::ExitScreenByName(const HxStr &name) {
     char szLine[kExitLogBufferSize];
     sprintf(szLine, "Exiting screen: %s\n", name.mStr != nullptr ? name.mStr : g_szEmptyString);
-    MemLogWrite(szLine);
+    MemLogWriteMarker(szLine);
     // The binary neither checks the result nor recovers from a key nothing registered under.
     FindScreenByName(name)->BeginExit();
 }

@@ -136,7 +136,7 @@ inline void AppendPersonas(std::vector<MetPersonaData *> &list,
 // Show one player's name, or the player number when the persona has no username.
 inline void ShowPlayerName(Rnd::Button *pButton, MetPersonaData *pPersona, int nPlayer) {
     if (pPersona->mAppearance.mUserName == kNoName) {
-        pButton->mText->SetText(HxStr(FormatString(kPlayerLabelFormat, nPlayer + 1)));
+        pButton->mText->SetText(HxStr(Rnd::MakeString(kPlayerLabelFormat, nPlayer + 1)));
     } else {
         pButton->mText->SetText(pPersona->mAppearance.mUserName);
     }
@@ -167,16 +167,16 @@ void MetLocPickCharScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     HxStr name;
     for (int i = 0; i < kMaxPlayers; ++i) {
-        name = FormatString(kCharacterMatFormat, i + 1);
+        name = Rnd::MakeString(kCharacterMatFormat, i + 1);
         Rnd::Mat *pMat = FindObject<Rnd::Mat>(name);
         mCharacterMats.push_back(pMat);
 
-        name = FormatString(kSelectViewFormat, i + 1);
+        name = Rnd::MakeString(kSelectViewFormat, i + 1);
         Rnd::View *pView = FindObject<Rnd::View>(name);
         pView->SetShowing(0);
         mSelectViews.push_back(pView);
 
-        name = FormatString(kNameButtonFormat, i + 1);
+        name = Rnd::MakeString(kNameButtonFormat, i + 1);
         Rnd::Button *pButton = FindObject<Rnd::Button>(name);
         mNameButtons.push_back(pButton);
 
@@ -185,7 +185,7 @@ void MetLocPickCharScreen::ResolveContainerViews() {
         Rnd::Tex *pTex = FreqAppearance::FindPersonaBurnTexture(i);
         mBurnTextures.push_back(pTex);
 
-        name = FormatString(kControllerMeshFormat, i + 1);
+        name = Rnd::MakeString(kControllerMeshFormat, i + 1);
         Rnd::Mesh *pMesh = FindObject<Rnd::Mesh>(name);
         mControllerMeshes.push_back(pMesh);
     }
@@ -319,12 +319,12 @@ void MetLocPickCharScreen::ShowPickers() {
         mView->RemoveAllTranses();
         mPlayerCount = nPlayers;
         Rnd::View *pLayout =
-            FindObject<Rnd::View>(HxStr(FormatString(kLayoutViewFormat, nPlayers)));
+            FindObject<Rnd::View>(HxStr(Rnd::MakeString(kLayoutViewFormat, nPlayers)));
         mView->AddAnim(pLayout);
         mView->AddTrans(pLayout);
         std::list<Rnd::Drawable *> &draws = mView->GetDraws();
         mView->AddDraw(pLayout, draws.empty() ? nullptr : draws.front());
-        mEnterAnim = FindObject<Rnd::View>(HxStr(FormatString(kEnterAnimFormat, nPlayers)));
+        mEnterAnim = FindObject<Rnd::View>(HxStr(Rnd::MakeString(kEnterAnimFormat, nPlayers)));
         mAnimEndFrame = mEnterAnim->FilteredFrameEnd();
     }
 
@@ -400,7 +400,8 @@ void MetLocPickCharScreen::OnExitFinished() {
 // NTSC-U/C: 0x002b4068, PAL: 0x002d3268
 void MetLocPickCharScreen::StartDetect() {
     const HxStr format(MetConfigText(kMetStrMemDetectMulti, kDialogueConfigCode, kDetectMultiKey));
-    const HxStr text(FormatString(TextOrEmpty(format), MetFrontEndState::shared()->mPlayerCount));
+    const HxStr text(
+        Rnd::MakeString(TextOrEmpty(format), MetFrontEndState::shared()->mPlayerCount));
     std::vector<HxStr> buttons;
     MetMsgScreen::Show(HxStr(kDetectMessage),
                        MetText(kMetStrMsgWARNING, kWarningTitle),
@@ -452,7 +453,7 @@ void MetLocPickCharScreen::OnDetectFinished() {
     const HxStr format(MetConfigText(kMetStrMemLoad, kDialogueConfigCode, kLoadKey));
     const HxStr cardName(
         GlobalSettings::shared()->mCardSlots[mFormattedCards[mCardIndex]].mSlotName);
-    const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(cardName)));
+    const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(cardName)));
     MetMsgScreen::ShowActive(HxStr(kLoadMessage),
                              MetText(kMetStrMsgLOADING, kLoadingTitle),
                              text,
@@ -493,7 +494,7 @@ void MetLocPickCharScreen::OnPersonasLoaded(int, int nStatus) {
         const HxStr format(GetMetString(kMetStrMemLoad));
         const HxStr cardName(
             GlobalSettings::shared()->mCardSlots[mFormattedCards[mCardIndex]].mSlotName);
-        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(cardName)));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(cardName)));
         MetMsgScreen::ShowActive(
             HxStr(kLoadMessage), GetMetString(kMetStrMsgLOADING), text, kNoButtons, buttons, this);
 #endif

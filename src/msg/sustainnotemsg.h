@@ -107,7 +107,7 @@ public:
     virtual void PrintExtra(std::ostream &stream) const;
 
     /**
-     * Write the byte to a stream through OBStream::WriteBytes().
+     * Write the byte to a stream through OBStream::Write().
      *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x003e3a70
@@ -116,7 +116,7 @@ public:
     virtual void saveGuts(OBStream &stream) const;
 
     /**
-     * Read the byte back in place through IBStream::ReadBytes().
+     * Read the byte back in place through IBStream::Read().
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x003e3ab0

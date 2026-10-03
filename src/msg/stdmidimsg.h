@@ -111,7 +111,7 @@ public:
     virtual void PrintExtra(std::ostream &stream) const;
 
     /**
-     * Write the three bytes to a stream, one byte each through OBStream::WriteBytes().
+     * Write the three bytes to a stream, one byte each through OBStream::Write().
      *
      * The song position is not written.
      *
@@ -122,7 +122,7 @@ public:
     virtual void saveGuts(OBStream &stream) const;
 
     /**
-     * Read the three bytes back in place, one byte each through IBStream::ReadBytes().
+     * Read the three bytes back in place, one byte each through IBStream::Read().
      *
      * @param stream The stream to read from.
      * @ghidraAddress NTSC-U/C: 0x003e36e8

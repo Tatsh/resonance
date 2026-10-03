@@ -163,12 +163,12 @@ void MetSoloStatsScreen::EnterAndShow() {
     mSongText->SetText(song);
 
     mSkillText->SetText(DifficultyName(params.mDifficulty));
-    mScoreText->SetText(HxStr(FormatString(kCountFormat, pStats->GetScore(kFirstPlayer))));
+    mScoreText->SetText(HxStr(Rnd::MakeString(kCountFormat, pStats->GetScore(kFirstPlayer))));
     mCompleteText->SetText(HxStr(
-        FormatString(kPercentFormat, static_cast<int>(pStats->GetProgress() * kPercentScale))));
-    mPhraseText->SetText(HxStr(FormatString(
+        Rnd::MakeString(kPercentFormat, static_cast<int>(pStats->GetProgress() * kPercentScale))));
+    mPhraseText->SetText(HxStr(Rnd::MakeString(
         kPercentFormat, static_cast<int>(pStats->GetRatio(kFirstPlayer) * kPercentScale))));
-    mHotText->SetText(HxStr(FormatString(kCountFormat, pStats->GetTally(kFirstPlayer))));
+    mHotText->SetText(HxStr(Rnd::MakeString(kCountFormat, pStats->GetTally(kFirstPlayer))));
 
     MetScreen::EnterAndShow();
 }

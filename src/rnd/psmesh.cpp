@@ -420,8 +420,8 @@ int PsMesh::DrawShowing() {
 }
 
 // NTSC-U/C: 0x00606a00, PAL: 0x00647658
-void PsMesh::Refresh() {
-    Mesh::Refresh();
+void PsMesh::AddRefObjects() {
+    Mesh::AddRefObjects();
     for (auto &vert : mVerts) {
         ClampColorToUnitRange(vert.mColor, vert.mColor);
     }

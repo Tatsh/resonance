@@ -32,7 +32,7 @@ TnlNowRing::TnlNowRing(int nMeshCount, int nPlayerCount) : mResetPending(1) {
     mMeshes.resize(nMeshCount);
     for (int i = 0; i < nMeshCount; ++i) {
         mMeshes[i] =
-            dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(FormatString("nowmesh%d", i))));
+            dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(Rnd::MakeString("nowmesh%d", i))));
         mMeshes[i]->SetShowing(1);
     }
     mPlayerMeshes.resize(nPlayerCount, 0);

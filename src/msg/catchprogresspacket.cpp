@@ -40,19 +40,19 @@ void CatchProgressPacket::saveGuts(OBStream &stream) const {
     Packet::saveGuts(stream);
 
     int id = mPlayer.mId;
-    OBStream &rest = stream.Write(&id, sizeof(id));
+    OBStream &rest = stream.WriteLE(&id, sizeof(id));
     mPosition.Save(rest);
 
     int track = mTrack;
     float succ = mSucc;
-    rest.Write(&track, sizeof(track)).Write(&succ, sizeof(succ));
+    rest.WriteLE(&track, sizeof(track)).WriteLE(&succ, sizeof(succ));
 }
 
 // NTSC-U/C: 0x003e7568, PAL: 0x0041f848
 void CatchProgressPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
 
-    IBStream &rest = stream.Read(&mPlayer.mId, sizeof(mPlayer.mId));
+    IBStream &rest = stream.ReadLE(&mPlayer.mId, sizeof(mPlayer.mId));
     mPosition.Load(rest);
-    rest.Read(&mTrack, sizeof(mTrack)).Read(&mSucc, sizeof(mSucc));
+    rest.ReadLE(&mTrack, sizeof(mTrack)).ReadLE(&mSucc, sizeof(mSucc));
 }

@@ -347,9 +347,9 @@ void MetLoadFreqBaseScreen::OnCreateButton() {
         ExitScreenByName(HxStr(kHelpScreen));
         const HxStr format(GetMetString(kMetStrFreqLimit));
         const HxStr text(
-            FormatString(TextOrEmpty(format),
-                         kMaxIdentities,
-                         TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName)));
+            Rnd::MakeString(TextOrEmpty(format),
+                            kMaxIdentities,
+                            TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName)));
         ShowFreqLimit(this, text);
         return;
     }
@@ -359,9 +359,9 @@ void MetLoadFreqBaseScreen::OnCreateButton() {
         ExitScreenByName(HxStr(kHelpScreen));
         const HxStr format(GetMetString(kMetStrFreqNoSpace));
         const HxStr text(
-            FormatString(TextOrEmpty(format),
-                         TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName),
-                         GlobalSettings::shared()->mPersonaMinimumFreeClusters));
+            Rnd::MakeString(TextOrEmpty(format),
+                            TextOrEmpty(GlobalSettings::shared()->mCardSlots[0].mSlotName),
+                            GlobalSettings::shared()->mPersonaMinimumFreeClusters));
         ShowFreqLimit(this, text);
         return;
     }

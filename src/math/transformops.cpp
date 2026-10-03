@@ -19,7 +19,7 @@ constexpr float kGimbalLockLimit = 0.9999998808f;
 } // namespace
 
 // NTSC-U/C: 0x004f0430, PAL: 0x0052f020
-void EulerAnglesToMatrix3x3(const float *pAngles, float *pMat3Rows) {
+void Rnd::MakeRotMatrix(const float *pAngles, float *pMat3Rows) {
     const float flSinZ = sinf(pAngles[2]);
     const float flCosZ = cosf(pAngles[2]);
     const float flSinY = sinf(pAngles[1]);
@@ -160,7 +160,7 @@ void MultiplyMat3VU0(const float *pMatA, const float *pMatB, float *pOut) {
 }
 
 // NTSC-U/C: 0x0045da58, PAL: 0x0049b100
-void ScaleRows3x3(const float *pScale, const float *pMat3Rows, float *pOut) {
+void Rnd::Scale(const float *pScale, const float *pMat3Rows, float *pOut) {
     pOut[0] = pMat3Rows[0] * pScale[0];
     pOut[1] = pMat3Rows[1] * pScale[0];
     pOut[2] = pMat3Rows[2] * pScale[0];

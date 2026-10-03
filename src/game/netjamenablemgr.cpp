@@ -21,11 +21,11 @@ constexpr int kMaxTrackCount = 12;
 // NTSC-U/C: 0x00102790, PAL: 0x00102790
 NetJamEnableMgr::NetJamEnableMgr(int nTrackCount,
                                  int nMaxOwned,
-                                 const std::vector<int> *pOpenTracks,
+                                 const std::vector<int> &openTracks,
                                  Gamer *pGamer)
     : mPlayMap(Application::shared()->GetPlayMap()), mGamer(pGamer),
       mLocalId(Application::shared()->GetWorld()->mLocalPlayers[0]->mPlayerId),
-      mTrackCount(nTrackCount), mMaxOwned(nMaxOwned), mOpenTracks(*pOpenTracks),
+      mTrackCount(nTrackCount), mMaxOwned(nMaxOwned), mOpenTracks(openTracks),
       mSteps(&Application::shared()->GetPlayMap()->mSteps) {
     const int nSectionCount = mSteps->size() - 1;
     mOwners =
@@ -33,11 +33,11 @@ NetJamEnableMgr::NetJamEnableMgr(int nTrackCount,
 }
 
 // NTSC-U/C: 0x00105958, PAL: 0x00105958
-NetJamEnableMgr *NetJamEnableMgr::Create(int nTrackCount,
-                                         int nMaxOwned,
-                                         const std::vector<int> *pOpenTracks,
-                                         Gamer *pGamer) {
-    return new NetJamEnableMgr(nTrackCount, nMaxOwned, pOpenTracks, pGamer);
+NetJamEnableMgr *NewNetJamEnableMgr(int nTrackCount,
+                                    int nMaxOwned,
+                                    const std::vector<int> &openTracks,
+                                    Gamer *pGamer) {
+    return new NetJamEnableMgr(nTrackCount, nMaxOwned, openTracks, pGamer);
 }
 
 // NTSC-U/C: 0x00105b08, PAL: 0x00105b08

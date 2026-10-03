@@ -121,7 +121,7 @@ void MetNullRenderer::Draw() {
         Application::shared()->GetGameManager()->ClearPersonas();
         for (int nPlayer = 0; nPlayer < mPlayerCount; ++nPlayer) {
             MetPersonaData persona;
-            persona.mAppearance.mUserName = HxStr(FormatString(kPersonaNameFormat, nPlayer));
+            persona.mAppearance.mUserName = HxStr(Rnd::MakeString(kPersonaNameFormat, nPlayer));
             Application::shared()->GetGameManager()->AddPersona(persona);
         }
         Application::shared()->GetGameManager()->SetGameMode(

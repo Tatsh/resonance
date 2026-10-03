@@ -77,7 +77,7 @@ public:
      * @param pBlock The block.
      */
     void operator delete(void *pBlock) {
-        FreeTaggedMemory(pBlock, "TrackData");
+        OperatorDeleteOverride(pBlock, "TrackData");
     }
 
     /**
@@ -433,11 +433,11 @@ public:
 
     /**
      * @param nBar The bar, mapped through PlayMap::MapBar().
-     * @return The bar's mCatchPoints.
+     * @return The bar's mCatchPoints, the juice a capture awards.
      * @ghidraAddress NTSC-U/C: 0x001d7aa0
      * @ghidraAddress PAL: 0x001dd980
      */
-    int GetCatchPoints(int nBar) const;
+    int GetJuice(int nBar) const;
 
     /**
      * @param nBar The index into mBars, not mapped.

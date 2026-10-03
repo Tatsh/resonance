@@ -12,7 +12,7 @@ constexpr int kSectorCacheRowEmpty = -1;
 /**
  * Stamp that locks a row against reuse.
  *
- * SectorCacheGetLru() skips a locked row, and neither routine advances a locked row's stamp. The
+ * SectorCacheGetLRU() skips a locked row, and neither routine advances a locked row's stamp. The
  * value sorts above every real stamp, so the unsigned comparison in the search excludes it even
  * before the explicit test.
  */
@@ -52,7 +52,7 @@ struct SectorCacheRow {
  * @ghidraAddress NTSC-U/C: 0x00554fb8
  * @ghidraAddress PAL: 0x00595640
  */
-void InitSectorCache(int nRows);
+void SectorCacheInit(int nRows);
 
 /**
  * Release every row and the row table.
@@ -63,7 +63,7 @@ void InitSectorCache(int nRows);
  * @ghidraAddress NTSC-U/C: 0x005550c8
  * @ghidraAddress PAL: 0x00595750
  */
-void ShutdownSectorCache();
+void SectorCacheTerm();
 
 /**
  * Drop every row that buffers a file.
@@ -75,7 +75,7 @@ void ShutdownSectorCache();
  * @ghidraAddress NTSC-U/C: 0x00555298
  * @ghidraAddress PAL: 0x00595920
  */
-void InvalidateCachedSectors(int nFile);
+void SectorCacheRemove(int nFile);
 
 /**
  * Find the row buffering a chunk.
@@ -104,21 +104,21 @@ SectorCacheRow *SectorCacheFind(int nFile, int nSector);
  * @ghidraAddress NTSC-U/C: 0x00554e50
  * @ghidraAddress PAL: 0x005954d8
  */
-SectorCacheRow *SectorCacheGetLru(int nFile, int nSector);
+SectorCacheRow *SectorCacheGetLRU(int nFile, int nSector);
 
 /**
  * Lock the row buffering a chunk against reuse.
  *
  * The search repeats SectorCacheFind() inline, stamp bump included, and the chosen row then takes
- * kSectorCacheLocked. A miss is reported through LogPrintf() and otherwise ignored. Nothing in the
- * image calls this routine, so it is dead code in the shipped build.
+ * kSectorCacheLocked. A miss is reported through printf() and otherwise ignored. The image does
+ * not call this routine.
  *
  * @param nFile The buffered file.
  * @param nSector The buffered chunk index.
  * @ghidraAddress NTSC-U/C: 0x005552f0
  * @ghidraAddress PAL: 0x00595978
  */
-void LockCachedSector(int nFile, int nSector);
+void SectorCacheLock(int nFile, int nSector);
 
 /**
  * Lock one row against reuse.
@@ -136,7 +136,7 @@ void SetSectorRowLocked(SectorCacheRow *pRow);
  *
  * The search repeats SectorCacheFind() inline, whose stamp bump is skipped because a locked row
  * stamp equals kSectorCacheLocked. Writing the current clock into the row both unlocks it and
- * makes it the newest. A miss is reported through LogPrintf() and otherwise ignored.
+ * makes it the newest. A miss is reported through printf() and otherwise ignored.
  *
  * @param nFile The buffered file.
  * @param nSector The buffered chunk index.
@@ -146,25 +146,27 @@ void SetSectorRowLocked(SectorCacheRow *pRow);
 void UnlockCachedSector(int nFile, int nSector);
 
 /**
- * Print every row through LogPrintf().
+ * Print every row through printf().
  *
  * @ghidraAddress NTSC-U/C: 0x005554a0
  * @ghidraAddress PAL: 0x00595b28
  */
-void DumpSectorCache();
+void SectorCacheDump();
 
 /**
- * Number of rows the cache was built with.
+ * The row table and its length.
+ *
+ * Every routine addresses both words through one base. The type name is inferred.
+ */
+struct SectorCache {
+    int mRowCount;         /*!< Number of rows the cache was built with. */
+    SectorCacheRow *mRows; /*!< The row table. */
+};
+
+/**
+ * The one sector cache.
  *
  * @ghidraAddress NTSC-U/C: 0x008de790
  * @ghidraAddress PAL: 0x00923750
  */
-extern int g_nSectorCacheRows;
-
-/**
- * The row table.
- *
- * @ghidraAddress NTSC-U/C: 0x008de794
- * @ghidraAddress PAL: 0x00923754
- */
-extern SectorCacheRow *g_pSectorCacheRows;
+extern SectorCache gSectorCache;

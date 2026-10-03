@@ -5,20 +5,19 @@ class MultiMuse;
 /**
  * Copy a sequence with every note moved by a number of semitones.
  *
- * The routine lives in `GsMuseUtil.cpp`, the unit the RTTI of its file-local helper class
+ * The routine is in `GsMuseUtil.cpp`, the unit the RTTI of its file-local helper class
  * `_GLOBAL_$N$GsMuseUtil.cpp::Shifter` identifies, apart from MultiMuse's own unit. It reads the
- * sequence only through the public MultiMuse::mEntries, so it is reconstructed as a free function
- * of that utility unit rather than as a MultiMuse member. The title is inferred.
+ * sequence only through the public MultiMuse::mEntries.
  *
  * A stack Shifter visits every entry. A NoteMsg, and a StdMidiMsg with a note-on or note-off
  * status, is copied with its note number raised by nTrans (wrapping at 256). Any other message
  * whose identity lies in the MuseMsg range is copied unchanged. Each copy is added at the entry's
  * position.
  *
- * @param pMuse The sequence to copy.
+ * @param muse The sequence to copy.
  * @param nTrans The semitones to add to every note.
  * @return A new sequence with one reference, which the caller releases.
  * @ghidraAddress NTSC-U/C: 0x001ab6d8
  * @ghidraAddress PAL: 0x001b1440
  */
-MultiMuse *TransposeMuse(MultiMuse *pMuse, int nTrans);
+MultiMuse *CloneAndTranspose(const MultiMuse &muse, int nTrans);

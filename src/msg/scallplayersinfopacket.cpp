@@ -45,16 +45,16 @@ void SCAllPlayersInfoPacket::saveGuts(OBStream &stream) const {
     Packet::saveGuts(stream);
 
     int count = static_cast<int>(mPlayers.size());
-    stream.Write(&count, sizeof(count));
+    stream.WriteLE(&count, sizeof(count));
     for (const auto &entry : mPlayers) {
         int pid = entry.mPid;
         int clientId = entry.mClientId;
-        OBStream &rest = stream.Write(&pid, sizeof(pid)).Write(&clientId, sizeof(clientId));
+        OBStream &rest = stream.WriteLE(&pid, sizeof(pid)).WriteLE(&clientId, sizeof(clientId));
 
         int trackCount = static_cast<int>(entry.mTracks.size());
-        rest.Write(&trackCount, sizeof(trackCount));
+        rest.WriteLE(&trackCount, sizeof(trackCount));
         for (int track : entry.mTracks) {
-            rest.Write(&track, sizeof(track));
+            rest.WriteLE(&track, sizeof(track));
         }
     }
 }
@@ -64,22 +64,22 @@ void SCAllPlayersInfoPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
 
     int count;
-    stream.Read(&count, sizeof(count));
+    stream.ReadLE(&count, sizeof(count));
     mPlayers.resize(count);
     for (auto &entry : mPlayers) {
-        IBStream &rest = stream.Read(&entry.mPid, sizeof(entry.mPid))
-                             .Read(&entry.mClientId, sizeof(entry.mClientId));
+        IBStream &rest = stream.ReadLE(&entry.mPid, sizeof(entry.mPid))
+                             .ReadLE(&entry.mClientId, sizeof(entry.mClientId));
 
         int trackCount;
-        rest.Read(&trackCount, sizeof(trackCount));
+        rest.ReadLE(&trackCount, sizeof(trackCount));
         entry.mTracks.resize(trackCount);
         for (int &track : entry.mTracks) {
-            rest.Read(&track, sizeof(track));
+            rest.ReadLE(&track, sizeof(track));
         }
     }
 }
 
 // NTSC-U/C: 0x003f23a8, PAL: 0x0042a8f0
-void SCAllPlayersInfoPacket::AddPlayerInfo(const PlayerEntry &entry) {
+void SCAllPlayersInfoPacket::AddPlayerInfo(const PlayerInfoEntry &entry) {
     mPlayers.push_back(entry);
 }

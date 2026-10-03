@@ -146,22 +146,22 @@ int ControllerConfig::ActionCode(int nSlot) {
 // NTSC-U/C: 0x00163e10, PAL: 0x00165ec0
 void ControllerConfig::Load(IBStream &stream) {
     int nVersion;
-    stream.Read(&nVersion, sizeof(nVersion));
+    stream.ReadLE(&nVersion, sizeof(nVersion));
     if (nVersion >= kRecordVersion) {
         int nCount;
-        stream.Read(&nCount, sizeof(nCount));
+        stream.ReadLE(&nCount, sizeof(nCount));
         mButtons.resize(nCount);
         for (std::vector<int>::iterator it = mButtons.begin(); it != mButtons.end(); ++it) {
-            stream.Read(&*it, sizeof(*it));
+            stream.ReadLE(&*it, sizeof(*it));
         }
     } else {
         // An older mapping is read and discarded.
         std::vector<int> discarded;
         int nCount;
-        stream.Read(&nCount, sizeof(nCount));
+        stream.ReadLE(&nCount, sizeof(nCount));
         discarded.resize(nCount);
         for (std::vector<int>::iterator it = discarded.begin(); it != discarded.end(); ++it) {
-            stream.Read(&*it, sizeof(*it));
+            stream.ReadLE(&*it, sizeof(*it));
         }
     }
 }
@@ -237,12 +237,12 @@ int ControllerConfig::RiffIndex(int nSlot) {
 // NTSC-U/C: 0x00164d00, PAL: 0x00166db0
 void ControllerConfig::Save(OBStream &stream) {
     int nVersion = kRecordVersion;
-    stream.Write(&nVersion, sizeof(nVersion));
+    stream.WriteLE(&nVersion, sizeof(nVersion));
     int nCount = mButtons.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (std::vector<int>::iterator it = mButtons.begin(); it != mButtons.end(); ++it) {
         int nCode = *it;
-        stream.Write(&nCode, sizeof(nCode));
+        stream.WriteLE(&nCode, sizeof(nCode));
     }
 }
 

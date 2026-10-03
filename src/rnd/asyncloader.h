@@ -130,7 +130,7 @@ public:
      * @param pBlock The block.
      */
     static void operator delete(void *pBlock) {
-        FreeTaggedMemory(pBlock, "RndAsyncLoader");
+        OperatorDeleteOverride(pBlock, "RndAsyncLoader");
     }
 
     /**

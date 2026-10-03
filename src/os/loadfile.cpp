@@ -129,7 +129,7 @@ extern "C" {
 void GzipSetMemoryOutput(void *pDest);
 
 // Clear the inflate state before a run.
-void GzipInitState();
+void gzip_clear_bufs();
 
 // Run the inflate and report the status word.
 int GzipInflate(int nDescriptor);
@@ -242,14 +242,14 @@ void *LoadWholeFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, un
     if (pBuffer == nullptr) {
         pBuffer = AllocateLoadBuffer(nSize, __FILE__, __LINE__);
     } else if (nBufferSize < nSize) {
-        FileClose(nFile);
+        close(nFile);
         return nullptr;
     }
 
     if (pBuffer != nullptr) {
-        FileRead(nFile, pBuffer, nSize);
+        read(nFile, pBuffer, nSize);
     }
-    FileClose(nFile);
+    close(nFile);
     // The size is reported even when the allocation failed and nothing was read.
     *pnSize = nSize;
     return pBuffer;
@@ -264,7 +264,7 @@ void *LoadGzFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsig
 
     unsigned nSize;
     if (UsingArkFiles() != 0) {
-        nSize = GetArkStreamInflatedSize(nFile & ~kFileHandleArkStream);
+        nSize = FindOpenFileInArkTrueSize(nFile & ~kFileHandleArkStream);
     } else {
         nSize = GetGzFileSize(nFile);
     }
@@ -272,13 +272,13 @@ void *LoadGzFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsig
     if (pBuffer == nullptr) {
         pBuffer = AllocateLoadBuffer(nSize, __FILE__, __LINE__);
     } else if (nBufferSize < nSize) {
-        FileClose(nFile);
+        close(nFile);
         Fatal("  Not enough room to load: %s!\n", pszPath);
         return nullptr;
     }
 
     if (pBuffer != nullptr) {
-        InflateGzFileWhole(nFile, pBuffer);
+        GzipDecompressFdToRam(nFile, pBuffer);
     }
     // The file is not closed here, unlike in LoadWholeFile().
     *pnSize = nSize;
@@ -286,14 +286,14 @@ void *LoadGzFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsig
 }
 
 // NTSC-U/C: 0x00555790, PAL: 0x00595e18
-int GetStoredFileLength(const char *pszPath) {
+int FileSize(const char *pszPath) {
     const int nFile = FileOpen(pszPath, kFileOpenRead);
     if (nFile < 0) {
         return 0;
     }
     const int nLength = FileSeek(nFile, 0, kFileSeekEnd);
     FileSeek(nFile, 0, kFileSeekSet);
-    FileClose(nFile);
+    close(nFile);
     return nLength;
 }
 
@@ -301,14 +301,14 @@ int GetStoredFileLength(const char *pszPath) {
 unsigned GetGzFileSize(int nFile) {
     FileSeek(nFile, kGzTrailerSizeOffset, kFileSeekEnd);
     unsigned nSize;
-    FileRead(nFile, &nSize, sizeof(nSize));
+    read(nFile, &nSize, sizeof(nSize));
     FileSeek(nFile, 0, kFileSeekSet);
     return nSize;
 }
 
 // NTSC-U/C: 0x005636a0, PAL: 0x005a1e10
 // Inflate a memory gzip member, reporting a positive size on success.
-int InflateGzBuffer(const void *pSource, int nSourceLength, void *pDest) {
+int GzipDecompressRamToRam(const void *pSource, int nSourceLength, void *pDest) {
     gzipInSrcPtr = pSource;
     gzipInSrcSize = nSourceLength;
     gzipInSrcBuff = pSource;
@@ -318,30 +318,30 @@ int InflateGzBuffer(const void *pSource, int nSourceLength, void *pDest) {
     }
     gzip_ifd = kMemoryInputDescriptor;
     GzipSetMemoryOutput(pDest);
-    GzipInitState();
+    gzip_clear_bufs();
     decompress = kGzipOutputEnabled;
     const int nResult = GzipInflate(gzip_ifd);
     gzipMethod = nResult;
     if (nResult < 0) {
         if (gzip_ifd != kMemoryInputDescriptor) {
-            FileClose(gzip_ifd);
+            close(gzip_ifd);
         }
         return -1;
     }
     if (GzipReportInflateError() != 0) {
         if (gzip_ifd != kMemoryInputDescriptor) {
-            FileClose(gzip_ifd);
+            close(gzip_ifd);
         }
         return -1;
     }
     if (gzip_ifd != kMemoryInputDescriptor) {
-        FileClose(gzip_ifd);
+        close(gzip_ifd);
     }
     return GzipInflatedSize();
 }
 
 // NTSC-U/C: 0x00555800, PAL: 0x00595e88
-int GetUncompressedFileLength(const char *pszPath) {
+int FileTrueSize(const char *pszPath) {
     const int nFile = FileOpen(pszPath, kFileOpenRead);
     if (nFile < 0) {
         return 0;
@@ -350,7 +350,7 @@ int GetUncompressedFileLength(const char *pszPath) {
     int nStored;
     int nSize;
     if ((nFile & kFileHandleArkStream) != 0) {
-        const ArkFileEntry *pEntry = GetArkStreamFileEntry(nFile & ~kFileHandleArkStream);
+        const ArkFileEntry *pEntry = FindOpenFileInArk(nFile & ~kFileHandleArkStream);
         nSize = pEntry->mSize;
         nStored = pEntry->mLength;
     } else {
@@ -358,13 +358,13 @@ int GetUncompressedFileLength(const char *pszPath) {
         // Unlike LoadWholeFile(), the extension test here is case-sensitive.
         if (strcmp(pszPath + strlen(pszPath) - (sizeof(kGzExtension) - 1), kGzExtension) == 0) {
             FileSeek(nFile, kGzTrailerSizeOffset, kFileSeekEnd);
-            FileRead(nFile, &nSize, sizeof(nSize));
+            read(nFile, &nSize, sizeof(nSize));
         } else {
             nSize = nStored;
         }
         FileSeek(nFile, 0, kFileSeekSet);
     }
-    FileClose(nFile);
+    close(nFile);
 
     // The larger of the two is reported. A file that compressed badly reports its stored size.
     return (nSize < nStored) ? nStored : nSize;
@@ -386,7 +386,7 @@ void GzipPrintSystemError(const char *pszName) {
 
 // NTSC-U/C: 0x00612508, PAL: 0x00653098
 // Prints a stream error under the input name and reports one.
-int GzipPrintStreamError(const char *pszMessage) {
+int gzip_error(const char *pszMessage) {
     fprintf(stderr, kStreamErrorFormat, gzipIfname, pszMessage);
     gzipExitCode = 1;
     return 1;
@@ -394,7 +394,7 @@ int GzipPrintStreamError(const char *pszMessage) {
 
 // NTSC-U/C: 0x00612550, PAL: 0x006530e0
 // Reports running out of input bytes and reports one.
-int GzipReportUnexpectedEof() {
+int gzip_read_error() {
     if (errno != 0) {
         GzipPrintSystemError(gzipIfname);
     } else {
@@ -424,7 +424,7 @@ int GzipRefillInputBuffer(int nSilentEof) {
         gzipInsize = 0;
         for (;;) {
             const int nHave = gzipInsize;
-            const int nGot = FileRead(
+            const int nGot = read(
                 gzip_ifd, &gzipInbuf[nHave], static_cast<unsigned>(kGzipInputBufferSize - nHave));
             if (nGot == -1 || nGot == 0) {
                 break;
@@ -438,7 +438,7 @@ int GzipRefillInputBuffer(int nSilentEof) {
             if (nSilentEof != 0) {
                 return -1;
             }
-            GzipReportUnexpectedEof();
+            gzip_read_error();
         }
         nBuffered = gzipInsize;
     }
@@ -490,7 +490,7 @@ void GzipSetMemoryOutput(void *pDest) {
 }
 
 // NTSC-U/C: 0x00612468, PAL: 0x00652ff8
-void GzipInitState() {
+void gzip_clear_bufs() {
     gzipOutcnt = 0;
     gzipInptr = 0;
     gzipInsize = 0;
@@ -581,16 +581,16 @@ int GzipInflatedSize() {
 int GzipReportInflateError() {
     GzipUpdateCrc(nullptr, 0);
     if (gzipMethod != kGzipDeflated) {
-        GzipPrintStreamError(kInvalidMethodError);
+        gzip_error(kInvalidMethodError);
         return 1;
     }
     const int nResult = inflate();
     if (nResult == kInflateOutOfMemory) {
-        GzipPrintStreamError(kOutOfMemoryError);
+        gzip_error(kOutOfMemoryError);
         return 1;
     }
     if (nResult != 0) {
-        GzipPrintStreamError(kFormatViolatedError);
+        gzip_error(kFormatViolatedError);
         return 1;
     }
     return 0;
@@ -598,30 +598,30 @@ int GzipReportInflateError() {
 
 // NTSC-U/C: 0x005635b8, PAL: 0x005a1d28
 // Inflates a whole file through the descriptor globals.
-void InflateGzFileWhole(int nFile, void *pDest) {
+void GzipDecompressFdToRam(int nFile, void *pDest) {
     memcpy(gzipIfname, kUnknownInputName, sizeof(kUnknownInputName));
     if (bInit == 0) {
         bInit = kGzipInitialised;
     }
     gzip_ifd = nFile;
     GzipSetMemoryOutput(pDest);
-    GzipInitState();
+    gzip_clear_bufs();
     decompress = kGzipOutputEnabled;
     const int nResult = GzipInflate(gzip_ifd);
     gzipMethod = nResult;
     if (nResult < 0) {
         if (gzip_ifd != kMemoryInputDescriptor) {
-            FileClose(gzip_ifd);
+            close(gzip_ifd);
         }
         return;
     }
     if (GzipReportInflateError() != 0) {
         if (gzip_ifd != kMemoryInputDescriptor) {
-            FileClose(gzip_ifd);
+            close(gzip_ifd);
         }
         return;
     }
     if (gzip_ifd != kMemoryInputDescriptor) {
-        FileClose(gzip_ifd);
+        close(gzip_ifd);
     }
 }

@@ -38,7 +38,7 @@ void MultiMuse::Print(std::ostream &stream) {
     if (pBuffer != nullptr) {
         nIndent = static_cast<int>(open.tellp()) - pBuffer->mLineStart;
     }
-    PrintMuseEntry(open, it->mPosition, it->mValue);
+    PrintMuseMsgTickObj(open, it->mPosition, it->mValue);
 
     for (++it; it != mEntries.end(); ++it) {
         std::ostream &line = stream << std::endl;
@@ -56,7 +56,7 @@ void MultiMuse::Print(std::ostream &stream) {
         if (pBuffer != nullptr) {
             nIndent = static_cast<int>(stream.tellp()) - pBuffer->mLineStart;
         }
-        PrintMuseEntry(stream, it->mPosition, it->mValue);
+        PrintMuseMsgTickObj(stream, it->mPosition, it->mValue);
     }
     stream << "]";
 }
@@ -68,24 +68,24 @@ void *MultiMuse::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x001a94b0, PAL: 0x001af218
 void MultiMuse::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, "MultiMuse");
+    OperatorDeleteOverride(pBlock, "MultiMuse");
 }
 
 // NTSC-U/C: 0x001a9738, PAL: 0x001af4a0
 void MultiMuse::SaveFields(OBStream &stream) {
     const int nCount = mEntries.end() - mEntries.begin();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
 
     std::vector<TickObj<MuseMsg *> >::iterator it = mEntries.begin();
     for (; it != mEntries.end(); ++it) {
         Mid::MBT position = it->mPosition;
         position.Save(stream);
-        WriteMessagePointerToStream(stream, it->mValue);
+        stream << it->mValue;
     }
 }
 
 // NTSC-U/C: 0x001a97e8, PAL: 0x001af550
-std::ostream &PrintMuseEntry(std::ostream &stream, Mid::MBT position, MuseMsg *pMsg) {
+std::ostream &PrintMuseMsgTickObj(std::ostream &stream, Mid::MBT position, MuseMsg *pMsg) {
     std::ostream &open = stream << "[";
     position.Print(open);
     std::ostream &separated = open << ": ";
@@ -110,13 +110,13 @@ void MultiMuse::Append(const MultiMuse &other) {
 void MultiMuse::LoadFields(IBStream &stream) {
     mEntries.clear();
     int nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     mEntries.reserve(nCount);
     for (int i = 0; i < nCount; ++i) {
         Mid::MBT position;
         position.Load(stream);
         Message *pMsg;
-        ReadMessagePointerFromStream(stream, pMsg);
+        stream >> pMsg;
         TickObj<MuseMsg *> entry;
         entry.mPosition = position;
         entry.mValue = dynamic_cast<MuseMsg *>(pMsg);

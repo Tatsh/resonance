@@ -20,7 +20,7 @@ constexpr char kLoaderZoneName[] = "rndfile";
 
 constexpr char kDuplicateRequestFormat[] = "INTERNAL ERROR: RNDASYNCLOAD SAME FILE TWICE (%s:%s)\n";
 
-// Size of the buffer MemEndAccounting() writes its report into.
+// Size of the buffer MemLogEndCount() writes its report into.
 constexpr int kMemoryReportSize = 1024;
 
 inline const char *NameText(const HxStr &name) {
@@ -102,13 +102,13 @@ void RndAsyncLoader::Unload() {
 void RndAsyncLoader::Enqueue() {
     for (const auto &entry : gInProgressRndFiles) {
         if (entry.mRequest == this) {
-            LogPrintf(kDuplicateRequestFormat, NameText(mDirectory), NameText(mFile));
+            printf(kDuplicateRequestFormat, NameText(mDirectory), NameText(mFile));
             return;
         }
     }
     for (RndAsyncLoader *pRequest : gPendingRndFiles) {
         if (pRequest == this) {
-            LogPrintf(kDuplicateRequestFormat, NameText(mDirectory), NameText(mFile));
+            printf(kDuplicateRequestFormat, NameText(mDirectory), NameText(mFile));
             return;
         }
     }
@@ -159,7 +159,7 @@ void RndAsyncLoader::PollAsyncLoads() {
         HxStr freqPath = MakeFreqPath(pRequest->mDirectory);
         HxStr path = freqPath + "gen/" + pRequest->mFile + ".gz";
 
-        const int nLength = GetUncompressedFileLength(NameText(path));
+        const int nLength = FileTrueSize(NameText(path));
         if (nLength == 0) {
             Fatal("RndAsyncLoader::%s(): couldn't find: %s\n", __func__, NameText(path));
         }
@@ -186,15 +186,15 @@ void RndAsyncLoader::PollAsyncLoads() {
             HxStr freqPath = MakeFreqPath(pRequest->mDirectory);
             Rnd::FilePath::SetRoot(freqPath);
             if (MemAccountingEnabled()) {
-                MemBeginAccounting();
+                MemLogBeginCount();
             }
 
             Rnd::BufStream stream(static_cast<char *>(pData), nSize);
             Rnd::TheManager.Read(stream);
             if (MemAccountingEnabled()) {
                 char szReport[kMemoryReportSize];
-                MemEndAccounting(szReport, sizeof(szReport));
-                LogPrintf("MEMORY REPORT FOR: %s\n%s", NameText(pRequest->mFile), szReport);
+                MemLogEndCount(szReport, sizeof(szReport));
+                printf("MEMORY REPORT FOR: %s\n%s", NameText(pRequest->mFile), szReport);
             }
 
             pRequest->HarvestLoadedObjects();
@@ -206,9 +206,9 @@ void RndAsyncLoader::PollAsyncLoads() {
             break;
         }
 
-        LogPrintf("ERROR reading RND file async: %s:%s!!\n",
-                  NameText(pRequest->mDirectory),
-                  NameText(pRequest->mFile));
+        printf("ERROR reading RND file async: %s:%s!!\n",
+               NameText(pRequest->mDirectory),
+               NameText(pRequest->mFile));
         gInProgressRndFiles.erase(it);
     }
 

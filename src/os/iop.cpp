@@ -158,7 +158,7 @@ inline void InitMemoryCardLibrary() {
 void InitIop() {
     ConfigureRetailBoot();
     RebootIopWithImage();
-    InitDebugConsole();
+    InitDebugPrinting();
     InitBootConfig();
 }
 

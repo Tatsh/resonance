@@ -55,9 +55,9 @@ TnlPanel::TnlPanel(
 void TnlPanel::Refresh() {
     const int nIndex = mColorIndex % kLaneMatCount;
     if (mPowerbar == kNoPowerbar) {
-        mMat = FindMat(FormatString("tunnel mat%d", nIndex));
+        mMat = FindMat(Rnd::MakeString("tunnel mat%d", nIndex));
     } else {
-        mMat = FindMat(FormatString("powerbar mat%d", nIndex));
+        mMat = FindMat(Rnd::MakeString("powerbar mat%d", nIndex));
     }
     mColor = Color{1.0f, 1.0f, 1.0f, 1.0f};
 

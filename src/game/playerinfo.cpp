@@ -22,53 +22,53 @@ void PlayerInfo::Print(std::ostream &stream) const {
 // NTSC-U/C: 0x00133578, PAL: 0x00133de0
 void PlayerInfo::Save(OBStream &stream) const {
     unsigned playerId = mPlayerId;
-    stream.Write(&playerId, sizeof(playerId));
+    stream.WriteLE(&playerId, sizeof(playerId));
 
     unsigned length = mColorName.mLen;
-    stream.Write(&length, sizeof(length));
+    stream.WriteLE(&length, sizeof(length));
     // An empty name has no buffer, and the stream receives the shared empty string in place of a
     // null pointer.
-    stream.WriteBytes(mColorName.mStr != nullptr ? mColorName.mStr : g_szEmptyString, length);
+    stream.Write(mColorName.mStr != nullptr ? mColorName.mStr : g_szEmptyString, length);
 
     mAppearance.Save(stream);
 
     int track = mTrack;
-    stream.Write(&track, sizeof(track));
+    stream.WriteLE(&track, sizeof(track));
 
     int active = mActive;
-    stream.Write(&active, sizeof(active));
+    stream.WriteLE(&active, sizeof(active));
 
     int ready = mReady;
-    stream.Write(&ready, sizeof(ready));
+    stream.WriteLE(&ready, sizeof(ready));
 
     int count = mEntries.end() - mEntries.begin();
-    stream.Write(&count, sizeof(count));
+    stream.WriteLE(&count, sizeof(count));
     for (std::vector<int>::const_iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
         int element = *it;
-        stream.Write(&element, sizeof(element));
+        stream.WriteLE(&element, sizeof(element));
     }
 }
 
 // NTSC-U/C: 0x00133740, PAL: 0x00133fa8
 void PlayerInfo::Load(IBStream &stream) {
-    stream.Read(&mPlayerId, sizeof(mPlayerId));
+    stream.ReadLE(&mPlayerId, sizeof(mPlayerId));
 
     unsigned length;
-    stream.Read(&length, sizeof(length));
+    stream.ReadLE(&length, sizeof(length));
     mColorName.Alloc(length);
-    stream.ReadBytes(
-        mColorName.mStr != nullptr ? mColorName.mStr : const_cast<char *>(g_szEmptyString), length);
+    stream.Read(mColorName.mStr != nullptr ? mColorName.mStr : const_cast<char *>(g_szEmptyString),
+                length);
 
     mAppearance.Load(stream);
 
-    stream.Read(&mTrack, sizeof(mTrack));
-    stream.Read(&mActive, sizeof(mActive));
-    stream.Read(&mReady, sizeof(mReady));
+    stream.ReadLE(&mTrack, sizeof(mTrack));
+    stream.ReadLE(&mActive, sizeof(mActive));
+    stream.ReadLE(&mReady, sizeof(mReady));
 
     int count;
-    stream.Read(&count, sizeof(count));
+    stream.ReadLE(&count, sizeof(count));
     mEntries.resize(count);
     for (std::vector<int>::iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
-        stream.Read(&*it, sizeof(*it));
+        stream.ReadLE(&*it, sizeof(*it));
     }
 }

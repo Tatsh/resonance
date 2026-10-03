@@ -127,11 +127,11 @@ public:
      * Test a ray against every level of the chain.
      *
      * @param ray The segment to test along.
-     * @param sink The collector to append intersections to.
+     * @param collisions The list to append intersections to.
      * @ghidraAddress NTSC-U/C: 0x00476ec0
      * @ghidraAddress PAL: 0x004b4b38
      */
-    void FindCollisions(const Ray &ray, Collideable::HitSink &sink);
+    void FindCollisions(const Segment &ray, std::list<Collideable::Collision> &collisions);
 
     /**
      * Resize the vertices of the finest level, which every level draws.

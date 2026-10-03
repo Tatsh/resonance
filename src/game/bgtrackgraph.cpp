@@ -34,7 +34,7 @@ void *BGTrackGraph::operator new(size_t nSize) {
 }
 
 void BGTrackGraph::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, kBGTrackGraphTag);
+    OperatorDeleteOverride(pBlock, kBGTrackGraphTag);
 }
 
 // NTSC-U/C: 0x0013fb10, PAL: 0x001404f0

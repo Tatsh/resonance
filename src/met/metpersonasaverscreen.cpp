@@ -144,7 +144,7 @@ inline void ShowNoSpace(MetScreen *pOwner, const HxStr &slotName, int nCopy, int
         buttons.push_back(GetMetString(kMetStrMsgRETRY));
         buttons.push_back(GetMetString(kMetStrMsgCONTINUE));
         HxStr format = GetMetString(kMetStrSaveFailNospace);
-        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slotName), nKilobytes));
+        HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(slotName), nKilobytes));
         MetMsgScreen::ShowActive(HxStr(kSaveNoSpaceDialogue),
                                  GetMetString(kMetStrMsgWARNING),
                                  text,
@@ -155,7 +155,7 @@ inline void ShowNoSpace(MetScreen *pOwner, const HxStr &slotName, int nCopy, int
         buttons.push_back(GetMetString(kMetStrMsgRETRY));
         buttons.push_back(GetMetString(kMetStrMsgCANCEL));
         HxStr format = GetMetString(kMetStrCopyFailNospace);
-        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slotName), nKilobytes));
+        HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(slotName), nKilobytes));
         MetMsgScreen::ShowActive(HxStr(kCopyNoSpaceDialogue),
                                  GetMetString(kMetStrMsgWARNING),
                                  text,
@@ -172,7 +172,7 @@ inline void ShowNoSpace(MetScreen *pOwner, const HxStr &slotName, int nCopy) {
         buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
         buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
         HxStr format = MetConfigText(kMetStrSaveFailNospace, kDialogueConfigCode, kSaveNoSpaceText);
-        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
+        HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(slotName)));
         MetMsgScreen::ShowActive(HxStr(kSaveNoSpaceDialogue),
                                  MetText(kMetStrMsgWARNING, kWarningTitle),
                                  text,
@@ -183,9 +183,9 @@ inline void ShowNoSpace(MetScreen *pOwner, const HxStr &slotName, int nCopy) {
         buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
         buttons.push_back(MetText(kMetStrMsgCANCEL, kCancelButton));
         HxStr format = MetConfigText(kMetStrCopyFailNospace, kDialogueConfigCode, kCopyNoSpaceText);
-        HxStr text(FormatString(TextOrEmpty(format),
-                                TextOrEmpty(slotName),
-                                GlobalSettings::shared()->mPersonaMinimumFreeClusters));
+        HxStr text(Rnd::MakeString(TextOrEmpty(format),
+                                   TextOrEmpty(slotName),
+                                   GlobalSettings::shared()->mPersonaMinimumFreeClusters));
         MetMsgScreen::ShowActive(HxStr(kCopyNoSpaceDialogue),
                                  MetText(kMetStrMsgWARNING, kWarningTitle),
                                  text,
@@ -204,7 +204,7 @@ inline void ShowNoCard(MetScreen *pOwner, const HxStr &slotName, int nDelete, in
         buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
         HxStr format =
             MetConfigText(kMetStrDelFailNocard, kDialogueConfigCode, kDeleteFailNoCardText);
-        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
+        HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(slotName)));
         MetMsgScreen::Show(HxStr(kMemCheckDialogue),
                            MetText(kMetStrMsgERROR, kErrorTitle),
                            text,
@@ -217,9 +217,9 @@ inline void ShowNoCard(MetScreen *pOwner, const HxStr &slotName, int nDelete, in
         HxStr format =
             MetConfigText(kMetStrSaveFailNocard, kDialogueConfigCode, kSaveFailNoCardText);
 #ifdef VIDEO_STANDARD_PAL
-        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(FirstCardSlotName())));
+        HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(FirstCardSlotName())));
 #else
-        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
+        HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(slotName)));
 #endif
         MetMsgScreen::Show(HxStr(kMemCheckDialogue),
                            MetText(kMetStrMsgERROR, kErrorTitle),
@@ -232,7 +232,7 @@ inline void ShowNoCard(MetScreen *pOwner, const HxStr &slotName, int nDelete, in
         buttons.push_back(MetText(kMetStrMsgCANCEL, kCancelButton));
         HxStr format =
             MetConfigText(kMetStrCopyFailNocard, kDialogueConfigCode, kCopyFailNoCardText);
-        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(slotName)));
+        HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(slotName)));
         MetMsgScreen::Show(HxStr(kMemCheckDialogue),
                            MetText(kMetStrMsgERROR, kErrorTitle),
                            text,
@@ -389,7 +389,7 @@ void MetPersonaSaverScreen::OnConnectState(MemcardConnectState state, int nStatu
         } else {
             format = ConfigText(kMetStrCopyFailFormat, kCopyFailFormatText);
         }
-        text = FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName));
+        text = Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName));
         MetMsgScreen::Show(HxStr(kFormatCheckDialogue),
                            MetText(kMetStrMsgERROR, kErrorTitle),
                            text,
@@ -433,16 +433,16 @@ void MetPersonaSaverScreen::OnConnectState(MemcardConnectState state, int nStatu
     if (bSave) {
         title = ConfigText(kMetStrSaveTitle, kSaveTitleKey);
         format = ConfigText(kMetStrMemSave, kSaveText);
-        text = FormatString(TextOrEmpty(format), TextOrEmpty(state.mSlotName));
+        text = Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(state.mSlotName));
         MetMsgScreen::Show(HxStr(kSaveDialogue), title, text, kNoButtons, buttons, this);
     } else if (bDelete) {
         std::vector<HxStr> noButtons;
         HxStr first = MetConfigText(kMetStrFreqMidDel1, kDialogueConfigCode, kDeleteFirstText);
         HxStr second = MetConfigText(kMetStrFreqMidDel2, kDialogueConfigCode, kDeleteSecondText);
-        HxStr deleting(FormatString(kDeleteFormat,
-                                    TextOrEmpty(first),
-                                    TextOrEmpty(mTargetSlot.mSlotName),
-                                    TextOrEmpty(second)));
+        HxStr deleting(Rnd::MakeString(kDeleteFormat,
+                                       TextOrEmpty(first),
+                                       TextOrEmpty(mTargetSlot.mSlotName),
+                                       TextOrEmpty(second)));
         MetMsgScreen::Show(HxStr(kDeletingDialogue),
                            MetText(kMetStrMsgWARNING, kWarningTitle),
                            deleting,
@@ -453,7 +453,7 @@ void MetPersonaSaverScreen::OnConnectState(MemcardConnectState state, int nStatu
         title = ConfigText(kMetStrCopyTitle, kCopyTitleKey);
         format = ConfigText(kMetStrMemCopy12, kCopyText);
         MemcardConnectState next = NextCardSlot(state);
-        text = FormatString(
+        text = Rnd::MakeString(
             TextOrEmpty(format), TextOrEmpty(next.mSlotName), TextOrEmpty(state.mSlotName));
         MetMsgScreen::Show(HxStr(kSaveDialogue), title, text, kNoButtons, buttons, this);
     }
@@ -474,7 +474,7 @@ void MetPersonaSaverScreen::OnCardFormatted(int, int nStatus) {
                                          nStatus == kMemcardStatusOk ? kFormatSuccessText :
                                                                        kFormatAlreadyText);
 #endif
-        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
+        HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
         MetMsgScreen::ShowActive(HxStr(kFormatDoneDialogue),
                                  MetText(kMetStrMsgWARNING, kWarningTitle),
                                  text,
@@ -504,7 +504,8 @@ int MetPersonaSaverScreen::CheckPersonaLimit() {
     std::vector<HxStr> buttons;
     buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
     HxStr format = MetConfigText(kMetStrFreqLimit, kDialogueConfigCode, kLimitText);
-    HxStr text(FormatString(TextOrEmpty(format), kMaxPersonas, TextOrEmpty(mTargetSlot.mSlotName)));
+    HxStr text(
+        Rnd::MakeString(TextOrEmpty(format), kMaxPersonas, TextOrEmpty(mTargetSlot.mSlotName)));
     MetMsgScreen::Show(HxStr(kLimitDialogue),
                        MetText(kMetStrMsgERROR, kErrorTitle),
                        text,
@@ -568,9 +569,9 @@ void MetPersonaSaverScreen::OnPersonasLoaded(int, int) {
             buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
             HxStr format =
                 MetConfigText(kMetStrDelFailNotfound, kDialogueConfigCode, kDeleteNotFoundText);
-            HxStr text(FormatString(TextOrEmpty(format),
-                                    TextOrEmpty(mPersona->mAppearance.mUserName),
-                                    TextOrEmpty(mTargetSlot.mSlotName)));
+            HxStr text(Rnd::MakeString(TextOrEmpty(format),
+                                       TextOrEmpty(mPersona->mAppearance.mUserName),
+                                       TextOrEmpty(mTargetSlot.mSlotName)));
             MetMsgScreen::Show(HxStr(kMemCheckDialogue),
                                MetText(kMetStrMsgERROR, kErrorTitle),
                                text,
@@ -586,7 +587,7 @@ void MetPersonaSaverScreen::OnPersonasLoaded(int, int) {
             std::vector<HxStr> buttons;
             buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
             HxStr format = MetConfigText(kMetStrFreqNewName, kDialogueConfigCode, kNewNameText);
-            HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
+            HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
             MetMsgScreen::Show(HxStr(kNameRequiredDialogue),
                                MetText(kMetStrMsgERROR, kErrorTitle),
                                text,
@@ -711,7 +712,7 @@ void MetPersonaSaverScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice)
         }
         MemcardManager::shared()->CreateFormatTask(mTargetSlot.mPortSlot);
         HxStr format = MetConfigText(kMetStrMemFormatGo, kDialogueConfigCode, kFormatGoText);
-        HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
+        HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
         std::vector<HxStr> noButtons;
         MetMsgScreen::Show(HxStr(kFormatGoDialogue),
                            MetText(kMetStrMsgWARNING, kWarningTitle),
@@ -822,7 +823,7 @@ void MetPersonaSaverScreen::AskToReplace(int bInLoadList) {
 void MetPersonaSaverScreen::AskToReplace() {
 #endif
     HxStr format = MetConfigText(kMetStrFreqReplace, kDialogueConfigCode, kReplaceText);
-    HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
+    HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mTargetSlot.mSlotName)));
     std::vector<HxStr> buttons;
     buttons.push_back(MetText(kMetStrMsgNO, kNoButton));
     buttons.push_back(MetText(kMetStrMsgYES, kYesButton));

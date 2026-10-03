@@ -46,8 +46,8 @@ TnlPlayer::TnlPlayer(Player *pPlayer, int nIndex, AppTunnel *pTunnel)
     : mPlayerNum(pPlayer->GetInputSlot() + 1), mCrippleFrame(kUnsetFrame),
       mCrippleActPath(FindObject<Rnd::TransAnim>("crip act path")), mActivatorFx(nullptr),
       mCrippleCamPath(FindObject<Rnd::TransAnim>("crip cam path")), mCamFx(nullptr),
-      mCam(FindObject<Rnd::Cam>(FormatString("tnl cam%d", mPlayerNum))), mCamIntro(nullptr),
-      mLocalView(FindObject<Rnd::View>(FormatString("tnl local%d.view", mPlayerNum))),
+      mCam(FindObject<Rnd::Cam>(Rnd::MakeString("tnl cam%d", mPlayerNum))), mCamIntro(nullptr),
+      mLocalView(FindObject<Rnd::View>(Rnd::MakeString("tnl local%d.view", mPlayerNum))),
       mTunnel(pTunnel), mUnusedWord(0), mIndex(nIndex), mPlayer(pPlayer),
       mActivator(nIndex, pPlayer->mColorName, this), mGridMarkers(pTunnel, mPlayerNum),
       mSabreTrail(nIndex, pPlayer->mColorName),
@@ -60,14 +60,14 @@ TnlPlayer::TnlPlayer(Player *pPlayer, int nIndex, AppTunnel *pTunnel)
         {0.0f, 0.0f, 0.0f, 1.0f},
     };
     // The binary does not test either effect transform for null.
-    mActivatorFx = FindObject<Rnd::Transformable>(FormatString("activator fx%d", mIndex));
+    mActivatorFx = FindObject<Rnd::Transformable>(Rnd::MakeString("activator fx%d", mIndex));
     ResetLocalXfm(mActivatorFx, identity);
     if (pPlayer->GetInputSlot() != kNoLocalSlot) {
         pSeeker->SetTrans(
-            FindObject<Rnd::Transformable>(FormatString("tnl cam slide%d", mPlayerNum)));
-        mCamFx = FindObject<Rnd::Transformable>(FormatString("tnl cam fx%d", mPlayerNum));
+            FindObject<Rnd::Transformable>(Rnd::MakeString("tnl cam slide%d", mPlayerNum)));
+        mCamFx = FindObject<Rnd::Transformable>(Rnd::MakeString("tnl cam fx%d", mPlayerNum));
         ResetLocalXfm(mCamFx, identity);
-        mCamIntro = FindObject<Rnd::TransAnim>(FormatString(
+        mCamIntro = FindObject<Rnd::TransAnim>(Rnd::MakeString(
             "tnl cam intro%d.tnm",
             static_cast<int>(Application::shared()->GetWorld()->mLocalPlayers.size())));
     } else {

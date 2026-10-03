@@ -209,7 +209,8 @@ void MetRemixDelScreen::EnterAndShow() {
             std::vector<HxStr> buttons;
             buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
             const HxStr format(ConfigText(kMetStrMcLoadFailNoCard, kNoCardText));
-            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
+            const HxStr text(
+                Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
             MetMsgScreen::Show(HxStr(kNoRemixDialogue),
                                MetText(kMetStrMsgERROR, kErrorTitle),
                                text,
@@ -222,7 +223,8 @@ void MetRemixDelScreen::EnterAndShow() {
             std::vector<HxStr> buttons;
             buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
             const HxStr format(ConfigText(kMetStrNoRemixOnCard, kNoRemixOnCardText));
-            const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
+            const HxStr text(
+                Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
             MetMsgScreen::Show(HxStr(kNoRemixDialogue),
                                MetText(kMetStrMsgERROR, kErrorTitle),
                                text,
@@ -250,7 +252,7 @@ void MetRemixDelScreen::EnterAndShow() {
     MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
     HxStr format = MetConfigText(kMetStrTMemDelType, kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(
-        HxStr(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName))));
+        HxStr(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName))));
     PushNamedScreen(HxStr(kDataScreen));
     MetScreen::EnterAndShow();
 }
@@ -371,10 +373,10 @@ inline void MetRemixDelScreen::StartDelete() {
     std::vector<HxStr> buttons;
     const HxStr first(ConfigText(kMetStrRemixDel1, kDeleteProgressFirst));
     const HxStr second(ConfigText(kMetStrRemixDel2, kDeleteProgressSecond));
-    const HxStr text(FormatString(kDeleteProgressFormat,
-                                  TextOrEmpty(first),
-                                  TextOrEmpty(mCardSlot.mSlotName),
-                                  TextOrEmpty(second)));
+    const HxStr text(Rnd::MakeString(kDeleteProgressFormat,
+                                     TextOrEmpty(first),
+                                     TextOrEmpty(mCardSlot.mSlotName),
+                                     TextOrEmpty(second)));
     MetMsgScreen::Show(HxStr(kDeleteDialogue),
                        MetText(kMetStrMsgDELETE, kDeleteTitle),
                        text,
@@ -392,7 +394,7 @@ void MetRemixDelScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
         if (nChoice == kChoiceYes) {
 #ifdef VIDEO_STANDARD_PAL
             // The European release logs only this path, while it builds the progress text.
-            LogPrintf("ok ay to delete remix\n");
+            printf("ok ay to delete remix\n");
 #endif
             StartDelete();
         } else {
@@ -474,7 +476,7 @@ void MetRemixDelScreen::OnExitFinished() {
         buttons.push_back(MetText(kMetStrMsgYES, kYesButton));
         const HxStr format(ConfigText(kMetStrRemixCopyAsk, kCopyAskDialogue));
         const MemcardConnectState target(NextCardSlot(mCardSlot));
-        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(target.mSlotName)));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(target.mSlotName)));
         MetMsgScreen::Show(HxStr(kCopyAskDialogue),
                            MetText(kMetStrMsgCOPY, kCopyTitle),
                            text,
@@ -541,7 +543,7 @@ void MetRemixDelScreen::OnRemixDeleted([[maybe_unused]] int nPortSlot, int nStat
         buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
         buttons.push_back(MetText(kMetStrMsgCANCEL, kCancelButton));
         const HxStr format(ConfigText(kMetStrDelFailNocard, kDeleteNoCardDialogue));
-        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
         MetMsgScreen::ShowActive(HxStr(kDeleteNoCardDialogue),
                                  MetText(kMetStrMsgERROR, kErrorTitle),
                                  text,

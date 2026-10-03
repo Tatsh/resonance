@@ -5,24 +5,6 @@
 #ifdef __cplusplus
 #include "os/hxstr.h"
 
-extern "C" {
-#endif
-
-/**
- * Write a formatted message to the debug console.
- *
- * The console is `stdout`. The routine reports nothing of its own and forwards everything to the C
- * library.
- *
- * @param pszFormat A printf-style format string.
- * @ghidraAddress NTSC-U/C: 0x0053dde0
- * @ghidraAddress PAL: 0x0057da10
- */
-void LogPrintf(const char *pszFormat, ...);
-
-#ifdef __cplusplus
-}
-
 /**
  * Report a recoverable problem and continue.
  *
@@ -30,7 +12,7 @@ void LogPrintf(const char *pszFormat, ...);
  * reports 1, which is the only use either the flag or this routine makes of that boot option.
  *
  * The message goes to ShowReportedMessage() rather than to the console. A warning therefore shares
- * the display path with the failure reports and not with LogPrintf().
+ * the display path with the failure reports and not with printf().
  *
  * @param pszFormat A printf-style format string.
  * @ghidraAddress NTSC-U/C: 0x0052e3e8
@@ -78,22 +60,22 @@ void Error(const char *pszFormat, ...);
  *
  * The report is built in a `strstream` as "Assertion failed ", the file, ":", the line, ": ", and
  * the message, then shown through ShowScreenMessage() for 600 units before `exit(0)`. No call
- * site survives in the shipped program, and the name is inferred from the text.
+ * site remains in the shipped program.
  *
  * @param pszMessage The message.
  * @param pszFile The reporting file.
- * @param nLine The reporting line.
+ * @param nLine The reporting line, written as an unsigned number.
  * @ghidraAddress NTSC-U/C: 0x0052e510
  * @ghidraAddress PAL: 0x0056dbc0
  */
-void ReportAssertion(const char *pszMessage, const char *pszFile, int nLine)
+void SysAssert(const char *pszMessage, const char *pszFile, unsigned int nLine)
     __attribute__((noreturn));
 
 /**
  * Show a registered script template, formatted with the arguments, as an alert.
  *
- * The template text is fetched with GetScriptTemplate(), formatted through FormatMessage(), and
- * passed to ShowAlertMessage(). No call site survives in the shipped program, and the name is
+ * The template text is fetched with Resid2Str(), formatted through FormatMessage(), and
+ * passed to ShowAlertMessage(). No call site remains in the shipped program, and the name is
  * inferred.
  *
  * @param nTemplate The template identifier.
@@ -126,8 +108,7 @@ HxStr FormatMessage(const HxStr &format, va_list args, int nUnused);
 /**
  * Format a message, passing zero as the word FormatMessage() does not read.
  *
- * QueryConfigVector() and PythonEvt::QueryOption() format their reports through it. The title is
- * inferred.
+ * QueryConfigVector() and PythonEvt::QueryOption() format their reports through it.
  *
  * @param format The format string.
  * @param args The arguments for it.
@@ -135,7 +116,7 @@ HxStr FormatMessage(const HxStr &format, va_list args, int nUnused);
  * @ghidraAddress NTSC-U/C: 0x005e4148
  * @ghidraAddress PAL: 0x00626308
  */
-HxStr FormatMessage(const HxStr &format, va_list args);
+HxStr FmtImp(const HxStr &format, va_list args);
 
 /**
  * Format a message from a C string and a variable argument list.
@@ -153,7 +134,7 @@ HxStr FormatHxStr(const char *pszFormat, ...);
 /**
  * Format a registered script template with a variable argument list.
  *
- * The template text is fetched with GetScriptTemplate() and formatted through FormatMessage(). The
+ * The template text is fetched with Resid2Str() and formatted through FormatMessage(). The
  * shipped program does not call it, and the title is inferred.
  *
  * @param nTemplate The template identifier.
@@ -199,7 +180,7 @@ void ShowAlertMessage(const HxStr &text);
  * The body of this routine is a bare return in the shipped build. None of the three messages that
  * go through it therefore ever appears. The reconstruction retains the call sites because the
  * strings and the calls are both in the image. The routine sits in the debug console unit, between
- * InitDebugGs() and OpenDebugConsole(), and devconsole.cpp defines it.
+ * Gs_Initialize() and InitDevConsole(), and devconsole.cpp defines it.
  *
  * The text is already formatted at every call site, so the routine is not variadic. Both the name
  * and the second argument's unit are inferred: the three callers pass a duration of 300, 600, and a

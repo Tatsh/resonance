@@ -84,7 +84,7 @@ public:
      * record. Rnd::MatAnim is the only code that touches the four channels, through the nested
      * access a member of the enclosing class has.
      */
-    class StageAnim {
+    class Stage {
     public:
         /**
          * One keyframe of the texture channel of a stage.
@@ -121,7 +121,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x004dbe38
          * @ghidraAddress PAL: 0x0051a3d8
          */
-        StageAnim() = default;
+        Stage() = default;
 
         /**
          * Copy the four channels and the owner of another stage animation.
@@ -133,7 +133,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x004d86d8
          * @ghidraAddress PAL: 0x00516bf0
          */
-        StageAnim(const StageAnim &other) = default;
+        Stage(const Stage &other) = default;
 
         /**
          * Release the four channels.
@@ -144,7 +144,7 @@ public:
          * @ghidraAddress NTSC-U/C: 0x004dbd88
          * @ghidraAddress PAL: 0x0051a328
          */
-        ~StageAnim() = default;
+        ~Stage() = default;
 
         /**
          * Copy the four channels and the owner of another stage animation over this one.
@@ -152,7 +152,7 @@ public:
          * @param other The stage animation to copy.
          * @return This stage animation.
          */
-        StageAnim &operator=(const StageAnim &other) = default;
+        Stage &operator=(const Stage &other) = default;
 
         /**
          * Serialise the stage animation.
@@ -233,10 +233,10 @@ public:
 
         // Channel blended into the last row of the stage transform, which is its translation.
         std::list<Vector3Key> mTranslateKeys; // +0x00
-        // Channel blended and then scaled into the stage transform through ScaleRows3x3().
+        // Channel blended and then scaled into the stage transform through Rnd::Scale().
         std::list<Vector3Key> mScaleKeys; // +0x04
         // Channel of Euler angles blended and then built into the stage transform through
-        // EulerAnglesToMatrix3x3().
+        // Rnd::MakeRotMatrix().
         std::list<Vector3Key> mRotateKeys; // +0x08
         // Channel of texture references. Its element is 8 bytes, a texture at `+0x00` and the
         // frame at `+0x04`, which the reference walk at `0x004d3750` pins by taking a reference on
@@ -405,8 +405,8 @@ protected:
      * Rnd::Animatable vtable slot 3. Nothing happens without a material. The stage half walks the
      * stages of mKeysOwner against `mMat->mStages`, bounded by both counts. Per stage, the
      * translation writes the last transform row, the rotation rebuilds the basis through
-     * EulerAnglesToMatrix3x3(), the scale folds into it through ScaleRows3x3(), and the texture
-     * channel replaces the stage texture. The vector blends write three components and take the
+     * Rnd::MakeRotMatrix(), the scale folds into it through Rnd::Scale(), and the texture channel
+     * replaces the stage texture. The vector blends write three components and take the
      * fourth word from the later key.
      *
      * The colour half hands each blended colour to the material through its setters. The specular
@@ -437,7 +437,7 @@ private:
     // The material this animation drives.
     Mat *mMat; // +0x18
     // One stage animation per texture stage of the material.
-    std::vector<StageAnim> mStages; // +0x1c
+    std::vector<Stage> mStages; // +0x1c
     // Animation whose channels this one reads, itself for an animation that owns its keys.
     MatAnim *mKeysOwner; // +0x28
     // Channel that drives Rnd::Mat::SetDiffuse().

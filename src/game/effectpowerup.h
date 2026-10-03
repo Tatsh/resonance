@@ -16,7 +16,7 @@ public:
      *
      * Inline. CreateForType() expands it and stores the kind after the table.
      *
-     * @param nEffectType The kind, a HudItemKind from kHudItemVolume through kHudItemChorus.
+     * @param nEffectType The kind, a PowerupType from kHudItemVolume through kHudItemChorus.
      */
     explicit EffectPowerup(int nEffectType) : mEffectType(nEffectType) {
     }

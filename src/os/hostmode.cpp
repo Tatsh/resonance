@@ -62,9 +62,9 @@ int g_nLanguage = SCE_FRENCH_LANGUAGE;
 // report. InitBootConfig() is the one caller.
 // NTSC-U/C: 0x0050dad8, PAL: 0x0054cfd0
 void ForceCdOnlyBoot() {
-    LogPrintf(" Running from CD only, since we couldn't find the config file\n");
+    printf(" Running from CD only, since we couldn't find the config file\n");
     g_nHostMode = kHostModeCdOnly;
-    LogPrintf(" Running from CD ONLY, forcing arkfiles ON and async ON\n");
+    printf(" Running from CD ONLY, forcing arkfiles ON and async ON\n");
     g_nUsingArkFiles = 1;
     g_nUsingCdMedia = 1;
     MemOpenLog(nullptr);
@@ -173,7 +173,7 @@ void TerminateBootConfig() {
 }
 
 // NTSC-U/C: 0x0050f0c8, PAL: 0x0054e670
-bool FileExists(const char *pszPath) {
+bool CheckCDFile(const char *pszPath) {
     const int nDescriptor = sceOpen(pszPath, kOpenReadOnly);
     if (nDescriptor < 0) {
         return false;

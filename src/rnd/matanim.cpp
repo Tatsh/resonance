@@ -147,14 +147,14 @@ void InterpolateTex(Tex *pFrom,
 }
 
 // NTSC-U/C: 0x004db6b0, PAL: 0x00519bf8
-Stream &ReadTexKey(Stream &stream, MatAnim::StageAnim::TexKey &key) {
+Stream &ReadTexKey(Stream &stream, MatAnim::Stage::TexKey &key) {
     ReadObjectRef(stream, key.mValue);
     stream.ReadLE(&key.mFrame, sizeof(key.mFrame));
     return stream;
 }
 
 // NTSC-U/C: 0x004dda98, PAL: 0x0051c050
-Stream &ReadTexKeys(Stream &stream, std::list<MatAnim::StageAnim::TexKey> &keys) {
+Stream &ReadTexKeys(Stream &stream, std::list<MatAnim::Stage::TexKey> &keys) {
     int nCount = 0;
     stream.ReadLE(&nCount, sizeof(nCount));
     keys.resize(nCount);
@@ -177,7 +177,7 @@ Stream &ReadTexList(Stream &stream, std::list<Tex *> &textures) {
 }
 
 // NTSC-U/C: 0x004dadc8, PAL: 0x005192e0
-Stream &WriteTexKeys(Stream &stream, const std::list<MatAnim::StageAnim::TexKey> &keys) {
+Stream &WriteTexKeys(Stream &stream, const std::list<MatAnim::Stage::TexKey> &keys) {
     const int nCount = keys.size();
     stream.WriteLE(&nCount, sizeof(nCount));
     for (const auto &key : keys) {
@@ -188,7 +188,7 @@ Stream &WriteTexKeys(Stream &stream, const std::list<MatAnim::StageAnim::TexKey>
 }
 
 // NTSC-U/C: 0x004daad0, PAL: 0x00518fe8
-Dbg &DumpTexKeys(Dbg &sink, const std::list<MatAnim::StageAnim::TexKey> &keys) {
+Dbg &DumpTexKeys(Dbg &sink, const std::list<MatAnim::Stage::TexKey> &keys) {
     sink.Print("(size:");
     sink.Format("%u", keys.size());
     sink.Print(")");
@@ -209,7 +209,7 @@ Dbg &DumpTexKeys(Dbg &sink, const std::list<MatAnim::StageAnim::TexKey> &keys) {
 }
 
 // NTSC-U/C: 0x004d8b78, PAL: 0x00517090
-Dbg &DumpStageAnims(Dbg &sink, std::vector<MatAnim::StageAnim> &stages) {
+Dbg &DumpStageAnims(Dbg &sink, std::vector<MatAnim::Stage> &stages) {
     sink.Print("(size:");
     sink.Format("%u", stages.size());
     sink.Print(")");
@@ -226,7 +226,7 @@ Dbg &DumpStageAnims(Dbg &sink, std::vector<MatAnim::StageAnim> &stages) {
 }
 
 // NTSC-U/C: 0x004d9338, PAL: 0x00517850
-Stream &ReadStageAnims(Stream &stream, std::vector<MatAnim::StageAnim> &stages) {
+Stream &ReadStageAnims(Stream &stream, std::vector<MatAnim::Stage> &stages) {
     int nCount = 0;
     stream.ReadLE(&nCount, sizeof(nCount));
     stages.resize(nCount);
@@ -237,7 +237,7 @@ Stream &ReadStageAnims(Stream &stream, std::vector<MatAnim::StageAnim> &stages) 
 }
 
 // NTSC-U/C: 0x004dd908, PAL: 0x0051bec0
-Stream &WriteStageAnims(Stream &stream, std::vector<MatAnim::StageAnim> &stages) {
+Stream &WriteStageAnims(Stream &stream, std::vector<MatAnim::Stage> &stages) {
     const int nCount = stages.size();
     stream.WriteLE(&nCount, sizeof(nCount));
     for (auto &stage : stages) {
@@ -252,7 +252,7 @@ Stream &WriteStageAnims(Stream &stream, std::vector<MatAnim::StageAnim> &stages)
 HxStr MatAnim::sClassName("MatAnim");
 
 // NTSC-U/C: 0x004dd500, PAL: 0x0051baa0
-void MatAnim::StageAnim::Save(Stream &stream) {
+void MatAnim::Stage::Save(Stream &stream) {
     stream << mTranslateKeys;
     stream << mScaleKeys;
     stream << mRotateKeys;
@@ -260,7 +260,7 @@ void MatAnim::StageAnim::Save(Stream &stream) {
 }
 
 // NTSC-U/C: 0x004d4068, PAL: 0x00512558
-void MatAnim::StageAnim::Load(Stream &stream) {
+void MatAnim::Stage::Load(Stream &stream) {
     if (g_nRndMatLoadVersion < kStageTexKeyRevision) {
         std::list<Tex *> textures;
         ReadTexList(stream, textures);
@@ -286,7 +286,7 @@ void MatAnim::StageAnim::Load(Stream &stream) {
 }
 
 // NTSC-U/C: 0x004d3f70, PAL: 0x00512460
-void MatAnim::StageAnim::Dump(Dbg &sink) {
+void MatAnim::Stage::Dump(Dbg &sink) {
     sink.Print(" transKeys:");
     DumpVector3Keys(sink, mTranslateKeys);
     sink.Print(" scaleKeys:");
@@ -300,7 +300,7 @@ void MatAnim::StageAnim::Dump(Dbg &sink) {
 }
 
 // NTSC-U/C: 0x004d3d30, PAL: 0x00512220
-void MatAnim::StageAnim::AddTexKey(Tex *pTex, float flFrame) {
+void MatAnim::Stage::AddTexKey(Tex *pTex, float flFrame) {
     if (pTex != nullptr) {
         pTex->AddRef(mOwner);
     }
@@ -312,7 +312,7 @@ void MatAnim::StageAnim::AddTexKey(Tex *pTex, float flFrame) {
 }
 
 // NTSC-U/C: 0x004d3e30, PAL: 0x00512320
-void MatAnim::StageAnim::RemoveTexKey(int nIndex) {
+void MatAnim::Stage::RemoveTexKey(int nIndex) {
     auto it = mTexKeys.begin();
     // Yes, the binary counts the index down to zero. A negative index walks forward.
     for (int i = nIndex; i != 0; --i) {
@@ -326,7 +326,7 @@ void MatAnim::StageAnim::RemoveTexKey(int nIndex) {
 }
 
 // NTSC-U/C: 0x004dd4a0, PAL: 0x0051ba40
-void MatAnim::StageAnim::SetTexKeyFrame(int nIndex, float flFrame) {
+void MatAnim::Stage::SetTexKeyFrame(int nIndex, float flFrame) {
     auto it = mTexKeys.begin();
     std::advance(it, nIndex);
     it->mFrame = flFrame;
@@ -501,18 +501,18 @@ void MatAnim::SetFrameSelf(float flFrame) {
         Vector3 angles;
         angles.w = 1.0f;
         if (BlendChannelVector3(it->mRotateKeys, flFrame, angles)) {
-            EulerAnglesToMatrix3x3(&angles.x, &stage.mXfm.mBasisX.x);
+            Rnd::MakeRotMatrix(&angles.x, &stage.mXfm.mBasisX.x);
         }
 
         Vector3 scale;
         scale.w = 1.0f;
         if (BlendChannelVector3(it->mScaleKeys, flFrame, scale)) {
-            ScaleRows3x3(&scale.x, &stage.mXfm.mBasisX.x, &stage.mXfm.mBasisX.x);
+            Rnd::Scale(&scale.x, &stage.mXfm.mBasisX.x, &stage.mXfm.mBasisX.x);
         }
 
         if (!it->mTexKeys.empty()) {
-            const StageAnim::TexKey *pFrom = nullptr;
-            const StageAnim::TexKey *pTo = nullptr;
+            const Stage::TexKey *pFrom = nullptr;
+            const Stage::TexKey *pTo = nullptr;
             float flBlend = 0.0f;
             SelectKeyPair(it->mTexKeys, flFrame, pFrom, pTo, flBlend);
             Tex *pTex = nullptr;
@@ -582,7 +582,7 @@ void MatAnim::SetKeysOwner(MatAnim *pOwner) {
 
 // NTSC-U/C: 0x004d3b58, PAL: 0x00512048
 void MatAnim::SetNumStages(int nCount) {
-    std::vector<StageAnim> &stages = mKeysOwner->mStages;
+    std::vector<Stage> &stages = mKeysOwner->mStages;
     if (static_cast<unsigned>(nCount) < stages.size()) {
         for (auto it = stages.begin() + nCount; it != stages.end(); ++it) {
             for (const auto &key : it->mTexKeys) {

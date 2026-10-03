@@ -51,11 +51,11 @@ public:
      * The powerup already stored is deleted first, whatever its kind, so a store of one never
      * queues. A ChoosePowerupMsg follows with the new kind.
      *
-     * @param nType The kind.
+     * @param type The kind.
      * @ghidraAddress NTSC-U/C: 0x001cb890
      * @ghidraAddress PAL: 0x001d1748
      */
-    virtual void Add(int nType);
+    virtual void Add(PowerupType type);
 
     /**
      * Do nothing. A store of one has no other entry to move to.
@@ -100,7 +100,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001cca00
      * @ghidraAddress PAL: 0x001d28b8
      */
-    virtual int HasSelection();
+    virtual int HasSelection() const;
 
     /**
      * Send the stored kind again, for a listener that has just registered.
@@ -111,7 +111,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x001cba20
      * @ghidraAddress PAL: 0x001d18d8
      */
-    virtual void SendState();
+    virtual void SendState() const;
 
 private:
     // The stored kind, or -1 for an empty store.

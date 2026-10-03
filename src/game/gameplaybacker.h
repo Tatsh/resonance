@@ -6,11 +6,10 @@ class HxStr;
 /**
  * Playback of a recorded game session that GameManagerImpl::Recreate() installs.
  *
- * The class is not polymorphic, emits no RTTI, and has no embedded file path, so the title is
- * inferred from its counterpart GameRecorder and from the manager slot that installs it. The object
- * is 4 bytes and is allocated with the untagged allocator.
+ * The class is not polymorphic and emits no RTTI. The object is 4 bytes and is allocated with the
+ * untagged allocator.
  */
-class GamePlayback {
+class GamePlaybacker {
 public:
     /**
      * Restore the recorded session and start the watchdog's playback of it.
@@ -25,7 +24,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0010cf30
      * @ghidraAddress PAL: 0x0010d208
      */
-    GamePlayback(const HxStr &file, GameManagerImpl *pManager, int nFlag);
+    GamePlaybacker(const HxStr &file, GameManagerImpl *pManager, int nFlag);
 
     /**
      * Close the watchdog's playback.
@@ -33,7 +32,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0010f0d8
      * @ghidraAddress PAL: 0x0010f538
      */
-    ~GamePlayback();
+    ~GamePlaybacker();
 
 private:
     GameManagerImpl *mManager; // +0x00

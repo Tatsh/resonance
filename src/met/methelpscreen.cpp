@@ -88,7 +88,7 @@ PlaceText(Rnd::Text *pText, const HxStr &fontName, const HxStr &textValue, Vecto
     pText->SetFont(dynamic_cast<Rnd::Font *>(Rnd::TheManager.Find(fontName)));
     pText->SetText(textValue);
     Vector3 advance = pText->CharPosition(textValue.mLen);
-    AddVec3(&end.x, &advance.x, &end.x);
+    Rnd::Add(&end.x, &advance.x, &end.x);
 }
 
 // Shift the first nCount texts left by half the width of the run from origin to end.
@@ -102,7 +102,7 @@ inline void CentreTexts(std::vector<Rnd::Text *> &texts,
         std::memcpy(&translation, texts[i]->mLocalXfm[kTranslationRow], sizeof(translation));
         Vector3 centred;
         centred.w = kVectorPadding;
-        Vec3Sub(&translation.x, &shift.x, &centred.x);
+        Rnd::Subtract(&translation.x, &shift.x, &centred.x);
         std::memcpy(texts[i]->mLocalXfm[kTranslationRow], &centred, sizeof(centred));
         texts[i]->mDirty = 1;
     }
@@ -128,7 +128,7 @@ void MetHelpScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
     for (int i = 0; i < kInfoTextCount; ++i) {
-        Rnd::Text *pText = FindText(FormatString(kInfoTextFormat, i + 1));
+        Rnd::Text *pText = FindText(Rnd::MakeString(kInfoTextFormat, i + 1));
         pText->SetText(HxStr(kNoText));
         pText->SetShowing(1);
         mInfoTexts.push_back(pText);
@@ -136,7 +136,7 @@ void MetHelpScreen::ResolveContainerViews() {
     std::memcpy(&mInfoOrigin, mInfoTexts[0]->mLocalXfm[kTranslationRow], sizeof(mInfoOrigin));
 
     for (int i = 0; i < kTitleTextCount; ++i) {
-        Rnd::Text *pText = FindText(FormatString(kTitleTextFormat, i + 1));
+        Rnd::Text *pText = FindText(Rnd::MakeString(kTitleTextFormat, i + 1));
         pText->SetText(HxStr(kNoText));
         pText->SetShowing(1);
         mTitleTexts.push_back(pText);

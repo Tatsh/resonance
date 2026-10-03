@@ -383,7 +383,7 @@ void MetDEMOStageSel::ShowSelectedSong() {
 
     const HxStr artist(QueryConfigString(kArtistConfigCode, TextOf(level)));
     const HxStr title(QueryConfigString(kTitleConfigCode, TextOf(level)));
-    mLabelText->SetText(HxStr(FormatString(kLabelFormat, TextOf(artist), TextOf(title))));
+    mLabelText->SetText(HxStr(Rnd::MakeString(kLabelFormat, TextOf(artist), TextOf(title))));
     mLoadPending = 1;
 }
 #endif

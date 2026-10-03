@@ -177,11 +177,11 @@ public:
      * Rnd::Collideable vtable slot 1.
      *
      * @param ray The segment to test along.
-     * @param sink The collector to append intersections to.
+     * @param collisions The list to append intersections to.
      * @ghidraAddress NTSC-U/C: 0x00476a10
      * @ghidraAddress PAL: 0x004b4688
      */
-    virtual void FindCollisions(const Ray &ray, HitSink &sink);
+    virtual void FindCollisions(const Segment &ray, std::list<Collision> &collisions);
 
     /**
      * Regenerate the geometry that the current state calls for.

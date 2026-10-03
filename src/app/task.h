@@ -129,7 +129,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004b6958
      * @ghidraAddress PAL: 0x004f4c68
      */
-    int State();
+    int State() const;
 
     /**
      * Test whether the task has been started and has not yet finished.
@@ -138,7 +138,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004b65e8
      * @ghidraAddress PAL: 0x004f48f8
      */
-    int InProgress();
+    int InProgress() const;
 
     /**
      * Read how far the task has progressed.
@@ -156,7 +156,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x004b6638
      * @ghidraAddress PAL: 0x004f4948
      */
-    HxStr GetStatus();
+    HxStr GetStatus() const;
 
     /**
      * Test whether the task suppresses its progress report.
@@ -195,7 +195,7 @@ protected:
      *
      * @return The title.
      */
-    virtual HxStr Name() = 0;
+    virtual HxStr Name() const = 0;
 
     /**
      * Report whether the task suppresses its progress report.

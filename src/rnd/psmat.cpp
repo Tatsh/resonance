@@ -341,7 +341,7 @@ void PsMat::SetupUvXfm() {
     }
     Stage &stage = mStages[g_nSelectedStage];
     g_nSelectedGenMode = stage.mGenMode;
-    if (stage.mGenMode == Stage::kGenModeSphere) {
+    if (stage.mGenMode == kGenModeSphere) {
         g_pSelectedUvXfm = &g_sphereMapUvXfm;
         g_pSelectedStageXfm = stage.mUseXfm != 0 ? &stage.mXfm : nullptr;
         return;
@@ -371,7 +371,7 @@ void PsMat::SetupUvXfm() {
 // is dead in the shipped image. Its own receiver is unused, which is what identifies
 // it as an instance method rather than a free function.
 void PsMat::SelectStageClamp(const Stage &stage) {
-    if (stage.mWrap == Stage::kWrapModeClamp) {
+    if (stage.mWrap == kWrapModeClamp) {
         Rnd::ThePs.SetGsReg(kGsRegClamp1, kClampBothAxes, kClampModeMask);
     } else {
         Rnd::ThePs.SetGsReg(kGsRegClamp1, kRepeatBothAxes, kClampModeMask);

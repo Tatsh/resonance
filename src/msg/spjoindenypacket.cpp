@@ -43,11 +43,11 @@ void SPJoinDenyPacket::saveGuts(OBStream &stream) const {
     Packet::saveGuts(stream);
 
     int reasonCode = mReasonCode;
-    SaveHxStr(stream.Write(&reasonCode, sizeof(reasonCode)), mReason);
+    SaveHxStr(stream.WriteLE(&reasonCode, sizeof(reasonCode)), mReason);
 }
 
 // NTSC-U/C: 0x003e5e98, PAL: 0x0041e178
 void SPJoinDenyPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
-    LoadHxStr(stream.Read(&mReasonCode, sizeof(mReasonCode)), mReason);
+    LoadHxStr(stream.ReadLE(&mReasonCode, sizeof(mReasonCode)), mReason);
 }

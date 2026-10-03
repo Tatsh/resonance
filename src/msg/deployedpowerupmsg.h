@@ -46,7 +46,7 @@ public:
      * @param nBarCount The number of bars it covers.
      * @param nTrack The track it acts on.
      */
-    DeployedPowerupMsg(HudItemKind kind,
+    DeployedPowerupMsg(PowerupType kind,
                        Player *pPlayer,
                        Player *pTarget,
                        int nFirstBar,
@@ -94,7 +94,7 @@ public:
      */
     virtual const char *GetName() const;
 
-    HudItemKind mKind; /*!< The deployed powerup. +0x04 */
+    PowerupType mKind; /*!< The deployed powerup. +0x04 */
     Player *mPlayer;   /*!< The deploying player. +0x08 */
     Player *mTarget;   /*!< The player a bumper strikes. +0x0c */
     int mFirstBar;     /*!< The first bar the powerup covers. +0x10 */

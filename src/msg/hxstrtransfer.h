@@ -11,17 +11,17 @@
  * copy, which is the shape of an inline function. The call sites are GameChatPacket::saveGuts() at
  * `0x003e8458`, its second emission at `0x003e8720` in TestArbiterPacket's table, and
  * SPJoinDenyPacket::saveGuts() at `0x003e5d58`. The name and the placement are inferred. The length
- * goes through OBStream::Write() and the text through OBStream::WriteBytes() on the same stream,
+ * goes through OBStream::WriteLE() and the text through OBStream::Write() on the same stream,
  * and only the second call's result is returned.
  *
  * @param stream The stream to write to.
  * @param text The string to write.
- * @return The stream WriteBytes() returned.
+ * @return The stream Write() returned.
  */
 inline OBStream &SaveHxStr(OBStream &stream, const HxStr &text) {
     int length = text.mLen;
-    stream.Write(&length, sizeof(length));
-    return stream.WriteBytes(text.mStr != nullptr ? text.mStr : g_szEmptyString, length);
+    stream.WriteLE(&length, sizeof(length));
+    return stream.Write(text.mStr != nullptr ? text.mStr : g_szEmptyString, length);
 }
 
 /**
@@ -34,12 +34,12 @@ inline OBStream &SaveHxStr(OBStream &stream, const HxStr &text) {
  *
  * @param stream The stream to read from.
  * @param text The string to fill.
- * @return The stream ReadBytes() returned.
+ * @return The stream Read() returned.
  */
 inline IBStream &LoadHxStr(IBStream &stream, HxStr &text) {
     int length;
-    stream.Read(&length, sizeof(length));
+    stream.ReadLE(&length, sizeof(length));
     text.Alloc(length);
-    return stream.ReadBytes(text.mStr != nullptr ? text.mStr : const_cast<char *>(g_szEmptyString),
-                            length);
+    return stream.Read(text.mStr != nullptr ? text.mStr : const_cast<char *>(g_szEmptyString),
+                       length);
 }

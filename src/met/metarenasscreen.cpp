@@ -214,7 +214,7 @@ void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
     mButtonView->RemoveAllDraws();
     mButtonView->RemoveAllTranses();
 
-    const HxStr viewName(FormatString(kButtonViewFormat, nArenaCount));
+    const HxStr viewName(Rnd::MakeString(kButtonViewFormat, nArenaCount));
     Rnd::View *pView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(viewName));
     mButtonView->AddDraw(pView, nullptr);
     mButtonView->AddTrans(pView);
@@ -399,7 +399,7 @@ void MetArenasScreen::ResolveContainerViews() {
     }
 
     for (int i = kFirstButton; i <= kLastButton; ++i) {
-        mArenaButtons->Add(HxStr(FormatString(kButtonFormat, i)), HxStr(kNoName));
+        mArenaButtons->Add(HxStr(Rnd::MakeString(kButtonFormat, i)), HxStr(kNoName));
     }
 
     mScreenshotMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr(kScreenshotMaterial)));

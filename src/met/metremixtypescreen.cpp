@@ -354,12 +354,12 @@ void MetRemixTypeScreen::OnExitFinished() {
                 HxStr text;
                 if (GetLanguage() == SCE_GERMAN_LANGUAGE) {
                     const HxStr cardName = FirstCardSlotName();
-                    text = FormatString(TextOrEmpty(format),
-                                        TextOrEmpty(cardName),
-                                        GlobalSettings::shared()->mMinimumFreeClusters);
+                    text = Rnd::MakeString(TextOrEmpty(format),
+                                           TextOrEmpty(cardName),
+                                           GlobalSettings::shared()->mMinimumFreeClusters);
                 } else {
-                    text = FormatString(TextOrEmpty(format),
-                                        GlobalSettings::shared()->mMinimumFreeClusters);
+                    text = Rnd::MakeString(TextOrEmpty(format),
+                                           GlobalSettings::shared()->mMinimumFreeClusters);
                 }
                 const HxStr dialogue(kNoSpaceDialogue);
                 const HxStr title = GetMetString(kMetStrMsgWARNING);

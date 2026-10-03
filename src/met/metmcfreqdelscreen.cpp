@@ -247,7 +247,7 @@ void MetMCFreqDelScreen::OnPanelActivated() {
     }
     std::vector<HxStr> buttons;
     const HxStr format(MetConfigText(kMetStrMemLoad, kDialogueConfigCode, kLoadKey));
-    const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
+    const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
     MetMsgScreen::Show(HxStr(kLoadMessage),
                        MetText(kMetStrMsgWARNING, kWarningTitle),
                        text,
@@ -276,7 +276,7 @@ void MetMCFreqDelScreen::ShowList() {
 
     const HxStr format(MetConfigText(kMetStrTMemDelType, kTitleConfigCode, kListTitleFormatKey));
     MetScreenTitleScreen::SetTitle(
-        HxStr(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName))));
+        HxStr(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName))));
     PushNamedScreen(HxStr(kHelpScreen));
     MetHelpScreen::SelectPreset(MetText(kMetStrHOnlyBackTitle, kOnlyBackPreset));
     MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
@@ -326,7 +326,7 @@ void MetMCFreqDelScreen::OnExitFinished() {
         buttons.push_back(MetText(kMetStrMsgYES, kYesButton));
         const HxStr format(MetConfigText(kMetStrFreqCopyOk, kDialogueConfigCode, kCopyKey));
         const MemcardConnectState next(NextCardSlot(mCardSlot));
-        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(next.mSlotName)));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(next.mSlotName)));
         MetMsgScreen::Show(HxStr(kCopyMessage),
                            MetText(kMetStrMsgCONFIRM, kConfirmTitle),
                            text,
@@ -383,7 +383,7 @@ void MetMCFreqDelScreen::OnPersonasLoaded(int, int nStatus) {
     if (nStatus != kLoadStatusLoaded && nStatus != kLoadStatusNoEntry &&
         nStatus != kLoadStatusNoFile) {
         const HxStr format(MetConfigText(kMetStrMcLoadFail, kDialogueConfigCode, kLoadFailKey));
-        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
+        const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
         std::vector<HxStr> buttons;
         buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
         MetMsgScreen::Show(HxStr(kLoadFailedMessage),
@@ -407,7 +407,7 @@ void MetMCFreqDelScreen::OnPersonasLoaded(int, int nStatus) {
     std::vector<HxStr> buttons;
     buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
     const HxStr format(MetConfigText(kMetStrNoFreqOnCard, kDialogueConfigCode, kNoFreqMessage));
-    const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
+    const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
     MetMsgScreen::Show(HxStr(kNoFreqMessage),
                        MetText(kMetStrMsgERROR, kErrorTitle),
                        text,
@@ -426,7 +426,7 @@ void MetMCFreqDelScreen::OnConnectState(MemcardConnectState, int nStatus) {
     }
 
     const HxStr format(MetConfigText(kMetStrMcLoadFailNoCard, kDialogueConfigCode, kNoCardKey));
-    const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
+    const HxStr text(Rnd::MakeString(TextOrEmpty(format), TextOrEmpty(mCardSlot.mSlotName)));
     std::vector<HxStr> buttons;
     buttons.push_back(MetText(kMetStrMsgOK, kOkButton));
     MetMsgScreen::Show(HxStr(kLoadFailedMessage),

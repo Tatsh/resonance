@@ -83,7 +83,8 @@ struct HeapNode {
  * MemReallocTagged() is what enforces that, because releasing an interior pointer would corrupt
  * the block that owns it.
  *
- * Every data member is private, because only the methods below touch them.
+ * Every data member is private, because only the methods below and the three heap routines after
+ * the class touch them.
  *
  * Every field name comes from the two dump lines, `Heap Info: length: %d flags: %d` and
  * `HHeap Stats: nUsedNodes:%d nFreeNodes:%d nCalls:(M:%d R:%d F:%d) nBytes:%d`. The doubled `H` in
@@ -109,17 +110,6 @@ public:
      * @ghidraAddress PAL: 0x00592680
      */
     static Heap *Create(void *pBlock, unsigned nSize, unsigned nFlags);
-
-    /**
-     * Release the backing block.
-     *
-     * Performs no work unless the heap allocated the block itself, because a caller-supplied block
-     * belongs to the caller. Nothing is cleared first, so the heap must not be used afterwards.
-     *
-     * @ghidraAddress NTSC-U/C: 0x00552108
-     * @ghidraAddress PAL: 0x00592748
-     */
-    void Destroy();
 
     /**
      * Take a block.
@@ -183,27 +173,11 @@ public:
      */
     int Shrink(unsigned nSize);
 
-    /**
-     * Write the header, the counters, the timings, and every node to a file.
-     *
-     * Performs no work when the file cannot be opened. The header and the counters also go to the
-     * log.
-     *
-     * @param pszPath The file to write.
-     * @ghidraAddress NTSC-U/C: 0x00551ec8
-     * @ghidraAddress PAL: 0x00592508
-     */
-    void DumpToFile(const char *pszPath);
-
-    /**
-     * Write the counters to the log and to the memory report.
-     *
-     * @ghidraAddress NTSC-U/C: 0x00552218
-     * @ghidraAddress PAL: 0x00592858
-     */
-    void DumpStats();
-
 private:
+    friend void HHeapDelete(Heap *pHeap);
+    friend void HHeapDump(Heap *pHeap, const char *pszPath);
+    friend void HHeapLogBasicStats(Heap *pHeap);
+
     // Alloc(), Free(), and Realloc() each repeat these three blocks of free-list relinking, and
     // each body appears in full at every one of those sites, which is what makes them
     // reconstructible as members. None is a trivial accessor.
@@ -222,6 +196,40 @@ private:
     int mCallsFree;      // +0x20
     unsigned mBytes;     // +0x24 payload bytes handed out
 };
+
+/**
+ * Release a heap's backing block.
+ *
+ * Performs no work unless the heap allocated the block itself. The heap is not cleared first and
+ * must not be used afterwards.
+ *
+ * @param pHeap The heap.
+ * @ghidraAddress NTSC-U/C: 0x00552108
+ * @ghidraAddress PAL: 0x00592748
+ */
+void HHeapDelete(Heap *pHeap);
+
+/**
+ * Write a heap's header, counters, timings, and every node to a file.
+ *
+ * Performs no work when the file cannot be opened. The header and the counters also go to the
+ * log.
+ *
+ * @param pHeap The heap.
+ * @param pszPath The file to write.
+ * @ghidraAddress NTSC-U/C: 0x00551ec8
+ * @ghidraAddress PAL: 0x00592508
+ */
+void HHeapDump(Heap *pHeap, const char *pszPath);
+
+/**
+ * Write a heap's counters to the log and to the memory report.
+ *
+ * @param pHeap The heap.
+ * @ghidraAddress NTSC-U/C: 0x00552218
+ * @ghidraAddress PAL: 0x00592858
+ */
+void HHeapLogBasicStats(Heap *pHeap);
 
 /**
  * The one interpreter heap, built by Py_Initialize() over the whole of the zone called

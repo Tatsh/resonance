@@ -10,7 +10,7 @@
  * view for exactly those six. The seven between are the effect names the track display prints.
  * The enumerator names follow the literals HudPowerupName() returns.
  */
-enum HudItemKind {
+enum PowerupType {
     kHudItemNone = -1,       /*!< No item. HudPowerup shows nothing. */
     kHudItemNeutralizer = 0, /*!< `NEUTRALIZER`. */
     kHudItemCrippler = 1,    /*!< `CRIPPLER`. */

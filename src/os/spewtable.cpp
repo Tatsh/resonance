@@ -1,4 +1,4 @@
-#include "os/spew.h"
+#include "os/spewtable.h"
 
 #include <algorithm>
 #include <ctype.h>
@@ -22,16 +22,16 @@ inline void LowerCase(HxStr &text) {
 } // namespace
 
 // NTSC-U/C: 0x004b32b8, PAL: 0x004f14f8
-Spew::Spew() {
+SpewTable::SpewTable() {
 }
 
 // NTSC-U/C: 0x004b32e8, PAL: 0x004f1528
-Spew::~Spew() {
+SpewTable::~SpewTable() {
     CloseChannels();
 }
 
 // NTSC-U/C: 0x004b3528, PAL: 0x004f1790
-void Spew::Register(std::ostream **ppStream, const char *pszFile) {
+void SpewTable::Register(std::ostream **ppStream, const char *pszFile) {
     HxStr name(pszFile);
     int nPos = name.ReverseFind('.');
     if (nPos != static_cast<int>(g_nHxStrNoPosition)) {
@@ -46,7 +46,7 @@ void Spew::Register(std::ostream **ppStream, const char *pszFile) {
 }
 
 // NTSC-U/C: 0x004b36b8, PAL: 0x004f1960
-void Spew::Connect(const HxStr &file, const HxStr &channel) {
+void SpewTable::Connect(const HxStr &file, const HxStr &channel) {
     Channel *pChannel = nullptr;
     HxStr channelName(channel);
     LowerCase(channelName);
@@ -74,7 +74,7 @@ void Spew::Connect(const HxStr &file, const HxStr &channel) {
 }
 
 // NTSC-U/C: 0x004b3898, PAL: 0x004f1b80
-Spew::Channel *Spew::NewChannel(const HxStr &name) {
+SpewTable::Channel *SpewTable::NewChannel(const HxStr &name) {
     std::ostream *pStream = nullptr;
     if (name == kChannelOff) {
         // A channel with no stream discards its output.
@@ -89,7 +89,7 @@ Spew::Channel *Spew::NewChannel(const HxStr &name) {
 }
 
 // NTSC-U/C: 0x004b3448, PAL: 0x004f16a0
-void Spew::CloseChannels() {
+void SpewTable::CloseChannels() {
     for (Channel *pChannel : mChannels) {
         if (pChannel == nullptr) {
             continue;
@@ -105,7 +105,7 @@ void Spew::CloseChannels() {
 }
 
 // NTSC-U/C: 0x004b4550, PAL: 0x004f2860
-void Spew::PrintConnections(std::ostream &stream) {
+void SpewTable::PrintConnections(std::ostream &stream) {
     for (const auto &connection : mConnections) {
         stream << connection.mFile;
         if (connection.mpChannel != nullptr) {

@@ -51,20 +51,19 @@ inline const char *TextOf(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
 }
 
-// Writes a string as its length and then its bytes, and reports the stream WriteBytes() reports.
+// Writes a string as its length and then its bytes, and reports the stream Write() reports.
 inline OBStream &WriteString(OBStream &stream, const HxStr &text) {
     int nLength = text.mLen;
-    stream.Write(&nLength, sizeof(nLength));
-    return stream.WriteBytes(TextOf(text), nLength);
+    stream.WriteLE(&nLength, sizeof(nLength));
+    return stream.Write(TextOf(text), nLength);
 }
 
 // Reads a string WriteString() wrote.
 inline void ReadString(IBStream &stream, HxStr &text) {
     int nLength;
-    stream.Read(&nLength, sizeof(nLength));
+    stream.ReadLE(&nLength, sizeof(nLength));
     text.Alloc(nLength);
-    stream.ReadBytes(text.mStr != nullptr ? text.mStr : const_cast<char *>(g_szEmptyString),
-                     nLength);
+    stream.Read(text.mStr != nullptr ? text.mStr : const_cast<char *>(g_szEmptyString), nLength);
 }
 
 } // namespace
@@ -76,7 +75,7 @@ void *GlobalSettings::operator new(size_t nSize) {
 
 // NTSC-U/C: 0x0018b9a8, PAL: 0x00191438
 void GlobalSettings::operator delete(void *pBlock) {
-    FreeTaggedMemory(pBlock, "GlobalSettings");
+    OperatorDeleteOverride(pBlock, "GlobalSettings");
 }
 
 // NTSC-U/C: 0x00187d00, PAL: 0x0018d588
@@ -84,7 +83,7 @@ GlobalSettings::GlobalSettings()
     : mDefaultMacros(MetKeyboardScreen::GetDefaultMacros()), mTutorialComplete(0),
       mTeamFreqUnlocked(0) {
     mNetAddress = kDefaultNetAddress;
-    mNetPort = FormatString(kPortFormat, kDefaultNetPort);
+    mNetPort = Rnd::MakeString(kPortFormat, kDefaultNetPort);
 
     int nCount = mDefaultMacros->size();
     mMacros.resize(nCount);
@@ -112,15 +111,15 @@ GlobalSettings::~GlobalSettings() {
 // NTSC-U/C: 0x001885d0, PAL: 0x0018df28
 void GlobalSettings::Save(OBStream &stream) {
     int nVersion = kRecordVersion;
-    OBStream &out =
-        WriteString(WriteString(stream.Write(&nVersion, sizeof(nVersion)), mNetAddress), mNetPort);
+    OBStream &out = WriteString(
+        WriteString(stream.WriteLE(&nVersion, sizeof(nVersion)), mNetAddress), mNetPort);
     for (int i = 0; i < kControllerCount; ++i) {
         mControllers[i].Save(out);
     }
     mGameOptions.Save(out);
 
     int nCount = mMacros.size();
-    stream.Write(&nCount, sizeof(nCount));
+    stream.WriteLE(&nCount, sizeof(nCount));
     for (std::vector<HxStr>::iterator it = mMacros.begin(); it != mMacros.end(); ++it) {
         WriteString(stream, *it);
     }
@@ -130,12 +129,12 @@ void GlobalSettings::Save(OBStream &stream) {
 // NTSC-U/C: 0x001887d0, PAL: 0x0018e128
 void GlobalSettings::Load(IBStream &stream) {
     int nVersion;
-    stream.Read(&nVersion, sizeof(nVersion));
+    stream.ReadLE(&nVersion, sizeof(nVersion));
     ReadString(stream, mNetAddress);
     if (nVersion < kPortVersion) {
         HxStr discarded;
         ReadString(stream, discarded);
-        mNetPort = FormatString(kPortFormat, kDefaultNetPort);
+        mNetPort = Rnd::MakeString(kPortFormat, kDefaultNetPort);
     } else {
         ReadString(stream, mNetPort);
     }
@@ -152,7 +151,7 @@ void GlobalSettings::Load(IBStream &stream) {
         SkipLegacyMacros(stream);
     } else {
         int nCount;
-        stream.Read(&nCount, sizeof(nCount));
+        stream.ReadLE(&nCount, sizeof(nCount));
         mMacros.resize(nCount);
         for (std::vector<HxStr>::iterator it = mMacros.begin(); it != mMacros.end(); ++it) {
             ReadString(stream, *it);
@@ -167,11 +166,11 @@ void GlobalSettings::Load(IBStream &stream) {
 // NTSC-U/C: 0x00188b90, PAL: 0x0018e550
 void GlobalSettings::SkipLegacyMacros(IBStream &stream) {
     int nCount;
-    stream.Read(&nCount, sizeof(nCount));
+    stream.ReadLE(&nCount, sizeof(nCount));
     HxStr macro;
     for (int i = 0; i < nCount; ++i) {
         int nUnused;
-        stream.Read(&nUnused, sizeof(nUnused));
+        stream.ReadLE(&nUnused, sizeof(nUnused));
         ReadString(stream, macro);
     }
 }

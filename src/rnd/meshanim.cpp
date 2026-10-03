@@ -456,7 +456,7 @@ MeshAnim::MeshAnim(const HxStr &name) : Object(name), mMesh(nullptr), mKeysOwner
 
 // NTSC-U/C: 0x00493240, PAL: 0x004d10f0
 MeshAnim::~MeshAnim() {
-    RemoveObjectRefs();
+    ReleaseObjects();
     ReleaseAllRefs();
 }
 
@@ -551,7 +551,7 @@ void MeshAnim::Copy(const Object *pSource, unsigned nFlags) {
     const MeshAnim *pSourceAnim = dynamic_cast<const MeshAnim *>(pSource);
 
     Animatable::Copy(pSource, nFlags);
-    RemoveObjectRefs();
+    ReleaseObjects();
 
     mMesh = pSourceAnim->mMesh;
     if ((nFlags & kCopyShareKeys) != 0 || pSourceAnim->mKeysOwner != pSourceAnim) {
@@ -564,7 +564,7 @@ void MeshAnim::Copy(const Object *pSource, unsigned nFlags) {
         mVertColorsKeys = pSourceAnim->mVertColorsKeys;
     }
 
-    AddObjectRefs();
+    AddRefObjects();
 }
 
 // NTSC-U/C: 0x00486fa8, PAL: 0x004c4d78
@@ -577,7 +577,7 @@ void MeshAnim::Load(Stream &stream) {
     }
 
     Animatable::Load(stream);
-    RemoveObjectRefs();
+    ReleaseObjects();
 
     ReadObjectRef(stream, mMesh);
     ReadPointsKeys(stream, mVertPointsKeys);
@@ -593,7 +593,7 @@ void MeshAnim::Load(Stream &stream) {
         mVertColorsKeys.clear();
     }
 
-    AddObjectRefs();
+    AddRefObjects();
 }
 
 // NTSC-U/C: 0x004867d8, PAL: 0x004c45a8
@@ -668,7 +668,7 @@ void MeshAnim::SetMesh(Mesh *pMesh) {
 }
 
 // NTSC-U/C: 0x00494288, PAL: 0x004d2138
-void MeshAnim::AddObjectRefs() {
+void MeshAnim::AddRefObjects() {
     if (mMesh != nullptr) {
         mMesh->AddRef(this);
     }
@@ -678,7 +678,7 @@ void MeshAnim::AddObjectRefs() {
 }
 
 // NTSC-U/C: 0x00494238, PAL: 0x004d20e8
-void MeshAnim::RemoveObjectRefs() {
+void MeshAnim::ReleaseObjects() {
     if (mMesh != nullptr) {
         mMesh->RemoveRef(this);
     }

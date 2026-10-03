@@ -33,15 +33,15 @@ HudScore::HudScore(Player *pPlayer, int nIndex) : mText(nullptr) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mMesh = dynamic_cast<Rnd::Mesh *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s score%d.mesh", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s score%d.mesh", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     mText = dynamic_cast<Rnd::Text *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s score%d.txt", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s score%d.txt", pszLayout, nIndex))));
 
     pszLayout = g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
     Rnd::Font *pFont = dynamic_cast<Rnd::Font *>(
-        Rnd::TheManager.Find(HxStr(FormatString("%s score%d.font", pszLayout, nIndex))));
+        Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s score%d.font", pszLayout, nIndex))));
 
     Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(
         Rnd::TheManager.Find(HxStr("HUD score font ") + HxStr(pPlayer->mColorName) + ".mat"));
@@ -63,7 +63,7 @@ void HudScore::Update(float flTime) {
     }
 
     if (flTime - mChangeTime > kRedrawDelay) {
-        mText->SetText(HxStr(FormatString("%d", mScore)));
+        mText->SetText(HxStr(Rnd::MakeString("%d", mScore)));
         mChangeTime = kScoreDrawn;
     }
 }

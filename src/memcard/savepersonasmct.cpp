@@ -15,7 +15,7 @@ SavePersonasMCT::SavePersonasMCT(MemcardUser *pUser,
     : SaveFileMCT(pUser, pCard, nPortSlot, nCookie),
       mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize) {
     const int nCount = roster.size();
-    mStream.Write(&nCount, sizeof(nCount));
+    mStream.WriteLE(&nCount, sizeof(nCount));
     for (int i = 0; i < nCount; ++i) {
         roster[i]->Save(&mStream);
     }
