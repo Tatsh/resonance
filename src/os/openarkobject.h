@@ -128,10 +128,10 @@ struct ArkStream {
  * into that block. The header's own path is lowercased in place and must include a `run`
  * component, which is what fixes the archive's mount point.
  *
- * The header member titles come from the labels PrintHeader() writes. The data members are public
- * because the stream and sector routines of this unit (ArkStream::FindArk(), SeekArkStream(),
- * ArkfileGetBaseSector(), and ArkfileLogicalToPhysicalSector()) read them directly as free
- * functions.
+ * The header member titles come from the labels PrintHeader() writes. The data members are private.
+ * The stream and sector routines of this unit (ArkStream::FindArk(), SeekArkStream(),
+ * ArkfileGetBaseSector(), and ArkfileLogicalToPhysicalSector()) are free functions that read the
+ * file, sector size, base sector, and optimized block members directly, and are friends.
  */
 class OpenArkObject {
 public:
@@ -301,7 +301,11 @@ private:
                                 const char *pszName,
                                 const char *pszRelPath) const;
 
-public:
+    friend OpenArkObject *ArkStream::FindArk() const;
+    friend int SeekArkStream(int nStream, int nOffset, int nOrigin);
+    friend int ArkfileGetBaseSector(int nFile);
+    friend int ArkfileLogicalToPhysicalSector(int nFile, int nSector);
+
     HxStr mPath;           /*!< The path the archive was mounted by. */
     int mFile;             /*!< The archive's file, negative when the open failed. */
     char mSig[4];          /*!< The header signature. */
