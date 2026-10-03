@@ -18,17 +18,27 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param path The file or directory to delete.
      * @param nCookie The tag Memcard::Cancel() matches on.
-     * @ghidraAddress 0x0055eed8
+     * @ghidraAddress NTSC-U/C: 0x0055eed8
+     * @ghidraAddress PAL: 0x005a01a8
      */
     DeleteFileOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
-    /** @ghidraAddress 0x0055dff8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055dff8
+     * @ghidraAddress PAL: 0x0059f290
+     */
     virtual ~DeleteFileOp();
 
-    /** @ghidraAddress 0x0055ef68 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055ef68
+     * @ghidraAddress PAL: 0x005a0238
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055e060 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055e060
+     * @ghidraAddress PAL: 0x0059f308
+     */
     virtual void Complete();
 
     /**
@@ -38,7 +48,8 @@ public:
      * indexed by the result plus six. A positive result falls outside the table and reports
      * kMemcardStatusUnknown. This is the only operation that produces kMemcardStatusNoFile.
      *
-     * @ghidraAddress 0x0055efb8
+     * @ghidraAddress NTSC-U/C: 0x0055efb8
+     * @ghidraAddress PAL: 0x005a0288
      */
     virtual void InterpretResult();
 

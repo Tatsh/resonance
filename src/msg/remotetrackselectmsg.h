@@ -32,7 +32,8 @@ public:
      * initialised.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6ed0
+     * @ghidraAddress NTSC-U/C: 0x003d6ed0
+     * @ghidraAddress PAL: 0x0040edc0
      */
     static Message *New();
 
@@ -40,7 +41,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dcb08
+     * @ghidraAddress NTSC-U/C: 0x003dcb08
+     * @ghidraAddress PAL: 0x00414f40
      */
     virtual Message *Clone();
 
@@ -48,7 +50,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nRemoteTrackSelectMsgType.
-     * @ghidraAddress 0x003dcb68
+     * @ghidraAddress NTSC-U/C: 0x003dcb68
+     * @ghidraAddress PAL: 0x00414fa0
      */
     virtual int Type();
 
@@ -56,7 +59,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `RemoteTrackSelectMsg`.
-     * @ghidraAddress 0x003dcb78
+     * @ghidraAddress NTSC-U/C: 0x003dcb78
+     * @ghidraAddress PAL: 0x00414fb0
      */
     virtual const char *Name();
 
@@ -65,7 +69,8 @@ public:
      * a space, and the position to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3bd0
+     * @ghidraAddress NTSC-U/C: 0x003e3bd0
+     * @ghidraAddress PAL: 0x00410460
      */
     virtual void Print(std::ostream &stream);
 
@@ -102,6 +107,7 @@ public:
  * returns it. Several handlers elsewhere read the same word to compare against it, which is the
  * expected shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d01f4
+ * @ghidraAddress NTSC-U/C: 0x006d01f4
+ * @ghidraAddress PAL: 0x0071398c
  */
 extern int g_nRemoteTrackSelectMsgType;

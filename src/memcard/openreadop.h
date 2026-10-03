@@ -21,17 +21,27 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param path The file to open.
      * @param nCookie The tag Memcard::Cancel() matches on.
-     * @ghidraAddress 0x0055ecc0
+     * @ghidraAddress NTSC-U/C: 0x0055ecc0
+     * @ghidraAddress PAL: 0x0059ff90
      */
     OpenReadOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
-    /** @ghidraAddress 0x0055ddd0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055ddd0
+     * @ghidraAddress PAL: 0x0059f058
+     */
     virtual ~OpenReadOp();
 
-    /** @ghidraAddress 0x0055ed50 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055ed50
+     * @ghidraAddress PAL: 0x005a0020
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055de38 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055de38
+     * @ghidraAddress PAL: 0x0059f0d0
+     */
     virtual void Complete();
 
     /**
@@ -41,7 +51,8 @@ public:
      * stores the libmc error code in mFile as well as in MemcardOp::mResult. The behaviour matches
      * the binary.
      *
-     * @ghidraAddress 0x0055eda0
+     * @ghidraAddress NTSC-U/C: 0x0055eda0
+     * @ghidraAddress PAL: 0x005a0070
      */
     virtual void InterpretResult();
 

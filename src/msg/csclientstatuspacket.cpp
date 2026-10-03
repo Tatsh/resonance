@@ -5,34 +5,34 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003e4e00
+// NTSC-U/C: 0x003e4e00, PAL: 0x0041d098
 Message *CSClientStatusPacket::New() {
     return new CSClientStatusPacket;
 }
 
-// 0x003ef970
+// NTSC-U/C: 0x003ef970, PAL: 0x00427f78
 // Clone allocates and hands off to the copy constructor at 0x003f3250, which is
 // the compiler expanding the implicit one.
 Message *CSClientStatusPacket::Clone() {
     return new CSClientStatusPacket(*this);
 }
 
-// 0x003ef9e8
+// NTSC-U/C: 0x003ef9e8, PAL: 0x00427ff0
 int CSClientStatusPacket::Type() {
     return g_nCSClientStatusPacketType;
 }
 
-// 0x003ef9f8
+// NTSC-U/C: 0x003ef9f8, PAL: 0x00428000
 const char *CSClientStatusPacket::Name() {
     return "CSClientStatusPacket";
 }
 
-// 0x003f2120
+// NTSC-U/C: 0x003f2120, PAL: 0x0042a668
 void CSClientStatusPacket::Print(std::ostream &stream) {
     stream << "ClientStatus: " << mStatus;
 }
 
-// 0x003e6090
+// NTSC-U/C: 0x003e6090, PAL: 0x0041e370
 void CSClientStatusPacket::Save(OBStream &stream) {
     Packet::Save(stream);
 
@@ -44,7 +44,7 @@ void CSClientStatusPacket::Save(OBStream &stream) {
     stream.Write(&clientIdAgain, sizeof(clientIdAgain));
 }
 
-// 0x003e6198
+// NTSC-U/C: 0x003e6198, PAL: 0x0041e478
 void CSClientStatusPacket::Load(IBStream &stream) {
     Packet::Load(stream);
 

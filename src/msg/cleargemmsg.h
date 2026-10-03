@@ -48,7 +48,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 404.
      *
      * @return The message.
-     * @ghidraAddress 0x003d74b8
+     * @ghidraAddress NTSC-U/C: 0x003d74b8
+     * @ghidraAddress PAL: 0x0040f3b8
      */
     static Message *New();
 
@@ -56,7 +57,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001bf8e0
+     * @ghidraAddress NTSC-U/C: 0x001bf8e0
+     * @ghidraAddress PAL: 0x001c5700
      */
     virtual Message *Clone();
 
@@ -64,7 +66,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nClearGemMsgType.
-     * @ghidraAddress 0x001bf938
+     * @ghidraAddress NTSC-U/C: 0x001bf938
+     * @ghidraAddress PAL: 0x001c5758
      */
     virtual int Type();
 
@@ -72,7 +75,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `ClearGemMsg`.
-     * @ghidraAddress 0x001bf948
+     * @ghidraAddress NTSC-U/C: 0x001bf948
+     * @ghidraAddress PAL: 0x001c5768
      */
     virtual const char *Name();
 
@@ -88,6 +92,7 @@ public:
  * registration at `0x003d9818` passes the same value, 404, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d02c4
+ * @ghidraAddress NTSC-U/C: 0x006d02c4
+ * @ghidraAddress PAL: 0x00713a5c
  */
 extern int g_nClearGemMsgType;

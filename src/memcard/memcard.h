@@ -42,7 +42,8 @@ public:
      * Occupies vtable slot 1. Any operation still queued is discarded without being issued and
      * without being destroyed, because the body clears the list rather than deleting through it.
      *
-     * @ghidraAddress 0x001f6140
+     * @ghidraAddress NTSC-U/C: 0x001f6140
+     * @ghidraAddress PAL: 0x001fcb50
      */
     virtual ~Memcard();
 
@@ -52,7 +53,8 @@ public:
      * Occupies vtable slot 2. The body of this class is empty, and `MemcardPS2` supplies the
      * PlayStation 2 implementation. The method title is inferred.
      *
-     * @ghidraAddress 0x001f61a8
+     * @ghidraAddress NTSC-U/C: 0x001f61a8
+     * @ghidraAddress PAL: 0x001fcbb8
      */
     virtual void Update();
 
@@ -62,7 +64,8 @@ public:
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047e370
+     * @ghidraAddress NTSC-U/C: 0x0047e370
+     * @ghidraAddress PAL: 0x004bc048
      */
     void CheckInfo(MemcardCBHandler *pHandler, int nPortSlot, int nCookie);
 
@@ -75,7 +78,8 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param path The directory to measure.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047e498
+     * @ghidraAddress NTSC-U/C: 0x0047e498
+     * @ghidraAddress PAL: 0x004bc170
      */
     void EntSpace(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
@@ -85,7 +89,8 @@ public:
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047e5d0
+     * @ghidraAddress NTSC-U/C: 0x0047e5d0
+     * @ghidraAddress PAL: 0x004bc2a8
      */
     void Format(MemcardCBHandler *pHandler, int nPortSlot, int nCookie);
 
@@ -95,7 +100,8 @@ public:
      * @param pHandler The receiver the finished operation reports to.
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047e6f8
+     * @ghidraAddress NTSC-U/C: 0x0047e6f8
+     * @ghidraAddress PAL: 0x004bc3d0
      */
     void Unformat(MemcardCBHandler *pHandler, int nPortSlot, int nCookie);
 
@@ -106,7 +112,8 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param path The directory to create, taken by value and destroyed on return.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047e820
+     * @ghidraAddress NTSC-U/C: 0x0047e820
+     * @ghidraAddress PAL: 0x004bc4f8
      */
     void CreateDir(MemcardCBHandler *pHandler, int nPortSlot, HxStr path, int nCookie);
 
@@ -118,7 +125,8 @@ public:
      * @param path The directory to list.
      * @param nCookie The tag Cancel() matches on.
      * @param nMode The `sceMcGetDir()` mode.
-     * @ghidraAddress 0x0047e990
+     * @ghidraAddress NTSC-U/C: 0x0047e990
+     * @ghidraAddress PAL: 0x004bc688
      */
     void ListDir(
         MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie, unsigned nMode);
@@ -132,7 +140,8 @@ public:
      * @param pBuffer The destination.
      * @param nLength The number of bytes to read.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047ead8
+     * @ghidraAddress NTSC-U/C: 0x0047ead8
+     * @ghidraAddress PAL: 0x004bc7d0
      */
     void Read(MemcardCBHandler *pHandler,
               int nPortSlot,
@@ -150,7 +159,8 @@ public:
      * @param pBuffer The source.
      * @param nLength The number of bytes to write.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047ec30
+     * @ghidraAddress NTSC-U/C: 0x0047ec30
+     * @ghidraAddress PAL: 0x004bc928
      */
     void Write(MemcardCBHandler *pHandler,
                int nPortSlot,
@@ -169,7 +179,8 @@ public:
      * @param nOffset The offset to move by.
      * @param nOrigin The origin the offset is measured from.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047ed88
+     * @ghidraAddress NTSC-U/C: 0x0047ed88
+     * @ghidraAddress PAL: 0x004bca80
      */
     void Seek(MemcardCBHandler *pHandler, int nFile, int nOffset, int nOrigin, int nCookie);
 
@@ -180,7 +191,8 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param path The file to open.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047eed0
+     * @ghidraAddress NTSC-U/C: 0x0047eed0
+     * @ghidraAddress PAL: 0x004bcbc8
      */
     void OpenWrite(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
@@ -191,7 +203,8 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param path The file to open.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047f008
+     * @ghidraAddress NTSC-U/C: 0x0047f008
+     * @ghidraAddress PAL: 0x004bcd00
      */
     void OpenRead(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
@@ -201,7 +214,8 @@ public:
      * @param pHandler The receiver the finished operation reports to.
      * @param nFile The descriptor to close.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047f140
+     * @ghidraAddress NTSC-U/C: 0x0047f140
+     * @ghidraAddress PAL: 0x004bce38
      */
     void Close(MemcardCBHandler *pHandler, int nFile, int nCookie);
 
@@ -212,7 +226,8 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param path The file or directory to delete.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047f268
+     * @ghidraAddress NTSC-U/C: 0x0047f268
+     * @ghidraAddress PAL: 0x004bcf60
      */
     void DeleteFile(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
@@ -226,7 +241,8 @@ public:
      * @param oldPath The existing name.
      * @param newPath The replacement name.
      * @param nCookie The tag Cancel() matches on.
-     * @ghidraAddress 0x0047f3a0
+     * @ghidraAddress NTSC-U/C: 0x0047f3a0
+     * @ghidraAddress PAL: 0x004bd098
      */
     void RenameFile(MemcardCBHandler *pHandler,
                     int nPortSlot,
@@ -241,7 +257,8 @@ public:
      * waited for.
      *
      * @param nCookie The tag to match.
-     * @ghidraAddress 0x0047f4e8
+     * @ghidraAddress NTSC-U/C: 0x0047f4e8
+     * @ghidraAddress PAL: 0x004bd1e0
      */
     void Cancel(int nCookie);
 

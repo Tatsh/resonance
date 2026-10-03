@@ -22,17 +22,27 @@ public:
      * @param nOffset The offset to move by.
      * @param nOrigin The libmc origin, which uses the same three values as `lseek()`.
      * @param nCookie The tag Memcard::Cancel() matches on.
-     * @ghidraAddress 0x0055eaa8
+     * @ghidraAddress NTSC-U/C: 0x0055eaa8
+     * @ghidraAddress PAL: 0x0059fd78
      */
     SeekOp(MemcardCBHandler *pHandler, int nFile, int nOffset, int nOrigin, int nCookie);
 
-    /** @ghidraAddress 0x0055dba8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055dba8
+     * @ghidraAddress PAL: 0x0059ee20
+     */
     virtual ~SeekOp();
 
-    /** @ghidraAddress 0x0055ead8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055ead8
+     * @ghidraAddress PAL: 0x0059fda8
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055dbd8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055dbd8
+     * @ghidraAddress PAL: 0x0059ee50
+     */
     virtual void Complete();
 
     /**
@@ -42,7 +52,8 @@ public:
      * constructor initialises. A successful seek therefore reports whatever that word stored when
      * the block was allocated. The behaviour matches the binary.
      *
-     * @ghidraAddress 0x0055eb10
+     * @ghidraAddress NTSC-U/C: 0x0055eb10
+     * @ghidraAddress PAL: 0x0059fde0
      */
     virtual void InterpretResult();
 

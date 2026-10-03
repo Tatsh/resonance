@@ -11,7 +11,7 @@
 
 PyShell *g_pPyShell;
 
-// 0x0050d588
+// NTSC-U/C: 0x0050d588, PAL: 0x0054ca40
 void GetPythonScriptHost() {
     if (g_pPyShell != nullptr) {
         return;
@@ -21,7 +21,7 @@ void GetPythonScriptHost() {
     g_pPyShell = pHost;
 }
 
-// 0x0050d608
+// NTSC-U/C: 0x0050d608, PAL: 0x0054cac0
 // The destructor is inlined rather than called, which is why the interpreter teardown
 // reads as part of this body in the disassembly.
 void DestroyPythonScriptHost() {
@@ -29,12 +29,12 @@ void DestroyPythonScriptHost() {
     g_pPyShell = nullptr;
 }
 
-// 0x0050d698
+// NTSC-U/C: 0x0050d698, PAL: 0x0054cb50
 void InvokeMasterInitScript() {
     g_pPyShell->RunMasterInitScript();
 }
 
-// 0x00508f30
+// NTSC-U/C: 0x00508f30, PAL: 0x005480c8
 HxStr GetPythonErrorText() {
     try {
         g_pPyShell->ReportError(HxStr(""), 1);
@@ -44,12 +44,12 @@ HxStr GetPythonErrorText() {
     return HxStr("no python exception found");
 }
 
-// 0x00509b00
+// NTSC-U/C: 0x00509b00, PAL: 0x00548e28
 void RunScript(const HxStr &script) {
     g_pPyShell->Eval(script, Py_file_input);
 }
 
-// 0x005099b0
+// NTSC-U/C: 0x005099b0, PAL: 0x00548ca0
 void CallScriptTemplate(int nTemplate, ...) {
     va_list args;
     va_start(args, nTemplate);

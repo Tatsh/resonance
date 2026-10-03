@@ -30,7 +30,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7ca0
+     * @ghidraAddress NTSC-U/C: 0x003d7ca0
+     * @ghidraAddress PAL: 0x0040fbb8
      */
     static Message *New();
 
@@ -38,7 +39,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e2788
+     * @ghidraAddress NTSC-U/C: 0x003e2788
+     * @ghidraAddress PAL: 0x0041ac28
      */
     virtual Message *Clone();
 
@@ -46,7 +48,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nCrippleMsgType.
-     * @ghidraAddress 0x003e27f8
+     * @ghidraAddress NTSC-U/C: 0x003e27f8
+     * @ghidraAddress PAL: 0x0041ac98
      */
     virtual int Type();
 
@@ -54,7 +57,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `CrippleMsg`.
-     * @ghidraAddress 0x003e2808
+     * @ghidraAddress NTSC-U/C: 0x003e2808
+     * @ghidraAddress PAL: 0x0041aca8
      */
     virtual const char *Name();
 
@@ -62,7 +66,8 @@ public:
      * Write `tr#`, the track, ` p#`, and the player's identifier to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e4290
+     * @ghidraAddress NTSC-U/C: 0x003e4290
+     * @ghidraAddress PAL: 0x0041c4c0
      */
     virtual void Print(std::ostream &stream);
 
@@ -84,6 +89,7 @@ public:
  * handlers elsewhere read the same word to compare against it, which is the expected shape for a
  * registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d03d4
+ * @ghidraAddress NTSC-U/C: 0x006d03d4
+ * @ghidraAddress PAL: 0x00713b6c
  */
 extern int g_nCrippleMsgType;

@@ -3,7 +3,7 @@
 #include "stream/hxdatachunkid.h"
 #include "stream/hxdatachunkreader.h"
 
-// 0x00145908
+// NTSC-U/C: 0x00145908, PAL: 0x00146420
 HxIDataChunk::HxIDataChunk(HxDataChunkReader *pReader)
     : mReader(pReader), mSource(pReader->mStream), mId(nullptr) {
     mFatalOnEnd = 1;
@@ -14,7 +14,7 @@ HxIDataChunk::HxIDataChunk(HxDataChunkReader *pReader)
     mReader->Lock();
 }
 
-// 0x00145a10
+// NTSC-U/C: 0x00145a10, PAL: 0x00146528
 HxIDataChunk::HxIDataChunk(HxStream *pSource) : mReader(nullptr), mSource(pSource), mId(nullptr) {
     mFatalOnEnd = 1;
     mSwapBytes = pSource->mSwapBytes;
@@ -24,7 +24,7 @@ HxIDataChunk::HxIDataChunk(HxStream *pSource) : mReader(nullptr), mSource(pSourc
     mEnd = mStart + mId->mSize;
 }
 
-// 0x00146080
+// NTSC-U/C: 0x00146080, PAL: 0x00146b98
 HxIDataChunk::~HxIDataChunk() {
     if (mReader != nullptr) {
         mReader->Unlock();
@@ -32,7 +32,7 @@ HxIDataChunk::~HxIDataChunk() {
     delete mId;
 }
 
-// 0x00145b20
+// NTSC-U/C: 0x00145b20, PAL: 0x00146638
 void HxIDataChunk::Seek(int nOffset, int nWhence) {
     if ((mStatus & kStatusRange) != 0 || (mStatus & kStatusFailed) != 0) {
         return;
@@ -58,7 +58,7 @@ void HxIDataChunk::Seek(int nOffset, int nWhence) {
     mStatus = kStatusOk; // Yes, the binary overwrites the range status set above.
 }
 
-// 0x001460f0
+// NTSC-U/C: 0x001460f0, PAL: 0x00146c08
 int HxIDataChunk::Tell() {
     if ((mStatus & kStatusRange) != 0 || (mStatus & kStatusFailed) != 0) {
         return -1;
@@ -66,12 +66,12 @@ int HxIDataChunk::Tell() {
     return mSource->Tell() - mStart;
 }
 
-// 0x00145fc0
+// NTSC-U/C: 0x00145fc0, PAL: 0x00146ad8
 int HxIDataChunk::Size() {
     return mId->mSize;
 }
 
-// 0x00146160
+// NTSC-U/C: 0x00146160, PAL: 0x00146c78
 HxStream &HxIDataChunk::Read(void *pDest, int nSize) {
     if (mStatus != kStatusOk) {
         return *this;
@@ -87,7 +87,7 @@ HxStream &HxIDataChunk::Read(void *pDest, int nSize) {
     return *this;
 }
 
-// 0x00145fd8
+// NTSC-U/C: 0x00145fd8, PAL: 0x00146af0
 HxStream *HxIDataChunk::UnderlyingStream() {
     return mSource;
 }

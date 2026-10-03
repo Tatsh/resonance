@@ -28,7 +28,7 @@ constexpr int kStepReadIndex = 1;
 
 } // namespace
 
-// 0x0017e528
+// NTSC-U/C: 0x0017e528, PAL: 0x00182f30
 ListRemixesMCT::ListRemixesMCT(MemcardUser *pUser,
                                Memcard *pCard,
                                int nPortSlot,
@@ -39,18 +39,18 @@ ListRemixesMCT::ListRemixesMCT(MemcardUser *pUser,
     mBuffer = mStream.mBuffer;
 }
 
-// 0x001856a8
+// NTSC-U/C: 0x001856a8, PAL: 0x0018b060
 ListRemixesMCT::~ListRemixesMCT() {
 }
 
-// 0x0017e708
+// NTSC-U/C: 0x0017e708, PAL: 0x00183140
 void ListRemixesMCT::ListRemixDir() {
     mStep = 0;
     HxStr pattern = g_saveDirBase + g_remixDirSuffix + kAnyDirectory;
     mCard->ListDir(this, mPortSlot, pattern, mCookie, kListDirModeFresh);
 }
 
-// 0x00186e28
+// NTSC-U/C: 0x00186e28, PAL: 0x0018c600
 void ListRemixesMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (pOp->mStatus != kMemcardStatusUnknown && pOp->mStatus != kMemcardStatusNotFormatted) {
@@ -63,7 +63,7 @@ void ListRemixesMCT::OnCheckInfo(CheckInfoOp *pOp) {
     }
 }
 
-// 0x0017e8b8
+// NTSC-U/C: 0x0017e8b8, PAL: 0x00183368
 void ListRemixesMCT::OnListDir(ListDirOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus != kMemcardStatusOk) {
@@ -91,7 +91,7 @@ void ListRemixesMCT::OnListDir(ListDirOp *pOp) {
     mLoadTask->Load(mCurrentDir + kIndexFileName, mBuffer, mStream.Capacity());
 }
 
-// 0x0017ece0
+// NTSC-U/C: 0x0017ece0, PAL: 0x00183868
 void ListRemixesMCT::OnFileLoaded(int nStatus) {
     mStatus = nStatus;
     if (nStatus != kMemcardStatusOk) {
@@ -127,13 +127,13 @@ void ListRemixesMCT::OnFileLoaded(int nStatus) {
     mLoadTask->Load(mCurrentDir + kIndexFileName, mBuffer, mStream.Capacity());
 }
 
-// 0x00186ea8
+// NTSC-U/C: 0x00186ea8, PAL: 0x0018c680
 void ListRemixesMCT::Finish() {
     mState = kMemcardTaskFinished;
     mUser->OnRemixesListed(mPortSlot, mStatus);
 }
 
-// 0x00186df8
+// NTSC-U/C: 0x00186df8, PAL: 0x0018c5d0
 void ListRemixesMCT::Execute() {
     mState = kMemcardTaskRunning;
     mCard->CheckInfo(this, mPortSlot, mCookie);

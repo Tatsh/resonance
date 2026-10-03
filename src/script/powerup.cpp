@@ -23,7 +23,7 @@ namespace {
 // The tuple carries the player number and the powerup kind. The first player whose input slot
 // matches gets a CaughtPowerbarMsg naming it and the kind. A number no slot matches leaves
 // every player alone.
-// 0x0015a820
+// NTSC-U/C: 0x0015a820, PAL: 0x0015c5a0
 Py::Object ScriptAddPowerup(Py::Tuple args) {
     if (args.length() != 2) {
         throw Py::TypeError(HxStr("required args: int:player-num, int:powerup-type"));
@@ -48,7 +48,7 @@ Py::Object ScriptAddPowerup(Py::Tuple args) {
 }
 
 // Run ScriptAddPowerup() on the interpreter's argument tuple.
-// 0x0015aec8
+// NTSC-U/C: 0x0015aec8, PAL: 0x0015cc68
 PyObject *PyInvokeAddPowerup(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -63,7 +63,7 @@ PyObject *PyInvokeAddPowerup(PyObject *, PyObject *pArgs) {
 }
 
 // The script interface this file exports, registered in static initialisation.
-// 0x0015b850
+// NTSC-U/C: 0x0015b850, PAL: 0x0015d5f0
 const ScriptFunc kAddPowerupFunc("add_powerup", PyInvokeAddPowerup);
 
 } // namespace

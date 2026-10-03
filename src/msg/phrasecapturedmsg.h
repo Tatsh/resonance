@@ -71,7 +71,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d73d0
+     * @ghidraAddress NTSC-U/C: 0x003d73d0
+     * @ghidraAddress PAL: 0x0040f2d0
      */
     static Message *New();
 
@@ -79,7 +80,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003debe0
+     * @ghidraAddress NTSC-U/C: 0x003debe0
+     * @ghidraAddress PAL: 0x00417038
      */
     virtual Message *Clone();
 
@@ -87,7 +89,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nPhraseCapturedMsgType.
-     * @ghidraAddress 0x003dec68
+     * @ghidraAddress NTSC-U/C: 0x003dec68
+     * @ghidraAddress PAL: 0x004170c0
      */
     virtual int Type();
 
@@ -95,7 +98,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `PhraseCapturedMsg`.
-     * @ghidraAddress 0x003dec78
+     * @ghidraAddress NTSC-U/C: 0x003dec78
+     * @ghidraAddress PAL: 0x004170d0
      */
     virtual const char *Name();
 
@@ -104,7 +108,8 @@ public:
      * ` juice `, the juice, a space, and the player's colour name to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003d8448
+     * @ghidraAddress NTSC-U/C: 0x003d8448
+     * @ghidraAddress PAL: 0x00410800
      */
     virtual void Print(std::ostream &stream);
 
@@ -153,6 +158,7 @@ public:
  * returns it. Several handlers elsewhere read the same word to compare against it, which is the
  * expected shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d02a4
+ * @ghidraAddress NTSC-U/C: 0x006d02a4
+ * @ghidraAddress PAL: 0x00713a3c
  */
 extern int g_nPhraseCapturedMsgType;

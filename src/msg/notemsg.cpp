@@ -5,29 +5,29 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003d6d80
+// NTSC-U/C: 0x003d6d80, PAL: 0x0040ec70
 Message *NoteMsg::New() {
     return new NoteMsg;
 }
 
-// 0x003dc208
+// NTSC-U/C: 0x003dc208, PAL: 0x00414640
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *NoteMsg::Clone() {
     return new NoteMsg(*this);
 }
 
-// 0x003dc280
+// NTSC-U/C: 0x003dc280, PAL: 0x004146b8
 int NoteMsg::Type() {
     return g_dwNoteMsgType;
 }
 
-// 0x003dc290
+// NTSC-U/C: 0x003dc290, PAL: 0x004146c8
 const char *NoteMsg::Name() {
     return "NoteMsg";
 }
 
-// 0x003e3760
+// NTSC-U/C: 0x003e3760, PAL: 0x0041bb00
 void NoteMsg::Print(std::ostream &stream) {
     Mid::MBT position;
     position.mTick = mTick;
@@ -39,7 +39,7 @@ void NoteMsg::Print(std::ostream &stream) {
     rest << " n" << static_cast<int>(mChannel);
 }
 
-// 0x003d80c0
+// NTSC-U/C: 0x003d80c0, PAL: 0x00410228
 void NoteMsg::Save(OBStream &stream) {
     unsigned char channel = mChannel;
     unsigned char note = mNote;
@@ -51,7 +51,7 @@ void NoteMsg::Save(OBStream &stream) {
         .Write(&length, sizeof(length));
 }
 
-// 0x003e3808
+// NTSC-U/C: 0x003e3808, PAL: 0x0041bba8
 void NoteMsg::Load(IBStream &stream) {
     unsigned short length;
     stream.ReadBytes(&mChannel, sizeof(mChannel))

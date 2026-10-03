@@ -25,7 +25,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 115.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6c28
+     * @ghidraAddress NTSC-U/C: 0x003d6c28
+     * @ghidraAddress PAL: 0x0040eb18
      */
     static Message *New();
 
@@ -33,7 +34,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x0011d7c0
+     * @ghidraAddress NTSC-U/C: 0x0011d7c0
+     * @ghidraAddress PAL: 0x0011dd48
      */
     virtual Message *Clone();
 
@@ -41,7 +43,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nToggleGhostMsgType.
-     * @ghidraAddress 0x0011d810
+     * @ghidraAddress NTSC-U/C: 0x0011d810
+     * @ghidraAddress PAL: 0x0011dd98
      */
     virtual int Type();
 
@@ -49,7 +52,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `ToggleGhostMsg`.
-     * @ghidraAddress 0x0011d820
+     * @ghidraAddress NTSC-U/C: 0x0011d820
+     * @ghidraAddress PAL: 0x0011dda8
      */
     virtual const char *Name();
 
@@ -83,6 +87,7 @@ public:
  * and the registration at `0x003d9818` passes the same value, 115, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d0194
+ * @ghidraAddress NTSC-U/C: 0x006d0194
+ * @ghidraAddress PAL: 0x0071392c
  */
 extern int g_nToggleGhostMsgType;

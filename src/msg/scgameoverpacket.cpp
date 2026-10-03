@@ -5,40 +5,40 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003e50f0
+// NTSC-U/C: 0x003e50f0, PAL: 0x0041d388
 Message *SCGameOverPacket::New() {
     return new SCGameOverPacket;
 }
 
-// 0x003f15d0
+// NTSC-U/C: 0x003f15d0, PAL: 0x00429a98
 // Clone allocates and hands off to the copy constructor at 0x003f3cd0, which is
 // the compiler expanding the implicit one.
 Message *SCGameOverPacket::Clone() {
     return new SCGameOverPacket(*this);
 }
 
-// 0x003f1648
+// NTSC-U/C: 0x003f1648, PAL: 0x00429b10
 int SCGameOverPacket::Type() {
     return g_nSCGameOverPacketType;
 }
 
-// 0x003f1658
+// NTSC-U/C: 0x003f1658, PAL: 0x00429b20
 const char *SCGameOverPacket::Name() {
     return "SCGameOverPacket";
 }
 
-// 0x003f2a90
+// NTSC-U/C: 0x003f2a90, PAL: 0x0042afd8
 void SCGameOverPacket::Print(std::ostream &stream) {
     stream << mResult;
 }
 
-// 0x003f2920
+// NTSC-U/C: 0x003f2920, PAL: 0x0042ae68
 void SCGameOverPacket::Save(OBStream &stream) {
     Packet::Save(stream);
     stream << mResult;
 }
 
-// 0x003f29e8
+// NTSC-U/C: 0x003f29e8, PAL: 0x0042af30
 void SCGameOverPacket::Load(IBStream &stream) {
     Packet::Load(stream);
     stream >> mResult;

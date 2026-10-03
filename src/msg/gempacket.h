@@ -55,7 +55,8 @@ public:
          * value written is mPlayer->mPlayerId.
          *
          * @param stream The stream to write to.
-         * @ghidraAddress 0x001a2560
+         * @ghidraAddress NTSC-U/C: 0x001a2560
+         * @ghidraAddress PAL: 0x001a82c8
          */
         void Save(OBStream &stream);
 
@@ -70,7 +71,8 @@ public:
          * table.
          *
          * @param stream The stream to read from.
-         * @ghidraAddress 0x001a2630
+         * @ghidraAddress NTSC-U/C: 0x001a2630
+         * @ghidraAddress PAL: 0x001a8398
          */
         void Load(IBStream &stream);
 
@@ -78,7 +80,8 @@ public:
          * Write the five values to a diagnostic stream.
          *
          * @param stream The stream to write to.
-         * @ghidraAddress 0x001a2ce0
+         * @ghidraAddress NTSC-U/C: 0x001a2ce0
+         * @ghidraAddress PAL: 0x001a8a48
          */
         void Print(std::ostream &stream);
 
@@ -118,7 +121,8 @@ public:
      * g_nGemPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e5148
+     * @ghidraAddress NTSC-U/C: 0x003e5148
+     * @ghidraAddress PAL: 0x0041d3e0
      */
     static Message *New();
 
@@ -126,7 +130,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f1750
+     * @ghidraAddress NTSC-U/C: 0x003f1750
+     * @ghidraAddress PAL: 0x00429c18
      */
     virtual Message *Clone();
 
@@ -134,7 +139,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nGemPacketType.
-     * @ghidraAddress 0x003f17c8
+     * @ghidraAddress NTSC-U/C: 0x003f17c8
+     * @ghidraAddress PAL: 0x00429c90
      */
     virtual int Type();
 
@@ -142,7 +148,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `GemPacket`.
-     * @ghidraAddress 0x003f17d8
+     * @ghidraAddress NTSC-U/C: 0x003f17d8
+     * @ghidraAddress PAL: 0x00429ca0
      */
     virtual const char *Name();
 
@@ -152,7 +159,8 @@ public:
      * Slot 5, overriding Message::Print().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2878
+     * @ghidraAddress NTSC-U/C: 0x003f2878
+     * @ghidraAddress PAL: 0x0042adc0
      */
     virtual void Print(std::ostream &stream);
 
@@ -162,7 +170,8 @@ public:
      * Slot 6, overriding Packet::Save().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e8258
+     * @ghidraAddress NTSC-U/C: 0x003e8258
+     * @ghidraAddress PAL: 0x00420538
      */
     virtual void Save(OBStream &stream);
 
@@ -172,7 +181,8 @@ public:
      * Slot 7, overriding Packet::Load().
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e8368
+     * @ghidraAddress NTSC-U/C: 0x003e8368
+     * @ghidraAddress PAL: 0x00420648
      */
     virtual void Load(IBStream &stream);
 
@@ -196,6 +206,7 @@ public:
  *
  * This word belongs to GemPacket because GemPacket::Type() at `0x003f17c8` returns it.
  *
- * @ghidraAddress 0x006d73cc
+ * @ghidraAddress NTSC-U/C: 0x006d73cc
+ * @ghidraAddress PAL: 0x0071ab6c
  */
 extern int g_nGemPacketType;

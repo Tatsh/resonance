@@ -31,8 +31,10 @@ constexpr int kScriptTemplateLevelGetPs2HardBankHeader = 505;
 constexpr int kScriptTemplateLevelGetPs2SoftBank = 506;
 constexpr int kScriptTemplateGetEffectsBank = 507;
 constexpr int kScriptTemplateGetEffectsBankHeader = 508;
+#ifndef VIDEO_STANDARD_PAL
 constexpr int kScriptTemplateGetMetString = 600;
 constexpr int kScriptTemplateGetMetStringList = 601;
+#endif
 constexpr int kScriptTemplateGetPersonaData = 602;
 constexpr int kScriptTemplateLevelListIsAvailGame = 603;
 constexpr int kScriptTemplateLevelListIsAvailJam = 604;
@@ -139,7 +141,7 @@ constexpr int kScriptTemplateGetAlbumName = 1301;
 
 } // namespace
 
-// 0x004016c8
+// NTSC-U/C: 0x004016c8, PAL: 0x0043a1b0
 void RegisterScriptCallTemplates() {
     RegisterScriptTemplate(
         kScriptTemplateExitInstanceException,
@@ -182,8 +184,10 @@ void RegisterScriptCallTemplates() {
                            HxStr("current_level.get_seermusic_bank()"));
     RegisterScriptTemplate(kScriptTemplateGetEffectsBank, HxStr("get_effects_bank()"));
     RegisterScriptTemplate(kScriptTemplateGetEffectsBankHeader, HxStr("get_effects_bank_header()"));
+#ifndef VIDEO_STANDARD_PAL
     RegisterScriptTemplate(kScriptTemplateGetMetString, HxStr("get_met_string('%s')"));
     RegisterScriptTemplate(kScriptTemplateGetMetStringList, HxStr("get_met_stringList('%s')"));
+#endif
     RegisterScriptTemplate(kScriptTemplateGetPersonaData, HxStr("get_persona_data('%s')"));
     RegisterScriptTemplate(kScriptTemplateLevelListIsAvailGame,
                            HxStr("level_list['%s'].is_avail_game()"));

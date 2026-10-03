@@ -4,29 +4,29 @@
 
 #include "game/player.h"
 
-// 0x003d7ca0
+// NTSC-U/C: 0x003d7ca0, PAL: 0x0040fbb8
 Message *CrippleMsg::New() {
     return new CrippleMsg;
 }
 
-// 0x003e2788
+// NTSC-U/C: 0x003e2788, PAL: 0x0041ac28
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *CrippleMsg::Clone() {
     return new CrippleMsg(*this);
 }
 
-// 0x003e27f8
+// NTSC-U/C: 0x003e27f8, PAL: 0x0041ac98
 int CrippleMsg::Type() {
     return g_nCrippleMsgType;
 }
 
-// 0x003e2808
+// NTSC-U/C: 0x003e2808, PAL: 0x0041aca8
 const char *CrippleMsg::Name() {
     return "CrippleMsg";
 }
 
-// 0x003e4290
+// NTSC-U/C: 0x003e4290, PAL: 0x0041c4c0
 void CrippleMsg::Print(std::ostream &stream) {
     stream << "tr#" << mTrack;
     stream << " p#" << mPlayer->mPlayerId;

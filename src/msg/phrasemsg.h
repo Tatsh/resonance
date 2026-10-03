@@ -29,7 +29,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d79b0
+     * @ghidraAddress NTSC-U/C: 0x003d79b0
+     * @ghidraAddress PAL: 0x0040f8b0
      */
     static Message *New();
 
@@ -37,7 +38,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e11e8
+     * @ghidraAddress NTSC-U/C: 0x003e11e8
+     * @ghidraAddress PAL: 0x00419640
      */
     virtual Message *Clone();
 
@@ -45,7 +47,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nPhraseMsgType.
-     * @ghidraAddress 0x003e1240
+     * @ghidraAddress NTSC-U/C: 0x003e1240
+     * @ghidraAddress PAL: 0x00419698
      */
     virtual int Type();
 
@@ -53,7 +56,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `PhraseMsg`.
-     * @ghidraAddress 0x003e1250
+     * @ghidraAddress NTSC-U/C: 0x003e1250
+     * @ghidraAddress PAL: 0x004196a8
      */
     virtual const char *Name();
 
@@ -61,7 +65,8 @@ public:
      * Write the phrase's address, ` [`, the word at `+0x04`, and `]` to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e42f8
+     * @ghidraAddress NTSC-U/C: 0x003e42f8
+     * @ghidraAddress PAL: 0x0041c528
      */
     virtual void Print(std::ostream &stream);
 
@@ -95,6 +100,7 @@ public:
  * handlers elsewhere read the same word to compare against it, which is the expected shape for a
  * registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d036c
+ * @ghidraAddress NTSC-U/C: 0x006d036c
+ * @ghidraAddress PAL: 0x00713b04
  */
 extern int g_nPhraseMsgType;

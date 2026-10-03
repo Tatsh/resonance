@@ -21,14 +21,16 @@ struct ShiftJisRange {
 /**
  * The ASCII punctuation from space to tilde in ASCII order, followed by one zero entry.
  *
- * @ghidraAddress 0x007251a8
+ * @ghidraAddress NTSC-U/C: 0x007251a8
+ * @ghidraAddress PAL: 0x00768e48
  */
 extern const ShiftJisSymbol g_aShiftJisSymbols[kShiftJisSymbolCount + 1];
 
 /**
  * The digit, capital, and small-letter runs, based at `0x824f`, `0x8260`, and `0x8281`.
  *
- * @ghidraAddress 0x00725230
+ * @ghidraAddress NTSC-U/C: 0x00725230
+ * @ghidraAddress PAL: 0x00768ed0
  */
 extern const ShiftJisRange g_aShiftJisRanges[kShiftJisRangeCount];
 
@@ -41,7 +43,8 @@ extern const ShiftJisRange g_aShiftJisRanges[kShiftJisRangeCount];
  *
  * @param pShiftJis The two bytes of the character.
  * @return The ASCII character, or zero when the character has none.
- * @ghidraAddress 0x00556750
+ * @ghidraAddress NTSC-U/C: 0x00556750
+ * @ghidraAddress PAL: 0x005978a8
  */
 char DecodeShiftJisCharacter(const char *pShiftJis);
 
@@ -53,7 +56,8 @@ char DecodeShiftJisCharacter(const char *pShiftJis);
  *
  * @param cAscii The character.
  * @return The two-byte code, lead byte high, or zero for a character outside the tables.
- * @ghidraAddress 0x00556818
+ * @ghidraAddress NTSC-U/C: 0x00556818
+ * @ghidraAddress PAL: 0x00597970
  */
 unsigned short EncodeShiftJisCharacter(unsigned char cAscii);
 
@@ -66,7 +70,8 @@ unsigned short EncodeShiftJisCharacter(unsigned char cAscii);
  *
  * @param pszShiftJis The text to convert.
  * @param pszAscii The destination, of at least half the source length plus one byte.
- * @ghidraAddress 0x00556928
+ * @ghidraAddress NTSC-U/C: 0x00556928
+ * @ghidraAddress PAL: 0x00597a80
  */
 void ShiftJisToAscii(const char *pszShiftJis, char *pszAscii);
 
@@ -79,6 +84,7 @@ void ShiftJisToAscii(const char *pszShiftJis, char *pszAscii);
  *
  * @param pszAscii The text to convert.
  * @param pszDest The destination, of at least twice the text length plus two bytes.
- * @ghidraAddress 0x00556a20
+ * @ghidraAddress NTSC-U/C: 0x00556a20
+ * @ghidraAddress PAL: 0x00597b78
  */
 void AsciiToShiftJis(const char *pszAscii, char *pszDest);

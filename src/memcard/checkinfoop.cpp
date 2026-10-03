@@ -4,29 +4,29 @@
 
 #include "memcard/memcardcbhandler.h"
 
-// 0x0055e368
+// NTSC-U/C: 0x0055e368, PAL: 0x0059f638
 CheckInfoOp::CheckInfoOp(MemcardCBHandler *pHandler, int nPortSlot, int nCookie)
     : MemcardOp(pHandler, nPortSlot, nCookie) {
 }
 
-// 0x0055d320
+// NTSC-U/C: 0x0055d320, PAL: 0x0059e568
 CheckInfoOp::~CheckInfoOp() {
 }
 
-// 0x0055e390
+// NTSC-U/C: 0x0055e390, PAL: 0x0059f660
 void CheckInfoOp::Issue() {
     sceMcGetInfo(
         mPortSlot >> kMemcardPortShift, mPortSlot & kMemcardSlotMask, &mType, &mFree, &mFormatted);
     mIssued = kMemcardOpInFlight;
 }
 
-// 0x0055d350
+// NTSC-U/C: 0x0055d350, PAL: 0x0059e598
 void CheckInfoOp::Complete() {
     InterpretResult();
     mHandler->OnCheckInfo(this);
 }
 
-// 0x0055e3d8
+// NTSC-U/C: 0x0055e3d8, PAL: 0x0059f6a8
 void CheckInfoOp::InterpretResult() {
     if (mResult == sceMcResNoFormat) {
         mStatus = kMemcardStatusNotFormatted;

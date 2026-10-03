@@ -35,7 +35,8 @@ public:
      *
      * @param pyob The reference to test.
      * @return True when the reference is a float.
-     * @ghidraAddress 0x0040c418
+     * @ghidraAddress NTSC-U/C: 0x0040c418
+     * @ghidraAddress PAL: 0x00445e40
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PyFloat_Check(pyob);

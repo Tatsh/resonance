@@ -6,29 +6,29 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003e52c0
+// NTSC-U/C: 0x003e52c0, PAL: 0x0041d558
 Message *TrackSelectPacket::New() {
     return new TrackSelectPacket;
 }
 
-// 0x003f0848
+// NTSC-U/C: 0x003f0848, PAL: 0x00428e50
 // Clone allocates and hands off to the copy constructor at 0x003f3868, which is
 // the compiler expanding the implicit one.
 Message *TrackSelectPacket::Clone() {
     return new TrackSelectPacket(*this);
 }
 
-// 0x003f08c0
+// NTSC-U/C: 0x003f08c0, PAL: 0x00428ec8
 int TrackSelectPacket::Type() {
     return g_nTrackSelectPacketType;
 }
 
-// 0x003f08d0
+// NTSC-U/C: 0x003f08d0, PAL: 0x00428ed8
 const char *TrackSelectPacket::Name() {
     return "TrackSelectPacket";
 }
 
-// 0x003f2568
+// NTSC-U/C: 0x003f2568, PAL: 0x0042aab0
 void TrackSelectPacket::Print(std::ostream &stream) {
     mPosition.Print(stream);
     std::ostream &rest = stream << " ";
@@ -36,7 +36,7 @@ void TrackSelectPacket::Print(std::ostream &stream) {
     rest << " track:" << mTrack << " place:" << mPlace;
 }
 
-// 0x003e71f8
+// NTSC-U/C: 0x003e71f8, PAL: 0x0041f4d8
 // The stream Mid::MBT::Save() returns is not used.
 void TrackSelectPacket::Save(OBStream &stream) {
     Packet::Save(stream);
@@ -48,7 +48,7 @@ void TrackSelectPacket::Save(OBStream &stream) {
     stream.Write(&id, sizeof(id)).Write(&track, sizeof(track)).Write(&place, sizeof(place));
 }
 
-// 0x003e7330
+// NTSC-U/C: 0x003e7330, PAL: 0x0041f610
 void TrackSelectPacket::Load(IBStream &stream) {
     Packet::Load(stream);
     mPosition.Load(stream);

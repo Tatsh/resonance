@@ -6,29 +6,29 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003e51a8
+// NTSC-U/C: 0x003e51a8, PAL: 0x0041d440
 Message *PhrasePacket::New() {
     return new PhrasePacket;
 }
 
-// 0x003f0320
+// NTSC-U/C: 0x003f0320, PAL: 0x00428928
 // Clone allocates and hands off to the copy constructor at 0x003f3760, which is
 // the compiler expanding the implicit one.
 Message *PhrasePacket::Clone() {
     return new PhrasePacket(*this);
 }
 
-// 0x003f0398
+// NTSC-U/C: 0x003f0398, PAL: 0x004289a0
 int PhrasePacket::Type() {
     return g_nPhrasePacketType;
 }
 
-// 0x003f03a8
+// NTSC-U/C: 0x003f03a8, PAL: 0x004289b0
 const char *PhrasePacket::Name() {
     return "PhrasePacket";
 }
 
-// 0x003f2408
+// NTSC-U/C: 0x003f2408, PAL: 0x0042a950
 void PhrasePacket::Print(std::ostream &stream) {
     stream << "tr:" << mTr << " b:" << mB << " ";
     if (mPhrase != nullptr) {
@@ -38,7 +38,7 @@ void PhrasePacket::Print(std::ostream &stream) {
     }
 }
 
-// 0x003e6b70
+// NTSC-U/C: 0x003e6b70, PAL: 0x0041ee50
 // The word at +0x0c crosses the wire twice.
 void PhrasePacket::Save(OBStream &stream) {
     Packet::Save(stream);
@@ -50,7 +50,7 @@ void PhrasePacket::Save(OBStream &stream) {
         .Write(&clientId, sizeof(clientId));
 }
 
-// 0x003e6ca8
+// NTSC-U/C: 0x003e6ca8, PAL: 0x0041ef88
 void PhrasePacket::Load(IBStream &stream) {
     Packet::Load(stream);
     (stream.Read(&mTr, sizeof(mTr)).Read(&mB, sizeof(mB)) >> mPhrase)

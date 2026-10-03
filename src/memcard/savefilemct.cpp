@@ -47,15 +47,15 @@ const char kIconImageLeafName[] = "freq1.ico";
 const char kMarkerText[] = "0";
 #endif
 
-// 0x007da170
+// NTSC-U/C: 0x007da170, PAL: 0x0081e020
 const float kIconLightDir[][4] = {
     {0.5f, 0.5f, 0.5f, 0.0f}, {0.0f, -0.4f, -0.1f, 0.0f}, {-0.5f, -0.5f, 0.5f, 0.0f}};
 
-// 0x007da1a0
+// NTSC-U/C: 0x007da1a0, PAL: 0x0081e050
 const float kIconLightCol[][4] = {
     {0.48f, 0.48f, 0.03f, 0.0f}, {0.5f, 0.33f, 0.2f, 0.0f}, {0.14f, 0.14f, 0.38f, 0.0f}};
 
-// 0x007da1d0
+// NTSC-U/C: 0x007da1d0, PAL: 0x0081e080
 const float kIconLightAmbient[] = {0.5f, 0.5f, 0.5f, 0.0f};
 
 } // namespace

@@ -24,12 +24,16 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag that abandons exactly this task's operations.
      * @param pSettings The settings to fill.
-     * @ghidraAddress 0x00179518
+     * @ghidraAddress NTSC-U/C: 0x00179518
+     * @ghidraAddress PAL: 0x0017d318
      */
     LoadGlobalSettingsMCT(
         MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, GlobalSettings *pSettings);
 
-    /** @ghidraAddress 0x00185898 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00185898
+     * @ghidraAddress PAL: 0x0018b290
+     */
     virtual ~LoadGlobalSettingsMCT();
 
     /**
@@ -37,7 +41,8 @@ public:
      *
      * Any status other than kMemcardStatusOk reports without touching mSettings.
      *
-     * @ghidraAddress 0x00186728
+     * @ghidraAddress NTSC-U/C: 0x00186728
+     * @ghidraAddress PAL: 0x0018c020
      */
     virtual void Finish();
 

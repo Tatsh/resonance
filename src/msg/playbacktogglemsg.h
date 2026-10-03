@@ -45,7 +45,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 316.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7248
+     * @ghidraAddress NTSC-U/C: 0x003d7248
+     * @ghidraAddress PAL: 0x0040f148
      */
     static Message *New();
 
@@ -53,7 +54,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001161d0
+     * @ghidraAddress NTSC-U/C: 0x001161d0
+     * @ghidraAddress PAL: 0x00116678
      */
     virtual Message *Clone();
 
@@ -61,7 +63,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nPlaybackToggleMsgType.
-     * @ghidraAddress 0x00116218
+     * @ghidraAddress NTSC-U/C: 0x00116218
+     * @ghidraAddress PAL: 0x001166c0
      */
     virtual int Type();
 
@@ -69,7 +72,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `PlaybackToggleMsg`.
-     * @ghidraAddress 0x00116228
+     * @ghidraAddress NTSC-U/C: 0x00116228
+     * @ghidraAddress PAL: 0x001166d0
      */
     virtual const char *Name();
 
@@ -83,6 +87,7 @@ public:
  * it, and the registration at `0x003d9818` passes the same value, 316, as the identity of this
  * class's factory.
  *
- * @ghidraAddress 0x006d026c
+ * @ghidraAddress NTSC-U/C: 0x006d026c
+ * @ghidraAddress PAL: 0x00713a04
  */
 extern int g_nPlaybackToggleMsgType;

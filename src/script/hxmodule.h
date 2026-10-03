@@ -27,6 +27,7 @@ inline Py::MethodTable &HxMethods() {
  * built-in module table, so `import hx` from a script resolves against a module that is already
  * present.
  *
- * @ghidraAddress 0x005597b8
+ * @ghidraAddress NTSC-U/C: 0x005597b8
+ * @ghidraAddress PAL: 0x0059a910
  */
 void InitHxModule();

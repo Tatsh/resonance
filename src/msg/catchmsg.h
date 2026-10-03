@@ -59,7 +59,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 408.
      *
      * @return The message.
-     * @ghidraAddress 0x003d75c0
+     * @ghidraAddress NTSC-U/C: 0x003d75c0
+     * @ghidraAddress PAL: 0x0040f4c0
      */
     static Message *New();
 
@@ -67,7 +68,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001b1068
+     * @ghidraAddress NTSC-U/C: 0x001b1068
+     * @ghidraAddress PAL: 0x001b6e18
      */
     virtual Message *Clone();
 
@@ -75,7 +77,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nCatchMsgType.
-     * @ghidraAddress 0x001b10e0
+     * @ghidraAddress NTSC-U/C: 0x001b10e0
+     * @ghidraAddress PAL: 0x001b6e90
      */
     virtual int Type();
 
@@ -83,7 +86,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `CatchMsg`.
-     * @ghidraAddress 0x001b10f0
+     * @ghidraAddress NTSC-U/C: 0x001b10f0
+     * @ghidraAddress PAL: 0x001b6ea0
      */
     virtual const char *Name();
 
@@ -103,6 +107,7 @@ public:
  * registration at `0x003d9818` passes the same value, 408, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d02e4
+ * @ghidraAddress NTSC-U/C: 0x006d02e4
+ * @ghidraAddress PAL: 0x00713a7c
  */
 extern int g_nCatchMsgType;

@@ -30,7 +30,8 @@ public:
      * initialised.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6e90
+     * @ghidraAddress NTSC-U/C: 0x003d6e90
+     * @ghidraAddress PAL: 0x0040ed80
      */
     static Message *New();
 
@@ -38,7 +39,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dc930
+     * @ghidraAddress NTSC-U/C: 0x003dc930
+     * @ghidraAddress PAL: 0x00414d68
      */
     virtual Message *Clone();
 
@@ -46,7 +48,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_dwTrackSelectMsgType.
-     * @ghidraAddress 0x003dc990
+     * @ghidraAddress NTSC-U/C: 0x003dc990
+     * @ghidraAddress PAL: 0x00414dc8
      */
     virtual int Type();
 
@@ -54,7 +57,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `TrackSelectMsg`.
-     * @ghidraAddress 0x003dc9a0
+     * @ghidraAddress NTSC-U/C: 0x003dc9a0
+     * @ghidraAddress PAL: 0x00414dd8
      */
     virtual const char *Name();
 
@@ -63,7 +67,8 @@ public:
      * a space, and the position to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3ae8
+     * @ghidraAddress NTSC-U/C: 0x003e3ae8
+     * @ghidraAddress PAL: 0x00410358
      */
     virtual void Print(std::ostream &stream);
 
@@ -110,6 +115,7 @@ public:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d01ec
+ * @ghidraAddress NTSC-U/C: 0x006d01ec
+ * @ghidraAddress PAL: 0x00713984
  */
 extern unsigned int g_dwTrackSelectMsgType;

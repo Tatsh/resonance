@@ -26,7 +26,7 @@ constexpr int kLoopRangeArgCount = 3;
 // other length, an unknown name, or a name held by an object of another type each throw
 // Py::TypeError, after posting the reason to the interpreter. The tuple arrives by value, so
 // the copy the caller builds is released here.
-// 0x004071a0
+// NTSC-U/C: 0x004071a0, PAL: 0x00440b00
 void ScriptParseAnimatableArgs(Py::Tuple args, Rnd::Animatable **ppTarget, float *pflValue) {
     if (args.length() != kAnimatableArgCount) {
         throw Py::TypeError(
@@ -49,7 +49,7 @@ void ScriptParseAnimatableArgs(Py::Tuple args, Rnd::Animatable **ppTarget, float
 //
 // The target lookup and every error match ScriptParseAnimatableArgs(). The tuple arrives by
 // value, so the copy the caller builds is released here.
-// 0x00407990
+// NTSC-U/C: 0x00407990, PAL: 0x00441340
 void ScriptParseAnimLoopRange(Py::Tuple args,
                               Rnd::Animatable **ppTarget,
                               float *pflMin,
@@ -74,7 +74,7 @@ void ScriptParseAnimLoopRange(Py::Tuple args,
 }
 
 // Move a named animation to a frame.
-// 0x004084a8
+// NTSC-U/C: 0x004084a8, PAL: 0x00441ea8
 Py::Object ScriptAnimFrame(Py::Tuple args) {
     Rnd::Animatable *pTarget = nullptr;
     float flValue = 0.0f;
@@ -84,7 +84,7 @@ Py::Object ScriptAnimFrame(Py::Tuple args) {
 }
 
 // Change the rate multiplier of a named animation.
-// 0x004085c0
+// NTSC-U/C: 0x004085c0, PAL: 0x00441fc0
 Py::Object ScriptAnimSpeed(Py::Tuple args) {
     Rnd::Animatable *pTarget = nullptr;
     float flValue = 0.0f;
@@ -94,7 +94,7 @@ Py::Object ScriptAnimSpeed(Py::Tuple args) {
 }
 
 // Change the addend of a named animation.
-// 0x004086d8
+// NTSC-U/C: 0x004086d8, PAL: 0x004420d8
 Py::Object ScriptAnimOffset(Py::Tuple args) {
     Rnd::Animatable *pTarget = nullptr;
     float flValue = 0.0f;
@@ -104,7 +104,7 @@ Py::Object ScriptAnimOffset(Py::Tuple args) {
 }
 
 // Change both ends of the loop range of a named animation.
-// 0x004087f0
+// NTSC-U/C: 0x004087f0, PAL: 0x004421f0
 Py::Object ScriptAnimMinmax(Py::Tuple args) {
     Rnd::Animatable *pTarget = nullptr;
     float flMin = 0.0f;
@@ -119,7 +119,7 @@ Py::Object ScriptAnimMinmax(Py::Tuple args) {
 // Sets the arena's juice-trip flag so HandleMessage() stops acting on juice, and passes level 1
 // to the screen animation, which is what TnlArena::LockLevel() does. The arguments are unused;
 // the tuple arrives by value and is released here.
-// 0x00408910
+// NTSC-U/C: 0x00408910, PAL: 0x00442310
 Py::Object ScriptTestArena([[maybe_unused]] Py::Tuple args) {
     if (g_pTnlArena != nullptr) {
         g_pTnlArena->mJuiceLock = 1;
@@ -132,7 +132,7 @@ Py::Object ScriptTestArena([[maybe_unused]] Py::Tuple args) {
 //
 // A C++ exception becomes a null return with the indicator the throw site posted, which is the
 // shape every invoker below shares.
-// 0x00408a38
+// NTSC-U/C: 0x00408a38, PAL: 0x00442438
 PyObject *PyInvokeAnimFrame(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -147,7 +147,7 @@ PyObject *PyInvokeAnimFrame(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptAnimSpeed() on the interpreter's argument tuple.
-// 0x00408be8
+// NTSC-U/C: 0x00408be8, PAL: 0x004425e8
 PyObject *PyInvokeAnimSpeed(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -162,7 +162,7 @@ PyObject *PyInvokeAnimSpeed(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptAnimOffset() on the interpreter's argument tuple.
-// 0x00408d98
+// NTSC-U/C: 0x00408d98, PAL: 0x00442798
 PyObject *PyInvokeAnimOffset(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -177,7 +177,7 @@ PyObject *PyInvokeAnimOffset(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptAnimMinmax() on the interpreter's argument tuple.
-// 0x00408f48
+// NTSC-U/C: 0x00408f48, PAL: 0x00442948
 PyObject *PyInvokeAnimMinmax(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -192,7 +192,7 @@ PyObject *PyInvokeAnimMinmax(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptTestArena() on the interpreter's argument tuple.
-// 0x004090f8
+// NTSC-U/C: 0x004090f8, PAL: 0x00442af8
 PyObject *PyInvokeTestArena(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -207,7 +207,7 @@ PyObject *PyInvokeTestArena(PyObject *, PyObject *pArgs) {
 }
 
 // The script interface this file exports, registered in static initialisation.
-// 0x0040bfe8
+// NTSC-U/C: 0x0040bfe8, PAL: 0x00445a10
 const ScriptFunc kAnimFrameFunc("anim_frame", PyInvokeAnimFrame);
 const ScriptFunc kAnimSpeedFunc("anim_speed", PyInvokeAnimSpeed);
 const ScriptFunc kAnimOffsetFunc("anim_offset", PyInvokeAnimOffset);

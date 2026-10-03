@@ -26,7 +26,8 @@ public:
      *
      * @param pszName The Python-visible name.
      * @param pfnMethod The C entry point.
-     * @ghidraAddress 0x00559720
+     * @ghidraAddress NTSC-U/C: 0x00559720
+     * @ghidraAddress PAL: 0x0059a878
      */
     ScriptFunc(const char *pszName, PyCFunction pfnMethod);
 };

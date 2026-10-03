@@ -2,29 +2,29 @@
 
 #include <iostream>
 
-// 0x003d7cd8
+// NTSC-U/C: 0x003d7cd8, PAL: 0x0040fbf0
 Message *MetStartNetLaunchMsg::New() {
     return new MetStartNetLaunchMsg;
 }
 
-// 0x003e2960
+// NTSC-U/C: 0x003e2960, PAL: 0x0041ae00
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *MetStartNetLaunchMsg::Clone() {
     return new MetStartNetLaunchMsg(*this);
 }
 
-// 0x003e2998
+// NTSC-U/C: 0x003e2998, PAL: 0x0041ae38
 int MetStartNetLaunchMsg::Type() {
     return g_nMetStartNetLaunchMsgType;
 }
 
-// 0x003e29a8
+// NTSC-U/C: 0x003e29a8, PAL: 0x0041ae48
 const char *MetStartNetLaunchMsg::Name() {
     return "MetStartNetLaunchMsg";
 }
 
-// 0x003e4460
+// NTSC-U/C: 0x003e4460, PAL: 0x0041c690
 void MetStartNetLaunchMsg::Print(std::ostream &stream) {
     stream << "MetStartNetLaunchMsg";
 }

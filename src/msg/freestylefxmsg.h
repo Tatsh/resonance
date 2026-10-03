@@ -47,7 +47,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 322.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7398
+     * @ghidraAddress NTSC-U/C: 0x003d7398
+     * @ghidraAddress PAL: 0x0040f298
      */
     static Message *New();
 
@@ -55,7 +56,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x00116500
+     * @ghidraAddress NTSC-U/C: 0x00116500
+     * @ghidraAddress PAL: 0x001169a8
      */
     virtual Message *Clone();
 
@@ -63,7 +65,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nFreestyleFXMsgType.
-     * @ghidraAddress 0x00116558
+     * @ghidraAddress NTSC-U/C: 0x00116558
+     * @ghidraAddress PAL: 0x00116a00
      */
     virtual int Type();
 
@@ -71,7 +74,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `FreestyleFXMsg`.
-     * @ghidraAddress 0x00116568
+     * @ghidraAddress NTSC-U/C: 0x00116568
+     * @ghidraAddress PAL: 0x00116a10
      */
     virtual const char *Name();
 
@@ -95,6 +99,7 @@ private:
  * and the registration at `0x003d9818` passes the same value, 322, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d029c
+ * @ghidraAddress NTSC-U/C: 0x006d029c
+ * @ghidraAddress PAL: 0x00713a34
  */
 extern int g_nFreestyleFXMsgType;

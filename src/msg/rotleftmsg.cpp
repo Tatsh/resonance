@@ -1,23 +1,23 @@
 #include "msg/rotleftmsg.h"
 
-// 0x003d68a8
+// NTSC-U/C: 0x003d68a8, PAL: 0x0040e798
 Message *RotLeftMsg::New() {
     return new RotLeftMsg;
 }
 
-// 0x0011d338
+// NTSC-U/C: 0x0011d338, PAL: 0x0011d8c0
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *RotLeftMsg::Clone() {
     return new RotLeftMsg(*this);
 }
 
-// 0x0011d388
+// NTSC-U/C: 0x0011d388, PAL: 0x0011d910
 int RotLeftMsg::Type() {
     return g_nRotLeftMsgType;
 }
 
-// 0x0011d398
+// NTSC-U/C: 0x0011d398, PAL: 0x0011d920
 const char *RotLeftMsg::Name() {
     return "RotLeftMsg";
 }

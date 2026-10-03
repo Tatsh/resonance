@@ -30,7 +30,8 @@ public:
      * initialised.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6868
+     * @ghidraAddress NTSC-U/C: 0x003d6868
+     * @ghidraAddress PAL: 0x0040e758
      */
     static Message *New();
 
@@ -38,7 +39,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003da200
+     * @ghidraAddress NTSC-U/C: 0x003da200
+     * @ghidraAddress PAL: 0x00412638
      */
     virtual Message *Clone();
 
@@ -46,7 +48,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nRawControllerMsgType.
-     * @ghidraAddress 0x003da268
+     * @ghidraAddress NTSC-U/C: 0x003da268
+     * @ghidraAddress PAL: 0x004126a0
      */
     virtual int Type();
 
@@ -54,7 +57,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `RawControllerMsg`.
-     * @ghidraAddress 0x003da278
+     * @ghidraAddress NTSC-U/C: 0x003da278
+     * @ghidraAddress PAL: 0x004126b0
      */
     virtual const char *Name();
 
@@ -62,7 +66,8 @@ public:
      * Write the reading to a diagnostic stream through MetControllerReading::Print().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e2fb0
+     * @ghidraAddress NTSC-U/C: 0x003e2fb0
+     * @ghidraAddress PAL: 0x0041b450
      */
     virtual void Print(std::ostream &stream);
 
@@ -77,6 +82,7 @@ public:
  * it. Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d0118
+ * @ghidraAddress NTSC-U/C: 0x006d0118
+ * @ghidraAddress PAL: 0x007138b0
  */
 extern int g_nRawControllerMsgType;

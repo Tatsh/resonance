@@ -23,7 +23,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7b18
+     * @ghidraAddress NTSC-U/C: 0x003d7b18
+     * @ghidraAddress PAL: 0x0040fa30
      */
     static Message *New();
 
@@ -31,7 +32,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e1e88
+     * @ghidraAddress NTSC-U/C: 0x003e1e88
+     * @ghidraAddress PAL: 0x0041a328
      */
     virtual Message *Clone();
 
@@ -39,7 +41,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nPlayerLeftGameMsgType.
-     * @ghidraAddress 0x003e1ed0
+     * @ghidraAddress NTSC-U/C: 0x003e1ed0
+     * @ghidraAddress PAL: 0x0041a370
      */
     virtual int Type();
 
@@ -47,7 +50,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `PlayerLeftGameMsg`.
-     * @ghidraAddress 0x003e1ee0
+     * @ghidraAddress NTSC-U/C: 0x003e1ee0
+     * @ghidraAddress PAL: 0x0041a380
      */
     virtual const char *Name();
 
@@ -55,7 +59,8 @@ public:
      * Write the word at `+0x04` to a diagnostic stream as a number.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e40a0
+     * @ghidraAddress NTSC-U/C: 0x003e40a0
+     * @ghidraAddress PAL: 0x0041c2d0
      */
     virtual void Print(std::ostream &stream);
 
@@ -70,6 +75,7 @@ private:
  * returns it. Several handlers elsewhere read the same word to compare against it, which is the
  * expected shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d039c
+ * @ghidraAddress NTSC-U/C: 0x006d039c
+ * @ghidraAddress PAL: 0x00713b34
  */
 extern int g_nPlayerLeftGameMsgType;

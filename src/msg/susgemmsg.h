@@ -28,7 +28,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 407.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7580
+     * @ghidraAddress NTSC-U/C: 0x003d7580
+     * @ghidraAddress PAL: 0x0040f480
      */
     static Message *New();
 
@@ -36,7 +37,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001a44d0
+     * @ghidraAddress NTSC-U/C: 0x001a44d0
+     * @ghidraAddress PAL: 0x001aa238
      */
     virtual Message *Clone();
 
@@ -44,7 +46,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nSusGemMsgType.
-     * @ghidraAddress 0x001a4540
+     * @ghidraAddress NTSC-U/C: 0x001a4540
+     * @ghidraAddress PAL: 0x001aa2a8
      */
     virtual int Type();
 
@@ -52,7 +55,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `SusGemMsg`.
-     * @ghidraAddress 0x001a4550
+     * @ghidraAddress NTSC-U/C: 0x001a4550
+     * @ghidraAddress PAL: 0x001aa2b8
      */
     virtual const char *Name();
 
@@ -71,6 +75,7 @@ public:
  * registration at `0x003d9818` passes the same value, 407, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d02dc
+ * @ghidraAddress NTSC-U/C: 0x006d02dc
+ * @ghidraAddress PAL: 0x00713a74
  */
 extern int g_nSusGemMsgType;

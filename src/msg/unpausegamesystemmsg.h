@@ -24,7 +24,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 435.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7bf8
+     * @ghidraAddress NTSC-U/C: 0x003d7bf8
+     * @ghidraAddress PAL: 0x0040fb10
      */
     static Message *New();
 
@@ -32,7 +33,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x00311c68
+     * @ghidraAddress NTSC-U/C: 0x00311c68
+     * @ghidraAddress PAL: 0x003379c8
      */
     virtual Message *Clone();
 
@@ -40,7 +42,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nUnpauseGameSystemMsgType.
-     * @ghidraAddress 0x00311ca0
+     * @ghidraAddress NTSC-U/C: 0x00311ca0
+     * @ghidraAddress PAL: 0x00337a00
      */
     virtual int Type();
 
@@ -48,7 +51,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `UnpauseGameSystemMsg`.
-     * @ghidraAddress 0x00311cb0
+     * @ghidraAddress NTSC-U/C: 0x00311cb0
+     * @ghidraAddress PAL: 0x00337a10
      */
     virtual const char *Name();
 };
@@ -60,6 +64,7 @@ public:
  * returns it, and the registration at `0x003d9818` passes the same value, 435, as the identity of
  * this class's factory.
  *
- * @ghidraAddress 0x006d03bc
+ * @ghidraAddress NTSC-U/C: 0x006d03bc
+ * @ghidraAddress PAL: 0x00713b54
  */
 extern int g_nUnpauseGameSystemMsgType;

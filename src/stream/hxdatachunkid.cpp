@@ -4,7 +4,7 @@
 
 #include "stream/hxstream.h"
 
-// 0x00145fe0
+// NTSC-U/C: 0x00145fe0, PAL: 0x00146af8
 HxStream &HxDataChunkId::Read(HxStream &stream) {
     (stream >> mName).ReadSwapped(&mSize, sizeof(mSize));
     if (mName == g_listChunkName || mName == g_riffChunkName) {
@@ -17,14 +17,14 @@ HxStream &HxDataChunkId::Read(HxStream &stream) {
     return stream;
 }
 
-// 0x00145868
+// NTSC-U/C: 0x00145868, PAL: 0x00146380
 void HxDataChunkId::Print(std::ostream &stream) {
     std::ostream &rest = mIsList != 0 ? stream << "LIST:" : stream;
     rest << mName.mText[0] << mName.mText[1] << mName.mText[2] << mName.mText[3] << "<" << mSize
          << ">";
 }
 
-// 0x001464b8
+// NTSC-U/C: 0x001464b8, PAL: 0x00146fd0
 HxStream &operator>>(HxStream &stream, HxDataChunkId &id) {
     return id.Read(stream); // The binary expands Read() inline here.
 }

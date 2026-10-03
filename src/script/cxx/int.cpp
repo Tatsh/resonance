@@ -4,24 +4,24 @@
 
 namespace Py {
 
-// 0x004c4680
+// NTSC-U/C: 0x004c4680, PAL: 0x00502908
 Int::Int(const Object &ob) {
     set(FromAPI(PyNumber_Int(ob.mPtr)).mPtr);
     validate();
 }
 
-// 0x004c44c0
+// NTSC-U/C: 0x004c44c0, PAL: 0x00502748
 Int::Int(long long nValue) {
     set(FromAPI(PyInt_FromLong(nValue)).mPtr);
     validate();
 }
 
-// 0x004c71f8
+// NTSC-U/C: 0x004c71f8, PAL: 0x00505420
 Int &Int::operator=(const Object &ob) {
     return operator=(ob.mPtr);
 }
 
-// 0x004c4840
+// NTSC-U/C: 0x004c4840, PAL: 0x00502ac8
 Int &Int::operator=(PyObject *pyob) {
     if (mPtr == pyob) {
         return *this;
@@ -30,17 +30,17 @@ Int &Int::operator=(PyObject *pyob) {
     return *this;
 }
 
-// 0x004c4980
+// NTSC-U/C: 0x004c4980, PAL: 0x00502c08
 Int &Int::operator=(int nValue) {
     return operator=(FromAPI(PyInt_FromLong(nValue)).mPtr);
 }
 
-// 0x004c4a60
+// NTSC-U/C: 0x004c4a60, PAL: 0x00502ce8
 Int &Int::operator=(long long nValue) {
     return operator=(FromAPI(PyInt_FromLong(nValue)).mPtr);
 }
 
-// 0x004c7240
+// NTSC-U/C: 0x004c7240, PAL: 0x00505468
 Int::operator long long() const {
     return PyInt_AsLong(mPtr);
 }

@@ -30,7 +30,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d77a0
+     * @ghidraAddress NTSC-U/C: 0x003d77a0
+     * @ghidraAddress PAL: 0x0040f6a0
      */
     static Message *New();
 
@@ -38,7 +39,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e05b0
+     * @ghidraAddress NTSC-U/C: 0x003e05b0
+     * @ghidraAddress PAL: 0x00418a08
      */
     virtual Message *Clone();
 
@@ -46,7 +48,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nPlayersTrackNeutralizedMsgType.
-     * @ghidraAddress 0x003e0618
+     * @ghidraAddress NTSC-U/C: 0x003e0618
+     * @ghidraAddress PAL: 0x00418a70
      */
     virtual int Type();
 
@@ -54,7 +57,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `PlayersTrackNeutralizedMsg`.
-     * @ghidraAddress 0x003e0628
+     * @ghidraAddress NTSC-U/C: 0x003e0628
+     * @ghidraAddress PAL: 0x00418a80
      */
     virtual const char *Name();
 
@@ -62,7 +66,8 @@ public:
      * Write the player's colour name to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3f30
+     * @ghidraAddress NTSC-U/C: 0x003e3f30
+     * @ghidraAddress PAL: 0x0041c120
      */
     virtual void Print(std::ostream &stream);
 
@@ -77,6 +82,7 @@ public:
  * `0x003e0618` returns it. Several handlers elsewhere read the same word to compare against it,
  * which is the expected shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d0324
+ * @ghidraAddress NTSC-U/C: 0x006d0324
+ * @ghidraAddress PAL: 0x00713abc
  */
 extern int g_nPlayersTrackNeutralizedMsgType;

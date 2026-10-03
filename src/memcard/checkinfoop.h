@@ -18,17 +18,27 @@ public:
      * @param pHandler The receiver Complete() reports to.
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag Memcard::Cancel() matches on.
-     * @ghidraAddress 0x0055e368
+     * @ghidraAddress NTSC-U/C: 0x0055e368
+     * @ghidraAddress PAL: 0x0059f638
      */
     CheckInfoOp(MemcardCBHandler *pHandler, int nPortSlot, int nCookie);
 
-    /** @ghidraAddress 0x0055d320 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055d320
+     * @ghidraAddress PAL: 0x0059e568
+     */
     virtual ~CheckInfoOp();
 
-    /** @ghidraAddress 0x0055e390 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055e390
+     * @ghidraAddress PAL: 0x0059f660
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055d350 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055d350
+     * @ghidraAddress PAL: 0x0059e598
+     */
     virtual void Complete();
 
     /**
@@ -37,7 +47,8 @@ public:
      *
      * A changed card is therefore not an error here, and a positive result is.
      *
-     * @ghidraAddress 0x0055e3d8
+     * @ghidraAddress NTSC-U/C: 0x0055e3d8
+     * @ghidraAddress PAL: 0x0059f6a8
      */
     virtual void InterpretResult();
 

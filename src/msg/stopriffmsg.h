@@ -58,7 +58,8 @@ public:
      * initialised.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6968
+     * @ghidraAddress NTSC-U/C: 0x003d6968
+     * @ghidraAddress PAL: 0x0040e858
      */
     static Message *New();
 
@@ -66,7 +67,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003da7f8
+     * @ghidraAddress NTSC-U/C: 0x003da7f8
+     * @ghidraAddress PAL: 0x00412c30
      */
     virtual Message *Clone();
 
@@ -74,7 +76,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nStopRiffMsgType.
-     * @ghidraAddress 0x003da858
+     * @ghidraAddress NTSC-U/C: 0x003da858
+     * @ghidraAddress PAL: 0x00412c90
      */
     virtual int Type();
 
@@ -82,7 +85,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `StopRiffMsg`.
-     * @ghidraAddress 0x003da868
+     * @ghidraAddress NTSC-U/C: 0x003da868
+     * @ghidraAddress PAL: 0x00412ca0
      */
     virtual const char *Name();
 
@@ -91,7 +95,8 @@ public:
      * diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3098
+     * @ghidraAddress NTSC-U/C: 0x003e3098
+     * @ghidraAddress PAL: 0x0041b558
      */
     virtual void Print(std::ostream &stream);
 
@@ -108,6 +113,7 @@ public:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d013c
+ * @ghidraAddress NTSC-U/C: 0x006d013c
+ * @ghidraAddress PAL: 0x007138d4
  */
 extern int g_nStopRiffMsgType;

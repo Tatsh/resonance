@@ -57,7 +57,8 @@ public:
      * g_nCaughtPhrasePacketType. Only the player reference is initialised beyond the Packet words.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e5200
+     * @ghidraAddress NTSC-U/C: 0x003e5200
+     * @ghidraAddress PAL: 0x0041d498
      */
     static Message *New();
 
@@ -65,7 +66,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f04b8
+     * @ghidraAddress NTSC-U/C: 0x003f04b8
+     * @ghidraAddress PAL: 0x00428ac0
      */
     virtual Message *Clone();
 
@@ -73,7 +75,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nCaughtPhrasePacketType.
-     * @ghidraAddress 0x003f0530
+     * @ghidraAddress NTSC-U/C: 0x003f0530
+     * @ghidraAddress PAL: 0x00428b38
      */
     virtual int Type();
 
@@ -81,7 +84,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `CaughtPhrasePacket`.
-     * @ghidraAddress 0x003f0540
+     * @ghidraAddress NTSC-U/C: 0x003f0540
+     * @ghidraAddress PAL: 0x00428b48
      */
     virtual const char *Name();
 
@@ -89,7 +93,8 @@ public:
      * Write ` tr:`, the track, ` b:`, the bar, and a space to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f24a8
+     * @ghidraAddress NTSC-U/C: 0x003f24a8
+     * @ghidraAddress PAL: 0x0042a9f0
      */
     virtual void Print(std::ostream &stream);
 
@@ -98,7 +103,8 @@ public:
      * `+0x0c` again to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e6db0
+     * @ghidraAddress NTSC-U/C: 0x003e6db0
+     * @ghidraAddress PAL: 0x0041f090
      */
     virtual void Save(OBStream &stream);
 
@@ -106,7 +112,8 @@ public:
      * Read the fields back in place in the order Save() wrote them.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e6f00
+     * @ghidraAddress NTSC-U/C: 0x003e6f00
+     * @ghidraAddress PAL: 0x0041f1e0
      */
     virtual void Load(IBStream &stream);
 
@@ -138,6 +145,7 @@ public:
  * This word belongs to CaughtPhrasePacket because CaughtPhrasePacket::Type() at `0x003f0530`
  * returns it.
  *
- * @ghidraAddress 0x006d73dc
+ * @ghidraAddress NTSC-U/C: 0x006d73dc
+ * @ghidraAddress PAL: 0x0071ab7c
  */
 extern int g_nCaughtPhrasePacketType;

@@ -29,7 +29,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7850
+     * @ghidraAddress NTSC-U/C: 0x003d7850
+     * @ghidraAddress PAL: 0x0040f750
      */
     static Message *New();
 
@@ -37,7 +38,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e0a48
+     * @ghidraAddress NTSC-U/C: 0x003e0a48
+     * @ghidraAddress PAL: 0x00418ea0
      */
     virtual Message *Clone();
 
@@ -45,7 +47,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nPointAmountMsgType.
-     * @ghidraAddress 0x003e0a98
+     * @ghidraAddress NTSC-U/C: 0x003e0a98
+     * @ghidraAddress PAL: 0x00418ef0
      */
     virtual int Type();
 
@@ -53,7 +56,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `PointAmountMsg`.
-     * @ghidraAddress 0x003e0aa8
+     * @ghidraAddress NTSC-U/C: 0x003e0aa8
+     * @ghidraAddress PAL: 0x00418f00
      */
     virtual const char *Name();
 
@@ -61,7 +65,8 @@ public:
      * Write the player to a diagnostic stream through Player::Print().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e4138
+     * @ghidraAddress NTSC-U/C: 0x003e4138
+     * @ghidraAddress PAL: 0x0041c368
      */
     virtual void Print(std::ostream &stream);
 
@@ -73,7 +78,8 @@ public:
      * forwards to.
      *
      * @return The score.
-     * @ghidraAddress 0x003e40d8
+     * @ghidraAddress NTSC-U/C: 0x003e40d8
+     * @ghidraAddress PAL: 0x0041c308
      */
     int GetScore();
 
@@ -84,7 +90,8 @@ public:
      * is inferred.
      *
      * @return The score divided by mMaxScore.
-     * @ghidraAddress 0x003e40f8
+     * @ghidraAddress NTSC-U/C: 0x003e40f8
+     * @ghidraAddress PAL: 0x0041c328
      */
     float GetScoreFraction();
 
@@ -106,6 +113,7 @@ public:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d033c
+ * @ghidraAddress NTSC-U/C: 0x006d033c
+ * @ghidraAddress PAL: 0x00713ad4
  */
 extern int g_nPointAmountMsgType;

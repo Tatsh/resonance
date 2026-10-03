@@ -55,7 +55,8 @@ struct RemixDirInfo {
      *
      * @param dirName The directory name.
      * @param nEntryCount Elements the directory's index file lists.
-     * @ghidraAddress 0x00186828
+     * @ghidraAddress NTSC-U/C: 0x00186828
+     * @ghidraAddress PAL: 0x0018c120
      */
     RemixDirInfo(const HxStr &dirName, unsigned int nEntryCount)
         : name(dirName), entryCount(nEntryCount), highestFileNumber(0) {
@@ -71,7 +72,8 @@ struct RemixDirInfo {
      * @param infos The records.
      * @param dirName The directory the file number came from.
      * @param nFileNumber The file number.
-     * @ghidraAddress 0x001868b8
+     * @ghidraAddress NTSC-U/C: 0x001868b8
+     * @ghidraAddress PAL: 0x0018c1c0
      */
     static void RaiseHighestFileNumber(std::vector<RemixDirInfo> &infos,
                                        const HxStr &dirName,
@@ -93,7 +95,8 @@ struct RemixDirInfo {
      *
      * @param infos The records.
      * @return The file name.
-     * @ghidraAddress 0x00186978
+     * @ghidraAddress NTSC-U/C: 0x00186978
+     * @ghidraAddress PAL: 0x0018c280
      */
     static HxStr NextPayloadFileName(const std::vector<RemixDirInfo> &infos) {
         for (std::vector<RemixDirInfo>::const_iterator it = infos.begin(); it != infos.end();

@@ -6,39 +6,39 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003ef628
+// NTSC-U/C: 0x003ef628, PAL: 0x00427c18
 SPJoinDenyPacket::SPJoinDenyPacket(int nReasonCode, const HxStr &reason)
     : mReasonCode(nReasonCode), mReason(reason) {
 }
 
-// 0x003e4ca0
+// NTSC-U/C: 0x003e4ca0, PAL: 0x0041cf18
 Message *SPJoinDenyPacket::New() {
     return new SPJoinDenyPacket;
 }
 
-// 0x003ef558
+// NTSC-U/C: 0x003ef558, PAL: 0x00427b40
 // Clone allocates and hands off to the copy constructor at 0x003f3130, which is
 // the compiler expanding the implicit one.
 Message *SPJoinDenyPacket::Clone() {
     return new SPJoinDenyPacket(*this);
 }
 
-// 0x003ef5d0
+// NTSC-U/C: 0x003ef5d0, PAL: 0x00427bb8
 int SPJoinDenyPacket::Type() {
     return g_nSPJoinDenyPacketType;
 }
 
-// 0x003ef5e0
+// NTSC-U/C: 0x003ef5e0, PAL: 0x00427bc8
 const char *SPJoinDenyPacket::Name() {
     return "SPJoinDenyPacket";
 }
 
-// 0x003f2000
+// NTSC-U/C: 0x003f2000, PAL: 0x0042a548
 void SPJoinDenyPacket::Print(std::ostream &stream) {
     stream << mReasonCode << " " << mReason;
 }
 
-// 0x003e5d58
+// NTSC-U/C: 0x003e5d58, PAL: 0x0041e038
 void SPJoinDenyPacket::Save(OBStream &stream) {
     Packet::Save(stream);
 
@@ -46,7 +46,7 @@ void SPJoinDenyPacket::Save(OBStream &stream) {
     SaveHxStr(stream.Write(&reasonCode, sizeof(reasonCode)), mReason);
 }
 
-// 0x003e5e98
+// NTSC-U/C: 0x003e5e98, PAL: 0x0041e178
 void SPJoinDenyPacket::Load(IBStream &stream) {
     Packet::Load(stream);
     LoadHxStr(stream.Read(&mReasonCode, sizeof(mReasonCode)), mReason);

@@ -34,7 +34,8 @@ public:
     /**
      * Destroy the wrapper without destroying the module.
      *
-     * @ghidraAddress 0x005abf30
+     * @ghidraAddress NTSC-U/C: 0x005abf30
+     * @ghidraAddress PAL: 0x005ee458
      */
     virtual ~ExtensionModuleBasePtr() {
     }

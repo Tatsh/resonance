@@ -62,7 +62,8 @@ public:
      * initialised.
      *
      * @return The message.
-     * @ghidraAddress 0x003d74f8
+     * @ghidraAddress NTSC-U/C: 0x003d74f8
+     * @ghidraAddress PAL: 0x0040f3f8
      */
     static Message *New();
 
@@ -70,7 +71,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003df540
+     * @ghidraAddress NTSC-U/C: 0x003df540
+     * @ghidraAddress PAL: 0x00417998
      */
     virtual Message *Clone();
 
@@ -78,7 +80,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nGemMsgType.
-     * @ghidraAddress 0x003df5a8
+     * @ghidraAddress NTSC-U/C: 0x003df5a8
+     * @ghidraAddress PAL: 0x00417a00
      */
     virtual int Type();
 
@@ -86,7 +89,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `GemMsg`.
-     * @ghidraAddress 0x003df5b8
+     * @ghidraAddress NTSC-U/C: 0x003df5b8
+     * @ghidraAddress PAL: 0x00417a10
      */
     virtual const char *Name();
 
@@ -95,7 +99,8 @@ public:
      * to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003d8830
+     * @ghidraAddress NTSC-U/C: 0x003d8830
+     * @ghidraAddress PAL: 0x00410c48
      */
     virtual void Print(std::ostream &stream);
 
@@ -113,6 +118,7 @@ public:
  * elsewhere read the same word to compare against it, which is the expected shape for a
  * registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d02cc
+ * @ghidraAddress NTSC-U/C: 0x006d02cc
+ * @ghidraAddress PAL: 0x00713a64
  */
 extern int g_nGemMsgType;

@@ -57,7 +57,8 @@ public:
      *
      * @param pyob The reference to test.
      * @return True when the reference is a list.
-     * @ghidraAddress 0x00317100
+     * @ghidraAddress NTSC-U/C: 0x00317100
+     * @ghidraAddress PAL: 0x005f0b78
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PyList_Check(pyob);
@@ -67,7 +68,8 @@ public:
      * Report the sentinel rather than the length, as Py::String does.
      *
      * @return The value max_size() reports.
-     * @ghidraAddress 0x003170d8
+     * @ghidraAddress NTSC-U/C: 0x003170d8
+     * @ghidraAddress PAL: 0x005f0b50
      */
     virtual int capacity() const {
         return max_size();

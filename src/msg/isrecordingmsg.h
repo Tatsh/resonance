@@ -20,7 +20,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7d48
+     * @ghidraAddress NTSC-U/C: 0x003d7d48
+     * @ghidraAddress PAL: 0x0040fc60
      */
     static Message *New();
 
@@ -28,7 +29,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e2c20
+     * @ghidraAddress NTSC-U/C: 0x003e2c20
+     * @ghidraAddress PAL: 0x0041b0c0
      */
     virtual Message *Clone();
 
@@ -36,7 +38,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nIsRecordingMsgType.
-     * @ghidraAddress 0x003e2c68
+     * @ghidraAddress NTSC-U/C: 0x003e2c68
+     * @ghidraAddress PAL: 0x0041b108
      */
     virtual int Type();
 
@@ -44,7 +47,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `IsRecordingMsg`.
-     * @ghidraAddress 0x003e2c78
+     * @ghidraAddress NTSC-U/C: 0x003e2c78
+     * @ghidraAddress PAL: 0x0041b118
      */
     virtual const char *Name();
 
@@ -52,7 +56,8 @@ public:
      * Write `IsRecordingMsg ` and the word at `+0x04` to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e44b0
+     * @ghidraAddress NTSC-U/C: 0x003e44b0
+     * @ghidraAddress PAL: 0x0041c6e0
      */
     virtual void Print(std::ostream &stream);
 
@@ -72,6 +77,7 @@ public:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d03ec
+ * @ghidraAddress NTSC-U/C: 0x006d03ec
+ * @ghidraAddress PAL: 0x00713b84
  */
 extern int g_nIsRecordingMsgType;

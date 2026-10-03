@@ -15,11 +15,15 @@ public:
     /**
      * Construct an empty queue.
      *
-     * @ghidraAddress 0x0055e268
+     * @ghidraAddress NTSC-U/C: 0x0055e268
+     * @ghidraAddress PAL: 0x0059f538
      */
     MemcardPS2();
 
-    /** @ghidraAddress 0x0055e300 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055e300
+     * @ghidraAddress PAL: 0x0059f5d0
+     */
     virtual ~MemcardPS2();
 
     /**
@@ -30,7 +34,8 @@ public:
      * has its result recorded on the operation, is reported through MemcardOp::Complete(), and is
      * then destroyed and removed. A head with any other value in MemcardOp::mIssued is ignored.
      *
-     * @ghidraAddress 0x0055cfc0
+     * @ghidraAddress NTSC-U/C: 0x0055cfc0
+     * @ghidraAddress PAL: 0x0059e208
      */
     virtual void Update();
 };

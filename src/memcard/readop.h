@@ -22,7 +22,8 @@ public:
      * @param pBuffer The destination.
      * @param nLength The number of bytes to read.
      * @param nCookie The tag Memcard::Cancel() matches on.
-     * @ghidraAddress 0x0055e8e0
+     * @ghidraAddress NTSC-U/C: 0x0055e8e0
+     * @ghidraAddress PAL: 0x0059fbb0
      */
     ReadOp(MemcardCBHandler *pHandler,
            int nPortSlot,
@@ -31,13 +32,22 @@ public:
            int nLength,
            int nCookie);
 
-    /** @ghidraAddress 0x0055d9b8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055d9b8
+     * @ghidraAddress PAL: 0x0059ec30
+     */
     virtual ~ReadOp();
 
-    /** @ghidraAddress 0x0055e910 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055e910
+     * @ghidraAddress PAL: 0x0059fbe0
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055d9e8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055d9e8
+     * @ghidraAddress PAL: 0x0059ec60
+     */
     virtual void Complete();
 
     /**
@@ -46,7 +56,8 @@ public:
      * `sceMcResNoEntry` becomes kMemcardStatusBadFile and `sceMcResDeniedPermit` becomes
      * kMemcardStatusNoEntry, which is the reverse of the pairing the open operations use.
      *
-     * @ghidraAddress 0x0055e948
+     * @ghidraAddress NTSC-U/C: 0x0055e948
+     * @ghidraAddress PAL: 0x0059fc18
      */
     virtual void InterpretResult();
 

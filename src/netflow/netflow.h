@@ -50,7 +50,8 @@ struct netflow_v_side {
  * Clear every adjacency list and mate of a graph, and its U count.
  *
  * @param graph The graph to clear.
- * @ghidraAddress 0x005e6508
+ * @ghidraAddress NTSC-U/C: 0x005e6508
+ * @ghidraAddress PAL: 0x006286f0
  */
 void netflow_graph_init(struct netflow_graph *graph);
 
@@ -58,7 +59,8 @@ void netflow_graph_init(struct netflow_graph *graph);
  * Clear every mate of a V set, and its V count.
  *
  * @param side The V set to clear.
- * @ghidraAddress 0x005e64e8
+ * @ghidraAddress NTSC-U/C: 0x005e64e8
+ * @ghidraAddress PAL: 0x006286d0
  */
 void netflow_v_side_init(struct netflow_v_side *side);
 
@@ -72,7 +74,8 @@ void netflow_v_side_init(struct netflow_v_side *side);
  * @param v The V vertex, from 1.
  * @param graph The graph that owns u.
  * @param side The V set.
- * @ghidraAddress 0x005e6538
+ * @ghidraAddress NTSC-U/C: 0x005e6538
+ * @ghidraAddress PAL: 0x00628720
  */
 void netflow_add_edge(int u, int v, struct netflow_graph *graph, struct netflow_v_side *side);
 
@@ -84,7 +87,8 @@ void netflow_add_edge(int u, int v, struct netflow_graph *graph, struct netflow_
  *
  * @param graph The U set and its edges.
  * @param side The V set.
- * @ghidraAddress 0x00569bf0
+ * @ghidraAddress NTSC-U/C: 0x00569bf0
+ * @ghidraAddress PAL: 0x005aa0b8
  */
 void netflow_build_matching(struct netflow_graph *graph, struct netflow_v_side *side);
 

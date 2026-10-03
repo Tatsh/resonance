@@ -41,7 +41,8 @@ public:
      * g_nSCAllClientsStatusPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e4e48
+     * @ghidraAddress NTSC-U/C: 0x003e4e48
+     * @ghidraAddress PAL: 0x0041d0e0
      */
     static Message *New();
 
@@ -49,7 +50,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003efaa8
+     * @ghidraAddress NTSC-U/C: 0x003efaa8
+     * @ghidraAddress PAL: 0x004280b0
      */
     virtual Message *Clone();
 
@@ -57,7 +59,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nSCAllClientsStatusPacketType.
-     * @ghidraAddress 0x003efb20
+     * @ghidraAddress NTSC-U/C: 0x003efb20
+     * @ghidraAddress PAL: 0x00428128
      */
     virtual int Type();
 
@@ -65,7 +68,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `SCAllClientsStatusPacket`.
-     * @ghidraAddress 0x003efb30
+     * @ghidraAddress NTSC-U/C: 0x003efb30
+     * @ghidraAddress PAL: 0x00428138
      */
     virtual const char *Name();
 
@@ -73,7 +77,8 @@ public:
      * Write every entry to a diagnostic stream as `(id:` id ` stat:` status `) `.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2160
+     * @ghidraAddress NTSC-U/C: 0x003f2160
+     * @ghidraAddress PAL: 0x0042a6a8
      */
     virtual void Print(std::ostream &stream);
 
@@ -81,7 +86,8 @@ public:
      * Write the Packet words, the entry count, and both words of every entry to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e6288
+     * @ghidraAddress NTSC-U/C: 0x003e6288
+     * @ghidraAddress PAL: 0x0041e568
      */
     virtual void Save(OBStream &stream);
 
@@ -89,7 +95,8 @@ public:
      * Read the Packet words and the entry count, resize the vector, and read every entry in place.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e63f0
+     * @ghidraAddress NTSC-U/C: 0x003e63f0
+     * @ghidraAddress PAL: 0x0041e6d0
      */
     virtual void Load(IBStream &stream);
 
@@ -100,7 +107,8 @@ public:
      * out-of-line body, and the verb is inferred from the body alone.
      *
      * @param entry The entry to append.
-     * @ghidraAddress 0x003f2218
+     * @ghidraAddress NTSC-U/C: 0x003f2218
+     * @ghidraAddress PAL: 0x0042a760
      */
     void AppendEntry(ClientStatus entry);
 
@@ -114,6 +122,7 @@ private:
  * This word belongs to SCAllClientsStatusPacket because SCAllClientsStatusPacket::Type() at
  * `0x003efb20` returns it.
  *
- * @ghidraAddress 0x006d7394
+ * @ghidraAddress NTSC-U/C: 0x006d7394
+ * @ghidraAddress PAL: 0x0071ab34
  */
 extern int g_nSCAllClientsStatusPacketType;

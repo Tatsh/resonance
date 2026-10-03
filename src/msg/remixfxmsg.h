@@ -49,7 +49,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 308.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7070
+     * @ghidraAddress NTSC-U/C: 0x003d7070
+     * @ghidraAddress PAL: 0x0040ef60
      */
     static Message *New();
 
@@ -57,7 +58,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001a6250
+     * @ghidraAddress NTSC-U/C: 0x001a6250
+     * @ghidraAddress PAL: 0x001abfb8
      */
     virtual Message *Clone();
 
@@ -65,7 +67,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nRemixFXMsgType.
-     * @ghidraAddress 0x001a62b8
+     * @ghidraAddress NTSC-U/C: 0x001a62b8
+     * @ghidraAddress PAL: 0x001ac020
      */
     virtual int Type();
 
@@ -73,7 +76,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `RemixFXMsg`.
-     * @ghidraAddress 0x001a62c8
+     * @ghidraAddress NTSC-U/C: 0x001a62c8
+     * @ghidraAddress PAL: 0x001ac030
      */
     virtual const char *Name();
 
@@ -92,6 +96,7 @@ private:
  * registration at `0x003d9818` passes the same value, 308, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d022c
+ * @ghidraAddress NTSC-U/C: 0x006d022c
+ * @ghidraAddress PAL: 0x007139c4
  */
 extern int g_nRemixFXMsgType;

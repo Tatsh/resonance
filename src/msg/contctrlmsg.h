@@ -27,7 +27,8 @@ public:
      * initialised.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7640
+     * @ghidraAddress NTSC-U/C: 0x003d7640
+     * @ghidraAddress PAL: 0x0040f540
      */
     static Message *New();
 
@@ -35,7 +36,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dfc28
+     * @ghidraAddress NTSC-U/C: 0x003dfc28
+     * @ghidraAddress PAL: 0x00418080
      */
     virtual Message *Clone();
 
@@ -43,7 +45,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nContCtrlMsgType.
-     * @ghidraAddress 0x003dfc80
+     * @ghidraAddress NTSC-U/C: 0x003dfc80
+     * @ghidraAddress PAL: 0x004180d8
      */
     virtual int Type();
 
@@ -51,7 +54,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `ContCtrlMsg`.
-     * @ghidraAddress 0x003dfc90
+     * @ghidraAddress NTSC-U/C: 0x003dfc90
+     * @ghidraAddress PAL: 0x004180e8
      */
     virtual const char *Name();
 
@@ -59,7 +63,8 @@ public:
      * Write the word at `+0x0c` to a diagnostic stream as a number.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3e80
+     * @ghidraAddress NTSC-U/C: 0x003e3e80
+     * @ghidraAddress PAL: 0x0041c050
      */
     virtual void Print(std::ostream &stream);
 
@@ -78,6 +83,7 @@ private:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d02f4
+ * @ghidraAddress NTSC-U/C: 0x006d02f4
+ * @ghidraAddress PAL: 0x00713a8c
  */
 extern int g_nContCtrlMsgType;

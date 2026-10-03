@@ -28,7 +28,8 @@ public:
      *
      * Occupies vtable slot 1. The body is empty.
      *
-     * @ghidraAddress 0x00184448
+     * @ghidraAddress NTSC-U/C: 0x00184448
+     * @ghidraAddress PAL: 0x00189730
      */
     virtual ~MemcardUser();
 
@@ -40,7 +41,8 @@ public:
      *
      * @param state What the slot reported.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x00184478
+     * @ghidraAddress NTSC-U/C: 0x00184478
+     * @ghidraAddress PAL: 0x00189760
      */
     virtual void OnConnectState(MemcardConnectState state, int nStatus);
 
@@ -50,7 +52,8 @@ public:
      * The task reports each slot through OnConnectState() as its enquiry finishes, and reports
      * here once with no argument when the last of them is done.
      *
-     * @ghidraAddress 0x001844a0
+     * @ghidraAddress NTSC-U/C: 0x001844a0
+     * @ghidraAddress PAL: 0x00189798
      */
     virtual void OnAllConnectStates();
 
@@ -83,7 +86,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x001844b0
+     * @ghidraAddress NTSC-U/C: 0x001844b0
+     * @ghidraAddress PAL: 0x001897a8
      */
     virtual void OnCardFormatted(int nPortSlot, int nStatus);
 
@@ -92,7 +96,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x001844b8
+     * @ghidraAddress NTSC-U/C: 0x001844b8
+     * @ghidraAddress PAL: 0x001897b0
      */
     virtual void OnCardUnformatted(int nPortSlot, int nStatus);
 
@@ -165,7 +170,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x001844e0
+     * @ghidraAddress NTSC-U/C: 0x001844e0
+     * @ghidraAddress PAL: 0x001897d8
      */
     virtual void OnRemixesListed(int nPortSlot, int nStatus);
 
@@ -174,7 +180,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x001844e8
+     * @ghidraAddress NTSC-U/C: 0x001844e8
+     * @ghidraAddress PAL: 0x001897e0
      */
     virtual void OnRemixLoaded(int nPortSlot, int nStatus);
 
@@ -183,7 +190,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x001844f0
+     * @ghidraAddress NTSC-U/C: 0x001844f0
+     * @ghidraAddress PAL: 0x001897e8
      */
     virtual void OnPersonasLoaded(int nPortSlot, int nStatus);
 
@@ -192,7 +200,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x001844f8
+     * @ghidraAddress NTSC-U/C: 0x001844f8
+     * @ghidraAddress PAL: 0x001897f0
      */
     virtual void OnGlobalSettingsLoaded(int nPortSlot, int nStatus);
 
@@ -201,7 +210,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x00184500
+     * @ghidraAddress NTSC-U/C: 0x00184500
+     * @ghidraAddress PAL: 0x001897f8
      */
     virtual void OnJukeboxPlayListLoaded(int nPortSlot, int nStatus);
 
@@ -210,7 +220,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x00184508
+     * @ghidraAddress NTSC-U/C: 0x00184508
+     * @ghidraAddress PAL: 0x00189800
      */
     virtual void OnRemixDeleted(int nPortSlot, int nStatus);
 
@@ -223,7 +234,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x00184510
+     * @ghidraAddress NTSC-U/C: 0x00184510
+     * @ghidraAddress PAL: 0x00189808
      */
     virtual void UnusedFirstReport(int nPortSlot, int nStatus);
 
@@ -234,7 +246,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x00184518
+     * @ghidraAddress NTSC-U/C: 0x00184518
+     * @ghidraAddress PAL: 0x00189810
      */
     virtual void UnusedSecondReport(int nPortSlot, int nStatus);
 
@@ -245,7 +258,8 @@ public:
      * report this way.
      *
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x00184520
+     * @ghidraAddress NTSC-U/C: 0x00184520
+     * @ghidraAddress PAL: 0x00189818
      */
     virtual void OnFileLoaded(int nStatus);
 
@@ -253,7 +267,8 @@ public:
      * Report a finished save of one file. Slot 20, from `SaveFileMCT`.
      *
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x00184528
+     * @ghidraAddress NTSC-U/C: 0x00184528
+     * @ghidraAddress PAL: 0x00189820
      */
     virtual void OnFileSaved(int nStatus);
 };

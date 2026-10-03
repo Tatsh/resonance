@@ -45,7 +45,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 317.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7280
+     * @ghidraAddress NTSC-U/C: 0x003d7280
+     * @ghidraAddress PAL: 0x0040f180
      */
     static Message *New();
 
@@ -53,7 +54,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001160b0
+     * @ghidraAddress NTSC-U/C: 0x001160b0
+     * @ghidraAddress PAL: 0x00116558
      */
     virtual Message *Clone();
 
@@ -61,7 +63,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nInvalidateSeekerMsgType.
-     * @ghidraAddress 0x00116100
+     * @ghidraAddress NTSC-U/C: 0x00116100
+     * @ghidraAddress PAL: 0x001165a8
      */
     virtual int Type();
 
@@ -69,7 +72,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `InvalidateSeekerMsg`.
-     * @ghidraAddress 0x00116110
+     * @ghidraAddress NTSC-U/C: 0x00116110
+     * @ghidraAddress PAL: 0x001165b8
      */
     virtual const char *Name();
 
@@ -89,6 +93,7 @@ public:
  * returns it, and the registration at `0x003d9818` passes the same value, 317, as the identity of
  * this class's factory.
  *
- * @ghidraAddress 0x006d0274
+ * @ghidraAddress NTSC-U/C: 0x006d0274
+ * @ghidraAddress PAL: 0x00713a0c
  */
 extern int g_nInvalidateSeekerMsgType;

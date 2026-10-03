@@ -29,7 +29,7 @@ constexpr int kStepReadPayload = 2;
 
 } // namespace
 
-// 0x0017be28
+// NTSC-U/C: 0x0017be28, PAL: 0x00180288
 LoadRemixMCT::LoadRemixMCT(
     MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, const HxStr &remixName)
     : MemcardTask(pUser, pCard, nPortSlot, nCookie), mRemixName(remixName), mLoadTask(nullptr),
@@ -38,18 +38,18 @@ LoadRemixMCT::LoadRemixMCT(
     mPayload = Application::shared()->GetResetLog();
 }
 
-// 0x00185380
+// NTSC-U/C: 0x00185380, PAL: 0x0018acb8
 LoadRemixMCT::~LoadRemixMCT() {
 }
 
-// 0x0017c060
+// NTSC-U/C: 0x0017c060, PAL: 0x00180500
 void LoadRemixMCT::ListRemixDir() {
     mStep = 0;
     HxStr pattern = g_saveDirBase + g_remixDirSuffix + kAnyDirectory;
     mCard->ListDir(this, mPortSlot, pattern, mCookie, kListDirModeFresh);
 }
 
-// 0x00186bd0
+// NTSC-U/C: 0x00186bd0, PAL: 0x0018c3a8
 void LoadRemixMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (pOp->mStatus != kMemcardStatusUnknown && pOp->mStatus != kMemcardStatusNotFormatted) {
@@ -62,7 +62,7 @@ void LoadRemixMCT::OnCheckInfo(CheckInfoOp *pOp) {
     }
 }
 
-// 0x0017c210
+// NTSC-U/C: 0x0017c210, PAL: 0x00180728
 void LoadRemixMCT::OnListDir(ListDirOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus != kMemcardStatusOk) {
@@ -90,7 +90,7 @@ void LoadRemixMCT::OnListDir(ListDirOp *pOp) {
     mLoadTask->Load(mCurrentDir + kIndexFileName, mBuffer, mStream.Capacity());
 }
 
-// 0x0017c650
+// NTSC-U/C: 0x0017c650, PAL: 0x00180c40
 void LoadRemixMCT::OnFileLoaded(int nStatus) {
     mStatus = nStatus;
     if (nStatus != kMemcardStatusOk) {
@@ -135,13 +135,13 @@ void LoadRemixMCT::OnFileLoaded(int nStatus) {
     mLoadTask->Load(mCurrentDir + kIndexFileName, mBuffer, mStream.Capacity());
 }
 
-// 0x00186c50
+// NTSC-U/C: 0x00186c50, PAL: 0x0018c428
 void LoadRemixMCT::Finish() {
     mState = kMemcardTaskFinished;
     mUser->OnRemixLoaded(mPortSlot, mStatus);
 }
 
-// 0x00186ba0
+// NTSC-U/C: 0x00186ba0, PAL: 0x0018c378
 void LoadRemixMCT::Execute() {
     mState = kMemcardTaskRunning;
     mCard->CheckInfo(this, mPortSlot, mCookie);

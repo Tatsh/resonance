@@ -49,7 +49,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 105.
      *
      * @return The message.
-     * @ghidraAddress 0x003d69a8
+     * @ghidraAddress NTSC-U/C: 0x003d69a8
+     * @ghidraAddress PAL: 0x0040e898
      */
     static Message *New();
 
@@ -57,7 +58,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x0011d578
+     * @ghidraAddress NTSC-U/C: 0x0011d578
+     * @ghidraAddress PAL: 0x0011db00
      */
     virtual Message *Clone();
 
@@ -65,7 +67,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nPlaybackModeMsgType.
-     * @ghidraAddress 0x0011d5c8
+     * @ghidraAddress NTSC-U/C: 0x0011d5c8
+     * @ghidraAddress PAL: 0x0011db50
      */
     virtual int Type();
 
@@ -73,7 +76,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `PlaybackModeMsg`.
-     * @ghidraAddress 0x0011d5d8
+     * @ghidraAddress NTSC-U/C: 0x0011d5d8
+     * @ghidraAddress PAL: 0x0011db60
      */
     virtual const char *Name();
 
@@ -88,6 +92,7 @@ public:
  * and the registration at `0x003d9818` passes the same value, 105, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d0144
+ * @ghidraAddress NTSC-U/C: 0x006d0144
+ * @ghidraAddress PAL: 0x007138dc
  */
 extern int g_nPlaybackModeMsgType;

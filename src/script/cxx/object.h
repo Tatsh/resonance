@@ -71,7 +71,8 @@ public:
     /**
      * Release the reference.
      *
-     * @ghidraAddress 0x0010ee70
+     * @ghidraAddress NTSC-U/C: 0x0010ee70
+     * @ghidraAddress PAL: 0x0010f2d0
      */
     virtual ~Object() {
         release();
@@ -96,7 +97,8 @@ public:
      *
      * @param pyob The reference to test.
      * @return True when the reference suits this type.
-     * @ghidraAddress 0x0010eee8
+     * @ghidraAddress NTSC-U/C: 0x0010eee8
+     * @ghidraAddress PAL: 0x0010f348
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr;
@@ -110,7 +112,8 @@ public:
      *
      * @param name The attribute name.
      * @return A handle on the attribute.
-     * @ghidraAddress 0x004c3f80
+     * @ghidraAddress NTSC-U/C: 0x004c3f80
+     * @ghidraAddress PAL: 0x00502100
      */
     Object getAttr(const HxStr &name) const;
 
@@ -118,7 +121,8 @@ public:
      * Produce the text of `str()` applied to the object.
      *
      * @return A new handle on the string object.
-     * @ghidraAddress 0x0055c980
+     * @ghidraAddress NTSC-U/C: 0x0055c980
+     * @ghidraAddress PAL: 0x0059dba0
      */
     String str() const;
 
@@ -126,7 +130,8 @@ public:
      * Produce the text of `str()` applied to the object, as a game string.
      *
      * @return The text.
-     * @ghidraAddress 0x0055cb30
+     * @ghidraAddress NTSC-U/C: 0x0055cb30
+     * @ghidraAddress PAL: 0x0059dd50
      */
     HxStr as_string() const;
 
@@ -134,7 +139,8 @@ public:
      * Produce the object's type.
      *
      * @return A new handle on the type object.
-     * @ghidraAddress 0x0055c818
+     * @ghidraAddress NTSC-U/C: 0x0055c818
+     * @ghidraAddress PAL: 0x0059da38
      */
     Type type() const;
 
@@ -143,7 +149,8 @@ public:
      *
      * @param type The type to compare with.
      * @return True when the two type objects are the same object.
-     * @ghidraAddress 0x0055ceb0
+     * @ghidraAddress NTSC-U/C: 0x0055ceb0
+     * @ghidraAddress PAL: 0x0059e0f8
      */
     bool isType(const Type &type) const;
 
@@ -201,7 +208,8 @@ protected:
      * empty in between, which is why the body does not use release().
      *
      * @param pyob The reference to wrap.
-     * @ghidraAddress 0x004c6a30
+     * @ghidraAddress NTSC-U/C: 0x004c6a30
+     * @ghidraAddress PAL: 0x00504cb8
      */
     void set(PyObject *pyob) {
         Py_XDECREF(mPtr);
@@ -222,7 +230,8 @@ protected:
      * back on this fixed text otherwise, and the image has the fixed text, so the binding was
      * built with neither `_CPPRTTI` nor `__GNUG__` reaching that block.
      *
-     * @ghidraAddress 0x004c3d10
+     * @ghidraAddress NTSC-U/C: 0x004c3d10
+     * @ghidraAddress PAL: 0x00501e50
      */
     void validate() {
         if (accepts(mPtr)) {
@@ -241,7 +250,8 @@ protected:
  *
  * @param object The handle to read.
  * @return The reference with one count added, which the caller then owns.
- * @ghidraAddress 0x004c6f28
+ * @ghidraAddress NTSC-U/C: 0x004c6f28
+ * @ghidraAddress PAL: 0x00505150
  */
 inline PyObject *new_reference_to(const Object &object) {
     PyObject *pyob = object.mPtr;

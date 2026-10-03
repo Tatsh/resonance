@@ -62,7 +62,8 @@ struct HxDataChunkId {
      *
      * @param stream The stream to read from.
      * @return The stream.
-     * @ghidraAddress 0x00145fe0
+     * @ghidraAddress NTSC-U/C: 0x00145fe0
+     * @ghidraAddress PAL: 0x00146af8
      */
     HxStream &Read(HxStream &stream);
 
@@ -71,7 +72,8 @@ struct HxDataChunkId {
      * size in angle brackets.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00145868
+     * @ghidraAddress NTSC-U/C: 0x00145868
+     * @ghidraAddress PAL: 0x00146380
      */
     void Print(std::ostream &stream);
 
@@ -89,6 +91,7 @@ struct HxDataChunkId {
  * @param stream The stream to read from.
  * @param id The header to fill.
  * @return The stream.
- * @ghidraAddress 0x001464b8
+ * @ghidraAddress NTSC-U/C: 0x001464b8
+ * @ghidraAddress PAL: 0x00146fd0
  */
 HxStream &operator>>(HxStream &stream, HxDataChunkId &id);

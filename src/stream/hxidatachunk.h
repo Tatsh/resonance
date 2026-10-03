@@ -24,7 +24,8 @@ public:
      * source stream's read position.
      *
      * @param pReader The reader positioned on the chunk.
-     * @ghidraAddress 0x00145908
+     * @ghidraAddress NTSC-U/C: 0x00145908
+     * @ghidraAddress PAL: 0x00146420
      */
     explicit HxIDataChunk(HxDataChunkReader *pReader);
 
@@ -33,14 +34,16 @@ public:
      *
      * @param pSource The stream positioned on the chunk header. The chunk does not take
      * ownership.
-     * @ghidraAddress 0x00145a10
+     * @ghidraAddress NTSC-U/C: 0x00145a10
+     * @ghidraAddress PAL: 0x00146528
      */
     explicit HxIDataChunk(HxStream *pSource);
 
     /**
      * Unlock the reader, if any, and free the header.
      *
-     * @ghidraAddress 0x00146080
+     * @ghidraAddress NTSC-U/C: 0x00146080
+     * @ghidraAddress PAL: 0x00146b98
      */
     ~HxIDataChunk() override;
 
@@ -51,7 +54,8 @@ public:
      *
      * @param nOffset The signed distance to move.
      * @param nWhence The origin, one of the HxStreamSeekOrigin values.
-     * @ghidraAddress 0x00145b20
+     * @ghidraAddress NTSC-U/C: 0x00145b20
+     * @ghidraAddress PAL: 0x00146638
      */
     void Seek(int nOffset, int nWhence) override;
 
@@ -60,7 +64,8 @@ public:
      *
      * @return The position from the start of the payload, or -1 while HxStream::kStatusRange or
      * HxStream::kStatusFailed is set.
-     * @ghidraAddress 0x001460f0
+     * @ghidraAddress NTSC-U/C: 0x001460f0
+     * @ghidraAddress PAL: 0x00146c08
      */
     int Tell() override;
 
@@ -68,7 +73,8 @@ public:
      * Report the payload size from the chunk header.
      *
      * @return The size in bytes.
-     * @ghidraAddress 0x00145fc0
+     * @ghidraAddress NTSC-U/C: 0x00145fc0
+     * @ghidraAddress PAL: 0x00146ad8
      */
     int Size() override;
 
@@ -81,7 +87,8 @@ public:
      * @param pDest The destination buffer.
      * @param nSize The number of bytes to move.
      * @return This stream.
-     * @ghidraAddress 0x00146160
+     * @ghidraAddress NTSC-U/C: 0x00146160
+     * @ghidraAddress PAL: 0x00146c78
      */
     HxStream &Read(void *pDest, int nSize) override;
 
@@ -89,7 +96,8 @@ public:
      * Report the stream the payload lies in.
      *
      * @return The source stream.
-     * @ghidraAddress 0x00145fd8
+     * @ghidraAddress NTSC-U/C: 0x00145fd8
+     * @ghidraAddress PAL: 0x00146af0
      */
     HxStream *UnderlyingStream() override;
 

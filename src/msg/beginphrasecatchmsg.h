@@ -53,7 +53,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 320.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7328
+     * @ghidraAddress NTSC-U/C: 0x003d7328
+     * @ghidraAddress PAL: 0x0040f228
      */
     static Message *New();
 
@@ -61,7 +62,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x0019d7e8
+     * @ghidraAddress NTSC-U/C: 0x0019d7e8
+     * @ghidraAddress PAL: 0x001a3550
      */
     virtual Message *Clone();
 
@@ -69,7 +71,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nBeginPhraseCatchMsgType.
-     * @ghidraAddress 0x0019d840
+     * @ghidraAddress NTSC-U/C: 0x0019d840
+     * @ghidraAddress PAL: 0x001a35a8
      */
     virtual int Type();
 
@@ -77,7 +80,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `BeginPhraseCatchMsg`.
-     * @ghidraAddress 0x0019d850
+     * @ghidraAddress NTSC-U/C: 0x0019d850
+     * @ghidraAddress PAL: 0x001a35b8
      */
     virtual const char *Name();
 
@@ -93,6 +97,7 @@ public:
  * returns it, and the registration at `0x003d9818` passes the same value, 320, as the identity of
  * this class's factory.
  *
- * @ghidraAddress 0x006d028c
+ * @ghidraAddress NTSC-U/C: 0x006d028c
+ * @ghidraAddress PAL: 0x00713a24
  */
 extern int g_nBeginPhraseCatchMsgType;

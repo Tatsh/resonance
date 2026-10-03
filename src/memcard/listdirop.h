@@ -28,18 +28,28 @@ public:
      * @param nCookie The tag Memcard::Cancel() matches on.
      * @param nMode The `sceMcGetDir()` mode, which selects between a fresh listing and a
      *              continuation of the previous one.
-     * @ghidraAddress 0x0055e778
+     * @ghidraAddress NTSC-U/C: 0x0055e778
+     * @ghidraAddress PAL: 0x0059fa48
      */
     ListDirOp(
         MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie, unsigned nMode);
 
-    /** @ghidraAddress 0x0055d868 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055d868
+     * @ghidraAddress PAL: 0x0059ead0
+     */
     virtual ~ListDirOp();
 
-    /** @ghidraAddress 0x0055e818 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055e818
+     * @ghidraAddress PAL: 0x0059fae8
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055d8d0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055d8d0
+     * @ghidraAddress PAL: 0x0059eb48
+     */
     virtual void Complete();
 
     /**
@@ -48,7 +58,8 @@ public:
      * `sceMcResNoEntry` becomes kMemcardStatusNoDirectory here rather than kMemcardStatusNoEntry,
      * which is the one place that value is produced.
      *
-     * @ghidraAddress 0x0055e870
+     * @ghidraAddress NTSC-U/C: 0x0055e870
+     * @ghidraAddress PAL: 0x0059fb40
      */
     virtual void InterpretResult();
 
@@ -71,6 +82,7 @@ public:
 /**
  * Table every listing writes into.
  *
- * @ghidraAddress 0x00726a40
+ * @ghidraAddress NTSC-U/C: 0x00726a40
+ * @ghidraAddress PAL: 0x0076a700
  */
 extern sceMcTblGetDir g_aMemcardDirEntries[kListDirMaxEntries];

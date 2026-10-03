@@ -5,54 +5,54 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003f1438
+// NTSC-U/C: 0x003f1438, PAL: 0x00429900
 SCLoadLevelPacket::SCLoadLevelPacket() {
 }
 
-// 0x003f14b0
+// NTSC-U/C: 0x003f14b0, PAL: 0x00429978
 SCLoadLevelPacket::SCLoadLevelPacket(const GameParams &params) : mParams(params) {
 }
 
-// 0x003e5040
+// NTSC-U/C: 0x003e5040, PAL: 0x0041d2d8
 Message *SCLoadLevelPacket::New() {
     return new SCLoadLevelPacket;
 }
 
-// 0x003f13a0
+// NTSC-U/C: 0x003f13a0, PAL: 0x00429868
 // Clone allocates and hands off to the copy constructor at 0x003f3c48, which is
 // the compiler expanding the implicit one.
 Message *SCLoadLevelPacket::Clone() {
     return new SCLoadLevelPacket(*this);
 }
 
-// 0x003f1418
+// NTSC-U/C: 0x003f1418, PAL: 0x004298e0
 int SCLoadLevelPacket::Type() {
     return g_nSCLoadLevelPacketType;
 }
 
-// 0x003f1428
+// NTSC-U/C: 0x003f1428, PAL: 0x004298f0
 const char *SCLoadLevelPacket::Name() {
     return "SCLoadLevelPacket";
 }
 
-// 0x003f2858
+// NTSC-U/C: 0x003f2858, PAL: 0x0042ada0
 void SCLoadLevelPacket::Print(std::ostream &stream) {
     mParams.Print(stream);
 }
 
-// 0x003e8180
+// NTSC-U/C: 0x003e8180, PAL: 0x00420460
 void SCLoadLevelPacket::Save(OBStream &stream) {
     Packet::Save(stream);
     mParams.Save(&stream);
 }
 
-// 0x003f27a0
+// NTSC-U/C: 0x003f27a0, PAL: 0x0042ace8
 void SCLoadLevelPacket::Load(IBStream &stream) {
     Packet::Load(stream);
     mParams.Load(&stream);
 }
 
-// 0x003f1528
+// NTSC-U/C: 0x003f1528, PAL: 0x004299f0
 GameParams SCLoadLevelPacket::GetParams() {
     return mParams;
 }

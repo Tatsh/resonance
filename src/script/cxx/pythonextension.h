@@ -46,7 +46,8 @@ public:
     /**
      * Destroy the object.
      *
-     * @ghidraAddress 0x005abf00
+     * @ghidraAddress NTSC-U/C: 0x005abf00
+     * @ghidraAddress PAL: 0x005ee428
      */
     virtual ~PythonExtension() {
     }
@@ -60,7 +61,8 @@ public:
      *
      * @param pszName The attribute name.
      * @return The list of names, or the bound function.
-     * @ghidraAddress 0x005ad5e0
+     * @ghidraAddress NTSC-U/C: 0x005ad5e0
+     * @ghidraAddress PAL: 0x005efb08
      */
     virtual Object getattr_methods(const char *pszName) {
         const HxStr name(pszName);
@@ -95,7 +97,8 @@ protected:
      * Build T's type object on first use.
      *
      * @return The type object builder.
-     * @ghidraAddress 0x005abe70
+     * @ghidraAddress NTSC-U/C: 0x005abe70
+     * @ghidraAddress PAL: 0x005ee398
      */
     static PythonType &behaviors() {
         static PythonType *pType = nullptr;
@@ -109,7 +112,7 @@ protected:
 private:
     typedef std::map<HxStr, MethodDefExt<T> *> method_map_t;
 
-    // 0x005aab58
+    // NTSC-U/C: 0x005aab58, PAL: 0x005ed080
     static method_map_t &methods() {
         static method_map_t *pMethods = nullptr;
         if (pMethods == nullptr) {
@@ -118,7 +121,7 @@ private:
         return *pMethods;
     }
 
-    // 0x005ae638
+    // NTSC-U/C: 0x005ae638, PAL: 0x005f0ba0
     static void extension_object_deallocator(PyObject *pyob) {
         delete static_cast<T *>(pyob);
     }

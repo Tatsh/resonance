@@ -15,7 +15,7 @@ namespace {
 // Flip the LSD filter.
 //
 // Only while a renderer exists. The tuple arrives by value and is released here.
-// 0x0042d558
+// NTSC-U/C: 0x0042d558, PAL: 0x00469110
 Py::Object ScriptLsdMode([[maybe_unused]] Py::Tuple args) {
     if (g_pRenderer != nullptr) {
         g_nLsdMode ^= 1;
@@ -25,7 +25,7 @@ Py::Object ScriptLsdMode([[maybe_unused]] Py::Tuple args) {
 }
 
 // Run ScriptLsdMode() on the interpreter's argument tuple.
-// 0x0042d670
+// NTSC-U/C: 0x0042d670, PAL: 0x00469228
 PyObject *PyInvokeLsdMode(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -42,7 +42,7 @@ PyObject *PyInvokeLsdMode(PyObject *, PyObject *pArgs) {
 // Flip the crate gems.
 //
 // Only while an app tunnel exists. The tuple arrives by value and is released here.
-// 0x00449dc0
+// NTSC-U/C: 0x00449dc0, PAL: 0x004870b0
 Py::Object ScriptCrates([[maybe_unused]] Py::Tuple args) {
     if (g_pAppTunnel != nullptr) {
         g_pAppTunnel->mShowCrates ^= 1;
@@ -52,7 +52,7 @@ Py::Object ScriptCrates([[maybe_unused]] Py::Tuple args) {
 }
 
 // Run ScriptCrates() on the interpreter's argument tuple.
-// 0x00449ed0
+// NTSC-U/C: 0x00449ed0, PAL: 0x004871c0
 PyObject *PyInvokeCrates(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -70,7 +70,7 @@ PyObject *PyInvokeCrates(PyObject *, PyObject *pArgs) {
 //
 // Both drawn, panels only, neither, and back to both. The mode does not change and no sound plays
 // unless both the tunnel and the app tunnel exist. The tuple arrives by value and is released here.
-// 0x0044a080
+// NTSC-U/C: 0x0044a080, PAL: 0x00487370
 Py::Object ScriptNolatticeToggle([[maybe_unused]] Py::Tuple args) {
     Rnd::Tunnel *pTunnel = GetCachedTunnelObject();
     if (pTunnel == nullptr || g_pAppTunnel == nullptr) {
@@ -94,7 +94,7 @@ Py::Object ScriptNolatticeToggle([[maybe_unused]] Py::Tuple args) {
 }
 
 // Run ScriptNolatticeToggle() on the interpreter's argument tuple.
-// 0x0044a1d0
+// NTSC-U/C: 0x0044a1d0, PAL: 0x004874c0
 PyObject *PyInvokeNolatticeToggle(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -109,9 +109,9 @@ PyObject *PyInvokeNolatticeToggle(PyObject *, PyObject *pArgs) {
 }
 
 // The script interface this file exports, registered in static initialisation.
-// 0x00431ab8
+// NTSC-U/C: 0x00431ab8, PAL: 0x0046d728
 const ScriptFunc kLsdmodeFunc("lsdmode", PyInvokeLsdMode);
-// 0x00453bc8
+// NTSC-U/C: 0x00453bc8, PAL: 0x004910c8
 const ScriptFunc kCratesFunc("crates", PyInvokeCrates);
 const ScriptFunc kNolatticeFunc("nolattice", PyInvokeNolatticeToggle);
 

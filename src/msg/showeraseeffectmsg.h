@@ -58,7 +58,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 315.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7210
+     * @ghidraAddress NTSC-U/C: 0x003d7210
+     * @ghidraAddress PAL: 0x0040f110
      */
     static Message *New();
 
@@ -66,7 +67,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x0019d6b0
+     * @ghidraAddress NTSC-U/C: 0x0019d6b0
+     * @ghidraAddress PAL: 0x001a3418
      */
     virtual Message *Clone();
 
@@ -74,7 +76,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nShowEraseEffectMsgType.
-     * @ghidraAddress 0x0019d718
+     * @ghidraAddress NTSC-U/C: 0x0019d718
+     * @ghidraAddress PAL: 0x001a3480
      */
     virtual int Type();
 
@@ -82,7 +85,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `ShowEraseEffectMsg`.
-     * @ghidraAddress 0x0019d728
+     * @ghidraAddress NTSC-U/C: 0x0019d728
+     * @ghidraAddress PAL: 0x001a3490
      */
     virtual const char *Name();
 
@@ -102,6 +106,7 @@ private:
  * returns it, and the registration at `0x003d9818` passes the same value, 315, as the identity of
  * this class's factory.
  *
- * @ghidraAddress 0x006d0264
+ * @ghidraAddress NTSC-U/C: 0x006d0264
+ * @ghidraAddress PAL: 0x007139fc
  */
 extern int g_nShowEraseEffectMsgType;

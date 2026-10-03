@@ -24,14 +24,16 @@ public:
      *
      * @param nBasicSize The instance size.
      * @param nItemSize The size of one variable-length item.
-     * @ghidraAddress 0x005ac120
+     * @ghidraAddress NTSC-U/C: 0x005ac120
+     * @ghidraAddress PAL: 0x005ee648
      */
     PythonType(int nBasicSize, int nItemSize);
 
     /**
      * Free the type object and the protocol tables.
      *
-     * @ghidraAddress 0x005ac220
+     * @ghidraAddress NTSC-U/C: 0x005ac220
+     * @ghidraAddress PAL: 0x005ee748
      */
     virtual ~PythonType();
 
@@ -39,7 +41,8 @@ public:
      * Read the type object.
      *
      * @return The type object.
-     * @ghidraAddress 0x005ac298
+     * @ghidraAddress NTSC-U/C: 0x005ac298
+     * @ghidraAddress PAL: 0x005ee7c0
      */
     PyTypeObject *type_object() const {
         return mTable;
@@ -49,7 +52,8 @@ public:
      * Set the deallocator.
      *
      * @param pfnDealloc The deallocator.
-     * @ghidraAddress 0x005ac2c0
+     * @ghidraAddress NTSC-U/C: 0x005ac2c0
+     * @ghidraAddress PAL: 0x005ee7e8
      */
     void dealloc(destructor pfnDealloc) {
         mTable->tp_dealloc = pfnDealloc;
@@ -61,14 +65,16 @@ public:
      * The first call allocates the table, attaches it, and points its first seven entries at the
      * Py::PythonExtensionBase handlers. The three entries after them remain unwritten.
      *
-     * @ghidraAddress 0x005abf90
+     * @ghidraAddress NTSC-U/C: 0x005abf90
+     * @ghidraAddress PAL: 0x005ee4b8
      */
     void supportSequenceType();
 
     /**
      * Give the type the mapping protocol, once.
      *
-     * @ghidraAddress 0x005ac040
+     * @ghidraAddress NTSC-U/C: 0x005ac040
+     * @ghidraAddress PAL: 0x005ee568
      */
     void supportMappingType();
 
@@ -77,7 +83,8 @@ public:
      *
      * The character buffer entry remains unwritten.
      *
-     * @ghidraAddress 0x005ac0b0
+     * @ghidraAddress NTSC-U/C: 0x005ac0b0
+     * @ghidraAddress PAL: 0x005ee5d8
      */
     void supportBufferType();
 

@@ -57,7 +57,8 @@ public:
      * initialised, by the MuseMsg constructor, and the three bytes are left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6d40
+     * @ghidraAddress NTSC-U/C: 0x003d6d40
+     * @ghidraAddress PAL: 0x0040ec30
      */
     static Message *New();
 
@@ -65,7 +66,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dbfa0
+     * @ghidraAddress NTSC-U/C: 0x003dbfa0
+     * @ghidraAddress PAL: 0x004143d8
      */
     virtual Message *Clone();
 
@@ -73,7 +75,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_dwStdMidiMsgType.
-     * @ghidraAddress 0x003dc010
+     * @ghidraAddress NTSC-U/C: 0x003dc010
+     * @ghidraAddress PAL: 0x00414448
      */
     virtual int Type();
 
@@ -81,7 +84,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `StdMidiMsg`.
-     * @ghidraAddress 0x003dc020
+     * @ghidraAddress NTSC-U/C: 0x003dc020
+     * @ghidraAddress PAL: 0x00414458
      */
     virtual const char *Name();
 
@@ -93,7 +97,8 @@ public:
      * `on`, `poly`, `ctl`, `prg`, `pres`, `pb`, and `sys` for the kinds 0x80 through 0xf0 in order.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003d7ec0
+     * @ghidraAddress NTSC-U/C: 0x003d7ec0
+     * @ghidraAddress PAL: 0x0040fff8
      */
     virtual void Print(std::ostream &stream);
 
@@ -103,7 +108,8 @@ public:
      * The song position is not written.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3658
+     * @ghidraAddress NTSC-U/C: 0x003e3658
+     * @ghidraAddress PAL: 0x0041b9f8
      */
     virtual void Save(OBStream &stream);
 
@@ -111,7 +117,8 @@ public:
      * Read the three bytes back in place, one byte each through IBStream::ReadBytes().
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e36e8
+     * @ghidraAddress NTSC-U/C: 0x003e36e8
+     * @ghidraAddress PAL: 0x0041ba88
      */
     virtual void Load(IBStream &stream);
 
@@ -141,6 +148,7 @@ public:
  * handlers elsewhere read the same word to compare against it, which is the expected shape for a
  * registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d01c4
+ * @ghidraAddress NTSC-U/C: 0x006d01c4
+ * @ghidraAddress PAL: 0x0071395c
  */
 extern unsigned int g_dwStdMidiMsgType;

@@ -46,7 +46,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 313.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7198
+     * @ghidraAddress NTSC-U/C: 0x003d7198
+     * @ghidraAddress PAL: 0x0040f098
      */
     static Message *New();
 
@@ -54,7 +55,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001224f0
+     * @ghidraAddress NTSC-U/C: 0x001224f0
+     * @ghidraAddress PAL: 0x00122b08
      */
     virtual Message *Clone();
 
@@ -62,7 +64,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nLoopToggleMsgType.
-     * @ghidraAddress 0x00122540
+     * @ghidraAddress NTSC-U/C: 0x00122540
+     * @ghidraAddress PAL: 0x00122b58
      */
     virtual int Type();
 
@@ -70,7 +73,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `LoopToggleMsg`.
-     * @ghidraAddress 0x00122550
+     * @ghidraAddress NTSC-U/C: 0x00122550
+     * @ghidraAddress PAL: 0x00122b68
      */
     virtual const char *Name();
 
@@ -85,6 +89,7 @@ public:
  * the registration at `0x003d9818` passes the same value, 313, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d0254
+ * @ghidraAddress NTSC-U/C: 0x006d0254
+ * @ghidraAddress PAL: 0x007139ec
  */
 extern int g_nLoopToggleMsgType;

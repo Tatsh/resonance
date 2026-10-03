@@ -38,7 +38,8 @@ public:
      * between the shipped binding and the release.
      *
      * @param pyob The tuple to wrap.
-     * @ghidraAddress 0x004c5448
+     * @ghidraAddress NTSC-U/C: 0x004c5448
+     * @ghidraAddress PAL: 0x005036d0
      */
     explicit Tuple(PyObject *pyob) : SeqBase<Object>(pyob) {
         validate();
@@ -52,7 +53,8 @@ public:
      * cannot be written. PyShell::ReportError() creates a two-element tuple this way.
      *
      * @param nSize The number of elements.
-     * @ghidraAddress 0x004c5690
+     * @ghidraAddress NTSC-U/C: 0x004c5690
+     * @ghidraAddress PAL: 0x00503918
      */
     explicit Tuple(int nSize);
 
@@ -62,7 +64,8 @@ public:
      * The body is out of line. It belongs to the vendored binding and is not reconstructed.
      *
      * @param ob The handle to copy.
-     * @ghidraAddress 0x004c5568
+     * @ghidraAddress NTSC-U/C: 0x004c5568
+     * @ghidraAddress PAL: 0x005037f0
      */
     explicit Tuple(const Object &ob);
 
@@ -75,7 +78,8 @@ public:
      *
      * @param i The index.
      * @param value The element to store.
-     * @ghidraAddress 0x004c7428
+     * @ghidraAddress NTSC-U/C: 0x004c7428
+     * @ghidraAddress PAL: 0x00505650
      */
     virtual void setItem(int i, const Object &value) {
         Py_XINCREF(value.mPtr);
@@ -89,7 +93,8 @@ public:
      *
      * @param pyob The reference to test.
      * @return True when the reference is a tuple.
-     * @ghidraAddress 0x004c75c0
+     * @ghidraAddress NTSC-U/C: 0x004c75c0
+     * @ghidraAddress PAL: 0x005057e8
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PyTuple_Check(pyob);

@@ -64,51 +64,127 @@ inline bool operator!=(const HxChunkName &left, const HxChunkName &right) {
  * @param stream The stream to read from.
  * @param name The name to fill.
  * @return The stream.
- * @ghidraAddress 0x00146550
+ * @ghidraAddress NTSC-U/C: 0x00146550
+ * @ghidraAddress PAL: 0x00147068
  */
 HxStream &operator>>(HxStream &stream, HxChunkName &name);
 
-/** `LIST`, the name of a list chunk. @ghidraAddress 0x00673a80 */
+/**
+ * `LIST`, the name of a list chunk.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673a80
+ * @ghidraAddress PAL: 0x006b4690
+ */
 extern HxChunkName g_listChunkName;
 
-/** `RIFF`, the name of a top-level chunk. @ghidraAddress 0x00673a88 */
+/**
+ * `RIFF`, the name of a top-level chunk.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673a88
+ * @ghidraAddress PAL: 0x006b4698
+ */
 extern HxChunkName g_riffChunkName;
 
-/** `MIDI`. @ghidraAddress 0x00673a90 */
+/**
+ * `MIDI`.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673a90
+ * @ghidraAddress PAL: 0x006b46a0
+ */
 extern HxChunkName g_midiChunkName;
 
-/** `MThd`, a Standard MIDI File header chunk. @ghidraAddress 0x00673a98 */
+/**
+ * `MThd`, a Standard MIDI File header chunk.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673a98
+ * @ghidraAddress PAL: 0x006b46a8
+ */
 extern HxChunkName g_mthdChunkName;
 
-/** `MTrk`, a Standard MIDI File track chunk. @ghidraAddress 0x00673aa0 */
+/**
+ * `MTrk`, a Standard MIDI File track chunk.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673aa0
+ * @ghidraAddress PAL: 0x006b46b0
+ */
 extern HxChunkName g_mtrkChunkName;
 
-/** `WAVE`. @ghidraAddress 0x00673aa8 */
+/**
+ * `WAVE`.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673aa8
+ * @ghidraAddress PAL: 0x006b46b8
+ */
 extern HxChunkName g_waveChunkName;
 
-/** `fmt `. @ghidraAddress 0x00673ab0 */
+/**
+ * `fmt `.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673ab0
+ * @ghidraAddress PAL: 0x006b46c0
+ */
 extern HxChunkName g_fmtChunkName;
 
-/** `data`. @ghidraAddress 0x00673ab8 */
+/**
+ * `data`.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673ab8
+ * @ghidraAddress PAL: 0x006b46c8
+ */
 extern HxChunkName g_dataChunkName;
 
-/** `fact`. @ghidraAddress 0x00673ac0 */
+/**
+ * `fact`.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673ac0
+ * @ghidraAddress PAL: 0x006b46d0
+ */
 extern HxChunkName g_factChunkName;
 
-/** `inst`. @ghidraAddress 0x00673ac8 */
+/**
+ * `inst`.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673ac8
+ * @ghidraAddress PAL: 0x006b46d8
+ */
 extern HxChunkName g_instChunkName;
 
-/** `smpl`. @ghidraAddress 0x00673ad0 */
+/**
+ * `smpl`.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673ad0
+ * @ghidraAddress PAL: 0x006b46e0
+ */
 extern HxChunkName g_smplChunkName;
 
-/** `cue `. @ghidraAddress 0x00673ad8 */
+/**
+ * `cue `.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673ad8
+ * @ghidraAddress PAL: 0x006b46e8
+ */
 extern HxChunkName g_cueChunkName;
 
-/** `labl`. @ghidraAddress 0x00673ae0 */
+/**
+ * `labl`.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673ae0
+ * @ghidraAddress PAL: 0x006b46f0
+ */
 extern HxChunkName g_lablChunkName;
 
-/** `ltxt`. @ghidraAddress 0x00673ae8 */
+/**
+ * `ltxt`.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673ae8
+ * @ghidraAddress PAL: 0x006b46f8
+ */
 extern HxChunkName g_ltxtChunkName;
 
-/** `adtl`. @ghidraAddress 0x00673af0 */
+/**
+ * `adtl`.
+ *
+ * @ghidraAddress NTSC-U/C: 0x00673af0
+ * @ghidraAddress PAL: 0x006b4700
+ */
 extern HxChunkName g_adtlChunkName;

@@ -50,7 +50,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d72b8
+     * @ghidraAddress NTSC-U/C: 0x003d72b8
+     * @ghidraAddress PAL: 0x0040f1b8
      */
     static Message *New();
 
@@ -58,7 +59,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003de450
+     * @ghidraAddress NTSC-U/C: 0x003de450
+     * @ghidraAddress PAL: 0x004168a8
      */
     virtual Message *Clone();
 
@@ -66,7 +68,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nInvalidateTrackMsgType.
-     * @ghidraAddress 0x003de4a8
+     * @ghidraAddress NTSC-U/C: 0x003de4a8
+     * @ghidraAddress PAL: 0x00416900
      */
     virtual int Type();
 
@@ -74,7 +77,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `InvalidateTrackMsg`.
-     * @ghidraAddress 0x003de4b8
+     * @ghidraAddress NTSC-U/C: 0x003de4b8
+     * @ghidraAddress PAL: 0x00416910
      */
     virtual const char *Name();
 
@@ -83,7 +87,8 @@ public:
      * joined by `-` to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3d90
+     * @ghidraAddress NTSC-U/C: 0x003e3d90
+     * @ghidraAddress PAL: 0x0041bf60
      */
     virtual void Print(std::ostream &stream);
 
@@ -99,6 +104,7 @@ public:
  * returns it. Several handlers elsewhere read the same word to compare against it, which is the
  * expected shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d027c
+ * @ghidraAddress NTSC-U/C: 0x006d027c
+ * @ghidraAddress PAL: 0x00713a14
  */
 extern int g_nInvalidateTrackMsgType;

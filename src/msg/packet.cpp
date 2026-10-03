@@ -3,7 +3,7 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003f1de8
+// NTSC-U/C: 0x003f1de8, PAL: 0x0042a330
 void Packet::Save(OBStream &stream) {
     int destination = mDestination;
     stream.Write(&destination, sizeof(destination));
@@ -18,7 +18,7 @@ void Packet::Save(OBStream &stream) {
     stream.Write(&targetClientId, sizeof(targetClientId));
 }
 
-// 0x003f1ea0
+// NTSC-U/C: 0x003f1ea0, PAL: 0x0042a3e8
 void Packet::Load(IBStream &stream) {
     stream.Read(&mDestination, sizeof(mDestination));
     stream.Read(&mDestinationSystem, sizeof(mDestinationSystem));

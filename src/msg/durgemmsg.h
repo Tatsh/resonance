@@ -25,7 +25,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 406.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7538
+     * @ghidraAddress NTSC-U/C: 0x003d7538
+     * @ghidraAddress PAL: 0x0040f438
      */
     static Message *New();
 
@@ -33,7 +34,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001a4388
+     * @ghidraAddress NTSC-U/C: 0x001a4388
+     * @ghidraAddress PAL: 0x001aa0f0
      */
     virtual Message *Clone();
 
@@ -41,7 +43,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nDurGemMsgType.
-     * @ghidraAddress 0x001a4400
+     * @ghidraAddress NTSC-U/C: 0x001a4400
+     * @ghidraAddress PAL: 0x001aa168
      */
     virtual int Type();
 
@@ -49,7 +52,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `DurGemMsg`.
-     * @ghidraAddress 0x001a4410
+     * @ghidraAddress NTSC-U/C: 0x001a4410
+     * @ghidraAddress PAL: 0x001aa178
      */
     virtual const char *Name();
 
@@ -78,6 +82,7 @@ public:
  * registration at `0x003d9818` passes the same value, 406, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d02d4
+ * @ghidraAddress NTSC-U/C: 0x006d02d4
+ * @ghidraAddress PAL: 0x00713a6c
  */
 extern int g_nDurGemMsgType;

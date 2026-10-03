@@ -37,24 +37,28 @@ public:
      * and the registration table at `0x003d9818` records it as this class's factory.
      *
      * @return The new message.
-     * @ghidraAddress 0x003d6e08
+     * @ghidraAddress NTSC-U/C: 0x003d6e08
+     * @ghidraAddress PAL: 0x0040ecf8
      */
     static Message *New();
 
     /**
      * @param pMuse The sequence, retained when it is not null. It is stored either way.
-     * @ghidraAddress 0x003e38e8
+     * @ghidraAddress NTSC-U/C: 0x003e38e8
+     * @ghidraAddress PAL: 0x0041bc88
      */
     MultiMuseMsg(MultiMuse *pMuse);
 
     /**
      * @param other The message to copy.
-     * @ghidraAddress 0x003e38a8
+     * @ghidraAddress NTSC-U/C: 0x003e38a8
+     * @ghidraAddress PAL: 0x0041bc48
      */
     MultiMuseMsg(const MultiMuseMsg &other);
 
     /**
-     * @ghidraAddress 0x003e3920
+     * @ghidraAddress NTSC-U/C: 0x003e3920
+     * @ghidraAddress PAL: 0x0041bcc0
      */
     virtual ~MultiMuseMsg();
 
@@ -62,7 +66,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dc590
+     * @ghidraAddress NTSC-U/C: 0x003dc590
+     * @ghidraAddress PAL: 0x004149c8
      */
     virtual Message *Clone();
 
@@ -70,7 +75,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_dwMultiMuseMsgType.
-     * @ghidraAddress 0x003dc608
+     * @ghidraAddress NTSC-U/C: 0x003dc608
+     * @ghidraAddress PAL: 0x00414a40
      */
     virtual int Type();
 
@@ -78,7 +84,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `MultiMuseMsg`.
-     * @ghidraAddress 0x003dc618
+     * @ghidraAddress NTSC-U/C: 0x003dc618
+     * @ghidraAddress PAL: 0x00414a50
      */
     virtual const char *Name();
 
@@ -88,7 +95,8 @@ public:
      * Writes the inherited song position, a literal, and then the sequence.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3990
+     * @ghidraAddress NTSC-U/C: 0x003e3990
+     * @ghidraAddress PAL: 0x0041bd30
      */
     virtual void Print(std::ostream &stream);
 
@@ -98,7 +106,8 @@ public:
      * The inherited song position is not written.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e39f8
+     * @ghidraAddress NTSC-U/C: 0x003e39f8
+     * @ghidraAddress PAL: 0x0041bd98
      */
     virtual void Save(OBStream &stream);
 
@@ -110,7 +119,8 @@ public:
      * sequence when the message already had one.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003d8180
+     * @ghidraAddress NTSC-U/C: 0x003d8180
+     * @ghidraAddress PAL: 0x004102e8
      */
     virtual void Load(IBStream &stream);
 
@@ -128,6 +138,7 @@ public:
  *
  * This word belongs to MultiMuseMsg because MultiMuseMsg::Type() at `0x003dc608` returns it.
  *
- * @ghidraAddress 0x006d01dc
+ * @ghidraAddress NTSC-U/C: 0x006d01dc
+ * @ghidraAddress PAL: 0x00713974
  */
 extern unsigned int g_dwMultiMuseMsgType;

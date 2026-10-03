@@ -57,7 +57,8 @@ struct RemixIndexElement {
     /**
      * Clear the three names, clear GameOK, set Version to 2, and set dateTime to the empty string.
      *
-     * @ghidraAddress 0x001397f0
+     * @ghidraAddress NTSC-U/C: 0x001397f0
+     * @ghidraAddress PAL: 0x0013a120
      */
     void Reset();
 
@@ -66,7 +67,8 @@ struct RemixIndexElement {
      *
      * RemixIndex::DumpElements() is the caller.
      *
-     * @ghidraAddress 0x00136150
+     * @ghidraAddress NTSC-U/C: 0x00136150
+     * @ghidraAddress PAL: 0x00136a30
      */
     void Dump();
 
@@ -79,7 +81,8 @@ struct RemixIndexElement {
      * WriteToStream() is the caller. The title is inferred.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00136278
+     * @ghidraAddress NTSC-U/C: 0x00136278
+     * @ghidraAddress PAL: 0x00136b58
      */
     void Save(OBStream &stream);
 
@@ -91,7 +94,8 @@ struct RemixIndexElement {
      * ReadFromStream() is the caller. The title is inferred.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00136448
+     * @ghidraAddress NTSC-U/C: 0x00136448
+     * @ghidraAddress PAL: 0x00136d28
      */
     void Load(IBStream &stream);
 
@@ -135,7 +139,8 @@ struct RemixIndex {
      * each and loads it through RemixIndexElement::Load().
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x001366e0
+     * @ghidraAddress NTSC-U/C: 0x001366e0
+     * @ghidraAddress PAL: 0x00136fc0
      */
     void ReadFromStream(IBStream &stream);
 
@@ -145,14 +150,16 @@ struct RemixIndex {
      * Writes version, the element count, and then each element through RemixIndexElement::Save().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00139858
+     * @ghidraAddress NTSC-U/C: 0x00139858
+     * @ghidraAddress PAL: 0x0013a188
      */
     void WriteToStream(OBStream &stream);
 
     /**
      * Print every element to the debug console through RemixIndexElement::Dump().
      *
-     * @ghidraAddress 0x00139920
+     * @ghidraAddress NTSC-U/C: 0x00139920
+     * @ghidraAddress PAL: 0x0013a250
      */
     void DumpElements();
 

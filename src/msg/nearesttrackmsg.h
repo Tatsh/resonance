@@ -23,7 +23,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d70a8
+     * @ghidraAddress NTSC-U/C: 0x003d70a8
+     * @ghidraAddress PAL: 0x0040ef98
      */
     static Message *New();
 
@@ -31,7 +32,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dd7c0
+     * @ghidraAddress NTSC-U/C: 0x003dd7c0
+     * @ghidraAddress PAL: 0x00415bf8
      */
     virtual Message *Clone();
 
@@ -39,7 +41,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nNearestTrackMsgType.
-     * @ghidraAddress 0x003dd808
+     * @ghidraAddress NTSC-U/C: 0x003dd808
+     * @ghidraAddress PAL: 0x00415c40
      */
     virtual int Type();
 
@@ -47,7 +50,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `NearestTrackMsg`.
-     * @ghidraAddress 0x003dd818
+     * @ghidraAddress NTSC-U/C: 0x003dd818
+     * @ghidraAddress PAL: 0x00415c50
      */
     virtual const char *Name();
 
@@ -55,7 +59,8 @@ public:
      * Write the word to a diagnostic stream, or `reset` when it is -1.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3d50
+     * @ghidraAddress NTSC-U/C: 0x003e3d50
+     * @ghidraAddress PAL: 0x0041bf20
      */
     virtual void Print(std::ostream &stream);
 
@@ -70,6 +75,7 @@ private:
  * it. Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d0234
+ * @ghidraAddress NTSC-U/C: 0x006d0234
+ * @ghidraAddress PAL: 0x007139cc
  */
 extern int g_nNearestTrackMsgType;

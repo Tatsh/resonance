@@ -33,7 +33,8 @@ public:
      * The image lists no caller for the out-of-line body.
      *
      * @param reason The string copied into `+0x04`.
-     * @ghidraAddress 0x003e1a90
+     * @ghidraAddress NTSC-U/C: 0x003e1a90
+     * @ghidraAddress PAL: 0x00419f18
      */
     GameConnectionLostMsg(const HxStr &reason);
 
@@ -43,7 +44,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7a98
+     * @ghidraAddress NTSC-U/C: 0x003d7a98
+     * @ghidraAddress PAL: 0x0040f9a0
      */
     static Message *New();
 
@@ -51,7 +53,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e19b0
+     * @ghidraAddress NTSC-U/C: 0x003e19b0
+     * @ghidraAddress PAL: 0x00419e30
      */
     virtual Message *Clone();
 
@@ -59,7 +62,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nGameConnectionLostMsgType.
-     * @ghidraAddress 0x003e1a50
+     * @ghidraAddress NTSC-U/C: 0x003e1a50
+     * @ghidraAddress PAL: 0x00419ed0
      */
     virtual int Type();
 
@@ -67,7 +71,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `GameConnectionLostMsg`.
-     * @ghidraAddress 0x003e1a60
+     * @ghidraAddress NTSC-U/C: 0x003e1a60
+     * @ghidraAddress PAL: 0x00419ee0
      */
     virtual const char *Name();
 
@@ -78,7 +83,8 @@ public:
      * only the vtable reaches it.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e4070
+     * @ghidraAddress NTSC-U/C: 0x003e4070
+     * @ghidraAddress PAL: 0x0041c2a0
      */
     virtual void Print(std::ostream &stream);
 
@@ -92,6 +98,7 @@ private:
  * This word belongs to GameConnectionLostMsg because GameConnectionLostMsg::Type() at
  * `0x003e1a50` returns it.
  *
- * @ghidraAddress 0x006d038c
+ * @ghidraAddress NTSC-U/C: 0x006d038c
+ * @ghidraAddress PAL: 0x00713b24
  */
 extern int g_nGameConnectionLostMsgType;

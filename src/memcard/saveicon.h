@@ -13,14 +13,16 @@ constexpr int kSaveIconBufferSize = 37000;
  *
  * `SaveFileMCT` writes g_abSaveIcon to the card as `freq1.ico`.
  *
- * @ghidraAddress 0x00177570
+ * @ghidraAddress NTSC-U/C: 0x00177570
+ * @ghidraAddress PAL: 0x0017a000
  */
 void LoadSaveIcon();
 
 /**
  * The icon mesh, as `mc/freq1.icn` stores it.
  *
- * @ghidraAddress 0x008889a8
+ * @ghidraAddress NTSC-U/C: 0x008889a8
+ * @ghidraAddress PAL: 0x008cd0c8
  */
 extern unsigned char g_abSaveIcon[kSaveIconBufferSize];
 
@@ -29,6 +31,7 @@ extern unsigned char g_abSaveIcon[kSaveIconBufferSize];
  *
  * Zero until LoadSaveIcon() has run.
  *
- * @ghidraAddress 0x0067bfd8
+ * @ghidraAddress NTSC-U/C: 0x0067bfd8
+ * @ghidraAddress PAL: 0x006bcf40
  */
 extern int g_nSaveIconLength;

@@ -4,28 +4,28 @@
 
 #include "memcard/memcardcbhandler.h"
 
-// 0x0055eaa8
+// NTSC-U/C: 0x0055eaa8, PAL: 0x0059fd78
 SeekOp::SeekOp(MemcardCBHandler *pHandler, int nFile, int nOffset, int nOrigin, int nCookie)
     : MemcardOp(pHandler, nCookie), mFile(nFile), mOffset(nOffset), mOrigin(nOrigin) {
 }
 
-// 0x0055dba8
+// NTSC-U/C: 0x0055dba8, PAL: 0x0059ee20
 SeekOp::~SeekOp() {
 }
 
-// 0x0055ead8
+// NTSC-U/C: 0x0055ead8, PAL: 0x0059fda8
 void SeekOp::Issue() {
     sceMcSeek(mFile, mOffset, mOrigin);
     mIssued = kMemcardOpInFlight;
 }
 
-// 0x0055dbd8
+// NTSC-U/C: 0x0055dbd8, PAL: 0x0059ee50
 void SeekOp::Complete() {
     InterpretResult();
     mHandler->OnSeek(this);
 }
 
-// 0x0055eb10
+// NTSC-U/C: 0x0055eb10, PAL: 0x0059fde0
 void SeekOp::InterpretResult() {
     if (mResult >= sceMcResSucceed) {
         mPosition = mResult; // Yes, the binary returns here without writing mStatus.

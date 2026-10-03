@@ -29,7 +29,7 @@ constexpr int kAlbumVersion = 2;
 
 } // namespace
 
-// 0x00136150
+// NTSC-U/C: 0x00136150, PAL: 0x00136a30
 void RemixIndexElement::Dump() {
     std::cout << kDumpBanner << std::endl;
     std::cout << kLevelNameLabel << LevelName << std::endl;
@@ -40,7 +40,7 @@ void RemixIndexElement::Dump() {
     std::cout << kAlbumNumLabel << AlbumNum << std::endl;
 }
 
-// 0x00136278
+// NTSC-U/C: 0x00136278, PAL: 0x00136b58
 void RemixIndexElement::Save(OBStream &stream) {
     // Yes, the binary writes the format constant rather than Version.
     int nFormat = kRemixIndexElementFormat;
@@ -61,7 +61,7 @@ void RemixIndexElement::Save(OBStream &stream) {
     stream.Write(&nAlbum, sizeof(nAlbum));
 }
 
-// 0x00136448
+// NTSC-U/C: 0x00136448, PAL: 0x00136d28
 void RemixIndexElement::Load(IBStream &stream) {
     stream.Read(&Version, sizeof(Version));
     if (Version > kNamelessVersion) {
@@ -84,7 +84,7 @@ void RemixIndexElement::Load(IBStream &stream) {
     }
 }
 
-// 0x001366e0
+// NTSC-U/C: 0x001366e0, PAL: 0x00136fc0
 void RemixIndex::ReadFromStream(IBStream &stream) {
     stream.Read(&version, sizeof(version));
     int nCount;
@@ -101,7 +101,7 @@ void RemixIndex::ReadFromStream(IBStream &stream) {
     }
 }
 
-// 0x001397f0
+// NTSC-U/C: 0x001397f0, PAL: 0x0013a120
 void RemixIndexElement::Reset() {
     memset(LevelName, 0, sizeof(LevelName));
     memset(RemixName, 0, sizeof(RemixName));
@@ -111,7 +111,7 @@ void RemixIndexElement::Reset() {
     dateTime = kEmptyDate;
 }
 
-// 0x00139858
+// NTSC-U/C: 0x00139858, PAL: 0x0013a188
 void RemixIndex::WriteToStream(OBStream &stream) {
     int nVersion = version;
     stream.Write(&nVersion, sizeof(nVersion));
@@ -123,7 +123,7 @@ void RemixIndex::WriteToStream(OBStream &stream) {
     }
 }
 
-// 0x00139920
+// NTSC-U/C: 0x00139920, PAL: 0x0013a250
 void RemixIndex::DumpElements() {
     for (std::vector<RemixIndexElement>::size_type nIndex = 0; nIndex < elements.size(); ++nIndex) {
         elements[nIndex].Dump();

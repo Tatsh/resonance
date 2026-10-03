@@ -23,7 +23,7 @@ bool operator<(const MessageFactoryEntry &left, const MessageFactoryEntry &right
 
 typedef std::vector<MessageFactoryEntry> MessageFactoryTable;
 
-// 0x005558f0
+// NTSC-U/C: 0x005558f0, PAL: 0x00595f78
 MessageFactoryTable &MessageFactoryList() {
     static MessageFactoryTable table;
     return table;
@@ -31,7 +31,7 @@ MessageFactoryTable &MessageFactoryList() {
 
 } // namespace
 
-// 0x00555948
+// NTSC-U/C: 0x00555948, PAL: 0x00595fd0
 MessageFactory::MessageFactory(int nType, MessageFactoryProc pfnCreate) {
     MessageFactoryEntry wanted;
     wanted.mType = nType; // Yes, the binary never writes the other field of the search key.
@@ -44,7 +44,7 @@ MessageFactory::MessageFactory(int nType, MessageFactoryProc pfnCreate) {
     MessageFactoryList().insert(position, entry);
 }
 
-// 0x005563d0
+// NTSC-U/C: 0x005563d0, PAL: 0x00596a58
 Message *Message::NewMessage(int nType) {
     MessageFactoryTable &table = MessageFactoryList();
     MessageFactoryEntry wanted;
@@ -56,14 +56,14 @@ Message *Message::NewMessage(int nType) {
     return (*entry->mpfnCreate)();
 }
 
-// 0x00556290
+// NTSC-U/C: 0x00556290, PAL: 0x00596918
 std::ostream &Message::PrintBraced(std::ostream &stream) {
     stream << "{" << Name() << " ";
     Print(stream);
     return stream << "}";
 }
 
-// 0x00555a18
+// NTSC-U/C: 0x00555a18, PAL: 0x005960a0
 IBStream &ReadMessageBodyFromStream(IBStream &stream, Message &msg) {
     char cPresent;
     unsigned short nType;
@@ -78,7 +78,7 @@ IBStream &ReadMessageBodyFromStream(IBStream &stream, Message &msg) {
     return stream;
 }
 
-// 0x00555b10
+// NTSC-U/C: 0x00555b10, PAL: 0x00596198
 IBStream &ReadMessagePointerFromStream(IBStream &stream, Message *&pMsg) {
     char cPresent;
     stream.ReadBytes(&cPresent, sizeof(cPresent));
@@ -102,7 +102,7 @@ IBStream &ReadMessagePointerFromStream(IBStream &stream, Message *&pMsg) {
     return stream;
 }
 
-// 0x00556448
+// NTSC-U/C: 0x00556448, PAL: 0x00596ad0
 OBStream &WriteMessageBodyToStream(OBStream &stream, Message &msg) {
     (void)msg.Type(); // Yes, the binary discards this call's result.
     const unsigned short nType = msg.Type();
@@ -112,7 +112,7 @@ OBStream &WriteMessageBodyToStream(OBStream &stream, Message &msg) {
     return stream;
 }
 
-// 0x00556508
+// NTSC-U/C: 0x00556508, PAL: 0x00596b90
 OBStream &WriteMessagePointerToStream(OBStream &stream, Message *pMsg) {
     if (pMsg == nullptr) {
         char cAbsent = '0';

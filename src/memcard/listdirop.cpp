@@ -5,20 +5,20 @@
 #include "memcard/memcardcbhandler.h"
 
 // The IOP writes the entries here by DMA.
-// 0x00726a40
+// NTSC-U/C: 0x00726a40, PAL: 0x0076a700
 alignas(64) sceMcTblGetDir g_aMemcardDirEntries[kListDirMaxEntries];
 
-// 0x0055e778
+// NTSC-U/C: 0x0055e778, PAL: 0x0059fa48
 ListDirOp::ListDirOp(
     MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie, unsigned nMode)
     : MemcardOp(pHandler, nPortSlot, nCookie), mPath(path), mMode(nMode) {
 }
 
-// 0x0055d868
+// NTSC-U/C: 0x0055d868, PAL: 0x0059ead0
 ListDirOp::~ListDirOp() {
 }
 
-// 0x0055e818
+// NTSC-U/C: 0x0055e818, PAL: 0x0059fae8
 void ListDirOp::Issue() {
     sceMcGetDir(mPortSlot >> kMemcardPortShift,
                 mPortSlot & kMemcardSlotMask,
@@ -29,13 +29,13 @@ void ListDirOp::Issue() {
     mIssued = kMemcardOpInFlight;
 }
 
-// 0x0055d8d0
+// NTSC-U/C: 0x0055d8d0, PAL: 0x0059eb48
 void ListDirOp::Complete() {
     InterpretResult();
     mHandler->OnListDir(this);
 }
 
-// 0x0055e870
+// NTSC-U/C: 0x0055e870, PAL: 0x0059fb40
 void ListDirOp::InterpretResult() {
     if (mResult >= sceMcResSucceed) {
         mStatus = kMemcardStatusOk;

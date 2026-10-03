@@ -26,14 +26,16 @@ public:
      * of the data. A copy is stored.
      * @param pData The first byte of the range. The stream does not take ownership.
      * @param nSize The range length in bytes.
-     * @ghidraAddress 0x00405cf8
+     * @ghidraAddress NTSC-U/C: 0x00405cf8
+     * @ghidraAddress PAL: 0x0043f5e8
      */
     HxMemStream(const char *pszName, char *pData, int nSize);
 
     /**
      * Close the stream and release the title.
      *
-     * @ghidraAddress 0x00405d98
+     * @ghidraAddress NTSC-U/C: 0x00405d98
+     * @ghidraAddress PAL: 0x0043f688
      */
     virtual ~HxMemStream();
 
@@ -46,14 +48,21 @@ public:
      * @param nOffset The signed distance to move.
      * @param nWhence The origin, one of the HxStreamSeekOrigin values. An origin outside 0 to 2 is
      * treated as the start.
-     * @ghidraAddress 0x00405e00
+     * @ghidraAddress NTSC-U/C: 0x00405e00
+     * @ghidraAddress PAL: 0x0043f700
      */
     virtual void Seek(int nOffset, int nWhence);
 
-    /** @ghidraAddress 0x00405e80 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00405e80
+     * @ghidraAddress PAL: 0x0043f780
+     */
     virtual int Tell();
 
-    /** @ghidraAddress 0x00405e90 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00405e90
+     * @ghidraAddress PAL: 0x0043f790
+     */
     virtual int Size();
 
     /**
@@ -64,7 +73,8 @@ public:
      * @param pSrc The source buffer.
      * @param nSize The number of bytes to move.
      * @return This stream, which the routine never arrives at.
-     * @ghidraAddress 0x00405ea0
+     * @ghidraAddress NTSC-U/C: 0x00405ea0
+     * @ghidraAddress PAL: 0x0043f7a0
      */
     virtual HxStream &Write(const void *pSrc, int nSize);
 
@@ -78,7 +88,8 @@ public:
      * @param pDest The destination buffer.
      * @param nSize The number of bytes to move.
      * @return This stream.
-     * @ghidraAddress 0x00405ed0
+     * @ghidraAddress NTSC-U/C: 0x00405ed0
+     * @ghidraAddress PAL: 0x0043f7d0
      */
     virtual HxStream &Read(void *pDest, int nSize);
 

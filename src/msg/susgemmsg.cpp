@@ -1,23 +1,23 @@
 #include "msg/susgemmsg.h"
 
-// 0x003d7580
+// NTSC-U/C: 0x003d7580, PAL: 0x0040f480
 Message *SusGemMsg::New() {
     return new SusGemMsg;
 }
 
-// 0x001a44d0
+// NTSC-U/C: 0x001a44d0, PAL: 0x001aa238
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *SusGemMsg::Clone() {
     return new SusGemMsg(*this);
 }
 
-// 0x001a4540
+// NTSC-U/C: 0x001a4540, PAL: 0x001aa2a8
 int SusGemMsg::Type() {
     return g_nSusGemMsgType;
 }
 
-// 0x001a4550
+// NTSC-U/C: 0x001a4550, PAL: 0x001aa2b8
 const char *SusGemMsg::Name() {
     return "SusGemMsg";
 }

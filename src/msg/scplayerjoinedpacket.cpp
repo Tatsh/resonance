@@ -5,44 +5,44 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003ef7b0
+// NTSC-U/C: 0x003ef7b0, PAL: 0x00427da0
 SCPlayerJoinedPacket::SCPlayerJoinedPacket() {
 }
 
-// 0x003e4cf8
+// NTSC-U/C: 0x003e4cf8, PAL: 0x0041cf78
 Message *SCPlayerJoinedPacket::New() {
     return new SCPlayerJoinedPacket;
 }
 
-// 0x003ef718
+// NTSC-U/C: 0x003ef718, PAL: 0x00427d08
 // Clone allocates and hands off to the copy constructor at 0x003f31c8, which is
 // the compiler expanding the implicit one.
 Message *SCPlayerJoinedPacket::Clone() {
     return new SCPlayerJoinedPacket(*this);
 }
 
-// 0x003ef790
+// NTSC-U/C: 0x003ef790, PAL: 0x00427d80
 int SCPlayerJoinedPacket::Type() {
     return g_nSCPlayerJoinedPacketType;
 }
 
-// 0x003ef7a0
+// NTSC-U/C: 0x003ef7a0, PAL: 0x00427d90
 const char *SCPlayerJoinedPacket::Name() {
     return "SCPlayerJoinedPacket";
 }
 
-// 0x003f2100
+// NTSC-U/C: 0x003f2100, PAL: 0x0042a648
 void SCPlayerJoinedPacket::Print(std::ostream &stream) {
     mPlayerInfo.Print(stream);
 }
 
-// 0x003e5fb8
+// NTSC-U/C: 0x003e5fb8, PAL: 0x0041e298
 void SCPlayerJoinedPacket::Save(OBStream &stream) {
     Packet::Save(stream);
     mPlayerInfo.Save(stream);
 }
 
-// 0x003f2048
+// NTSC-U/C: 0x003f2048, PAL: 0x0042a590
 void SCPlayerJoinedPacket::Load(IBStream &stream) {
     Packet::Load(stream);
     mPlayerInfo.Load(stream);

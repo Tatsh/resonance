@@ -27,7 +27,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 307.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7038
+     * @ghidraAddress NTSC-U/C: 0x003d7038
+     * @ghidraAddress PAL: 0x0040ef28
      */
     static Message *New();
 
@@ -35,7 +36,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001ca778
+     * @ghidraAddress NTSC-U/C: 0x001ca778
+     * @ghidraAddress PAL: 0x001d0630
      */
     virtual Message *Clone();
 
@@ -43,7 +45,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nPowerupFailedMsgType.
-     * @ghidraAddress 0x001ca7c8
+     * @ghidraAddress NTSC-U/C: 0x001ca7c8
+     * @ghidraAddress PAL: 0x001d0680
      */
     virtual int Type();
 
@@ -51,7 +54,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `PowerupFailedMsg`.
-     * @ghidraAddress 0x001ca7d8
+     * @ghidraAddress NTSC-U/C: 0x001ca7d8
+     * @ghidraAddress PAL: 0x001d0690
      */
     virtual const char *Name();
 
@@ -66,6 +70,7 @@ public:
  * it, and the registration at `0x003d9818` passes the same value, 307, as the identity of this
  * class's factory.
  *
- * @ghidraAddress 0x006d0224
+ * @ghidraAddress NTSC-U/C: 0x006d0224
+ * @ghidraAddress PAL: 0x007139bc
  */
 extern int g_nPowerupFailedMsgType;

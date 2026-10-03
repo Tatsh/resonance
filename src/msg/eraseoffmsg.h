@@ -29,7 +29,8 @@ public:
      * initialised.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6b68
+     * @ghidraAddress NTSC-U/C: 0x003d6b68
+     * @ghidraAddress PAL: 0x0040ea58
      */
     static Message *New();
 
@@ -37,7 +38,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003db5b8
+     * @ghidraAddress NTSC-U/C: 0x003db5b8
+     * @ghidraAddress PAL: 0x004139f0
      */
     virtual Message *Clone();
 
@@ -45,7 +47,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nEraseOffMsgType.
-     * @ghidraAddress 0x003db610
+     * @ghidraAddress NTSC-U/C: 0x003db610
+     * @ghidraAddress PAL: 0x00413a48
      */
     virtual int Type();
 
@@ -53,7 +56,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `EraseOffMsg`.
-     * @ghidraAddress 0x003db620
+     * @ghidraAddress NTSC-U/C: 0x003db620
+     * @ghidraAddress PAL: 0x00413a58
      */
     virtual const char *Name();
 
@@ -62,7 +66,8 @@ public:
      * stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e33d0
+     * @ghidraAddress NTSC-U/C: 0x003e33d0
+     * @ghidraAddress PAL: 0x0041b710
      */
     virtual void Print(std::ostream &stream);
 
@@ -79,6 +84,7 @@ private:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d017c
+ * @ghidraAddress NTSC-U/C: 0x006d017c
+ * @ghidraAddress PAL: 0x00713914
  */
 extern int g_nEraseOffMsgType;

@@ -23,7 +23,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7d10
+     * @ghidraAddress NTSC-U/C: 0x003d7d10
+     * @ghidraAddress PAL: 0x0040fc28
      */
     static Message *New();
 
@@ -31,7 +32,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e2ac0
+     * @ghidraAddress NTSC-U/C: 0x003e2ac0
+     * @ghidraAddress PAL: 0x0041af60
      */
     virtual Message *Clone();
 
@@ -39,7 +41,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nMetStartPauseMsgType.
-     * @ghidraAddress 0x003e2af8
+     * @ghidraAddress NTSC-U/C: 0x003e2af8
+     * @ghidraAddress PAL: 0x0041af98
      */
     virtual int Type();
 
@@ -47,7 +50,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `MetStartPauseMsg`.
-     * @ghidraAddress 0x003e2b08
+     * @ghidraAddress NTSC-U/C: 0x003e2b08
+     * @ghidraAddress PAL: 0x0041afa8
      */
     virtual const char *Name();
 
@@ -58,7 +62,8 @@ public:
      * only the vtable reaches it.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e4488
+     * @ghidraAddress NTSC-U/C: 0x003e4488
+     * @ghidraAddress PAL: 0x0041c6b8
      */
     virtual void Print(std::ostream &stream);
 };
@@ -70,6 +75,7 @@ public:
  * it. Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d03e4
+ * @ghidraAddress NTSC-U/C: 0x006d03e4
+ * @ghidraAddress PAL: 0x00713b7c
  */
 extern int g_nMetStartPauseMsgType;

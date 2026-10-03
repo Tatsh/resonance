@@ -29,7 +29,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 411.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7680
+     * @ghidraAddress NTSC-U/C: 0x003d7680
+     * @ghidraAddress PAL: 0x0040f580
      */
     static Message *New();
 
@@ -37,7 +38,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x0019fa20
+     * @ghidraAddress NTSC-U/C: 0x0019fa20
+     * @ghidraAddress PAL: 0x001a5788
      */
     virtual Message *Clone();
 
@@ -45,7 +47,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nNowBarMsgType.
-     * @ghidraAddress 0x0019fa78
+     * @ghidraAddress NTSC-U/C: 0x0019fa78
+     * @ghidraAddress PAL: 0x001a57e0
      */
     virtual int Type();
 
@@ -53,7 +56,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `NowBarMsg`.
-     * @ghidraAddress 0x0019fa88
+     * @ghidraAddress NTSC-U/C: 0x0019fa88
+     * @ghidraAddress PAL: 0x001a57f0
      */
     virtual const char *Name();
 
@@ -77,6 +81,7 @@ public:
  * registration at `0x003d9818` passes the same value, 411, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d02fc
+ * @ghidraAddress NTSC-U/C: 0x006d02fc
+ * @ghidraAddress PAL: 0x00713a94
  */
 extern int g_nNowBarMsgType;

@@ -14,7 +14,7 @@ namespace {
 //
 // The file holds two length-prefixed strings, and the result joins them with a newline. The
 // tuple carries the path.
-// 0x0010d1a8
+// NTSC-U/C: 0x0010d1a8, PAL: 0x0010d4c8
 Py::Object ScriptRecInfo(Py::Tuple args) {
     Py::Object element = args.getItem(0);
     Py::String text(element);
@@ -37,7 +37,7 @@ Py::Object ScriptRecInfo(Py::Tuple args) {
 }
 
 // Run ScriptRecInfo() on the interpreter's argument tuple.
-// 0x0010d848
+// NTSC-U/C: 0x0010d848, PAL: 0x0010dc18
 PyObject *PyInvokeRecInfo(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -52,7 +52,7 @@ PyObject *PyInvokeRecInfo(PyObject *, PyObject *pArgs) {
 }
 
 // The script interface this file exports, registered in static initialisation.
-// 0x0010ed58
+// NTSC-U/C: 0x0010ed58, PAL: 0x0010f198
 const ScriptFunc kRecInfoFunc("rec_info", PyInvokeRecInfo);
 
 } // namespace

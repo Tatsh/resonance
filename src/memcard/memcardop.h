@@ -93,7 +93,8 @@ public:
      * The body is empty. MemcardPS2::Update() destroys an operation through this slot as soon as
      * Complete() has returned.
      *
-     * @ghidraAddress 0x0055f2e0
+     * @ghidraAddress NTSC-U/C: 0x0055f2e0
+     * @ghidraAddress PAL: 0x005a05c0
      */
     virtual ~MemcardOp();
 
@@ -103,7 +104,8 @@ public:
      * Every derived body ends by writing 1 to mIssued, which is what moves the operation from the
      * queue head into the polling state.
      *
-     * @ghidraAddress 0x0055f310
+     * @ghidraAddress NTSC-U/C: 0x0055f310
+     * @ghidraAddress PAL: 0x005a05f0
      */
     virtual void Issue();
 
@@ -113,14 +115,16 @@ public:
      * Each derived body calls InterpretResult() on itself and then the one MemcardCBHandler method
      * that matches the operation's type.
      *
-     * @ghidraAddress 0x0055f318
+     * @ghidraAddress NTSC-U/C: 0x0055f318
+     * @ghidraAddress PAL: 0x005a05f8
      */
     virtual void Complete();
 
     /**
      * Map mResult to mStatus, and copy any result the call delivered out of it.
      *
-     * @ghidraAddress 0x0055f320
+     * @ghidraAddress NTSC-U/C: 0x0055f320
+     * @ghidraAddress PAL: 0x005a0600
      */
     virtual void InterpretResult();
 

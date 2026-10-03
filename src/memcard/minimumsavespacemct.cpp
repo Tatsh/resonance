@@ -36,7 +36,7 @@ MinimumSaveSpaceMCT::MinimumSaveSpaceMCT(MemcardUser *pUser,
 #endif
 }
 
-// 0x00184c18
+// NTSC-U/C: 0x00184c18, PAL: 0x0018a140
 MinimumSaveSpaceMCT::~MinimumSaveSpaceMCT() {
 }
 
@@ -56,7 +56,7 @@ void MinimumSaveSpaceMCT::Execute() {
     RunStep();
 }
 
-// 0x00178660
+// NTSC-U/C: 0x00178660, PAL: 0x0017bd20
 void MinimumSaveSpaceMCT::RunStep() {
     switch (mStep) {
     case kMinimumSaveSpaceStepCheckInfo:
@@ -107,19 +107,19 @@ void MinimumSaveSpaceMCT::RunStep() {
     }
 }
 
-// 0x00186200
+// NTSC-U/C: 0x00186200, PAL: 0x0018bcc0
 void MinimumSaveSpaceMCT::OnCheckInfo([[maybe_unused]] CheckInfoOp *pOp) {
     RunStep();
 }
 
-// 0x00186220
+// NTSC-U/C: 0x00186220, PAL: 0x0018bce0
 void MinimumSaveSpaceMCT::OnOpenRead(OpenReadOp *pOp) {
     mStatus = pOp->mStatus;
     mFile = pOp->mFile;
     RunStep();
 }
 
-// 0x00186250
+// NTSC-U/C: 0x00186250, PAL: 0x0018bd10
 void MinimumSaveSpaceMCT::OnClose(CloseOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus == kMemcardStatusOk) {

@@ -13,9 +13,11 @@ constexpr int kScriptTemplateAutoexec = 0xc9;
  *
  * The routine registers 132 templates against integer identifiers, among them `autoexec()`,
  * `get_screen_config()[0]`, and `level_list['%s'].stage`, plus the two exception messages for
- * Application::Run() and Application::ExitInstance().
+ * Application::Run() and Application::ExitInstance(). The European release drops the
+ * `get_met_string('%s')` and `get_met_stringList('%s')` templates and registers 130.
  *
- * @ghidraAddress 0x004016c8
+ * @ghidraAddress NTSC-U/C: 0x004016c8
+ * @ghidraAddress PAL: 0x0043a1b0
  */
 void RegisterScriptCallTemplates();
 
@@ -30,7 +32,8 @@ void RegisterScriptCallTemplates();
  * The routine returns nothing. Its early exit and its creation path disagree about what the
  * result register holds, so the value is scratch rather than a return.
  *
- * @ghidraAddress 0x0050d588
+ * @ghidraAddress NTSC-U/C: 0x0050d588
+ * @ghidraAddress PAL: 0x0054ca40
  */
 void GetPythonScriptHost();
 
@@ -39,7 +42,8 @@ void GetPythonScriptHost();
  *
  * The destructor is inlined here rather than called, so the body repeats PyShell's teardown.
  *
- * @ghidraAddress 0x0050d608
+ * @ghidraAddress NTSC-U/C: 0x0050d608
+ * @ghidraAddress PAL: 0x0054cac0
  */
 void DestroyPythonScriptHost();
 
@@ -49,7 +53,8 @@ void DestroyPythonScriptHost();
  * A second entry point onto PyShell::RunMasterInitScript(), separate from the one
  * GetPythonScriptHost() takes during creation.
  *
- * @ghidraAddress 0x0050d698
+ * @ghidraAddress NTSC-U/C: 0x0050d698
+ * @ghidraAddress PAL: 0x0054cb50
  */
 void InvokeMasterInitScript();
 
@@ -64,7 +69,8 @@ void InvokeMasterInitScript();
  * what proves the arguments are read rather than merely reserved.
  *
  * @param nTemplate The template identifier.
- * @ghidraAddress 0x005099b0
+ * @ghidraAddress NTSC-U/C: 0x005099b0
+ * @ghidraAddress PAL: 0x00548ca0
  */
 void CallScriptTemplate(int nTemplate, ...);
 
@@ -74,7 +80,8 @@ void CallScriptTemplate(int nTemplate, ...);
  * The result is discarded. ScriptSink uses this for the text a ScriptMsg supplies.
  *
  * @param script The text to run.
- * @ghidraAddress 0x00509b00
+ * @ghidraAddress NTSC-U/C: 0x00509b00
+ * @ghidraAddress PAL: 0x00548e28
  */
 void RunScript(const HxStr &script);
 
@@ -89,6 +96,7 @@ void RunScript(const HxStr &script);
  * what() slot in the g++ 2.9x layout.
  *
  * @return The text.
- * @ghidraAddress 0x00508f30
+ * @ghidraAddress NTSC-U/C: 0x00508f30
+ * @ghidraAddress PAL: 0x005480c8
  */
 HxStr GetPythonErrorText();

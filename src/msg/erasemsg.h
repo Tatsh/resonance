@@ -58,7 +58,8 @@ public:
      * initialised.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6b28
+     * @ghidraAddress NTSC-U/C: 0x003d6b28
+     * @ghidraAddress PAL: 0x0040ea18
      */
     static Message *New();
 
@@ -66,7 +67,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003db3e0
+     * @ghidraAddress NTSC-U/C: 0x003db3e0
+     * @ghidraAddress PAL: 0x00413818
      */
     virtual Message *Clone();
 
@@ -74,7 +76,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nEraseMsgType.
-     * @ghidraAddress 0x003db440
+     * @ghidraAddress NTSC-U/C: 0x003db440
+     * @ghidraAddress PAL: 0x00413878
      */
     virtual int Type();
 
@@ -82,7 +85,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `EraseMsg`.
-     * @ghidraAddress 0x003db450
+     * @ghidraAddress NTSC-U/C: 0x003db450
+     * @ghidraAddress PAL: 0x00413888
      */
     virtual const char *Name();
 
@@ -91,7 +95,8 @@ public:
      * stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3320
+     * @ghidraAddress NTSC-U/C: 0x003e3320
+     * @ghidraAddress PAL: 0x0041b640
      */
     virtual void Print(std::ostream &stream);
 
@@ -112,6 +117,7 @@ public:
  * handlers elsewhere read the same word to compare against it, which is the expected shape for a
  * registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d0174
+ * @ghidraAddress NTSC-U/C: 0x006d0174
+ * @ghidraAddress PAL: 0x0071390c
  */
 extern int g_nEraseMsgType;

@@ -1,23 +1,23 @@
 #include "msg/freestylefxmsg.h"
 
-// 0x003d7398
+// NTSC-U/C: 0x003d7398, PAL: 0x0040f298
 Message *FreestyleFXMsg::New() {
     return new FreestyleFXMsg;
 }
 
-// 0x00116500
+// NTSC-U/C: 0x00116500, PAL: 0x001169a8
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *FreestyleFXMsg::Clone() {
     return new FreestyleFXMsg(*this);
 }
 
-// 0x00116558
+// NTSC-U/C: 0x00116558, PAL: 0x00116a00
 int FreestyleFXMsg::Type() {
     return g_nFreestyleFXMsgType;
 }
 
-// 0x00116568
+// NTSC-U/C: 0x00116568, PAL: 0x00116a10
 const char *FreestyleFXMsg::Name() {
     return "FreestyleFXMsg";
 }

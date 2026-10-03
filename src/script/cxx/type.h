@@ -37,7 +37,8 @@ public:
      *
      * @param pyob The reference to test.
      * @return True when the reference is a type object.
-     * @ghidraAddress 0x004c7058
+     * @ghidraAddress NTSC-U/C: 0x004c7058
+     * @ghidraAddress PAL: 0x00505280
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PyType_Check(pyob);

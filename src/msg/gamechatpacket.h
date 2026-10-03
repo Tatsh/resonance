@@ -38,7 +38,8 @@ public:
      *
      * @param sender The string for mSender.
      * @param text The string for mText.
-     * @ghidraAddress 0x003f1a28
+     * @ghidraAddress NTSC-U/C: 0x003f1a28
+     * @ghidraAddress PAL: 0x00429f20
      */
     GameChatPacket(const HxStr &sender, const HxStr &text);
 
@@ -49,7 +50,8 @@ public:
      * g_nGameChatPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e5478
+     * @ghidraAddress NTSC-U/C: 0x003e5478
+     * @ghidraAddress PAL: 0x0041d710
      */
     static Message *New();
 
@@ -57,7 +59,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f1950
+     * @ghidraAddress NTSC-U/C: 0x003f1950
+     * @ghidraAddress PAL: 0x00429e40
      */
     virtual Message *Clone();
 
@@ -65,7 +68,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nGameChatPacketType.
-     * @ghidraAddress 0x003f19c8
+     * @ghidraAddress NTSC-U/C: 0x003f19c8
+     * @ghidraAddress PAL: 0x00429eb8
      */
     virtual int Type();
 
@@ -73,7 +77,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `GameChatPacket`.
-     * @ghidraAddress 0x003f19d8
+     * @ghidraAddress NTSC-U/C: 0x003f19d8
+     * @ghidraAddress PAL: 0x00429ec8
      */
     virtual const char *Name();
 
@@ -81,7 +86,8 @@ public:
      * Write both strings to a diagnostic stream, with nothing between them.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f28e8
+     * @ghidraAddress NTSC-U/C: 0x003f28e8
+     * @ghidraAddress PAL: 0x0042ae30
      */
     virtual void Print(std::ostream &stream);
 
@@ -89,7 +95,8 @@ public:
      * Write the Packet words and then both strings to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e8458
+     * @ghidraAddress NTSC-U/C: 0x003e8458
+     * @ghidraAddress PAL: 0x00420738
      */
     virtual void Save(OBStream &stream);
 
@@ -99,7 +106,8 @@ public:
      * Each string is resized through HxStr::Alloc() to the length read and then filled in place.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e85c8
+     * @ghidraAddress NTSC-U/C: 0x003e85c8
+     * @ghidraAddress PAL: 0x004208a8
      */
     virtual void Load(IBStream &stream);
 
@@ -109,7 +117,8 @@ public:
      * The image lists no caller. The title is inferred.
      *
      * @return A copy of mSender.
-     * @ghidraAddress 0x003f1ae0
+     * @ghidraAddress NTSC-U/C: 0x003f1ae0
+     * @ghidraAddress PAL: 0x00429fe8
      */
     HxStr GetSender();
 
@@ -119,7 +128,8 @@ public:
      * The image lists no caller. The title is inferred.
      *
      * @return A copy of mText.
-     * @ghidraAddress 0x003f1b10
+     * @ghidraAddress NTSC-U/C: 0x003f1b10
+     * @ghidraAddress PAL: 0x0042a018
      */
     HxStr GetText();
 
@@ -135,6 +145,7 @@ private:
  *
  * This word belongs to GameChatPacket because GameChatPacket::Type() at `0x003f19c8` returns it.
  *
- * @ghidraAddress 0x006d740c
+ * @ghidraAddress NTSC-U/C: 0x006d740c
+ * @ghidraAddress PAL: 0x0071abac
  */
 extern int g_nGameChatPacketType;

@@ -48,7 +48,8 @@ public:
      * g_nSCAllPlayersInfoPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e4ee8
+     * @ghidraAddress NTSC-U/C: 0x003e4ee8
+     * @ghidraAddress PAL: 0x0041d180
      */
     static Message *New();
 
@@ -56,7 +57,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003eff60
+     * @ghidraAddress NTSC-U/C: 0x003eff60
+     * @ghidraAddress PAL: 0x00428568
      */
     virtual Message *Clone();
 
@@ -64,7 +66,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nSCAllPlayersInfoPacketType.
-     * @ghidraAddress 0x003effd8
+     * @ghidraAddress NTSC-U/C: 0x003effd8
+     * @ghidraAddress PAL: 0x004285e0
      */
     virtual int Type();
 
@@ -72,7 +75,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `SCAllPlayersInfoPacket`.
-     * @ghidraAddress 0x003effe8
+     * @ghidraAddress NTSC-U/C: 0x003effe8
+     * @ghidraAddress PAL: 0x004285f0
      */
     virtual const char *Name();
 
@@ -81,7 +85,8 @@ public:
      * numbers in parentheses each followed by a space, and ` | `.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2278
+     * @ghidraAddress NTSC-U/C: 0x003f2278
+     * @ghidraAddress PAL: 0x0042a7c0
      */
     virtual void Print(std::ostream &stream);
 
@@ -90,7 +95,8 @@ public:
      * and its tracks to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e6578
+     * @ghidraAddress NTSC-U/C: 0x003e6578
+     * @ghidraAddress PAL: 0x0041e858
      */
     virtual void Save(OBStream &stream);
 
@@ -99,7 +105,8 @@ public:
      * counts read.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e6788
+     * @ghidraAddress NTSC-U/C: 0x003e6788
+     * @ghidraAddress PAL: 0x0041ea68
      */
     virtual void Load(IBStream &stream);
 
@@ -110,7 +117,8 @@ public:
      * alone.
      *
      * @param entry The entry to append.
-     * @ghidraAddress 0x003f23a8
+     * @ghidraAddress NTSC-U/C: 0x003f23a8
+     * @ghidraAddress PAL: 0x0042a8f0
      */
     void AppendEntry(const PlayerEntry &entry);
 
@@ -124,6 +132,7 @@ private:
  * This word belongs to SCAllPlayersInfoPacket because SCAllPlayersInfoPacket::Type() at
  * `0x003effd8` returns it.
  *
- * @ghidraAddress 0x006d73a4
+ * @ghidraAddress NTSC-U/C: 0x006d73a4
+ * @ghidraAddress PAL: 0x0071ab44
  */
 extern int g_nSCAllPlayersInfoPacketType;

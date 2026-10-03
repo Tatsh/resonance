@@ -25,14 +25,16 @@ public:
      * Record the module name and start an empty method table.
      *
      * @param pszName The module name.
-     * @ghidraAddress 0x005a5d28
+     * @ghidraAddress NTSC-U/C: 0x005a5d28
+     * @ghidraAddress PAL: 0x005e8218
      */
     explicit ExtensionModuleBase(const char *pszName);
 
     /**
      * Release the method table and the name.
      *
-     * @ghidraAddress 0x005a5d98
+     * @ghidraAddress NTSC-U/C: 0x005a5d98
+     * @ghidraAddress PAL: 0x005e8298
      */
     virtual ~ExtensionModuleBase();
 
@@ -43,7 +45,8 @@ protected:
      * The module's `self` is a new Py::ExtensionModuleBasePtr pointing back at this object.
      *
      * @param pszModuleDoc The module doc string.
-     * @ghidraAddress 0x005a5ea0
+     * @ghidraAddress NTSC-U/C: 0x005a5ea0
+     * @ghidraAddress PAL: 0x005e83b0
      */
     void initialize(const char *pszModuleDoc);
 

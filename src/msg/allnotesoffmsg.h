@@ -48,7 +48,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 203.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6dc8
+     * @ghidraAddress NTSC-U/C: 0x003d6dc8
+     * @ghidraAddress PAL: 0x0040ecb8
      */
     static Message *New();
 
@@ -56,7 +57,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x0019a618
+     * @ghidraAddress NTSC-U/C: 0x0019a618
+     * @ghidraAddress PAL: 0x001a0380
      */
     virtual Message *Clone();
 
@@ -64,7 +66,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_dwAllNotesOffMsgType.
-     * @ghidraAddress 0x0019a670
+     * @ghidraAddress NTSC-U/C: 0x0019a670
+     * @ghidraAddress PAL: 0x001a03d8
      */
     virtual int Type();
 
@@ -72,7 +75,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `AllNotesOffMsg`.
-     * @ghidraAddress 0x0019a680
+     * @ghidraAddress NTSC-U/C: 0x0019a680
+     * @ghidraAddress PAL: 0x001a03e8
      */
     virtual const char *Name();
 
@@ -84,7 +88,8 @@ public:
      * constant result on a virtual only this class declares.
      *
      * @return 1.
-     * @ghidraAddress 0x0019a690
+     * @ghidraAddress NTSC-U/C: 0x0019a690
+     * @ghidraAddress PAL: 0x001a03f8
      */
     virtual int IsAllNotesOff();
 };
@@ -96,6 +101,7 @@ public:
  * and the registration at `0x003d9818` passes the same value, 203, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d01d4
+ * @ghidraAddress NTSC-U/C: 0x006d01d4
+ * @ghidraAddress PAL: 0x0071396c
  */
 extern unsigned int g_dwAllNotesOffMsgType;

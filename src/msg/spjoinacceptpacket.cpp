@@ -6,40 +6,40 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003ef110
+// NTSC-U/C: 0x003ef110, PAL: 0x00427660
 SPJoinAcceptPacket::SPJoinAcceptPacket() {
 }
 
-// 0x003e4b40
+// NTSC-U/C: 0x003e4b40, PAL: 0x0041cd70
 Message *SPJoinAcceptPacket::New() {
     return new SPJoinAcceptPacket;
 }
 
-// 0x003ef078
+// NTSC-U/C: 0x003ef078, PAL: 0x004275c8
 // Clone allocates and hands off to the copy constructor at 0x003f2e48, which is
 // the compiler expanding the implicit one.
 Message *SPJoinAcceptPacket::Clone() {
     return new SPJoinAcceptPacket(*this);
 }
 
-// 0x003ef0f0
+// NTSC-U/C: 0x003ef0f0, PAL: 0x00427640
 int SPJoinAcceptPacket::Type() {
     return g_nSPJoinAcceptPacketType;
 }
 
-// 0x003ef100
+// NTSC-U/C: 0x003ef100, PAL: 0x00427650
 const char *SPJoinAcceptPacket::Name() {
     return "SPJoinAcceptPacket";
 }
 
-// 0x003f1f58
+// NTSC-U/C: 0x003f1f58, PAL: 0x0042a4a0
 void SPJoinAcceptPacket::Print(std::ostream &stream) {
     std::ostream &rest = stream << " plid:" << mPlayerId << " destid:" << mDestId;
     mParams.Print(rest);
     mAppearance.Print(rest << " clr:" << mColorName << " thm:");
 }
 
-// 0x003e5718
+// NTSC-U/C: 0x003e5718, PAL: 0x0041d9c0
 void SPJoinAcceptPacket::Save(OBStream &stream) {
     Packet::Save(stream);
 
@@ -58,7 +58,7 @@ void SPJoinAcceptPacket::Save(OBStream &stream) {
     }
 }
 
-// 0x003e5930
+// NTSC-U/C: 0x003e5930, PAL: 0x0041dbd8
 void SPJoinAcceptPacket::Load(IBStream &stream) {
     Packet::Load(stream);
 
@@ -76,27 +76,27 @@ void SPJoinAcceptPacket::Load(IBStream &stream) {
     }
 }
 
-// 0x003ef390
+// NTSC-U/C: 0x003ef390, PAL: 0x00427968
 HxStr SPJoinAcceptPacket::GetUsername() {
     return mAppearance.mUserName;
 }
 
-// 0x003ef3c0
+// NTSC-U/C: 0x003ef3c0, PAL: 0x00427998
 GameParams SPJoinAcceptPacket::GetParams() {
     return mParams;
 }
 
-// 0x003ef3f0
+// NTSC-U/C: 0x003ef3f0, PAL: 0x004279c8
 HxStr SPJoinAcceptPacket::GetColorName() {
     return mColorName;
 }
 
-// 0x003ef420
+// NTSC-U/C: 0x003ef420, PAL: 0x004279f8
 FreqAppearance SPJoinAcceptPacket::GetAppearance() {
     return mAppearance;
 }
 
-// 0x003ef450
+// NTSC-U/C: 0x003ef450, PAL: 0x00427a28
 void SPJoinAcceptPacket::AddPlayer(const PlayerInfo &player) {
     mPlayers.push_back(player);
 }

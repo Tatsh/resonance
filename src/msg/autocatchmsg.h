@@ -30,7 +30,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7c68
+     * @ghidraAddress NTSC-U/C: 0x003d7c68
+     * @ghidraAddress PAL: 0x0040fb80
      */
     static Message *New();
 
@@ -38,7 +39,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e2580
+     * @ghidraAddress NTSC-U/C: 0x003e2580
+     * @ghidraAddress PAL: 0x0041aa20
      */
     virtual Message *Clone();
 
@@ -46,7 +48,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nAutoCatchMsgType.
-     * @ghidraAddress 0x003e25f0
+     * @ghidraAddress NTSC-U/C: 0x003e25f0
+     * @ghidraAddress PAL: 0x0041aa90
      */
     virtual int Type();
 
@@ -54,7 +57,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `AutoCatchMsg`.
-     * @ghidraAddress 0x003e2600
+     * @ghidraAddress NTSC-U/C: 0x003e2600
+     * @ghidraAddress PAL: 0x0041aaa0
      */
     virtual const char *Name();
 
@@ -63,7 +67,8 @@ public:
      * a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e4208
+     * @ghidraAddress NTSC-U/C: 0x003e4208
+     * @ghidraAddress PAL: 0x0041c438
      */
     virtual void Print(std::ostream &stream);
 
@@ -79,6 +84,7 @@ public:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d03cc
+ * @ghidraAddress NTSC-U/C: 0x006d03cc
+ * @ghidraAddress PAL: 0x00713b64
  */
 extern int g_nAutoCatchMsgType;

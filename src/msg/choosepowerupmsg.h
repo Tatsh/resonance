@@ -35,7 +35,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6f90
+     * @ghidraAddress NTSC-U/C: 0x003d6f90
+     * @ghidraAddress PAL: 0x0040ee80
      */
     static Message *New();
 
@@ -57,7 +58,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dd0b8
+     * @ghidraAddress NTSC-U/C: 0x003dd0b8
+     * @ghidraAddress PAL: 0x004154f0
      */
     virtual Message *Clone();
 
@@ -65,7 +67,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nChoosePowerupMsgType.
-     * @ghidraAddress 0x003dd110
+     * @ghidraAddress NTSC-U/C: 0x003dd110
+     * @ghidraAddress PAL: 0x00415548
      */
     virtual int Type();
 
@@ -73,7 +76,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `ChoosePowerupMsg`.
-     * @ghidraAddress 0x003dd120
+     * @ghidraAddress NTSC-U/C: 0x003dd120
+     * @ghidraAddress PAL: 0x00415558
      */
     virtual const char *Name();
 
@@ -81,7 +85,8 @@ public:
      * Write the selected entry to a diagnostic stream as a number.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3ce0
+     * @ghidraAddress NTSC-U/C: 0x003e3ce0
+     * @ghidraAddress PAL: 0x0041beb0
      */
     virtual void Print(std::ostream &stream);
 
@@ -102,6 +107,7 @@ public:
  * it. Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d020c
+ * @ghidraAddress NTSC-U/C: 0x006d020c
+ * @ghidraAddress PAL: 0x007139a4
  */
 extern int g_nChoosePowerupMsgType;

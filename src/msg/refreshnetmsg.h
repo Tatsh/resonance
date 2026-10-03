@@ -23,7 +23,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d72f0
+     * @ghidraAddress NTSC-U/C: 0x003d72f0
+     * @ghidraAddress PAL: 0x0040f1f0
      */
     static Message *New();
 
@@ -31,7 +32,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003de630
+     * @ghidraAddress NTSC-U/C: 0x003de630
+     * @ghidraAddress PAL: 0x00416a88
      */
     virtual Message *Clone();
 
@@ -39,7 +41,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nRefreshNetMsgType.
-     * @ghidraAddress 0x003de688
+     * @ghidraAddress NTSC-U/C: 0x003de688
+     * @ghidraAddress PAL: 0x00416ae0
      */
     virtual int Type();
 
@@ -47,7 +50,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `RefreshNetMsg`.
-     * @ghidraAddress 0x003de698
+     * @ghidraAddress NTSC-U/C: 0x003de698
+     * @ghidraAddress PAL: 0x00416af0
      */
     virtual const char *Name();
 
@@ -56,7 +60,8 @@ public:
      * by ` - ` to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3e08
+     * @ghidraAddress NTSC-U/C: 0x003e3e08
+     * @ghidraAddress PAL: 0x0041bfd8
      */
     virtual void Print(std::ostream &stream);
 
@@ -89,6 +94,7 @@ public:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d0284
+ * @ghidraAddress NTSC-U/C: 0x006d0284
+ * @ghidraAddress PAL: 0x00713a1c
  */
 extern int g_nRefreshNetMsgType;

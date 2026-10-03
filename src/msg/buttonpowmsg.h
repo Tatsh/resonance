@@ -53,7 +53,8 @@ public:
      * initialised.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6ae8
+     * @ghidraAddress NTSC-U/C: 0x003d6ae8
+     * @ghidraAddress PAL: 0x0040e9d8
      */
     static Message *New();
 
@@ -61,7 +62,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003db220
+     * @ghidraAddress NTSC-U/C: 0x003db220
+     * @ghidraAddress PAL: 0x00413658
      */
     virtual Message *Clone();
 
@@ -69,7 +71,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nButtonPowMsgType.
-     * @ghidraAddress 0x003db278
+     * @ghidraAddress NTSC-U/C: 0x003db278
+     * @ghidraAddress PAL: 0x004136b0
      */
     virtual int Type();
 
@@ -77,7 +80,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `ButtonPowMsg`.
-     * @ghidraAddress 0x003db288
+     * @ghidraAddress NTSC-U/C: 0x003db288
+     * @ghidraAddress PAL: 0x004136c0
      */
     virtual const char *Name();
 
@@ -86,7 +90,8 @@ public:
      * spaces, to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003d7df0
+     * @ghidraAddress NTSC-U/C: 0x003d7df0
+     * @ghidraAddress PAL: 0x0040ff08
      */
     virtual void Print(std::ostream &stream);
 
@@ -110,6 +115,7 @@ private:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d016c
+ * @ghidraAddress NTSC-U/C: 0x006d016c
+ * @ghidraAddress PAL: 0x00713904
  */
 extern int g_nButtonPowMsgType;

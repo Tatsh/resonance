@@ -27,7 +27,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6f58
+     * @ghidraAddress NTSC-U/C: 0x003d6f58
+     * @ghidraAddress PAL: 0x0040ee48
      */
     static Message *New();
 
@@ -35,7 +36,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dcf10
+     * @ghidraAddress NTSC-U/C: 0x003dcf10
+     * @ghidraAddress PAL: 0x00415348
      */
     virtual Message *Clone();
 
@@ -43,7 +45,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nCaughtPowerbarMsgType.
-     * @ghidraAddress 0x003dcf60
+     * @ghidraAddress NTSC-U/C: 0x003dcf60
+     * @ghidraAddress PAL: 0x00415398
      */
     virtual int Type();
 
@@ -51,7 +54,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `CaughtPowerbarMsg`.
-     * @ghidraAddress 0x003dcf70
+     * @ghidraAddress NTSC-U/C: 0x003dcf70
+     * @ghidraAddress PAL: 0x004153a8
      */
     virtual const char *Name();
 
@@ -59,7 +63,8 @@ public:
      * Write the item kind to a diagnostic stream as a number.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3cb8
+     * @ghidraAddress NTSC-U/C: 0x003e3cb8
+     * @ghidraAddress PAL: 0x0041be88
      */
     virtual void Print(std::ostream &stream);
 
@@ -74,6 +79,7 @@ public:
  * returns it. Several handlers elsewhere read the same word to compare against it, which is the
  * expected shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d0204
+ * @ghidraAddress NTSC-U/C: 0x006d0204
+ * @ghidraAddress PAL: 0x0071399c
  */
 extern int g_nCaughtPowerbarMsgType;

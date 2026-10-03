@@ -36,7 +36,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d70e0
+     * @ghidraAddress NTSC-U/C: 0x003d70e0
+     * @ghidraAddress PAL: 0x0040efd0
      */
     static Message *New();
 
@@ -60,7 +61,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dd980
+     * @ghidraAddress NTSC-U/C: 0x003dd980
+     * @ghidraAddress PAL: 0x00415db8
      */
     virtual Message *Clone();
 
@@ -68,7 +70,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nDisplayPointerMsgType.
-     * @ghidraAddress 0x003dd9d8
+     * @ghidraAddress NTSC-U/C: 0x003dd9d8
+     * @ghidraAddress PAL: 0x00415e10
      */
     virtual int Type();
 
@@ -76,7 +79,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `DisplayPointerMsg`.
-     * @ghidraAddress 0x003dd9e8
+     * @ghidraAddress NTSC-U/C: 0x003dd9e8
+     * @ghidraAddress PAL: 0x00415e20
      */
     virtual const char *Name();
 
@@ -85,7 +89,8 @@ public:
      * space, and the player's colour name, to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003d8358
+     * @ghidraAddress NTSC-U/C: 0x003d8358
+     * @ghidraAddress PAL: 0x004106f0
      */
     virtual void Print(std::ostream &stream);
 
@@ -106,6 +111,7 @@ public:
  * returns it. Several handlers elsewhere read the same word to compare against it, which is the
  * expected shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d023c
+ * @ghidraAddress NTSC-U/C: 0x006d023c
+ * @ghidraAddress PAL: 0x007139d4
  */
 extern int g_nDisplayPointerMsgType;

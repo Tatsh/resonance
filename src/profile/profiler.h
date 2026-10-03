@@ -30,7 +30,8 @@ struct ProfileTimer {
  * MainLoop labels the first four, and GfxDevice::DrawSubsystemTimingGraph() draws one bar per
  * record.
  *
- * @ghidraAddress 0x00720378
+ * @ghidraAddress NTSC-U/C: 0x00720378
+ * @ghidraAddress PAL: 0x00763e00
  */
 extern std::vector<ProfileTimer> g_profileTimers;
 
@@ -40,14 +41,16 @@ extern std::vector<ProfileTimer> g_profileTimers;
  * GfxDevice::BeginFrame() passes it by address, and the frame-rate readouts take the frame time
  * from record 19 and a second interval from record 18.
  *
- * @ghidraAddress 0x00720388
+ * @ghidraAddress NTSC-U/C: 0x00720388
+ * @ghidraAddress PAL: 0x00763e10
  */
 extern std::vector<ProfileTimer> g_lastFrameProfileTimers;
 
 /**
  * Milliseconds per EE cycle, `1.0f / 294912.0f`, which the frame timer reset stores.
  *
- * @ghidraAddress 0x00720394
+ * @ghidraAddress NTSC-U/C: 0x00720394
+ * @ghidraAddress PAL: 0x00763e1c
  */
 extern float g_flCyclesToMilliseconds;
 
@@ -56,14 +59,16 @@ extern float g_flCyclesToMilliseconds;
  *
  * The name is inferred.
  *
- * @ghidraAddress 0x007203a0
+ * @ghidraAddress NTSC-U/C: 0x007203a0
+ * @ghidraAddress PAL: 0x00763e28
  */
 extern ProfileTimer g_frameTimer;
 
 /**
  * Doubleword ResetFrameTimer() clears. The image has no reader, and the name is inferred.
  *
- * @ghidraAddress 0x00720398
+ * @ghidraAddress NTSC-U/C: 0x00720398
+ * @ghidraAddress PAL: 0x00763e20
  */
 extern long long g_llFrameTimerCycles;
 
@@ -76,6 +81,7 @@ extern long long g_llFrameTimerCycles;
  * g_llFrameTimerCycles. Rnd::Manager::Init() is the one caller. The name is the analysis
  * program's.
  *
- * @ghidraAddress 0x0053dcf8
+ * @ghidraAddress NTSC-U/C: 0x0053dcf8
+ * @ghidraAddress PAL: 0x0057d928
  */
 void ResetFrameTimer();

@@ -49,7 +49,8 @@ public:
      *
      * @param nSize The object size the compiler supplies.
      * @return The block.
-     * @ghidraAddress 0x003da1c0
+     * @ghidraAddress NTSC-U/C: 0x003da1c0
+     * @ghidraAddress PAL: 0x004125f8
      */
     void *operator new(size_t nSize) {
         return AllocateTaggedMemory(nSize, "MSG");
@@ -61,7 +62,8 @@ public:
      * Defined in the class for the same reason as operator new(), with 69 copies.
      *
      * @param pBlock The block.
-     * @ghidraAddress 0x003da1e0
+     * @ghidraAddress NTSC-U/C: 0x003da1e0
+     * @ghidraAddress PAL: 0x00412618
      */
     void operator delete(void *pBlock) {
         FreeTaggedMemory(pBlock, "MSG");
@@ -74,7 +76,8 @@ public:
      * releasing through the class operator delete, FreeTaggedMemory() under the tag `MSG`, where
      * `0x001051c0` releases through the scalar free. It has no source of its own.
      *
-     * @ghidraAddress 0x001051c0
+     * @ghidraAddress NTSC-U/C: 0x001051c0
+     * @ghidraAddress PAL: 0x001051c0
      */
     virtual ~Message();
 
@@ -119,7 +122,8 @@ public:
      * member exists for diagnostics.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001051f0
+     * @ghidraAddress NTSC-U/C: 0x001051f0
+     * @ghidraAddress PAL: 0x001051f0
      */
     virtual void Print(std::ostream &stream);
 
@@ -134,7 +138,8 @@ public:
      * slot.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x001051f8
+     * @ghidraAddress NTSC-U/C: 0x001051f8
+     * @ghidraAddress PAL: 0x001051f8
      */
     virtual void Save(OBStream &stream);
 
@@ -149,7 +154,8 @@ public:
      * than a diagnostic.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x00105200
+     * @ghidraAddress NTSC-U/C: 0x00105200
+     * @ghidraAddress PAL: 0x00105200
      */
     virtual void Load(IBStream &stream);
 
@@ -161,7 +167,8 @@ public:
      *
      * @param stream The stream to write to.
      * @return The stream.
-     * @ghidraAddress 0x00556290
+     * @ghidraAddress NTSC-U/C: 0x00556290
+     * @ghidraAddress PAL: 0x00596918
      */
     std::ostream &PrintBraced(std::ostream &stream);
 
@@ -174,7 +181,8 @@ public:
      *
      * @param nType The identity to construct for.
      * @return The new message, or null when the identity is unregistered.
-     * @ghidraAddress 0x005563d0
+     * @ghidraAddress NTSC-U/C: 0x005563d0
+     * @ghidraAddress PAL: 0x00596a58
      */
     static Message *NewMessage(int nType);
 };

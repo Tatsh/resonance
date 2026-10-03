@@ -70,7 +70,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6f10
+     * @ghidraAddress NTSC-U/C: 0x003d6f10
+     * @ghidraAddress PAL: 0x0040ee00
      */
     static Message *New();
 
@@ -78,7 +79,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dcce0
+     * @ghidraAddress NTSC-U/C: 0x003dcce0
+     * @ghidraAddress PAL: 0x00415118
      */
     virtual Message *Clone();
 
@@ -86,7 +88,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nSeekerMsgType.
-     * @ghidraAddress 0x003dcd50
+     * @ghidraAddress NTSC-U/C: 0x003dcd50
+     * @ghidraAddress PAL: 0x00415188
      */
     virtual int Type();
 
@@ -94,7 +97,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `SeekerMsg`.
-     * @ghidraAddress 0x003dcd60
+     * @ghidraAddress NTSC-U/C: 0x003dcd60
+     * @ghidraAddress PAL: 0x00415198
      */
     virtual const char *Name();
 
@@ -106,7 +110,8 @@ public:
      * kMBTInfinity.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003d81f0
+     * @ghidraAddress NTSC-U/C: 0x003d81f0
+     * @ghidraAddress PAL: 0x00410568
      */
     virtual void Print(std::ostream &stream);
 
@@ -129,6 +134,7 @@ private:
  * handlers elsewhere read the same word to compare against it, which is the expected shape for a
  * registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d01fc
+ * @ghidraAddress NTSC-U/C: 0x006d01fc
+ * @ghidraAddress PAL: 0x00713994
  */
 extern int g_nSeekerMsgType;

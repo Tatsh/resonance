@@ -43,12 +43,16 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag that abandons exactly this task's operations.
      * @param remixName The remix to read, copied into mRemixName.
-     * @ghidraAddress 0x0017be28
+     * @ghidraAddress NTSC-U/C: 0x0017be28
+     * @ghidraAddress PAL: 0x00180288
      */
     LoadRemixMCT(
         MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, const HxStr &remixName);
 
-    /** @ghidraAddress 0x00185380 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00185380
+     * @ghidraAddress PAL: 0x0018acb8
+     */
     virtual ~LoadRemixMCT();
 
     /**
@@ -56,7 +60,8 @@ public:
      *
      * Clears mStep first, so the listing always restarts the walk from its first step.
      *
-     * @ghidraAddress 0x0017c060
+     * @ghidraAddress NTSC-U/C: 0x0017c060
+     * @ghidraAddress PAL: 0x00180500
      */
     void ListRemixDir();
 
@@ -67,21 +72,24 @@ public:
      * nothing.
      *
      * @param pOp The finished enquiry.
-     * @ghidraAddress 0x00186bd0
+     * @ghidraAddress NTSC-U/C: 0x00186bd0
+     * @ghidraAddress PAL: 0x0018c3a8
      */
     virtual void OnCheckInfo(CheckInfoOp *pOp);
 
     /**
      * Report the finished load through MemcardUser::OnRemixLoaded().
      *
-     * @ghidraAddress 0x00186c50
+     * @ghidraAddress NTSC-U/C: 0x00186c50
+     * @ghidraAddress PAL: 0x0018c428
      */
     virtual void Finish();
 
     /**
      * Enquire about the card and start the load.
      *
-     * @ghidraAddress 0x00186ba0
+     * @ghidraAddress NTSC-U/C: 0x00186ba0
+     * @ghidraAddress PAL: 0x0018c378
      */
     virtual void Execute();
 
@@ -93,7 +101,8 @@ public:
      * mCurrentDir and a fresh LoadFileMCT reads `<dir>/index` into mBuffer.
      *
      * @param pOp The finished listing.
-     * @ghidraAddress 0x0017c210
+     * @ghidraAddress NTSC-U/C: 0x0017c210
+     * @ghidraAddress PAL: 0x00180728
      */
     virtual void OnListDir(ListDirOp *pOp);
 
@@ -107,7 +116,8 @@ public:
      * step 2 mPayload's size is set from the read and the task reports.
      *
      * @param nStatus The inner read's status.
-     * @ghidraAddress 0x0017c650
+     * @ghidraAddress NTSC-U/C: 0x0017c650
+     * @ghidraAddress PAL: 0x00180c40
      */
     virtual void OnFileLoaded(int nStatus);
 

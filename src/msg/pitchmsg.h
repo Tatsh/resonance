@@ -29,7 +29,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 409.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7600
+     * @ghidraAddress NTSC-U/C: 0x003d7600
+     * @ghidraAddress PAL: 0x0040f500
      */
     static Message *New();
 
@@ -37,7 +38,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001b3940
+     * @ghidraAddress NTSC-U/C: 0x001b3940
+     * @ghidraAddress PAL: 0x001b9718
      */
     virtual Message *Clone();
 
@@ -45,7 +47,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nPitchMsgType.
-     * @ghidraAddress 0x001b39a0
+     * @ghidraAddress NTSC-U/C: 0x001b39a0
+     * @ghidraAddress PAL: 0x001b9778
      */
     virtual int Type();
 
@@ -53,7 +56,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `PitchMsg`.
-     * @ghidraAddress 0x001b39b0
+     * @ghidraAddress NTSC-U/C: 0x001b39b0
+     * @ghidraAddress PAL: 0x001b9788
      */
     virtual const char *Name();
 
@@ -76,6 +80,7 @@ public:
  * registration at `0x003d9818` passes the same value, 409, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d02ec
+ * @ghidraAddress NTSC-U/C: 0x006d02ec
+ * @ghidraAddress PAL: 0x00713a84
  */
 extern int g_nPitchMsgType;

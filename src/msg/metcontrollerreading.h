@@ -30,7 +30,8 @@ struct MetControllerReading {
      * nothing for any other tag. The three numbers follow separated by `.`, `.`, and `:`.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x00100f40
+     * @ghidraAddress NTSC-U/C: 0x00100f40
+     * @ghidraAddress PAL: 0x00100f40
      */
     void Print(std::ostream &stream);
 
@@ -46,7 +47,8 @@ struct MetControllerReading {
  * @param stream The stream to write to.
  * @param reading The reading.
  * @return The stream.
- * @ghidraAddress 0x00101060
+ * @ghidraAddress NTSC-U/C: 0x00101060
+ * @ghidraAddress PAL: 0x00101060
  */
 OBStream &operator<<(OBStream &stream, const MetControllerReading &reading);
 
@@ -58,6 +60,7 @@ OBStream &operator<<(OBStream &stream, const MetControllerReading &reading);
  * @param stream The stream to read from.
  * @param reading The reading to fill.
  * @return The stream.
- * @ghidraAddress 0x00101120
+ * @ghidraAddress NTSC-U/C: 0x00101120
+ * @ghidraAddress PAL: 0x00101120
  */
 IBStream &operator>>(IBStream &stream, MetControllerReading &reading);

@@ -39,7 +39,8 @@ public:
      *
      * @param sender The string for mSender.
      * @param text The string for mText.
-     * @ghidraAddress 0x003f1cd0
+     * @ghidraAddress NTSC-U/C: 0x003f1cd0
+     * @ghidraAddress PAL: 0x0042a208
      */
     TestArbiterPacket(const HxStr &sender, const HxStr &text);
 
@@ -50,7 +51,8 @@ public:
      * g_nTestArbiterPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e54d8
+     * @ghidraAddress NTSC-U/C: 0x003e54d8
+     * @ghidraAddress PAL: 0x0041d778
      */
     static Message *New();
 
@@ -58,7 +60,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f1bf8
+     * @ghidraAddress NTSC-U/C: 0x003f1bf8
+     * @ghidraAddress PAL: 0x0042a128
      */
     virtual Message *Clone();
 
@@ -66,7 +69,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nTestArbiterPacketType.
-     * @ghidraAddress 0x003f1c70
+     * @ghidraAddress NTSC-U/C: 0x003f1c70
+     * @ghidraAddress PAL: 0x0042a1a0
      */
     virtual int Type();
 
@@ -74,7 +78,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `TestArbiterPacket`.
-     * @ghidraAddress 0x003f1c80
+     * @ghidraAddress NTSC-U/C: 0x003f1c80
+     * @ghidraAddress PAL: 0x0042a1b0
      */
     virtual const char *Name();
 
@@ -82,7 +87,8 @@ public:
      * Write both strings to a diagnostic stream, with nothing between them.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2ab8
+     * @ghidraAddress NTSC-U/C: 0x003f2ab8
+     * @ghidraAddress PAL: 0x0042b000
      */
     virtual void Print(std::ostream &stream);
 
@@ -90,7 +96,8 @@ public:
      * Write the Packet words and then both strings to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e8720
+     * @ghidraAddress NTSC-U/C: 0x003e8720
+     * @ghidraAddress PAL: 0x00420a00
      */
     virtual void Save(OBStream &stream);
 
@@ -98,7 +105,8 @@ public:
      * Read the Packet words and then both strings back from a stream.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e8890
+     * @ghidraAddress NTSC-U/C: 0x003e8890
+     * @ghidraAddress PAL: 0x00420b70
      */
     virtual void Load(IBStream &stream);
 
@@ -108,7 +116,8 @@ public:
      * The image lists no caller. The title is inferred.
      *
      * @return A copy of mSender.
-     * @ghidraAddress 0x003f1d88
+     * @ghidraAddress NTSC-U/C: 0x003f1d88
+     * @ghidraAddress PAL: 0x0042a2d0
      */
     HxStr GetSender();
 
@@ -118,7 +127,8 @@ public:
      * The image lists no caller. The title is inferred.
      *
      * @return A copy of mText.
-     * @ghidraAddress 0x003f1db8
+     * @ghidraAddress NTSC-U/C: 0x003f1db8
+     * @ghidraAddress PAL: 0x0042a300
      */
     HxStr GetText();
 
@@ -134,6 +144,7 @@ private:
  * This word belongs to TestArbiterPacket because TestArbiterPacket::Type() at `0x003f1c70`
  * returns it.
  *
- * @ghidraAddress 0x006d7414
+ * @ghidraAddress NTSC-U/C: 0x006d7414
+ * @ghidraAddress PAL: 0x0071abb4
  */
 extern int g_nTestArbiterPacketType;

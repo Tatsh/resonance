@@ -34,7 +34,8 @@ public:
      * g_nPhrasePacketType. The payload, the phrase pointer included, is left unset.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e51a8
+     * @ghidraAddress NTSC-U/C: 0x003e51a8
+     * @ghidraAddress PAL: 0x0041d440
      */
     static Message *New();
 
@@ -42,7 +43,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f0320
+     * @ghidraAddress NTSC-U/C: 0x003f0320
+     * @ghidraAddress PAL: 0x00428928
      */
     virtual Message *Clone();
 
@@ -50,7 +52,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nPhrasePacketType.
-     * @ghidraAddress 0x003f0398
+     * @ghidraAddress NTSC-U/C: 0x003f0398
+     * @ghidraAddress PAL: 0x004289a0
      */
     virtual int Type();
 
@@ -58,7 +61,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `PhrasePacket`.
-     * @ghidraAddress 0x003f03a8
+     * @ghidraAddress NTSC-U/C: 0x003f03a8
+     * @ghidraAddress PAL: 0x004289b0
      */
     virtual const char *Name();
 
@@ -67,7 +71,8 @@ public:
      * one, to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2408
+     * @ghidraAddress NTSC-U/C: 0x003f2408
+     * @ghidraAddress PAL: 0x0042a950
      */
     virtual void Print(std::ostream &stream);
 
@@ -76,7 +81,8 @@ public:
      * to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e6b70
+     * @ghidraAddress NTSC-U/C: 0x003e6b70
+     * @ghidraAddress PAL: 0x0041ee50
      */
     virtual void Save(OBStream &stream);
 
@@ -86,7 +92,8 @@ public:
      * The phrase is replaced with a freshly allocated one without releasing the previous pointer.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e6ca8
+     * @ghidraAddress NTSC-U/C: 0x003e6ca8
+     * @ghidraAddress PAL: 0x0041ef88
      */
     virtual void Load(IBStream &stream);
 
@@ -117,6 +124,7 @@ public:
  *
  * This word belongs to PhrasePacket because PhrasePacket::Type() at `0x003f0398` returns it.
  *
- * @ghidraAddress 0x006d73d4
+ * @ghidraAddress NTSC-U/C: 0x006d73d4
+ * @ghidraAddress PAL: 0x0071ab74
  */
 extern int g_nPhrasePacketType;

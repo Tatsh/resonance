@@ -55,7 +55,8 @@ public:
     /**
      * Start with the terminator record alone.
      *
-     * @ghidraAddress 0x005a5aa8
+     * @ghidraAddress NTSC-U/C: 0x005a5aa8
+     * @ghidraAddress PAL: 0x005e7f78
      */
     MethodTable() {
         mRecords.push_back(method(nullptr, nullptr, 0, nullptr));
@@ -65,7 +66,8 @@ public:
     /**
      * Release the flattened table.
      *
-     * @ghidraAddress 0x005abb68
+     * @ghidraAddress NTSC-U/C: 0x005abb68
+     * @ghidraAddress PAL: 0x005ee090
      */
     virtual ~MethodTable() {
         delete[] mTable;
@@ -81,7 +83,8 @@ public:
      * @param pfnMethod The C entry point.
      * @param pszDoc The doc string.
      * @param nFlags The calling convention flag.
-     * @ghidraAddress 0x005a5bc8
+     * @ghidraAddress NTSC-U/C: 0x005a5bc8
+     * @ghidraAddress PAL: 0x005e8098
      */
     void
     add(const char *pszMethodName, PyCFunction pfnMethod, const char *pszDoc = "", int nFlags = 1) {
@@ -98,7 +101,8 @@ public:
      * additions.
      *
      * @return The array, terminated by the record the constructor placed.
-     * @ghidraAddress 0x005abc98
+     * @ghidraAddress NTSC-U/C: 0x005abc98
+     * @ghidraAddress PAL: 0x005ee1c0
      */
     PyMethodDef *table() {
         if (mTable == nullptr) {

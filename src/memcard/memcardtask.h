@@ -108,7 +108,8 @@ protected:
      * and then reports through Finish(). kMemcardStatusOk does nothing. The out-of-line copy is
      * never called. Every report handler across the sixteen subclasses inlined the body instead.
      *
-     * @ghidraAddress 0x00185998
+     * @ghidraAddress NTSC-U/C: 0x00185998
+     * @ghidraAddress PAL: 0x0018b3c0
      */
     void AbortOnError();
 

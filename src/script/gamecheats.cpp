@@ -38,7 +38,7 @@ constexpr int kPowerupCheatTemplate = 207;
 // Add juice to the gamer.
 //
 // The error names the enable_freestyle command, whose check this repeats.
-// 0x00147e40
+// NTSC-U/C: 0x00147e40, PAL: 0x00148a10
 Py::Object ScriptAddJuice(const Py::Tuple &args) {
     if (args.length() != 1) {
         throw Py::TypeError(HxStr("wrong # args for enable_freestyle"));
@@ -49,7 +49,7 @@ Py::Object ScriptAddJuice(const Py::Tuple &args) {
 }
 
 // Move the gamer to a song position.
-// 0x00148540
+// NTSC-U/C: 0x00148540, PAL: 0x00149130
 Py::Object ScriptAdvanceSection(const Py::Tuple &args) {
     if (args.length() != 1) {
         throw Py::TypeError(HxStr("wrong # args for advance_section"));
@@ -61,7 +61,7 @@ Py::Object ScriptAdvanceSection(const Py::Tuple &args) {
 }
 
 // End the game with a score.
-// 0x0014a200
+// NTSC-U/C: 0x0014a200, PAL: 0x0014ae10
 Py::Object ScriptWinWithPointsCheat(const Py::Tuple &args) {
     PlayActivateSound();
     if (args.length() != 1) {
@@ -76,7 +76,7 @@ Py::Object ScriptWinWithPointsCheat(const Py::Tuple &args) {
 //
 // Each track stays free until bar -1, which never arrives, so every track is enabled. Jam
 // sessions keep their requirements.
-// 0x0014a6d8
+// NTSC-U/C: 0x0014a6d8, PAL: 0x0014b308
 Py::Object ScriptEnableAllTracksCheat([[maybe_unused]] const Py::Tuple &args) {
     PlayActivateSound();
     GrooveWorld *pWorld = Application::shared()->GetWorld();
@@ -94,7 +94,7 @@ Py::Object ScriptEnableAllTracksCheat([[maybe_unused]] const Py::Tuple &args) {
 // Enter listen mode.
 //
 // Ends the game scoreless and arms the cheat flag, everywhere but in a jam session.
-// 0x00148c68
+// NTSC-U/C: 0x00148c68, PAL: 0x00149878
 Py::Object ScriptActivateListenMode([[maybe_unused]] const Py::Tuple &args) {
     PlayActivateSound();
     GrooveWorld *pWorld = Application::shared()->GetWorld();
@@ -106,7 +106,7 @@ Py::Object ScriptActivateListenMode([[maybe_unused]] const Py::Tuple &args) {
 }
 
 // Save the live scene to tunnel/livegame.rnd.
-// 0x00146590
+// NTSC-U/C: 0x00146590, PAL: 0x001470a8
 Py::Object ScriptSaveRnd([[maybe_unused]] const Py::Tuple &args) {
     Rnd::FilePath::SetRoot(MakeFreqPath(HxStr("tunnel")));
     Rnd::g_manager.SaveFile(MakeFreqPath(HxStr("tunnel/livegame.rnd")));
@@ -117,14 +117,14 @@ Py::Object ScriptSaveRnd([[maybe_unused]] const Py::Tuple &args) {
 //
 // The binary expands the three steps of ClearAlbumCache() inline; calling it repeats them
 // without duplicating the body, which met/albumcache.h records.
-// 0x003f6860
+// NTSC-U/C: 0x003f6860, PAL: 0x0042f070
 Py::Object ScriptEmptyAlbumCaches([[maybe_unused]] Py::Tuple args) {
     ClearAlbumCache();
     return Py::Object();
 }
 
 // Enter practice mode.
-// 0x00148f98
+// NTSC-U/C: 0x00148f98, PAL: 0x00149ba8
 PyObject *PyInvokeActivatePracticeMode(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -144,7 +144,7 @@ PyObject *PyInvokeActivatePracticeMode(PyObject *, PyObject *pArgs) {
 }
 
 // Unlock every stage.
-// 0x00149230
+// NTSC-U/C: 0x00149230, PAL: 0x00149e40
 PyObject *PyInvokeActivateAllAccessMode(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -165,7 +165,7 @@ PyObject *PyInvokeActivateAllAccessMode(PyObject *, PyObject *pArgs) {
 // Offer the team identities.
 //
 // Only from the logo screen, where the cheat is entered.
-// 0x001494f8
+// NTSC-U/C: 0x001494f8, PAL: 0x0014a108
 PyObject *PyInvokeEnableTeamFreqs(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -187,7 +187,7 @@ PyObject *PyInvokeEnableTeamFreqs(PyObject *, PyObject *pArgs) {
 // Grant a powerup through its script template.
 //
 // Only from the logo screen, where the cheat is entered.
-// 0x001497d8
+// NTSC-U/C: 0x001497d8, PAL: 0x0014a3e8
 PyObject *PyInvokeEnablePowerupCheats(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -207,7 +207,7 @@ PyObject *PyInvokeEnablePowerupCheats(PyObject *, PyObject *pArgs) {
 }
 
 // Play the powerup cheat sound.
-// 0x00149ab0
+// NTSC-U/C: 0x00149ab0, PAL: 0x0014a6c0
 PyObject *PyInvokeDoPowerupCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -222,7 +222,7 @@ PyObject *PyInvokeDoPowerupCheat(PyObject *, PyObject *pArgs) {
 }
 
 // Play the big-gem cheat sound.
-// 0x00149d20
+// NTSC-U/C: 0x00149d20, PAL: 0x0014a930
 PyObject *PyInvokeDoBigGemModeCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -237,7 +237,7 @@ PyObject *PyInvokeDoBigGemModeCheat(PyObject *, PyObject *pArgs) {
 }
 
 // Play the no-lattice cheat sound.
-// 0x00149f90
+// NTSC-U/C: 0x00149f90, PAL: 0x0014aba0
 PyObject *PyInvokeDoNoLatticeModeCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -252,7 +252,7 @@ PyObject *PyInvokeDoNoLatticeModeCheat(PyObject *, PyObject *pArgs) {
 }
 
 // Play the arena-cycle cheat sound.
-// 0x0014aa58
+// NTSC-U/C: 0x0014aa58, PAL: 0x0014b688
 PyObject *PyInvokeDoArenaStateCycleCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -269,7 +269,7 @@ PyObject *PyInvokeDoArenaStateCycleCheat(PyObject *, PyObject *pArgs) {
 // Flip the expansion-pack flag.
 //
 // Only from the logo screen, where the cheat is entered.
-// 0x0014acc8
+// NTSC-U/C: 0x0014acc8, PAL: 0x0014b8f8
 PyObject *PyInvokeDoExpansionPackToggleCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -289,7 +289,7 @@ PyObject *PyInvokeDoExpansionPackToggleCheat(PyObject *, PyObject *pArgs) {
 }
 
 // Flag the win sequence to run.
-// 0x0014afa8
+// NTSC-U/C: 0x0014afa8, PAL: 0x0014bbd8
 PyObject *PyInvokeDoWinSequenceCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -304,7 +304,7 @@ PyObject *PyInvokeDoWinSequenceCheat(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptAddJuice() on the interpreter's argument tuple.
-// 0x001480d0
+// NTSC-U/C: 0x001480d0, PAL: 0x00148cc0
 PyObject *PyInvokeAddJuice(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -319,7 +319,7 @@ PyObject *PyInvokeAddJuice(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptAdvanceSection() on the interpreter's argument tuple.
-// 0x001487d8
+// NTSC-U/C: 0x001487d8, PAL: 0x001493e8
 PyObject *PyInvokeAdvanceSection(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -334,7 +334,7 @@ PyObject *PyInvokeAdvanceSection(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptWinWithPointsCheat() on the interpreter's argument tuple.
-// 0x0014a490
+// NTSC-U/C: 0x0014a490, PAL: 0x0014b0c0
 PyObject *PyInvokeDoWinWithPointsCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -349,7 +349,7 @@ PyObject *PyInvokeDoWinWithPointsCheat(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptEnableAllTracksCheat() on the interpreter's argument tuple.
-// 0x0014a810
+// NTSC-U/C: 0x0014a810, PAL: 0x0014b440
 PyObject *PyInvokeDoEnableAllTracksCheat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -364,7 +364,7 @@ PyObject *PyInvokeDoEnableAllTracksCheat(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptActivateListenMode() on the interpreter's argument tuple.
-// 0x00148d50
+// NTSC-U/C: 0x00148d50, PAL: 0x00149960
 PyObject *PyInvokeActivateListenMode(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -379,7 +379,7 @@ PyObject *PyInvokeActivateListenMode(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptSaveRnd() on the interpreter's argument tuple.
-// 0x00146750
+// NTSC-U/C: 0x00146750, PAL: 0x001472e0
 PyObject *PyInvokeSaveRnd(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -394,7 +394,7 @@ PyObject *PyInvokeSaveRnd(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptEmptyAlbumCaches() on the interpreter's argument tuple.
-// 0x003f69c0
+// NTSC-U/C: 0x003f69c0, PAL: 0x0042f1d0
 PyObject *PyInvokeEmptyAlbumCaches(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -409,13 +409,13 @@ PyObject *PyInvokeEmptyAlbumCaches(PyObject *, PyObject *pArgs) {
 }
 
 // The script interface this file exports, registered in static initialisation.
-// 0x00147af8
+// NTSC-U/C: 0x00147af8, PAL: 0x001486b0
 const ScriptFunc kSaveRndFunc("save_rnd", PyInvokeSaveRnd);
-// 0x00148318
+// NTSC-U/C: 0x00148318, PAL: 0x00148f08
 const ScriptFunc kAddJuiceFunc("add_juice", PyInvokeAddJuice);
-// 0x00148a20
+// NTSC-U/C: 0x00148a20, PAL: 0x00149630
 const ScriptFunc kAdvanceSectionFunc("advance_section", PyInvokeAdvanceSection);
-// 0x0014e5b8
+// NTSC-U/C: 0x0014e5b8, PAL: 0x0014f280
 const ScriptFunc kActivateListenModeFunc("activate_listen_mode", PyInvokeActivateListenMode);
 const ScriptFunc kActivatePracticeModeFunc("activate_practice_mode", PyInvokeActivatePracticeMode);
 const ScriptFunc kActivateAllAccessModeFunc("activate_all_access_mode",
@@ -435,11 +435,11 @@ const ScriptFunc kDoArenaStateCycleCheatFunc("do_arena_state_cycle_cheat",
 const ScriptFunc kDoExpansionPackToggleCheatFunc("do_expansion_pack_toggle_cheat",
                                                  PyInvokeDoExpansionPackToggleCheat);
 const ScriptFunc kDoWinSequenceCheatFunc("do_win_sequence_cheat", PyInvokeDoWinSequenceCheat);
-// 0x00150580
+// NTSC-U/C: 0x00150580, PAL: 0x001512d0
 const ScriptFunc kCheatUnlockstagesFunc(
     "cheat_unlockstages",
     PyInvokeActivateAllAccessMode); // The binary has an identical copy of the body at 0x0014f0c8.
-// 0x003f6760
+// NTSC-U/C: 0x003f6760, PAL: 0x0042ef48
 const ScriptFunc kClearAlbumCacheFunc("clear_album_cache", PyInvokeEmptyAlbumCaches);
 
 } // namespace

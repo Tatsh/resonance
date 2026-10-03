@@ -19,7 +19,7 @@
 namespace {
 
 // Move the activator label to a value.
-// 0x00420d00
+// NTSC-U/C: 0x00420d00, PAL: 0x0045c148
 Py::Object ScriptActivatorLabel(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
@@ -34,7 +34,7 @@ Py::Object ScriptActivatorLabel(Py::Tuple args) {
 }
 
 // Put the highlight box on a rectangle at once.
-// 0x00421238
+// NTSC-U/C: 0x00421238, PAL: 0x0045c6a0
 Py::Object ScriptHighlightSnap(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
@@ -55,7 +55,7 @@ Py::Object ScriptHighlightSnap(Py::Tuple args) {
 }
 
 // Glide the highlight box to a rectangle over a time.
-// 0x004220f8
+// NTSC-U/C: 0x004220f8, PAL: 0x0045d580
 Py::Object ScriptHighlightSlide(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
@@ -80,7 +80,7 @@ Py::Object ScriptHighlightSlide(Py::Tuple args) {
 // Show or hide the highlight box.
 //
 // Only a value of 1 shows.
-// 0x004232d8
+// NTSC-U/C: 0x004232d8, PAL: 0x0045e780
 Py::Object ScriptHighlightSetshow(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
@@ -96,7 +96,7 @@ Py::Object ScriptHighlightSetshow(Py::Tuple args) {
 // Show or hide the analog stick prompt.
 //
 // Only a value of 1 shows.
-// 0x004236f8
+// NTSC-U/C: 0x004236f8, PAL: 0x0045ebc0
 Py::Object ScriptAnalogStickSetshow(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
@@ -113,7 +113,7 @@ Py::Object ScriptAnalogStickSetshow(Py::Tuple args) {
 //
 // Only a value of 1 shows. The length error repeats the analog stick message, as the image
 // does.
-// 0x00423b18
+// NTSC-U/C: 0x00423b18, PAL: 0x0045f000
 Py::Object ScriptControllerSetshow(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
@@ -130,7 +130,7 @@ Py::Object ScriptControllerSetshow(Py::Tuple args) {
 //
 // The binary expands the two branches of HudAnalogStick::SetMotion() inline; calling it repeats
 // them without duplicating the body.
-// 0x00423f40
+// NTSC-U/C: 0x00423f40, PAL: 0x0045f448
 Py::Object ScriptAnalogStickSetmat(Py::Tuple args) {
     if (g_pOverlay == nullptr) {
         return Py::Object();
@@ -146,7 +146,7 @@ Py::Object ScriptAnalogStickSetmat(Py::Tuple args) {
 }
 
 // Run ScriptActivatorLabel() on the interpreter's argument tuple.
-// 0x004243c0
+// NTSC-U/C: 0x004243c0, PAL: 0x0045f908
 PyObject *PyInvokeActivatorLabel(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -161,7 +161,7 @@ PyObject *PyInvokeActivatorLabel(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptHighlightSnap() on the interpreter's argument tuple.
-// 0x00424570
+// NTSC-U/C: 0x00424570, PAL: 0x0045fab8
 PyObject *PyInvokeHighlightSnap(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -176,7 +176,7 @@ PyObject *PyInvokeHighlightSnap(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptHighlightSlide() on the interpreter's argument tuple.
-// 0x00424720
+// NTSC-U/C: 0x00424720, PAL: 0x0045fc68
 PyObject *PyInvokeHighlightSlide(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -191,7 +191,7 @@ PyObject *PyInvokeHighlightSlide(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptHighlightSetshow() on the interpreter's argument tuple.
-// 0x004248d0
+// NTSC-U/C: 0x004248d0, PAL: 0x0045fe18
 PyObject *PyInvokeHighlightSetshow(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -206,7 +206,7 @@ PyObject *PyInvokeHighlightSetshow(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptAnalogStickSetshow() on the interpreter's argument tuple.
-// 0x00424a80
+// NTSC-U/C: 0x00424a80, PAL: 0x0045ffc8
 PyObject *PyInvokeAnalogStickSetshow(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -221,7 +221,7 @@ PyObject *PyInvokeAnalogStickSetshow(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptControllerSetshow() on the interpreter's argument tuple.
-// 0x00424c30
+// NTSC-U/C: 0x00424c30, PAL: 0x00460178
 PyObject *PyInvokeControllerSetshow(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -236,7 +236,7 @@ PyObject *PyInvokeControllerSetshow(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptAnalogStickSetmat() on the interpreter's argument tuple.
-// 0x00424de0
+// NTSC-U/C: 0x00424de0, PAL: 0x00460328
 PyObject *PyInvokeAnalogStickSetmat(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -251,7 +251,7 @@ PyObject *PyInvokeAnalogStickSetmat(PyObject *, PyObject *pArgs) {
 }
 
 // The script interface this file exports, registered in static initialisation.
-// 0x00429348
+// NTSC-U/C: 0x00429348, PAL: 0x00464950
 const ScriptFunc kActivatorLabelFunc("activator_label", PyInvokeActivatorLabel);
 const ScriptFunc kHighlightSnapFunc("highlight_snap", PyInvokeHighlightSnap);
 const ScriptFunc kHighlightSlideFunc("highlight_slide", PyInvokeHighlightSlide);

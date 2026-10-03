@@ -25,7 +25,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7818
+     * @ghidraAddress NTSC-U/C: 0x003d7818
+     * @ghidraAddress PAL: 0x0040f718
      */
     static Message *New();
 
@@ -33,7 +34,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e08a8
+     * @ghidraAddress NTSC-U/C: 0x003e08a8
+     * @ghidraAddress PAL: 0x00418d00
      */
     virtual Message *Clone();
 
@@ -41,7 +43,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nJuiceAmountMsgType.
-     * @ghidraAddress 0x003e08f8
+     * @ghidraAddress NTSC-U/C: 0x003e08f8
+     * @ghidraAddress PAL: 0x00418d50
      */
     virtual int Type();
 
@@ -49,7 +52,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `JuiceAmountMsg`.
-     * @ghidraAddress 0x003e0908
+     * @ghidraAddress NTSC-U/C: 0x003e0908
+     * @ghidraAddress PAL: 0x00418d60
      */
     virtual const char *Name();
 
@@ -57,7 +61,8 @@ public:
      * Write the player to a diagnostic stream through Player::Print().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e41d8
+     * @ghidraAddress NTSC-U/C: 0x003e41d8
+     * @ghidraAddress PAL: 0x0041c408
      */
     virtual void Print(std::ostream &stream);
 
@@ -68,7 +73,8 @@ public:
      * is inferred from the accessor it forwards to.
      *
      * @return The juice.
-     * @ghidraAddress 0x003e4178
+     * @ghidraAddress NTSC-U/C: 0x003e4178
+     * @ghidraAddress PAL: 0x0041c3a8
      */
     int GetJuice();
 
@@ -80,7 +86,8 @@ public:
      * The name is inferred.
      *
      * @return The juice divided by mMaxJuice.
-     * @ghidraAddress 0x003e4198
+     * @ghidraAddress NTSC-U/C: 0x003e4198
+     * @ghidraAddress PAL: 0x0041c3c8
      */
     float GetJuiceFraction();
 
@@ -106,6 +113,7 @@ public:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d0334
+ * @ghidraAddress NTSC-U/C: 0x006d0334
+ * @ghidraAddress PAL: 0x00713acc
  */
 extern int g_nJuiceAmountMsgType;

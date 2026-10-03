@@ -54,7 +54,8 @@ public:
      * g_nBumpPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e5410
+     * @ghidraAddress NTSC-U/C: 0x003e5410
+     * @ghidraAddress PAL: 0x0041d6a8
      */
     static Message *New();
 
@@ -62,7 +63,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f0e80
+     * @ghidraAddress NTSC-U/C: 0x003f0e80
+     * @ghidraAddress PAL: 0x00429488
      */
     virtual Message *Clone();
 
@@ -70,7 +72,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nBumpPacketType.
-     * @ghidraAddress 0x003f0ef8
+     * @ghidraAddress NTSC-U/C: 0x003f0ef8
+     * @ghidraAddress PAL: 0x00429500
      */
     virtual int Type();
 
@@ -78,7 +81,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `BumpPacket`.
-     * @ghidraAddress 0x003f0f08
+     * @ghidraAddress NTSC-U/C: 0x003f0f08
+     * @ghidraAddress PAL: 0x00429510
      */
     virtual const char *Name();
 
@@ -89,7 +93,8 @@ public:
      * The player is written through the pointer inserter, so the output is its address.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f26d8
+     * @ghidraAddress NTSC-U/C: 0x003f26d8
+     * @ghidraAddress PAL: 0x0042ac20
      */
     virtual void Print(std::ostream &stream);
 
@@ -97,7 +102,8 @@ public:
      * Write the Packet words, the player's identifier, the bar, and the track to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e7d88
+     * @ghidraAddress NTSC-U/C: 0x003e7d88
+     * @ghidraAddress PAL: 0x00420068
      */
     virtual void Save(OBStream &stream);
 
@@ -105,7 +111,8 @@ public:
      * Read the Packet words, the player's identifier, the bar, and the track back in place.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e7eb0
+     * @ghidraAddress NTSC-U/C: 0x003e7eb0
+     * @ghidraAddress PAL: 0x00420190
      */
     virtual void Load(IBStream &stream);
 
@@ -133,6 +140,7 @@ public:
  *
  * This word belongs to BumpPacket because BumpPacket::Type() at `0x003f0ef8` returns it.
  *
- * @ghidraAddress 0x006d7404
+ * @ghidraAddress NTSC-U/C: 0x006d7404
+ * @ghidraAddress PAL: 0x0071aba4
  */
 extern int g_nBumpPacketType;

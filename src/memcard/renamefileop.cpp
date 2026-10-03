@@ -4,7 +4,7 @@
 
 #include "memcard/memcardcbhandler.h"
 
-// 0x0055f030
+// NTSC-U/C: 0x0055f030, PAL: 0x005a0300
 RenameFileOp::RenameFileOp(MemcardCBHandler *pHandler,
                            int nPortSlot,
                            const HxStr &oldPath,
@@ -13,11 +13,11 @@ RenameFileOp::RenameFileOp(MemcardCBHandler *pHandler,
     : MemcardOp(pHandler, nPortSlot, nCookie), mOldPath(oldPath), mNewPath(newPath) {
 }
 
-// 0x0055e128
+// NTSC-U/C: 0x0055e128, PAL: 0x0059f3d0
 RenameFileOp::~RenameFileOp() {
 }
 
-// 0x0055f108
+// NTSC-U/C: 0x0055f108, PAL: 0x005a03e8
 void RenameFileOp::Issue() {
     sceMcRename(mPortSlot >> kMemcardPortShift,
                 mPortSlot & kMemcardSlotMask,
@@ -26,13 +26,13 @@ void RenameFileOp::Issue() {
     mIssued = kMemcardOpInFlight;
 }
 
-// 0x0055e1a0
+// NTSC-U/C: 0x0055e1a0, PAL: 0x0059f470
 void RenameFileOp::Complete() {
     InterpretResult();
     mHandler->OnRenameFile(this);
 }
 
-// 0x0055f168
+// NTSC-U/C: 0x0055f168, PAL: 0x005a0448
 void RenameFileOp::InterpretResult() {
     switch (mResult) {
     case sceMcResSucceed:

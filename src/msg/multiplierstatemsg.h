@@ -51,7 +51,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 117.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6c98
+     * @ghidraAddress NTSC-U/C: 0x003d6c98
+     * @ghidraAddress PAL: 0x0040eb88
      */
     static Message *New();
 
@@ -59,7 +60,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x00122610
+     * @ghidraAddress NTSC-U/C: 0x00122610
+     * @ghidraAddress PAL: 0x00122c28
      */
     virtual Message *Clone();
 
@@ -67,7 +69,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nMultiplierStateMsgType.
-     * @ghidraAddress 0x00122668
+     * @ghidraAddress NTSC-U/C: 0x00122668
+     * @ghidraAddress PAL: 0x00122c80
      */
     virtual int Type();
 
@@ -75,7 +78,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `MultiplierStateMsg`.
-     * @ghidraAddress 0x00122678
+     * @ghidraAddress NTSC-U/C: 0x00122678
+     * @ghidraAddress PAL: 0x00122c90
      */
     virtual const char *Name();
 
@@ -91,6 +95,7 @@ public:
  * returns it, and the registration at `0x003d9818` passes the same value, 117, as the identity of
  * this class's factory.
  *
- * @ghidraAddress 0x006d01a4
+ * @ghidraAddress NTSC-U/C: 0x006d01a4
+ * @ghidraAddress PAL: 0x0071393c
  */
 extern int g_nMultiplierStateMsgType;

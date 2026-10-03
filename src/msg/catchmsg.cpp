@@ -1,23 +1,23 @@
 #include "msg/catchmsg.h"
 
-// 0x003d75c0
+// NTSC-U/C: 0x003d75c0, PAL: 0x0040f4c0
 Message *CatchMsg::New() {
     return new CatchMsg;
 }
 
-// 0x001b1068
+// NTSC-U/C: 0x001b1068, PAL: 0x001b6e18
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *CatchMsg::Clone() {
     return new CatchMsg(*this);
 }
 
-// 0x001b10e0
+// NTSC-U/C: 0x001b10e0, PAL: 0x001b6e90
 int CatchMsg::Type() {
     return g_nCatchMsgType;
 }
 
-// 0x001b10f0
+// NTSC-U/C: 0x001b10f0, PAL: 0x001b6ea0
 const char *CatchMsg::Name() {
     return "CatchMsg";
 }

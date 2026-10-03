@@ -22,11 +22,11 @@ GetAllConnectStatesMCT::GetAllConnectStatesMCT(MemcardUser *pUser,
     : MemcardTask(pUser, pCard, nCookie), mExpected(0), mStates(pStates), mCompleted(0) {
 }
 
-// 0x00184b08
+// NTSC-U/C: 0x00184b08, PAL: 0x0018a020
 GetAllConnectStatesMCT::~GetAllConnectStatesMCT() {
 }
 
-// 0x00178138
+// NTSC-U/C: 0x00178138, PAL: 0x0017b508
 void GetAllConnectStatesMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus != kMemcardStatusUnknown) {
@@ -34,7 +34,11 @@ void GetAllConnectStatesMCT::OnCheckInfo(CheckInfoOp *pOp) {
         MemcardConnectState state;
         state.mPortSlot = g_anMemcardSlotPortSlot[nSlot];
         state.mSlotName = g_apszMemcardSlotNames[nSlot];
+#ifdef VIDEO_STANDARD_PAL
+        state.mFree = MemcardConnectStateFree(pOp->mFormatted, pOp->mFree);
+#else
         state.mFree = pOp->mFree;
+#endif
         state.mType = pOp->mType;
         state.mFormatted = pOp->mFormatted == 1 ? 1 : 0;
         mStates->push_back(state);
@@ -46,13 +50,13 @@ void GetAllConnectStatesMCT::OnCheckInfo(CheckInfoOp *pOp) {
     }
 }
 
-// 0x001860a0
+// NTSC-U/C: 0x001860a0, PAL: 0x0018bb58
 void GetAllConnectStatesMCT::Finish() {
     mState = kMemcardTaskFinished;
     mUser->OnAllConnectStates();
 }
 
-// 0x001860d8
+// NTSC-U/C: 0x001860d8, PAL: 0x0018bb90
 void GetAllConnectStatesMCT::Execute() {
     mState = kMemcardTaskRunning;
 

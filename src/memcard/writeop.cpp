@@ -4,7 +4,7 @@
 
 #include "memcard/memcardcbhandler.h"
 
-// 0x0055e9b8
+// NTSC-U/C: 0x0055e9b8, PAL: 0x0059fc88
 WriteOp::WriteOp(MemcardCBHandler *pHandler,
                  int nPortSlot,
                  int nFile,
@@ -14,23 +14,23 @@ WriteOp::WriteOp(MemcardCBHandler *pHandler,
     : MemcardOp(pHandler, nPortSlot, nCookie), mFile(nFile), mBuffer(pBuffer), mLength(nLength) {
 }
 
-// 0x0055dab0
+// NTSC-U/C: 0x0055dab0, PAL: 0x0059ed28
 WriteOp::~WriteOp() {
 }
 
-// 0x0055e9e8
+// NTSC-U/C: 0x0055e9e8, PAL: 0x0059fcb8
 void WriteOp::Issue() {
     sceMcWrite(mFile, mBuffer, mLength);
     mIssued = kMemcardOpInFlight;
 }
 
-// 0x0055dae0
+// NTSC-U/C: 0x0055dae0, PAL: 0x0059ed58
 void WriteOp::Complete() {
     InterpretResult();
     mHandler->OnWrite(this);
 }
 
-// 0x0055ea20
+// NTSC-U/C: 0x0055ea20, PAL: 0x0059fcf0
 void WriteOp::InterpretResult() {
     if (mResult >= sceMcResSucceed) {
         mBytesTransferred = mResult;

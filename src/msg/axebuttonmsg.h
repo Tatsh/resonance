@@ -53,7 +53,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 412.
      *
      * @return The message.
-     * @ghidraAddress 0x003d76b8
+     * @ghidraAddress NTSC-U/C: 0x003d76b8
+     * @ghidraAddress PAL: 0x0040f5b8
      */
     static Message *New();
 
@@ -61,7 +62,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x0019a748
+     * @ghidraAddress NTSC-U/C: 0x0019a748
+     * @ghidraAddress PAL: 0x001a04b0
      */
     virtual Message *Clone();
 
@@ -69,7 +71,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nAxeButtonMsgType.
-     * @ghidraAddress 0x0019a7a0
+     * @ghidraAddress NTSC-U/C: 0x0019a7a0
+     * @ghidraAddress PAL: 0x001a0508
      */
     virtual int Type();
 
@@ -77,7 +80,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `AxeButtonMsg`.
-     * @ghidraAddress 0x0019a7b0
+     * @ghidraAddress NTSC-U/C: 0x0019a7b0
+     * @ghidraAddress PAL: 0x001a0518
      */
     virtual const char *Name();
 
@@ -93,6 +97,7 @@ public:
  * the registration at `0x003d9818` passes the same value, 412, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d0304
+ * @ghidraAddress NTSC-U/C: 0x006d0304
+ * @ghidraAddress PAL: 0x00713a9c
  */
 extern int g_nAxeButtonMsgType;

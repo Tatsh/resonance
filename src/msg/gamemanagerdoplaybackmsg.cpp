@@ -1,23 +1,23 @@
 #include "msg/gamemanagerdoplaybackmsg.h"
 
-// 0x003d7c30
+// NTSC-U/C: 0x003d7c30, PAL: 0x0040fb48
 Message *GameManagerDoPlaybackMsg::New() {
     return new GameManagerDoPlaybackMsg;
 }
 
-// 0x00291970
+// NTSC-U/C: 0x00291970, PAL: 0x002ad888
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *GameManagerDoPlaybackMsg::Clone() {
     return new GameManagerDoPlaybackMsg(*this);
 }
 
-// 0x002919a8
+// NTSC-U/C: 0x002919a8, PAL: 0x002ad8c0
 int GameManagerDoPlaybackMsg::Type() {
     return g_nGameManagerDoPlaybackMsgType;
 }
 
-// 0x002919b8
+// NTSC-U/C: 0x002919b8, PAL: 0x002ad8d0
 const char *GameManagerDoPlaybackMsg::Name() {
     return "GameManagerDoPlaybackMsg";
 }

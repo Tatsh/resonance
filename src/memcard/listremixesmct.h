@@ -43,7 +43,8 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag that abandons exactly this task's operations.
      * @param pRecords The collection the parse fills, stored in mRecords.
-     * @ghidraAddress 0x0017e528
+     * @ghidraAddress NTSC-U/C: 0x0017e528
+     * @ghidraAddress PAL: 0x00182f30
      */
     ListRemixesMCT(MemcardUser *pUser,
                    Memcard *pCard,
@@ -51,7 +52,10 @@ public:
                    int nCookie,
                    std::vector<MetRemixRecord> *pRecords);
 
-    /** @ghidraAddress 0x001856a8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001856a8
+     * @ghidraAddress PAL: 0x0018b060
+     */
     virtual ~ListRemixesMCT();
 
     /**
@@ -61,11 +65,15 @@ public:
      * top-level save directories rather than the files inside one. The mode argument is 0, which
      * starts a fresh listing.
      *
-     * @ghidraAddress 0x0017e708
+     * @ghidraAddress NTSC-U/C: 0x0017e708
+     * @ghidraAddress PAL: 0x00183140
      */
     void ListRemixDir();
 
-    /** @ghidraAddress 0x00186e28 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00186e28
+     * @ghidraAddress PAL: 0x0018c600
+     */
     virtual void OnCheckInfo(CheckInfoOp *pOp);
 
     /**
@@ -77,21 +85,24 @@ public:
      * this object's MemcardUser part.
      *
      * @param pOp The finished listing.
-     * @ghidraAddress 0x0017e8b8
+     * @ghidraAddress NTSC-U/C: 0x0017e8b8
+     * @ghidraAddress PAL: 0x00183368
      */
     virtual void OnListDir(ListDirOp *pOp);
 
     /**
      * Report the finished listing through MemcardUser::OnRemixesListed().
      *
-     * @ghidraAddress 0x00186ea8
+     * @ghidraAddress NTSC-U/C: 0x00186ea8
+     * @ghidraAddress PAL: 0x0018c680
      */
     virtual void Finish();
 
     /**
      * Enquire about the card and start the listing.
      *
-     * @ghidraAddress 0x00186df8
+     * @ghidraAddress NTSC-U/C: 0x00186df8
+     * @ghidraAddress PAL: 0x0018c5d0
      */
     virtual void Execute();
 
@@ -103,7 +114,8 @@ public:
      * into mCurrentDir, mStream is rewound, and a fresh LoadFileMCT replaces the previous one.
      *
      * @param nStatus The inner read's status.
-     * @ghidraAddress 0x0017ece0
+     * @ghidraAddress NTSC-U/C: 0x0017ece0
+     * @ghidraAddress PAL: 0x00183868
      */
     virtual void OnFileLoaded(int nStatus);
 

@@ -22,7 +22,8 @@ public:
      * @param pBuffer The source.
      * @param nLength The number of bytes to write.
      * @param nCookie The tag Memcard::Cancel() matches on.
-     * @ghidraAddress 0x0055e9b8
+     * @ghidraAddress NTSC-U/C: 0x0055e9b8
+     * @ghidraAddress PAL: 0x0059fc88
      */
     WriteOp(MemcardCBHandler *pHandler,
             int nPortSlot,
@@ -31,13 +32,22 @@ public:
             int nLength,
             int nCookie);
 
-    /** @ghidraAddress 0x0055dab0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055dab0
+     * @ghidraAddress PAL: 0x0059ed28
+     */
     virtual ~WriteOp();
 
-    /** @ghidraAddress 0x0055e9e8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055e9e8
+     * @ghidraAddress PAL: 0x0059fcb8
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055dae0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055dae0
+     * @ghidraAddress PAL: 0x0059ed58
+     */
     virtual void Complete();
 
     /**
@@ -47,7 +57,8 @@ public:
      * `sceMcResNoFormat`, indexed by the result plus eight. This is the only operation that
      * produces kMemcardStatusWriteDenied.
      *
-     * @ghidraAddress 0x0055ea20
+     * @ghidraAddress NTSC-U/C: 0x0055ea20
+     * @ghidraAddress PAL: 0x0059fcf0
      */
     virtual void InterpretResult();
 

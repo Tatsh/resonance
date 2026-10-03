@@ -24,7 +24,8 @@ public:
      * g_nCSInitiatePlayPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e4ea0
+     * @ghidraAddress NTSC-U/C: 0x003e4ea0
+     * @ghidraAddress PAL: 0x0041d138
      */
     static Message *New();
 
@@ -32,7 +33,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003efca8
+     * @ghidraAddress NTSC-U/C: 0x003efca8
+     * @ghidraAddress PAL: 0x004282b0
      */
     virtual Message *Clone();
 
@@ -40,7 +42,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nCSInitiatePlayPacketType.
-     * @ghidraAddress 0x003efd20
+     * @ghidraAddress NTSC-U/C: 0x003efd20
+     * @ghidraAddress PAL: 0x00428328
      */
     virtual int Type();
 
@@ -48,7 +51,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `CSInitiatePlayPacket`.
-     * @ghidraAddress 0x003efd30
+     * @ghidraAddress NTSC-U/C: 0x003efd30
+     * @ghidraAddress PAL: 0x00428338
      */
     virtual const char *Name();
 };
@@ -59,6 +63,7 @@ public:
  * This word belongs to CSInitiatePlayPacket because CSInitiatePlayPacket::Type() at `0x003efd20`
  * returns it.
  *
- * @ghidraAddress 0x006d739c
+ * @ghidraAddress NTSC-U/C: 0x006d739c
+ * @ghidraAddress PAL: 0x0071ab3c
  */
 extern int g_nCSInitiatePlayPacketType;

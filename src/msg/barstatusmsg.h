@@ -83,7 +83,8 @@ public:
      * Allocates 0x30 bytes under the tag `MSG`. The unit's static initialiser registers it.
      *
      * @return The new message.
-     * @ghidraAddress 0x003d7440
+     * @ghidraAddress NTSC-U/C: 0x003d7440
+     * @ghidraAddress PAL: 0x0040f340
      */
     static Message *New();
 
@@ -91,7 +92,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003defd0
+     * @ghidraAddress NTSC-U/C: 0x003defd0
+     * @ghidraAddress PAL: 0x00417428
      */
     virtual Message *Clone();
 
@@ -99,7 +101,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nBarStatusMsgType.
-     * @ghidraAddress 0x003df050
+     * @ghidraAddress NTSC-U/C: 0x003df050
+     * @ghidraAddress PAL: 0x004174a8
      */
     virtual int Type();
 
@@ -107,7 +110,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `BarStatusMsg`.
-     * @ghidraAddress 0x003df060
+     * @ghidraAddress NTSC-U/C: 0x003df060
+     * @ghidraAddress PAL: 0x004174b8
      */
     virtual const char *Name();
 
@@ -118,7 +122,8 @@ public:
      * ` pow:<powerup>`, and ` effect:<mask>` for each Field bit set in mFlags.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003d8670
+     * @ghidraAddress NTSC-U/C: 0x003d8670
+     * @ghidraAddress PAL: 0x00410a68
      */
     virtual void Print(std::ostream &stream);
 
@@ -127,7 +132,8 @@ public:
      *
      * @param nField The Field bit to test.
      * @return 1 when the bit is set in mFlags, and 0 otherwise.
-     * @ghidraAddress 0x003df1f8
+     * @ghidraAddress NTSC-U/C: 0x003df1f8
+     * @ghidraAddress PAL: 0x00417650
      */
     int Has(int nField);
 
@@ -135,7 +141,8 @@ public:
      * Report the player field.
      *
      * @return The player whose track the bar belongs to.
-     * @ghidraAddress 0x003df130
+     * @ghidraAddress NTSC-U/C: 0x003df130
+     * @ghidraAddress PAL: 0x00417588
      */
     Player *GetPlayer() {
         Has(kFieldPlayer); // Yes, the binary discards this result.
@@ -146,7 +153,8 @@ public:
      * Report the enabled field.
      *
      * @return Non-zero when the bar is enabled.
-     * @ghidraAddress 0x003df160
+     * @ghidraAddress NTSC-U/C: 0x003df160
+     * @ghidraAddress PAL: 0x004175b8
      */
     int GetEnabled() {
         Has(kFieldEnabled); // Yes, the binary discards this result.
@@ -157,7 +165,8 @@ public:
      * Report the powerup field.
      *
      * @return The powerup kind on the bar.
-     * @ghidraAddress 0x003df190
+     * @ghidraAddress NTSC-U/C: 0x003df190
+     * @ghidraAddress PAL: 0x004175e8
      */
     int GetPowerup() {
         Has(kFieldPowerup); // Yes, the binary discards this result.
@@ -168,7 +177,8 @@ public:
      * Report the effect mask.
      *
      * @return One bit per effect kind.
-     * @ghidraAddress 0x003df1c0
+     * @ghidraAddress NTSC-U/C: 0x003df1c0
+     * @ghidraAddress PAL: 0x00417618
      */
     Effects GetEffects() {
         Has(kFieldEffects); // Yes, the binary discards this result.
@@ -225,6 +235,7 @@ public:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d02b4
+ * @ghidraAddress NTSC-U/C: 0x006d02b4
+ * @ghidraAddress PAL: 0x00713a4c
  */
 extern int g_nBarStatusMsgType;

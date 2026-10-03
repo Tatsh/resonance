@@ -11,7 +11,7 @@ constexpr int kListHeaderSize = 12;
 
 } // namespace
 
-// 0x00145c40
+// NTSC-U/C: 0x00145c40, PAL: 0x00146758
 HxDataChunkReader::HxDataChunkReader(HxStream *pStream, bool bReadHeader)
     : mParent(nullptr), mStream(pStream), mHeader(nullptr), mLocked(0), mAtStart(1) {
     if (bReadHeader) {
@@ -25,7 +25,7 @@ HxDataChunkReader::HxDataChunkReader(HxStream *pStream, bool bReadHeader)
     Init();
 }
 
-// 0x00146220
+// NTSC-U/C: 0x00146220, PAL: 0x00146d38
 HxDataChunkReader::HxDataChunkReader(HxDataChunkReader *pParent)
     : mParent(pParent), mStream(pParent->mStream), mHeader(nullptr), mLocked(0), mAtStart(1) {
     mHeader = new HxDataChunkId(*mParent->Current());
@@ -33,7 +33,7 @@ HxDataChunkReader::HxDataChunkReader(HxDataChunkReader *pParent)
     Init();
 }
 
-// 0x00146308
+// NTSC-U/C: 0x00146308, PAL: 0x00146e20
 HxDataChunkReader::~HxDataChunkReader() {
     if (mParent != nullptr) {
         mParent->Unlock();
@@ -41,7 +41,7 @@ HxDataChunkReader::~HxDataChunkReader() {
     delete mHeader;
 }
 
-// 0x00146360
+// NTSC-U/C: 0x00146360, PAL: 0x00146e78
 void HxDataChunkReader::Init() {
     mEnd = mStart + mHeader->mSize;
     if (mParent != nullptr) {
@@ -50,7 +50,7 @@ void HxDataChunkReader::Init() {
     Rewind();
 }
 
-// 0x001463b0
+// NTSC-U/C: 0x001463b0, PAL: 0x00146ec8
 void HxDataChunkReader::Rewind() {
     mStream->Seek(mStart, kHxSeekSet);
     mAtStart = 1;
@@ -58,7 +58,7 @@ void HxDataChunkReader::Rewind() {
     mHasCurrent = 0;
 }
 
-// 0x00145db8
+// NTSC-U/C: 0x00145db8, PAL: 0x001468d0
 HxDataChunkId *HxDataChunkReader::Next() {
     mAtStart = 0;
     if (mNext >= mEnd) {
@@ -77,12 +77,12 @@ HxDataChunkId *HxDataChunkReader::Next() {
     return &mCurrent;
 }
 
-// 0x00146408
+// NTSC-U/C: 0x00146408, PAL: 0x00146f20
 HxDataChunkId *HxDataChunkReader::Current() {
     return mHasCurrent != 0 ? &mCurrent : nullptr;
 }
 
-// 0x00146428
+// NTSC-U/C: 0x00146428, PAL: 0x00146f40
 HxDataChunkId *HxDataChunkReader::Find(const HxChunkName &name) {
     while (Next() != nullptr) {
         if (name == mCurrent.Name()) {
@@ -92,12 +92,12 @@ HxDataChunkId *HxDataChunkReader::Find(const HxChunkName &name) {
     return nullptr;
 }
 
-// 0x001464a0
+// NTSC-U/C: 0x001464a0, PAL: 0x00146fb8
 void HxDataChunkReader::Lock() {
     mLocked = 1;
 }
 
-// 0x001464b0
+// NTSC-U/C: 0x001464b0, PAL: 0x00146fc8
 void HxDataChunkReader::Unlock() {
     mLocked = 0;
 }

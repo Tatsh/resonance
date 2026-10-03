@@ -4,16 +4,16 @@
 
 #include "memcard/memcardcbhandler.h"
 
-// 0x0055eb58
+// NTSC-U/C: 0x0055eb58, PAL: 0x0059fe28
 OpenWriteOp::OpenWriteOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie)
     : MemcardOp(pHandler, nPortSlot, nCookie), mPath(path) {
 }
 
-// 0x0055dca0
+// NTSC-U/C: 0x0055dca0, PAL: 0x0059ef18
 OpenWriteOp::~OpenWriteOp() {
 }
 
-// 0x0055ebe8
+// NTSC-U/C: 0x0055ebe8, PAL: 0x0059feb8
 void OpenWriteOp::Issue() {
     sceMcOpen(mPortSlot >> kMemcardPortShift,
               mPortSlot & kMemcardSlotMask,
@@ -22,13 +22,13 @@ void OpenWriteOp::Issue() {
     mIssued = kMemcardOpInFlight;
 }
 
-// 0x0055dd08
+// NTSC-U/C: 0x0055dd08, PAL: 0x0059ef90
 void OpenWriteOp::Complete() {
     InterpretResult();
     mHandler->OnOpenWrite(this);
 }
 
-// 0x0055ec38
+// NTSC-U/C: 0x0055ec38, PAL: 0x0059ff08
 void OpenWriteOp::InterpretResult() {
     if (mResult >= sceMcResSucceed) {
         mFile = mResult;

@@ -122,14 +122,14 @@ SaveRemixMCT::~SaveRemixMCT() {
     delete mLoadTask;
 }
 
-// 0x00179c28
+// NTSC-U/C: 0x00179c28, PAL: 0x0017dd60
 void SaveRemixMCT::AppendDirInfo(std::vector<RemixDirInfo> &infos,
                                  const HxStr &name,
                                  int nEntryCount) {
     infos.push_back(RemixDirInfo(name, nEntryCount));
 }
 
-// 0x00179d60
+// NTSC-U/C: 0x00179d60, PAL: 0x0017ded0
 HxStr SaveRemixMCT::ChooseTargetDir(const std::vector<RemixDirInfo> &infos) {
     unsigned int nHighest = 0;
     for (auto it = infos.begin(); it != infos.end(); ++it) {
@@ -143,7 +143,7 @@ HxStr SaveRemixMCT::ChooseTargetDir(const std::vector<RemixDirInfo> &infos) {
     return g_remixDirBase + HxStr(szNumber);
 }
 
-// 0x0017a778
+// NTSC-U/C: 0x0017a778, PAL: 0x0017eb60
 void SaveRemixMCT::ListRemixDir() {
     HxStr pattern = g_saveDirBase + g_remixDirSuffix + kAnyDirectory;
     mCard->ListDir(this, mPortSlot, pattern, mCookie, kListDirModeFresh);
@@ -167,7 +167,7 @@ void SaveRemixMCT::OnCheckInfo(CheckInfoOp *pOp) {
 }
 #endif
 
-// 0x0017a430
+// NTSC-U/C: 0x0017a430, PAL: 0x0017e768
 void SaveRemixMCT::OnListDir(ListDirOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus == kMemcardStatusOk) {
@@ -190,7 +190,7 @@ void SaveRemixMCT::OnListDir(ListDirOp *pOp) {
     ReadTargetIndex();
 }
 
-// 0x0017a928
+// NTSC-U/C: 0x0017a928, PAL: 0x0017ed88
 void SaveRemixMCT::ReadNextIndex() {
     mCurrentDir = mDirNames.front();
     mDirNames.erase(mDirNames.begin());
@@ -200,7 +200,7 @@ void SaveRemixMCT::ReadNextIndex() {
     mLoadTask->Load(mCurrentDir + kIndexFileName, mStream.mBuffer, mStream.Capacity());
 }
 
-// 0x0017ab50
+// NTSC-U/C: 0x0017ab50, PAL: 0x0017f000
 void SaveRemixMCT::ReadTargetIndex() {
     IOBPreallocMemStream *pPayload = Application::shared()->GetLog();
     char szName[kPayloadRemixNameSize];

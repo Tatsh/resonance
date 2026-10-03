@@ -79,8 +79,10 @@ public:
      *
      * @param pyob The reference to test.
      * @return True when the reference is a sequence.
-     * @ghidraAddress 0x0012b328
-     * @ghidraAddress 0x004c7c30
+     * @ghidraAddress NTSC-U/C: 0x0012b328
+     * @ghidraAddress PAL: 0x0012ba60
+     * @ghidraAddress NTSC-U/C: 0x004c7c30
+     * @ghidraAddress PAL: 0x00505e58
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PySequence_Check(pyob) != 0;
@@ -99,8 +101,10 @@ public:
      * The bodies are explicit specialisations that read the sentinel from `os/hxstr.h`.
      *
      * @return The sentinel.
-     * @ghidraAddress 0x0012ad48
-     * @ghidraAddress 0x004c7260
+     * @ghidraAddress NTSC-U/C: 0x0012ad48
+     * @ghidraAddress PAL: 0x0012b480
+     * @ghidraAddress NTSC-U/C: 0x004c7260
+     * @ghidraAddress PAL: 0x00505488
      */
     virtual int max_size() const;
 
@@ -111,8 +115,10 @@ public:
      * class that narrows either one. Py::String overrides it to return max_size() instead.
      *
      * @return The length.
-     * @ghidraAddress 0x0012b378
-     * @ghidraAddress 0x004c7c80
+     * @ghidraAddress NTSC-U/C: 0x0012b378
+     * @ghidraAddress PAL: 0x0012bab0
+     * @ghidraAddress NTSC-U/C: 0x004c7c80
+     * @ghidraAddress PAL: 0x00505ea8
      */
     virtual int capacity() const {
         return size();
@@ -126,8 +132,10 @@ public:
      * set() runs validate(). A reference the receiving type rejects throws.
      *
      * @param other The handle to exchange with.
-     * @ghidraAddress 0x0012b3a0
-     * @ghidraAddress 0x004c7890
+     * @ghidraAddress NTSC-U/C: 0x0012b3a0
+     * @ghidraAddress PAL: 0x0012bad8
+     * @ghidraAddress NTSC-U/C: 0x004c7890
+     * @ghidraAddress PAL: 0x00505ab8
      */
     virtual void swap(SeqBase<T> &other);
 
@@ -141,8 +149,10 @@ public:
      * not recovered. The bodies are explicit specialisations.
      *
      * @return The length.
-     * @ghidraAddress 0x0012b358
-     * @ghidraAddress 0x004c73d0
+     * @ghidraAddress NTSC-U/C: 0x0012b358
+     * @ghidraAddress PAL: 0x0012ba90
+     * @ghidraAddress NTSC-U/C: 0x004c73d0
+     * @ghidraAddress PAL: 0x005055f8
      */
     virtual int size() const;
 
@@ -154,8 +164,10 @@ public:
      *
      * @param i The index.
      * @return A handle on the element.
-     * @ghidraAddress 0x0012ac48
-     * @ghidraAddress 0x004c7a48
+     * @ghidraAddress NTSC-U/C: 0x0012ac48
+     * @ghidraAddress PAL: 0x0012b380
+     * @ghidraAddress NTSC-U/C: 0x004c7a48
+     * @ghidraAddress PAL: 0x00505c70
      */
     virtual T getItem(int i) const {
         return T(FromAPI(PySequence_GetItem(mPtr, i)).mPtr);
@@ -166,8 +178,10 @@ public:
      *
      * @param i The index.
      * @param value The element to store.
-     * @ghidraAddress 0x0012b4d0
-     * @ghidraAddress 0x004c7bb8
+     * @ghidraAddress NTSC-U/C: 0x0012b4d0
+     * @ghidraAddress PAL: 0x0012bc08
+     * @ghidraAddress NTSC-U/C: 0x004c7bb8
+     * @ghidraAddress PAL: 0x00505de0
      */
     virtual void setItem(int i, const T &value) {
         if (PySequence_SetItem(mPtr, i, value.mPtr) == -1) {

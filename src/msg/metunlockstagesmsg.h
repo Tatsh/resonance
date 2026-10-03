@@ -24,7 +24,8 @@ public:
      * Clone(), because the class has no payload.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7db8
+     * @ghidraAddress NTSC-U/C: 0x003d7db8
+     * @ghidraAddress PAL: 0x0040fcd0
      */
     static Message *New();
 
@@ -32,7 +33,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e2f40
+     * @ghidraAddress NTSC-U/C: 0x003e2f40
+     * @ghidraAddress PAL: 0x0041b3e0
      */
     virtual Message *Clone();
 
@@ -40,7 +42,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nMetUnlockStagesMsgType.
-     * @ghidraAddress 0x003e2f78
+     * @ghidraAddress NTSC-U/C: 0x003e2f78
+     * @ghidraAddress PAL: 0x0041b418
      */
     virtual int Type();
 
@@ -48,7 +51,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `MetUnlockStagesMsg`.
-     * @ghidraAddress 0x003e2f88
+     * @ghidraAddress NTSC-U/C: 0x003e2f88
+     * @ghidraAddress PAL: 0x0041b428
      */
     virtual const char *Name();
 
@@ -61,7 +65,8 @@ public:
      * disassembler until this reconstruction, because only the vtable reaches it.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e4530
+     * @ghidraAddress NTSC-U/C: 0x003e4530
+     * @ghidraAddress PAL: 0x0041c760
      */
     virtual void Print(std::ostream &stream);
 };
@@ -73,6 +78,7 @@ public:
  * returns it. Several handlers elsewhere read the same word to compare against it, which is the
  * expected shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d03fc
+ * @ghidraAddress NTSC-U/C: 0x006d03fc
+ * @ghidraAddress PAL: 0x00713b94
  */
 extern int g_nMetUnlockStagesMsgType;

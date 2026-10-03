@@ -47,11 +47,11 @@
 namespace {
 
 // Calls the memlog terminator has made, which names it. The name is inferred.
-// 0x00676750
+// NTSC-U/C: 0x00676750, PAL: 0x006b75a8
 int g_nMemlogTermCalls = 1;
 
 // Report the frequency root.
-// 0x00506f50
+// NTSC-U/C: 0x00506f50, PAL: 0x00545e30
 Py::Object ScriptGetFreqRoot([[maybe_unused]] Py::Tuple args) {
     HxStr root = GetFreqRoot();
     Py::String text(root);
@@ -59,7 +59,7 @@ Py::Object ScriptGetFreqRoot([[maybe_unused]] Py::Tuple args) {
 }
 
 // Run ScriptGetFreqRoot() on the interpreter's argument tuple.
-// 0x00507138
+// NTSC-U/C: 0x00507138, PAL: 0x00546038
 PyObject *PyInvokeGetFreqRoot(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -74,7 +74,7 @@ PyObject *PyInvokeGetFreqRoot(PyObject *, PyObject *pArgs) {
 }
 
 // Record the watchdog's snapshot.
-// 0x00117388
+// NTSC-U/C: 0x00117388, PAL: 0x00117830
 PyObject *PyInvokeKillSch(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -92,7 +92,7 @@ PyObject *PyInvokeKillSch(PyObject *, PyObject *pArgs) {
 //
 // Dumps the sector cache and the heap log, logs the shutdown, closes the memory log and the
 // file log, and writes the Python heap's statistics and contents to heapdump.txt.
-// 0x00155dc0
+// NTSC-U/C: 0x00155dc0, PAL: 0x00157980
 Py::Object ScriptMemlogTerm([[maybe_unused]] Py::Tuple args) {
     DumpSectorCache();
     DumpHeapMemoryLog(g_nMemlogTermCalls);
@@ -106,7 +106,7 @@ Py::Object ScriptMemlogTerm([[maybe_unused]] Py::Tuple args) {
 }
 
 // Run ScriptMemlogTerm() on the interpreter's argument tuple.
-// 0x00155f08
+// NTSC-U/C: 0x00155f08, PAL: 0x00157ac8
 PyObject *PyInvokeMemlogTerm(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -205,7 +205,7 @@ PyObject *PyInvokeGetLanguageSuffix(PyObject *, PyObject *pArgs) {
 // Stop the game.
 //
 // Takes no arguments.
-// 0x0015e5f0
+// NTSC-U/C: 0x0015e5f0, PAL: 0x00160450
 Py::Object ScriptStopGame(const Py::Tuple &args) {
     if (args.length() != 0) {
         throw Py::TypeError(HxStr("requires 0 args"));
@@ -215,7 +215,7 @@ Py::Object ScriptStopGame(const Py::Tuple &args) {
 }
 
 // Run ScriptStopGame() on the interpreter's argument tuple.
-// 0x0015e718
+// NTSC-U/C: 0x0015e718, PAL: 0x00160598
 PyObject *PyInvokeStopGame(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -230,7 +230,7 @@ PyObject *PyInvokeStopGame(PyObject *, PyObject *pArgs) {
 }
 
 // Show a line of text on the display.
-// 0x001532d8
+// NTSC-U/C: 0x001532d8, PAL: 0x00154128
 Py::Object ScriptDisplayText(const Py::Tuple &args) {
     if (args.length() != 1) {
         throw Py::TypeError(HxStr("wrong # args for display_text"));
@@ -246,7 +246,7 @@ Py::Object ScriptDisplayText(const Py::Tuple &args) {
 }
 
 // Run ScriptDisplayText() on the interpreter's argument tuple.
-// 0x00153590
+// NTSC-U/C: 0x00153590, PAL: 0x00154420
 PyObject *PyInvokeDisplayText(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -263,7 +263,7 @@ PyObject *PyInvokeDisplayText(PyObject *, PyObject *pArgs) {
 // Report a value on the screen.
 //
 // Shows the string form with a newline for fifty ticks.
-// 0x001611f8
+// NTSC-U/C: 0x001611f8, PAL: 0x00163158
 Py::Object ScriptTrace(const Py::Tuple &args) {
     if (args.length() != 1) {
         throw Py::TypeError(HxStr("requires 1 arg"));
@@ -275,7 +275,7 @@ Py::Object ScriptTrace(const Py::Tuple &args) {
 }
 
 // Run ScriptTrace() on the interpreter's argument tuple.
-// 0x001614c0
+// NTSC-U/C: 0x001614c0, PAL: 0x00163490
 PyObject *PyInvokeTrace(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -292,7 +292,7 @@ PyObject *PyInvokeTrace(PyObject *, PyObject *pArgs) {
 // Withdraw a scheduled command.
 //
 // The tuple carries the command handle.
-// 0x00159a90
+// NTSC-U/C: 0x00159a90, PAL: 0x0015b7b0
 Py::Object ScriptCancelCmd(const Py::Tuple &args) {
     if (args.length() != 1) {
         throw Py::TypeError(HxStr("requres 1 arg: cmdId"));
@@ -305,7 +305,7 @@ Py::Object ScriptCancelCmd(const Py::Tuple &args) {
 }
 
 // Run ScriptCancelCmd() on the interpreter's argument tuple.
-// 0x00159f78
+// NTSC-U/C: 0x00159f78, PAL: 0x0015bcb8
 PyObject *PyInvokeCancelCmd(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -322,7 +322,7 @@ PyObject *PyInvokeCancelCmd(PyObject *, PyObject *pArgs) {
 // Freeze the juice.
 //
 // A non-zero value stops juice changes.
-// 0x00154258
+// NTSC-U/C: 0x00154258, PAL: 0x00155108
 Py::Object ScriptFreezeJuice(const Py::Tuple &args) {
     if (args.length() != 1) {
         throw Py::TypeError(HxStr("wrong # args for freeze_juice"));
@@ -336,7 +336,7 @@ Py::Object ScriptFreezeJuice(const Py::Tuple &args) {
 }
 
 // Run ScriptFreezeJuice() on the interpreter's argument tuple.
-// 0x001544f8
+// NTSC-U/C: 0x001544f8, PAL: 0x001553c8
 PyObject *PyInvokeFreezeJuice(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -353,7 +353,7 @@ PyObject *PyInvokeFreezeJuice(PyObject *, PyObject *pArgs) {
 // Recreate the session from a recording.
 //
 // A second argument sets the playback flag.
-// 0x0015bb00
+// NTSC-U/C: 0x0015bb00, PAL: 0x0015d8a0
 Py::Object ScriptRecreate(const Py::Tuple &args) {
     if (args.length() <= 0) {
         throw Py::TypeError(HxStr("requres arg: filename [ignore-autoexec]"));
@@ -366,7 +366,7 @@ Py::Object ScriptRecreate(const Py::Tuple &args) {
 }
 
 // Run ScriptRecreate() on the interpreter's argument tuple.
-// 0x0015c080
+// NTSC-U/C: 0x0015c080, PAL: 0x0015de60
 PyObject *PyInvokeRecreate(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -382,7 +382,7 @@ PyObject *PyInvokeRecreate(PyObject *, PyObject *pArgs) {
 
 // Open a freestyle span.
 //
-// 0x00153a00
+// NTSC-U/C: 0x00153a00, PAL: 0x00154890
 Py::Object ScriptEnableFreestyle(const Py::Tuple &args) {
     if (args.length() != 2) {
         throw Py::TypeError(HxStr("wrong # args for enable_freestyle"));
@@ -395,7 +395,7 @@ Py::Object ScriptEnableFreestyle(const Py::Tuple &args) {
 }
 
 // Run ScriptEnableFreestyle() on the interpreter's argument tuple.
-// 0x00153de8
+// NTSC-U/C: 0x00153de8, PAL: 0x00154c98
 PyObject *PyInvokeEnableFreestyle(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -410,7 +410,7 @@ PyObject *PyInvokeEnableFreestyle(PyObject *, PyObject *pArgs) {
 }
 
 // Select a powerup by index.
-// 0x0015c998
+// NTSC-U/C: 0x0015c998, PAL: 0x0015e778
 Py::Object ScriptSelectPowerup(const Py::Tuple &args) {
     if (args.length() != 1) {
         throw Py::TypeError(HxStr("wrong # args for select_powerup"));
@@ -433,7 +433,7 @@ Py::Object ScriptSelectPowerup(const Py::Tuple &args) {
 }
 
 // Run ScriptSelectPowerup() on the interpreter's argument tuple.
-// 0x0015ccb8
+// NTSC-U/C: 0x0015ccb8, PAL: 0x0015eab8
 PyObject *PyInvokeSelectPowerup(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -450,7 +450,7 @@ PyObject *PyInvokeSelectPowerup(PyObject *, PyObject *pArgs) {
 // Post script text to run at a song position.
 //
 // Returns the posted command's handle. The tuple carries the position and the text.
-// 0x00159538
+// NTSC-U/C: 0x00159538, PAL: 0x0015b218
 Py::Object ScriptPostScript(const Py::Tuple &args) {
     if (args.length() != 2) {
         throw Py::TypeError(HxStr("requres 2 arg: tick, script"));
@@ -468,7 +468,7 @@ Py::Object ScriptPostScript(const Py::Tuple &args) {
 }
 
 // Run ScriptPostScript() on the interpreter's argument tuple.
-// 0x00159d30
+// NTSC-U/C: 0x00159d30, PAL: 0x0015ba70
 PyObject *PyInvokePostScript(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -483,14 +483,14 @@ PyObject *PyInvokePostScript(PyObject *, PyObject *pArgs) {
 }
 
 // Write the display buffer to a scrndump file.
-// 0x0015c580
+// NTSC-U/C: 0x0015c580, PAL: 0x0015e360
 Py::Object ScriptScreenDump([[maybe_unused]] Py::Tuple args) {
     g_vramTable.Screendump("scrndump");
     return Py::Object();
 }
 
 // Run ScriptScreenDump() on the interpreter's argument tuple.
-// 0x0015c688
+// NTSC-U/C: 0x0015c688, PAL: 0x0015e468
 PyObject *PyInvokeScreenDump(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -507,7 +507,7 @@ PyObject *PyInvokeScreenDump(PyObject *, PyObject *pArgs) {
 // Run a synthesiser command.
 //
 // Takes any positive argument count.
-// 0x0015eb88
+// NTSC-U/C: 0x0015eb88, PAL: 0x00160a08
 Py::Object ScriptSynthCmd(const Py::Tuple &args) {
     if (args.length() <= 0) {
         throw Py::TypeError(HxStr("wrong # args for synth_info"));
@@ -518,7 +518,7 @@ Py::Object ScriptSynthCmd(const Py::Tuple &args) {
 }
 
 // Run ScriptSynthCmd() on the interpreter's argument tuple.
-// 0x0015ee00
+// NTSC-U/C: 0x0015ee00, PAL: 0x00160ca0
 PyObject *PyInvokeSynthCmd(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -536,7 +536,7 @@ PyObject *PyInvokeSynthCmd(PyObject *, PyObject *pArgs) {
 //
 // The name is score or bg, although both select the same path. The volume goes out as
 // controller 7 on the track's channel.
-// 0x00158060
+// NTSC-U/C: 0x00158060, PAL: 0x00159cf0
 Py::Object ScriptSetVolume(const Py::Tuple &args) {
     if (args.length() != 3) {
         throw Py::TypeError(HxStr("requires 3 args"));
@@ -555,7 +555,7 @@ Py::Object ScriptSetVolume(const Py::Tuple &args) {
 }
 
 // Run ScriptSetVolume() on the interpreter's argument tuple.
-// 0x00158660
+// NTSC-U/C: 0x00158660, PAL: 0x0015a340
 PyObject *PyInvokeSetVolume(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -576,7 +576,7 @@ PyObject *PyInvokeSetVolume(PyObject *, PyObject *pArgs) {
 // Otherwise play sends a note on, stop a note off, and bank_swap moves the stream. The
 // channel nibble reads 0 where it is consumed: voice and fx never reach play or stop with
 // their values, so the status is always channel 0 there.
-// 0x00157578
+// NTSC-U/C: 0x00157578, PAL: 0x001591a8
 Py::Object ScriptMidi(const Py::Tuple &args) {
     if (args.length() != 6) {
         throw Py::TypeError(HxStr("requires 6 args"));
@@ -617,7 +617,7 @@ Py::Object ScriptMidi(const Py::Tuple &args) {
 }
 
 // Run ScriptMidi() on the interpreter's argument tuple.
-// 0x001588a8
+// NTSC-U/C: 0x001588a8, PAL: 0x0015a588
 PyObject *PyInvokeMidi(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -635,7 +635,7 @@ PyObject *PyInvokeMidi(PyObject *, PyObject *pArgs) {
 //
 // Reports `ok` for a passing test and `not ok` otherwise. An unknown name throws NameError
 // over the valid test list.
-// 0x0015f270
+// NTSC-U/C: 0x0015f270, PAL: 0x00161110
 Py::Object ScriptTest(const Py::Tuple &args) {
     if (args.length() <= 0) {
         throw Py::TypeError(HxStr("requires 1 arg (name of test)"));
@@ -657,7 +657,7 @@ Py::Object ScriptTest(const Py::Tuple &args) {
 }
 
 // Run ScriptTest() on the interpreter's argument tuple.
-// 0x0015fa20
+// NTSC-U/C: 0x0015fa20, PAL: 0x00161940
 PyObject *PyInvokeTest(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -675,7 +675,7 @@ PyObject *PyInvokeTest(PyObject *, PyObject *pArgs) {
 //
 // Without arguments reports the connections. With a file and a channel, connects them first.
 // The report is built before the arguments are checked.
-// 0x0015d950
+// NTSC-U/C: 0x0015d950, PAL: 0x0015f750
 Py::Object ScriptSpew(const Py::Tuple &args) {
     Spew &shared = Spew::shared();
     std::ostringstream report;
@@ -699,7 +699,7 @@ Py::Object ScriptSpew(const Py::Tuple &args) {
 }
 
 // Run ScriptSpew() on the interpreter's argument tuple.
-// 0x0015e180
+// NTSC-U/C: 0x0015e180, PAL: 0x0015ffe0
 PyObject *PyInvokeSpew(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -721,7 +721,7 @@ constexpr int kTicksPerMeasure = 1920;
 // Pause and start hold and release it, step advances it by milliseconds, tempo reports or sets
 // the microseconds per quarter, tick reports the song position, and song_bar reports the
 // play map's section there.
-// 0x00150d88
+// NTSC-U/C: 0x00150d88, PAL: 0x00151ad8
 Py::Object ScriptClock(Py::Tuple args) {
     if (args.length() == 0) {
         throw Py::TypeError(HxStr("requires 1st arg: pause, start, step, tempo, tick"));
@@ -769,7 +769,7 @@ Py::Object ScriptClock(Py::Tuple args) {
 }
 
 // Run ScriptClock() on the interpreter's argument tuple.
-// 0x00151b20
+// NTSC-U/C: 0x00151b20, PAL: 0x00152900
 PyObject *PyInvokeClock(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -784,7 +784,7 @@ PyObject *PyInvokeClock(PyObject *, PyObject *pArgs) {
 }
 
 // Dump the zone table.
-// 0x00163660
+// NTSC-U/C: 0x00163660, PAL: 0x00165710
 PyObject *PyInvokeZoneDump(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -800,7 +800,7 @@ PyObject *PyInvokeZoneDump(PyObject *, PyObject *pArgs) {
 }
 
 // Start a recording capture.
-// 0x0015bdf8
+// NTSC-U/C: 0x0015bdf8, PAL: 0x0015dbd8
 PyObject *PyInvokeCapture(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -816,7 +816,7 @@ PyObject *PyInvokeCapture(PyObject *, PyObject *pArgs) {
 }
 
 // Silence every channel.
-// 0x00158af0
+// NTSC-U/C: 0x00158af0, PAL: 0x0015a7d0
 PyObject *PyInvokeStopAllMidi(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -835,7 +835,7 @@ PyObject *PyInvokeStopAllMidi(PyObject *, PyObject *pArgs) {
 }
 
 // Win with five hundred points.
-// 0x001508f8
+// NTSC-U/C: 0x001508f8, PAL: 0x00151648
 PyObject *PyInvokeCheatWin(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -854,52 +854,52 @@ PyObject *PyInvokeCheatWin(PyObject *, PyObject *pArgs) {
 }
 
 // The script interface this file exports, registered in static initialisation.
-// 0x00118960
+// NTSC-U/C: 0x00118960, PAL: 0x00118e78
 const ScriptFunc kKillschFunc("killsch", PyInvokeKillSch);
-// 0x00150b80
+// NTSC-U/C: 0x00150b80, PAL: 0x001518d0
 const ScriptFunc kCheatWinFunc("cheat_win", PyInvokeCheatWin);
-// 0x00153030
+// NTSC-U/C: 0x00153030, PAL: 0x00153e80
 const ScriptFunc kClockFunc("clock", PyInvokeClock);
-// 0x001537d8
+// NTSC-U/C: 0x001537d8, PAL: 0x00154668
 const ScriptFunc kDisplayTextFunc("display_text", PyInvokeDisplayText);
-// 0x00154030
+// NTSC-U/C: 0x00154030, PAL: 0x00154ee0
 const ScriptFunc kEnableFreestyleFunc("enable_freestyle", PyInvokeEnableFreestyle);
-// 0x00154740
+// NTSC-U/C: 0x00154740, PAL: 0x00155610
 const ScriptFunc kFreezeJuiceFunc("freeze_juice", PyInvokeFreezeJuice);
-// 0x00157418
+// NTSC-U/C: 0x00157418, PAL: 0x00159048
 const ScriptFunc kMemlogTermFunc("memlog_term", PyInvokeMemlogTerm);
 #ifdef VIDEO_STANDARD_PAL
 // PAL: 0x00157740
 const ScriptFunc kSetLangFunc("set_lang", PyInvokeSetLang);
 const ScriptFunc kGetLanguageSuffixFunc("get_language_suffix", PyInvokeGetLanguageSuffix);
 #endif
-// 0x00159248
+// NTSC-U/C: 0x00159248, PAL: 0x0015af28
 const ScriptFunc kSetVolumeFunc("set_volume", PyInvokeSetVolume);
 const ScriptFunc kMidiFunc("midi", PyInvokeMidi);
 const ScriptFunc kStopAllMidiFunc("stop_all_midi", PyInvokeStopAllMidi);
-// 0x0015a1c0
+// NTSC-U/C: 0x0015a1c0, PAL: 0x0015bf00
 const ScriptFunc kPostScriptFunc("post_script", PyInvokePostScript);
 const ScriptFunc kCancelCmdFunc("cancel_cmd", PyInvokeCancelCmd);
-// 0x0015c2c8
+// NTSC-U/C: 0x0015c2c8, PAL: 0x0015e0a8
 const ScriptFunc kCaptureFunc("capture", PyInvokeCapture);
 const ScriptFunc kRecreateFunc("recreate", PyInvokeRecreate);
-// 0x0015c838
+// NTSC-U/C: 0x0015c838, PAL: 0x0015e618
 const ScriptFunc kScreenDumpFunc("screen_dump", PyInvokeScreenDump);
-// 0x0015d6d8
+// NTSC-U/C: 0x0015d6d8, PAL: 0x0015f4d8
 const ScriptFunc kSelectPowerupFunc("select_powerup", PyInvokeSelectPowerup);
-// 0x0015e3c8
+// NTSC-U/C: 0x0015e3c8, PAL: 0x00160228
 const ScriptFunc kSpewFunc("spew", PyInvokeSpew);
-// 0x0015e960
+// NTSC-U/C: 0x0015e960, PAL: 0x001607e0
 const ScriptFunc kStopGameFunc("stop_game", PyInvokeStopGame);
-// 0x0015f048
+// NTSC-U/C: 0x0015f048, PAL: 0x00160ee8
 const ScriptFunc kSynthCmdFunc("synth_cmd", PyInvokeSynthCmd);
-// 0x0015fc68
+// NTSC-U/C: 0x0015fc68, PAL: 0x00161b88
 const ScriptFunc kTestFunc("test", PyInvokeTest);
-// 0x00162a68
+// NTSC-U/C: 0x00162a68, PAL: 0x00164aa8
 const ScriptFunc kTraceFunc("trace", PyInvokeTrace);
-// 0x001638d0
+// NTSC-U/C: 0x001638d0, PAL: 0x00165980
 const ScriptFunc kZoneDumpFunc("zone_dump", PyInvokeZoneDump);
-// 0x0050cbc0
+// NTSC-U/C: 0x0050cbc0, PAL: 0x0054c058
 const ScriptFunc kGetFreqRootFunc("get_freq_root", PyInvokeGetFreqRoot);
 
 } // namespace

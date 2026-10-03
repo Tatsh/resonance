@@ -5,29 +5,29 @@
 #include "game/player.h"
 #include "os/hxstr.h"
 
-// 0x003d6968
+// NTSC-U/C: 0x003d6968, PAL: 0x0040e858
 Message *StopRiffMsg::New() {
     return new StopRiffMsg;
 }
 
-// 0x003da7f8
+// NTSC-U/C: 0x003da7f8, PAL: 0x00412c30
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *StopRiffMsg::Clone() {
     return new StopRiffMsg(*this);
 }
 
-// 0x003da858
+// NTSC-U/C: 0x003da858, PAL: 0x00412c90
 int StopRiffMsg::Type() {
     return g_nStopRiffMsgType;
 }
 
-// 0x003da868
+// NTSC-U/C: 0x003da868, PAL: 0x00412ca0
 const char *StopRiffMsg::Name() {
     return "StopRiffMsg";
 }
 
-// 0x003e3098
+// NTSC-U/C: 0x003e3098, PAL: 0x0041b558
 // The colour name is copied into a temporary before it is written.
 void StopRiffMsg::Print(std::ostream &stream) {
     mPosition.Print(stream);

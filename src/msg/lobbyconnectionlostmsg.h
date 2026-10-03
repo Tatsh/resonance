@@ -35,7 +35,8 @@ public:
      * The image lists no caller for the out-of-line body.
      *
      * @param reason The string copied into `+0x04`.
-     * @ghidraAddress 0x003e1d10
+     * @ghidraAddress NTSC-U/C: 0x003e1d10
+     * @ghidraAddress PAL: 0x0041a1b0
      */
     LobbyConnectionLostMsg(const HxStr &reason);
 
@@ -45,7 +46,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7ad8
+     * @ghidraAddress NTSC-U/C: 0x003d7ad8
+     * @ghidraAddress PAL: 0x0040f9e8
      */
     static Message *New();
 
@@ -53,7 +55,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e1c30
+     * @ghidraAddress NTSC-U/C: 0x003e1c30
+     * @ghidraAddress PAL: 0x0041a0c8
      */
     virtual Message *Clone();
 
@@ -61,7 +64,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nLobbyConnectionLostMsgType.
-     * @ghidraAddress 0x003e1cd0
+     * @ghidraAddress NTSC-U/C: 0x003e1cd0
+     * @ghidraAddress PAL: 0x0041a168
      */
     virtual int Type();
 
@@ -69,7 +73,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `LobbyConnectionLostMsg`.
-     * @ghidraAddress 0x003e1ce0
+     * @ghidraAddress NTSC-U/C: 0x003e1ce0
+     * @ghidraAddress PAL: 0x0041a178
      */
     virtual const char *Name();
 
@@ -81,7 +86,8 @@ public:
      * class's own.
      *
      * @param stream The stream, which is not written.
-     * @ghidraAddress 0x003e4098
+     * @ghidraAddress NTSC-U/C: 0x003e4098
+     * @ghidraAddress PAL: 0x0041c2c8
      */
     virtual void Print(std::ostream &stream);
 
@@ -95,6 +101,7 @@ private:
  * This word belongs to LobbyConnectionLostMsg because LobbyConnectionLostMsg::Type() at
  * `0x003e1cd0` returns it.
  *
- * @ghidraAddress 0x006d0394
+ * @ghidraAddress NTSC-U/C: 0x006d0394
+ * @ghidraAddress PAL: 0x00713b2c
  */
 extern int g_nLobbyConnectionLostMsgType;

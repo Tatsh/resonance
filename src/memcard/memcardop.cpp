@@ -8,18 +8,18 @@ MemcardOp::MemcardOp(MemcardCBHandler *pHandler, int nCookie)
     : mCookie(nCookie), mIssued(kMemcardOpNotIssued), mHandler(pHandler) {
 }
 
-// 0x0055f2e0
+// NTSC-U/C: 0x0055f2e0, PAL: 0x005a05c0
 MemcardOp::~MemcardOp() {
 }
 
-// 0x0055f310
+// NTSC-U/C: 0x0055f310, PAL: 0x005a05f0
 void MemcardOp::Issue() {
 }
 
-// 0x0055f318
+// NTSC-U/C: 0x0055f318, PAL: 0x005a05f8
 void MemcardOp::Complete() {
 }
 
-// 0x0055f320
+// NTSC-U/C: 0x0055f320, PAL: 0x005a0600
 void MemcardOp::InterpretResult() {
 }

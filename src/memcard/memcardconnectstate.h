@@ -35,6 +35,25 @@ struct MemcardConnectState {
     int mFormatted;  /*!< Non-zero when `CheckInfoOp::mFormatted` was exactly 1. +0x14 */
 };
 
+#ifdef VIDEO_STANDARD_PAL
+/** The free clusters reported for a card that is not formatted. */
+constexpr int kMemcardUnformattedFreeClusters = 8000;
+
+/**
+ * Choose the free clusters a connect state records for a finished enquiry.
+ *
+ * A formatted card reports its real free space. Any other card reports
+ * kMemcardUnformattedFreeClusters.
+ *
+ * @param nFormatted `CheckInfoOp::mFormatted`.
+ * @param nFree `CheckInfoOp::mFree`.
+ * @return The free clusters to record.
+ */
+inline int MemcardConnectStateFree(int nFormatted, int nFree) {
+    return nFormatted == 1 ? nFree : kMemcardUnformattedFreeClusters;
+}
+#endif
+
 /** Entries in the parallel slot tables, two ports of four multi-tap slots plus the two bare slots.
  */
 constexpr int kMemcardSlotCount = 10;
@@ -46,7 +65,8 @@ constexpr int kMemcardSlotCount = 10;
  * of port 1, and index 6 to 9 those of port 2. `GetAllConnectStatesMCT` uses index 0 to 5 and never
  * index 6 to 9, so the last four entries are unreferenced.
  *
- * @ghidraAddress 0x007db440
+ * @ghidraAddress NTSC-U/C: 0x007db440
+ * @ghidraAddress PAL: 0x0081f330
  */
 extern const int g_anMemcardSlotPortSlot[kMemcardSlotCount];
 
@@ -55,7 +75,8 @@ extern const int g_anMemcardSlotPortSlot[kMemcardSlotCount];
  *
  * `1`, `2`, then `1-A` to `1-D` and `2-A` to `2-D`. The last four are reached by no code path.
  *
- * @ghidraAddress 0x0067bfe0
+ * @ghidraAddress NTSC-U/C: 0x0067bfe0
+ * @ghidraAddress PAL: 0x006bcf48
  */
 extern const char *const g_apszMemcardSlotNames[kMemcardSlotCount];
 

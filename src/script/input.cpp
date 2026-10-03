@@ -49,7 +49,7 @@ struct InputEventDesc {
 //
 // Accepts none, mouse, joy, and key. An empty string or anything else throws TypeError. The
 // image extracts the word through an istrstream and tests the stream state.
-// 0x00154968
+// NTSC-U/C: 0x00154968, PAL: 0x00155838
 void InputParseDevice(const HxStr &text, InputDeviceDesc *pDesc) {
     std::istringstream stream(text.mStr != nullptr ? text.mStr : "");
     std::string word;
@@ -72,7 +72,7 @@ void InputParseDevice(const HxStr &text, InputDeviceDesc *pDesc) {
 // Parse an event name into its four-character tag.
 //
 // Reads four characters; a short read throws TypeError.
-// 0x00154b30
+// NTSC-U/C: 0x00154b30, PAL: 0x00155a20
 void InputParseEvent(const HxStr &text, InputEventDesc *pDesc) {
     std::istringstream stream(text.mStr != nullptr ? text.mStr : "");
     // The first character becomes the most significant byte, and spaces count as characters.
@@ -89,7 +89,7 @@ void InputParseEvent(const HxStr &text, InputEventDesc *pDesc) {
 // The tuple carries the command, the slot, and the event text. The add command further carries
 // the action argument of a pitch-riff event, the device text, the port, and the button; other
 // events leave the argument zero. Disable and enable switch the slot and action off and on.
-// 0x00154d00
+// NTSC-U/C: 0x00154d00, PAL: 0x00155c10
 Py::Object ScriptInput(const Py::Tuple &args) {
     InputMap *pMap = InputMap::shared();
     if (args.length() < 3) {
@@ -136,7 +136,7 @@ Py::Object ScriptInput(const Py::Tuple &args) {
 }
 
 // Run ScriptInput() on the interpreter's argument tuple.
-// 0x00155950
+// NTSC-U/C: 0x00155950, PAL: 0x001568e8
 PyObject *PyInvokeInput(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -155,7 +155,7 @@ PyObject *PyInvokeInput(PyObject *, PyObject *pArgs) {
 // The tuple carries the command and the track. In a jam session, or without an enable policy,
 // it does nothing. Enable frees the track from bar zero through bar -1, which never arrives,
 // so the track stays enabled.
-// 0x00162c90
+// NTSC-U/C: 0x00162c90, PAL: 0x00164cd0
 Py::Object ScriptTrackCtrl(const Py::Tuple &args) {
     if (args.length() != 2) {
         throw Py::TypeError(HxStr("wrong # args for input"));
@@ -187,7 +187,7 @@ Py::Object ScriptTrackCtrl(const Py::Tuple &args) {
 }
 
 // Run ScriptTrackCtrl() on the interpreter's argument tuple.
-// 0x001631f0
+// NTSC-U/C: 0x001631f0, PAL: 0x001652a0
 PyObject *PyInvokeTrackCtrl(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -202,9 +202,9 @@ PyObject *PyInvokeTrackCtrl(PyObject *, PyObject *pArgs) {
 }
 
 // The script interface this file exports, registered in static initialisation.
-// 0x00155b98
+// NTSC-U/C: 0x00155b98, PAL: 0x00156b30
 const ScriptFunc kInputFunc("input", PyInvokeInput);
-// 0x00163438
+// NTSC-U/C: 0x00163438, PAL: 0x001654e8
 const ScriptFunc kTrackCtrlFunc("track_ctrl", PyInvokeTrackCtrl);
 
 } // namespace

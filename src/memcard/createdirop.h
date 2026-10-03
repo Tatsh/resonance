@@ -18,17 +18,27 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param path The directory to create.
      * @param nCookie The tag Memcard::Cancel() matches on.
-     * @ghidraAddress 0x0055e628
+     * @ghidraAddress NTSC-U/C: 0x0055e628
+     * @ghidraAddress PAL: 0x0059f8f8
      */
     CreateDirOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
-    /** @ghidraAddress 0x0055d738 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055d738
+     * @ghidraAddress PAL: 0x0059e990
+     */
     virtual ~CreateDirOp();
 
-    /** @ghidraAddress 0x0055e6b8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055e6b8
+     * @ghidraAddress PAL: 0x0059f988
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055d7a0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055d7a0
+     * @ghidraAddress PAL: 0x0059ea08
+     */
     virtual void Complete();
 
     /**
@@ -38,7 +48,8 @@ public:
      * SaveFileMCT proceeds to the open after kMemcardStatusNoEntry as well as after
      * kMemcardStatusOk, and abandons the save only on any other value.
      *
-     * @ghidraAddress 0x0055e708
+     * @ghidraAddress NTSC-U/C: 0x0055e708
+     * @ghidraAddress PAL: 0x0059f9d8
      */
     virtual void InterpretResult();
 

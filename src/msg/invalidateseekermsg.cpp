@@ -1,23 +1,23 @@
 #include "msg/invalidateseekermsg.h"
 
-// 0x003d7280
+// NTSC-U/C: 0x003d7280, PAL: 0x0040f180
 Message *InvalidateSeekerMsg::New() {
     return new InvalidateSeekerMsg;
 }
 
-// 0x001160b0
+// NTSC-U/C: 0x001160b0, PAL: 0x00116558
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *InvalidateSeekerMsg::Clone() {
     return new InvalidateSeekerMsg(*this);
 }
 
-// 0x00116100
+// NTSC-U/C: 0x00116100, PAL: 0x001165a8
 int InvalidateSeekerMsg::Type() {
     return g_nInvalidateSeekerMsgType;
 }
 
-// 0x00116110
+// NTSC-U/C: 0x00116110, PAL: 0x001165b8
 const char *InvalidateSeekerMsg::Name() {
     return "InvalidateSeekerMsg";
 }

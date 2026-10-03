@@ -45,7 +45,8 @@ public:
      *
      * @param pAttacker The player who deployed the crippler.
      * @param victims The players it strikes.
-     * @ghidraAddress 0x003e7668
+     * @ghidraAddress NTSC-U/C: 0x003e7668
+     * @ghidraAddress PAL: 0x0041f948
      */
     CripplePacket(Player *pAttacker, std::vector<Player *> victims);
 
@@ -56,7 +57,8 @@ public:
      * g_nCripplePacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e53a0
+     * @ghidraAddress NTSC-U/C: 0x003e53a0
+     * @ghidraAddress PAL: 0x0041d638
      */
     static Message *New();
 
@@ -64,7 +66,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f0c60
+     * @ghidraAddress NTSC-U/C: 0x003f0c60
+     * @ghidraAddress PAL: 0x00429268
      */
     virtual Message *Clone();
 
@@ -72,7 +75,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nCripplePacketType.
-     * @ghidraAddress 0x003f0cd8
+     * @ghidraAddress NTSC-U/C: 0x003f0cd8
+     * @ghidraAddress PAL: 0x004292e0
      */
     virtual int Type();
 
@@ -80,7 +84,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `CripplePacket`.
-     * @ghidraAddress 0x003f0ce8
+     * @ghidraAddress NTSC-U/C: 0x003f0ce8
+     * @ghidraAddress PAL: 0x004292f0
      */
     virtual const char *Name();
 
@@ -89,7 +94,8 @@ public:
      * each followed by a space, to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e7c38
+     * @ghidraAddress NTSC-U/C: 0x003e7c38
+     * @ghidraAddress PAL: 0x0041ff18
      */
     virtual void Print(std::ostream &stream);
 
@@ -98,7 +104,8 @@ public:
      * player's identifier to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e7938
+     * @ghidraAddress NTSC-U/C: 0x003e7938
+     * @ghidraAddress PAL: 0x0041fc18
      */
     virtual void Save(OBStream &stream);
 
@@ -107,7 +114,8 @@ public:
      * other identifier in place.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e7aa0
+     * @ghidraAddress NTSC-U/C: 0x003e7aa0
+     * @ghidraAddress PAL: 0x0041fd80
      */
     virtual void Load(IBStream &stream);
 
@@ -129,6 +137,7 @@ public:
  *
  * This word belongs to CripplePacket because CripplePacket::Type() at `0x003f0cd8` returns it.
  *
- * @ghidraAddress 0x006d73fc
+ * @ghidraAddress NTSC-U/C: 0x006d73fc
+ * @ghidraAddress PAL: 0x0071ab9c
  */
 extern int g_nCripplePacketType;

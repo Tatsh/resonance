@@ -5,36 +5,36 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003e5330
+// NTSC-U/C: 0x003e5330, PAL: 0x0041d5c8
 Message *CatchProgressPacket::New() {
     return new CatchProgressPacket;
 }
 
-// 0x003f0a70
+// NTSC-U/C: 0x003f0a70, PAL: 0x00429078
 // Clone allocates and hands off to the copy constructor at 0x003f38d0, which is
 // the compiler expanding the implicit one.
 Message *CatchProgressPacket::Clone() {
     return new CatchProgressPacket(*this);
 }
 
-// 0x003f0ae8
+// NTSC-U/C: 0x003f0ae8, PAL: 0x004290f0
 int CatchProgressPacket::Type() {
     return g_nCatchProgressPacketType;
 }
 
-// 0x003f0af8
+// NTSC-U/C: 0x003f0af8, PAL: 0x00429100
 const char *CatchProgressPacket::Name() {
     return "CatchProgressPacket";
 }
 
-// 0x003f2648
+// NTSC-U/C: 0x003f2648, PAL: 0x0042ab90
 void CatchProgressPacket::Print(std::ostream &stream) {
     std::ostream &rest = stream << " @";
     mPosition.Print(rest);
     rest << " track:" << mTrack << " succ:" << mSucc;
 }
 
-// 0x003e7430
+// NTSC-U/C: 0x003e7430, PAL: 0x0041f710
 // The stream Mid::MBT::Save() returns is not used.
 void CatchProgressPacket::Save(OBStream &stream) {
     Packet::Save(stream);
@@ -48,7 +48,7 @@ void CatchProgressPacket::Save(OBStream &stream) {
     rest.Write(&track, sizeof(track)).Write(&succ, sizeof(succ));
 }
 
-// 0x003e7568
+// NTSC-U/C: 0x003e7568, PAL: 0x0041f848
 void CatchProgressPacket::Load(IBStream &stream) {
     Packet::Load(stream);
 

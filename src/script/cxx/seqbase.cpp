@@ -5,19 +5,19 @@
 
 namespace Py {
 
-// 0x004c73d0
+// NTSC-U/C: 0x004c73d0, PAL: 0x005055f8
 template <>
 int SeqBase<Char>::size() const {
     return PyString_Size(mPtr);
 }
 
-// 0x004c7260
+// NTSC-U/C: 0x004c7260, PAL: 0x00505488
 template <>
 int SeqBase<Char>::max_size() const {
     return static_cast<int>(g_nHxStrNoPosition);
 }
 
-// 0x004c7890
+// NTSC-U/C: 0x004c7890, PAL: 0x00505ab8
 template <>
 void SeqBase<Char>::swap(SeqBase<Char> &other) {
     const SeqBase<Char> temp(other);
@@ -27,19 +27,19 @@ void SeqBase<Char>::swap(SeqBase<Char> &other) {
     set(temp.mPtr);
 }
 
-// 0x0012b358
+// NTSC-U/C: 0x0012b358, PAL: 0x0012ba90
 template <>
 int SeqBase<Object>::size() const {
     return PySequence_Size(mPtr);
 }
 
-// 0x0012ad48
+// NTSC-U/C: 0x0012ad48, PAL: 0x0012b480
 template <>
 int SeqBase<Object>::max_size() const {
     return static_cast<int>(g_nHxStrNoPosition);
 }
 
-// 0x0012b3a0
+// NTSC-U/C: 0x0012b3a0, PAL: 0x0012bad8
 template <>
 void SeqBase<Object>::swap(SeqBase<Object> &other) {
     const SeqBase<Object> temp(other);

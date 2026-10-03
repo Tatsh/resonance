@@ -40,7 +40,8 @@ public:
      * Vtable slot 1, which is the first of the interface, because the destructor is declared ahead
      * of the transfer virtuals.
      *
-     * @ghidraAddress 0x00145ee8
+     * @ghidraAddress NTSC-U/C: 0x00145ee8
+     * @ghidraAddress PAL: 0x00146a00
      */
     virtual ~HxStream();
 
@@ -52,7 +53,8 @@ public:
      *
      * @param nOffset The signed distance to move.
      * @param nWhence The origin, one of the HxStreamSeekOrigin values.
-     * @ghidraAddress 0x00145f18
+     * @ghidraAddress NTSC-U/C: 0x00145f18
+     * @ghidraAddress PAL: 0x00146a30
      */
     virtual void Seek(int nOffset, int nWhence);
 
@@ -62,7 +64,8 @@ public:
      * Vtable slot 3. The default reports 0.
      *
      * @return The position in bytes from the start.
-     * @ghidraAddress 0x00145f20
+     * @ghidraAddress NTSC-U/C: 0x00145f20
+     * @ghidraAddress PAL: 0x00146a38
      */
     virtual int Tell();
 
@@ -72,7 +75,8 @@ public:
      * Vtable slot 4. The default reports 0.
      *
      * @return The length in bytes.
-     * @ghidraAddress 0x00145f28
+     * @ghidraAddress NTSC-U/C: 0x00145f28
+     * @ghidraAddress PAL: 0x00146a40
      */
     virtual int Size();
 
@@ -84,7 +88,8 @@ public:
      * @param pSrc The source buffer.
      * @param nSize The number of bytes to move.
      * @return This stream.
-     * @ghidraAddress 0x00145f30
+     * @ghidraAddress NTSC-U/C: 0x00145f30
+     * @ghidraAddress PAL: 0x00146a48
      */
     virtual HxStream &Write(const void *pSrc, int nSize);
 
@@ -96,7 +101,8 @@ public:
      * @param pDest The destination buffer.
      * @param nSize The number of bytes to move.
      * @return This stream.
-     * @ghidraAddress 0x00145f38
+     * @ghidraAddress NTSC-U/C: 0x00145f38
+     * @ghidraAddress PAL: 0x00146a50
      */
     virtual HxStream &Read(void *pDest, int nSize);
 
@@ -107,7 +113,8 @@ public:
      * it at `0x00145fd8` and reports the stream its chunk lies in.
      *
      * @return The underlying stream, or null by default.
-     * @ghidraAddress 0x00145f40
+     * @ghidraAddress NTSC-U/C: 0x00145f40
+     * @ghidraAddress PAL: 0x00146a58
      */
     virtual HxStream *UnderlyingStream();
 
@@ -122,7 +129,8 @@ public:
      * @param pDest The destination buffer.
      * @param nSize The number of bytes to move.
      * @return This stream.
-     * @ghidraAddress 0x004059f8
+     * @ghidraAddress NTSC-U/C: 0x004059f8
+     * @ghidraAddress PAL: 0x0043f2e8
      */
     HxStream &ReadSwapped(void *pDest, int nSize);
 
@@ -136,7 +144,8 @@ public:
      * @param pSrc The source buffer.
      * @param nSize The number of bytes to move.
      * @return This stream.
-     * @ghidraAddress 0x00405958
+     * @ghidraAddress NTSC-U/C: 0x00405958
+     * @ghidraAddress PAL: 0x0043f248
      */
     HxStream &WriteSwapped(const void *pSrc, int nSize);
 
@@ -151,7 +160,8 @@ public:
      * @param pszDest The destination buffer.
      * @param nDestSize The size of pszDest in bytes, terminator included.
      * @return This stream.
-     * @ghidraAddress 0x004057c8
+     * @ghidraAddress NTSC-U/C: 0x004057c8
+     * @ghidraAddress PAL: 0x0043f0b8
      */
     HxStream &ReadString(char *pszDest, int nDestSize);
 
@@ -164,7 +174,8 @@ public:
      *
      * @param str Receives the string.
      * @return This stream.
-     * @ghidraAddress 0x004058a8
+     * @ghidraAddress NTSC-U/C: 0x004058a8
+     * @ghidraAddress PAL: 0x0043f198
      */
     HxStream &ReadString(HxStr &str);
 
@@ -175,7 +186,8 @@ public:
      * The shipped program does not call it. The title is inferred.
      *
      * @return The innermost stream, which is this stream when it reads through no other.
-     * @ghidraAddress 0x00405a98
+     * @ghidraAddress NTSC-U/C: 0x00405a98
+     * @ghidraAddress PAL: 0x0043f388
      */
     HxStream *BaseStream();
 
@@ -186,28 +198,32 @@ public:
      * them as class constants defined in this class's translation unit. HxMemStream writes the same
      * two values, 0 and 1, as immediates. The names of all four are inferred.
      *
-     * @ghidraAddress 0x00816d40
+     * @ghidraAddress NTSC-U/C: 0x00816d40
+     * @ghidraAddress PAL: 0x00859cb8
      */
     static const int kStatusOk;
 
     /**
      * Status value of a stream whose read position arrived at the end of its data.
      *
-     * @ghidraAddress 0x00816d44
+     * @ghidraAddress NTSC-U/C: 0x00816d44
+     * @ghidraAddress PAL: 0x00859cbc
      */
     static const int kStatusEnd;
 
     /**
      * Status bit a seek outside a chunk's bounds would set. Tell() reports -1 while it is set.
      *
-     * @ghidraAddress 0x00816d48
+     * @ghidraAddress NTSC-U/C: 0x00816d48
+     * @ghidraAddress PAL: 0x00859cc0
      */
     static const int kStatusRange;
 
     /**
      * Second status bit Tell() and Seek() of HxIDataChunk test. No writer is recovered.
      *
-     * @ghidraAddress 0x00816d4c
+     * @ghidraAddress NTSC-U/C: 0x00816d4c
+     * @ghidraAddress PAL: 0x00859cc4
      */
     static const int kStatusFailed;
 
@@ -225,7 +241,8 @@ protected:
     /**
      * Construct a stream with a zeroed state.
      *
-     * @ghidraAddress 0x004057a8
+     * @ghidraAddress NTSC-U/C: 0x004057a8
+     * @ghidraAddress PAL: 0x0043f098
      */
     HxStream();
 
@@ -249,7 +266,8 @@ protected:
  * @param nValue Receives the quantity.
  * @param stream The stream to read from.
  * @return The stream.
- * @ghidraAddress 0x00405b70
+ * @ghidraAddress NTSC-U/C: 0x00405b70
+ * @ghidraAddress PAL: 0x0043f460
  */
 HxStream &ReadVarLen(int &nValue, HxStream &stream);
 
@@ -264,6 +282,7 @@ HxStream &ReadVarLen(int &nValue, HxStream &stream);
  * @param nValue The quantity.
  * @param stream The stream to write to.
  * @return The stream.
- * @ghidraAddress 0x00405ad8
+ * @ghidraAddress NTSC-U/C: 0x00405ad8
+ * @ghidraAddress PAL: 0x0043f3c8
  */
 HxStream &WriteVarLen(const int &nValue, HxStream &stream);

@@ -26,14 +26,16 @@ public:
      * @param address The second string.
      * @param service The third string.
      * @param nPort The word.
-     * @ghidraAddress 0x003f43a8
+     * @ghidraAddress NTSC-U/C: 0x003f43a8
+     * @ghidraAddress PAL: 0x0042c990
      */
     TransportAddress(const HxStr &host, const HxStr &address, const HxStr &service, int nPort);
 
     /**
      * Slot 1. The body frees the three string buffers, in reverse order, and nothing else.
      *
-     * @ghidraAddress 0x003f4478
+     * @ghidraAddress NTSC-U/C: 0x003f4478
+     * @ghidraAddress PAL: 0x0042ca80
      */
     virtual ~TransportAddress();
 
@@ -43,7 +45,8 @@ public:
      * Slot 2. Each write goes to the stream the previous write returned.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f4078
+     * @ghidraAddress NTSC-U/C: 0x003f4078
+     * @ghidraAddress PAL: 0x0042c658
      */
     virtual void Save(OBStream &stream);
 
@@ -53,7 +56,8 @@ public:
      * Slot 3.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003f41d0
+     * @ghidraAddress NTSC-U/C: 0x003f41d0
+     * @ghidraAddress PAL: 0x0042c7b0
      */
     virtual void Load(IBStream &stream);
 
@@ -61,7 +65,8 @@ public:
      * Report a copy of the first string.
      *
      * @return The first string.
-     * @ghidraAddress 0x003f4500
+     * @ghidraAddress NTSC-U/C: 0x003f4500
+     * @ghidraAddress PAL: 0x0042cb38
      */
     HxStr GetHost();
 
@@ -69,7 +74,8 @@ public:
      * Report a copy of the second string.
      *
      * @return The second string.
-     * @ghidraAddress 0x003f4528
+     * @ghidraAddress NTSC-U/C: 0x003f4528
+     * @ghidraAddress PAL: 0x0042cb60
      */
     HxStr GetAddress();
 
@@ -77,7 +83,8 @@ public:
      * Report a copy of the third string.
      *
      * @return The third string.
-     * @ghidraAddress 0x003f4558
+     * @ghidraAddress NTSC-U/C: 0x003f4558
+     * @ghidraAddress PAL: 0x0042cb90
      */
     HxStr GetService();
 

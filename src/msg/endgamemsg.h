@@ -23,7 +23,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 433.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7b88
+     * @ghidraAddress NTSC-U/C: 0x003d7b88
+     * @ghidraAddress PAL: 0x0040faa0
      */
     static Message *New();
 
@@ -31,7 +32,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001939b8
+     * @ghidraAddress NTSC-U/C: 0x001939b8
+     * @ghidraAddress PAL: 0x001995e0
      */
     virtual Message *Clone();
 
@@ -39,7 +41,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nEndGameMsgType.
-     * @ghidraAddress 0x00193a00
+     * @ghidraAddress NTSC-U/C: 0x00193a00
+     * @ghidraAddress PAL: 0x00199628
      */
     virtual int Type();
 
@@ -47,7 +50,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `EndGameMsg`.
-     * @ghidraAddress 0x00193a10
+     * @ghidraAddress NTSC-U/C: 0x00193a10
+     * @ghidraAddress PAL: 0x00199638
      */
     virtual const char *Name();
 
@@ -68,6 +72,7 @@ public:
  * registration at `0x003d9818` passes the same value, 433, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d03ac
+ * @ghidraAddress NTSC-U/C: 0x006d03ac
+ * @ghidraAddress PAL: 0x00713b44
  */
 extern int g_nEndGameMsgType;

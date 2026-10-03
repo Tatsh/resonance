@@ -35,21 +35,24 @@ public:
      * `0x001f6530`.
      *
      * @return The manager.
-     * @ghidraAddress 0x001f61b8
+     * @ghidraAddress NTSC-U/C: 0x001f61b8
+     * @ghidraAddress PAL: 0x001fcbc8
      */
     static MemcardManager *shared();
 
     /**
      * Construct an empty manager that owns a new MemcardPS2.
      *
-     * @ghidraAddress 0x001f2960
+     * @ghidraAddress NTSC-U/C: 0x001f2960
+     * @ghidraAddress PAL: 0x001f9330
      */
     MemcardManager();
 
     /**
      * Delete the queue and release the task list.
      *
-     * @ghidraAddress 0x001f6210
+     * @ghidraAddress NTSC-U/C: 0x001f6210
+     * @ghidraAddress PAL: 0x001fcc20
      */
     ~MemcardManager();
 
@@ -62,7 +65,8 @@ public:
      * skips the queue's update for that frame. GameManagerImpl::DrawFrame() calls it once per
      * frame while the front end is active. The title is inferred.
      *
-     * @ghidraAddress 0x001f3cb0
+     * @ghidraAddress NTSC-U/C: 0x001f3cb0
+     * @ghidraAddress PAL: 0x001fa698
      */
     void Update();
 
@@ -70,7 +74,8 @@ public:
      * Queue a GetConnectStateMCT for one slot.
      *
      * @param nPortSlot The packed port and slot.
-     * @ghidraAddress 0x001f2ae0
+     * @ghidraAddress NTSC-U/C: 0x001f2ae0
+     * @ghidraAddress PAL: 0x001f94b0
      */
     void CreateGetConnectStateTask(int nPortSlot);
 
@@ -78,7 +83,8 @@ public:
      * Queue a GetAllConnectStatesMCT.
      *
      * @param pStates Where the answers are appended. Borrowed, not owned.
-     * @ghidraAddress 0x001f2c70
+     * @ghidraAddress NTSC-U/C: 0x001f2c70
+     * @ghidraAddress PAL: 0x001f9640
      */
     void CreateGetAllConnectStatesTask(std::vector<MemcardConnectState> *pStates);
 
@@ -86,7 +92,8 @@ public:
      * Queue a MinimumSaveSpaceMCT for one slot.
      *
      * @param nPortSlot The packed port and slot.
-     * @ghidraAddress 0x001f2d78
+     * @ghidraAddress NTSC-U/C: 0x001f2d78
+     * @ghidraAddress PAL: 0x001f9748
      */
     void CreateMinimumSaveSpaceTask(int nPortSlot);
 
@@ -94,7 +101,8 @@ public:
      * Queue a FormatCardMCT that formats one slot.
      *
      * @param nPortSlot The packed port and slot.
-     * @ghidraAddress 0x001f2e88
+     * @ghidraAddress NTSC-U/C: 0x001f2e88
+     * @ghidraAddress PAL: 0x001f9868
      */
     void CreateFormatTask(int nPortSlot);
 
@@ -104,7 +112,8 @@ public:
      * Nothing in the image calls it.
      *
      * @param nPortSlot The packed port and slot.
-     * @ghidraAddress 0x001f2f88
+     * @ghidraAddress NTSC-U/C: 0x001f2f88
+     * @ghidraAddress PAL: 0x001f9968
      */
     void CreateUnformatTask(int nPortSlot);
 
@@ -113,7 +122,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param roster The personas to save.
-     * @ghidraAddress 0x001f3090
+     * @ghidraAddress NTSC-U/C: 0x001f3090
+     * @ghidraAddress PAL: 0x001f9a70
      */
     void CreateSavePersonasTask(int nPortSlot, const std::vector<MetPersonaData *> &roster);
 
@@ -122,7 +132,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param pSettings The settings to save.
-     * @ghidraAddress 0x001f3328
+     * @ghidraAddress NTSC-U/C: 0x001f3328
+     * @ghidraAddress PAL: 0x001f9d08
      */
     void CreateSaveGlobalSettingsTask(int nPortSlot, GlobalSettings *pSettings);
 
@@ -132,7 +143,8 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param pPlayList The playlist to save.
      * @param nIndex The playlist number the file name carries.
-     * @ghidraAddress 0x001f3458
+     * @ghidraAddress NTSC-U/C: 0x001f3458
+     * @ghidraAddress PAL: 0x001f9e38
      */
     void CreateSaveJukeboxPlayListTask(int nPortSlot, JukeboxPlayList *pPlayList, int nIndex);
 
@@ -141,7 +153,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param pRoster Where the loaded personas are appended.
-     * @ghidraAddress 0x001f37f8
+     * @ghidraAddress NTSC-U/C: 0x001f37f8
+     * @ghidraAddress PAL: 0x001fa1d8
      */
     void CreateLoadPersonasTask(int nPortSlot, std::vector<MetPersonaData *> *pRoster);
 
@@ -150,7 +163,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param pSettings The settings to fill.
-     * @ghidraAddress 0x001f3910
+     * @ghidraAddress NTSC-U/C: 0x001f3910
+     * @ghidraAddress PAL: 0x001fa2f8
      */
     void CreateLoadGlobalSettingsTask(int nPortSlot, GlobalSettings *pSettings);
 
@@ -160,7 +174,8 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param pPlayList The playlist to fill.
      * @param nIndex The playlist number the file name carries.
-     * @ghidraAddress 0x001f3a40
+     * @ghidraAddress NTSC-U/C: 0x001f3a40
+     * @ghidraAddress PAL: 0x001fa428
      */
     void CreateLoadJukeboxPlayListTask(int nPortSlot, JukeboxPlayList *pPlayList, int nIndex);
 
@@ -172,7 +187,8 @@ public:
      * @param appearances The players' appearances.
      * @param levelName The level the remix was built over.
      * @param nAlbumNum The album number the index entry records.
-     * @ghidraAddress 0x001f31c8
+     * @ghidraAddress NTSC-U/C: 0x001f31c8
+     * @ghidraAddress PAL: 0x001f9ba8
      */
     void CreateSaveRemixTask(int nPortSlot,
                              const HxStr &remixName,
@@ -185,7 +201,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param pRecords The collection the listing fills.
-     * @ghidraAddress 0x001f3598
+     * @ghidraAddress NTSC-U/C: 0x001f3598
+     * @ghidraAddress PAL: 0x001f9f78
      */
     void CreateListRemixesTask(int nPortSlot, std::vector<MetRemixRecord> *pRecords);
 
@@ -194,7 +211,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param remixName The remix to read.
-     * @ghidraAddress 0x001f36c8
+     * @ghidraAddress NTSC-U/C: 0x001f36c8
+     * @ghidraAddress PAL: 0x001fa0a8
      */
     void CreateLoadRemixTask(int nPortSlot, const HxStr &remixName);
 
@@ -203,7 +221,8 @@ public:
      *
      * @param nPortSlot The packed port and slot.
      * @param remixName The remix to remove.
-     * @ghidraAddress 0x001f3b80
+     * @ghidraAddress NTSC-U/C: 0x001f3b80
+     * @ghidraAddress PAL: 0x001fa568
      */
     void CreateDeleteRemixTask(int nPortSlot, const HxStr &remixName);
 

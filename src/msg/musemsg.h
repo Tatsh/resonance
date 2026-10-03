@@ -58,7 +58,8 @@ public:
      *
      * @param nTick The song position of the copy, in MIDI ticks.
      * @return The copy.
-     * @ghidraAddress 0x003e3620
+     * @ghidraAddress NTSC-U/C: 0x003e3620
+     * @ghidraAddress PAL: 0x0041b9c0
      */
     MuseMsg *CloneAt(int nTick);
 
@@ -77,7 +78,8 @@ public:
  * The GsMuseUtil Shifter at `0x001ab9e4` copies any message whose identity lies from this word up
  * to g_nEndMuseMsgType.
  *
- * @ghidraAddress 0x006d01bc
+ * @ghidraAddress NTSC-U/C: 0x006d01bc
+ * @ghidraAddress PAL: 0x00713954
  */
 extern int g_nFirstMuseMsgType;
 
@@ -86,6 +88,7 @@ extern int g_nFirstMuseMsgType;
  *
  * The GsMuseUtil Shifter at `0x001ab9f8` reads it as the end of the range.
  *
- * @ghidraAddress 0x006d01c0
+ * @ghidraAddress NTSC-U/C: 0x006d01c0
+ * @ghidraAddress PAL: 0x00713958
  */
 extern int g_nEndMuseMsgType;

@@ -26,7 +26,8 @@ public:
      * @param nCookie The tag that abandons exactly this task's operations.
      * @param pPlayList The playlist to fill.
      * @param nIndex The playlist number in the file name.
-     * @ghidraAddress 0x001797e8
+     * @ghidraAddress NTSC-U/C: 0x001797e8
+     * @ghidraAddress PAL: 0x0017d750
      */
     LoadJukeboxPlayListMCT(MemcardUser *pUser,
                            Memcard *pCard,
@@ -35,7 +36,10 @@ public:
                            JukeboxPlayList *pPlayList,
                            int nIndex);
 
-    /** @ghidraAddress 0x00185918 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00185918
+     * @ghidraAddress PAL: 0x0018b328
+     */
     virtual ~LoadJukeboxPlayListMCT();
 
     /**
@@ -43,7 +47,8 @@ public:
      *
      * Any status other than kMemcardStatusOk reports without touching mPlayList.
      *
-     * @ghidraAddress 0x001867a8
+     * @ghidraAddress NTSC-U/C: 0x001867a8
+     * @ghidraAddress PAL: 0x0018c0a0
      */
     virtual void Finish();
 

@@ -54,7 +54,8 @@ public:
      * initialised, by the MuseMsg constructor.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6e50
+     * @ghidraAddress NTSC-U/C: 0x003d6e50
+     * @ghidraAddress PAL: 0x0040ed40
      */
     static Message *New();
 
@@ -62,7 +63,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dc778
+     * @ghidraAddress NTSC-U/C: 0x003dc778
+     * @ghidraAddress PAL: 0x00414bb0
      */
     virtual Message *Clone();
 
@@ -70,7 +72,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_dwSustainNoteMsgType.
-     * @ghidraAddress 0x003dc7d8
+     * @ghidraAddress NTSC-U/C: 0x003dc7d8
+     * @ghidraAddress PAL: 0x00414c10
      */
     virtual int Type();
 
@@ -78,7 +81,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `SustainNoteMsg`.
-     * @ghidraAddress 0x003dc7e8
+     * @ghidraAddress NTSC-U/C: 0x003dc7e8
+     * @ghidraAddress PAL: 0x00414c20
      */
     virtual const char *Name();
 
@@ -89,7 +93,8 @@ public:
      * integer one, so a note number appears as the character with that code.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3a18
+     * @ghidraAddress NTSC-U/C: 0x003e3a18
+     * @ghidraAddress PAL: 0x0041bdb8
      */
     virtual void Print(std::ostream &stream);
 
@@ -97,7 +102,8 @@ public:
      * Write the byte to a stream through OBStream::WriteBytes().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3a70
+     * @ghidraAddress NTSC-U/C: 0x003e3a70
+     * @ghidraAddress PAL: 0x0041be10
      */
     virtual void Save(OBStream &stream);
 
@@ -105,7 +111,8 @@ public:
      * Read the byte back in place through IBStream::ReadBytes().
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e3ab0
+     * @ghidraAddress NTSC-U/C: 0x003e3ab0
+     * @ghidraAddress PAL: 0x0041be50
      */
     virtual void Load(IBStream &stream);
 
@@ -127,6 +134,7 @@ public:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d01e4
+ * @ghidraAddress NTSC-U/C: 0x006d01e4
+ * @ghidraAddress PAL: 0x0071397c
  */
 extern unsigned int g_dwSustainNoteMsgType;

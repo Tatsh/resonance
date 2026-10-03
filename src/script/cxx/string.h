@@ -37,7 +37,8 @@ public:
      * Take a borrowed reference to an existing string.
      *
      * @param pyob The string to wrap.
-     * @ghidraAddress 0x004c4b40
+     * @ghidraAddress NTSC-U/C: 0x004c4b40
+     * @ghidraAddress PAL: 0x00502dc8
      */
     explicit String(PyObject *pyob) : SeqBase<Char>(pyob) {
         validate();
@@ -52,7 +53,8 @@ public:
      * way.
      *
      * @param text The text to copy.
-     * @ghidraAddress 0x004c4d88
+     * @ghidraAddress NTSC-U/C: 0x004c4d88
+     * @ghidraAddress PAL: 0x00503010
      */
     explicit String(const HxStr &text);
 
@@ -64,7 +66,8 @@ public:
      * unchanged.
      *
      * @param pszText The text to copy.
-     * @ghidraAddress 0x004c5138
+     * @ghidraAddress NTSC-U/C: 0x004c5138
+     * @ghidraAddress PAL: 0x005033c0
      */
     explicit String(const char *pszText);
 
@@ -76,7 +79,8 @@ public:
      * binding and is not reconstructed.
      *
      * @param ob The handle to copy.
-     * @ghidraAddress 0x004c4c60
+     * @ghidraAddress NTSC-U/C: 0x004c4c60
+     * @ghidraAddress PAL: 0x00502ee8
      */
     explicit String(const Object &ob);
 
@@ -85,7 +89,8 @@ public:
      *
      * @param pyob The reference to test.
      * @return True when the reference is a string.
-     * @ghidraAddress 0x004c73a8
+     * @ghidraAddress NTSC-U/C: 0x004c73a8
+     * @ghidraAddress PAL: 0x005055d0
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PyString_Check(pyob);
@@ -99,7 +104,8 @@ public:
      * equal to its length would invite a caller to write into it.
      *
      * @return The value max_size() reports.
-     * @ghidraAddress 0x004c7270
+     * @ghidraAddress NTSC-U/C: 0x004c7270
+     * @ghidraAddress PAL: 0x00505498
      */
     virtual int capacity() const {
         return max_size();
@@ -109,7 +115,8 @@ public:
      * Copy the text out of the Python string.
      *
      * @return The text.
-     * @ghidraAddress 0x004c73f0
+     * @ghidraAddress NTSC-U/C: 0x004c73f0
+     * @ghidraAddress PAL: 0x00505618
      */
     operator HxStr() const {
         return HxStr(PyString_AsString(mPtr));

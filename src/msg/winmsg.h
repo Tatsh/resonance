@@ -44,7 +44,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 421.
      *
      * @return The message.
-     * @ghidraAddress 0x003d78c0
+     * @ghidraAddress NTSC-U/C: 0x003d78c0
+     * @ghidraAddress PAL: 0x0040f7c0
      */
     static Message *New();
 
@@ -52,7 +53,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x00116368
+     * @ghidraAddress NTSC-U/C: 0x00116368
+     * @ghidraAddress PAL: 0x00116810
      */
     virtual Message *Clone();
 
@@ -60,7 +62,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nWinMsgType.
-     * @ghidraAddress 0x001163e0
+     * @ghidraAddress NTSC-U/C: 0x001163e0
+     * @ghidraAddress PAL: 0x00116888
      */
     virtual int Type();
 
@@ -68,7 +71,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `WinMsg`.
-     * @ghidraAddress 0x001163f0
+     * @ghidraAddress NTSC-U/C: 0x001163f0
+     * @ghidraAddress PAL: 0x00116898
      */
     virtual const char *Name();
 
@@ -80,7 +84,8 @@ public:
      * `mWinners.push_back()`, growing the vector through `0x00112cd8` when it is full.
      *
      * @param pPlayer The winner.
-     * @ghidraAddress 0x00116400
+     * @ghidraAddress NTSC-U/C: 0x00116400
+     * @ghidraAddress PAL: 0x001168a8
      */
     void AddWinner(Player *pPlayer) {
         mWinners.push_back(pPlayer);
@@ -96,6 +101,7 @@ public:
  * registration at `0x003d9818` passes the same value, 421, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d034c
+ * @ghidraAddress NTSC-U/C: 0x006d034c
+ * @ghidraAddress PAL: 0x00713ae4
  */
 extern int g_nWinMsgType;

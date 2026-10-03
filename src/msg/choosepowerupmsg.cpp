@@ -7,29 +7,29 @@ ChoosePowerupMsg::ChoosePowerupMsg(int nIndex, Player *pOwner, int nType)
     : mIndex(nIndex), mOwner(pOwner), mType(nType) {
 }
 
-// 0x003d6f90
+// NTSC-U/C: 0x003d6f90, PAL: 0x0040ee80
 Message *ChoosePowerupMsg::New() {
     return new ChoosePowerupMsg;
 }
 
-// 0x003dd0b8
+// NTSC-U/C: 0x003dd0b8, PAL: 0x004154f0
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *ChoosePowerupMsg::Clone() {
     return new ChoosePowerupMsg(*this);
 }
 
-// 0x003dd110
+// NTSC-U/C: 0x003dd110, PAL: 0x00415548
 int ChoosePowerupMsg::Type() {
     return g_nChoosePowerupMsgType;
 }
 
-// 0x003dd120
+// NTSC-U/C: 0x003dd120, PAL: 0x00415558
 const char *ChoosePowerupMsg::Name() {
     return "ChoosePowerupMsg";
 }
 
-// 0x003e3ce0
+// NTSC-U/C: 0x003e3ce0, PAL: 0x0041beb0
 void ChoosePowerupMsg::Print(std::ostream &stream) {
     stream << mIndex;
 }

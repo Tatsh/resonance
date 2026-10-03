@@ -28,7 +28,8 @@ public:
      *
      * The image lists no caller for the out-of-line body. New() expands the same stores in place.
      *
-     * @ghidraAddress 0x003f1438
+     * @ghidraAddress NTSC-U/C: 0x003f1438
+     * @ghidraAddress PAL: 0x00429900
      */
     SCLoadLevelPacket();
 
@@ -38,7 +39,8 @@ public:
      * The image lists no caller for the out-of-line body.
      *
      * @param params The settings to copy.
-     * @ghidraAddress 0x003f14b0
+     * @ghidraAddress NTSC-U/C: 0x003f14b0
+     * @ghidraAddress PAL: 0x00429978
      */
     SCLoadLevelPacket(const GameParams &params);
 
@@ -49,7 +51,8 @@ public:
      * g_nSCLoadLevelPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e5040
+     * @ghidraAddress NTSC-U/C: 0x003e5040
+     * @ghidraAddress PAL: 0x0041d2d8
      */
     static Message *New();
 
@@ -57,7 +60,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f13a0
+     * @ghidraAddress NTSC-U/C: 0x003f13a0
+     * @ghidraAddress PAL: 0x00429868
      */
     virtual Message *Clone();
 
@@ -65,7 +69,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nSCLoadLevelPacketType.
-     * @ghidraAddress 0x003f1418
+     * @ghidraAddress NTSC-U/C: 0x003f1418
+     * @ghidraAddress PAL: 0x004298e0
      */
     virtual int Type();
 
@@ -73,7 +78,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `SCLoadLevelPacket`.
-     * @ghidraAddress 0x003f1428
+     * @ghidraAddress NTSC-U/C: 0x003f1428
+     * @ghidraAddress PAL: 0x004298f0
      */
     virtual const char *Name();
 
@@ -81,7 +87,8 @@ public:
      * Write the settings to a diagnostic stream through GameParams::Print().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2858
+     * @ghidraAddress NTSC-U/C: 0x003f2858
+     * @ghidraAddress PAL: 0x0042ada0
      */
     virtual void Print(std::ostream &stream);
 
@@ -89,7 +96,8 @@ public:
      * Write the Packet words and the settings to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e8180
+     * @ghidraAddress NTSC-U/C: 0x003e8180
+     * @ghidraAddress PAL: 0x00420460
      */
     virtual void Save(OBStream &stream);
 
@@ -97,7 +105,8 @@ public:
      * Read the Packet words and the settings back from a stream.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003f27a0
+     * @ghidraAddress NTSC-U/C: 0x003f27a0
+     * @ghidraAddress PAL: 0x0042ace8
      */
     virtual void Load(IBStream &stream);
 
@@ -107,7 +116,8 @@ public:
      * The image lists no caller. The title is inferred.
      *
      * @return A copy of the settings.
-     * @ghidraAddress 0x003f1528
+     * @ghidraAddress NTSC-U/C: 0x003f1528
+     * @ghidraAddress PAL: 0x004299f0
      */
     GameParams GetParams();
 
@@ -121,6 +131,7 @@ private:
  * This word belongs to SCLoadLevelPacket because SCLoadLevelPacket::Type() at `0x003f1418`
  * returns it.
  *
- * @ghidraAddress 0x006d73bc
+ * @ghidraAddress NTSC-U/C: 0x006d73bc
+ * @ghidraAddress PAL: 0x0071ab5c
  */
 extern int g_nSCLoadLevelPacketType;

@@ -26,7 +26,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 422.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7908
+     * @ghidraAddress NTSC-U/C: 0x003d7908
+     * @ghidraAddress PAL: 0x0040f808
      */
     static Message *New();
 
@@ -34,7 +35,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x00193bd8
+     * @ghidraAddress NTSC-U/C: 0x00193bd8
+     * @ghidraAddress PAL: 0x00199800
      */
     virtual Message *Clone();
 
@@ -42,7 +44,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nGameOverMsgType.
-     * @ghidraAddress 0x00193c10
+     * @ghidraAddress NTSC-U/C: 0x00193c10
+     * @ghidraAddress PAL: 0x00199838
      */
     virtual int Type();
 
@@ -50,7 +53,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `GameOverMsg`.
-     * @ghidraAddress 0x00193c20
+     * @ghidraAddress NTSC-U/C: 0x00193c20
+     * @ghidraAddress PAL: 0x00199848
      */
     virtual const char *Name();
 };
@@ -62,6 +66,7 @@ public:
  * registration at `0x003d9818` passes the same value, 422, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d0354
+ * @ghidraAddress NTSC-U/C: 0x006d0354
+ * @ghidraAddress PAL: 0x00713aec
  */
 extern int g_nGameOverMsgType;

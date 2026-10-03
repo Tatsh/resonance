@@ -23,29 +23,29 @@ constexpr int kStatusSystem = 0xf0;
 
 } // namespace
 
-// 0x003d6d40
+// NTSC-U/C: 0x003d6d40, PAL: 0x0040ec30
 Message *StdMidiMsg::New() {
     return new StdMidiMsg;
 }
 
-// 0x003dbfa0
+// NTSC-U/C: 0x003dbfa0, PAL: 0x004143d8
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *StdMidiMsg::Clone() {
     return new StdMidiMsg(*this);
 }
 
-// 0x003dc010
+// NTSC-U/C: 0x003dc010, PAL: 0x00414448
 int StdMidiMsg::Type() {
     return g_dwStdMidiMsgType;
 }
 
-// 0x003dc020
+// NTSC-U/C: 0x003dc020, PAL: 0x00414458
 const char *StdMidiMsg::Name() {
     return "StdMidiMsg";
 }
 
-// 0x003d7ec0
+// NTSC-U/C: 0x003d7ec0, PAL: 0x0040fff8
 void StdMidiMsg::Print(std::ostream &stream) {
     HxStr kind;
     switch (mStatus & kStatusKindMask) {
@@ -82,7 +82,7 @@ void StdMidiMsg::Print(std::ostream &stream) {
            << " n" << (mStatus & kStatusChannelMask);
 }
 
-// 0x003e3658
+// NTSC-U/C: 0x003e3658, PAL: 0x0041b9f8
 void StdMidiMsg::Save(OBStream &stream) {
     unsigned char status = mStatus;
     unsigned char data1 = mData1;
@@ -92,7 +92,7 @@ void StdMidiMsg::Save(OBStream &stream) {
         .WriteBytes(&data2, sizeof(data2));
 }
 
-// 0x003e36e8
+// NTSC-U/C: 0x003e36e8, PAL: 0x0041ba88
 void StdMidiMsg::Load(IBStream &stream) {
     stream.ReadBytes(&mStatus, sizeof(mStatus))
         .ReadBytes(&mData1, sizeof(mData1))

@@ -33,7 +33,8 @@ public:
      *
      * The buffer reserves one growth step up front.
      *
-     * @ghidraAddress 0x004ecca8
+     * @ghidraAddress NTSC-U/C: 0x004ecca8
+     * @ghidraAddress PAL: 0x0052b850
      */
     IOBMemStream();
 
@@ -45,7 +46,8 @@ public:
      *
      * @param pData The bytes to write.
      * @param nSize The number of bytes to write.
-     * @ghidraAddress 0x004ece70
+     * @ghidraAddress NTSC-U/C: 0x004ece70
+     * @ghidraAddress PAL: 0x0052ba18
      */
     IOBMemStream(const void *pData, int nSize);
 
@@ -54,20 +56,33 @@ public:
      *
      * IBStream vtable slot 8.
      *
-     * @ghidraAddress 0x004ed978
+     * @ghidraAddress NTSC-U/C: 0x004ed978
+     * @ghidraAddress PAL: 0x0052c520
      */
     virtual ~IOBMemStream();
 
-    /** @ghidraAddress 0x004ee0e8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004ee0e8
+     * @ghidraAddress PAL: 0x0052cc90
+     */
     virtual IBStream &ReadBytes(void *pDest, int nSize);
 
-    /** @ghidraAddress 0x004ee168 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004ee168
+     * @ghidraAddress PAL: 0x0052cd10
+     */
     virtual IBStream &Seek(int nOffset, int nWhence);
 
-    /** @ghidraAddress 0x004eda38 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004eda38
+     * @ghidraAddress PAL: 0x0052c5e0
+     */
     virtual int Tell();
 
-    /** @ghidraAddress 0x004eda40 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004eda40
+     * @ghidraAddress PAL: 0x0052c5e8
+     */
     virtual int Eof();
 
     /**
@@ -76,11 +91,15 @@ public:
      * One body serves IBStream vtable slot 5 and OBStream vtable slot 3.
      *
      * @return Non-zero once a transfer has failed.
-     * @ghidraAddress 0x004eda48
+     * @ghidraAddress NTSC-U/C: 0x004eda48
+     * @ghidraAddress PAL: 0x0052c5f0
      */
     virtual int Fail();
 
-    /** @ghidraAddress 0x004eda50 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004eda50
+     * @ghidraAddress PAL: 0x0052c5f8
+     */
     virtual IBStream &Flush();
 
     /**
@@ -92,7 +111,8 @@ public:
      *
      * @param pSrc The bytes to write.
      * @param nSize The number of bytes to write.
-     * @ghidraAddress 0x004ee018
+     * @ghidraAddress NTSC-U/C: 0x004ee018
+     * @ghidraAddress PAL: 0x0052cbc0
      */
     virtual void Load(const void *pSrc, int nSize);
 
@@ -103,7 +123,8 @@ public:
      * call site remains in the image.
      *
      * @param nSize The new buffer size in bytes.
-     * @ghidraAddress 0x004ee260
+     * @ghidraAddress NTSC-U/C: 0x004ee260
+     * @ghidraAddress PAL: 0x0052ce08
      */
     virtual void Resize(int nSize);
 
@@ -113,7 +134,8 @@ public:
      * IBStream vtable slot 11. The pointer is null while the buffer has never been allocated.
      *
      * @return The first byte of the buffer.
-     * @ghidraAddress 0x004eda58
+     * @ghidraAddress NTSC-U/C: 0x004eda58
+     * @ghidraAddress PAL: 0x0052c600
      */
     virtual char *Buffer();
 
@@ -124,14 +146,21 @@ public:
      * position. The routine is absent from the vtable, and no call site survives in the shipped
      * program. The name is inferred.
      *
-     * @ghidraAddress 0x004ee1f0
+     * @ghidraAddress NTSC-U/C: 0x004ee1f0
+     * @ghidraAddress PAL: 0x0052cd98
      */
     void DiscardReadBytes();
 
-    /** @ghidraAddress 0x004ed068 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004ed068
+     * @ghidraAddress PAL: 0x0052bc10
+     */
     virtual OBStream &WriteBytes(const void *pSrc, int nSize);
 
-    /** @ghidraAddress 0x004eda30 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004eda30
+     * @ghidraAddress PAL: 0x0052c5d8
+     */
     virtual OBStream &Reset();
 
 private:

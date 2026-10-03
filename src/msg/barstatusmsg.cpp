@@ -6,12 +6,12 @@
 #include "game/player.h"
 #include "os/hxstr.h"
 
-// 0x003d7440
+// NTSC-U/C: 0x003d7440, PAL: 0x0040f340
 Message *BarStatusMsg::New() {
     return new BarStatusMsg;
 }
 
-// 0x003d8670
+// NTSC-U/C: 0x003d8670, PAL: 0x00410a68
 // The colour name is copied into a temporary before it is written.
 void BarStatusMsg::Print(std::ostream &stream) {
     stream << "b#" << mBar << " tr#" << mTrack;
@@ -33,24 +33,24 @@ void BarStatusMsg::Print(std::ostream &stream) {
     }
 }
 
-// 0x003defd0
+// NTSC-U/C: 0x003defd0, PAL: 0x00417428
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *BarStatusMsg::Clone() {
     return new BarStatusMsg(*this);
 }
 
-// 0x003df050
+// NTSC-U/C: 0x003df050, PAL: 0x004174a8
 int BarStatusMsg::Type() {
     return g_nBarStatusMsgType;
 }
 
-// 0x003df060
+// NTSC-U/C: 0x003df060, PAL: 0x004174b8
 const char *BarStatusMsg::Name() {
     return "BarStatusMsg";
 }
 
-// 0x003df1f8
+// NTSC-U/C: 0x003df1f8, PAL: 0x00417650
 int BarStatusMsg::Has(int nField) {
     return (mFlags & nField) != 0;
 }

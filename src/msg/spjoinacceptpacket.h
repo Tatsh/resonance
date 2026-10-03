@@ -36,7 +36,8 @@ public:
      *
      * The image lists no caller for the out-of-line body. New() expands the same stores in place.
      *
-     * @ghidraAddress 0x003ef110
+     * @ghidraAddress NTSC-U/C: 0x003ef110
+     * @ghidraAddress PAL: 0x00427660
      */
     SPJoinAcceptPacket();
 
@@ -47,7 +48,8 @@ public:
      * g_nSPJoinAcceptPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e4b40
+     * @ghidraAddress NTSC-U/C: 0x003e4b40
+     * @ghidraAddress PAL: 0x0041cd70
      */
     static Message *New();
 
@@ -55,7 +57,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003ef078
+     * @ghidraAddress NTSC-U/C: 0x003ef078
+     * @ghidraAddress PAL: 0x004275c8
      */
     virtual Message *Clone();
 
@@ -63,7 +66,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nSPJoinAcceptPacketType.
-     * @ghidraAddress 0x003ef0f0
+     * @ghidraAddress NTSC-U/C: 0x003ef0f0
+     * @ghidraAddress PAL: 0x00427640
      */
     virtual int Type();
 
@@ -71,7 +75,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `SPJoinAcceptPacket`.
-     * @ghidraAddress 0x003ef100
+     * @ghidraAddress NTSC-U/C: 0x003ef100
+     * @ghidraAddress PAL: 0x00427650
      */
     virtual const char *Name();
 
@@ -82,7 +87,8 @@ public:
      * The player records are not written.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f1f58
+     * @ghidraAddress NTSC-U/C: 0x003f1f58
+     * @ghidraAddress PAL: 0x0042a4a0
      */
     virtual void Print(std::ostream &stream);
 
@@ -91,7 +97,8 @@ public:
      * record count, and every record to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e5718
+     * @ghidraAddress NTSC-U/C: 0x003e5718
+     * @ghidraAddress PAL: 0x0041d9c0
      */
     virtual void Save(OBStream &stream);
 
@@ -100,7 +107,8 @@ public:
      * read.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e5930
+     * @ghidraAddress NTSC-U/C: 0x003e5930
+     * @ghidraAddress PAL: 0x0041dbd8
      */
     virtual void Load(IBStream &stream);
 
@@ -110,7 +118,8 @@ public:
      * The image lists no caller. The title is inferred.
      *
      * @return A copy of the appearance's first string.
-     * @ghidraAddress 0x003ef390
+     * @ghidraAddress NTSC-U/C: 0x003ef390
+     * @ghidraAddress PAL: 0x00427968
      */
     HxStr GetUsername();
 
@@ -120,7 +129,8 @@ public:
      * The image lists no caller. The title is inferred.
      *
      * @return A copy of the settings.
-     * @ghidraAddress 0x003ef3c0
+     * @ghidraAddress NTSC-U/C: 0x003ef3c0
+     * @ghidraAddress PAL: 0x00427998
      */
     GameParams GetParams();
 
@@ -130,7 +140,8 @@ public:
      * The image lists no caller. The title is inferred.
      *
      * @return A copy of mColorName.
-     * @ghidraAddress 0x003ef3f0
+     * @ghidraAddress NTSC-U/C: 0x003ef3f0
+     * @ghidraAddress PAL: 0x004279c8
      */
     HxStr GetColorName();
 
@@ -140,7 +151,8 @@ public:
      * The image lists no caller. The title is inferred.
      *
      * @return A copy of the appearance.
-     * @ghidraAddress 0x003ef420
+     * @ghidraAddress NTSC-U/C: 0x003ef420
+     * @ghidraAddress PAL: 0x004279f8
      */
     FreqAppearance GetAppearance();
 
@@ -150,7 +162,8 @@ public:
      * The image lists no caller. The title is inferred.
      *
      * @param player The player to copy in.
-     * @ghidraAddress 0x003ef450
+     * @ghidraAddress NTSC-U/C: 0x003ef450
+     * @ghidraAddress PAL: 0x00427a28
      */
     void AddPlayer(const PlayerInfo &player);
 
@@ -169,6 +182,7 @@ private:
  * This word belongs to SPJoinAcceptPacket because SPJoinAcceptPacket::Type() at `0x003ef0f0`
  * returns it.
  *
- * @ghidraAddress 0x006d7374
+ * @ghidraAddress NTSC-U/C: 0x006d7374
+ * @ghidraAddress PAL: 0x0071ab14
  */
 extern int g_nSPJoinAcceptPacketType;

@@ -24,7 +24,8 @@ public:
      *
      * The image lists no caller for the out-of-line body. New() expands the same stores in place.
      *
-     * @ghidraAddress 0x003eef50
+     * @ghidraAddress NTSC-U/C: 0x003eef50
+     * @ghidraAddress PAL: 0x004274a0
      */
     PSJoinRequestPacket();
 
@@ -35,7 +36,8 @@ public:
      * g_nPSJoinRequestPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e4a98
+     * @ghidraAddress NTSC-U/C: 0x003e4a98
+     * @ghidraAddress PAL: 0x0041ccc8
      */
     static Message *New();
 
@@ -43,7 +45,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003eeeb8
+     * @ghidraAddress NTSC-U/C: 0x003eeeb8
+     * @ghidraAddress PAL: 0x00427408
      */
     virtual Message *Clone();
 
@@ -51,7 +54,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nPSJoinRequestPacketType.
-     * @ghidraAddress 0x003eef30
+     * @ghidraAddress NTSC-U/C: 0x003eef30
+     * @ghidraAddress PAL: 0x00427480
      */
     virtual int Type();
 
@@ -59,7 +63,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `PSJoinRequestPacket`.
-     * @ghidraAddress 0x003eef40
+     * @ghidraAddress NTSC-U/C: 0x003eef40
+     * @ghidraAddress PAL: 0x00427490
      */
     virtual const char *Name();
 
@@ -70,7 +75,8 @@ public:
      * again after the appearance.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e5538
+     * @ghidraAddress NTSC-U/C: 0x003e5538
+     * @ghidraAddress PAL: 0x0041d7e0
      */
     virtual void Save(OBStream &stream);
 
@@ -80,7 +86,8 @@ public:
      * Slot 7. Mirrors Save(), including the repeated transfer of `+0x0c`.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e5638
+     * @ghidraAddress NTSC-U/C: 0x003e5638
+     * @ghidraAddress PAL: 0x0041d8e0
      */
     virtual void Load(IBStream &stream);
 
@@ -90,7 +97,8 @@ public:
      * Slot 5.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f1f38
+     * @ghidraAddress NTSC-U/C: 0x003f1f38
+     * @ghidraAddress PAL: 0x0042a480
      */
     virtual void Print(std::ostream &stream);
 
@@ -104,6 +112,7 @@ private:
  * This word belongs to PSJoinRequestPacket because PSJoinRequestPacket::Type() at `0x003eef30`
  * returns it.
  *
- * @ghidraAddress 0x006d7368
+ * @ghidraAddress NTSC-U/C: 0x006d7368
+ * @ghidraAddress PAL: 0x0071ab08
  */
 extern int g_nPSJoinRequestPacketType;

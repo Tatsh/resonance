@@ -2,29 +2,29 @@
 
 #include <iostream>
 
-// 0x003d72b8
+// NTSC-U/C: 0x003d72b8, PAL: 0x0040f1b8
 Message *InvalidateTrackMsg::New() {
     return new InvalidateTrackMsg;
 }
 
-// 0x003de450
+// NTSC-U/C: 0x003de450, PAL: 0x004168a8
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *InvalidateTrackMsg::Clone() {
     return new InvalidateTrackMsg(*this);
 }
 
-// 0x003de4a8
+// NTSC-U/C: 0x003de4a8, PAL: 0x00416900
 int InvalidateTrackMsg::Type() {
     return g_nInvalidateTrackMsgType;
 }
 
-// 0x003de4b8
+// NTSC-U/C: 0x003de4b8, PAL: 0x00416910
 const char *InvalidateTrackMsg::Name() {
     return "InvalidateTrackMsg";
 }
 
-// 0x003e3d90
+// NTSC-U/C: 0x003e3d90, PAL: 0x0041bf60
 void InvalidateTrackMsg::Print(std::ostream &stream) {
     stream << "tr#" << mTrack << " song-bars " << mFirstBar << "-" << mEndBar;
 }

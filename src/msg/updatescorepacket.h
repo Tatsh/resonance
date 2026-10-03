@@ -54,7 +54,8 @@ public:
      * g_nUpdateScorePacketType. Only the Packet words are initialised.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e5268
+     * @ghidraAddress NTSC-U/C: 0x003e5268
+     * @ghidraAddress PAL: 0x0041d500
      */
     static Message *New();
 
@@ -62,7 +63,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f06c0
+     * @ghidraAddress NTSC-U/C: 0x003f06c0
+     * @ghidraAddress PAL: 0x00428cc8
      */
     virtual Message *Clone();
 
@@ -70,7 +72,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nUpdateScorePacketType.
-     * @ghidraAddress 0x003f0738
+     * @ghidraAddress NTSC-U/C: 0x003f0738
+     * @ghidraAddress PAL: 0x00428d40
      */
     virtual int Type();
 
@@ -78,7 +81,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `UpdateScorePacket`.
-     * @ghidraAddress 0x003f0748
+     * @ghidraAddress NTSC-U/C: 0x003f0748
+     * @ghidraAddress PAL: 0x00428d50
      */
     virtual const char *Name();
 
@@ -88,7 +92,8 @@ public:
      * Slot 5. The literals are at `0x00814240` and `0x00814248`.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2510
+     * @ghidraAddress NTSC-U/C: 0x003f2510
+     * @ghidraAddress PAL: 0x0042aa58
      */
     virtual void Print(std::ostream &stream);
 
@@ -98,7 +103,8 @@ public:
      * Slot 6.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e7018
+     * @ghidraAddress NTSC-U/C: 0x003e7018
+     * @ghidraAddress PAL: 0x0041f2f8
      */
     virtual void Save(OBStream &stream);
 
@@ -108,7 +114,8 @@ public:
      * Slot 7. Both members are filled in place rather than through a local.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e7120
+     * @ghidraAddress NTSC-U/C: 0x003e7120
+     * @ghidraAddress PAL: 0x0041f400
      */
     virtual void Load(IBStream &stream);
 
@@ -126,6 +133,7 @@ public:
  * This word belongs to UpdateScorePacket because UpdateScorePacket::Type() at `0x003f0738`
  * returns it.
  *
- * @ghidraAddress 0x006d73e4
+ * @ghidraAddress NTSC-U/C: 0x006d73e4
+ * @ghidraAddress PAL: 0x0071ab84
  */
 extern int g_nUpdateScorePacketType;

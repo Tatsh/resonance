@@ -40,7 +40,8 @@ public:
      * Slot 6.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f1de8
+     * @ghidraAddress NTSC-U/C: 0x003f1de8
+     * @ghidraAddress PAL: 0x0042a330
      */
     virtual void Save(OBStream &stream);
 
@@ -51,7 +52,8 @@ public:
      * field in place.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003f1ea0
+     * @ghidraAddress NTSC-U/C: 0x003f1ea0
+     * @ghidraAddress PAL: 0x0042a3e8
      */
     virtual void Load(IBStream &stream);
 

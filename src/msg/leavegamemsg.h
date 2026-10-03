@@ -24,7 +24,8 @@ public:
      * Clone(), because the class has no payload.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7940
+     * @ghidraAddress NTSC-U/C: 0x003d7940
+     * @ghidraAddress PAL: 0x0040f840
      */
     static Message *New();
 
@@ -32,7 +33,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e0f80
+     * @ghidraAddress NTSC-U/C: 0x003e0f80
+     * @ghidraAddress PAL: 0x004193d8
      */
     virtual Message *Clone();
 
@@ -40,7 +42,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nLeaveGameMsgType.
-     * @ghidraAddress 0x003e0fb8
+     * @ghidraAddress NTSC-U/C: 0x003e0fb8
+     * @ghidraAddress PAL: 0x00419410
      */
     virtual int Type();
 
@@ -48,7 +51,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `LeaveGameMsg`.
-     * @ghidraAddress 0x003e0fc8
+     * @ghidraAddress NTSC-U/C: 0x003e0fc8
+     * @ghidraAddress PAL: 0x00419420
      */
     virtual const char *Name();
 };
@@ -60,6 +64,7 @@ public:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d035c
+ * @ghidraAddress NTSC-U/C: 0x006d035c
+ * @ghidraAddress PAL: 0x00713af4
  */
 extern int g_nLeaveGameMsgType;

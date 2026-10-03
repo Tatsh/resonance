@@ -49,7 +49,8 @@ public:
      *
      * The body releases nothing, which is what establishes that mStates is borrowed.
      *
-     * @ghidraAddress 0x00184b08
+     * @ghidraAddress NTSC-U/C: 0x00184b08
+     * @ghidraAddress PAL: 0x0018a020
      */
     virtual ~GetAllConnectStatesMCT();
 
@@ -59,17 +60,22 @@ public:
      * kMemcardStatusUnknown skips the append but still counts toward the total, so a missing card
      * does not stall the task.
      *
-     * @ghidraAddress 0x00178138
+     * @ghidraAddress NTSC-U/C: 0x00178138
+     * @ghidraAddress PAL: 0x0017b508
      */
     virtual void OnCheckInfo(CheckInfoOp *pOp);
 
-    /** @ghidraAddress 0x001860a0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001860a0
+     * @ghidraAddress PAL: 0x0018bb58
+     */
     virtual void Finish();
 
     /**
      * Queue one enquiry per available slot.
      *
-     * @ghidraAddress 0x001860d8
+     * @ghidraAddress NTSC-U/C: 0x001860d8
+     * @ghidraAddress PAL: 0x0018bb90
      */
     virtual void Execute();
 

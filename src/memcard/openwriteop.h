@@ -21,17 +21,27 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param path The file to open.
      * @param nCookie The tag Memcard::Cancel() matches on.
-     * @ghidraAddress 0x0055eb58
+     * @ghidraAddress NTSC-U/C: 0x0055eb58
+     * @ghidraAddress PAL: 0x0059fe28
      */
     OpenWriteOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
-    /** @ghidraAddress 0x0055dca0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055dca0
+     * @ghidraAddress PAL: 0x0059ef18
+     */
     virtual ~OpenWriteOp();
 
-    /** @ghidraAddress 0x0055ebe8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055ebe8
+     * @ghidraAddress PAL: 0x0059feb8
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055dd08 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055dd08
+     * @ghidraAddress PAL: 0x0059ef90
+     */
     virtual void Complete();
 
     /**
@@ -40,7 +50,8 @@ public:
      * The table at `0x0082bff0` covers the six libmc codes from `sceMcResUpLimitHandle` up to
      * `sceMcResNoFormat`, indexed by the result plus seven.
      *
-     * @ghidraAddress 0x0055ec38
+     * @ghidraAddress NTSC-U/C: 0x0055ec38
+     * @ghidraAddress PAL: 0x0059ff08
      */
     virtual void InterpretResult();
 

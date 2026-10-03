@@ -26,33 +26,53 @@ public:
      * An empty path arrives at `fopen` as the program-wide empty string rather than as null.
      *
      * @param path The file to open.
-     * @ghidraAddress 0x004edd38
+     * @ghidraAddress NTSC-U/C: 0x004edd38
+     * @ghidraAddress PAL: 0x0052c8e0
      */
     IBFileStream(const HxStr &path);
 
     /**
      * Close the file.
      *
-     * @ghidraAddress 0x004edd88
+     * @ghidraAddress NTSC-U/C: 0x004edd88
+     * @ghidraAddress PAL: 0x0052c930
      */
     virtual ~IBFileStream();
 
-    /** @ghidraAddress 0x004edde0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004edde0
+     * @ghidraAddress PAL: 0x0052c988
+     */
     virtual IBStream &ReadBytes(void *pDest, int nSize);
 
-    /** @ghidraAddress 0x004ede20 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004ede20
+     * @ghidraAddress PAL: 0x0052c9c8
+     */
     virtual IBStream &Seek(int nOffset, int nWhence);
 
-    /** @ghidraAddress 0x004ede78 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004ede78
+     * @ghidraAddress PAL: 0x0052ca20
+     */
     virtual int Tell();
 
-    /** @ghidraAddress 0x004edea0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004edea0
+     * @ghidraAddress PAL: 0x0052ca48
+     */
     virtual int Eof();
 
-    /** @ghidraAddress 0x004edeb8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004edeb8
+     * @ghidraAddress PAL: 0x0052ca60
+     */
     virtual int Fail();
 
-    /** @ghidraAddress 0x004ede18 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004ede18
+     * @ghidraAddress PAL: 0x0052c9c0
+     */
     virtual IBStream &Flush();
 
 private:

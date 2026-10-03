@@ -27,7 +27,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 432.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7b50
+     * @ghidraAddress NTSC-U/C: 0x003d7b50
+     * @ghidraAddress PAL: 0x0040fa68
      */
     static Message *New();
 
@@ -35,7 +36,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x0010ba48
+     * @ghidraAddress NTSC-U/C: 0x0010ba48
+     * @ghidraAddress PAL: 0x0010bbd0
      */
     virtual Message *Clone();
 
@@ -43,7 +45,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nBeginGameLocalMsgType.
-     * @ghidraAddress 0x0010ba80
+     * @ghidraAddress NTSC-U/C: 0x0010ba80
+     * @ghidraAddress PAL: 0x0010bc08
      */
     virtual int Type();
 
@@ -51,7 +54,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `BeginGameLocalMsg`.
-     * @ghidraAddress 0x0010ba90
+     * @ghidraAddress NTSC-U/C: 0x0010ba90
+     * @ghidraAddress PAL: 0x0010bc18
      */
     virtual const char *Name();
 };
@@ -63,6 +67,7 @@ public:
  * it, and the registration at `0x003d9818` passes the same value, 432, as the identity of this
  * class's factory.
  *
- * @ghidraAddress 0x006d03a4
+ * @ghidraAddress NTSC-U/C: 0x006d03a4
+ * @ghidraAddress PAL: 0x00713b3c
  */
 extern int g_nBeginGameLocalMsgType;

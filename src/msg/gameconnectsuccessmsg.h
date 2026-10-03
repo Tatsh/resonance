@@ -24,7 +24,8 @@ public:
      * Clone(), because the class has no payload.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7a20
+     * @ghidraAddress NTSC-U/C: 0x003d7a20
+     * @ghidraAddress PAL: 0x0040f920
      */
     static Message *New();
 
@@ -32,7 +33,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e15a8
+     * @ghidraAddress NTSC-U/C: 0x003e15a8
+     * @ghidraAddress PAL: 0x00419a00
      */
     virtual Message *Clone();
 
@@ -40,7 +42,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nGameConnectSuccessMsgType.
-     * @ghidraAddress 0x003e15e0
+     * @ghidraAddress NTSC-U/C: 0x003e15e0
+     * @ghidraAddress PAL: 0x00419a38
      */
     virtual int Type();
 
@@ -48,7 +51,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `GameConnectSuccessMsg`.
-     * @ghidraAddress 0x003e15f0
+     * @ghidraAddress NTSC-U/C: 0x003e15f0
+     * @ghidraAddress PAL: 0x00419a48
      */
     virtual const char *Name();
 
@@ -60,7 +64,8 @@ public:
      * Message::Print() stub of each translation unit sits, so the override is this class's own.
      *
      * @param stream The stream, which is not written.
-     * @ghidraAddress 0x003e4040
+     * @ghidraAddress NTSC-U/C: 0x003e4040
+     * @ghidraAddress PAL: 0x0041c270
      */
     virtual void Print(std::ostream &stream);
 };
@@ -72,6 +77,7 @@ public:
  * `0x003e15e0` returns it. Several handlers elsewhere read the same word to compare against it,
  * which is the expected shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d037c
+ * @ghidraAddress NTSC-U/C: 0x006d037c
+ * @ghidraAddress PAL: 0x00713b14
  */
 extern int g_nGameConnectSuccessMsgType;

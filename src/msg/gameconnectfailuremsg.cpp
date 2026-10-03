@@ -2,31 +2,31 @@
 
 #include <iostream>
 
-// 0x003e1810
+// NTSC-U/C: 0x003e1810, PAL: 0x00419c80
 GameConnectFailureMsg::GameConnectFailureMsg(const HxStr &reason) : mReason(reason) {
 }
 
-// 0x003d7a58
+// NTSC-U/C: 0x003d7a58, PAL: 0x0040f958
 Message *GameConnectFailureMsg::New() {
     return new GameConnectFailureMsg;
 }
 
-// 0x003e1730
+// NTSC-U/C: 0x003e1730, PAL: 0x00419b98
 Message *GameConnectFailureMsg::Clone() {
     return new GameConnectFailureMsg(*this);
 }
 
-// 0x003e17d0
+// NTSC-U/C: 0x003e17d0, PAL: 0x00419c38
 int GameConnectFailureMsg::Type() {
     return g_nGameConnectFailureMsgType;
 }
 
-// 0x003e17e0
+// NTSC-U/C: 0x003e17e0, PAL: 0x00419c48
 const char *GameConnectFailureMsg::Name() {
     return "GameConnectFailureMsg";
 }
 
-// 0x003e4048
+// NTSC-U/C: 0x003e4048, PAL: 0x0041c278
 void GameConnectFailureMsg::Print(std::ostream &stream) {
     stream << mReason;
 }

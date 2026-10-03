@@ -11,29 +11,29 @@ constexpr int kTicksPerBar = 1920;
 
 } // namespace
 
-// 0x003d6f10
+// NTSC-U/C: 0x003d6f10, PAL: 0x0040ee00
 Message *SeekerMsg::New() {
     return new SeekerMsg;
 }
 
-// 0x003dcce0
+// NTSC-U/C: 0x003dcce0, PAL: 0x00415118
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *SeekerMsg::Clone() {
     return new SeekerMsg(*this);
 }
 
-// 0x003dcd50
+// NTSC-U/C: 0x003dcd50, PAL: 0x00415188
 int SeekerMsg::Type() {
     return g_nSeekerMsgType;
 }
 
-// 0x003dcd60
+// NTSC-U/C: 0x003dcd60, PAL: 0x00415198
 const char *SeekerMsg::Name() {
     return "SeekerMsg";
 }
 
-// 0x003d81f0
+// NTSC-U/C: 0x003d81f0, PAL: 0x00410568
 // The colour name is copied into a temporary before it is written, and the discarded
 // IsFiniteMBT() call is the shape of an assertion compiled without its report.
 void SeekerMsg::Print(std::ostream &stream) {

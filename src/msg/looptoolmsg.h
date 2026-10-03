@@ -52,7 +52,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 114.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6be8
+     * @ghidraAddress NTSC-U/C: 0x003d6be8
+     * @ghidraAddress PAL: 0x0040ead8
      */
     static Message *New();
 
@@ -60,7 +61,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x0011d8e0
+     * @ghidraAddress NTSC-U/C: 0x0011d8e0
+     * @ghidraAddress PAL: 0x0011de68
      */
     virtual Message *Clone();
 
@@ -68,7 +70,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nLoopToolMsgType.
-     * @ghidraAddress 0x0011d938
+     * @ghidraAddress NTSC-U/C: 0x0011d938
+     * @ghidraAddress PAL: 0x0011dec0
      */
     virtual int Type();
 
@@ -76,7 +79,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `LoopToolMsg`.
-     * @ghidraAddress 0x0011d948
+     * @ghidraAddress NTSC-U/C: 0x0011d948
+     * @ghidraAddress PAL: 0x0011ded0
      */
     virtual const char *Name();
 
@@ -96,6 +100,7 @@ private:
  * registration at `0x003d9818` passes the same value, 114, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d018c
+ * @ghidraAddress NTSC-U/C: 0x006d018c
+ * @ghidraAddress PAL: 0x00713924
  */
 extern int g_nLoopToolMsgType;

@@ -4,29 +4,29 @@
 
 #include "game/player.h"
 
-// 0x003d76f0
+// NTSC-U/C: 0x003d76f0, PAL: 0x0040f5f0
 Message *PhraseMuffedMsg::New() {
     return new PhraseMuffedMsg;
 }
 
-// 0x003e0038
+// NTSC-U/C: 0x003e0038, PAL: 0x00418490
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *PhraseMuffedMsg::Clone() {
     return new PhraseMuffedMsg(*this);
 }
 
-// 0x003e0098
+// NTSC-U/C: 0x003e0098, PAL: 0x004184f0
 int PhraseMuffedMsg::Type() {
     return g_nPhraseMuffedMsgType;
 }
 
-// 0x003e00a8
+// NTSC-U/C: 0x003e00a8, PAL: 0x00418500
 const char *PhraseMuffedMsg::Name() {
     return "PhraseMuffedMsg";
 }
 
-// 0x003e4350
+// NTSC-U/C: 0x003e4350, PAL: 0x0041c580
 void PhraseMuffedMsg::Print(std::ostream &stream) {
     std::ostream &rest = stream << "tr#" << mTrack << " ";
     mPlayer->Print(rest);

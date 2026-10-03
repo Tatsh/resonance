@@ -22,24 +22,35 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param path The directory to measure.
      * @param nCookie The tag Memcard::Cancel() matches on.
-     * @ghidraAddress 0x0055e418
+     * @ghidraAddress NTSC-U/C: 0x0055e418
+     * @ghidraAddress PAL: 0x0059f6e8
      */
     EntSpaceOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie);
 
-    /** @ghidraAddress 0x0055d418 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055d418
+     * @ghidraAddress PAL: 0x0059e660
+     */
     virtual ~EntSpaceOp();
 
-    /** @ghidraAddress 0x0055e4a8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055e4a8
+     * @ghidraAddress PAL: 0x0059f778
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055d480 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055d480
+     * @ghidraAddress PAL: 0x0059e6d8
+     */
     virtual void Complete();
 
     /**
      * Report kMemcardStatusOk for any result that is not negative, and
      * kMemcardStatusNotFormatted for `sceMcResNoFormat`.
      *
-     * @ghidraAddress 0x0055e4f8
+     * @ghidraAddress NTSC-U/C: 0x0055e4f8
+     * @ghidraAddress PAL: 0x0059f7c8
      */
     virtual void InterpretResult();
 

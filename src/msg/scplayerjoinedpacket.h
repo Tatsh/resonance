@@ -28,7 +28,8 @@ public:
      *
      * The image lists no caller for the out-of-line body. New() expands the same stores in place.
      *
-     * @ghidraAddress 0x003ef7b0
+     * @ghidraAddress NTSC-U/C: 0x003ef7b0
+     * @ghidraAddress PAL: 0x00427da0
      */
     SCPlayerJoinedPacket();
 
@@ -39,7 +40,8 @@ public:
      * g_nSCPlayerJoinedPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e4cf8
+     * @ghidraAddress NTSC-U/C: 0x003e4cf8
+     * @ghidraAddress PAL: 0x0041cf78
      */
     static Message *New();
 
@@ -47,7 +49,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003ef718
+     * @ghidraAddress NTSC-U/C: 0x003ef718
+     * @ghidraAddress PAL: 0x00427d08
      */
     virtual Message *Clone();
 
@@ -55,7 +58,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nSCPlayerJoinedPacketType.
-     * @ghidraAddress 0x003ef790
+     * @ghidraAddress NTSC-U/C: 0x003ef790
+     * @ghidraAddress PAL: 0x00427d80
      */
     virtual int Type();
 
@@ -63,7 +67,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `SCPlayerJoinedPacket`.
-     * @ghidraAddress 0x003ef7a0
+     * @ghidraAddress NTSC-U/C: 0x003ef7a0
+     * @ghidraAddress PAL: 0x00427d90
      */
     virtual const char *Name();
 
@@ -71,7 +76,8 @@ public:
      * Write the player record to a diagnostic stream through PlayerInfo::Print().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2100
+     * @ghidraAddress NTSC-U/C: 0x003f2100
+     * @ghidraAddress PAL: 0x0042a648
      */
     virtual void Print(std::ostream &stream);
 
@@ -79,7 +85,8 @@ public:
      * Write the Packet words and the player record to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e5fb8
+     * @ghidraAddress NTSC-U/C: 0x003e5fb8
+     * @ghidraAddress PAL: 0x0041e298
      */
     virtual void Save(OBStream &stream);
 
@@ -87,7 +94,8 @@ public:
      * Read the Packet words and the player record back from a stream.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003f2048
+     * @ghidraAddress NTSC-U/C: 0x003f2048
+     * @ghidraAddress PAL: 0x0042a590
      */
     virtual void Load(IBStream &stream);
 
@@ -101,6 +109,7 @@ private:
  * This word belongs to SCPlayerJoinedPacket because SCPlayerJoinedPacket::Type() at `0x003ef790`
  * returns it.
  *
- * @ghidraAddress 0x006d7384
+ * @ghidraAddress NTSC-U/C: 0x006d7384
+ * @ghidraAddress PAL: 0x0071ab24
  */
 extern int g_nSCPlayerJoinedPacketType;

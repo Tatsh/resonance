@@ -5,29 +5,29 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003e4ee8
+// NTSC-U/C: 0x003e4ee8, PAL: 0x0041d180
 Message *SCAllPlayersInfoPacket::New() {
     return new SCAllPlayersInfoPacket;
 }
 
-// 0x003eff60
+// NTSC-U/C: 0x003eff60, PAL: 0x00428568
 // Clone allocates and hands off to the copy constructor at 0x003f34e8, which is
 // the compiler expanding the implicit one.
 Message *SCAllPlayersInfoPacket::Clone() {
     return new SCAllPlayersInfoPacket(*this);
 }
 
-// 0x003effd8
+// NTSC-U/C: 0x003effd8, PAL: 0x004285e0
 int SCAllPlayersInfoPacket::Type() {
     return g_nSCAllPlayersInfoPacketType;
 }
 
-// 0x003effe8
+// NTSC-U/C: 0x003effe8, PAL: 0x004285f0
 const char *SCAllPlayersInfoPacket::Name() {
     return "SCAllPlayersInfoPacket";
 }
 
-// 0x003f2278
+// NTSC-U/C: 0x003f2278, PAL: 0x0042a7c0
 void SCAllPlayersInfoPacket::Print(std::ostream &stream) {
     for (const auto &entry : mPlayers) {
         std::ostream &rest = stream << " pid:" << entry.mPid << " tracks:";
@@ -40,7 +40,7 @@ void SCAllPlayersInfoPacket::Print(std::ostream &stream) {
     }
 }
 
-// 0x003e6578
+// NTSC-U/C: 0x003e6578, PAL: 0x0041e858
 void SCAllPlayersInfoPacket::Save(OBStream &stream) {
     Packet::Save(stream);
 
@@ -59,7 +59,7 @@ void SCAllPlayersInfoPacket::Save(OBStream &stream) {
     }
 }
 
-// 0x003e6788
+// NTSC-U/C: 0x003e6788, PAL: 0x0041ea68
 void SCAllPlayersInfoPacket::Load(IBStream &stream) {
     Packet::Load(stream);
 
@@ -79,7 +79,7 @@ void SCAllPlayersInfoPacket::Load(IBStream &stream) {
     }
 }
 
-// 0x003f23a8
+// NTSC-U/C: 0x003f23a8, PAL: 0x0042a8f0
 void SCAllPlayersInfoPacket::AppendEntry(const PlayerEntry &entry) {
     mPlayers.push_back(entry);
 }

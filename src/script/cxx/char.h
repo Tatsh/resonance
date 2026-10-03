@@ -38,7 +38,8 @@ public:
      *
      * @param pyob The reference to test.
      * @return True when the reference is a one-character string.
-     * @ghidraAddress 0x004c7d40
+     * @ghidraAddress NTSC-U/C: 0x004c7d40
+     * @ghidraAddress PAL: 0x00505f68
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PyString_Check(pyob) && PySequence_Length(pyob) == 1;

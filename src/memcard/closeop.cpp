@@ -4,28 +4,28 @@
 
 #include "memcard/memcardcbhandler.h"
 
-// 0x0055ee28
+// NTSC-U/C: 0x0055ee28, PAL: 0x005a00f8
 CloseOp::CloseOp(MemcardCBHandler *pHandler, int nFile, int nCookie)
     : MemcardOp(pHandler, nCookie), mFile(nFile) {
 }
 
-// 0x0055df00
+// NTSC-U/C: 0x0055df00, PAL: 0x0059f198
 CloseOp::~CloseOp() {
 }
 
-// 0x0055ee50
+// NTSC-U/C: 0x0055ee50, PAL: 0x005a0120
 void CloseOp::Issue() {
     sceMcClose(mFile);
     mIssued = kMemcardOpInFlight;
 }
 
-// 0x0055df30
+// NTSC-U/C: 0x0055df30, PAL: 0x0059f1c8
 void CloseOp::Complete() {
     InterpretResult();
     mHandler->OnClose(this);
 }
 
-// 0x0055ee80
+// NTSC-U/C: 0x0055ee80, PAL: 0x005a0150
 void CloseOp::InterpretResult() {
     switch (mResult) {
     case sceMcResSucceed:

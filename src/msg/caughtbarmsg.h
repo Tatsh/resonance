@@ -46,7 +46,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 119.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6d08
+     * @ghidraAddress NTSC-U/C: 0x003d6d08
+     * @ghidraAddress PAL: 0x0040ebf8
      */
     static Message *New();
 
@@ -54,7 +55,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001b11b0
+     * @ghidraAddress NTSC-U/C: 0x001b11b0
+     * @ghidraAddress PAL: 0x001b6f60
      */
     virtual Message *Clone();
 
@@ -62,7 +64,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nCaughtBarMsgType.
-     * @ghidraAddress 0x001b1200
+     * @ghidraAddress NTSC-U/C: 0x001b1200
+     * @ghidraAddress PAL: 0x001b6fb0
      */
     virtual int Type();
 
@@ -70,7 +73,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `CaughtBarMsg`.
-     * @ghidraAddress 0x001b1210
+     * @ghidraAddress NTSC-U/C: 0x001b1210
+     * @ghidraAddress PAL: 0x001b6fc0
      */
     virtual const char *Name();
 
@@ -87,6 +91,7 @@ public:
  * the registration at `0x003d9818` passes the same value, 119, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d01b4
+ * @ghidraAddress NTSC-U/C: 0x006d01b4
+ * @ghidraAddress PAL: 0x0071394c
  */
 extern int g_nCaughtBarMsgType;

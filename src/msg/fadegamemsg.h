@@ -24,7 +24,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 424.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7978
+     * @ghidraAddress NTSC-U/C: 0x003d7978
+     * @ghidraAddress PAL: 0x0040f878
      */
     static Message *New();
 
@@ -32,7 +33,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x00193f88
+     * @ghidraAddress NTSC-U/C: 0x00193f88
+     * @ghidraAddress PAL: 0x00199bc0
      */
     virtual Message *Clone();
 
@@ -40,7 +42,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nFadeGameMsgType.
-     * @ghidraAddress 0x00193fd8
+     * @ghidraAddress NTSC-U/C: 0x00193fd8
+     * @ghidraAddress PAL: 0x00199c10
      */
     virtual int Type();
 
@@ -48,7 +51,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `FadeGameMsg`.
-     * @ghidraAddress 0x00193fe8
+     * @ghidraAddress NTSC-U/C: 0x00193fe8
+     * @ghidraAddress PAL: 0x00199c20
      */
     virtual const char *Name();
 
@@ -63,6 +67,7 @@ public:
  * registration at `0x003d9818` passes the same value, 424, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d0364
+ * @ghidraAddress NTSC-U/C: 0x006d0364
+ * @ghidraAddress PAL: 0x00713afc
  */
 extern int g_nFadeGameMsgType;

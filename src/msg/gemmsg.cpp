@@ -5,29 +5,29 @@
 #include "game/player.h"
 #include "os/hxstr.h"
 
-// 0x003d74f8
+// NTSC-U/C: 0x003d74f8, PAL: 0x0040f3f8
 Message *GemMsg::New() {
     return new GemMsg;
 }
 
-// 0x003df540
+// NTSC-U/C: 0x003df540, PAL: 0x00417998
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *GemMsg::Clone() {
     return new GemMsg(*this);
 }
 
-// 0x003df5a8
+// NTSC-U/C: 0x003df5a8, PAL: 0x00417a00
 int GemMsg::Type() {
     return g_nGemMsgType;
 }
 
-// 0x003df5b8
+// NTSC-U/C: 0x003df5b8, PAL: 0x00417a10
 const char *GemMsg::Name() {
     return "GemMsg";
 }
 
-// 0x003d8830
+// NTSC-U/C: 0x003d8830, PAL: 0x00410c48
 // The colour name is copied into a temporary before it is written.
 void GemMsg::Print(std::ostream &stream) {
     std::ostream &rest = stream << mTrack << " ";

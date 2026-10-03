@@ -6,29 +6,29 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003d6e50
+// NTSC-U/C: 0x003d6e50, PAL: 0x0040ed40
 Message *SustainNoteMsg::New() {
     return new SustainNoteMsg;
 }
 
-// 0x003dc778
+// NTSC-U/C: 0x003dc778, PAL: 0x00414bb0
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *SustainNoteMsg::Clone() {
     return new SustainNoteMsg(*this);
 }
 
-// 0x003dc7d8
+// NTSC-U/C: 0x003dc7d8, PAL: 0x00414c10
 int SustainNoteMsg::Type() {
     return g_dwSustainNoteMsgType;
 }
 
-// 0x003dc7e8
+// NTSC-U/C: 0x003dc7e8, PAL: 0x00414c20
 const char *SustainNoteMsg::Name() {
     return "SustainNoteMsg";
 }
 
-// 0x003e3a18
+// NTSC-U/C: 0x003e3a18, PAL: 0x0041bdb8
 void SustainNoteMsg::Print(std::ostream &stream) {
     Mid::MBT position;
     position.mTick = mTick;
@@ -37,13 +37,13 @@ void SustainNoteMsg::Print(std::ostream &stream) {
     stream << static_cast<char>(mNote);
 }
 
-// 0x003e3a70
+// NTSC-U/C: 0x003e3a70, PAL: 0x0041be10
 void SustainNoteMsg::Save(OBStream &stream) {
     unsigned char note = mNote;
     stream.WriteBytes(&note, sizeof(note));
 }
 
-// 0x003e3ab0
+// NTSC-U/C: 0x003e3ab0, PAL: 0x0041be50
 void SustainNoteMsg::Load(IBStream &stream) {
     stream.ReadBytes(&mNote, sizeof(mNote));
 }

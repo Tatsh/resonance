@@ -36,7 +36,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7158
+     * @ghidraAddress NTSC-U/C: 0x003d7158
+     * @ghidraAddress PAL: 0x0040f050
      */
     static Message *New();
 
@@ -44,7 +45,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x0015a6c8
+     * @ghidraAddress NTSC-U/C: 0x0015a6c8
+     * @ghidraAddress PAL: 0x0015c448
      */
     virtual Message *Clone();
 
@@ -52,7 +54,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nScriptMsgType.
-     * @ghidraAddress 0x0015a768
+     * @ghidraAddress NTSC-U/C: 0x0015a768
+     * @ghidraAddress PAL: 0x0015c4e8
      */
     virtual int Type();
 
@@ -60,7 +63,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `ScriptMsg`.
-     * @ghidraAddress 0x0015a778
+     * @ghidraAddress NTSC-U/C: 0x0015a778
+     * @ghidraAddress PAL: 0x0015c4f8
      */
     virtual const char *Name();
 
@@ -79,6 +83,7 @@ public:
  *
  * ScriptMsg::Type() at `0x0015a768` returns it.
  *
- * @ghidraAddress 0x006d024c
+ * @ghidraAddress NTSC-U/C: 0x006d024c
+ * @ghidraAddress PAL: 0x007139e4
  */
 extern int g_nScriptMsgType;

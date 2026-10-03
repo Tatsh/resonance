@@ -4,16 +4,16 @@
 
 #include "memcard/memcardcbhandler.h"
 
-// 0x0055e628
+// NTSC-U/C: 0x0055e628, PAL: 0x0059f8f8
 CreateDirOp::CreateDirOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie)
     : MemcardOp(pHandler, nPortSlot, nCookie), mPath(path) {
 }
 
-// 0x0055d738
+// NTSC-U/C: 0x0055d738, PAL: 0x0059e990
 CreateDirOp::~CreateDirOp() {
 }
 
-// 0x0055e6b8
+// NTSC-U/C: 0x0055e6b8, PAL: 0x0059f988
 void CreateDirOp::Issue() {
     sceMcMkDir(mPortSlot >> kMemcardPortShift,
                mPortSlot & kMemcardSlotMask,
@@ -21,13 +21,13 @@ void CreateDirOp::Issue() {
     mIssued = kMemcardOpInFlight;
 }
 
-// 0x0055d7a0
+// NTSC-U/C: 0x0055d7a0, PAL: 0x0059ea08
 void CreateDirOp::Complete() {
     InterpretResult();
     mHandler->OnCreateDir(this);
 }
 
-// 0x0055e708
+// NTSC-U/C: 0x0055e708, PAL: 0x0059f9d8
 void CreateDirOp::InterpretResult() {
     switch (mResult) {
     case sceMcResSucceed:

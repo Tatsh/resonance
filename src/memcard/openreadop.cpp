@@ -4,16 +4,16 @@
 
 #include "memcard/memcardcbhandler.h"
 
-// 0x0055ecc0
+// NTSC-U/C: 0x0055ecc0, PAL: 0x0059ff90
 OpenReadOp::OpenReadOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie)
     : MemcardOp(pHandler, nPortSlot, nCookie), mPath(path) {
 }
 
-// 0x0055ddd0
+// NTSC-U/C: 0x0055ddd0, PAL: 0x0059f058
 OpenReadOp::~OpenReadOp() {
 }
 
-// 0x0055ed50
+// NTSC-U/C: 0x0055ed50, PAL: 0x005a0020
 void OpenReadOp::Issue() {
     sceMcOpen(mPortSlot >> kMemcardPortShift,
               mPortSlot & kMemcardSlotMask,
@@ -22,13 +22,13 @@ void OpenReadOp::Issue() {
     mIssued = kMemcardOpInFlight;
 }
 
-// 0x0055de38
+// NTSC-U/C: 0x0055de38, PAL: 0x0059f0d0
 void OpenReadOp::Complete() {
     InterpretResult();
     mHandler->OnOpenRead(this);
 }
 
-// 0x0055eda0
+// NTSC-U/C: 0x0055eda0, PAL: 0x005a0070
 void OpenReadOp::InterpretResult() {
     mFile = mResult; // Yes, a failed open stores its error code in mFile as well.
     if (mResult >= sceMcResSucceed) {

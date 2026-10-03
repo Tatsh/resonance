@@ -48,7 +48,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 314.
      *
      * @return The message.
-     * @ghidraAddress 0x003d71d0
+     * @ghidraAddress NTSC-U/C: 0x003d71d0
+     * @ghidraAddress PAL: 0x0040f0d0
      */
     static Message *New();
 
@@ -56,7 +57,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x00115f90
+     * @ghidraAddress NTSC-U/C: 0x00115f90
+     * @ghidraAddress PAL: 0x00116438
      */
     virtual Message *Clone();
 
@@ -64,7 +66,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nAdvanceSectionToggleMsgType.
-     * @ghidraAddress 0x00115fe0
+     * @ghidraAddress NTSC-U/C: 0x00115fe0
+     * @ghidraAddress PAL: 0x00116488
      */
     virtual int Type();
 
@@ -72,7 +75,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `AdvanceSectionToggleMsg`.
-     * @ghidraAddress 0x00115ff0
+     * @ghidraAddress NTSC-U/C: 0x00115ff0
+     * @ghidraAddress PAL: 0x00116498
      */
     virtual const char *Name();
 
@@ -89,6 +93,7 @@ private:
  * `0x00115fe0` returns it, and the registration at `0x003d9818` passes the same value, 314, as the
  * identity of this class's factory.
  *
- * @ghidraAddress 0x006d025c
+ * @ghidraAddress NTSC-U/C: 0x006d025c
+ * @ghidraAddress PAL: 0x007139f4
  */
 extern int g_nAdvanceSectionToggleMsgType;

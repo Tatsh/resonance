@@ -53,7 +53,8 @@ public:
      * initialised.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6aa8
+     * @ghidraAddress NTSC-U/C: 0x003d6aa8
+     * @ghidraAddress PAL: 0x0040e998
      */
     static Message *New();
 
@@ -61,7 +62,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003db060
+     * @ghidraAddress NTSC-U/C: 0x003db060
+     * @ghidraAddress PAL: 0x00413498
      */
     virtual Message *Clone();
 
@@ -69,7 +71,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nAxisXPowMsgType.
-     * @ghidraAddress 0x003db0b8
+     * @ghidraAddress NTSC-U/C: 0x003db0b8
+     * @ghidraAddress PAL: 0x004134f0
      */
     virtual int Type();
 
@@ -77,7 +80,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `AxisXPowMsg`.
-     * @ghidraAddress 0x003db0c8
+     * @ghidraAddress NTSC-U/C: 0x003db0c8
+     * @ghidraAddress PAL: 0x00413500
      */
     virtual const char *Name();
 
@@ -86,7 +90,8 @@ public:
      * spaces, to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3550
+     * @ghidraAddress NTSC-U/C: 0x003e3550
+     * @ghidraAddress PAL: 0x0041b8d0
      */
     virtual void Print(std::ostream &stream);
 
@@ -103,6 +108,7 @@ private:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d0164
+ * @ghidraAddress NTSC-U/C: 0x006d0164
+ * @ghidraAddress PAL: 0x007138fc
  */
 extern int g_nAxisXPowMsgType;

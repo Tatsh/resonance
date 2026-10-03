@@ -16,7 +16,7 @@ constexpr int kTestMapProbeCount = 20;
 constexpr int kTestMapResultSize = 61;
 
 // Build one probe pair: the bar and the section holding it.
-// 0x0012c040
+// NTSC-U/C: 0x0012c040, PAL: 0x0012c788
 Py::Tuple BuildTestMapProbeList(PlayMapRepeatRing *pRing, long long nBar) {
     Py::Tuple probe(2);
     probe.setItem(0, Py::Int(nBar));
@@ -28,7 +28,7 @@ Py::Tuple BuildTestMapProbeList(PlayMapRepeatRing *pRing, long long nBar) {
 //
 // Lays four sections over a repeat ring, probes three bars per section step, and returns the
 // pairs. The tuple arrives by value and is released here.
-// 0x0012c448
+// NTSC-U/C: 0x0012c448, PAL: 0x0012cb90
 Py::Object ScriptTestMap([[maybe_unused]] Py::Tuple args) {
     PlayMapRepeatRing ring;
     ring.AddStep(5, HxStr(""));
@@ -54,7 +54,7 @@ Py::Object ScriptTestMap([[maybe_unused]] Py::Tuple args) {
 }
 
 // Run ScriptTestMap() on the interpreter's argument tuple.
-// 0x0012cbc8
+// NTSC-U/C: 0x0012cbc8, PAL: 0x0012d310
 PyObject *PyInvokeTestMap(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -69,7 +69,7 @@ PyObject *PyInvokeTestMap(PyObject *, PyObject *pArgs) {
 }
 
 // The script interface this file exports, registered in static initialisation.
-// 0x0012d178
+// NTSC-U/C: 0x0012d178, PAL: 0x0012d8c0
 const ScriptFunc kTestMapFunc("test_map", PyInvokeTestMap);
 
 } // namespace

@@ -35,7 +35,8 @@ public:
     /**
      * Destroy the object.
      *
-     * @ghidraAddress 0x005abaf8
+     * @ghidraAddress NTSC-U/C: 0x005abaf8
+     * @ghidraAddress PAL: 0x005ee020
      */
     virtual ~PythonExtensionBase() {
     }
@@ -46,7 +47,8 @@ public:
      * @param pFile The stream.
      * @param nFlags The print flags.
      * @return 0.
-     * @ghidraAddress 0x005ac880
+     * @ghidraAddress NTSC-U/C: 0x005ac880
+     * @ghidraAddress PAL: 0x005eeda8
      */
     virtual int print(FILE *pFile, int nFlags);
 
@@ -55,7 +57,8 @@ public:
      *
      * @param pszName The attribute name.
      * @return `None`.
-     * @ghidraAddress 0x005ac8a0
+     * @ghidraAddress NTSC-U/C: 0x005ac8a0
+     * @ghidraAddress PAL: 0x005eedc8
      */
     virtual Object getattr(const char *pszName);
 
@@ -65,7 +68,8 @@ public:
      * @param pszName The attribute name.
      * @param value The value.
      * @return 0.
-     * @ghidraAddress 0x005ac900
+     * @ghidraAddress NTSC-U/C: 0x005ac900
+     * @ghidraAddress PAL: 0x005eee28
      */
     virtual int setattr(const char *pszName, const Object &value);
 
@@ -74,7 +78,8 @@ public:
      *
      * @param name The attribute name.
      * @return `None`.
-     * @ghidraAddress 0x005ac920
+     * @ghidraAddress NTSC-U/C: 0x005ac920
+     * @ghidraAddress PAL: 0x005eee48
      */
     virtual Object getattro(const Object &name);
 
@@ -84,7 +89,8 @@ public:
      * @param name The attribute name.
      * @param value The value.
      * @return 0.
-     * @ghidraAddress 0x005ac980
+     * @ghidraAddress NTSC-U/C: 0x005ac980
+     * @ghidraAddress PAL: 0x005eeea8
      */
     virtual int setattro(const Object &name, const Object &value);
 
@@ -93,7 +99,8 @@ public:
      *
      * @param other The other object.
      * @return 0.
-     * @ghidraAddress 0x005ac9a0
+     * @ghidraAddress NTSC-U/C: 0x005ac9a0
+     * @ghidraAddress PAL: 0x005eeec8
      */
     virtual int compare(const Object &other);
 
@@ -101,7 +108,8 @@ public:
      * Produce the `repr()` text.
      *
      * @return `None`.
-     * @ghidraAddress 0x005ac9c0
+     * @ghidraAddress NTSC-U/C: 0x005ac9c0
+     * @ghidraAddress PAL: 0x005eeee8
      */
     virtual Object repr();
 
@@ -109,7 +117,8 @@ public:
      * Produce the `str()` text.
      *
      * @return `None`.
-     * @ghidraAddress 0x005aca20
+     * @ghidraAddress NTSC-U/C: 0x005aca20
+     * @ghidraAddress PAL: 0x005eef48
      */
     virtual Object str();
 
@@ -117,7 +126,8 @@ public:
      * Produce the hash.
      *
      * @return 0.
-     * @ghidraAddress 0x005aca80
+     * @ghidraAddress NTSC-U/C: 0x005aca80
+     * @ghidraAddress PAL: 0x005eefa8
      */
     virtual Py_LONG hash();
 
@@ -127,7 +137,8 @@ public:
      * @param args The positional arguments.
      * @param keywords The keyword arguments.
      * @return `None`.
-     * @ghidraAddress 0x005acaa0
+     * @ghidraAddress NTSC-U/C: 0x005acaa0
+     * @ghidraAddress PAL: 0x005eefc8
      */
     virtual Object call(const Object &args, const Object &keywords);
 
@@ -135,7 +146,8 @@ public:
      * Report the sequence length.
      *
      * @return 0.
-     * @ghidraAddress 0x005acb00
+     * @ghidraAddress NTSC-U/C: 0x005acb00
+     * @ghidraAddress PAL: 0x005ef028
      */
     virtual int sequence_length();
 
@@ -144,7 +156,8 @@ public:
      *
      * @param other The other sequence.
      * @return `None`.
-     * @ghidraAddress 0x005acb20
+     * @ghidraAddress NTSC-U/C: 0x005acb20
+     * @ghidraAddress PAL: 0x005ef048
      */
     virtual Object sequence_concat(const Object &other);
 
@@ -153,7 +166,8 @@ public:
      *
      * @param nCount The repeat count.
      * @return `None`.
-     * @ghidraAddress 0x005acb80
+     * @ghidraAddress NTSC-U/C: 0x005acb80
+     * @ghidraAddress PAL: 0x005ef0a8
      */
     virtual Object sequence_repeat(int nCount);
 
@@ -162,7 +176,8 @@ public:
      *
      * @param nIndex The index.
      * @return `None`.
-     * @ghidraAddress 0x005acbe0
+     * @ghidraAddress NTSC-U/C: 0x005acbe0
+     * @ghidraAddress PAL: 0x005ef108
      */
     virtual Object sequence_item(int nIndex);
 
@@ -172,7 +187,8 @@ public:
      * @param nFirst The first index.
      * @param nLast The index past the slice.
      * @return `None`.
-     * @ghidraAddress 0x005acc40
+     * @ghidraAddress NTSC-U/C: 0x005acc40
+     * @ghidraAddress PAL: 0x005ef168
      */
     virtual Object sequence_slice(int nFirst, int nLast);
 
@@ -182,7 +198,8 @@ public:
      * @param nIndex The index.
      * @param value The value.
      * @return 0.
-     * @ghidraAddress 0x005acca0
+     * @ghidraAddress NTSC-U/C: 0x005acca0
+     * @ghidraAddress PAL: 0x005ef1c8
      */
     virtual int sequence_ass_item(int nIndex, const Object &value);
 
@@ -193,7 +210,8 @@ public:
      * @param nLast The index past the slice.
      * @param value The value.
      * @return 0.
-     * @ghidraAddress 0x005accc0
+     * @ghidraAddress NTSC-U/C: 0x005accc0
+     * @ghidraAddress PAL: 0x005ef1e8
      */
     virtual int sequence_ass_slice(int nFirst, int nLast, const Object &value);
 
@@ -201,7 +219,8 @@ public:
      * Report the mapping length.
      *
      * @return 0.
-     * @ghidraAddress 0x005acce0
+     * @ghidraAddress NTSC-U/C: 0x005acce0
+     * @ghidraAddress PAL: 0x005ef208
      */
     virtual int mapping_length();
 
@@ -210,7 +229,8 @@ public:
      *
      * @param key The key.
      * @return `None`.
-     * @ghidraAddress 0x005acd00
+     * @ghidraAddress NTSC-U/C: 0x005acd00
+     * @ghidraAddress PAL: 0x005ef228
      */
     virtual Object mapping_subscript(const Object &key);
 
@@ -220,7 +240,8 @@ public:
      * @param key The key.
      * @param value The value.
      * @return 0.
-     * @ghidraAddress 0x005acd60
+     * @ghidraAddress NTSC-U/C: 0x005acd60
+     * @ghidraAddress PAL: 0x005ef288
      */
     virtual int mapping_ass_subscript(const Object &key, const Object &value);
 
@@ -228,7 +249,8 @@ public:
      * Report whether the number is nonzero.
      *
      * @return 0.
-     * @ghidraAddress 0x005acd80
+     * @ghidraAddress NTSC-U/C: 0x005acd80
+     * @ghidraAddress PAL: 0x005ef2a8
      */
     virtual int number_nonzero();
 
@@ -236,7 +258,8 @@ public:
      * Negate the number.
      *
      * @return `None`.
-     * @ghidraAddress 0x005acda0
+     * @ghidraAddress NTSC-U/C: 0x005acda0
+     * @ghidraAddress PAL: 0x005ef2c8
      */
     virtual Object number_negative();
 
@@ -244,7 +267,8 @@ public:
      * Apply unary plus.
      *
      * @return `None`.
-     * @ghidraAddress 0x005ace00
+     * @ghidraAddress NTSC-U/C: 0x005ace00
+     * @ghidraAddress PAL: 0x005ef328
      */
     virtual Object number_positive();
 
@@ -252,7 +276,8 @@ public:
      * Produce the absolute value.
      *
      * @return `None`.
-     * @ghidraAddress 0x005ace60
+     * @ghidraAddress NTSC-U/C: 0x005ace60
+     * @ghidraAddress PAL: 0x005ef388
      */
     virtual Object number_absolute();
 
@@ -260,7 +285,8 @@ public:
      * Invert the bits.
      *
      * @return `None`.
-     * @ghidraAddress 0x005acec0
+     * @ghidraAddress NTSC-U/C: 0x005acec0
+     * @ghidraAddress PAL: 0x005ef3e8
      */
     virtual Object number_invert();
 
@@ -268,7 +294,8 @@ public:
      * Convert to an integer.
      *
      * @return `None`.
-     * @ghidraAddress 0x005acf20
+     * @ghidraAddress NTSC-U/C: 0x005acf20
+     * @ghidraAddress PAL: 0x005ef448
      */
     virtual Object number_int();
 
@@ -276,7 +303,8 @@ public:
      * Convert to a float.
      *
      * @return `None`.
-     * @ghidraAddress 0x005acf80
+     * @ghidraAddress NTSC-U/C: 0x005acf80
+     * @ghidraAddress PAL: 0x005ef4a8
      */
     virtual Object number_float();
 
@@ -284,7 +312,8 @@ public:
      * Convert to a long integer.
      *
      * @return `None`.
-     * @ghidraAddress 0x005acfe0
+     * @ghidraAddress NTSC-U/C: 0x005acfe0
+     * @ghidraAddress PAL: 0x005ef508
      */
     virtual Object number_long();
 
@@ -292,7 +321,8 @@ public:
      * Produce the octal text.
      *
      * @return `None`.
-     * @ghidraAddress 0x005ad040
+     * @ghidraAddress NTSC-U/C: 0x005ad040
+     * @ghidraAddress PAL: 0x005ef568
      */
     virtual Object number_oct();
 
@@ -300,7 +330,8 @@ public:
      * Produce the hexadecimal text.
      *
      * @return `None`.
-     * @ghidraAddress 0x005ad0a0
+     * @ghidraAddress NTSC-U/C: 0x005ad0a0
+     * @ghidraAddress PAL: 0x005ef5c8
      */
     virtual Object number_hex();
 
@@ -309,7 +340,8 @@ public:
      *
      * @param other The other operand.
      * @return `None`.
-     * @ghidraAddress 0x005ad100
+     * @ghidraAddress NTSC-U/C: 0x005ad100
+     * @ghidraAddress PAL: 0x005ef628
      */
     virtual Object number_add(const Object &other);
 
@@ -318,7 +350,8 @@ public:
      *
      * @param other The other operand.
      * @return `None`.
-     * @ghidraAddress 0x005ad160
+     * @ghidraAddress NTSC-U/C: 0x005ad160
+     * @ghidraAddress PAL: 0x005ef688
      */
     virtual Object number_subtract(const Object &other);
 
@@ -327,7 +360,8 @@ public:
      *
      * @param other The other operand.
      * @return `None`.
-     * @ghidraAddress 0x005ad1c0
+     * @ghidraAddress NTSC-U/C: 0x005ad1c0
+     * @ghidraAddress PAL: 0x005ef6e8
      */
     virtual Object number_multiply(const Object &other);
 
@@ -336,7 +370,8 @@ public:
      *
      * @param other The other operand.
      * @return `None`.
-     * @ghidraAddress 0x005ad220
+     * @ghidraAddress NTSC-U/C: 0x005ad220
+     * @ghidraAddress PAL: 0x005ef748
      */
     virtual Object number_divide(const Object &other);
 
@@ -345,7 +380,8 @@ public:
      *
      * @param other The other operand.
      * @return `None`.
-     * @ghidraAddress 0x005ad280
+     * @ghidraAddress NTSC-U/C: 0x005ad280
+     * @ghidraAddress PAL: 0x005ef7a8
      */
     virtual Object number_remainder(const Object &other);
 
@@ -354,7 +390,8 @@ public:
      *
      * @param other The other operand.
      * @return `None`.
-     * @ghidraAddress 0x005ad2e0
+     * @ghidraAddress NTSC-U/C: 0x005ad2e0
+     * @ghidraAddress PAL: 0x005ef808
      */
     virtual Object number_divmod(const Object &other);
 
@@ -363,7 +400,8 @@ public:
      *
      * @param other The other operand.
      * @return `None`.
-     * @ghidraAddress 0x005ad340
+     * @ghidraAddress NTSC-U/C: 0x005ad340
+     * @ghidraAddress PAL: 0x005ef868
      */
     virtual Object number_lshift(const Object &other);
 
@@ -372,7 +410,8 @@ public:
      *
      * @param other The other operand.
      * @return `None`.
-     * @ghidraAddress 0x005ad3a0
+     * @ghidraAddress NTSC-U/C: 0x005ad3a0
+     * @ghidraAddress PAL: 0x005ef8c8
      */
     virtual Object number_rshift(const Object &other);
 
@@ -381,7 +420,8 @@ public:
      *
      * @param other The other operand.
      * @return `None`.
-     * @ghidraAddress 0x005ad400
+     * @ghidraAddress NTSC-U/C: 0x005ad400
+     * @ghidraAddress PAL: 0x005ef928
      */
     virtual Object number_and(const Object &other);
 
@@ -390,7 +430,8 @@ public:
      *
      * @param other The other operand.
      * @return `None`.
-     * @ghidraAddress 0x005ad460
+     * @ghidraAddress NTSC-U/C: 0x005ad460
+     * @ghidraAddress PAL: 0x005ef988
      */
     virtual Object number_xor(const Object &other);
 
@@ -399,7 +440,8 @@ public:
      *
      * @param other The other operand.
      * @return `None`.
-     * @ghidraAddress 0x005ad4c0
+     * @ghidraAddress NTSC-U/C: 0x005ad4c0
+     * @ghidraAddress PAL: 0x005ef9e8
      */
     virtual Object number_or(const Object &other);
 
@@ -409,7 +451,8 @@ public:
      * @param exponent The exponent.
      * @param modulus The modulus.
      * @return `None`.
-     * @ghidraAddress 0x005ad520
+     * @ghidraAddress NTSC-U/C: 0x005ad520
+     * @ghidraAddress PAL: 0x005efa48
      */
     virtual Object number_power(const Object &exponent, const Object &modulus);
 
@@ -419,7 +462,8 @@ public:
      * @param nSegment The segment.
      * @param ppData Receives the segment address.
      * @return 0.
-     * @ghidraAddress 0x005ad580
+     * @ghidraAddress NTSC-U/C: 0x005ad580
+     * @ghidraAddress PAL: 0x005efaa8
      */
     virtual int buffer_getreadbuffer(int nSegment, void **ppData);
 
@@ -429,7 +473,8 @@ public:
      * @param nSegment The segment.
      * @param ppData Receives the segment address.
      * @return 0.
-     * @ghidraAddress 0x005ad5a0
+     * @ghidraAddress NTSC-U/C: 0x005ad5a0
+     * @ghidraAddress PAL: 0x005efac8
      */
     virtual int buffer_getwritebuffer(int nSegment, void **ppData);
 
@@ -438,7 +483,8 @@ public:
      *
      * @param pnLength Receives the total length.
      * @return 0.
-     * @ghidraAddress 0x005ad5c0
+     * @ghidraAddress NTSC-U/C: 0x005ad5c0
+     * @ghidraAddress PAL: 0x005efae8
      */
     virtual int buffer_getsegcount(int *pnLength);
 
@@ -449,7 +495,8 @@ public:
      * @param pFile The stream.
      * @param nFlags The print flags.
      * @return The member's result, or 0 after a thrown Py::Exception.
-     * @ghidraAddress 0x005ac3c0
+     * @ghidraAddress NTSC-U/C: 0x005ac3c0
+     * @ghidraAddress PAL: 0x005ee8e8
      */
     static int print_handler(PyObject *self, FILE *pFile, int nFlags);
 
@@ -458,7 +505,8 @@ public:
      *
      * @param self The object.
      * @return The member's result, or 0 after a thrown Py::Exception.
-     * @ghidraAddress 0x005ac458
+     * @ghidraAddress NTSC-U/C: 0x005ac458
+     * @ghidraAddress PAL: 0x005ee980
      */
     static Py_LONG hash_handler(PyObject *self);
 
@@ -467,7 +515,8 @@ public:
      *
      * @param self The object.
      * @return The member's result, or 0 after a thrown Py::Exception.
-     * @ghidraAddress 0x005ac4f0
+     * @ghidraAddress NTSC-U/C: 0x005ac4f0
+     * @ghidraAddress PAL: 0x005eea18
      */
     static int sequence_length_handler(PyObject *self);
 
@@ -476,7 +525,8 @@ public:
      *
      * @param self The object.
      * @return The member's result, or 0 after a thrown Py::Exception.
-     * @ghidraAddress 0x005ac588
+     * @ghidraAddress NTSC-U/C: 0x005ac588
+     * @ghidraAddress PAL: 0x005eeab0
      */
     static int mapping_length_handler(PyObject *self);
 
@@ -485,7 +535,8 @@ public:
      *
      * @param self The object.
      * @return The member's result, or 0 after a thrown Py::Exception.
-     * @ghidraAddress 0x005ac620
+     * @ghidraAddress NTSC-U/C: 0x005ac620
+     * @ghidraAddress PAL: 0x005eeb48
      */
     static int number_nonzero_handler(PyObject *self);
 
@@ -496,7 +547,8 @@ public:
      * @param nSegment The segment.
      * @param ppData Receives the segment address.
      * @return The member's result, or 0 after a thrown Py::Exception.
-     * @ghidraAddress 0x005ac6b8
+     * @ghidraAddress NTSC-U/C: 0x005ac6b8
+     * @ghidraAddress PAL: 0x005eebe0
      */
     static int buffer_getreadbuffer_handler(PyObject *self, int nSegment, void **ppData);
 
@@ -507,7 +559,8 @@ public:
      * @param nSegment The segment.
      * @param ppData Receives the segment address.
      * @return The member's result, or 0 after a thrown Py::Exception.
-     * @ghidraAddress 0x005ac750
+     * @ghidraAddress NTSC-U/C: 0x005ac750
+     * @ghidraAddress PAL: 0x005eec78
      */
     static int buffer_getwritebuffer_handler(PyObject *self, int nSegment, void **ppData);
 
@@ -517,7 +570,8 @@ public:
      * @param self The object.
      * @param pnLength Receives the total length.
      * @return The member's result, or 0 after a thrown Py::Exception.
-     * @ghidraAddress 0x005ac7e8
+     * @ghidraAddress NTSC-U/C: 0x005ac7e8
+     * @ghidraAddress PAL: 0x005eed10
      */
     static int buffer_getsegcount_handler(PyObject *self, int *pnLength);
 
@@ -527,7 +581,8 @@ public:
      * @param self The object.
      * @param other The other sequence.
      * @return A new reference to the member's result, or null after a thrown Py::Exception.
-     * @ghidraAddress 0x005a7258
+     * @ghidraAddress NTSC-U/C: 0x005a7258
+     * @ghidraAddress PAL: 0x005e9768
      */
     static PyObject *sequence_concat_handler(PyObject *self, PyObject *other);
 
@@ -537,7 +592,8 @@ public:
      * @param self The object.
      * @param nCount The repeat count.
      * @return A new reference to the member's result, or null after a thrown Py::Exception.
-     * @ghidraAddress 0x005a7460
+     * @ghidraAddress NTSC-U/C: 0x005a7460
+     * @ghidraAddress PAL: 0x005e9970
      */
     static PyObject *sequence_repeat_handler(PyObject *self, int nCount);
 
@@ -547,7 +603,8 @@ public:
      * @param self The object.
      * @param nIndex The index.
      * @return A new reference to the member's result, or null after a thrown Py::Exception.
-     * @ghidraAddress 0x005a75a8
+     * @ghidraAddress NTSC-U/C: 0x005a75a8
+     * @ghidraAddress PAL: 0x005e9ab8
      */
     static PyObject *sequence_item_handler(PyObject *self, int nIndex);
 
@@ -558,7 +615,8 @@ public:
      * @param nFirst The first index.
      * @param nLast The index past the slice.
      * @return A new reference to the member's result, or null after a thrown Py::Exception.
-     * @ghidraAddress 0x005a76f0
+     * @ghidraAddress NTSC-U/C: 0x005a76f0
+     * @ghidraAddress PAL: 0x005e9c00
      */
     static PyObject *sequence_slice_handler(PyObject *self, int nFirst, int nLast);
 
@@ -569,7 +627,8 @@ public:
      * @param nIndex The index.
      * @param value The value.
      * @return The member's result, or 0 after a thrown Py::Exception.
-     * @ghidraAddress 0x005a7838
+     * @ghidraAddress NTSC-U/C: 0x005a7838
+     * @ghidraAddress PAL: 0x005e9d48
      */
     static int sequence_ass_item_handler(PyObject *self, int nIndex, PyObject *value);
 
@@ -581,7 +640,8 @@ public:
      * @param nLast The index past the slice.
      * @param value The value.
      * @return The member's result, or 0 after a thrown Py::Exception.
-     * @ghidraAddress 0x005a79b8
+     * @ghidraAddress NTSC-U/C: 0x005a79b8
+     * @ghidraAddress PAL: 0x005e9ec8
      */
     static int sequence_ass_slice_handler(PyObject *self, int nFirst, int nLast, PyObject *value);
 
@@ -591,7 +651,8 @@ public:
      * @param self The object.
      * @param key The key.
      * @return A new reference to the member's result, or null after a thrown Py::Exception.
-     * @ghidraAddress 0x005a7b48
+     * @ghidraAddress NTSC-U/C: 0x005a7b48
+     * @ghidraAddress PAL: 0x005ea058
      */
     static PyObject *mapping_subscript_handler(PyObject *self, PyObject *key);
 
@@ -602,7 +663,8 @@ public:
      * @param key The key.
      * @param value The value.
      * @return The member's result, or 0 after a thrown Py::Exception.
-     * @ghidraAddress 0x005a7d50
+     * @ghidraAddress NTSC-U/C: 0x005a7d50
+     * @ghidraAddress PAL: 0x005ea260
      */
     static int mapping_ass_subscript_handler(PyObject *self, PyObject *key, PyObject *value);
 

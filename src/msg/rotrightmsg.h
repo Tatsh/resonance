@@ -49,7 +49,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 102.
      *
      * @return The message.
-     * @ghidraAddress 0x003d68e8
+     * @ghidraAddress NTSC-U/C: 0x003d68e8
+     * @ghidraAddress PAL: 0x0040e7d8
      */
     static Message *New();
 
@@ -57,7 +58,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x0011d458
+     * @ghidraAddress NTSC-U/C: 0x0011d458
+     * @ghidraAddress PAL: 0x0011d9e0
      */
     virtual Message *Clone();
 
@@ -65,7 +67,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nRotRightMsgType.
-     * @ghidraAddress 0x0011d4a8
+     * @ghidraAddress NTSC-U/C: 0x0011d4a8
+     * @ghidraAddress PAL: 0x0011da30
      */
     virtual int Type();
 
@@ -73,7 +76,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `RotRightMsg`.
-     * @ghidraAddress 0x0011d4b8
+     * @ghidraAddress NTSC-U/C: 0x0011d4b8
+     * @ghidraAddress PAL: 0x0011da40
      */
     virtual const char *Name();
 
@@ -95,6 +99,7 @@ public:
  * registration at `0x003d9818` passes the same value, 102, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d012c
+ * @ghidraAddress NTSC-U/C: 0x006d012c
+ * @ghidraAddress PAL: 0x007138c4
  */
 extern int g_nRotRightMsgType;

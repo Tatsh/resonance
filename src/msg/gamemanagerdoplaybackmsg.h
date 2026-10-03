@@ -27,7 +27,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 436.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7c30
+     * @ghidraAddress NTSC-U/C: 0x003d7c30
+     * @ghidraAddress PAL: 0x0040fb48
      */
     static Message *New();
 
@@ -35,7 +36,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x00291970
+     * @ghidraAddress NTSC-U/C: 0x00291970
+     * @ghidraAddress PAL: 0x002ad888
      */
     virtual Message *Clone();
 
@@ -43,7 +45,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nGameManagerDoPlaybackMsgType.
-     * @ghidraAddress 0x002919a8
+     * @ghidraAddress NTSC-U/C: 0x002919a8
+     * @ghidraAddress PAL: 0x002ad8c0
      */
     virtual int Type();
 
@@ -51,7 +54,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `GameManagerDoPlaybackMsg`.
-     * @ghidraAddress 0x002919b8
+     * @ghidraAddress NTSC-U/C: 0x002919b8
+     * @ghidraAddress PAL: 0x002ad8d0
      */
     virtual const char *Name();
 };
@@ -63,6 +67,7 @@ public:
  * `0x002919a8` returns it, and the registration at `0x003d9818` passes the same value, 436, as the
  * identity of this class's factory.
  *
- * @ghidraAddress 0x006d03c4
+ * @ghidraAddress NTSC-U/C: 0x006d03c4
+ * @ghidraAddress PAL: 0x00713b5c
  */
 extern int g_nGameManagerDoPlaybackMsgType;

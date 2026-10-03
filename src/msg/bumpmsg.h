@@ -25,7 +25,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d79e8
+     * @ghidraAddress NTSC-U/C: 0x003d79e8
+     * @ghidraAddress PAL: 0x0040f8e8
      */
     static Message *New();
 
@@ -33,7 +34,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e13d0
+     * @ghidraAddress NTSC-U/C: 0x003e13d0
+     * @ghidraAddress PAL: 0x00419828
      */
     virtual Message *Clone();
 
@@ -41,7 +43,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nBumpMsgType.
-     * @ghidraAddress 0x003e1440
+     * @ghidraAddress NTSC-U/C: 0x003e1440
+     * @ghidraAddress PAL: 0x00419898
      */
     virtual int Type();
 
@@ -49,7 +52,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `BumpMsg`.
-     * @ghidraAddress 0x003e1450
+     * @ghidraAddress NTSC-U/C: 0x003e1450
+     * @ghidraAddress PAL: 0x004198a8
      */
     virtual const char *Name();
 
@@ -57,7 +61,8 @@ public:
      * Write the player's colour name to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3fb8
+     * @ghidraAddress NTSC-U/C: 0x003e3fb8
+     * @ghidraAddress PAL: 0x0041c1c8
      */
     virtual void Print(std::ostream &stream);
 
@@ -75,6 +80,7 @@ private:
  * handlers elsewhere read the same word to compare against it, which is the expected shape for a
  * registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d0374
+ * @ghidraAddress NTSC-U/C: 0x006d0374
+ * @ghidraAddress PAL: 0x00713b0c
  */
 extern int g_nBumpMsgType;

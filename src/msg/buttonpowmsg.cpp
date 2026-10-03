@@ -5,29 +5,29 @@
 #include "game/player.h"
 #include "os/hxstr.h"
 
-// 0x003d6ae8
+// NTSC-U/C: 0x003d6ae8, PAL: 0x0040e9d8
 Message *ButtonPowMsg::New() {
     return new ButtonPowMsg;
 }
 
-// 0x003db220
+// NTSC-U/C: 0x003db220, PAL: 0x00413658
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *ButtonPowMsg::Clone() {
     return new ButtonPowMsg(*this);
 }
 
-// 0x003db278
+// NTSC-U/C: 0x003db278, PAL: 0x004136b0
 int ButtonPowMsg::Type() {
     return g_nButtonPowMsgType;
 }
 
-// 0x003db288
+// NTSC-U/C: 0x003db288, PAL: 0x004136c0
 const char *ButtonPowMsg::Name() {
     return "ButtonPowMsg";
 }
 
-// 0x003d7df0
+// NTSC-U/C: 0x003d7df0, PAL: 0x0040ff08
 // The colour name is copied into a temporary before it is written.
 void ButtonPowMsg::Print(std::ostream &stream) {
     mPosition.Print(stream);

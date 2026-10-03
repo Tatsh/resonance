@@ -2,29 +2,29 @@
 
 #include <iostream>
 
-// 0x003d72f0
+// NTSC-U/C: 0x003d72f0, PAL: 0x0040f1f0
 Message *RefreshNetMsg::New() {
     return new RefreshNetMsg;
 }
 
-// 0x003de630
+// NTSC-U/C: 0x003de630, PAL: 0x00416a88
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *RefreshNetMsg::Clone() {
     return new RefreshNetMsg(*this);
 }
 
-// 0x003de688
+// NTSC-U/C: 0x003de688, PAL: 0x00416ae0
 int RefreshNetMsg::Type() {
     return g_nRefreshNetMsgType;
 }
 
-// 0x003de698
+// NTSC-U/C: 0x003de698, PAL: 0x00416af0
 const char *RefreshNetMsg::Name() {
     return "RefreshNetMsg";
 }
 
-// 0x003e3e08
+// NTSC-U/C: 0x003e3e08, PAL: 0x0041bfd8
 void RefreshNetMsg::Print(std::ostream &stream) {
     stream << "tr#" << mTrack << " bars " << mFirstBar << " - " << mEndBar;
 }

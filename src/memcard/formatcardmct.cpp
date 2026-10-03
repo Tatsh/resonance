@@ -10,11 +10,11 @@ FormatCardMCT::FormatCardMCT(
     : MemcardTask(pUser, pCard, nPortSlot, nCookie), mUnformat(bUnformat) {
 }
 
-// 0x00184d68
+// NTSC-U/C: 0x00184d68, PAL: 0x0018a2b8
 FormatCardMCT::~FormatCardMCT() {
 }
 
-// 0x00186348
+// NTSC-U/C: 0x00186348, PAL: 0x0018be08
 void FormatCardMCT::IssueFormat() {
     if (mUnformat == 0) {
         mCard->Format(this, mPortSlot, mCookie);
@@ -24,7 +24,7 @@ void FormatCardMCT::IssueFormat() {
     mCard->Unformat(this, mPortSlot, mCookie);
 }
 
-// 0x00186390
+// NTSC-U/C: 0x00186390, PAL: 0x0018be50
 void FormatCardMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus != kMemcardStatusUnknown) {
@@ -42,7 +42,7 @@ void FormatCardMCT::OnCheckInfo(CheckInfoOp *pOp) {
     }
 }
 
-// 0x00186438
+// NTSC-U/C: 0x00186438, PAL: 0x0018bef8
 void FormatCardMCT::OnFormat(FormatOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus == kMemcardStatusOk) {
@@ -54,7 +54,7 @@ void FormatCardMCT::OnFormat(FormatOp *pOp) {
     Finish();
 }
 
-// 0x001862b0
+// NTSC-U/C: 0x001862b0, PAL: 0x0018bd70
 void FormatCardMCT::Finish() {
     mState = kMemcardTaskFinished;
     if (mUnformat == 0) {
@@ -65,7 +65,7 @@ void FormatCardMCT::Finish() {
     mUser->OnCardUnformatted(mPortSlot, mStatus);
 }
 
-// 0x00186318
+// NTSC-U/C: 0x00186318, PAL: 0x0018bdd8
 void FormatCardMCT::Execute() {
     mState = kMemcardTaskRunning;
     mCard->CheckInfo(this, mPortSlot, mCookie);

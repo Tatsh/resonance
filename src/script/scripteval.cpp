@@ -13,12 +13,12 @@
 #include "script/pyshell.h"
 #include "script/scripttemplatemap.h"
 
-// 0x0050d6c0
+// NTSC-U/C: 0x0050d6c0, PAL: 0x0054cb78
 Py::Object EvalScriptExpression(const HxStr &expression) {
     return g_pPyShell->Eval(expression, Py_eval_input);
 }
 
-// 0x0050a750
+// NTSC-U/C: 0x0050a750, PAL: 0x00549b18
 Py::Object EvalScriptTemplate(int nTemplate, ...) {
     va_list args;
     va_start(args, nTemplate);
@@ -27,7 +27,7 @@ Py::Object EvalScriptTemplate(int nTemplate, ...) {
     return g_pPyShell->Eval(text, Py_eval_input);
 }
 
-// 0x0050a868
+// NTSC-U/C: 0x0050a868, PAL: 0x00549c68
 Py::Object CallScriptFunction(const HxStr &name, Py::Tuple args) {
     Py::Object function;
     {

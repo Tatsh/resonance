@@ -28,7 +28,8 @@ public:
      *
      * The image lists no caller for the out-of-line body. New() expands the same stores in place.
      *
-     * @ghidraAddress 0x003f11b0
+     * @ghidraAddress NTSC-U/C: 0x003f11b0
+     * @ghidraAddress PAL: 0x00429718
      */
     BSLoadLevelPacket();
 
@@ -39,7 +40,8 @@ public:
      * construction leaves there. The image lists no caller for the out-of-line body.
      *
      * @param params The settings to copy.
-     * @ghidraAddress 0x003f1220
+     * @ghidraAddress NTSC-U/C: 0x003f1220
+     * @ghidraAddress PAL: 0x00429788
      */
     BSLoadLevelPacket(const GameParams &params);
 
@@ -50,7 +52,8 @@ public:
      * g_nBSLoadLevelPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e4f98
+     * @ghidraAddress NTSC-U/C: 0x003e4f98
+     * @ghidraAddress PAL: 0x0041d230
      */
     static Message *New();
 
@@ -58,7 +61,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f1118
+     * @ghidraAddress NTSC-U/C: 0x003f1118
+     * @ghidraAddress PAL: 0x00429680
      */
     virtual Message *Clone();
 
@@ -66,7 +70,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nBSLoadLevelPacketType.
-     * @ghidraAddress 0x003f1190
+     * @ghidraAddress NTSC-U/C: 0x003f1190
+     * @ghidraAddress PAL: 0x004296f8
      */
     virtual int Type();
 
@@ -74,7 +79,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `BSLoadLevelPacket`.
-     * @ghidraAddress 0x003f11a0
+     * @ghidraAddress NTSC-U/C: 0x003f11a0
+     * @ghidraAddress PAL: 0x00429708
      */
     virtual const char *Name();
 
@@ -82,7 +88,8 @@ public:
      * Write the settings to a diagnostic stream through GameParams::Print().
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2780
+     * @ghidraAddress NTSC-U/C: 0x003f2780
+     * @ghidraAddress PAL: 0x0042acc8
      */
     virtual void Print(std::ostream &stream);
 
@@ -90,7 +97,8 @@ public:
      * Write the Packet words, the settings, and the Packet word at `+0x0c` again to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e7fa0
+     * @ghidraAddress NTSC-U/C: 0x003e7fa0
+     * @ghidraAddress PAL: 0x00420280
      */
     virtual void Save(OBStream &stream);
 
@@ -98,7 +106,8 @@ public:
      * Read the fields back in the order Save() wrote them.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e80a0
+     * @ghidraAddress NTSC-U/C: 0x003e80a0
+     * @ghidraAddress PAL: 0x00420380
      */
     virtual void Load(IBStream &stream);
 
@@ -108,7 +117,8 @@ public:
      * The image lists no caller. The title is inferred.
      *
      * @return A copy of the settings.
-     * @ghidraAddress 0x003f1290
+     * @ghidraAddress NTSC-U/C: 0x003f1290
+     * @ghidraAddress PAL: 0x004297f8
      */
     GameParams GetParams();
 
@@ -122,6 +132,7 @@ private:
  * This word belongs to BSLoadLevelPacket because BSLoadLevelPacket::Type() at `0x003f1190`
  * returns it.
  *
- * @ghidraAddress 0x006d73b4
+ * @ghidraAddress NTSC-U/C: 0x006d73b4
+ * @ghidraAddress PAL: 0x0071ab54
  */
 extern int g_nBSLoadLevelPacketType;

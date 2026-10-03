@@ -35,7 +35,8 @@ public:
     /**
      * Release the adopted reference.
      *
-     * @ghidraAddress 0x0012b588
+     * @ghidraAddress NTSC-U/C: 0x0012b588
+     * @ghidraAddress PAL: 0x0012bcc0
      */
     virtual ~FromAPI() {
         Py_XDECREF(mPtr);

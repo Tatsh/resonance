@@ -5,7 +5,7 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x004ee2f8
+// NTSC-U/C: 0x004ee2f8, PAL: 0x0052cea0
 IOBPreallocMemStream::IOBPreallocMemStream(char *pBuffer, int nCapacity) {
     mBuffer = pBuffer;
     mCapacity = nCapacity;
@@ -15,11 +15,11 @@ IOBPreallocMemStream::IOBPreallocMemStream(char *pBuffer, int nCapacity) {
     mFail = 0;
 }
 
-// 0x004edb00
+// NTSC-U/C: 0x004edb00, PAL: 0x0052c6a8
 IOBPreallocMemStream::~IOBPreallocMemStream() {
 }
 
-// 0x004ee330
+// NTSC-U/C: 0x004ee330, PAL: 0x0052ced8
 IBStream &IOBPreallocMemStream::ReadBytes(void *pDest, int nSize) {
     if (mWritePos < (mReadPos + nSize)) {
         nSize = mWritePos - mReadPos;
@@ -31,7 +31,7 @@ IBStream &IOBPreallocMemStream::ReadBytes(void *pDest, int nSize) {
     return *this;
 }
 
-// 0x004ee3a8
+// NTSC-U/C: 0x004ee3a8, PAL: 0x0052cf50
 IBStream &IOBPreallocMemStream::Seek(int nOffset, int nWhence) {
     switch (nWhence) {
     case kStreamSeekSet:
@@ -53,42 +53,42 @@ IBStream &IOBPreallocMemStream::Seek(int nOffset, int nWhence) {
     return *this;
 }
 
-// 0x004edb48
+// NTSC-U/C: 0x004edb48, PAL: 0x0052c6f0
 int IOBPreallocMemStream::Tell() {
     return mReadPos;
 }
 
-// 0x004edb50
+// NTSC-U/C: 0x004edb50, PAL: 0x0052c6f8
 int IOBPreallocMemStream::Eof() {
     return mEof;
 }
 
-// 0x004edb58
+// NTSC-U/C: 0x004edb58, PAL: 0x0052c700
 int IOBPreallocMemStream::Fail() {
     return mFail;
 }
 
-// 0x004ee420
+// NTSC-U/C: 0x004ee420, PAL: 0x0052cfc8
 IBStream &IOBPreallocMemStream::Flush() {
     return *this;
 }
 
-// 0x004edb40
+// NTSC-U/C: 0x004edb40, PAL: 0x0052c6e8
 void IOBPreallocMemStream::SetSize(int nSize) {
     mWritePos = nSize;
 }
 
-// 0x004edb60
+// NTSC-U/C: 0x004edb60, PAL: 0x0052c708
 char *IOBPreallocMemStream::Buffer() {
     return mBuffer;
 }
 
-// 0x004edb70
+// NTSC-U/C: 0x004edb70, PAL: 0x0052c718
 int IOBPreallocMemStream::Capacity() {
     return mCapacity;
 }
 
-// 0x004ee428
+// NTSC-U/C: 0x004ee428, PAL: 0x0052cfd0
 OBStream &IOBPreallocMemStream::WriteBytes(const void *pSrc, int nSize) {
     if (mCapacity < (mWritePos + nSize)) {
         mFail = 1; // An overrun transfers nothing and does not set the end flag.
@@ -99,7 +99,7 @@ OBStream &IOBPreallocMemStream::WriteBytes(const void *pSrc, int nSize) {
     return *this;
 }
 
-// 0x004ee498
+// NTSC-U/C: 0x004ee498, PAL: 0x0052d040
 OBStream &IOBPreallocMemStream::Reset() {
     mWritePos = 0;
     mReadPos = 0;

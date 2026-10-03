@@ -23,7 +23,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7cd8
+     * @ghidraAddress NTSC-U/C: 0x003d7cd8
+     * @ghidraAddress PAL: 0x0040fbf0
      */
     static Message *New();
 
@@ -31,7 +32,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e2960
+     * @ghidraAddress NTSC-U/C: 0x003e2960
+     * @ghidraAddress PAL: 0x0041ae00
      */
     virtual Message *Clone();
 
@@ -39,7 +41,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nMetStartNetLaunchMsgType.
-     * @ghidraAddress 0x003e2998
+     * @ghidraAddress NTSC-U/C: 0x003e2998
+     * @ghidraAddress PAL: 0x0041ae38
      */
     virtual int Type();
 
@@ -47,7 +50,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `MetStartNetLaunchMsg`.
-     * @ghidraAddress 0x003e29a8
+     * @ghidraAddress NTSC-U/C: 0x003e29a8
+     * @ghidraAddress PAL: 0x0041ae48
      */
     virtual const char *Name();
 
@@ -58,7 +62,8 @@ public:
      * only the vtable reaches it.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e4460
+     * @ghidraAddress NTSC-U/C: 0x003e4460
+     * @ghidraAddress PAL: 0x0041c690
      */
     virtual void Print(std::ostream &stream);
 };
@@ -70,6 +75,7 @@ public:
  * returns it. Several handlers elsewhere read the same word to compare against it, which is the
  * expected shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d03dc
+ * @ghidraAddress NTSC-U/C: 0x006d03dc
+ * @ghidraAddress PAL: 0x00713b74
  */
 extern int g_nMetStartNetLaunchMsgType;

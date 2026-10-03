@@ -25,7 +25,8 @@ class Tuple;
  * accessor, so a call made before creation dereferences null. Application::Run() creates the host
  * early enough that no recovered caller does that.
  *
- * @ghidraAddress 0x0070b288
+ * @ghidraAddress NTSC-U/C: 0x0070b288
+ * @ghidraAddress PAL: 0x0074ede0
  */
 extern PyShell *g_pPyShell;
 
@@ -36,7 +37,8 @@ extern PyShell *g_pPyShell;
  *
  * @param nTemplate The template identifier.
  * @return A handle on the result.
- * @ghidraAddress 0x0050a750
+ * @ghidraAddress NTSC-U/C: 0x0050a750
+ * @ghidraAddress PAL: 0x00549b18
  */
 Py::Object EvalScriptTemplate(int nTemplate, ...);
 
@@ -45,7 +47,8 @@ Py::Object EvalScriptTemplate(int nTemplate, ...);
  *
  * @param expression The text to evaluate.
  * @return A handle on the result.
- * @ghidraAddress 0x0050d6c0
+ * @ghidraAddress NTSC-U/C: 0x0050d6c0
+ * @ghidraAddress PAL: 0x0054cb78
  */
 Py::Object EvalScriptExpression(const HxStr &expression);
 
@@ -60,6 +63,7 @@ Py::Object EvalScriptExpression(const HxStr &expression);
  * @param name The function name.
  * @param args The positional arguments, taken by value.
  * @return A handle on the call's result.
- * @ghidraAddress 0x0050a868
+ * @ghidraAddress NTSC-U/C: 0x0050a868
+ * @ghidraAddress PAL: 0x00549c68
  */
 Py::Object CallScriptFunction(const HxStr &name, Py::Tuple args);

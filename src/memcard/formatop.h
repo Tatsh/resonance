@@ -16,23 +16,34 @@ public:
      * @param pHandler The receiver Complete() reports to.
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag Memcard::Cancel() matches on.
-     * @ghidraAddress 0x0055e528
+     * @ghidraAddress NTSC-U/C: 0x0055e528
+     * @ghidraAddress PAL: 0x0059f7f8
      */
     FormatOp(MemcardCBHandler *pHandler, int nPortSlot, int nCookie);
 
-    /** @ghidraAddress 0x0055d548 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055d548
+     * @ghidraAddress PAL: 0x0059e7a0
+     */
     virtual ~FormatOp();
 
-    /** @ghidraAddress 0x0055e550 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055e550
+     * @ghidraAddress PAL: 0x0059f820
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055d578 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055d578
+     * @ghidraAddress PAL: 0x0059e7d0
+     */
     virtual void Complete();
 
     /**
      * Report kMemcardStatusOk for zero and kMemcardStatusUnknown for every other result.
      *
-     * @ghidraAddress 0x0055e588
+     * @ghidraAddress NTSC-U/C: 0x0055e588
+     * @ghidraAddress PAL: 0x0059f858
      */
     virtual void InterpretResult();
 };

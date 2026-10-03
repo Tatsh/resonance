@@ -60,7 +60,8 @@ public:
      *
      * @param pyob The reference to test.
      * @return True when the reference is a mapping.
-     * @ghidraAddress 0x0050d7f8
+     * @ghidraAddress NTSC-U/C: 0x0050d7f8
+     * @ghidraAddress PAL: 0x0054ccb0
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PyMapping_Check(pyob) != 0;
@@ -72,7 +73,8 @@ public:
      * @param key The key, as text. An empty string arrives at the interpreter as
      *            g_szEmptyString rather than as a null pointer.
      * @param value The value to store.
-     * @ghidraAddress 0x0050d6f8
+     * @ghidraAddress NTSC-U/C: 0x0050d6f8
+     * @ghidraAddress PAL: 0x0054cbb0
      */
     virtual void setItem(const HxStr &key, const Object &value) {
         char *pszKey = const_cast<char *>(key.mStr != nullptr ? key.mStr : g_szEmptyString);
@@ -86,7 +88,8 @@ public:
      *
      * @param key The key.
      * @param value The value to store.
-     * @ghidraAddress 0x0050d780
+     * @ghidraAddress NTSC-U/C: 0x0050d780
+     * @ghidraAddress PAL: 0x0054cc38
      */
     virtual void setItem(const Object &key, const Object &value) {
         if (PyObject_SetItem(mPtr, key.mPtr, value.mPtr) == -1) {

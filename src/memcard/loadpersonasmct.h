@@ -35,7 +35,10 @@ public:
                     int nCookie,
                     std::vector<MetPersonaData *> *pRoster);
 
-    /** @ghidraAddress 0x00185828 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00185828
+     * @ghidraAddress PAL: 0x0018b210
+     */
     virtual ~LoadPersonasMCT();
 
     /**
@@ -45,7 +48,8 @@ public:
      * personas, each allocated and filled through MetPersonaData::Load() and appended to mRoster.
      * Any other status reports without touching mRoster.
      *
-     * @ghidraAddress 0x00179360
+     * @ghidraAddress NTSC-U/C: 0x00179360
+     * @ghidraAddress PAL: 0x0017d160
      */
     virtual void Finish();
 

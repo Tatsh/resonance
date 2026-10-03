@@ -32,7 +32,8 @@ public:
      * g_nCSClientStatusPacketType. Only the Packet words are initialised.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e4e00
+     * @ghidraAddress NTSC-U/C: 0x003e4e00
+     * @ghidraAddress PAL: 0x0041d098
      */
     static Message *New();
 
@@ -40,7 +41,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003ef970
+     * @ghidraAddress NTSC-U/C: 0x003ef970
+     * @ghidraAddress PAL: 0x00427f78
      */
     virtual Message *Clone();
 
@@ -48,7 +50,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nCSClientStatusPacketType.
-     * @ghidraAddress 0x003ef9e8
+     * @ghidraAddress NTSC-U/C: 0x003ef9e8
+     * @ghidraAddress PAL: 0x00427ff0
      */
     virtual int Type();
 
@@ -56,7 +59,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `CSClientStatusPacket`.
-     * @ghidraAddress 0x003ef9f8
+     * @ghidraAddress NTSC-U/C: 0x003ef9f8
+     * @ghidraAddress PAL: 0x00428000
      */
     virtual const char *Name();
 
@@ -66,7 +70,8 @@ public:
      * Slot 5. The output is the literal `ClientStatus: ` at `0x008141c8` followed by the member.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2120
+     * @ghidraAddress NTSC-U/C: 0x003f2120
+     * @ghidraAddress PAL: 0x0042a668
      */
     virtual void Print(std::ostream &stream);
 
@@ -76,7 +81,8 @@ public:
      * Slot 6.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e6090
+     * @ghidraAddress NTSC-U/C: 0x003e6090
+     * @ghidraAddress PAL: 0x0041e370
      */
     virtual void Save(OBStream &stream);
 
@@ -86,7 +92,8 @@ public:
      * Slot 7. The member arrives in a local that construction clears before the transfer.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e6198
+     * @ghidraAddress NTSC-U/C: 0x003e6198
+     * @ghidraAddress PAL: 0x0041e478
      */
     virtual void Load(IBStream &stream);
 
@@ -100,6 +107,7 @@ private:
  * This word belongs to CSClientStatusPacket because CSClientStatusPacket::Type() at `0x003ef9e8`
  * returns it.
  *
- * @ghidraAddress 0x006d738c
+ * @ghidraAddress NTSC-U/C: 0x006d738c
+ * @ghidraAddress PAL: 0x0071ab2c
  */
 extern int g_nCSClientStatusPacketType;

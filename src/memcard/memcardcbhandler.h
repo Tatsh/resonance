@@ -38,7 +38,8 @@ public:
      *
      * Occupies vtable slot 1. The body is empty.
      *
-     * @ghidraAddress 0x00183f30
+     * @ghidraAddress NTSC-U/C: 0x00183f30
+     * @ghidraAddress PAL: 0x001891a0
      */
     virtual ~MemcardCBHandler();
 
@@ -46,7 +47,8 @@ public:
      * Report a finished card enquiry. Slot 2.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183f60
+     * @ghidraAddress NTSC-U/C: 0x00183f60
+     * @ghidraAddress PAL: 0x001891d0
      */
     virtual void OnCheckInfo(CheckInfoOp *pOp);
 
@@ -54,7 +56,8 @@ public:
      * Report a finished free-entry enquiry. Slot 3.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183f68
+     * @ghidraAddress NTSC-U/C: 0x00183f68
+     * @ghidraAddress PAL: 0x001891d8
      */
     virtual void OnEntSpace(EntSpaceOp *pOp);
 
@@ -62,7 +65,8 @@ public:
      * Report a finished format. Slot 4.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183f70
+     * @ghidraAddress NTSC-U/C: 0x00183f70
+     * @ghidraAddress PAL: 0x001891e0
      */
     virtual void OnFormat(FormatOp *pOp);
 
@@ -70,7 +74,8 @@ public:
      * Report a finished unformat. Slot 5.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183f78
+     * @ghidraAddress NTSC-U/C: 0x00183f78
+     * @ghidraAddress PAL: 0x001891e8
      */
     virtual void OnUnformat(UnformatOp *pOp);
 
@@ -78,7 +83,8 @@ public:
      * Report a finished directory creation. Slot 6.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183f80
+     * @ghidraAddress NTSC-U/C: 0x00183f80
+     * @ghidraAddress PAL: 0x001891f0
      */
     virtual void OnCreateDir(CreateDirOp *pOp);
 
@@ -86,7 +92,8 @@ public:
      * Report a finished directory listing. Slot 7.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183f88
+     * @ghidraAddress NTSC-U/C: 0x00183f88
+     * @ghidraAddress PAL: 0x001891f8
      */
     virtual void OnListDir(ListDirOp *pOp);
 
@@ -94,7 +101,8 @@ public:
      * Report a finished read. Slot 8.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183f90
+     * @ghidraAddress NTSC-U/C: 0x00183f90
+     * @ghidraAddress PAL: 0x00189200
      */
     virtual void OnRead(ReadOp *pOp);
 
@@ -102,7 +110,8 @@ public:
      * Report a finished write. Slot 9.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183f98
+     * @ghidraAddress NTSC-U/C: 0x00183f98
+     * @ghidraAddress PAL: 0x00189208
      */
     virtual void OnWrite(WriteOp *pOp);
 
@@ -110,7 +119,8 @@ public:
      * Report a finished open for writing. Slot 10.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183fa0
+     * @ghidraAddress NTSC-U/C: 0x00183fa0
+     * @ghidraAddress PAL: 0x00189210
      */
     virtual void OnOpenWrite(OpenWriteOp *pOp);
 
@@ -118,7 +128,8 @@ public:
      * Report a finished open for reading. Slot 11.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183fa8
+     * @ghidraAddress NTSC-U/C: 0x00183fa8
+     * @ghidraAddress PAL: 0x00189218
      */
     virtual void OnOpenRead(OpenReadOp *pOp);
 
@@ -126,7 +137,8 @@ public:
      * Report a finished close. Slot 12.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183fb0
+     * @ghidraAddress NTSC-U/C: 0x00183fb0
+     * @ghidraAddress PAL: 0x00189220
      */
     virtual void OnClose(CloseOp *pOp);
 
@@ -134,7 +146,8 @@ public:
      * Report a finished seek. Slot 13.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183fb8
+     * @ghidraAddress NTSC-U/C: 0x00183fb8
+     * @ghidraAddress PAL: 0x00189228
      */
     virtual void OnSeek(SeekOp *pOp);
 
@@ -142,7 +155,8 @@ public:
      * Report a finished file deletion. Slot 14.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183fc0
+     * @ghidraAddress NTSC-U/C: 0x00183fc0
+     * @ghidraAddress PAL: 0x00189230
      */
     virtual void OnDeleteFile(DeleteFileOp *pOp);
 
@@ -150,7 +164,8 @@ public:
      * Report a finished rename. Slot 15.
      *
      * @param pOp The finished operation.
-     * @ghidraAddress 0x00183fc8
+     * @ghidraAddress NTSC-U/C: 0x00183fc8
+     * @ghidraAddress PAL: 0x00189238
      */
     virtual void OnRenameFile(RenameFileOp *pOp);
 };

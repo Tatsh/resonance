@@ -52,7 +52,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 113.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6ba8
+     * @ghidraAddress NTSC-U/C: 0x003d6ba8
+     * @ghidraAddress PAL: 0x0040ea98
      */
     static Message *New();
 
@@ -60,7 +61,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x0011d698
+     * @ghidraAddress NTSC-U/C: 0x0011d698
+     * @ghidraAddress PAL: 0x0011dc20
      */
     virtual Message *Clone();
 
@@ -68,7 +70,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nAdvanceSectionMsgType.
-     * @ghidraAddress 0x0011d6f0
+     * @ghidraAddress NTSC-U/C: 0x0011d6f0
+     * @ghidraAddress PAL: 0x0011dc78
      */
     virtual int Type();
 
@@ -76,7 +79,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `AdvanceSectionMsg`.
-     * @ghidraAddress 0x0011d700
+     * @ghidraAddress NTSC-U/C: 0x0011d700
+     * @ghidraAddress PAL: 0x0011dc88
      */
     virtual const char *Name();
 
@@ -94,6 +98,7 @@ private:
  * it, and the registration at `0x003d9818` passes the same value, 113, as the identity of this
  * class's factory.
  *
- * @ghidraAddress 0x006d0184
+ * @ghidraAddress NTSC-U/C: 0x006d0184
+ * @ghidraAddress PAL: 0x0071391c
  */
 extern int g_nAdvanceSectionMsgType;

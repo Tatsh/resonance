@@ -13,7 +13,8 @@
  * @param stream The stream to write to.
  * @param pMsg The message, which may be null.
  * @return The stream, allowing calls to be chained.
- * @ghidraAddress 0x00556508
+ * @ghidraAddress NTSC-U/C: 0x00556508
+ * @ghidraAddress PAL: 0x00596b90
  */
 OBStream &WriteMessagePointerToStream(OBStream &stream, Message *pMsg);
 
@@ -26,7 +27,8 @@ OBStream &WriteMessagePointerToStream(OBStream &stream, Message *pMsg);
  * @param stream The stream to write to.
  * @param msg The message.
  * @return The stream, allowing calls to be chained.
- * @ghidraAddress 0x00556448
+ * @ghidraAddress NTSC-U/C: 0x00556448
+ * @ghidraAddress PAL: 0x00596ad0
  */
 OBStream &WriteMessageBodyToStream(OBStream &stream, Message &msg);
 
@@ -40,7 +42,8 @@ OBStream &WriteMessageBodyToStream(OBStream &stream, Message &msg);
  * @param stream The stream to read from.
  * @param msg The message to fill.
  * @return The stream, allowing calls to be chained.
- * @ghidraAddress 0x00555a18
+ * @ghidraAddress NTSC-U/C: 0x00555a18
+ * @ghidraAddress PAL: 0x005960a0
  */
 IBStream &ReadMessageBodyFromStream(IBStream &stream, Message &msg);
 
@@ -54,6 +57,7 @@ IBStream &ReadMessageBodyFromStream(IBStream &stream, Message &msg);
  * @param stream The stream to read from.
  * @param pMsg Receives the new message, or null.
  * @return The stream, allowing calls to be chained.
- * @ghidraAddress 0x00555b10
+ * @ghidraAddress NTSC-U/C: 0x00555b10
+ * @ghidraAddress PAL: 0x00596198
  */
 IBStream &ReadMessagePointerFromStream(IBStream &stream, Message *&pMsg);

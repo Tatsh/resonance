@@ -29,7 +29,8 @@ public:
      *
      * @param pszName The name the command matches.
      * @param pfnTest The test.
-     * @ghidraAddress 0x0015fda8
+     * @ghidraAddress NTSC-U/C: 0x0015fda8
+     * @ghidraAddress PAL: 0x00161cc8
      */
     static void Register(const char *pszName, TestFunc pfnTest);
 
@@ -38,7 +39,8 @@ public:
      *
      * @param pszName The name.
      * @return The first test registered under the name, or null.
-     * @ghidraAddress 0x0015fdd8
+     * @ghidraAddress NTSC-U/C: 0x0015fdd8
+     * @ghidraAddress PAL: 0x00161cf8
      */
     static TestFunc Find(const char *pszName);
 
@@ -47,14 +49,16 @@ public:
      *
      * Public because the command walks the table itself to list the valid tests.
      *
-     * @ghidraAddress 0x008ef950
+     * @ghidraAddress NTSC-U/C: 0x008ef950
+     * @ghidraAddress PAL: 0x00934950
      */
     static Entry sTests[kMaxTests];
 
     /**
      * The number of registered tests.
      *
-     * @ghidraAddress 0x0086f790
+     * @ghidraAddress NTSC-U/C: 0x0086f790
+     * @ghidraAddress PAL: 0x008b3e70
      */
     static int sTestCount;
 };

@@ -23,7 +23,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6cd0
+     * @ghidraAddress NTSC-U/C: 0x003d6cd0
+     * @ghidraAddress PAL: 0x0040ebc0
      */
     static Message *New();
 
@@ -31,7 +32,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dbcf8
+     * @ghidraAddress NTSC-U/C: 0x003dbcf8
+     * @ghidraAddress PAL: 0x00414130
      */
     virtual Message *Clone();
 
@@ -39,7 +41,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nStreakOverMsgType.
-     * @ghidraAddress 0x003dbd40
+     * @ghidraAddress NTSC-U/C: 0x003dbd40
+     * @ghidraAddress PAL: 0x00414178
      */
     virtual int Type();
 
@@ -47,7 +50,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `StreakOverMsg`.
-     * @ghidraAddress 0x003dbd50
+     * @ghidraAddress NTSC-U/C: 0x003dbd50
+     * @ghidraAddress PAL: 0x00414188
      */
     virtual const char *Name();
 
@@ -62,6 +66,7 @@ private:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d01ac
+ * @ghidraAddress NTSC-U/C: 0x006d01ac
+ * @ghidraAddress PAL: 0x00713944
  */
 extern int g_nStreakOverMsgType;

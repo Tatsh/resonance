@@ -4,16 +4,16 @@
 
 #include "memcard/memcardcbhandler.h"
 
-// 0x0055e418
+// NTSC-U/C: 0x0055e418, PAL: 0x0059f6e8
 EntSpaceOp::EntSpaceOp(MemcardCBHandler *pHandler, int nPortSlot, const HxStr &path, int nCookie)
     : MemcardOp(pHandler, nPortSlot, nCookie), mPath(path) {
 }
 
-// 0x0055d418
+// NTSC-U/C: 0x0055d418, PAL: 0x0059e660
 EntSpaceOp::~EntSpaceOp() {
 }
 
-// 0x0055e4a8
+// NTSC-U/C: 0x0055e4a8, PAL: 0x0059f778
 void EntSpaceOp::Issue() {
     sceMcGetEntSpace(mPortSlot >> kMemcardPortShift,
                      mPortSlot & kMemcardSlotMask,
@@ -21,13 +21,13 @@ void EntSpaceOp::Issue() {
     mIssued = kMemcardOpInFlight;
 }
 
-// 0x0055d480
+// NTSC-U/C: 0x0055d480, PAL: 0x0059e6d8
 void EntSpaceOp::Complete() {
     InterpretResult();
     mHandler->OnEntSpace(this);
 }
 
-// 0x0055e4f8
+// NTSC-U/C: 0x0055e4f8, PAL: 0x0059f7c8
 void EntSpaceOp::InterpretResult() {
     if (mResult >= sceMcResSucceed) {
         mStatus = kMemcardStatusOk;

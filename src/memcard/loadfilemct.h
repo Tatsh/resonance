@@ -52,7 +52,10 @@ public:
      */
     LoadFileMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie);
 
-    /** @ghidraAddress 0x001847e0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001847e0
+     * @ghidraAddress PAL: 0x00189cd8
+     */
     virtual ~LoadFileMCT();
 
     /**
@@ -61,14 +64,16 @@ public:
      * @param path The file to read.
      * @param pBuffer The destination.
      * @param nLength The number of bytes to read.
-     * @ghidraAddress 0x00185e20
+     * @ghidraAddress NTSC-U/C: 0x00185e20
+     * @ghidraAddress PAL: 0x0018b8d8
      */
     void Load(const HxStr &path, void *pBuffer, int nLength);
 
     /**
      * Run the step mState selects and advance to the state after it.
      *
-     * @ghidraAddress 0x00185f08
+     * @ghidraAddress NTSC-U/C: 0x00185f08
+     * @ghidraAddress PAL: 0x0018b9c0
      */
     void RunStep();
 
@@ -80,26 +85,45 @@ public:
      * came from another unit.
      *
      * @param nState One of LoadFileState.
-     * @ghidraAddress 0x001f61b0
+     * @ghidraAddress NTSC-U/C: 0x001f61b0
+     * @ghidraAddress PAL: 0x001fcbc0
      */
     void SetState(int nState);
 
-    /** @ghidraAddress 0x00185db8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00185db8
+     * @ghidraAddress PAL: 0x0018b870
+     */
     virtual void OnCheckInfo(CheckInfoOp *pOp);
 
-    /** @ghidraAddress 0x00185d00 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00185d00
+     * @ghidraAddress PAL: 0x0018b7b8
+     */
     virtual void OnRead(ReadOp *pOp);
 
-    /** @ghidraAddress 0x00185ca0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00185ca0
+     * @ghidraAddress PAL: 0x0018b758
+     */
     virtual void OnOpenRead(OpenReadOp *pOp);
 
-    /** @ghidraAddress 0x00185d58 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00185d58
+     * @ghidraAddress PAL: 0x0018b810
+     */
     virtual void OnClose(CloseOp *pOp);
 
-    /** @ghidraAddress 0x00185ec0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00185ec0
+     * @ghidraAddress PAL: 0x0018b978
+     */
     virtual void Finish();
 
-    /** @ghidraAddress 0x00185e80 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00185e80
+     * @ghidraAddress PAL: 0x0018b938
+     */
     virtual void Execute();
 
     /**

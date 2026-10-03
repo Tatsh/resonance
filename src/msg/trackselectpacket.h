@@ -58,7 +58,8 @@ public:
      * g_nTrackSelectPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e52c0
+     * @ghidraAddress NTSC-U/C: 0x003e52c0
+     * @ghidraAddress PAL: 0x0041d558
      */
     static Message *New();
 
@@ -66,7 +67,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f0848
+     * @ghidraAddress NTSC-U/C: 0x003f0848
+     * @ghidraAddress PAL: 0x00428e50
      */
     virtual Message *Clone();
 
@@ -74,7 +76,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nTrackSelectPacketType.
-     * @ghidraAddress 0x003f08c0
+     * @ghidraAddress NTSC-U/C: 0x003f08c0
+     * @ghidraAddress PAL: 0x00428ec8
      */
     virtual int Type();
 
@@ -82,7 +85,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `TrackSelectPacket`.
-     * @ghidraAddress 0x003f08d0
+     * @ghidraAddress NTSC-U/C: 0x003f08d0
+     * @ghidraAddress PAL: 0x00428ed8
      */
     virtual const char *Name();
 
@@ -91,7 +95,8 @@ public:
      * diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2568
+     * @ghidraAddress NTSC-U/C: 0x003f2568
+     * @ghidraAddress PAL: 0x0042aab0
      */
     virtual void Print(std::ostream &stream);
 
@@ -100,7 +105,8 @@ public:
      * stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e71f8
+     * @ghidraAddress NTSC-U/C: 0x003e71f8
+     * @ghidraAddress PAL: 0x0041f4d8
      */
     virtual void Save(OBStream &stream);
 
@@ -108,7 +114,8 @@ public:
      * Read the fields back in place in the order Save() wrote them.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e7330
+     * @ghidraAddress NTSC-U/C: 0x003e7330
+     * @ghidraAddress PAL: 0x0041f610
      */
     virtual void Load(IBStream &stream);
 
@@ -132,6 +139,7 @@ public:
  * This word belongs to TrackSelectPacket because TrackSelectPacket::Type() at `0x003f08c0`
  * returns it.
  *
- * @ghidraAddress 0x006d73ec
+ * @ghidraAddress NTSC-U/C: 0x006d73ec
+ * @ghidraAddress PAL: 0x0071ab8c
  */
 extern int g_nTrackSelectPacketType;

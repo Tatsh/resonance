@@ -1,6 +1,6 @@
 #include "msg/musemsg.h"
 
-// 0x003e3620
+// NTSC-U/C: 0x003e3620, PAL: 0x0041b9c0
 MuseMsg *MuseMsg::CloneAt(int nTick) {
     MuseMsg *pCopy = static_cast<MuseMsg *>(Clone());
     pCopy->mTick = nTick;

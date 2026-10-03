@@ -20,7 +20,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7d80
+     * @ghidraAddress NTSC-U/C: 0x003d7d80
+     * @ghidraAddress PAL: 0x0040fc98
      */
     static Message *New();
 
@@ -28,7 +29,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e2db0
+     * @ghidraAddress NTSC-U/C: 0x003e2db0
+     * @ghidraAddress PAL: 0x0041b250
      */
     virtual Message *Clone();
 
@@ -36,7 +38,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nMetFreqEndedMsgType.
-     * @ghidraAddress 0x003e2df8
+     * @ghidraAddress NTSC-U/C: 0x003e2df8
+     * @ghidraAddress PAL: 0x0041b298
      */
     virtual int Type();
 
@@ -44,7 +47,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `MetFreqEndedMsg`.
-     * @ghidraAddress 0x003e2e08
+     * @ghidraAddress NTSC-U/C: 0x003e2e08
+     * @ghidraAddress PAL: 0x0041b2a8
      */
     virtual const char *Name();
 
@@ -52,7 +56,8 @@ public:
      * Write `MetFreqEndedMsg ` and the word at `+0x04` to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e44f0
+     * @ghidraAddress NTSC-U/C: 0x003e44f0
+     * @ghidraAddress PAL: 0x0041c720
      */
     virtual void Print(std::ostream &stream);
 
@@ -73,6 +78,7 @@ public:
  * it. Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d03f4
+ * @ghidraAddress NTSC-U/C: 0x006d03f4
+ * @ghidraAddress PAL: 0x00713b8c
  */
 extern int g_nMetFreqEndedMsgType;

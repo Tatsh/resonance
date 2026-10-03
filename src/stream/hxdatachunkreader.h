@@ -26,7 +26,8 @@ public:
      *
      * @param pStream The stream to read. The reader does not take ownership.
      * @param bReadHeader Read an enclosing chunk header first.
-     * @ghidraAddress 0x00145c40
+     * @ghidraAddress NTSC-U/C: 0x00145c40
+     * @ghidraAddress PAL: 0x00146758
      */
     HxDataChunkReader(HxStream *pStream, bool bReadHeader);
 
@@ -36,28 +37,32 @@ public:
      * The enclosing header is a heap copy of pParent's current header.
      *
      * @param pParent The reader whose current chunk is a list.
-     * @ghidraAddress 0x00146220
+     * @ghidraAddress NTSC-U/C: 0x00146220
+     * @ghidraAddress PAL: 0x00146d38
      */
     explicit HxDataChunkReader(HxDataChunkReader *pParent);
 
     /**
      * Unlock the parent reader, if any, and free the enclosing header.
      *
-     * @ghidraAddress 0x00146308
+     * @ghidraAddress NTSC-U/C: 0x00146308
+     * @ghidraAddress PAL: 0x00146e20
      */
     ~HxDataChunkReader();
 
     /**
      * Compute mEnd from the enclosing header, lock the parent reader, if any, and rewind.
      *
-     * @ghidraAddress 0x00146360
+     * @ghidraAddress NTSC-U/C: 0x00146360
+     * @ghidraAddress PAL: 0x00146e78
      */
     void Init();
 
     /**
      * Seek back to the first chunk and forget the current one.
      *
-     * @ghidraAddress 0x001463b0
+     * @ghidraAddress NTSC-U/C: 0x001463b0
+     * @ghidraAddress PAL: 0x00146ec8
      */
     void Rewind();
 
@@ -68,7 +73,8 @@ public:
      * track is padded to an even size.
      *
      * @return The new current header, or null once the enclosing chunk is exhausted.
-     * @ghidraAddress 0x00145db8
+     * @ghidraAddress NTSC-U/C: 0x00145db8
+     * @ghidraAddress PAL: 0x001468d0
      */
     HxDataChunkId *Next();
 
@@ -76,7 +82,8 @@ public:
      * Report the current chunk header.
      *
      * @return The current header, or null before the first Next() or after the last.
-     * @ghidraAddress 0x00146408
+     * @ghidraAddress NTSC-U/C: 0x00146408
+     * @ghidraAddress PAL: 0x00146f20
      */
     HxDataChunkId *Current();
 
@@ -87,21 +94,24 @@ public:
      *
      * @param name The chunk name, or a list's form type.
      * @return The matching header, or null when no later chunk matches.
-     * @ghidraAddress 0x00146428
+     * @ghidraAddress NTSC-U/C: 0x00146428
+     * @ghidraAddress PAL: 0x00146f40
      */
     HxDataChunkId *Find(const HxChunkName &name);
 
     /**
      * Mark the reader as having a nested reader or chunk open.
      *
-     * @ghidraAddress 0x001464a0
+     * @ghidraAddress NTSC-U/C: 0x001464a0
+     * @ghidraAddress PAL: 0x00146fb8
      */
     void Lock();
 
     /**
      * Clear the mark Lock() sets.
      *
-     * @ghidraAddress 0x001464b0
+     * @ghidraAddress NTSC-U/C: 0x001464b0
+     * @ghidraAddress PAL: 0x00146fc8
      */
     void Unlock();
 

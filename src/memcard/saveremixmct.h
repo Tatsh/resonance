@@ -96,7 +96,8 @@ public:
      * Unlike the other three remix tasks, this one does not clear mStep, because Execute() has
      * already cleared it.
      *
-     * @ghidraAddress 0x0017a778
+     * @ghidraAddress NTSC-U/C: 0x0017a778
+     * @ghidraAddress PAL: 0x0017eb60
      */
     void ListRemixDir();
 
@@ -138,7 +139,8 @@ public:
      * 1. With none, the target and payload file name are chosen at once and step 2 starts.
      *
      * @param pOp The finished listing.
-     * @ghidraAddress 0x0017a430
+     * @ghidraAddress NTSC-U/C: 0x0017a430
+     * @ghidraAddress PAL: 0x0017e768
      */
     virtual void OnListDir(ListDirOp *pOp);
 
@@ -192,21 +194,21 @@ public:
 #endif
 
 private:
-    // 0x00179c28
+    // NTSC-U/C: 0x00179c28, PAL: 0x0017dd60
     // Appends a summary of one directory to infos, with the directory number parsed out of name
     // and no highest file number yet.
     static void AppendDirInfo(std::vector<RemixDirInfo> &infos, const HxStr &name, int nEntryCount);
 
-    // 0x00179d60
+    // NTSC-U/C: 0x00179d60, PAL: 0x0017ded0
     // Returns the first directory with room, or a fresh name one past the highest directory number.
     static HxStr ChooseTargetDir(const std::vector<RemixDirInfo> &infos);
 
-    // 0x0017a928
+    // NTSC-U/C: 0x0017a928, PAL: 0x0017ed88
     // Moves the first entry of mDirNames into mCurrentDir, erases it, rewinds mStream, and reads
     // `<dir>/index` through a fresh inner LoadFileMCT.
     void ReadNextIndex();
 
-    // 0x0017ab50
+    // NTSC-U/C: 0x0017ab50, PAL: 0x0017f000
     // Writes mRemixName into the payload in the shared log stream, rewinds mStream, and reads the
     // target directory's index through a fresh inner LoadFileMCT.
     void ReadTargetIndex();

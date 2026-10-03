@@ -24,12 +24,12 @@ public:
     explicit ScriptCmd(const HxStr &script) : mScript(script) {
     }
 
-    // 0x0015a3f8
+    // NTSC-U/C: 0x0015a3f8, PAL: 0x0015c148
     virtual int CmdID() {
         return sCmdID;
     }
 
-    // 0x0015a408
+    // NTSC-U/C: 0x0015a408, PAL: 0x0015c158
     virtual void Execute() {
         ScriptMsg msg(mScript);
         Application::shared()->GetScriptSink()->Handle(&msg);

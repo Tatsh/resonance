@@ -6,18 +6,18 @@
 #include "memcard/memcardsavepaths.h"
 #include "memcard/memcarduser.h"
 
-// 0x00179518
+// NTSC-U/C: 0x00179518, PAL: 0x0017d318
 LoadGlobalSettingsMCT::LoadGlobalSettingsMCT(
     MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, GlobalSettings *pSettings)
     : LoadFileMCT(pUser, pCard, nPortSlot, nCookie),
       mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize), mSettings(pSettings) {
 }
 
-// 0x00185898
+// NTSC-U/C: 0x00185898, PAL: 0x0018b290
 LoadGlobalSettingsMCT::~LoadGlobalSettingsMCT() {
 }
 
-// 0x00186728
+// NTSC-U/C: 0x00186728, PAL: 0x0018c020
 void LoadGlobalSettingsMCT::Finish() {
     MemcardTask::mState = kMemcardTaskFinished;
     if (mStatus == kMemcardStatusOk) {

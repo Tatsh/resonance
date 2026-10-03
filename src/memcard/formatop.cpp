@@ -4,28 +4,28 @@
 
 #include "memcard/memcardcbhandler.h"
 
-// 0x0055e528
+// NTSC-U/C: 0x0055e528, PAL: 0x0059f7f8
 FormatOp::FormatOp(MemcardCBHandler *pHandler, int nPortSlot, int nCookie)
     : MemcardOp(pHandler, nPortSlot, nCookie) {
 }
 
-// 0x0055d548
+// NTSC-U/C: 0x0055d548, PAL: 0x0059e7a0
 FormatOp::~FormatOp() {
 }
 
-// 0x0055e550
+// NTSC-U/C: 0x0055e550, PAL: 0x0059f820
 void FormatOp::Issue() {
     sceMcFormat(mPortSlot >> kMemcardPortShift, mPortSlot & kMemcardSlotMask);
     mIssued = kMemcardOpInFlight;
 }
 
-// 0x0055d578
+// NTSC-U/C: 0x0055d578, PAL: 0x0059e7d0
 void FormatOp::Complete() {
     InterpretResult();
     mHandler->OnFormat(this);
 }
 
-// 0x0055e588
+// NTSC-U/C: 0x0055e588, PAL: 0x0059f858
 void FormatOp::InterpretResult() {
     mStatus = mResult == sceMcResSucceed ? kMemcardStatusOk : kMemcardStatusUnknown;
 }

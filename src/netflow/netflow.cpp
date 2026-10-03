@@ -25,15 +25,15 @@ void NetflowFindAugmentingPaths(struct netflow_graph *graph, struct netflow_v_si
 
 } // extern "C"
 
-// 0x007B88D8
+// NTSC-U/C: 0x007b88d8, PAL: 0x007fc5d8
 // Edge examinations counted across the search, statistics only.
 int g_nNetflowProbeCount = 0;
 
-// 0x007B88DC
+// NTSC-U/C: 0x007b88dc, PAL: 0x007fc5dc
 // Augmentations applied, statistics only.
 int g_nNetflowAugmentTotal = 0;
 
-// 0x007B88E0
+// NTSC-U/C: 0x007b88e0, PAL: 0x007fc5e0
 // Head of the free U queue, 2500 when the queue is empty.
 int g_nNetflowQueueHead = 0;
 
@@ -44,15 +44,15 @@ struct NetflowQueueEntry {
     int mVVertex; // +0x08: V vertex used to reach this slot.
 };
 
-// 0x007B88E8
+// NTSC-U/C: 0x007b88e8, PAL: 0x007fc5e8
 // The search queue, 2500 slots of twelve bytes.
 NetflowQueueEntry g_aNetflowQueue[NETFLOW_MAX_VERTICES];
 
-// 0x007BFE18
+// NTSC-U/C: 0x007bfe18, PAL: 0x00803b18
 // The U vertices on the current search path.
 unsigned char g_abNetflowVisited[NETFLOW_MAX_VERTICES];
 
-// 0x005e6508
+// NTSC-U/C: 0x005e6508, PAL: 0x006286f0
 // Clear every adjacency list and mate, and clear the U count.
 void netflow_graph_init(struct netflow_graph *graph) {
     for (int i = 0; i < NETFLOW_MAX_VERTICES; ++i) {
@@ -62,7 +62,7 @@ void netflow_graph_init(struct netflow_graph *graph) {
     graph->u_count = 0;
 }
 
-// 0x005e64e8
+// NTSC-U/C: 0x005e64e8, PAL: 0x006286d0
 // Clear every mate, and clear the V count.
 void netflow_v_side_init(struct netflow_v_side *side) {
     for (int i = 0; i < NETFLOW_MAX_VERTICES; ++i) {
@@ -71,7 +71,7 @@ void netflow_v_side_init(struct netflow_v_side *side) {
     side->v_count = 0;
 }
 
-// 0x005e6538
+// NTSC-U/C: 0x005e6538, PAL: 0x00628720
 // Prepend a record for the edge, and allocate a reverse record recording u.
 void netflow_add_edge(int u, int v, struct netflow_graph *graph, struct netflow_v_side *side) {
     (void)side;
@@ -83,7 +83,7 @@ void netflow_add_edge(int u, int v, struct netflow_graph *graph, struct netflow_
     pReverse->v = u;
 }
 
-// 0x00569bf0
+// NTSC-U/C: 0x00569bf0, PAL: 0x005aa0b8
 // Seed a greedy matching, initialise the pool, and grow along augmenting paths.
 void netflow_build_matching(struct netflow_graph *graph, struct netflow_v_side *side) {
     NetflowReportInitialMatching(graph, side);
@@ -91,13 +91,13 @@ void netflow_build_matching(struct netflow_graph *graph, struct netflow_v_side *
     NetflowFindAugmentingPaths(graph, side);
 }
 
-// 0x00610880
+// NTSC-U/C: 0x00610880, PAL: 0x006514f0
 // Reports an empty edge pool and returns.
 void NetflowReportOutOfSpace(const char *pszMessage) {
     fprintf(stderr, "%s\n", pszMessage);
 }
 
-// 0x00610840
+// NTSC-U/C: 0x00610840, PAL: 0x006514b0
 // Allocates an edge record, reporting an empty pool. The image routes the request through the
 // shared reentrancy allocator; the toolchain allocator serves the same pool here.
 void *NetflowAllocChecked(unsigned nSize) {
@@ -108,7 +108,7 @@ void *NetflowAllocChecked(unsigned nSize) {
     return pMemory;
 }
 
-// 0x00569c38
+// NTSC-U/C: 0x00569c38, PAL: 0x005aa100
 // Matches every U vertex with its first free neighbour and reports the count.
 void NetflowReportInitialMatching(struct netflow_graph *graph, struct netflow_v_side *side) {
     int nMatched = 0;
@@ -128,7 +128,7 @@ void NetflowReportInitialMatching(struct netflow_graph *graph, struct netflow_v_
     LogPrintf("%d vertices in U were initially matched (%.1f%%).\n", nMatched, dPercent);
 }
 
-// 0x0062be30
+// NTSC-U/C: 0x0062be30, PAL: 0x0066c9c0
 // Clears the search statistics and queues every unmatched U vertex.
 void NetflowInitMatchingPool(struct netflow_graph *graph, struct netflow_v_side *side) {
     (void)side;
@@ -147,7 +147,7 @@ void NetflowInitMatchingPool(struct netflow_graph *graph, struct netflow_v_side 
     g_nNetflowQueueHead = nSlot;
 }
 
-// 0x0062bb38
+// NTSC-U/C: 0x0062bb38, PAL: 0x0066c6c8
 // Grows the matching along augmenting paths from every queued U vertex.
 void NetflowFindAugmentingPaths(struct netflow_graph *graph, struct netflow_v_side *side) {
     while (g_nNetflowQueueHead < NETFLOW_MAX_VERTICES) {

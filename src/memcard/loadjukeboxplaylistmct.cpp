@@ -15,7 +15,7 @@ constexpr int kIndexTextSize = 16;
 
 } // namespace
 
-// 0x001797e8
+// NTSC-U/C: 0x001797e8, PAL: 0x0017d750
 LoadJukeboxPlayListMCT::LoadJukeboxPlayListMCT(MemcardUser *pUser,
                                                Memcard *pCard,
                                                int nPortSlot,
@@ -27,11 +27,11 @@ LoadJukeboxPlayListMCT::LoadJukeboxPlayListMCT(MemcardUser *pUser,
       mIndex(nIndex) {
 }
 
-// 0x00185918
+// NTSC-U/C: 0x00185918, PAL: 0x0018b328
 LoadJukeboxPlayListMCT::~LoadJukeboxPlayListMCT() {
 }
 
-// 0x001867a8
+// NTSC-U/C: 0x001867a8, PAL: 0x0018c0a0
 void LoadJukeboxPlayListMCT::Finish() {
     MemcardTask::mState = kMemcardTaskFinished;
     if (mStatus == kMemcardStatusOk) {

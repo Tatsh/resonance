@@ -62,7 +62,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory.
      *
      * @return The message.
-     * @ghidraAddress 0x003d6d80
+     * @ghidraAddress NTSC-U/C: 0x003d6d80
+     * @ghidraAddress PAL: 0x0040ec70
      */
     static Message *New();
 
@@ -70,7 +71,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003dc208
+     * @ghidraAddress NTSC-U/C: 0x003dc208
+     * @ghidraAddress PAL: 0x00414640
      */
     virtual Message *Clone();
 
@@ -78,7 +80,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_dwNoteMsgType.
-     * @ghidraAddress 0x003dc280
+     * @ghidraAddress NTSC-U/C: 0x003dc280
+     * @ghidraAddress PAL: 0x004146b8
      */
     virtual int Type();
 
@@ -86,7 +89,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `NoteMsg`.
-     * @ghidraAddress 0x003dc290
+     * @ghidraAddress NTSC-U/C: 0x003dc290
+     * @ghidraAddress PAL: 0x004146c8
      */
     virtual const char *Name();
 
@@ -97,7 +101,8 @@ public:
      * `+0x08` after ` n`.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e3760
+     * @ghidraAddress NTSC-U/C: 0x003e3760
+     * @ghidraAddress PAL: 0x0041bb00
      */
     virtual void Print(std::ostream &stream);
 
@@ -108,7 +113,8 @@ public:
      * OBStream::Write(). The song position MuseMsg provides is not written.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003d80c0
+     * @ghidraAddress NTSC-U/C: 0x003d80c0
+     * @ghidraAddress PAL: 0x00410228
      */
     virtual void Save(OBStream &stream);
 
@@ -118,7 +124,8 @@ public:
      * The position arrives as an unsigned sixteen-bit value and is widened into the member.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e3808
+     * @ghidraAddress NTSC-U/C: 0x003e3808
+     * @ghidraAddress PAL: 0x0041bba8
      */
     virtual void Load(IBStream &stream);
 
@@ -160,6 +167,7 @@ public:
  * handlers elsewhere read the same word to compare against it, which is the expected shape for a
  * registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d01cc
+ * @ghidraAddress NTSC-U/C: 0x006d01cc
+ * @ghidraAddress PAL: 0x00713964
  */
 extern unsigned int g_dwNoteMsgType;

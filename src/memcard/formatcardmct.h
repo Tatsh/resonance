@@ -43,7 +43,10 @@ public:
      */
     FormatCardMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, int bUnformat);
 
-    /** @ghidraAddress 0x00184d68 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00184d68
+     * @ghidraAddress PAL: 0x0018a2b8
+     */
     virtual ~FormatCardMCT();
 
     /**
@@ -52,7 +55,8 @@ public:
      * A second copy of this dispatch survives at `0x00186348` with no caller, which is one of this
      * compiler's unfolded per-unit emissions.
      *
-     * @ghidraAddress 0x00186348
+     * @ghidraAddress NTSC-U/C: 0x00186348
+     * @ghidraAddress PAL: 0x0018be08
      */
     void IssueFormat();
 
@@ -62,17 +66,27 @@ public:
      * A card reporting itself formatted yields kMemcardStatusAlreadyFormatted and the task
      * abandons its work. kMemcardStatusUnknown abandons it as well. Any other status proceeds.
      *
-     * @ghidraAddress 0x00186390
+     * @ghidraAddress NTSC-U/C: 0x00186390
+     * @ghidraAddress PAL: 0x0018be50
      */
     virtual void OnCheckInfo(CheckInfoOp *pOp);
 
-    /** @ghidraAddress 0x00186438 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00186438
+     * @ghidraAddress PAL: 0x0018bef8
+     */
     virtual void OnFormat(FormatOp *pOp);
 
-    /** @ghidraAddress 0x001862b0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001862b0
+     * @ghidraAddress PAL: 0x0018bd70
+     */
     virtual void Finish();
 
-    /** @ghidraAddress 0x00186318 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00186318
+     * @ghidraAddress PAL: 0x0018bdd8
+     */
     virtual void Execute();
 
 private:

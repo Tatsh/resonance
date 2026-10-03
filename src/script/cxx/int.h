@@ -28,7 +28,8 @@ public:
      * set() from a Py::FromAPI temporary, releasing `None`, and runs validate() once more.
      *
      * @param ob The handle to convert.
-     * @ghidraAddress 0x004c4680
+     * @ghidraAddress NTSC-U/C: 0x004c4680
+     * @ghidraAddress PAL: 0x00502908
      */
     explicit Int(const Object &ob);
 
@@ -39,7 +40,8 @@ public:
      * set() from a Py::FromAPI temporary, releasing `None`, and runs validate() once more.
      *
      * @param nValue The value to wrap.
-     * @ghidraAddress 0x004c44c0
+     * @ghidraAddress NTSC-U/C: 0x004c44c0
+     * @ghidraAddress PAL: 0x00502748
      */
     explicit Int(long long nValue);
 
@@ -48,7 +50,8 @@ public:
      *
      * @param ob The handle to convert.
      * @return This handle.
-     * @ghidraAddress 0x004c71f8
+     * @ghidraAddress NTSC-U/C: 0x004c71f8
+     * @ghidraAddress PAL: 0x00505420
      */
     Int &operator=(const Object &ob);
 
@@ -60,7 +63,8 @@ public:
      *
      * @param pyob The reference to convert.
      * @return This handle.
-     * @ghidraAddress 0x004c4840
+     * @ghidraAddress NTSC-U/C: 0x004c4840
+     * @ghidraAddress PAL: 0x00502ac8
      */
     Int &operator=(PyObject *pyob);
 
@@ -72,7 +76,8 @@ public:
      *
      * @param nValue The value.
      * @return This handle.
-     * @ghidraAddress 0x004c4980
+     * @ghidraAddress NTSC-U/C: 0x004c4980
+     * @ghidraAddress PAL: 0x00502c08
      */
     Int &operator=(int nValue);
 
@@ -81,7 +86,8 @@ public:
      *
      * @param nValue The value.
      * @return This handle.
-     * @ghidraAddress 0x004c4a60
+     * @ghidraAddress NTSC-U/C: 0x004c4a60
+     * @ghidraAddress PAL: 0x00502ce8
      */
     Int &operator=(long long nValue);
 
@@ -92,7 +98,8 @@ public:
      * long. Callers test the result at full width before any narrowing.
      *
      * @return The value.
-     * @ghidraAddress 0x004c7240
+     * @ghidraAddress NTSC-U/C: 0x004c7240
+     * @ghidraAddress PAL: 0x00505468
      */
     operator long long() const;
 
@@ -101,7 +108,8 @@ public:
      *
      * @param pyob The reference to test.
      * @return True when the reference is an integer.
-     * @ghidraAddress 0x004c7218
+     * @ghidraAddress NTSC-U/C: 0x004c7218
+     * @ghidraAddress PAL: 0x00505440
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PyInt_Check(pyob);

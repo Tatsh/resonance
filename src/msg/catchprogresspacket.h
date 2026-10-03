@@ -37,7 +37,8 @@ public:
      * g_nCatchProgressPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e5330
+     * @ghidraAddress NTSC-U/C: 0x003e5330
+     * @ghidraAddress PAL: 0x0041d5c8
      */
     static Message *New();
 
@@ -45,7 +46,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f0a70
+     * @ghidraAddress NTSC-U/C: 0x003f0a70
+     * @ghidraAddress PAL: 0x00429078
      */
     virtual Message *Clone();
 
@@ -53,7 +55,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nCatchProgressPacketType.
-     * @ghidraAddress 0x003f0ae8
+     * @ghidraAddress NTSC-U/C: 0x003f0ae8
+     * @ghidraAddress PAL: 0x004290f0
      */
     virtual int Type();
 
@@ -61,7 +64,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `CatchProgressPacket`.
-     * @ghidraAddress 0x003f0af8
+     * @ghidraAddress NTSC-U/C: 0x003f0af8
+     * @ghidraAddress PAL: 0x00429100
      */
     virtual const char *Name();
 
@@ -70,7 +74,8 @@ public:
      * diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2648
+     * @ghidraAddress NTSC-U/C: 0x003f2648
+     * @ghidraAddress PAL: 0x0042ab90
      */
     virtual void Print(std::ostream &stream);
 
@@ -79,7 +84,8 @@ public:
      * value to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e7430
+     * @ghidraAddress NTSC-U/C: 0x003e7430
+     * @ghidraAddress PAL: 0x0041f710
      */
     virtual void Save(OBStream &stream);
 
@@ -87,7 +93,8 @@ public:
      * Read the fields back in place in the order Save() wrote them.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e7568
+     * @ghidraAddress NTSC-U/C: 0x003e7568
+     * @ghidraAddress PAL: 0x0041f848
      */
     virtual void Load(IBStream &stream);
 
@@ -103,6 +110,7 @@ public:
  * This word belongs to CatchProgressPacket because CatchProgressPacket::Type() at `0x003f0ae8`
  * returns it.
  *
- * @ghidraAddress 0x006d73f4
+ * @ghidraAddress NTSC-U/C: 0x006d73f4
+ * @ghidraAddress PAL: 0x0071ab94
  */
 extern int g_nCatchProgressPacketType;

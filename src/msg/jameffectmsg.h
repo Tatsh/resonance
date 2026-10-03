@@ -25,7 +25,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 417.
      *
      * @return The message.
-     * @ghidraAddress 0x003d77e0
+     * @ghidraAddress NTSC-U/C: 0x003d77e0
+     * @ghidraAddress PAL: 0x0040f6e0
      */
     static Message *New();
 
@@ -33,7 +34,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x001caa00
+     * @ghidraAddress NTSC-U/C: 0x001caa00
+     * @ghidraAddress PAL: 0x001d08b8
      */
     virtual Message *Clone();
 
@@ -41,7 +43,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nJamEffectMsgType.
-     * @ghidraAddress 0x001caa60
+     * @ghidraAddress NTSC-U/C: 0x001caa60
+     * @ghidraAddress PAL: 0x001d0918
      */
     virtual int Type();
 
@@ -49,7 +52,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `JamEffectMsg`.
-     * @ghidraAddress 0x001caa70
+     * @ghidraAddress NTSC-U/C: 0x001caa70
+     * @ghidraAddress PAL: 0x001d0928
      */
     virtual const char *Name();
 
@@ -67,6 +71,7 @@ public:
  * the registration at `0x003d9818` passes the same value, 417, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d032c
+ * @ghidraAddress NTSC-U/C: 0x006d032c
+ * @ghidraAddress PAL: 0x00713ac4
  */
 extern int g_nJamEffectMsgType;

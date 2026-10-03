@@ -45,7 +45,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory. The payload is left unset.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7360
+     * @ghidraAddress NTSC-U/C: 0x003d7360
+     * @ghidraAddress PAL: 0x0040f260
      */
     static Message *New();
 
@@ -53,7 +54,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003de910
+     * @ghidraAddress NTSC-U/C: 0x003de910
+     * @ghidraAddress PAL: 0x00416d68
      */
     virtual Message *Clone();
 
@@ -61,7 +63,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_dwTracksOnMsgType.
-     * @ghidraAddress 0x003de960
+     * @ghidraAddress NTSC-U/C: 0x003de960
+     * @ghidraAddress PAL: 0x00416db8
      */
     virtual int Type();
 
@@ -69,7 +72,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `TracksOnMsg`.
-     * @ghidraAddress 0x003de970
+     * @ghidraAddress NTSC-U/C: 0x003de970
+     * @ghidraAddress PAL: 0x00416dc8
      */
     virtual const char *Name();
 
@@ -78,7 +82,8 @@ public:
      * stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e4408
+     * @ghidraAddress NTSC-U/C: 0x003e4408
+     * @ghidraAddress PAL: 0x0041c638
      */
     virtual void Print(std::ostream &stream);
 
@@ -93,6 +98,7 @@ public:
  * Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d0294
+ * @ghidraAddress NTSC-U/C: 0x006d0294
+ * @ghidraAddress PAL: 0x00713a2c
  */
 extern unsigned int g_dwTracksOnMsgType;

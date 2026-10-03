@@ -36,7 +36,8 @@ public:
      * ReportError() with the context `while initializing PyShell`, so a script failure at
      * start-up halts the machine with a message rather than propagating.
      *
-     * @ghidraAddress 0x005072e8
+     * @ghidraAddress NTSC-U/C: 0x005072e8
+     * @ghidraAddress PAL: 0x005461e8
      */
     PyShell();
 
@@ -44,7 +45,8 @@ public:
      * Release the namespace dictionary, and then shut the interpreter down through the
      * interpreter member.
      *
-     * @ghidraAddress 0x0050d480
+     * @ghidraAddress NTSC-U/C: 0x0050d480
+     * @ghidraAddress PAL: 0x0054c938
      */
     ~PyShell();
 
@@ -59,7 +61,8 @@ public:
      * @param nStartSymbol The grammar start symbol, `Py_file_input` for a statement and
      *                     `Py_eval_input` for an expression.
      * @return A handle on the result.
-     * @ghidraAddress 0x00508ca8
+     * @ghidraAddress NTSC-U/C: 0x00508ca8
+     * @ghidraAddress PAL: 0x00547e08
      */
     Py::Object Eval(const HxStr &source, int nStartSymbol);
 
@@ -72,7 +75,8 @@ public:
      * script imports `os`, `os.path`, and `hx`, calls `hx.get_freq_root()`, and runs
      * `global/defaults.py`.
      *
-     * @ghidraAddress 0x00508de8
+     * @ghidraAddress NTSC-U/C: 0x00508de8
+     * @ghidraAddress PAL: 0x00547f48
      */
     void RunMasterInitScript();
 
@@ -89,7 +93,8 @@ public:
      * @param context Text describing what was being attempted.
      * @param bWithTraceback Non-zero to format the traceback through `hxutl.traceback_str`, which
      *                       also consumes the context. Zero appends the context directly instead.
-     * @ghidraAddress 0x00507f58
+     * @ghidraAddress NTSC-U/C: 0x00507f58
+     * @ghidraAddress PAL: 0x00547018
      */
     void ReportError(const HxStr &context, int bWithTraceback);
 

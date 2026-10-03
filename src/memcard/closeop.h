@@ -19,24 +19,35 @@ public:
      * @param pHandler The receiver Complete() reports to.
      * @param nFile The descriptor to close.
      * @param nCookie The tag Memcard::Cancel() matches on.
-     * @ghidraAddress 0x0055ee28
+     * @ghidraAddress NTSC-U/C: 0x0055ee28
+     * @ghidraAddress PAL: 0x005a00f8
      */
     CloseOp(MemcardCBHandler *pHandler, int nFile, int nCookie);
 
-    /** @ghidraAddress 0x0055df00 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055df00
+     * @ghidraAddress PAL: 0x0059f198
+     */
     virtual ~CloseOp();
 
-    /** @ghidraAddress 0x0055ee50 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055ee50
+     * @ghidraAddress PAL: 0x005a0120
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055df30 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055df30
+     * @ghidraAddress PAL: 0x0059f1c8
+     */
     virtual void Complete();
 
     /**
      * Map `sceMcResNoFormat` to kMemcardStatusNotFormatted and `sceMcResNoEntry` to
      * kMemcardStatusBadFile, and report kMemcardStatusOk for zero alone.
      *
-     * @ghidraAddress 0x0055ee80
+     * @ghidraAddress NTSC-U/C: 0x0055ee80
+     * @ghidraAddress PAL: 0x005a0150
      */
     virtual void InterpretResult();
 

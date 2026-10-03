@@ -41,7 +41,8 @@ public:
      *
      * @param name The module name. An empty string arrives at the interpreter as
      *             g_szEmptyString rather than as a null pointer.
-     * @ghidraAddress 0x005a6008
+     * @ghidraAddress NTSC-U/C: 0x005a6008
+     * @ghidraAddress PAL: 0x005e8518
      */
     explicit Module(const HxStr &name) : Object() {
         set(PyImport_ImportModule(

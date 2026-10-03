@@ -4,15 +4,15 @@
 
 namespace Py {
 
-// 0x005a5d28
+// NTSC-U/C: 0x005a5d28, PAL: 0x005e8218
 ExtensionModuleBase::ExtensionModuleBase(const char *pszName) : mModuleName(pszName) {
 }
 
-// 0x005a5d98
+// NTSC-U/C: 0x005a5d98, PAL: 0x005e8298
 ExtensionModuleBase::~ExtensionModuleBase() {
 }
 
-// 0x005a5ea0
+// NTSC-U/C: 0x005a5ea0, PAL: 0x005e83b0
 void ExtensionModuleBase::initialize(const char *pszModuleDoc) {
     PyObject *pModulePtr = new ExtensionModuleBasePtr(this);
     Py_InitModule4(

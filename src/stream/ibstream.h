@@ -92,7 +92,8 @@ public:
      * @param pDest The destination buffer.
      * @param nSize The number of bytes to move.
      * @return This stream.
-     * @ghidraAddress 0x004ed838
+     * @ghidraAddress NTSC-U/C: 0x004ed838
+     * @ghidraAddress PAL: 0x0052c3e0
      */
     virtual IBStream &Read(void *pDest, int nSize);
 
@@ -130,7 +131,8 @@ public:
  * @param stream The stream to read from.
  * @param bValue Receives zero or one.
  * @return The stream.
- * @ghidraAddress 0x004edb78
+ * @ghidraAddress NTSC-U/C: 0x004edb78
+ * @ghidraAddress PAL: 0x0052c720
  */
 IBStream &operator>>(IBStream &stream, int &bValue);
 
@@ -144,7 +146,8 @@ IBStream &operator>>(IBStream &stream, int &bValue);
  * @param stream The stream to read from.
  * @param nValue Receives the value.
  * @return The stream.
- * @ghidraAddress 0x004edbd0
+ * @ghidraAddress NTSC-U/C: 0x004edbd0
+ * @ghidraAddress PAL: 0x0052c778
  */
 IBStream &operator>>(IBStream &stream, long &nValue);
 
@@ -156,6 +159,7 @@ IBStream &operator>>(IBStream &stream, long &nValue);
  * @param stream The stream to read from.
  * @param nValue Receives the value.
  * @return The stream.
- * @ghidraAddress 0x004edc28
+ * @ghidraAddress NTSC-U/C: 0x004edc28
+ * @ghidraAddress PAL: 0x0052c7d0
  */
 IBStream &operator>>(IBStream &stream, unsigned long &nValue);

@@ -21,7 +21,8 @@ public:
      * @param oldPath The existing name.
      * @param newPath The replacement name.
      * @param nCookie The tag Memcard::Cancel() matches on.
-     * @ghidraAddress 0x0055f030
+     * @ghidraAddress NTSC-U/C: 0x0055f030
+     * @ghidraAddress PAL: 0x005a0300
      */
     RenameFileOp(MemcardCBHandler *pHandler,
                  int nPortSlot,
@@ -29,20 +30,30 @@ public:
                  const HxStr &newPath,
                  int nCookie);
 
-    /** @ghidraAddress 0x0055e128 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055e128
+     * @ghidraAddress PAL: 0x0059f3d0
+     */
     virtual ~RenameFileOp();
 
-    /** @ghidraAddress 0x0055f108 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055f108
+     * @ghidraAddress PAL: 0x005a03e8
+     */
     virtual void Issue();
 
-    /** @ghidraAddress 0x0055e1a0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x0055e1a0
+     * @ghidraAddress PAL: 0x0059f470
+     */
     virtual void Complete();
 
     /**
      * Map `sceMcResNoFormat` to kMemcardStatusNotFormatted, `sceMcResFullDevice` to
      * kMemcardStatusCardFull, and `sceMcResNoEntry` to kMemcardStatusNoEntry.
      *
-     * @ghidraAddress 0x0055f168
+     * @ghidraAddress NTSC-U/C: 0x0055f168
+     * @ghidraAddress PAL: 0x005a0448
      */
     virtual void InterpretResult();
 

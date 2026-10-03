@@ -19,7 +19,8 @@
  *
  * @param nEventCode The template identifier.
  * @return 1 when the value is non-zero, and 0 otherwise or after a failed conversion.
- * @ghidraAddress 0x005093e0
+ * @ghidraAddress NTSC-U/C: 0x005093e0
+ * @ghidraAddress PAL: 0x00548628
  */
 int QueryConfigFlag(int nEventCode, ...);
 
@@ -30,7 +31,8 @@ int QueryConfigFlag(int nEventCode, ...);
  *
  * @param nEventCode The template identifier.
  * @return The value, or 0 after a failed conversion.
- * @ghidraAddress 0x00509110
+ * @ghidraAddress NTSC-U/C: 0x00509110
+ * @ghidraAddress PAL: 0x00548308
  */
 int QueryConfigValue(int nEventCode, ...);
 
@@ -43,7 +45,8 @@ int QueryConfigValue(int nEventCode, ...);
  *
  * @param nEventCode The template identifier.
  * @return The value.
- * @ghidraAddress 0x005096d0
+ * @ghidraAddress NTSC-U/C: 0x005096d0
+ * @ghidraAddress PAL: 0x00548970
  */
 HxStr QueryConfigString(int nEventCode, ...);
 
@@ -56,7 +59,8 @@ HxStr QueryConfigString(int nEventCode, ...);
  *
  * @param pResult The vector the values are written to.
  * @param nEventCode The template identifier.
- * @ghidraAddress 0x0050a1a0
+ * @ghidraAddress NTSC-U/C: 0x0050a1a0
+ * @ghidraAddress PAL: 0x00549528
  */
 void QueryConfigVector(std::vector<int> *pResult, int nEventCode, ...);
 
@@ -69,6 +73,7 @@ void QueryConfigVector(std::vector<int> *pResult, int nEventCode, ...);
  *
  * @param pResult The vector the values are written to.
  * @param nEventCode The template identifier.
- * @ghidraAddress 0x00509b78
+ * @ghidraAddress NTSC-U/C: 0x00509b78
+ * @ghidraAddress PAL: 0x00548ea0
  */
 void QueryConfigStrings(std::vector<HxStr> *pResult, int nEventCode, ...);

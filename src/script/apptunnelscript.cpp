@@ -29,7 +29,7 @@ namespace {
 // An empty tuple reports the showing flag. Otherwise the first element selects showing, and any
 // nonzero value shows. The tuple arrives by value, and the copy the caller builds is released
 // here.
-// 0x0044a380
+// NTSC-U/C: 0x0044a380, PAL: 0x00487670
 Py::Object ShowDrawable(Py::Tuple args, Rnd::Drawable *pTarget) {
     if (pTarget == nullptr) {
         return Py::Object();
@@ -43,7 +43,7 @@ Py::Object ShowDrawable(Py::Tuple args, Rnd::Drawable *pTarget) {
 }
 
 // Show the activator.
-// 0x0044a7b0
+// NTSC-U/C: 0x0044a7b0, PAL: 0x00487aa0
 Py::Object ScriptActivatorShow(Py::Tuple args) {
     Rnd::Drawable *pTarget =
         dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("activator0")));
@@ -51,7 +51,7 @@ Py::Object ScriptActivatorShow(Py::Tuple args) {
 }
 
 // Show the now ring.
-// 0x0044a930
+// NTSC-U/C: 0x0044a930, PAL: 0x00487c40
 Py::Object ScriptNowRing(Py::Tuple args) {
     Rnd::Drawable *pTarget =
         dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("nowring.view")));
@@ -59,7 +59,7 @@ Py::Object ScriptNowRing(Py::Tuple args) {
 }
 
 // Show the three head-up displays.
-// 0x0044aab0
+// NTSC-U/C: 0x0044aab0, PAL: 0x00487de0
 Py::Object ScriptHudEnable(Py::Tuple args) {
     Rnd::Drawable *pEnergy =
         dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("HUD1 energy.mesh")));
@@ -74,7 +74,7 @@ Py::Object ScriptHudEnable(Py::Tuple args) {
 }
 
 // Show the section boundary.
-// 0x0044af40
+// NTSC-U/C: 0x0044af40, PAL: 0x004882e8
 Py::Object ScriptSections(Py::Tuple args) {
     Rnd::Drawable *pMessage =
         dynamic_cast<Rnd::Drawable *>(Rnd::g_manager.Find(HxStr("boundary msg")));
@@ -91,7 +91,7 @@ Py::Object ScriptSections(Py::Tuple args) {
 // showing. Any nonzero value applies the fade's stored range to the seeker, and anything else
 // applies an empty range. Either way the sabre-trail string follows the flag. Without an app
 // tunnel there is nothing to drive. The tuple arrives by value and is released here.
-// 0x0044b2d8
+// NTSC-U/C: 0x0044b2d8, PAL: 0x004886e0
 Py::Object ScriptSeeker(Py::Tuple args) {
     if (g_pAppTunnel == nullptr) {
         return Py::Object();
@@ -118,7 +118,7 @@ Py::Object ScriptSeeker(Py::Tuple args) {
 // Fade the activator materials to one alpha.
 //
 // All five materials have to resolve, or nothing happens. The tuple carries the alpha.
-// 0x0044b7a0
+// NTSC-U/C: 0x0044b7a0, PAL: 0x00488ba8
 Py::Object ScriptFadeActivator(Py::Tuple args) {
     Rnd::Mat *pActTarUp = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("act_g tar up.mat")));
     Rnd::Mat *pScratch = dynamic_cast<Rnd::Mat *>(Rnd::g_manager.Find(HxStr("scratch_g.mat")));
@@ -144,7 +144,7 @@ Py::Object ScriptFadeActivator(Py::Tuple args) {
 }
 
 // Run ScriptActivatorShow() on the interpreter's argument tuple.
-// 0x0044c080
+// NTSC-U/C: 0x0044c080, PAL: 0x00489538
 PyObject *PyInvokeActivatorShow(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -159,7 +159,7 @@ PyObject *PyInvokeActivatorShow(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptNowRing() on the interpreter's argument tuple.
-// 0x0044c230
+// NTSC-U/C: 0x0044c230, PAL: 0x004896e8
 PyObject *PyInvokeNowRing(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -174,7 +174,7 @@ PyObject *PyInvokeNowRing(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptHudEnable() on the interpreter's argument tuple.
-// 0x0044c8f0
+// NTSC-U/C: 0x0044c8f0, PAL: 0x00489da8
 PyObject *PyInvokeHudEnable(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -189,7 +189,7 @@ PyObject *PyInvokeHudEnable(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptSections() on the interpreter's argument tuple.
-// 0x0044c3e0
+// NTSC-U/C: 0x0044c3e0, PAL: 0x00489898
 PyObject *PyInvokeSections(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -204,7 +204,7 @@ PyObject *PyInvokeSections(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptSeeker() on the interpreter's argument tuple.
-// 0x0044c590
+// NTSC-U/C: 0x0044c590, PAL: 0x00489a48
 PyObject *PyInvokeSeeker(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -219,7 +219,7 @@ PyObject *PyInvokeSeeker(PyObject *, PyObject *pArgs) {
 }
 
 // Run ScriptFadeActivator() on the interpreter's argument tuple.
-// 0x0044c740
+// NTSC-U/C: 0x0044c740, PAL: 0x00489bf8
 PyObject *PyInvokeFadeActivator(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -234,7 +234,7 @@ PyObject *PyInvokeFadeActivator(PyObject *, PyObject *pArgs) {
 }
 
 // The script interface this file exports, registered in static initialisation.
-// 0x00453bc8
+// NTSC-U/C: 0x00453bc8, PAL: 0x004910c8
 const ScriptFunc kActivatorFunc("activator", PyInvokeActivatorShow);
 const ScriptFunc kNowringFunc("nowring", PyInvokeNowRing);
 const ScriptFunc kSectionsFunc("sections", PyInvokeSections);

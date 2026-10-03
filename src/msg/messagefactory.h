@@ -23,7 +23,8 @@ public:
      *
      * @param nType The identity the class streams itself under.
      * @param pfnCreate The factory for the class.
-     * @ghidraAddress 0x00555948
+     * @ghidraAddress NTSC-U/C: 0x00555948
+     * @ghidraAddress PAL: 0x00595fd0
      */
     MessageFactory(int nType, MessageFactoryProc pfnCreate);
 };

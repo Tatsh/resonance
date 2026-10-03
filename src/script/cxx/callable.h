@@ -42,7 +42,8 @@ public:
      *
      * @param pyob The reference to test.
      * @return True when the reference is callable.
-     * @ghidraAddress 0x0050d360
+     * @ghidraAddress NTSC-U/C: 0x0050d360
+     * @ghidraAddress PAL: 0x0054c818
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PyCallable_Check(pyob) != 0;

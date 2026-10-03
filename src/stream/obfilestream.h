@@ -29,17 +29,27 @@ public:
      * An empty path arrives at `fopen` as the program-wide empty string rather than as null.
      *
      * @param path The file to open.
-     * @ghidraAddress 0x004edee0
+     * @ghidraAddress NTSC-U/C: 0x004edee0
+     * @ghidraAddress PAL: 0x0052ca88
      */
     OBFileStream(const HxStr &path);
 
-    /** @ghidraAddress 0x004edf88 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004edf88
+     * @ghidraAddress PAL: 0x0052cb30
+     */
     virtual OBStream &WriteBytes(const void *pSrc, int nSize);
 
-    /** @ghidraAddress 0x004edfc0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004edfc0
+     * @ghidraAddress PAL: 0x0052cb68
+     */
     virtual OBStream &Reset();
 
-    /** @ghidraAddress 0x004edff0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x004edff0
+     * @ghidraAddress PAL: 0x0052cb98
+     */
     virtual int Fail();
 
     /**
@@ -47,7 +57,8 @@ public:
      *
      * Vtable slot 5, the first virtual this class adds.
      *
-     * @ghidraAddress 0x004edf30
+     * @ghidraAddress NTSC-U/C: 0x004edf30
+     * @ghidraAddress PAL: 0x0052cad8
      */
     virtual ~OBFileStream();
 
@@ -58,7 +69,8 @@ public:
      * this one is new rather than an override.
      *
      * @return The position in bytes from the start of the file.
-     * @ghidraAddress 0x004edfc8
+     * @ghidraAddress NTSC-U/C: 0x004edfc8
+     * @ghidraAddress PAL: 0x0052cb70
      */
     virtual int Tell();
 

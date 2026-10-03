@@ -5,43 +5,43 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// 0x003f11b0
+// NTSC-U/C: 0x003f11b0, PAL: 0x00429718
 BSLoadLevelPacket::BSLoadLevelPacket() {
 }
 
-// 0x003f1220
+// NTSC-U/C: 0x003f1220, PAL: 0x00429788
 BSLoadLevelPacket::BSLoadLevelPacket(const GameParams &params) : mParams(params) {
     mClientId = 0;
 }
 
-// 0x003e4f98
+// NTSC-U/C: 0x003e4f98, PAL: 0x0041d230
 Message *BSLoadLevelPacket::New() {
     return new BSLoadLevelPacket;
 }
 
-// 0x003f1118
+// NTSC-U/C: 0x003f1118, PAL: 0x00429680
 // Clone allocates and hands off to the copy constructor at 0x003f3bc0, which is
 // the compiler expanding the implicit one.
 Message *BSLoadLevelPacket::Clone() {
     return new BSLoadLevelPacket(*this);
 }
 
-// 0x003f1190
+// NTSC-U/C: 0x003f1190, PAL: 0x004296f8
 int BSLoadLevelPacket::Type() {
     return g_nBSLoadLevelPacketType;
 }
 
-// 0x003f11a0
+// NTSC-U/C: 0x003f11a0, PAL: 0x00429708
 const char *BSLoadLevelPacket::Name() {
     return "BSLoadLevelPacket";
 }
 
-// 0x003f2780
+// NTSC-U/C: 0x003f2780, PAL: 0x0042acc8
 void BSLoadLevelPacket::Print(std::ostream &stream) {
     mParams.Print(stream);
 }
 
-// 0x003e7fa0
+// NTSC-U/C: 0x003e7fa0, PAL: 0x00420280
 // The word at +0x0c crosses the wire twice.
 void BSLoadLevelPacket::Save(OBStream &stream) {
     Packet::Save(stream);
@@ -51,14 +51,14 @@ void BSLoadLevelPacket::Save(OBStream &stream) {
     stream.Write(&clientId, sizeof(clientId));
 }
 
-// 0x003e80a0
+// NTSC-U/C: 0x003e80a0, PAL: 0x00420380
 void BSLoadLevelPacket::Load(IBStream &stream) {
     Packet::Load(stream);
     mParams.Load(&stream);
     stream.Read(&mClientId, sizeof(mClientId));
 }
 
-// 0x003f1290
+// NTSC-U/C: 0x003f1290, PAL: 0x004297f8
 GameParams BSLoadLevelPacket::GetParams() {
     return mParams;
 }

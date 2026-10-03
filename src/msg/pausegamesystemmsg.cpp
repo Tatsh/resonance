@@ -1,23 +1,23 @@
 #include "msg/pausegamesystemmsg.h"
 
-// 0x003d7bc0
+// NTSC-U/C: 0x003d7bc0, PAL: 0x0040fad8
 Message *PauseGameSystemMsg::New() {
     return new PauseGameSystemMsg;
 }
 
-// 0x00193ce0
+// NTSC-U/C: 0x00193ce0, PAL: 0x00199908
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *PauseGameSystemMsg::Clone() {
     return new PauseGameSystemMsg(*this);
 }
 
-// 0x00193d18
+// NTSC-U/C: 0x00193d18, PAL: 0x00199940
 int PauseGameSystemMsg::Type() {
     return g_nPauseGameSystemMsgType;
 }
 
-// 0x00193d28
+// NTSC-U/C: 0x00193d28, PAL: 0x00199950
 const char *PauseGameSystemMsg::Name() {
     return "PauseGameSystemMsg";
 }

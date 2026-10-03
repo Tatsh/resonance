@@ -47,7 +47,8 @@ public:
      * The translation unit at `0x003d9818` registers this factory against identity 311.
      *
      * @return The message.
-     * @ghidraAddress 0x003d7118
+     * @ghidraAddress NTSC-U/C: 0x003d7118
+     * @ghidraAddress PAL: 0x0040f008
      */
     static Message *New();
 
@@ -55,7 +56,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x00193e10
+     * @ghidraAddress NTSC-U/C: 0x00193e10
+     * @ghidraAddress PAL: 0x00199a48
      */
     virtual Message *Clone();
 
@@ -63,7 +65,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nTextMsgType.
-     * @ghidraAddress 0x00193eb8
+     * @ghidraAddress NTSC-U/C: 0x00193eb8
+     * @ghidraAddress PAL: 0x00199af0
      */
     virtual int Type();
 
@@ -71,7 +74,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `TextMsg`.
-     * @ghidraAddress 0x00193ec8
+     * @ghidraAddress NTSC-U/C: 0x00193ec8
+     * @ghidraAddress PAL: 0x00199b00
      */
     virtual const char *Name();
 
@@ -90,6 +94,7 @@ private:
  * registration at `0x003d9818` passes the same value, 311, as the identity of this class's
  * factory.
  *
- * @ghidraAddress 0x006d0244
+ * @ghidraAddress NTSC-U/C: 0x006d0244
+ * @ghidraAddress PAL: 0x007139dc
  */
 extern int g_nTextMsgType;

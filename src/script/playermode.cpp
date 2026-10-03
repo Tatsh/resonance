@@ -22,7 +22,7 @@ namespace {
 // The tuple carries the looping flag. Nothing happens unless the first local player is a
 // LocalPlayer. The image dispatches SetLooping through the secondary table; the static type
 // carries the same slot.
-// 0x0015ff98
+// NTSC-U/C: 0x0015ff98, PAL: 0x00161eb8
 Py::Object ScriptSetLoopMode(const Py::Tuple &args) {
     if (args.length() != 1) {
         throw Py::TypeError(HxStr("wrong # args for set_loop_mode"));
@@ -40,7 +40,7 @@ Py::Object ScriptSetLoopMode(const Py::Tuple &args) {
 }
 
 // Run ScriptSetLoopMode() on the interpreter's argument tuple.
-// 0x00160590
+// NTSC-U/C: 0x00160590, PAL: 0x001624f0
 PyObject *PyInvokeSetLoopMode(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -58,7 +58,7 @@ PyObject *PyInvokeSetLoopMode(PyObject *, PyObject *pArgs) {
 //
 // The tuple includes the ghost flag. SetGhost() stores it and announces it; a player that is not a
 // LocalPlayer retains its display.
-// 0x001602a8
+// NTSC-U/C: 0x001602a8, PAL: 0x001621e8
 Py::Object ScriptSetGhostMode(const Py::Tuple &args) {
     if (args.length() != 1) {
         throw Py::TypeError(HxStr("wrong # args for set_ghost_mode"));
@@ -75,7 +75,7 @@ Py::Object ScriptSetGhostMode(const Py::Tuple &args) {
 }
 
 // Run ScriptSetGhostMode() on the interpreter's argument tuple.
-// 0x001607d8
+// NTSC-U/C: 0x001607d8, PAL: 0x00162738
 PyObject *PyInvokeSetGhostMode(PyObject *, PyObject *pArgs) {
     try {
         Py::Tuple args(pArgs);
@@ -90,7 +90,7 @@ PyObject *PyInvokeSetGhostMode(PyObject *, PyObject *pArgs) {
 }
 
 // The script interface this file exports, registered in static initialisation.
-// 0x00160fb8
+// NTSC-U/C: 0x00160fb8, PAL: 0x00162f18
 const ScriptFunc kSetLoopModeFunc("set_loop_mode", PyInvokeSetLoopMode);
 const ScriptFunc kSetGhostModeFunc("set_ghost_mode", PyInvokeSetGhostMode);
 

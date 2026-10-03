@@ -40,7 +40,8 @@ public:
      *
      * @param nReasonCode The word stored at `+0x14`.
      * @param reason The string copied into `+0x18`.
-     * @ghidraAddress 0x003ef628
+     * @ghidraAddress NTSC-U/C: 0x003ef628
+     * @ghidraAddress PAL: 0x00427c18
      */
     SPJoinDenyPacket(int nReasonCode, const HxStr &reason);
 
@@ -51,7 +52,8 @@ public:
      * g_nSPJoinDenyPacketType. The word at `+0x14` is left unset.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e4ca0
+     * @ghidraAddress NTSC-U/C: 0x003e4ca0
+     * @ghidraAddress PAL: 0x0041cf18
      */
     static Message *New();
 
@@ -59,7 +61,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003ef558
+     * @ghidraAddress NTSC-U/C: 0x003ef558
+     * @ghidraAddress PAL: 0x00427b40
      */
     virtual Message *Clone();
 
@@ -67,7 +70,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nSPJoinDenyPacketType.
-     * @ghidraAddress 0x003ef5d0
+     * @ghidraAddress NTSC-U/C: 0x003ef5d0
+     * @ghidraAddress PAL: 0x00427bb8
      */
     virtual int Type();
 
@@ -75,7 +79,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `SPJoinDenyPacket`.
-     * @ghidraAddress 0x003ef5e0
+     * @ghidraAddress NTSC-U/C: 0x003ef5e0
+     * @ghidraAddress PAL: 0x00427bc8
      */
     virtual const char *Name();
 
@@ -83,7 +88,8 @@ public:
      * Write the word as a number, a space, and the string to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2000
+     * @ghidraAddress NTSC-U/C: 0x003f2000
+     * @ghidraAddress PAL: 0x0042a548
      */
     virtual void Print(std::ostream &stream);
 
@@ -91,7 +97,8 @@ public:
      * Write the Packet words, the word, and the string to a stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e5d58
+     * @ghidraAddress NTSC-U/C: 0x003e5d58
+     * @ghidraAddress PAL: 0x0041e038
      */
     virtual void Save(OBStream &stream);
 
@@ -99,7 +106,8 @@ public:
      * Read the Packet words, the word, and the string back from a stream.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003e5e98
+     * @ghidraAddress NTSC-U/C: 0x003e5e98
+     * @ghidraAddress PAL: 0x0041e178
      */
     virtual void Load(IBStream &stream);
 
@@ -115,6 +123,7 @@ private:
  * This word belongs to SPJoinDenyPacket because SPJoinDenyPacket::Type() at `0x003ef5d0` returns
  * it.
  *
- * @ghidraAddress 0x006d737c
+ * @ghidraAddress NTSC-U/C: 0x006d737c
+ * @ghidraAddress PAL: 0x0071ab1c
  */
 extern int g_nSPJoinDenyPacketType;

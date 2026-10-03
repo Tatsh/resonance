@@ -59,7 +59,8 @@ public:
      *
      * @param pyob The reference to test.
      * @return True when the reference is a dictionary.
-     * @ghidraAddress 0x0050d248
+     * @ghidraAddress NTSC-U/C: 0x0050d248
+     * @ghidraAddress PAL: 0x0054c700
      */
     virtual bool accepts(PyObject *pyob) const {
         return pyob != nullptr && PyDict_Check(pyob);

@@ -1,28 +1,28 @@
 #include "msg/allnotesoffmsg.h"
 
-// 0x003d6dc8
+// NTSC-U/C: 0x003d6dc8, PAL: 0x0040ecb8
 Message *AllNotesOffMsg::New() {
     return new AllNotesOffMsg;
 }
 
-// 0x0019a618
+// NTSC-U/C: 0x0019a618, PAL: 0x001a0380
 // The field copies are the compiler expanding the implicit copy
 // constructor, so the allocation tag is the only part written here.
 Message *AllNotesOffMsg::Clone() {
     return new AllNotesOffMsg(*this);
 }
 
-// 0x0019a670
+// NTSC-U/C: 0x0019a670, PAL: 0x001a03d8
 int AllNotesOffMsg::Type() {
     return g_dwAllNotesOffMsgType;
 }
 
-// 0x0019a680
+// NTSC-U/C: 0x0019a680, PAL: 0x001a03e8
 const char *AllNotesOffMsg::Name() {
     return "AllNotesOffMsg";
 }
 
-// 0x0019a690
+// NTSC-U/C: 0x0019a690, PAL: 0x001a03f8
 int AllNotesOffMsg::IsAllNotesOff() {
     return 1;
 }

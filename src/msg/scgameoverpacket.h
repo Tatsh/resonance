@@ -32,7 +32,8 @@ public:
      * g_nSCGameOverPacketType. Only the Packet words are initialised.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e50f0
+     * @ghidraAddress NTSC-U/C: 0x003e50f0
+     * @ghidraAddress PAL: 0x0041d388
      */
     static Message *New();
 
@@ -40,7 +41,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f15d0
+     * @ghidraAddress NTSC-U/C: 0x003f15d0
+     * @ghidraAddress PAL: 0x00429a98
      */
     virtual Message *Clone();
 
@@ -48,7 +50,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nSCGameOverPacketType.
-     * @ghidraAddress 0x003f1648
+     * @ghidraAddress NTSC-U/C: 0x003f1648
+     * @ghidraAddress PAL: 0x00429b10
      */
     virtual int Type();
 
@@ -56,7 +59,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `SCGameOverPacket`.
-     * @ghidraAddress 0x003f1658
+     * @ghidraAddress NTSC-U/C: 0x003f1658
+     * @ghidraAddress PAL: 0x00429b20
      */
     virtual const char *Name();
 
@@ -66,7 +70,8 @@ public:
      * Slot 5. The one member is the whole output, with no literal around it.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2a90
+     * @ghidraAddress NTSC-U/C: 0x003f2a90
+     * @ghidraAddress PAL: 0x0042afd8
      */
     virtual void Print(std::ostream &stream);
 
@@ -76,7 +81,8 @@ public:
      * Slot 6. The member reaches the stream as a single byte rather than as a word.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003f2920
+     * @ghidraAddress NTSC-U/C: 0x003f2920
+     * @ghidraAddress PAL: 0x0042ae68
      */
     virtual void Save(OBStream &stream);
 
@@ -86,7 +92,8 @@ public:
      * Slot 7.
      *
      * @param stream The stream to read from.
-     * @ghidraAddress 0x003f29e8
+     * @ghidraAddress NTSC-U/C: 0x003f29e8
+     * @ghidraAddress PAL: 0x0042af30
      */
     virtual void Load(IBStream &stream);
 
@@ -100,6 +107,7 @@ private:
  * This word belongs to SCGameOverPacket because SCGameOverPacket::Type() at `0x003f1648` returns
  * it.
  *
- * @ghidraAddress 0x006d73c4
+ * @ghidraAddress NTSC-U/C: 0x006d73c4
+ * @ghidraAddress PAL: 0x0071ab64
  */
 extern int g_nSCGameOverPacketType;

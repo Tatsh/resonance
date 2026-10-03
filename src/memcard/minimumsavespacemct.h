@@ -63,13 +63,17 @@ public:
      */
     MinimumSaveSpaceMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie);
 
-    /** @ghidraAddress 0x00184c18 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00184c18
+     * @ghidraAddress PAL: 0x0018a140
+     */
     virtual ~MinimumSaveSpaceMCT();
 
     /**
      * Run the step mStep selects and advance to the step after it.
      *
-     * @ghidraAddress 0x00178660
+     * @ghidraAddress NTSC-U/C: 0x00178660
+     * @ghidraAddress PAL: 0x0017bd20
      */
     void RunStep();
 
@@ -79,14 +83,21 @@ public:
      * The body does not read the operation, not even its status. The free-cluster count therefore
      * plays no part in the measurement.
      *
-     * @ghidraAddress 0x00186200
+     * @ghidraAddress NTSC-U/C: 0x00186200
+     * @ghidraAddress PAL: 0x0018bcc0
      */
     virtual void OnCheckInfo(CheckInfoOp *pOp);
 
-    /** @ghidraAddress 0x00186220 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00186220
+     * @ghidraAddress PAL: 0x0018bce0
+     */
     virtual void OnOpenRead(OpenReadOp *pOp);
 
-    /** @ghidraAddress 0x00186250 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00186250
+     * @ghidraAddress PAL: 0x0018bd10
+     */
     virtual void OnClose(CloseOp *pOp);
 
     /**

@@ -45,12 +45,16 @@ public:
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag that abandons exactly this task's operations.
      * @param remixName The remix to remove.
-     * @ghidraAddress 0x0017ce08
+     * @ghidraAddress NTSC-U/C: 0x0017ce08
+     * @ghidraAddress PAL: 0x001814d0
      */
     DeleteRemixMCT(
         MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, const HxStr &remixName);
 
-    /** @ghidraAddress 0x001854e0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001854e0
+     * @ghidraAddress PAL: 0x0018ae48
+     */
     virtual ~DeleteRemixMCT();
 
     /**
@@ -58,7 +62,8 @@ public:
      *
      * Clears mStep first.
      *
-     * @ghidraAddress 0x0017d098
+     * @ghidraAddress NTSC-U/C: 0x0017d098
+     * @ghidraAddress PAL: 0x001817b0
      */
     void ListRemixDir();
 
@@ -83,7 +88,8 @@ public:
      * The body is LoadRemixMCT::OnListDir()'s, except that mStream is rewound before the read.
      *
      * @param pOp The finished listing.
-     * @ghidraAddress 0x0017d248
+     * @ghidraAddress NTSC-U/C: 0x0017d248
+     * @ghidraAddress PAL: 0x001819d8
      */
     virtual void OnListDir(ListDirOp *pOp);
 
@@ -91,7 +97,8 @@ public:
      * Start the listing unless the card reported that it cannot be read.
      *
      * @param pOp The finished enquiry.
-     * @ghidraAddress 0x00186cc0
+     * @ghidraAddress NTSC-U/C: 0x00186cc0
+     * @ghidraAddress PAL: 0x0018c498
      */
     virtual void OnCheckInfo(CheckInfoOp *pOp);
 
@@ -102,21 +109,24 @@ public:
      * before the step call rather than instead of it.
      *
      * @param pOp The finished deletion.
-     * @ghidraAddress 0x00186d40
+     * @ghidraAddress NTSC-U/C: 0x00186d40
+     * @ghidraAddress PAL: 0x0018c518
      */
     virtual void OnDeleteFile(DeleteFileOp *pOp);
 
     /**
      * Report the finished deletion through MemcardUser::OnRemixDeleted().
      *
-     * @ghidraAddress 0x00186db8
+     * @ghidraAddress NTSC-U/C: 0x00186db8
+     * @ghidraAddress PAL: 0x0018c590
      */
     virtual void Finish();
 
     /**
      * Enquire about the card and start the deletion.
      *
-     * @ghidraAddress 0x00186c90
+     * @ghidraAddress NTSC-U/C: 0x00186c90
+     * @ghidraAddress PAL: 0x0018c468
      */
     virtual void Execute();
 
@@ -130,7 +140,8 @@ public:
      * kMemcardStatusNoFile.
      *
      * @param nStatus The inner read's status.
-     * @ghidraAddress 0x0017d690
+     * @ghidraAddress NTSC-U/C: 0x0017d690
+     * @ghidraAddress PAL: 0x00181ef8
      */
     virtual void OnFileLoaded(int nStatus);
 
@@ -138,7 +149,8 @@ public:
      * Record the status of the index rewrite and advance to the next step.
      *
      * @param nStatus One of MemcardStatus.
-     * @ghidraAddress 0x00186d98
+     * @ghidraAddress NTSC-U/C: 0x00186d98
+     * @ghidraAddress PAL: 0x0018c570
      */
     virtual void OnFileSaved(int nStatus);
 

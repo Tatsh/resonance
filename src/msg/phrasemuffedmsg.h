@@ -63,7 +63,8 @@ public:
      * initialised.
      *
      * @return The message.
-     * @ghidraAddress 0x003d76f0
+     * @ghidraAddress NTSC-U/C: 0x003d76f0
+     * @ghidraAddress PAL: 0x0040f5f0
      */
     static Message *New();
 
@@ -71,7 +72,8 @@ public:
      * Produce a heap copy of this message.
      *
      * @return The copy.
-     * @ghidraAddress 0x003e0038
+     * @ghidraAddress NTSC-U/C: 0x003e0038
+     * @ghidraAddress PAL: 0x00418490
      */
     virtual Message *Clone();
 
@@ -79,7 +81,8 @@ public:
      * Report this message's registered identity.
      *
      * @return g_nPhraseMuffedMsgType.
-     * @ghidraAddress 0x003e0098
+     * @ghidraAddress NTSC-U/C: 0x003e0098
+     * @ghidraAddress PAL: 0x004184f0
      */
     virtual int Type();
 
@@ -87,7 +90,8 @@ public:
      * Report this message's class name.
      *
      * @return The literal `PhraseMuffedMsg`.
-     * @ghidraAddress 0x003e00a8
+     * @ghidraAddress NTSC-U/C: 0x003e00a8
+     * @ghidraAddress PAL: 0x00418500
      */
     virtual const char *Name();
 
@@ -96,7 +100,8 @@ public:
      * at `+0x10` to a diagnostic stream.
      *
      * @param stream The stream to write to.
-     * @ghidraAddress 0x003e4350
+     * @ghidraAddress NTSC-U/C: 0x003e4350
+     * @ghidraAddress PAL: 0x0041c580
      */
     virtual void Print(std::ostream &stream);
 
@@ -113,6 +118,7 @@ public:
  * it. Several handlers elsewhere read the same word to compare against it, which is the expected
  * shape for a registered identity and does not make the word theirs.
  *
- * @ghidraAddress 0x006d030c
+ * @ghidraAddress NTSC-U/C: 0x006d030c
+ * @ghidraAddress PAL: 0x00713aa4
  */
 extern int g_nPhraseMuffedMsgType;

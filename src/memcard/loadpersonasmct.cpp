@@ -15,11 +15,11 @@ LoadPersonasMCT::LoadPersonasMCT(MemcardUser *pUser,
     : LoadFileMCT(pUser, pCard, nPortSlot, nCookie), mRoster(pRoster) {
 }
 
-// 0x00185828
+// NTSC-U/C: 0x00185828, PAL: 0x0018b210
 LoadPersonasMCT::~LoadPersonasMCT() {
 }
 
-// 0x00179360
+// NTSC-U/C: 0x00179360, PAL: 0x0017d160
 void LoadPersonasMCT::Finish() {
     MemcardTask::mState = kMemcardTaskFinished;
     if (mStatus == kMemcardStatusOk) {

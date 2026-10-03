@@ -38,7 +38,8 @@ public:
      * g_nSCStartPlayingPacketType.
      *
      * @return The packet.
-     * @ghidraAddress 0x003e4f40
+     * @ghidraAddress NTSC-U/C: 0x003e4f40
+     * @ghidraAddress PAL: 0x0041d1d8
      */
     static Message *New();
 
@@ -46,7 +47,8 @@ public:
      * Produce a heap copy of this packet.
      *
      * @return The copy.
-     * @ghidraAddress 0x003f01f8
+     * @ghidraAddress NTSC-U/C: 0x003f01f8
+     * @ghidraAddress PAL: 0x00428800
      */
     virtual Message *Clone();
 
@@ -54,7 +56,8 @@ public:
      * Report this packet's registered identity.
      *
      * @return g_nSCStartPlayingPacketType.
-     * @ghidraAddress 0x003f0270
+     * @ghidraAddress NTSC-U/C: 0x003f0270
+     * @ghidraAddress PAL: 0x00428878
      */
     virtual int Type();
 
@@ -62,7 +65,8 @@ public:
      * Report this packet's class name.
      *
      * @return The literal `SCStartPlayingPacket`.
-     * @ghidraAddress 0x003f0280
+     * @ghidraAddress NTSC-U/C: 0x003f0280
+     * @ghidraAddress PAL: 0x00428888
      */
     virtual const char *Name();
 
@@ -71,7 +75,8 @@ public:
      *
      * Slot 6.
      *
-     * @ghidraAddress 0x003f0290
+     * @ghidraAddress NTSC-U/C: 0x003f0290
+     * @ghidraAddress PAL: 0x00428898
      */
     virtual void Save(OBStream &) {
     }
@@ -81,7 +86,8 @@ public:
      *
      * Slot 7.
      *
-     * @ghidraAddress 0x003f0298
+     * @ghidraAddress NTSC-U/C: 0x003f0298
+     * @ghidraAddress PAL: 0x004288a0
      */
     virtual void Load(IBStream &) {
     }
@@ -91,7 +97,8 @@ public:
      *
      * Slot 5.
      *
-     * @ghidraAddress 0x003f02a0
+     * @ghidraAddress NTSC-U/C: 0x003f02a0
+     * @ghidraAddress PAL: 0x004288a8
      */
     virtual void Print(std::ostream &) {
     }
@@ -103,6 +110,7 @@ public:
  * This word belongs to SCStartPlayingPacket because SCStartPlayingPacket::Type() at `0x003f0270`
  * returns it.
  *
- * @ghidraAddress 0x006d73ac
+ * @ghidraAddress NTSC-U/C: 0x006d73ac
+ * @ghidraAddress PAL: 0x0071ab4c
  */
 extern int g_nSCStartPlayingPacketType;

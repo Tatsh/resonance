@@ -26,11 +26,15 @@ public:
      * @param pCard The queue the task submits operations to.
      * @param nPortSlot The packed port and slot.
      * @param nCookie The tag that abandons exactly this task's operations.
-     * @ghidraAddress 0x001848f8
+     * @ghidraAddress NTSC-U/C: 0x001848f8
+     * @ghidraAddress PAL: 0x00189e00
      */
     GetConnectStateMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie);
 
-    /** @ghidraAddress 0x001849c8 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001849c8
+     * @ghidraAddress PAL: 0x00189ed0
+     */
     virtual ~GetConnectStateMCT();
 
     /**
@@ -39,14 +43,21 @@ public:
      * The formatted flag is recorded as the result of comparing the operation's own flag against
      * exactly 1, so any other non-zero value arrives as zero.
      *
-     * @ghidraAddress 0x00177fb0
+     * @ghidraAddress NTSC-U/C: 0x00177fb0
+     * @ghidraAddress PAL: 0x0017b370
      */
     virtual void OnCheckInfo(CheckInfoOp *pOp);
 
-    /** @ghidraAddress 0x00185ff0 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00185ff0
+     * @ghidraAddress PAL: 0x0018baa8
+     */
     virtual void Finish();
 
-    /** @ghidraAddress 0x00186070 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x00186070
+     * @ghidraAddress PAL: 0x0018bb28
+     */
     virtual void Execute();
 
 private:

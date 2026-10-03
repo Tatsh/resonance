@@ -15,13 +15,13 @@ constexpr size_t kSaveIconElementSize = 1;
 
 } // namespace
 
-// 0x008889a8
+// NTSC-U/C: 0x008889a8, PAL: 0x008cd0c8
 unsigned char g_abSaveIcon[kSaveIconBufferSize];
 
-// 0x0067bfd8
+// NTSC-U/C: 0x0067bfd8, PAL: 0x006bcf40
 int g_nSaveIconLength;
 
-// 0x00177570
+// NTSC-U/C: 0x00177570, PAL: 0x0017a000
 void LoadSaveIcon() {
     FILE *pFile;
     // The binary releases the path before it tests the open.
