@@ -17,6 +17,7 @@
 #include "met/metpersonadata.h"
 #include "met/metrenderer.h"
 #include "met/metscreentitlescreen.h"
+#include "met/metstrings.h"
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 #include "os/r250.h"
@@ -27,7 +28,6 @@
 #include "rnd/tex.h"
 #include "rnd/text.h"
 #include "rnd/view.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -119,12 +119,6 @@ inline const char *TextOrEmpty(const HxStr &text) {
     return text.mStr != nullptr ? text.mStr : g_szEmptyString;
 }
 
-// A configuration value read by value.
-inline HxStr ConfigText(int nCode, const char *pszKey) {
-    HxStr value = QueryConfigString(nCode, pszKey);
-    return value;
-}
-
 // Resolve one named object of the renderer as T.
 template <class T>
 inline T *FindObject(const HxStr &name) {
@@ -150,13 +144,13 @@ inline void ShowPlayerName(Rnd::Button *pButton, MetPersonaData *pPersona, int n
 
 } // namespace
 
-// 0x002b1270
+// NTSC-U/C: 0x002b1270, PAL: 0x002d0050
 MetLocPickCharScreen::MetLocPickCharScreen(MetRenderer *pRenderer, int nPriority)
     : MetMemDetectScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mReadyCount(0), mPlayerCount(0), mExitCountdown(0), mCardIndex(0), mUnusedFirst(0),
       mUnusedSecond(0) {
-    mHelpKeys.push_back(HxStr(kHelpKey));
+    mHelpKeys.push_back(MetText(kMetStrHLocPc, kHelpKey));
 }
 
 // 0x002b19b0
@@ -309,10 +303,11 @@ void MetLocPickCharScreen::SelectPersona(MetPersonaData *pPersona, int nPlayer) 
     }
 }
 
-// 0x002b2ef8
+// NTSC-U/C: 0x002b2ef8, PAL: 0x002d1e58
 void MetLocPickCharScreen::ShowPickers() {
     HxStr title;
-    title = ConfigText(kTitleConfigCode, kMultiTitleKey); // Yes, the binary never reads it.
+    // Yes, the binary never reads the title.
+    title = MetConfigText(kMetStrTMulti, kTitleConfigCode, kMultiTitleKey);
 
     const int nPlayers = MetFrontEndState::shared()->mPlayerCount;
     mChosenPersonas.clear();
@@ -383,7 +378,7 @@ void MetLocPickCharScreen::ShowPickers() {
     }
 
     mReadyCount = 0;
-    MetScreenTitleScreen::SetTitle(ConfigText(kTitleConfigCode, kPickTitleKey));
+    MetScreenTitleScreen::SetTitle(MetConfigText(kMetStrTMpChar, kTitleConfigCode, kPickTitleKey));
     PushNamedScreen(HxStr(kHelpScreen));
     MetScreen::EnterAndShow();
     MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
@@ -402,30 +397,34 @@ void MetLocPickCharScreen::OnExitFinished() {
     }
 }
 
-// 0x002b4068
+// NTSC-U/C: 0x002b4068, PAL: 0x002d3268
 void MetLocPickCharScreen::StartDetect() {
-    const HxStr format(ConfigText(kDialogueConfigCode, kDetectMultiKey));
+    const HxStr format(MetConfigText(kMetStrMemDetectMulti, kDialogueConfigCode, kDetectMultiKey));
     const HxStr text(FormatString(TextOrEmpty(format), MetFrontEndState::shared()->mPlayerCount));
     std::vector<HxStr> buttons;
-    MetMsgScreen::Show(
-        HxStr(kDetectMessage), HxStr(kWarningTitle), text, kNoButtons, buttons, this);
+    MetMsgScreen::Show(HxStr(kDetectMessage),
+                       MetText(kMetStrMsgWARNING, kWarningTitle),
+                       text,
+                       kNoButtons,
+                       buttons,
+                       this);
     MetMemDetectScreen::StartDetect();
 }
 
-// 0x002b4378
+// NTSC-U/C: 0x002b4378, PAL: 0x002d35f0
 void MetLocPickCharScreen::OnNoCard() {
     std::vector<HxStr> buttons;
-    buttons.push_back(HxStr(kRetryButton));
-    buttons.push_back(HxStr(kContinueButton));
+    buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
+    buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
     MetMsgScreen::ShowActive(HxStr(kNoCardMessage),
-                             HxStr(kWarningTitle),
-                             ConfigText(kDialogueConfigCode, kNoCardMessage),
+                             MetText(kMetStrMsgWARNING, kWarningTitle),
+                             MetConfigText(kMetStrMemCheck, kDialogueConfigCode, kNoCardMessage),
                              kTwoButtons,
                              buttons,
                              this);
 }
 
-// 0x002b4738
+// NTSC-U/C: 0x002b4738, PAL: 0x002d3a40
 void MetLocPickCharScreen::OnDetectFinished() {
     if (!MetFrontEndState::shared()->mUsingMemcard) {
         AppendPersonas(mPersonas, *MetPersonaData::savedList());
@@ -450,12 +449,16 @@ void MetLocPickCharScreen::OnDetectFinished() {
 
     mCardIndex = 0;
     std::vector<HxStr> buttons;
-    const HxStr format(ConfigText(kDialogueConfigCode, kLoadKey));
+    const HxStr format(MetConfigText(kMetStrMemLoad, kDialogueConfigCode, kLoadKey));
     const HxStr cardName(
         GlobalSettings::shared()->mCardSlots[mFormattedCards[mCardIndex]].mSlotName);
     const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(cardName)));
-    MetMsgScreen::ShowActive(
-        HxStr(kLoadMessage), HxStr(kLoadingTitle), text, kNoButtons, buttons, this);
+    MetMsgScreen::ShowActive(HxStr(kLoadMessage),
+                             MetText(kMetStrMsgLOADING, kLoadingTitle),
+                             text,
+                             kNoButtons,
+                             buttons,
+                             this);
     const int nPortSlot =
         GlobalSettings::shared()->mCardSlots[mFormattedCards[mCardIndex]].mPortSlot;
     mCardPersonaStarts.clear();
@@ -465,7 +468,7 @@ void MetLocPickCharScreen::OnDetectFinished() {
     MemcardManager::shared()->CreateLoadPersonasTask(nPortSlot, MetPersonaData::loadList());
 }
 
-// 0x002b4ff0
+// NTSC-U/C: 0x002b4ff0, PAL: 0x002d4398
 void MetLocPickCharScreen::OnPersonasLoaded(int, int nStatus) {
     if (mCardIndex == 0) {
         mPersonas.clear();
@@ -485,6 +488,15 @@ void MetLocPickCharScreen::OnPersonasLoaded(int, int nStatus) {
     if (static_cast<unsigned int>(++mCardIndex) < mFormattedCards.size()) {
         const int nPortSlot =
             GlobalSettings::shared()->mCardSlots[mFormattedCards[mCardIndex]].mPortSlot;
+#ifdef VIDEO_STANDARD_PAL
+        std::vector<HxStr> buttons;
+        const HxStr format(GetMetString(kMetStrMemLoad));
+        const HxStr cardName(
+            GlobalSettings::shared()->mCardSlots[mFormattedCards[mCardIndex]].mSlotName);
+        const HxStr text(FormatString(TextOrEmpty(format), TextOrEmpty(cardName)));
+        MetMsgScreen::ShowActive(
+            HxStr(kLoadMessage), GetMetString(kMetStrMsgLOADING), text, kNoButtons, buttons, this);
+#endif
         MemcardManager::shared()->CreateLoadPersonasTask(nPortSlot, &mPersonas);
     } else {
         ExitScreenByName(HxStr(kMsgScreen));

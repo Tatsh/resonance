@@ -3,6 +3,7 @@
 #include "app/application.h"
 #include "game/gamemanagerimpl.h"
 #include "gfx/gfxdevice.h"
+#include "met/metstrings.h"
 #include "os/hxstr.h"
 #include "rnd/text.h"
 
@@ -39,7 +40,7 @@ HudWinMessage::HudWinMessage()
       mPrompt(HxStr("HUD genmsg.txt")) {
 }
 
-// 0x0041b658
+// NTSC-U/C: 0x0041b658, PAL: 0x00456010
 void HudWinMessage::SetFrame(float flTime) {
     if (mState == kStateIdle) {
         return;
@@ -54,6 +55,24 @@ void HudWinMessage::SetFrame(float flTime) {
         g_gfxDevice.mFeedbackInset = kFeedbackInset;
         g_gfxDevice.mFeedbackRect = GfxDevice::Rect{0.0f, 0.0f, 1.0f, 1.0f};
 
+#ifdef VIDEO_STANDARD_PAL
+        HxStr congrats;
+        switch (Application::shared()->GetGameManager()->GetDifficulty()) {
+        case kDifficultyTrue:
+            congrats = GetMetString(kMetStrIngCongrat1);
+            break;
+        case kDifficultySuper:
+            congrats = GetMetString(kMetStrIngCongrat2);
+            break;
+        case kDifficultyMega:
+            congrats = GetMetString(kMetStrIngCongrat3);
+            break;
+        default:
+            GetMetString(kMetStrIngCongratDef); // Yes, the binary discards this text.
+            break;
+        }
+        mMessage.Show(congrats, kCongratsScale, kMessageHold);
+#else
         const char *pszCongrats;
         switch (Application::shared()->GetGameManager()->GetDifficulty()) {
         case kDifficultyTrue:
@@ -70,12 +89,14 @@ void HudWinMessage::SetFrame(float flTime) {
             break;
         }
         mMessage.Show(HxStr(pszCongrats), kCongratsScale, kMessageHold);
+#endif
         mState = kStateCongrats;
     } else if (mState == kStateCongrats) {
         if (kCreditDelay < flElapsed) {
             mStart = flTime;
-            mMessage.Show(HxStr("TEAM FREQUENCY<\nBELIEVES THERE IS\nNO GREATER HIGH\nTHAN MAKING "
-                                "MUSIC.\n"),
+            mMessage.Show(MetText(kMetStrIngWinMsg1,
+                                  "TEAM FREQUENCY<\nBELIEVES THERE IS\nNO GREATER HIGH\nTHAN "
+                                  "MAKING MUSIC.\n"),
                           kTeamScale,
                           kMessageHold);
             mState = kStateTeam;
@@ -83,15 +104,16 @@ void HudWinMessage::SetFrame(float flTime) {
     } else if (mState == kStateTeam) {
         if (kCreditDelay < flElapsed) {
             mStart = flTime;
-            mMessage.Show(HxStr("WE HOPE YOU ENJOYED\nSHAKING YOUR BOOTY,\nSHOWING OFF YOUR "
-                                "SKILLZ,\nAND CRANKING UP YOUR\nFAVORITE FREQUENCY< MIX!"),
+            mMessage.Show(MetText(kMetStrIngWinMsg2,
+                                  "WE HOPE YOU ENJOYED\nSHAKING YOUR BOOTY,\nSHOWING OFF YOUR "
+                                  "SKILLZ,\nAND CRANKING UP YOUR\nFAVORITE FREQUENCY< MIX!"),
                           kThanksScale,
                           kMessageHold);
             mState = kStateThanks;
         }
     } else if (mState == kStateThanks) {
         if (kPromptDelay < flElapsed) {
-            mPrompt.Show(HxStr("Press the START button to exit"));
+            mPrompt.Show(MetText(kMetStrIngStartPress, "Press the START button to exit"));
             mState = kStatePrompt;
         }
     }

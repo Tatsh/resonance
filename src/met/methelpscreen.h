@@ -22,8 +22,9 @@ class Text;
  * unchanged rather than overriding it.
  *
  * A prompt is posted through SetText(). The screen fills the six info texts from script template
- * 0x268 and plays `so_TT_01.anim` to show them. A new prompt arriving while one is shown plays
- * `so_TT_02.anim` to hide the old one first, and the new one is shown when the hide finishes.
+ * 0x268, or in the European release from the prompt text itself, and plays `so_TT_01.anim` to show
+ * them. A new prompt arriving while one is shown plays `so_TT_02.anim` to hide the old one first,
+ * and the new one is shown when the hide finishes.
  * UpdateIdle() advances both animations. The four title texts are filled the same way from
  * the layout SelectPreset() chooses.
  */
@@ -62,11 +63,13 @@ public:
      * The routine resolves the screen registered under the literal `MetHelpScreen`, casts it to
      * this class, and forwards to PostText(). A front end with no help screen registered forwards
      * through a null receiver. It is a static member rather than a free function, because it takes
-     * no receiver and vends exactly one class.
+     * no receiver and vends exactly one class. The North American release passes a key that
+     * FillTexts() looks up, and the European release passes the text itself.
      *
      * @param text The prompt to display.
      * @param flTime The renderer time to post the prompt at.
-     * @ghidraAddress 0x00317368
+     * @ghidraAddress NTSC-U/C: 0x00317368
+     * @ghidraAddress PAL: 0x0033d550
      */
     static void SetText(const HxStr &text, float flTime);
 
@@ -74,10 +77,12 @@ public:
      * Select one named prompt layout.
      *
      * The routine resolves the same registered screen SetText() does and forwards to
-     * ApplyPreset(). MetLoadFreqScreen::EnterAndShow() passes `standard_title`.
+     * ApplyPreset(). MetLoadFreqScreen::EnterAndShow() passes `standard_title`. The European
+     * release passes the layout text itself rather than a name.
      *
      * @param name The layout name.
-     * @ghidraAddress 0x00317298
+     * @ghidraAddress NTSC-U/C: 0x00317298
+     * @ghidraAddress PAL: 0x00338328
      */
     static void SelectPreset(const HxStr &name);
 
@@ -153,19 +158,42 @@ private:
      */
     void ClearInfoTexts();
 
+#ifdef VIDEO_STANDARD_PAL
     /**
-     * Fill a group of texts from the list script template 0x268 returns for a key.
+     * Map a font code of the help text to a font name.
      *
-     * Every text of the group is emptied first. Each list entry that is a tuple gives a font name
-     * and a text for the text at the same index, and the texts are then shifted left by half their
-     * combined width so the run is centred on the origin. A result that is not a list changes
-     * nothing. The texts are indexed without a bounds test.
+     * `F1` is `font1_plain_3`, `F2` is `font1_blue_1`, and `FC` is `big_controller.font`. Any other
+     * code is `font1_plain_3`. The name is inferred.
      *
-     * @param key The prompt or layout to look up.
+     * @param code The code between the angle brackets, such as `F1`.
+     * @return The font name.
+     * @ghidraAddress PAL: 0x003391d8
+     */
+    static HxStr FontForCode(const HxStr &code);
+#endif
+
+    /**
+     * Fill a group of texts from a list of runs, each a font name and a text.
+     *
+     * The North American release takes the list script template 0x268 returns for a key. Every
+     * text of the group is emptied first, and each list entry that is a tuple gives the run for the
+     * text at the same index. A result that is not a list does not change the texts.
+     *
+     * The European release splits the text itself into runs. A font code such as `<F1>` starts a
+     * run, the text before the first code is in font code `F1`, and FontForCode() gives each font
+     * name. A code with no closing bracket makes the split loop forever. With no runs, the texts
+     * are unchanged. Otherwise every text of the group is emptied first.
+     *
+     * Each run is placed after the one before it, and the texts are then shifted left by half
+     * their combined width so the run is centred on the origin. The texts are indexed without a
+     * bounds test.
+     *
+     * @param key The prompt or layout to look up, or in the European release the text itself.
      * @param texts The texts to fill.
      * @param origin The resting translation of the first text.
      * @param nTitles Zero for the info texts, whose root view is then recomposed.
-     * @ghidraAddress 0x00313208
+     * @ghidraAddress NTSC-U/C: 0x00313208
+     * @ghidraAddress PAL: 0x00339300
      */
     void FillTexts(const HxStr &key,
                    std::vector<Rnd::Text *> &texts,

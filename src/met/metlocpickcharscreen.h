@@ -43,7 +43,8 @@ public:
      *
      * @param pRenderer The front-end renderer this screen registers on.
      * @param nPriority The load priority.
-     * @ghidraAddress 0x002b1270
+     * @ghidraAddress NTSC-U/C: 0x002b1270
+     * @ghidraAddress PAL: 0x002d0050
      */
     MetLocPickCharScreen(MetRenderer *pRenderer, int nPriority);
 
@@ -169,7 +170,8 @@ public:
      *
      * Slot 39. The notice receives MetFrontEndState::mPlayerCount.
      *
-     * @ghidraAddress 0x002b4068
+     * @ghidraAddress NTSC-U/C: 0x002b4068
+     * @ghidraAddress PAL: 0x002d3268
      */
     virtual void StartDetect();
 
@@ -187,7 +189,8 @@ public:
      *
      * Slot 41. Raises `mem_check`.
      *
-     * @ghidraAddress 0x002b4378
+     * @ghidraAddress NTSC-U/C: 0x002b4378
+     * @ghidraAddress PAL: 0x002d35f0
      */
     virtual void OnNoCard();
 
@@ -198,7 +201,8 @@ public:
      * Slot 42. With a card but none formatted, the screen closes the message screen and shows the
      * pickers when the dismissal arrives.
      *
-     * @ghidraAddress 0x002b4738
+     * @ghidraAddress NTSC-U/C: 0x002b4738
+     * @ghidraAddress PAL: 0x002d3a40
      */
     virtual void OnDetectFinished();
 
@@ -206,11 +210,13 @@ public:
      * Record one card's personas and load the next formatted card, or close the loading notice.
      *
      * MemcardUser slot 13. mCardPersonaStarts receives the size of mPersonas after the card, or
-     * -1 when the load failed.
+     * -1 when the load failed. The European release shows the loading notice again, with the next
+     * card's name, before loading the next card.
      *
      * @param nPortSlot The card the personas came from. The body does not read it.
      * @param nStatus The result, 0 on success.
-     * @ghidraAddress 0x002b4ff0
+     * @ghidraAddress NTSC-U/C: 0x002b4ff0
+     * @ghidraAddress PAL: 0x002d4398
      */
     virtual void OnPersonasLoaded(int nPortSlot, int nStatus);
 
@@ -225,7 +231,7 @@ private:
     // random entry when there is none. The title is inferred.
     void SelectPersona(MetPersonaData *pPersona, int nPlayer);
 
-    // 0x002b2ef8
+    // NTSC-U/C: 0x002b2ef8, PAL: 0x002d1e58
     // Loads the layout for the player count, fills mPersonas and the choices, dresses each
     // player's picker, and enters. The title is inferred.
     void ShowPickers();

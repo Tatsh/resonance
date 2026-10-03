@@ -1,6 +1,7 @@
 #include "met/methelpscreen.h"
 
 #include <cstring>
+#include <utility>
 
 #include "os/formatstring.h"
 #include "os/hxstr.h"
@@ -30,6 +31,21 @@ static const char *const kShowAnimation = "so_TT_01.anim";
 static const char *const kHideAnimation = "so_TT_02.anim";
 static const char *const kNoText = "";
 
+#ifdef VIDEO_STANDARD_PAL
+// A run of help text opens with a font code in angle brackets, such as `<F1>`.
+static const char *const kFontCodeOpen = "<F";
+static const char *const kFontCodeClose = ">";
+static const char *const kPlainFontCode = "F1";
+static const char *const kBlueFontCode = "F2";
+static const char *const kControllerFontCode = "FC";
+static const char *const kPlainFont = "font1_plain_3";
+static const char *const kBlueFont = "font1_blue_1";
+static const char *const kControllerFont = "big_controller.font";
+
+// HxStr::Find() reports an absent text as this index.
+constexpr int kNotFound = -1;
+#endif
+
 constexpr int kInfoTextCount = 6;
 constexpr int kTitleTextCount = 4;
 
@@ -56,6 +72,40 @@ inline Rnd::Animatable *FindAnimation(const char *pszName) {
 
 inline MetHelpScreen *FindHelpScreen() {
     return dynamic_cast<MetHelpScreen *>(MetScreen::FindScreenByName(HxStr(kRegisteredName)));
+}
+
+inline void EmptyTexts(std::vector<Rnd::Text *> &texts) {
+    for (std::vector<Rnd::Text *>::size_type i = 0; i < texts.size(); ++i) {
+        texts[i]->SetText(HxStr(kNoText));
+    }
+}
+
+// Place one run of text at end in its font, and advance end past it.
+inline void
+PlaceText(Rnd::Text *pText, const HxStr &fontName, const HxStr &textValue, Vector3 &end) {
+    std::memcpy(pText->mLocalXfm[kTranslationRow], &end, sizeof(end));
+    pText->mDirty = 1;
+    pText->SetFont(dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(fontName)));
+    pText->SetText(textValue);
+    Vector3 advance = pText->CharPosition(textValue.mLen);
+    AddVec3(&end.x, &advance.x, &end.x);
+}
+
+// Shift the first nCount texts left by half the width of the run from origin to end.
+inline void CentreTexts(std::vector<Rnd::Text *> &texts,
+                        int nCount,
+                        const Vector3 &origin,
+                        const Vector3 &end) {
+    const Vector3 shift{(end.x - origin.x) * kHalf, 0.0f, 0.0f, kVectorPadding};
+    for (int i = 0; i < nCount; ++i) {
+        Vector3 translation;
+        std::memcpy(&translation, texts[i]->mLocalXfm[kTranslationRow], sizeof(translation));
+        Vector3 centred;
+        centred.w = kVectorPadding;
+        Vec3Sub(&translation.x, &shift.x, &centred.x);
+        std::memcpy(texts[i]->mLocalXfm[kTranslationRow], &centred, sizeof(centred));
+        texts[i]->mDirty = 1;
+    }
 }
 
 } // namespace
@@ -139,21 +189,74 @@ void MetHelpScreen::ClearInfoTexts() {
     mView->UpdateWorldXfm(nullptr, 1); // Yes, the binary discards the result.
 }
 
-// 0x00313208
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x003391d8
+HxStr MetHelpScreen::FontForCode(const HxStr &code) {
+    HxStr fontName(kPlainFont);
+    if (code == kPlainFontCode) {
+        fontName = kPlainFont;
+    } else if (code == kBlueFontCode) {
+        fontName = kBlueFont;
+    } else if (code == kControllerFontCode) {
+        fontName = kControllerFont;
+    }
+    return fontName;
+}
+#endif
+
+// NTSC-U/C: 0x00313208, PAL: 0x00339300
 void MetHelpScreen::FillTexts(const HxStr &key,
                               std::vector<Rnd::Text *> &texts,
                               const Vector3 &origin,
                               int nTitles) {
+#ifdef VIDEO_STANDARD_PAL
+    std::vector<std::pair<HxStr, HxStr>> runs;
+    HxStr fontCode(kPlainFontCode);
+    HxStr rest(key);
+    while (rest.mLen != 0) {
+        const int nOpen = rest.Find(kFontCodeOpen);
+        if (nOpen == kNotFound) {
+            break;
+        }
+        const int nClose = rest.Find(kFontCodeClose);
+        if (nClose == kNotFound) {
+            continue; // Yes, the binary loops forever on a font code with no closing bracket.
+        }
+        if (nOpen > 0) {
+            std::pair<HxStr, HxStr> run;
+            run.first = FontForCode(fontCode);
+            run.second = rest.Mid(0, nOpen);
+            runs.push_back(run);
+        }
+        fontCode = rest.Mid(nOpen + 1, nClose - 1 - nOpen);
+        rest = rest.Mid(nClose + 1);
+    }
+    if (rest.mLen != 0) {
+        std::pair<HxStr, HxStr> run;
+        run.first = FontForCode(fontCode);
+        run.second = rest;
+        runs.push_back(run);
+    }
+
+    const int nCount = runs.size();
+    if (nCount != 0) {
+        Vector3 end = origin;
+        EmptyTexts(texts);
+        for (int i = 0; i < nCount; ++i) {
+            const HxStr fontName(runs[i].first);
+            const HxStr textValue(runs[i].second);
+            PlaceText(texts[i], fontName, textValue, end);
+        }
+        CentreTexts(texts, nCount, origin, end);
+    }
+#else
     Py::Object result =
         EvalScriptTemplate(kHelpTextTemplate, key.mStr != nullptr ? key.mStr : g_szEmptyString);
     if (result.isList()) {
         Py::List entries(result);
         const int nCount = entries.length();
         Vector3 end = origin;
-        for (std::vector<Rnd::Text *>::size_type i = 0; i < texts.size(); ++i) {
-            texts[i]->SetText(HxStr(kNoText));
-        }
-
+        EmptyTexts(texts);
         for (int i = 0; i < nCount; ++i) {
             if (entries[i].isTuple()) {
                 Py::Tuple entry(entries[i]);
@@ -161,26 +264,12 @@ void MetHelpScreen::FillTexts(const HxStr &key,
                 Py::String value(entry[kEntryFieldText]);
                 HxStr fontName = font.as_string();
                 HxStr textValue = value.as_string();
-                std::memcpy(texts[i]->mLocalXfm[kTranslationRow], &end, sizeof(end));
-                texts[i]->mDirty = 1;
-                texts[i]->SetFont(dynamic_cast<Rnd::Font *>(Rnd::g_manager.Find(fontName)));
-                texts[i]->SetText(textValue);
-                Vector3 advance = texts[i]->CharPosition(textValue.mLen);
-                AddVec3(&end.x, &advance.x, &end.x);
+                PlaceText(texts[i], fontName, textValue, end);
             }
         }
-
-        const Vector3 shift{(end.x - origin.x) * kHalf, 0.0f, 0.0f, kVectorPadding};
-        for (int i = 0; i < nCount; ++i) {
-            Vector3 translation;
-            std::memcpy(&translation, texts[i]->mLocalXfm[kTranslationRow], sizeof(translation));
-            Vector3 centred;
-            centred.w = kVectorPadding;
-            Vec3Sub(&translation.x, &shift.x, &centred.x);
-            std::memcpy(texts[i]->mLocalXfm[kTranslationRow], &centred, sizeof(centred));
-            texts[i]->mDirty = 1;
-        }
+        CentreTexts(texts, nCount, origin, end);
     }
+#endif
 
     if (nTitles == kFillInfoTexts) {
         mView->UpdateWorldXfm(nullptr, 1); // Yes, the binary discards the result.
@@ -192,12 +281,12 @@ MetHelpScreen *MetHelpScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetHelpScreen(pRenderer, nPriority);
 }
 
-// 0x00317298
+// NTSC-U/C: 0x00317298, PAL: 0x00338328
 void MetHelpScreen::SelectPreset(const HxStr &name) {
     FindHelpScreen()->ApplyPreset(name);
 }
 
-// 0x00317368
+// NTSC-U/C: 0x00317368, PAL: 0x0033d550
 void MetHelpScreen::SetText(const HxStr &text, float flTime) {
     FindHelpScreen()->PostText(text, flTime);
 }

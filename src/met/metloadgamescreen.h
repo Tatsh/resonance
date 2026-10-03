@@ -68,14 +68,11 @@ public:
     /**
      * Show the loading captions and start the enter animation.
      *
-     * Slot 5. Outside a jukebox session, `loading.txt` shows `load_loading` and the event text
-     * shows `load_demo`, `load_tut`, `load_remix`, or `load_game` for an attract run, the tutorial,
-     * jam mode, or anything else. The win sequence is armed for a solo game on its last remaining
-     * level, and slot 39 runs. A jukebox session that returns to
-     * `MetJukeboxEditPlaylistScreenDone` clears that return and shows `load_loading` and
-     * `load_jukebox`, and any other jukebox session blanks both texts.
+     * Slot 5. Runs LLEnter(). The European release has the body as a separate routine, and the
+     * North American release has the body inline.
      *
-     * @ghidraAddress 0x0028d590
+     * @ghidraAddress NTSC-U/C: 0x0028d590
+     * @ghidraAddress PAL: 0x002ad9e8
      */
     virtual void EnterAndShow();
 
@@ -134,11 +131,12 @@ public:
     virtual void OnFadeInDone();
 
     /**
-     * Do nothing.
+     * Do nothing in the North American release, and run LLEnter() in the European release.
      *
-     * FadeUser slot. The body is empty in the image.
+     * FadeUser slot. The North American body is empty.
      *
-     * @ghidraAddress 0x00291b80
+     * @ghidraAddress NTSC-U/C: 0x00291b80
+     * @ghidraAddress PAL: 0x002adab8
      */
     virtual void OnFadeOutDone();
 
@@ -197,6 +195,17 @@ private:
     // 0x00291b28
     // Record the tutorial phase and load the level.
     void LoadTutorialLevel();
+
+    // NTSC-U/C: 0x0028d590, PAL: 0x002a9270
+    // Show the loading captions and start the enter animation. Outside a jukebox session,
+    // `loading.txt` shows `load_loading` and the event text shows `load_demo`, `load_tut`,
+    // `load_remix`, or `load_game` for an attract run, the tutorial, jam mode, or anything else.
+    // The win sequence is armed for a solo game on its last remaining level, and slot 39 runs. In a
+    // jukebox session the European release first logs the mode. A jukebox session that returns to
+    // `MetJukeboxEditPlaylistScreenDone` clears the return screen and shows `load_loading` and
+    // `load_jukebox`, and any other jukebox session blanks both texts. The name is inferred from
+    // the European release's log message.
+    void LLEnter();
 
     // `event.txt`, which slot 38 resolves. Not written by the constructor. +0x90
     Rnd::Text *mpEvent;

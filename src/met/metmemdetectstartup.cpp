@@ -6,10 +6,10 @@
 #include "game/gamemanagerimpl.h"
 #include "met/metmsgscreen.h"
 #include "met/metrenderer.h"
+#include "met/metstrings.h"
 #include "msg/message.h"
 #include "os/hxstr.h"
 #include "rnd/view.h"
-#include "script/configquery.h"
 
 namespace {
 
@@ -44,12 +44,6 @@ constexpr float kFadeFrames = 360.0f;
 // The view MetFade releases when the fade ends.
 constexpr int kReleaseView = 0;
 
-// A configuration value read by value.
-inline HxStr ConfigText(const char *pszKey) {
-    HxStr value = QueryConfigString(kDialogueConfigCode, pszKey);
-    return value;
-}
-
 } // namespace
 
 // 0x002df058
@@ -70,7 +64,7 @@ MetMemDetectStartup *MetMemDetectStartup::New(MetRenderer *pRenderer, int nPrior
     return new MetMemDetectStartup(pRenderer, nPriority);
 }
 
-// 0x002df250
+// NTSC-U/C: 0x002df250, PAL: 0x00302018
 void MetMemDetectStartup::UpdateIdle(float flTime) {
     mFade->Update(flTime);
     if (mEnterTime != 0 && mEnterTime + kFadeFrames < flTime) {
@@ -81,24 +75,25 @@ void MetMemDetectStartup::UpdateIdle(float flTime) {
     if (mNoCardTime != 0 && mNoCardTime + kFadeFrames < flTime) {
         mNoCardTime = 0;
         std::vector<HxStr> buttons;
-        buttons.push_back(HxStr(kRetryButton));
-        buttons.push_back(HxStr(kContinueButton));
-        MetMsgScreen::ShowActive(HxStr(kNoCardMessage),
-                                 HxStr(kWarningTitle),
-                                 ConfigText(kNoCardMessage),
-                                 kTwoButtons,
-                                 buttons,
-                                 this);
+        buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
+        buttons.push_back(MetText(kMetStrMsgCONTINUE, kContinueButton));
+        MetMsgScreen::ShowActive(
+            HxStr(kNoCardMessage),
+            MetText(kMetStrMsgWARNING, kWarningTitle),
+            MetConfigText(kMetStrMemCheck, kDialogueConfigCode, kNoCardMessage),
+            kTwoButtons,
+            buttons,
+            this);
     }
     MetMemDetectScreen::UpdateIdle(flTime);
 }
 
-// 0x002df6e0
+// NTSC-U/C: 0x002df6e0, PAL: 0x00302530
 void MetMemDetectStartup::StartDetect() {
     std::vector<HxStr> buttons;
     MetMsgScreen::Show(HxStr(kDetectMessage),
-                       HxStr(kWarningTitle),
-                       ConfigText(kDetectKey),
+                       MetText(kMetStrMsgWARNING, kWarningTitle),
+                       MetConfigText(kMetStrMemDetect, kDialogueConfigCode, kDetectKey),
                        kNoButtons,
                        buttons,
                        this);

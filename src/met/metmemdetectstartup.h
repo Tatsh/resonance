@@ -112,7 +112,8 @@ public:
      * Slot 26.
      *
      * @param flTime The renderer's current animation frame position.
-     * @ghidraAddress 0x002df250
+     * @ghidraAddress NTSC-U/C: 0x002df250
+     * @ghidraAddress PAL: 0x00302018
      */
     virtual void UpdateIdle(float flTime);
 
@@ -121,7 +122,8 @@ public:
      *
      * Slot 39.
      *
-     * @ghidraAddress 0x002df6e0
+     * @ghidraAddress NTSC-U/C: 0x002df6e0
+     * @ghidraAddress PAL: 0x00302530
      */
     virtual void StartDetect();
 

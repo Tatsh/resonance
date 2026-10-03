@@ -39,9 +39,13 @@ public:
      * The congratulation shows at 2.5 times the message font size, the first credit 10000 units of
      * time later at twice the size, the second credit 10000 units after that at 1.7 times the size,
      * and the prompt 8000 units after that. Each message stays for 8000 units between its fades.
+     * The European release looks every text up in the current language, and for a difficulty
+     * other than True, Super, or Mega it shows an empty congratulation where the North American
+     * release shows `Yup`.
      *
      * @param flTime The current time.
-     * @ghidraAddress 0x0041b658
+     * @ghidraAddress NTSC-U/C: 0x0041b658
+     * @ghidraAddress PAL: 0x00456010
      */
     void SetFrame(float flTime);
 

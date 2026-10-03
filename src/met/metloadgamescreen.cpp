@@ -14,15 +14,16 @@
 #include "met/metfrontendstate.h"
 #include "met/metpersonadata.h"
 #include "met/metrenderer.h"
+#include "met/metstrings.h"
 #include "msg/begingamelocalmsg.h"
 #include "msg/gamemanagerdoplaybackmsg.h"
 #include "msg/message.h"
 #include "os/cycles.h"
 #include "os/hxstr.h"
+#include "os/log.h"
 #include "os/r250.h"
 #include "rnd/manager.h"
 #include "rnd/text.h"
-#include "script/configquery.h"
 #include "synth/ps2hardsynth.h"
 
 namespace {
@@ -82,8 +83,8 @@ inline long long WatchdogNowNs() {
 }
 
 // A caption read from the configuration.
-inline HxStr Caption(const char *pszKey) {
-    HxStr caption = QueryConfigString(kCaptionConfigCode, pszKey);
+inline HxStr Caption(MetStringId nId, const char *pszKey) {
+    HxStr caption = MetConfigText(nId, kCaptionConfigCode, pszKey);
     return caption;
 }
 
@@ -102,21 +103,26 @@ void MetLoadGameScreen::ResolveContainerViews() {
     mpEvent = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kEventText)));
 }
 
-// 0x0028d590
+// NTSC-U/C: 0x0028d590, PAL: 0x002ad9e8
 void MetLoadGameScreen::EnterAndShow() {
+    LLEnter();
+}
+
+// NTSC-U/C: 0x0028d590, PAL: 0x002a9270
+void MetLoadGameScreen::LLEnter() {
     const GameParams params(*Application::shared()->GetGameManager()->GetParams());
     Rnd::Text *pLoading = dynamic_cast<Rnd::Text *>(Rnd::g_manager.Find(HxStr(kLoadingText)));
 
     if (params.mJukeboxMode == 0) {
-        pLoading->SetText(Caption(kLoadingCaption));
+        pLoading->SetText(Caption(kMetStrLoadLoading, kLoadingCaption));
         if (mDemoPlayback != 0) {
-            mpEvent->SetText(Caption(kDemoCaption));
+            mpEvent->SetText(Caption(kMetStrLoadDemo, kDemoCaption));
         } else if (MetFrontEndState::shared()->mReturnScreen == kTutorialScreen) {
-            mpEvent->SetText(Caption(kTutorialCaption));
+            mpEvent->SetText(Caption(kMetStrLoadTut, kTutorialCaption));
         } else if (params.mPlayMode == kPlayModeJamValue) {
-            mpEvent->SetText(Caption(kRemixCaption));
+            mpEvent->SetText(Caption(kMetStrLoadRemix, kRemixCaption));
         } else {
-            mpEvent->SetText(Caption(kGameCaption));
+            mpEvent->SetText(Caption(kMetStrLoadGame, kGameCaption));
         }
 
         MetPersonaData *pPersona = MetFrontEndState::shared()->GetFirstPersona();
@@ -129,13 +135,18 @@ void MetLoadGameScreen::EnterAndShow() {
         }
         SetDoWinSequence(nDoWinSequence);
         AssignBurnSlots();
-    } else if (MetFrontEndState::shared()->mReturnScreen == kJukeboxDoneScreen) {
-        MetFrontEndState::shared()->mReturnScreen = HxStr(kNoScreen);
-        pLoading->SetText(Caption(kLoadingCaption));
-        mpEvent->SetText(Caption(kJukeboxCaption));
     } else {
-        pLoading->SetText(HxStr(kNoCaption));
-        mpEvent->SetText(HxStr(kNoCaption));
+#ifdef VIDEO_STANDARD_PAL
+        LogPrintf("MetLoadGameScreen::%s() - recognized JB mode.\n", __func__);
+#endif
+        if (MetFrontEndState::shared()->mReturnScreen == kJukeboxDoneScreen) {
+            MetFrontEndState::shared()->mReturnScreen = HxStr(kNoScreen);
+            pLoading->SetText(Caption(kMetStrLoadLoading, kLoadingCaption));
+            mpEvent->SetText(Caption(kMetStrLoadJukebox, kJukeboxCaption));
+        } else {
+            pLoading->SetText(HxStr(kNoCaption));
+            mpEvent->SetText(HxStr(kNoCaption));
+        }
     }
 
     MetScreen::EnterAndShow();
@@ -250,6 +261,9 @@ void MetLoadGameScreen::LoadTutorialLevel() {
     Renderer::LoadLevel(*Application::shared()->GetGameManager()->GetParams());
 }
 
-// 0x00291b80
+// NTSC-U/C: 0x00291b80, PAL: 0x002adab8
 void MetLoadGameScreen::OnFadeOutDone() {
+#ifdef VIDEO_STANDARD_PAL
+    LLEnter();
+#endif
 }
