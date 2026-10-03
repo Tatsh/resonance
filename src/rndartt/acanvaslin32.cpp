@@ -5,7 +5,7 @@
 #include "rndartt/apalette.h"
 #include "rndartt/apoint.h"
 #include "rndartt/arowspan.h"
-#include "rndartt/astretchspan.h"
+#include "rndartt/astretchblit.h"
 
 namespace {
 
@@ -43,7 +43,7 @@ ACanvasLin32::ACanvasLin32(const ABitmap &bitmap) : ACanvas32(bitmap) {
 }
 
 // NTSC-U/C: 0x00614278, PAL: 0x00654e08
-void ACanvasLin32::BuildAlphaFromColorKey(unsigned int nColorKey) {
+void ACanvasLin32::SetAlphaValues(unsigned int nColorKey) {
     unsigned char *pRow = static_cast<unsigned char *>(mBitmap.mPixels);
     nColorKey &= kACanvas32ChannelsMask;
     for (int y = 0; y < mBitmap.mHeight; ++y) {
@@ -62,22 +62,22 @@ void ACanvasLin32::BuildAlphaFromColorKey(unsigned int nColorKey) {
 }
 
 // NTSC-U/C: 0x00614308, PAL: 0x00654e98
-void ACanvasLin32::PutPixelNoClip(int nX, int nY) {
+void ACanvasLin32::DrawPixelU(int nX, int nY) {
     *PixelAt(mBitmap, nX, nY) = mColor;
 }
 
 // NTSC-U/C: 0x00614330, PAL: 0x00654ec0
-void ACanvasLin32::PutPixelNoClip(int nX, int nY, unsigned int nColor) {
+void ACanvasLin32::DrawPixel32U(int nX, int nY, unsigned int nColor) {
     *PixelAt(mBitmap, nX, nY) = nColor;
 }
 
 // NTSC-U/C: 0x00614350, PAL: 0x00654ee0
-unsigned int ACanvasLin32::GetPixelNoClip(int nX, int nY) {
+unsigned int ACanvasLin32::GetPixel32U(int nX, int nY) {
     return *PixelAt(mBitmap, nX, nY);
 }
 
 // NTSC-U/C: 0x00614370, PAL: 0x00654f00
-void ACanvasLin32::FillRowNoClip(int nY, int nLeft, int nRight) {
+void ACanvasLin32::DrawHorzLineU(int nY, int nLeft, int nRight) {
     unsigned int *pPixel = PixelAt(mBitmap, nLeft, nY);
     // Yes, the binary counts down to zero exactly. A reversed span runs on.
     for (int nRemaining = nRight - nLeft; nRemaining != 0; --nRemaining) {
@@ -86,7 +86,7 @@ void ACanvasLin32::FillRowNoClip(int nY, int nLeft, int nRight) {
 }
 
 // NTSC-U/C: 0x006143b8, PAL: 0x00654f48
-void ACanvasLin32::FillColumnNoClip(int nX, int nTop, int nBottom) {
+void ACanvasLin32::DrawVertLineU(int nX, int nTop, int nBottom) {
     unsigned char *pPixel = ByteAt(mBitmap, nX, nTop);
     // Yes, the binary counts down to zero exactly. A reversed span runs on.
     for (int nRemaining = nBottom - nTop; nRemaining != 0; --nRemaining) {
@@ -96,7 +96,7 @@ void ACanvasLin32::FillColumnNoClip(int nX, int nTop, int nBottom) {
 }
 
 // NTSC-U/C: 0x00614408, PAL: 0x00654f98
-void ACanvasLin32::FillRectNoClip(ARect rect) {
+void ACanvasLin32::DrawRectU(ARect rect) {
     const short nWidth = static_cast<short>(rect.mRight - rect.mLeft);
     unsigned char *pRow = ByteAt(mBitmap, rect.mLeft, rect.mTop);
     const int nGap = mBitmap.mBytesPerRow - kBytesPerPixel * nWidth;
@@ -112,12 +112,12 @@ void ACanvasLin32::FillRectNoClip(ARect rect) {
 }
 
 // NTSC-U/C: 0x006148e0, PAL: 0x00655470
-void ACanvasLin32::TextureRowIndexed(int nY,
-                                     int nLeft,
-                                     int nRight,
-                                     const ABitmap *pSource,
-                                     APoint *pSourcePosition,
-                                     const APoint *pSourceStep) {
+void ACanvasLin32::DrawTmapRow8U(int nY,
+                                 int nLeft,
+                                 int nRight,
+                                 const ABitmap *pSource,
+                                 APoint *pSourcePosition,
+                                 const APoint *pSourceStep) {
     const APalette *pPalette = ResolvePalette(*pSource, mBitmap);
     if (pPalette == nullptr) {
         return;
@@ -135,7 +135,7 @@ void ACanvasLin32::TextureRowIndexed(int nY,
 }
 
 // NTSC-U/C: 0x006144b0, PAL: 0x00655040
-void ACanvasLin32::Blit4NoClip(const ABitmap &source, int nX, int nY) {
+void ACanvasLin32::DrawBitmapLin4U(const ABitmap &source, int nX, int nY) {
     const APalette *pPalette = ResolvePalette(source, mBitmap);
     if (pPalette == nullptr) {
         return;
@@ -143,7 +143,7 @@ void ACanvasLin32::Blit4NoClip(const ABitmap &source, int nX, int nY) {
     const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
     unsigned char *pDestRow = ByteAt(mBitmap, nX, nY);
     for (int nRemainingRows = source.mHeight; nRemainingRows > 0; --nRemainingRows) {
-        UnpackNibbleRow(pSourceRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
+        Unpack4(pSourceRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
         const unsigned char *pIndex = g_abCanvasRowScratch;
         unsigned int *pDest = reinterpret_cast<unsigned int *>(pDestRow);
         for (int nRemaining = source.mWidth; nRemaining > 0; --nRemaining) {
@@ -160,7 +160,7 @@ void ACanvasLin32::Blit4NoClip(const ABitmap &source, int nX, int nY) {
 }
 
 // NTSC-U/C: 0x00614608, PAL: 0x00655198
-void ACanvasLin32::Blit8NoClip(const ABitmap &source, int nX, int nY) {
+void ACanvasLin32::DrawBitmapLin8U(const ABitmap &source, int nX, int nY) {
     const APalette *pPalette = ResolvePalette(source, mBitmap);
     if (pPalette == nullptr) {
         return;
@@ -184,7 +184,7 @@ void ACanvasLin32::Blit8NoClip(const ABitmap &source, int nX, int nY) {
 }
 
 // NTSC-U/C: 0x00614070, PAL: 0x00654c00
-void ACanvasLin32::Blit32NoClip(const ABitmap &source, int nX, int nY) {
+void ACanvasLin32::DrawBitmapLin32U(const ABitmap &source, int nX, int nY) {
     const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
     unsigned char *pDestRow = ByteAt(mBitmap, nX, nY);
     if (source.mHasTransparentColor == 0 && source.mBytesPerRow == mBitmap.mBytesPerRow) {
@@ -211,7 +211,7 @@ void ACanvasLin32::Blit32NoClip(const ABitmap &source, int nX, int nY) {
 }
 
 // NTSC-U/C: 0x006146f0, PAL: 0x00655280
-void ACanvasLin32::RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap) {
+void ACanvasLin32::DrawClutBitmapRowLin8U(const ARowInfo &span, const unsigned char *pRemap) {
     if (span.mPalette == nullptr) {
         return;
     }
@@ -228,7 +228,7 @@ void ACanvasLin32::RemapRowIndexed(const ARowSpan &span, const unsigned char *pR
 }
 
 // NTSC-U/C: 0x00614790, PAL: 0x00655320
-void ACanvasLin32::StretchRowIndexed(const AStretchSpan &span) {
+void ACanvasLin32::DrawScaledBitmapRowLin8U(const AScaledRowInfo &span) {
     if (span.mPalette == nullptr) {
         return;
     }
@@ -246,7 +246,8 @@ void ACanvasLin32::StretchRowIndexed(const AStretchSpan &span) {
 }
 
 // NTSC-U/C: 0x00614830, PAL: 0x006553c0
-void ACanvasLin32::StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap) {
+void ACanvasLin32::DrawScaledClutBitmapRowLin8U(const AScaledRowInfo &span,
+                                                const unsigned char *pRemap) {
     if (span.mPalette == nullptr) {
         return;
     }

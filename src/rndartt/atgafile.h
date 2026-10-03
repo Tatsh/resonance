@@ -33,7 +33,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0061fff8
      * @ghidraAddress PAL: 0x00660b88
      */
-    virtual int ReadHeader();
+    virtual int StartRead();
 
     /**
      * Slot 3. Read the image.
@@ -81,5 +81,5 @@ private:
     int mPixelDepth; // +0x20 Bits per pixel.
     int mWidth;      // +0x24
     int mHeight;     // +0x28
-    int mImageRead;  // +0x2c Cleared by ReadHeader() and never set.
+    int mImageRead;  // +0x2c Cleared by StartRead() and never set.
 };

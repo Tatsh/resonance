@@ -5,11 +5,11 @@ class APalette;
 /**
  * Pixel layout code stored in ABitmap::mFormat.
  *
- * ACanvas::CreateForBitmap() accepts only codes 0 through 5 and rejects every larger code. Each
+ * ACanvas::NewCompatibleCanvas() accepts only codes 0 through 5 and rejects every larger code. Each
  * accepted code selects one of the five linear canvas subclasses. The mapping was recovered from
  * the jump table at 0x00837d90 together with the type function each branch installs.
  *
- * The same code selects a copy routine in ACanvas::DrawGlyphNoClip(), through the six entry member
+ * The same code selects a copy routine in ACanvas::DrawCharU(), through the six entry member
  * pointer table at 0x0077dc98, and a read routine through the table at 0x0077dcf8. Both tables
  * confirm the order, because their entries address the 4, 8, 15, 24, 32, and run length encoded
  * slots in that sequence.
@@ -38,7 +38,7 @@ enum ABitmapColorKey {
  * Bytes one pixel of each ABitmapFormat occupies.
  *
  * The entry for kABitmapFormatLinear4 is zero, because four bit rows use a separate stride
- * formula. Both ABitmap::ABitmap() and ACanvas::CreateForBitmap() read the table.
+ * formula. Both ABitmap::ABitmap() and ACanvas::NewCompatibleCanvas() read the table.
  *
  * @ghidraAddress NTSC-U/C: 0x00725cc0
  * @ghidraAddress PAL: 0x00769960
@@ -73,23 +73,24 @@ extern int g_nSkipColorSwap;
 /**
  * Description of a pixel rectangle, its layout, and its palette.
  *
- * The record is not polymorphic and has no RTTI. Its name is inferred from the header its
- * allocations bill themselves to, `C:/FREQ/src/rndartt/abitmap.h`. That is the only source path
- * the shipped image retains. 165 copies of the tag pair ("APalette", "abitmap.h") appear in the
- * data segment, one per translation unit that inlined a palette allocation.
+ * The record is not polymorphic and has no RTTI. Its allocations bill themselves to
+ * `C:/FREQ/src/rndartt/abitmap.h`, the only source path the shipped image retains. 165 copies of
+ * the tag pair ("APalette", "abitmap.h") appear in the data segment, one per translation unit that
+ * inlined a palette allocation.
  *
  * ACanvas stores one of these at offset zero and reads mWidth and mHeight directly. The members
  * are therefore public, although a friend declaration would fit the image equally well.
  *
- * The record is 0x18 bytes. ACanvas::CreateForBitmap() copies it whole, then fills in mBytesPerRow
- * and mPixels for the copy. Every clipped copy slot of ACanvas copies exactly 0x18 bytes of its
- * argument onto its stack, mutates the copy, and passes the copy on, which confirms the size.
+ * The record is 0x18 bytes. ACanvas::NewCompatibleCanvas() copies it whole, then fills in
+ * mBytesPerRow and mPixels for the copy. Every clipped copy slot of ACanvas copies exactly 0x18
+ * bytes of its argument onto its stack, mutates the copy, and passes the copy on. The 0x18 byte
+ * copies confirm the size.
  *
  * The constructor settles the five bit-fields, because it writes the low eight bits with a byte
  * store and the four bit code and the two flag bits with read, modify, and write cycles over the
  * enclosing halfword. Reading that halfword with a word load, as both the constructor and
- * ACanvas::Blit4NoClip() do, is a toolchain choice over a 16 bit container rather than evidence of
- * a wider member. The neighbouring mWidth is intact after every such cycle because the read
+ * ACanvas::DrawBitmapLin4U() do, is a toolchain choice over a 16 bit container rather than evidence
+ * of a wider member. The neighbouring mWidth is intact after every such cycle because the read
  * precedes the write.
  *
  * A 0x420-byte form of this record, with an APalette inline at offset 0x18, does not fit the record
@@ -97,7 +98,7 @@ extern int g_nSkipColorSwap;
  * clip rectangle. A base and derived pair reconciles the two, the 0x18 byte head described here
  * being the base and the 0x420 byte form adding the inline palette.
  *
- * One copy of the record does not fit the 0x18 byte size. ACanvas::DrawGlyph() copies 0x1c bytes
+ * One copy of the record does not fit the 0x18 byte size. ACanvas::DrawChar() copies 0x1c bytes
  * of the glyph it is about to draw and then passes the copy where an ABitmap is expected. Either
  * a font glyph is a derived record with one further word, or the description is 0x1c bytes with a
  * member no canvas routine reads. The four bytes are unresolved.
@@ -116,7 +117,7 @@ struct ABitmap {
      * sets mOwnsPixels. A supplied pointer clears the flag.
      *
      * mTransparentColor and mPalette are both cleared, so a caller that wants either writes it
-     * afterwards. ACanvas::BlitRle8NoClip() and its three relatives do exactly that.
+     * afterwards. ACanvas::DrawBitmapRle8U() and its three relatives do exactly that.
      *
      * @param pPixels The pixel rectangle, or null to allocate one.
      * @param nFormat The ABitmapFormat code.
@@ -141,7 +142,7 @@ struct ABitmap {
      * mOwnsPixels is cleared. mPixels points at column nX of row nY of source. A
      * kABitmapFormatLinear4 source addresses half bytes, so the column offset is nX / 2 bytes and
      * an odd nX inverts mOddNibbleStart, taking one more byte when source starts high.
-     * mTransparentColor is never written. ACanvas::CreateForSubBitmap() is the only caller.
+     * mTransparentColor is never written. ACanvas::SubCanvas() is the only caller.
      *
      * @param source The bitmap whose pixels the rectangle lies in.
      * @param nX The left column of the rectangle.
@@ -179,7 +180,7 @@ struct ABitmap {
      * @ghidraAddress NTSC-U/C: 0x00559310
      * @ghidraAddress PAL: 0x0059a468
      */
-    static int FormatForBitsPerPixel(int nBitsPerPixel);
+    static int Bpp2Format(int nBitsPerPixel);
 
     /**
      * Return the size of a pixel rectangle in bytes, with rows packed at the format's own stride.
@@ -205,7 +206,7 @@ struct ABitmap {
      * @ghidraAddress NTSC-U/C: 0x00559568
      * @ghidraAddress PAL: 0x0059a6c0
      */
-    static void SwapRedBlue15(unsigned short *pPixels, int nCount);
+    static void Reverse15(unsigned short *pPixels, int nCount);
 
     /**
      * Exchange the first and third byte of a run of three byte pixels in place.
@@ -215,7 +216,7 @@ struct ABitmap {
      * @ghidraAddress NTSC-U/C: 0x005595c8
      * @ghidraAddress PAL: 0x0059a720
      */
-    static void SwapRedBlue24(unsigned char *pPixels, int nCount);
+    static void Reverse24(unsigned char *pPixels, int nCount);
 
     /**
      * Exchange the first and third byte of a run of four byte pixels in place.
@@ -225,7 +226,7 @@ struct ABitmap {
      * @ghidraAddress NTSC-U/C: 0x00559600
      * @ghidraAddress PAL: 0x0059a758
      */
-    static void SwapRedBlue32(unsigned char *pPixels, int nCount);
+    static void Reverse32(unsigned char *pPixels, int nCount);
 
     /**
      * Pick a colour key from the flags and rebuild the alpha of every pixel from it.
@@ -236,8 +237,8 @@ struct ABitmap {
      * zero, the white bit winning when both are set. Other formats pick nothing.
      *
      * Whenever mHasTransparentColor is then set, whether by this call or before it, a canvas is
-     * built over the bitmap with ACanvas::CreateForBitmap(), its
-     * ACanvas::BuildAlphaFromColorKey() runs with mTransparentColor, and the canvas is deleted.
+     * built over the bitmap with ACanvas::NewCompatibleCanvas(), its
+     * ACanvas::SetAlphaValues() runs with mTransparentColor, and the canvas is deleted.
      * The canvas is used before the null test that guards its deletion.
      *
      * The one out-of-line copy sits inside the Rnd::Tex translation unit, and Rnd::Tex's slot 15
@@ -254,7 +255,7 @@ struct ABitmap {
      *
      * An indexed format swaps the first mPalette->mEnd palette entries, and does nothing without a
      * palette. A direct colour format swaps every pixel of every row, stepping by mBytesPerRow.
-     * The four row loops inline SwapRedBlue15(), SwapRedBlue24(), and SwapRedBlue32(). Callers
+     * The four row loops inline Reverse15(), Reverse24(), and Reverse32(). Callers
      * skip the call while g_nSkipColorSwap is non-zero.
      *
      * @ghidraAddress NTSC-U/C: 0x00559140

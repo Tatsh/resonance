@@ -45,7 +45,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0061c688
      * @ghidraAddress PAL: 0x0065d218
      */
-    virtual int ReadHeader();
+    virtual int StartRead();
 
     /**
      * Slot 3. Read the one image the file holds.
@@ -96,7 +96,7 @@ private:
      * @ghidraAddress NTSC-U/C: 0x0061d5c0
      * @ghidraAddress PAL: 0x0065e150
      */
-    int ReadPixels(ABitmap *pImage);
+    int ReadBitsFromFile(ABitmap *pImage);
 
     /**
      * Read uncompressed rows, in file order.
@@ -106,7 +106,7 @@ private:
      * @ghidraAddress NTSC-U/C: 0x0061cef8
      * @ghidraAddress PAL: 0x0065da88
      */
-    int ReadUncompressedPixels(ABitmap *pImage);
+    int ReadBitmapNotCompressed(ABitmap *pImage);
 
     /**
      * Read run length encoded rows, in file order.
@@ -119,7 +119,7 @@ private:
      * @ghidraAddress NTSC-U/C: 0x0061d0e8
      * @ghidraAddress PAL: 0x0065dc78
      */
-    int ReadRlePixels(ABitmap *pImage);
+    int ReadBitmapCompressed(ABitmap *pImage);
 
     /**
      * Widen a row of three byte pixels to four bytes in place, with full alpha.

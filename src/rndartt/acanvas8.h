@@ -26,11 +26,10 @@
  * memory differently, which is why the indexed pair cannot live here.
  *
  * mColor is a single BYTE at offset 0x24, written with `sb` and read with `lbu`, where ACanvas15
- * keeps a halfword and ACanvas32 a word at the same offset. For this format the native value and
- * the palette index are the same thing, which the binary states outright: SetColorIndex at
- * 0x00635bf8 and SetColorNative at 0x00635c00 are two distinct routines occupying two distinct
- * table slots whose bodies are byte for byte the same single store, and the same holds for the two
- * getters.
+ * stores a halfword and ACanvas32 a word at the same offset. For this format the native value and
+ * the palette index are the same thing. SetColor8 at 0x00635bf8 and SetColorNative at 0x00635c00
+ * are two distinct routines occupying two distinct table slots whose bodies are byte for byte the
+ * same single store, and the two getters match in the same way.
  *
  * Every slot below is mapped from the table, by comparing each entry against ACanvas's table at
  * 0x00837dc8 at the same index. The base declares both spellings.
@@ -63,7 +62,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00635bf8
      * @ghidraAddress PAL: 0x00676788
      */
-    virtual void SetColorIndex(int nIndex);
+    virtual void SetColor8(int nIndex);
 
     /**
      * Slot 3.
@@ -79,7 +78,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00635d08
      * @ghidraAddress PAL: 0x00676898
      */
-    virtual void SetColorRGB(const unsigned char *pRGB);
+    virtual void SetColor24(const unsigned char *pRGB);
 
     /**
      * Slot 5.
@@ -103,7 +102,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00635c08
      * @ghidraAddress PAL: 0x00676798
      */
-    virtual int GetColorIndex();
+    virtual int GetColor8();
 
     /**
      * Slot 8.
@@ -119,7 +118,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00635e78
      * @ghidraAddress PAL: 0x00676a08
      */
-    virtual void GetColorRGB(unsigned char *pRGB);
+    virtual void GetColor24(unsigned char *pRGB);
 
     /**
      * Slot 10.
@@ -143,7 +142,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006362d0
      * @ghidraAddress PAL: 0x00676e60
      */
-    virtual void BuildAlphaFromColorKey(unsigned int nColorKey);
+    virtual void SetAlphaValues(unsigned int nColorKey);
 
     /**
      * Slot 17.
@@ -151,7 +150,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00635ef8
      * @ghidraAddress PAL: 0x00676a88
      */
-    virtual void PutPixel15NoClip(int nX, int nY, unsigned short nColor);
+    virtual void DrawPixel15U(int nX, int nY, unsigned short nColor);
 
     /**
      * Slot 19.
@@ -159,12 +158,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00635fd8
      * @ghidraAddress PAL: 0x00676b68
      */
-    virtual void PutPixelRGBNoClip(int nX, int nY, const unsigned char *pRGB);
-
-    // The base declares a PutPixelNoClip of its own at a different slot, and declaring this
-    // overload would otherwise hide it from lookup on this class. The declaration below affects
-    // name lookup only: it adds no slot and changes no layout.
-    using ACanvas::PutPixelNoClip;
+    virtual void DrawPixel24U(int nX, int nY, const unsigned char *pRGB);
 
     /**
      * Slot 21.
@@ -172,7 +166,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006360c8
      * @ghidraAddress PAL: 0x00676c58
      */
-    virtual void PutPixelNoClip(int nX, int nY, unsigned int nColor);
+    virtual void DrawPixel32U(int nX, int nY, unsigned int nColor);
 
     /**
      * Slot 23.
@@ -180,7 +174,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00635c18
      * @ghidraAddress PAL: 0x006767a8
      */
-    virtual void PutPixelNativeNoClip(int nX, int nY, unsigned int nColor);
+    virtual void DrawPixelNativeU(int nX, int nY, unsigned int nColor);
 
     /**
      * Slot 27.
@@ -188,7 +182,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00636190
      * @ghidraAddress PAL: 0x00676d20
      */
-    virtual unsigned short GetPixel15NoClip(int nX, int nY);
+    virtual unsigned short GetPixel15U(int nX, int nY);
 
     /**
      * Slot 29.
@@ -196,7 +190,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006361f8
      * @ghidraAddress PAL: 0x00676d88
      */
-    virtual void GetPixelRGBNoClip(int nX, int nY, unsigned char *pRGB);
+    virtual void GetPixel24U(int nX, int nY, unsigned char *pRGB);
 
     /**
      * Slot 31.
@@ -207,7 +201,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00636270
      * @ghidraAddress PAL: 0x00676e00
      */
-    virtual unsigned int GetPixelNoClip(int nX, int nY);
+    virtual unsigned int GetPixel32U(int nX, int nY);
 
     /**
      * Slot 33.
@@ -215,7 +209,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00635c48
      * @ghidraAddress PAL: 0x006767d8
      */
-    virtual unsigned int GetPixelNativeNoClip(int nX, int nY);
+    virtual unsigned int GetPixelNativeU(int nX, int nY);
 
 protected:
     // The colour the store slots write, one byte where the wider formats keep a halfword or a word.

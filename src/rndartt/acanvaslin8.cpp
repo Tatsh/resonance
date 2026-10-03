@@ -5,7 +5,7 @@
 #include "rndartt/apoint.h"
 #include "rndartt/arle8reader.h"
 #include "rndartt/arowspan.h"
-#include "rndartt/astretchspan.h"
+#include "rndartt/astretchblit.h"
 
 namespace {
 
@@ -29,22 +29,22 @@ ACanvasLin8::~ACanvasLin8() {
 }
 
 // NTSC-U/C: 0x00628638, PAL: 0x006691c8
-void ACanvasLin8::PutPixelNoClip(int nX, int nY) {
+void ACanvasLin8::DrawPixelU(int nX, int nY) {
     *PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY) = mColor;
 }
 
 // NTSC-U/C: 0x00628658, PAL: 0x006691e8
-void ACanvasLin8::PutPixelIndexedNoClip(int nX, int nY, int nIndex) {
+void ACanvasLin8::DrawPixel8U(int nX, int nY, int nIndex) {
     *PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY) = static_cast<unsigned char>(nIndex);
 }
 
 // NTSC-U/C: 0x00628678, PAL: 0x00669208
-int ACanvasLin8::GetPixelIndexedNoClip(int nX, int nY) {
+int ACanvasLin8::GetPixel8U(int nX, int nY) {
     return *PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
 }
 
 // NTSC-U/C: 0x00628698, PAL: 0x00669228
-void ACanvasLin8::FillRowNoClip(int nY, int nLeft, int nRight) {
+void ACanvasLin8::DrawHorzLineU(int nY, int nLeft, int nRight) {
     memset(PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nLeft, nY),
            mColor,
            static_cast<unsigned int>(nRight - nLeft));
@@ -53,7 +53,7 @@ void ACanvasLin8::FillRowNoClip(int nY, int nLeft, int nRight) {
 // NTSC-U/C: 0x006286d0, PAL: 0x00669260
 // The colour and the row pitch are both re-read on every iteration rather than
 // hoisted, which is what the binary does.
-void ACanvasLin8::FillColumnNoClip(int nX, int nTop, int nBottom) {
+void ACanvasLin8::DrawVertLineU(int nX, int nTop, int nBottom) {
     if (nTop >= nBottom) {
         return;
     }
@@ -66,7 +66,7 @@ void ACanvasLin8::FillColumnNoClip(int nX, int nTop, int nBottom) {
 
 // NTSC-U/C: 0x00628718, PAL: 0x006692a8
 // One memset per row, with the rectangle's own bounds re-read each time round.
-void ACanvasLin8::FillRectNoClip(ARect rect) {
+void ACanvasLin8::DrawRectU(ARect rect) {
     unsigned char *pRow = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, rect.mLeft, rect.mTop);
     for (int nRow = rect.mTop; nRow < rect.mBottom; ++nRow) {
         memset(pRow, mColor, static_cast<unsigned int>(rect.mRight - rect.mLeft));
@@ -77,7 +77,7 @@ void ACanvasLin8::FillRectNoClip(ARect rect) {
 // NTSC-U/C: 0x006287b8, PAL: 0x00669348
 // The row advance subtracts the column span whether or not the span was walked, so a
 // rectangle whose right edge is left of its left edge advances by more than the pitch.
-void ACanvasLin8::RemapRectIndices(ARect rect, const unsigned char *pRemap) {
+void ACanvasLin8::DrawClutRectU(ARect rect, const unsigned char *pRemap) {
     const int nColumns = rect.mRight - rect.mLeft;
     unsigned char *pByte = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, rect.mLeft, rect.mTop);
     for (int nRow = rect.mTop; nRow < rect.mBottom; ++nRow) {
@@ -92,7 +92,7 @@ void ACanvasLin8::RemapRectIndices(ARect rect, const unsigned char *pRemap) {
 // NTSC-U/C: 0x00628848, PAL: 0x006693d8
 // The nibble phase starts from the source's odd-start flag and alternates per pixel,
 // and the low nibble of a byte is the earlier pixel.
-void ACanvasLin8::Blit4NoClip(const ABitmap &source, int nX, int nY) {
+void ACanvasLin8::DrawBitmapLin4U(const ABitmap &source, int nX, int nY) {
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
     const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
     for (int nRow = source.mHeight; nRow > 0; --nRow) {
@@ -123,7 +123,7 @@ void ACanvasLin8::Blit4NoClip(const ABitmap &source, int nX, int nY) {
 // this canvas's is one memcpy of the whole rectangle, a source with no transparent colour is one
 // memcpy per row, and a keyed source is walked a byte at a time. The transparency test is repeated
 // inside the row loop even though the flag cannot change between rows.
-void ACanvasLin8::Blit8NoClip(const ABitmap &source, int nX, int nY) {
+void ACanvasLin8::DrawBitmapLin8U(const ABitmap &source, int nX, int nY) {
     const unsigned char *pSourceByte = static_cast<const unsigned char *>(source.mPixels);
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
     if (!source.mHasTransparentColor && source.mBytesPerRow == mBitmap.mBytesPerRow) {
@@ -153,7 +153,7 @@ void ACanvasLin8::Blit8NoClip(const ABitmap &source, int nX, int nY) {
 // NTSC-U/C: 0x00628a48, PAL: 0x006695d8
 // The reader is built on the stack and the row decoder advances its cursor, so the
 // rows are consumed in order without this routine tracking the compressed stream.
-void ACanvasLin8::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
+void ACanvasLin8::DrawBitmapRle8U(const ABitmap &source, int nX, int nY) {
     ARle8Reader reader;
     reader.mSource = static_cast<const unsigned char *>(source.mPixels);
     reader.mWidth = source.mWidth;
@@ -162,19 +162,19 @@ void ACanvasLin8::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
                                    kARleReaderNoTransparentValue;
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
     for (int nRow = nY; nRow < nY + source.mHeight; ++nRow) {
-        (void)reader.DecodeRow(pDest); // The advanced destination the decoder returns is discarded.
+        (void)reader.UnpackRow(pDest); // The advanced destination the decoder returns is discarded.
         pDest += mBitmap.mBytesPerRow;
     }
 }
 
 // NTSC-U/C: 0x00628db0, PAL: 0x00669940
 // The source position is advanced in place, so the caller sees where the row ended.
-void ACanvasLin8::TextureRowIndexed(int nY,
-                                    int nLeft,
-                                    int nRight,
-                                    const ABitmap *pSource,
-                                    APoint *pSourcePosition,
-                                    const APoint *pSourceStep) {
+void ACanvasLin8::DrawTmapRow8U(int nY,
+                                int nLeft,
+                                int nRight,
+                                const ABitmap *pSource,
+                                APoint *pSourcePosition,
+                                const APoint *pSourceStep) {
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nLeft, nY);
     for (int nRemaining = nRight - nLeft; nRemaining > 0; --nRemaining) {
         *pDest = *PixelAt(pSource->mPixels,
@@ -189,7 +189,7 @@ void ACanvasLin8::TextureRowIndexed(int nY,
 
 // NTSC-U/C: 0x00628ae8, PAL: 0x00669678
 // The keyed and the opaque walks are separate loops in the binary.
-void ACanvasLin8::RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap) {
+void ACanvasLin8::DrawClutBitmapRowLin8U(const ARowInfo &span, const unsigned char *pRemap) {
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
     const unsigned char *pSourceByte = span.mSource;
     const int nColumns = span.mRight - span.mLeft;
@@ -211,9 +211,10 @@ void ACanvasLin8::RemapRowIndexed(const ARowSpan &span, const unsigned char *pRe
 }
 
 // NTSC-U/C: 0x00628ba8, PAL: 0x00669738
-// Unlike ACanvas::BlendRowIndexed(), the key here is the span transparent colour
+// Unlike ACanvas::DrawBlendBitmapRowLin8U(), the key here is the span transparent colour
 // rather than index zero.
-void ACanvasLin8::BlendRowIndexed(const ARowSpan &span, const unsigned char *const *ppBlend) {
+void ACanvasLin8::DrawBlendBitmapRowLin8U(const ARowInfo &span,
+                                          const unsigned char *const *ppBlend) {
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
     const unsigned char *pSourceByte = span.mSource;
     const int nColumns = span.mRight - span.mLeft;
@@ -237,7 +238,7 @@ void ACanvasLin8::BlendRowIndexed(const ARowSpan &span, const unsigned char *con
 // NTSC-U/C: 0x006284a0, PAL: 0x00669030
 // The keyed loop runs until its counter passes zero exactly, where the opaque loop
 // stops at any count of zero or less, so a reversed span walks far past the row only when keyed.
-void ACanvasLin8::StretchRowIndexed(const AStretchSpan &span) {
+void ACanvasLin8::DrawScaledBitmapRowLin8U(const AScaledRowInfo &span) {
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
     int nPosition = span.mSourcePosition;
     const int nColumns = span.mRight - span.mLeft;
@@ -261,7 +262,8 @@ void ACanvasLin8::StretchRowIndexed(const AStretchSpan &span) {
 
 // NTSC-U/C: 0x00628c80, PAL: 0x00669810
 // The transparency flag is re-read for every pixel.
-void ACanvasLin8::StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap) {
+void ACanvasLin8::DrawScaledClutBitmapRowLin8U(const AScaledRowInfo &span,
+                                               const unsigned char *pRemap) {
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
     int nPosition = span.mSourcePosition;
     for (int nRemaining = span.mRight - span.mLeft; nRemaining != 0; --nRemaining) {
@@ -276,7 +278,8 @@ void ACanvasLin8::StretchRowRemap(const AStretchSpan &span, const unsigned char 
 }
 
 // NTSC-U/C: 0x00628d10, PAL: 0x006698a0
-void ACanvasLin8::StretchRowBlend(const AStretchSpan &span, const unsigned char *const *ppBlend) {
+void ACanvasLin8::DrawScaledBlendBitmapRowLin8U(const AScaledRowInfo &span,
+                                                const unsigned char *const *ppBlend) {
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, span.mLeft, span.mY);
     int nPosition = span.mSourcePosition;
     for (int nRemaining = span.mRight - span.mLeft; nRemaining != 0; --nRemaining) {

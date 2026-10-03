@@ -400,11 +400,11 @@ Color *MetFreqMakerAssetManager::SampleTexture(Rnd::Tex *pTex, float flU, float 
     g_sampledColor = kOpaqueBlack;
     ACanvas *pCanvas = pTex->LockMipBitmap(kTopMip, 0, kNoReadBack);
     unsigned char abTexel[kTexelChannelCount];
-    pCanvas->GetPixelRGB(static_cast<int>(flU * pCanvas->mBitmap.mWidth),
-                         static_cast<int>(flV * pCanvas->mBitmap.mHeight),
-                         abTexel);
+    pCanvas->GetPixel24(static_cast<int>(flU * pCanvas->mBitmap.mWidth),
+                        static_cast<int>(flV * pCanvas->mBitmap.mHeight),
+                        abTexel);
     if (g_nSkipColorSwap == 0) {
-        ABitmap::SwapRedBlue24(abTexel, kOneTexel);
+        ABitmap::Reverse24(abTexel, kOneTexel);
     }
 
     g_sampledColor = kOpaqueBlack; // Yes, the binary clears the colour a second time.
@@ -425,11 +425,11 @@ bool MetFreqMakerAssetManager::PaintTexel(Rnd::Tex *pTex,
     abTexel[kTexelGreen] = static_cast<unsigned>(color.g * kByteRange);
     abTexel[kTexelBlue] = static_cast<unsigned>(color.b * kByteRange);
     if (g_nSkipColorSwap == 0) {
-        ABitmap::SwapRedBlue24(abTexel, kOneTexel);
+        ABitmap::Reverse24(abTexel, kOneTexel);
     }
 
     ACanvas *pCanvas = pTex->LockMipBitmap(kTopMip, 0, kNoReadBack);
-    pCanvas->PutPixelRGB(static_cast<int>(flU * pCanvas->mBitmap.mWidth),
+    pCanvas->DrawPixel24(static_cast<int>(flU * pCanvas->mBitmap.mWidth),
                          static_cast<int>(flV * pCanvas->mBitmap.mHeight),
                          abTexel);
     pTex->UnlockMipBitmap();

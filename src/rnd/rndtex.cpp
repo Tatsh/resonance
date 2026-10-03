@@ -366,7 +366,7 @@ void Tex::AllocateBitmapFromStream() {
         nWidth *= kCubeMapWidthFactor;
         nHeight *= kCubeMapHeightFactor;
     }
-    const int nFormat = ABitmap::FormatForBitsPerPixel(mBitsPerPixel);
+    const int nFormat = ABitmap::Bpp2Format(mBitsPerPixel);
     const int nPixelBytes = ABitmap::ComputeByteCount(nFormat, nWidth, nHeight);
     const bool bIndexed = mBitsPerPixel <= kMaxIndexedBitsPerPixel;
     const size_t nHeaderBytes = bIndexed ? sizeof(ABitmap) + sizeof(APalette) : sizeof(ABitmap);

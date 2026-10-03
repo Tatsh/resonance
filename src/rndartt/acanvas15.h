@@ -31,8 +31,8 @@
  * only layout difference in the family; the object is 0x28 bytes either way.
  *
  * Every pixel slot converts and then forwards to the layout class through the table. The store
- * slots dispatch through the entry at table offset 0x88, slot 17 or PutPixel15NoClip(), and the
- * read slots through the one at 0xd8, slot 27 or GetPixel15NoClip(). So each format costs one
+ * slots dispatch through the entry at table offset 0x88, slot 17 or DrawPixel15U(), and the
+ * read slots through the one at 0xd8, slot 27 or GetPixel15U(). So each format costs one
  * conversion body and one dispatch, never a second addressing body.
  */
 class ACanvas15 : public ACanvas {
@@ -59,7 +59,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0062fd48
      * @ghidraAddress PAL: 0x006708d8
      */
-    void SetColorIndex(int nIndex);
+    void SetColor8(int nIndex);
 
     /**
      * Set the pen colour from a 1555 halfword, which on this canvas is stored verbatim.
@@ -79,7 +79,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0062fc00
      * @ghidraAddress PAL: 0x00670790
      */
-    void SetColorRGB(const unsigned char *pRGB);
+    void SetColor24(const unsigned char *pRGB);
 
     /**
      * Set the pen colour from an 8888 word.
@@ -112,7 +112,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0062fd98
      * @ghidraAddress PAL: 0x00670928
      */
-    int GetColorIndex();
+    int GetColor8();
 
     /**
      * Return the pen colour, which on this canvas is already 1555.
@@ -133,7 +133,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0062fc80
      * @ghidraAddress PAL: 0x00670810
      */
-    void GetColorRGB(unsigned char *pRGB);
+    void GetColor24(unsigned char *pRGB);
 
     /**
      * Return the pen colour as an 8888 word.
@@ -168,7 +168,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0062fe28
      * @ghidraAddress PAL: 0x006709b8
      */
-    void PutPixelIndexedNoClip(int nX, int nY, int nIndex);
+    void DrawPixel8U(int nX, int nY, int nIndex);
 
     /**
      * Store one red, green, blue triple at one point, with no clip test.
@@ -179,12 +179,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0062fec0
      * @ghidraAddress PAL: 0x00670a50
      */
-    void PutPixelRGBNoClip(int nX, int nY, const unsigned char *pRGB);
-
-    // The base declares a PutPixelNoClip of its own at a different slot, and declaring this
-    // overload would otherwise hide it from lookup on this class. The declaration below affects
-    // name lookup only: it adds no slot and changes no layout.
-    using ACanvas::PutPixelNoClip;
+    void DrawPixel24U(int nX, int nY, const unsigned char *pRGB);
 
     /**
      * Store one 8888 colour at one point, with no clip test.
@@ -195,7 +190,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0062ff18
      * @ghidraAddress PAL: 0x00670aa8
      */
-    void PutPixelNoClip(int nX, int nY, unsigned int nColor);
+    void DrawPixel32U(int nX, int nY, unsigned int nColor);
 
     /**
      * Store one native value at one point, with no clip test.
@@ -206,7 +201,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0062fcf0
      * @ghidraAddress PAL: 0x00670880
      */
-    void PutPixelNativeNoClip(int nX, int nY, unsigned int nColor);
+    void DrawPixelNativeU(int nX, int nY, unsigned int nColor);
 
     /**
      * Read one point as a palette index, with no clip test.
@@ -217,7 +212,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0062ff70
      * @ghidraAddress PAL: 0x00670b00
      */
-    int GetPixelIndexedNoClip(int nX, int nY);
+    int GetPixel8U(int nX, int nY);
 
     /**
      * Read one point into three bytes in red, green, blue order, with no clip test.
@@ -228,7 +223,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00630020
      * @ghidraAddress PAL: 0x00670bb0
      */
-    void GetPixelRGBNoClip(int nX, int nY, unsigned char *pRGB);
+    void GetPixel24U(int nX, int nY, unsigned char *pRGB);
 
     /**
      * Read one point as an 8888 colour, with no clip test.
@@ -239,7 +234,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00630078
      * @ghidraAddress PAL: 0x00670c08
      */
-    unsigned int GetPixelNoClip(int nX, int nY);
+    unsigned int GetPixel32U(int nX, int nY);
 
     /**
      * Read one point in the native width, with no clip test.
@@ -250,7 +245,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0062fd20
      * @ghidraAddress PAL: 0x006708b0
      */
-    unsigned int GetPixelNativeNoClip(int nX, int nY);
+    unsigned int GetPixelNativeU(int nX, int nY);
 
 protected:
     // ACanvasLin15 stores and reads the pen colour in its own slots, so protected is the narrowest

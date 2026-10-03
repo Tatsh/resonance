@@ -264,9 +264,8 @@ void AMovieSet::Update(int nTick, int nReadSize) {
                 PaletteChunk *pPalette = reinterpret_cast<PaletteChunk *>(pHeader + 1);
                 if ((pPalette->mFlags & kChunkSwapped) == 0) {
                     if (g_nSkipColorSwap == 0) {
-                        ABitmap::SwapRedBlue32(
-                            reinterpret_cast<unsigned char *>(pPalette->mEntries),
-                            pPalette->mCount);
+                        ABitmap::Reverse32(reinterpret_cast<unsigned char *>(pPalette->mEntries),
+                                           pPalette->mCount);
                     }
                     for (int i = 0; i < pPalette->mCount; ++i) {
                         const unsigned int nEntry = pPalette->mEntries[i];

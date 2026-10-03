@@ -93,7 +93,7 @@ public:
      *
      * @return An AGfxFileResult code.
      */
-    virtual int ReadHeader() = 0;
+    virtual int StartRead() = 0;
 
     /**
      * Set mUnreadWord.

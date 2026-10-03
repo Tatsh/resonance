@@ -34,20 +34,20 @@ struct ARle8Reader {
      * @ghidraAddress NTSC-U/C: 0x0060da78
      * @ghidraAddress PAL: 0x0064e6e8
      */
-    unsigned char *DecodeRow(unsigned char *pDest);
+    unsigned char *UnpackRow(unsigned char *pDest);
 
     /**
      * Decode rows into a buffer until the stream terminates.
      *
      * Tests for the terminator before the first row, so an empty stream writes nothing. Each row
-     * starts where DecodeRow() left the previous one, so the rows land contiguously at the width
+     * starts where UnpackRow() ended the previous one, so the rows land contiguously at the width
      * mWidth.
      *
      * @param pDest The first row to write.
      * @ghidraAddress NTSC-U/C: 0x0060dc98
      * @ghidraAddress PAL: 0x0064e908
      */
-    void DecodeRows(unsigned char *pDest);
+    void UnpackAll(unsigned char *pDest);
 
     /**
      * Advance past a number of rows without writing.
@@ -56,7 +56,7 @@ struct ARle8Reader {
      * @ghidraAddress NTSC-U/C: 0x0060dc10
      * @ghidraAddress PAL: 0x0064e880
      */
-    void SkipRows(int nRows);
+    void SkipRow(int nRows);
 
     const unsigned char *mSource; /*!< The next control byte. +0x00 */
     short mWidth;                 /*!< Pixels in one row. +0x04 */

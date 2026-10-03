@@ -22,7 +22,7 @@ ACanvasLin4::~ACanvasLin4() {
 }
 
 // NTSC-U/C: 0x00628108, PAL: 0x00668c98
-void ACanvasLin4::PutPixelNoClip(int nX, int nY) {
+void ACanvasLin4::DrawPixelU(int nX, int nY) {
     unsigned char *pByte = static_cast<unsigned char *>(mBitmap.mPixels) +
                            (nY * mBitmap.mBytesPerRow) + ((nX + mBitmap.mOddNibbleStart) / 2);
     if (((nX ^ mBitmap.mOddNibbleStart) & 1) != 0) {
@@ -34,20 +34,20 @@ void ACanvasLin4::PutPixelNoClip(int nX, int nY) {
 }
 
 // NTSC-U/C: 0x00628180, PAL: 0x00668d10
-void ACanvasLin4::PutPixelIndexedNoClip(int nX, int nY, int nIndex) {
+void ACanvasLin4::DrawPixel8U(int nX, int nY, int nIndex) {
     const unsigned int nValue = static_cast<unsigned int>(nIndex) & 0xff;
     unsigned char *pByte = static_cast<unsigned char *>(mBitmap.mPixels) +
                            (nY * mBitmap.mBytesPerRow) + ((nX + mBitmap.mOddNibbleStart) / 2);
     if (((nX ^ mBitmap.mOddNibbleStart) & 1) != 0) {
         *pByte = static_cast<unsigned char>((*pByte & kNibbleMask) | (nValue << kNibbleShift));
     } else {
-        // Yes, the whole index byte is OR'd in, as in PutPixelNoClip().
+        // Yes, the whole index byte is OR'd in, as in DrawPixelU().
         *pByte = static_cast<unsigned char>((*pByte & (kNibbleMask << kNibbleShift)) | nValue);
     }
 }
 
 // NTSC-U/C: 0x006281f0, PAL: 0x00668d80
-int ACanvasLin4::GetPixelIndexedNoClip(int nX, int nY) {
+int ACanvasLin4::GetPixel8U(int nX, int nY) {
     const unsigned char *pByte = static_cast<const unsigned char *>(mBitmap.mPixels) +
                                  (nY * mBitmap.mBytesPerRow) + ((nX + mBitmap.mOddNibbleStart) / 2);
     if (((nX ^ mBitmap.mOddNibbleStart) & 1) != 0) {
@@ -61,7 +61,7 @@ int ACanvasLin4::GetPixelIndexedNoClip(int nX, int nY) {
 // colour, neither bitmap starts on an odd nibble, and the destination column and the source width
 // are both even. Any one of them failing drops to unpacking each row into the shared scratch row
 // and writing it back a pixel at a time.
-void ACanvasLin4::Blit4NoClip(const ABitmap &source, int nX, int nY) {
+void ACanvasLin4::DrawBitmapLin4U(const ABitmap &source, int nX, int nY) {
     const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
     const bool bAligned = !source.mHasTransparentColor && mBitmap.mOddNibbleStart == 0 &&
                           source.mOddNibbleStart == 0 && (nX & 1) == 0 && (source.mWidth & 1) == 0;
@@ -78,8 +78,8 @@ void ACanvasLin4::Blit4NoClip(const ABitmap &source, int nX, int nY) {
         return;
     }
     for (int nRow = 0; nRow < source.mHeight; ++nRow) {
-        UnpackNibbleRow(pSourceRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
-        WriteIndexedRow(&source, g_abCanvasRowScratch, nX, nY + nRow);
+        Unpack4(pSourceRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
+        DrawBitmapRowLin8U(&source, g_abCanvasRowScratch, nX, nY + nRow);
         pSourceRow += source.mBytesPerRow;
     }
 }
@@ -88,10 +88,10 @@ void ACanvasLin4::Blit4NoClip(const ABitmap &source, int nX, int nY) {
 // The destination row advances by two per source row, which covers every other row of
 // the destination and consumes half the source height. The run length encoded sibling advances by
 // one. Both behaviours match the binary.
-void ACanvasLin4::Blit8NoClip(const ABitmap &source, int nX, int nY) {
+void ACanvasLin4::DrawBitmapLin8U(const ABitmap &source, int nX, int nY) {
     const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
     for (int nRow = nY; nRow < nY + source.mHeight; nRow += 2) {
-        WriteIndexedRow(&source, pSourceRow, nX, nRow);
+        DrawBitmapRowLin8U(&source, pSourceRow, nX, nRow);
         pSourceRow += source.mBytesPerRow;
     }
 }
@@ -99,7 +99,7 @@ void ACanvasLin4::Blit8NoClip(const ABitmap &source, int nX, int nY) {
 // NTSC-U/C: 0x006282e0, PAL: 0x00668e70
 // Each row is decoded into the shared scratch row and written from there, so the
 // compressed stream is consumed in order without this routine tracking it.
-void ACanvasLin4::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
+void ACanvasLin4::DrawBitmapRle8U(const ABitmap &source, int nX, int nY) {
     ARle8Reader reader;
     reader.mSource = static_cast<const unsigned char *>(source.mPixels);
     reader.mWidth = source.mWidth;
@@ -107,8 +107,8 @@ void ACanvasLin4::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
                                    static_cast<int>(source.mTransparentColor) :
                                    kARleReaderNoTransparentValue;
     for (int nRow = nY; nRow < nY + source.mHeight; ++nRow) {
-        (void)reader.DecodeRow(g_abCanvasRowScratch); // The advanced destination is discarded.
-        WriteIndexedRow(&source, g_abCanvasRowScratch, nX, nRow);
+        (void)reader.UnpackRow(g_abCanvasRowScratch); // The advanced destination is discarded.
+        DrawBitmapRowLin8U(&source, g_abCanvasRowScratch, nX, nRow);
     }
 }
 
@@ -116,10 +116,10 @@ void ACanvasLin4::BlitRle8NoClip(const ABitmap &source, int nX, int nY) {
 // The bulk loop packs with a bitwise OR, and both per pixel paths store a logical OR in
 // the same position, so each of those stores writes 0 or 1 over the whole byte. That reading
 // accounts for both destination meanings the binary shows.
-void ACanvasLin4::WriteIndexedRow(const ABitmap *pSource,
-                                  const unsigned char *pRow,
-                                  int nX,
-                                  int nY) {
+void ACanvasLin4::DrawBitmapRowLin8U(const ABitmap *pSource,
+                                     const unsigned char *pRow,
+                                     int nX,
+                                     int nY) {
     unsigned char *pDest = static_cast<unsigned char *>(mBitmap.mPixels) +
                            (nY * mBitmap.mBytesPerRow) +
                            ((nX + mBitmap.mOddNibbleStart) / kPixelsPerByte);

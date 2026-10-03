@@ -7,11 +7,11 @@
 #include "rndartt/apolygonedge.h"
 
 // NTSC-U/C: 0x005ebfe0, PAL: 0x0062e128
-int APolygon::FindTopVertex() const {
+int ACanvas::FindTopmostPolyVertex(const APolygon &polygon) {
     int nTop = 0;
-    int nTopY = mPoints[mIndices[0]].mY;
-    for (int i = 1; i < mVertexCount; ++i) {
-        const APoint &point = mPoints[mIndices[i]];
+    int nTopY = polygon.mPoints[polygon.mIndices[0]].mY;
+    for (int i = 1; i < polygon.mVertexCount; ++i) {
+        const APoint &point = polygon.mPoints[polygon.mIndices[i]];
         if (point.mY < nTopY) {
             nTop = i;
             nTopY = point.mY;

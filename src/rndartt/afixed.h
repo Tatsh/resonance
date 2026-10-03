@@ -39,7 +39,7 @@ extern int g_nFixedPi;
 /**
  * The smallest positive 24.8 fixed point value, 1.
  *
- * ACanvas::ClipLineToRect() subtracts it from the exclusive right and bottom clip edges, which
+ * ACanvas::ClipLine() subtracts it from the exclusive right and bottom clip edges, which
  * places a clipped endpoint on the last column or row that remains inside.
  *
  * @ghidraAddress NTSC-U/C: 0x007a82d8

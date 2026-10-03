@@ -158,7 +158,7 @@ public:
      * Table of one palette index per 1555 colour, null until a caller supplies one.
      *
      * ACanvas8::SetColor15() indexes it with the 1555 colour and the alpha bit cleared, and
-     * ACanvas32::GetColorIndex() indexes it with the pen colour packed the same way. Both fall
+     * ACanvas32::GetColor8() indexes it with the pen colour packed the same way. Both fall
      * back to FindNearestEntry() over the whole table when the member is null, so the table is a
      * cache of that search rather than a required part of the palette. The entry count follows
      * the widest index either routine forms.

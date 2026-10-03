@@ -24,7 +24,7 @@ constexpr int kPaletteLastIndex = 255;
 
 // Expand a 1555 colour to 8888. Alpha is all ones when the 1555 alpha bit is set and zero
 // otherwise, and the low three bits of every channel expand to zero rather than being replicated.
-// GetColor32(), GetPixelNoClip(), and both index lookups form the same value.
+// GetColor32(), GetPixel32U(), and both index lookups form the same value.
 inline unsigned int Rgb8888From1555(unsigned int nColor) {
     unsigned int nResult = ((nColor & kRed15Mask) << kChannel5Shift) |
                            ((nColor & kGreen15Mask) << 6) | ((nColor & kBlue15Mask) << 9);
@@ -34,7 +34,7 @@ inline unsigned int Rgb8888From1555(unsigned int nColor) {
     return nResult;
 }
 
-// Pack an 8888 colour into 1555, alpha bit from bit 31. SetColor32() and PutPixelNoClip() both
+// Pack an 8888 colour into 1555, alpha bit from bit 31. SetColor32() and DrawPixel32U() both
 // write this sequence out rather than reaching APackRgb1555From8888(), which is the same packing
 // out of line.
 inline unsigned short Rgb1555From8888(unsigned int nColor) {
@@ -44,8 +44,8 @@ inline unsigned short Rgb1555From8888(unsigned int nColor) {
                                        ((nColor >> kBlueShift) & kAlpha15Bit));
 }
 
-// Pack three channel bytes into 1555 with the alpha bit set. SetColorRGB() and
-// PutPixelRGBNoClip() form the same value.
+// Pack three channel bytes into 1555 with the alpha bit set. SetColor24() and
+// DrawPixel24U() form the same value.
 inline unsigned short Rgb1555FromChannels(const unsigned char *pRGB) {
     return static_cast<unsigned short>((pRGB[0] >> kChannel5Shift) |
                                        ((pRGB[1] & kChannel5Mask) << 2) |
@@ -59,7 +59,7 @@ ACanvas15::ACanvas15(const ABitmap &bitmap) : ACanvas(bitmap), mColor(0) {
 }
 
 // NTSC-U/C: 0x0062fd48, PAL: 0x006708d8
-void ACanvas15::SetColorIndex(int nIndex) {
+void ACanvas15::SetColor8(int nIndex) {
     APalette *pPalette = mBitmap.mPalette;
     if (pPalette == nullptr) {
         pPalette = g_pDefaultPalette;
@@ -76,7 +76,7 @@ void ACanvas15::SetColor15(unsigned short nColor) {
 }
 
 // NTSC-U/C: 0x0062fc00, PAL: 0x00670790
-void ACanvas15::SetColorRGB(const unsigned char *pRGB) {
+void ACanvas15::SetColor24(const unsigned char *pRGB) {
     mColor = Rgb1555FromChannels(pRGB);
 }
 
@@ -91,7 +91,7 @@ void ACanvas15::SetColorNative(unsigned int nColor) {
 }
 
 // NTSC-U/C: 0x0062fd98, PAL: 0x00670928
-int ACanvas15::GetColorIndex() {
+int ACanvas15::GetColor8() {
     APalette *pPalette = mBitmap.mPalette;
     if (pPalette == nullptr) {
         pPalette = g_pDefaultPalette;
@@ -113,7 +113,7 @@ unsigned short ACanvas15::GetColor15() {
 }
 
 // NTSC-U/C: 0x0062fc80, PAL: 0x00670810
-void ACanvas15::GetColorRGB(unsigned char *pRGB) {
+void ACanvas15::GetColor24(unsigned char *pRGB) {
     pRGB[0] = static_cast<unsigned char>(mColor << kChannel5Shift);
     pRGB[1] = static_cast<unsigned char>((mColor >> 2) & kChannel5Mask);
     pRGB[2] = static_cast<unsigned char>((mColor >> 7) & kChannel5Mask);
@@ -130,7 +130,7 @@ unsigned int ACanvas15::GetColorNative() {
 }
 
 // NTSC-U/C: 0x0062fe28, PAL: 0x006709b8
-void ACanvas15::PutPixelIndexedNoClip(int nX, int nY, int nIndex) {
+void ACanvas15::DrawPixel8U(int nX, int nY, int nIndex) {
     APalette *pPalette = mBitmap.mPalette;
     if (pPalette == nullptr) {
         pPalette = g_pDefaultPalette;
@@ -138,26 +138,26 @@ void ACanvas15::PutPixelIndexedNoClip(int nX, int nY, int nIndex) {
             return;
         }
     }
-    PutPixel15NoClip(nX, nY, APackRgb1555From8888(pPalette->mEntries[nIndex & kChannelMask]));
+    DrawPixel15U(nX, nY, APackRgb1555From8888(pPalette->mEntries[nIndex & kChannelMask]));
 }
 
 // NTSC-U/C: 0x0062fec0, PAL: 0x00670a50
-void ACanvas15::PutPixelRGBNoClip(int nX, int nY, const unsigned char *pRGB) {
-    PutPixel15NoClip(nX, nY, Rgb1555FromChannels(pRGB));
+void ACanvas15::DrawPixel24U(int nX, int nY, const unsigned char *pRGB) {
+    DrawPixel15U(nX, nY, Rgb1555FromChannels(pRGB));
 }
 
 // NTSC-U/C: 0x0062ff18, PAL: 0x00670aa8
-void ACanvas15::PutPixelNoClip(int nX, int nY, unsigned int nColor) {
-    PutPixel15NoClip(nX, nY, Rgb1555From8888(nColor));
+void ACanvas15::DrawPixel32U(int nX, int nY, unsigned int nColor) {
+    DrawPixel15U(nX, nY, Rgb1555From8888(nColor));
 }
 
 // NTSC-U/C: 0x0062fcf0, PAL: 0x00670880
-void ACanvas15::PutPixelNativeNoClip(int nX, int nY, unsigned int nColor) {
-    PutPixel15NoClip(nX, nY, static_cast<unsigned short>(nColor));
+void ACanvas15::DrawPixelNativeU(int nX, int nY, unsigned int nColor) {
+    DrawPixel15U(nX, nY, static_cast<unsigned short>(nColor));
 }
 
 // NTSC-U/C: 0x0062ff70, PAL: 0x00670b00
-int ACanvas15::GetPixelIndexedNoClip(int nX, int nY) {
+int ACanvas15::GetPixel8U(int nX, int nY) {
     APalette *pPalette = mBitmap.mPalette;
     if (pPalette == nullptr) {
         pPalette = g_pDefaultPalette;
@@ -165,7 +165,7 @@ int ACanvas15::GetPixelIndexedNoClip(int nX, int nY) {
             return 0;
         }
     }
-    const unsigned int nColor = GetPixel15NoClip(nX, nY);
+    const unsigned int nColor = GetPixel15U(nX, nY);
     if (pPalette->mpRgb15ToIndex != nullptr) {
         return pPalette->mpRgb15ToIndex[nColor & kColor15Mask] & kChannelMask;
     }
@@ -175,19 +175,19 @@ int ACanvas15::GetPixelIndexedNoClip(int nX, int nY) {
 }
 
 // NTSC-U/C: 0x00630020, PAL: 0x00670bb0
-void ACanvas15::GetPixelRGBNoClip(int nX, int nY, unsigned char *pRGB) {
-    const unsigned int nColor = GetPixel15NoClip(nX, nY);
+void ACanvas15::GetPixel24U(int nX, int nY, unsigned char *pRGB) {
+    const unsigned int nColor = GetPixel15U(nX, nY);
     pRGB[0] = static_cast<unsigned char>(nColor << kChannel5Shift);
     pRGB[1] = static_cast<unsigned char>((nColor >> 2) & kChannel5Mask);
     pRGB[2] = static_cast<unsigned char>((nColor >> 7) & kChannel5Mask);
 }
 
 // NTSC-U/C: 0x00630078, PAL: 0x00670c08
-unsigned int ACanvas15::GetPixelNoClip(int nX, int nY) {
-    return Rgb8888From1555(GetPixel15NoClip(nX, nY));
+unsigned int ACanvas15::GetPixel32U(int nX, int nY) {
+    return Rgb8888From1555(GetPixel15U(nX, nY));
 }
 
 // NTSC-U/C: 0x0062fd20, PAL: 0x006708b0
-unsigned int ACanvas15::GetPixelNativeNoClip(int nX, int nY) {
-    return GetPixel15NoClip(nX, nY);
+unsigned int ACanvas15::GetPixelNativeU(int nX, int nY) {
+    return GetPixel15U(nX, nY);
 }

@@ -441,7 +441,7 @@ void PsTex::RestoreSurfaces() {
         }
 
         mDirtyMips |= 1u << nMip;
-        mip.mVramBitmap = ACanvas::CreateForBitmap(*pBitmap, false);
+        mip.mVramBitmap = ACanvas::NewCompatibleCanvas(*pBitmap, false);
         mip.mVramBitmap->mBitmap.mPixels = pBitmap->mPixels;
         mip.mVramBitmap->mBitmap.mPalette = pBitmap->mPalette;
         mip.mPage = g_vramTable.AllocEntry();
@@ -512,7 +512,7 @@ int PsTex::UploadBitmapMipToGs(int nMip) {
     reader.mTransparentValue = pBitmap->mHasTransparentColor ?
                                    static_cast<int>(pBitmap->mTransparentColor) :
                                    kARleReaderNoTransparentValue;
-    reader.DecodeRows(pIndices);
+    reader.UnpackAll(pIndices);
     ZoneReleaseTemp(); // Yes, the binary releases the buffer before the upload reads it.
     return mip.mPage->UploadImage(
         pIndices, pBitmap->mWidth, pBitmap->mHeight, kRleBitsPerPixel, kGsPsmT8);
@@ -551,7 +551,7 @@ inline void PsTex::UploadBitmapMipToSubImage(VRAM::Entry *pPage, int nMip, int n
     reader.mTransparentValue = pBitmap->mHasTransparentColor ?
                                    static_cast<int>(pBitmap->mTransparentColor) :
                                    kARleReaderNoTransparentValue;
-    reader.DecodeRows(pIndices);
+    reader.UnpackAll(pIndices);
     ZoneReleaseTemp(); // Yes, the binary releases the buffer before the upload reads it.
     pPage->UploadSubImage(
         pIndices, pBitmap->mWidth, pBitmap->mHeight, kRleBitsPerPixel, kGsPsmT8, nBlockOffset);

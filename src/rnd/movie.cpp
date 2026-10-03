@@ -315,7 +315,7 @@ void Movie::OnChunk(AMovieSet::ChunkHeader *pHeader, void *pPayload) {
             return;
         }
         pChunk->mBitmap.mPalette = &mPalette;
-        pCanvas->Blit(pChunk->mBitmap, pChunk->mX, pChunk->mY);
+        pCanvas->DrawBitmap(pChunk->mBitmap, pChunk->mX, pChunk->mY);
         pTex->UnlockMipBitmap();
     } else if (nTag == g_nBlakTag) {
         ACanvas *pCanvas = pTex->LockMipBitmap(0, 0, 0);
@@ -324,7 +324,7 @@ void Movie::OnChunk(AMovieSet::ChunkHeader *pHeader, void *pPayload) {
         }
         pCanvas->SetColor32(static_cast<AMovieSet::BlankChunk *>(pPayload)->mColor);
         const ARect rect = {0, 0, pCanvas->mBitmap.mWidth, pCanvas->mBitmap.mHeight};
-        pCanvas->FillRect(rect);
+        pCanvas->DrawRect(rect);
         pTex->UnlockMipBitmap();
     }
 }

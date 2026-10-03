@@ -151,7 +151,7 @@ NextDataByte(FILE *pFile, unsigned char *pBlock, unsigned char **ppByte, unsigne
 } // namespace
 
 // NTSC-U/C: 0x0062a9c0, PAL: 0x0066b550
-int AGifFile::ReadHeader() {
+int AGifFile::StartRead() {
     GifScreenDescriptor screen;
     fread(&screen, 1, kScreenDescriptorSize, mFile);
     s_screen = screen;

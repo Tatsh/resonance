@@ -99,7 +99,7 @@ ABitmap::ABitmap(void *pPixels,
 }
 
 // NTSC-U/C: 0x00559310, PAL: 0x0059a468
-int ABitmap::FormatForBitsPerPixel(int nBitsPerPixel) {
+int ABitmap::Bpp2Format(int nBitsPerPixel) {
     switch (nBitsPerPixel) {
     case kBitsPerPixel4:
         return kABitmapFormatLinear4;
@@ -128,7 +128,7 @@ int ABitmap::ComputeByteCount(int nFormat, int nWidth, int nHeight) {
 }
 
 // NTSC-U/C: 0x00559568, PAL: 0x0059a6c0
-void ABitmap::SwapRedBlue15(unsigned short *pPixels, int nCount) {
+void ABitmap::Reverse15(unsigned short *pPixels, int nCount) {
     for (int nRemaining = nCount; nRemaining > 0; --nRemaining) {
         const unsigned int nColor = *pPixels;
         *pPixels++ = static_cast<unsigned short>(((nColor & kRed15Mask) << kBlue15Shift) |
@@ -138,7 +138,7 @@ void ABitmap::SwapRedBlue15(unsigned short *pPixels, int nCount) {
 }
 
 // NTSC-U/C: 0x005595c8, PAL: 0x0059a720
-void ABitmap::SwapRedBlue24(unsigned char *pPixels, int nCount) {
+void ABitmap::Reverse24(unsigned char *pPixels, int nCount) {
     for (int nRemaining = nCount; nRemaining > 0; --nRemaining) {
         const unsigned char nFirst = pPixels[0];
         pPixels[0] = pPixels[2];
@@ -148,7 +148,7 @@ void ABitmap::SwapRedBlue24(unsigned char *pPixels, int nCount) {
 }
 
 // NTSC-U/C: 0x00559600, PAL: 0x0059a758
-void ABitmap::SwapRedBlue32(unsigned char *pPixels, int nCount) {
+void ABitmap::Reverse32(unsigned char *pPixels, int nCount) {
     for (int nRemaining = nCount; nRemaining > 0; --nRemaining) {
         const unsigned char nFirst = pPixels[0];
         pPixels[0] = pPixels[2];
@@ -204,24 +204,24 @@ void ABitmap::SwapRedBlue() {
     case kABitmapFormatLinear8:
     case kABitmapFormatRle8:
         if (mPalette != nullptr) {
-            SwapRedBlue32(reinterpret_cast<unsigned char *>(mPalette->mEntries), mPalette->mEnd);
+            Reverse32(reinterpret_cast<unsigned char *>(mPalette->mEntries), mPalette->mEnd);
         }
         break;
     case kABitmapFormatLinear15:
         for (int nRow = 0; nRow < mHeight; ++nRow) {
-            SwapRedBlue15(reinterpret_cast<unsigned short *>(pRow), mWidth);
+            Reverse15(reinterpret_cast<unsigned short *>(pRow), mWidth);
             pRow += mBytesPerRow;
         }
         break;
     case kABitmapFormatLinear24:
         for (int nRow = 0; nRow < mHeight; ++nRow) {
-            SwapRedBlue24(pRow, mWidth);
+            Reverse24(pRow, mWidth);
             pRow += mBytesPerRow;
         }
         break;
     case kABitmapFormatLinear32:
         for (int nRow = 0; nRow < mHeight; ++nRow) {
-            SwapRedBlue32(pRow, mWidth);
+            Reverse32(pRow, mWidth);
             pRow += mBytesPerRow;
         }
         break;
@@ -268,8 +268,8 @@ void ABitmap::ApplyColorKey(int nFlags) {
         }
     }
     if (mHasTransparentColor != 0) {
-        ACanvas *pCanvas = ACanvas::CreateForBitmap(*this, false);
-        pCanvas->BuildAlphaFromColorKey(mTransparentColor);
+        ACanvas *pCanvas = ACanvas::NewCompatibleCanvas(*this, false);
+        pCanvas->SetAlphaValues(mTransparentColor);
         delete pCanvas;
     }
 }

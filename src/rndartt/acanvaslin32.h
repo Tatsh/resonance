@@ -9,7 +9,7 @@
  * virtual function table is at 0x0083c360 and terminates on the zero entry at 0x0083c610, matching
  * the 85 slots of ACanvas.
  *
- * ACanvas::CreateForBitmap() constructs one for kABitmapFormatLinear32 through branch 4 of the
+ * ACanvas::NewCompatibleCanvas() constructs one for kABitmapFormatLinear32 through branch 4 of the
  * jump table at 0x00837d90.
  *
  * The class adds no data member, so it shares the 0x28 byte layout of ACanvas32. It overrides
@@ -29,7 +29,7 @@ public:
      * Adopt a pixel description.
      *
      * The out-of-line copy calls ACanvas's constructor directly, installs this class's table, and
-     * clears mColor. ACanvas::CreateForBitmap() compiles the same sequence inline.
+     * clears mColor. ACanvas::NewCompatibleCanvas() compiles the same sequence inline.
      *
      * @param bitmap The description to adopt.
      * @ghidraAddress NTSC-U/C: 0x00614240
@@ -47,7 +47,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00614278
      * @ghidraAddress PAL: 0x00654e08
      */
-    void BuildAlphaFromColorKey(unsigned int nColorKey);
+    void SetAlphaValues(unsigned int nColorKey);
 
     /**
      * Store the pen colour at one point, with no clip test.
@@ -57,7 +57,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00614308
      * @ghidraAddress PAL: 0x00654e98
      */
-    void PutPixelNoClip(int nX, int nY);
+    void DrawPixelU(int nX, int nY);
 
     /**
      * Store one 8888 colour at one point, with no clip test.
@@ -71,7 +71,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00614330
      * @ghidraAddress PAL: 0x00654ec0
      */
-    void PutPixelNoClip(int nX, int nY, unsigned int nColor);
+    void DrawPixel32U(int nX, int nY, unsigned int nColor);
 
     /**
      * Read one point as an 8888 colour, with no clip test.
@@ -82,7 +82,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00614350
      * @ghidraAddress PAL: 0x00654ee0
      */
-    unsigned int GetPixelNoClip(int nX, int nY);
+    unsigned int GetPixel32U(int nX, int nY);
 
     /**
      * Fill part of one row with the pen colour, with no clip test.
@@ -93,7 +93,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00614370
      * @ghidraAddress PAL: 0x00654f00
      */
-    void FillRowNoClip(int nY, int nLeft, int nRight);
+    void DrawHorzLineU(int nY, int nLeft, int nRight);
 
     /**
      * Fill part of one column with the pen colour, with no clip test.
@@ -104,7 +104,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006143b8
      * @ghidraAddress PAL: 0x00654f48
      */
-    void FillColumnNoClip(int nX, int nTop, int nBottom);
+    void DrawVertLineU(int nX, int nTop, int nBottom);
 
     /**
      * Fill a rectangle with the pen colour, with no clip test.
@@ -113,7 +113,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00614408
      * @ghidraAddress PAL: 0x00654f98
      */
-    void FillRectNoClip(ARect rect);
+    void DrawRectU(ARect rect);
 
     /**
      * Fill part of one row by sampling an indexed source bitmap along a fixed step.
@@ -130,12 +130,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006148e0
      * @ghidraAddress PAL: 0x00655470
      */
-    void TextureRowIndexed(int nY,
-                           int nLeft,
-                           int nRight,
-                           const ABitmap *pSource,
-                           APoint *pSourcePosition,
-                           const APoint *pSourceStep);
+    void DrawTmapRow8U(int nY,
+                       int nLeft,
+                       int nRight,
+                       const ABitmap *pSource,
+                       APoint *pSourcePosition,
+                       const APoint *pSourceStep);
 
     /**
      * Copy a four bit source bitmap, with no clip test.
@@ -149,7 +149,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006144b0
      * @ghidraAddress PAL: 0x00655040
      */
-    void Blit4NoClip(const ABitmap &source, int nX, int nY);
+    void DrawBitmapLin4U(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy an eight bit source bitmap, with no clip test.
@@ -160,7 +160,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00614608
      * @ghidraAddress PAL: 0x00655198
      */
-    void Blit8NoClip(const ABitmap &source, int nX, int nY);
+    void DrawBitmapLin8U(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy a 32 bit source bitmap, with no clip test.
@@ -175,7 +175,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00614070
      * @ghidraAddress PAL: 0x00654c00
      */
-    void Blit32NoClip(const ABitmap &source, int nX, int nY);
+    void DrawBitmapLin32U(const ABitmap &source, int nX, int nY);
 
     /**
      * Store one row of palette indices through a remap table.
@@ -188,7 +188,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006146f0
      * @ghidraAddress PAL: 0x00655280
      */
-    void RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap);
+    void DrawClutBitmapRowLin8U(const ARowInfo &span, const unsigned char *pRemap);
 
     /**
      * Store one row of palette indices sampled along a fixed step.
@@ -197,7 +197,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00614790
      * @ghidraAddress PAL: 0x00655320
      */
-    void StretchRowIndexed(const AStretchSpan &span);
+    void DrawScaledBitmapRowLin8U(const AScaledRowInfo &span);
 
     /**
      * Store one row of palette indices sampled along a fixed step, through a remap table.
@@ -207,5 +207,5 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00614830
      * @ghidraAddress PAL: 0x006553c0
      */
-    void StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap);
+    void DrawScaledClutBitmapRowLin8U(const AScaledRowInfo &span, const unsigned char *pRemap);
 };

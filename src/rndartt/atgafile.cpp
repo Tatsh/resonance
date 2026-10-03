@@ -35,7 +35,7 @@ unsigned char s_abPixel[kRGBAByteCount] = {0, 0, 0, 0xff};
 } // namespace
 
 // NTSC-U/C: 0x0061fff8, PAL: 0x00660b88
-int ATgaFile::ReadHeader() {
+int ATgaFile::StartRead() {
     TgaHeader header;
     fread(&header, 1, kHeaderSize, mFile);
     if (header.mColorMapType != 0) {

@@ -35,7 +35,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x0062a9c0
      * @ghidraAddress PAL: 0x0066b550
      */
-    virtual int ReadHeader();
+    virtual int StartRead();
 
     /**
      * Slot 3. Read blocks up to and including the next image.

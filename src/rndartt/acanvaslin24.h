@@ -27,7 +27,7 @@
  *
  * Every override that reads a palette stores the three low bytes of the entry, red first. The
  * block copy and the textured row resolve the palette from the source, then the canvas, then
- * g_pDefaultPalette, and the span overrides read ARowSpan::mPalette or AStretchSpan::mPalette.
+ * g_pDefaultPalette, and the span overrides read ARowInfo::mPalette or AScaledRowInfo::mPalette.
  * Each returns without drawing when the palette is null.
  *
  * The destructor in slot 1 at `0x006183d0` is compiler-generated. It restores ACanvas's table at
@@ -56,10 +56,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006184a8
      * @ghidraAddress PAL: 0x00659038
      */
-    virtual void BuildAlphaFromColorKey(unsigned int nColorKey);
-
-    // Lookup only, as in the base: this overload would otherwise hide the base's other one.
-    using ACanvas24::PutPixelNoClip;
+    virtual void SetAlphaValues(unsigned int nColorKey);
 
     /**
      * Slot 13. Writes the three stored channel bytes.
@@ -67,7 +64,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006184b0
      * @ghidraAddress PAL: 0x00659040
      */
-    virtual void PutPixelNoClip(int nX, int nY);
+    virtual void DrawPixelU(int nX, int nY);
 
     /**
      * Slot 19.
@@ -75,7 +72,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006184e8
      * @ghidraAddress PAL: 0x00659078
      */
-    virtual void PutPixelRGBNoClip(int nX, int nY, const unsigned char *pRGB);
+    virtual void DrawPixel24U(int nX, int nY, const unsigned char *pRGB);
 
     /**
      * Slot 29.
@@ -83,7 +80,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00618528
      * @ghidraAddress PAL: 0x006590b8
      */
-    virtual void GetPixelRGBNoClip(int nX, int nY, unsigned char *pRGB);
+    virtual void GetPixel24U(int nX, int nY, unsigned char *pRGB);
 
     /**
      * Slot 35.
@@ -91,7 +88,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00618568
      * @ghidraAddress PAL: 0x006590f8
      */
-    virtual void FillRowNoClip(int nY, int nLeft, int nRight);
+    virtual void DrawHorzLineU(int nY, int nLeft, int nRight);
 
     /**
      * Slot 37.
@@ -99,7 +96,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006185d0
      * @ghidraAddress PAL: 0x00659160
      */
-    virtual void FillColumnNoClip(int nX, int nTop, int nBottom);
+    virtual void DrawVertLineU(int nX, int nTop, int nBottom);
 
     /**
      * Slot 39.
@@ -107,7 +104,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00618630
      * @ghidraAddress PAL: 0x006591c0
      */
-    virtual void FillRectNoClip(ARect rect);
+    virtual void DrawRectU(ARect rect);
 
     /**
      * Slot 46.
@@ -115,12 +112,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00618a28
      * @ghidraAddress PAL: 0x006595b8
      */
-    virtual void TextureRowIndexed(int nY,
-                                   int nLeft,
-                                   int nRight,
-                                   const ABitmap *pSource,
-                                   APoint *pSourcePosition,
-                                   const APoint *pSourceStep);
+    virtual void DrawTmapRow8U(int nY,
+                               int nLeft,
+                               int nRight,
+                               const ABitmap *pSource,
+                               APoint *pSourcePosition,
+                               const APoint *pSourceStep);
 
     /**
      * Slot 49.
@@ -128,7 +125,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006186f8
      * @ghidraAddress PAL: 0x00659288
      */
-    virtual void Blit8NoClip(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin8U(const ABitmap &source, int nX, int nY);
 
     /**
      * Slot 53.
@@ -136,7 +133,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00618270
      * @ghidraAddress PAL: 0x00658e00
      */
-    virtual void Blit24NoClip(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin24U(const ABitmap &source, int nX, int nY);
 
     /**
      * Slot 75.
@@ -144,7 +141,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00618800
      * @ghidraAddress PAL: 0x00659390
      */
-    virtual void RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap);
+    virtual void DrawClutBitmapRowLin8U(const ARowInfo &span, const unsigned char *pRemap);
 
     /**
      * Slot 79.
@@ -152,7 +149,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006188b0
      * @ghidraAddress PAL: 0x00659440
      */
-    virtual void StretchRowIndexed(const AStretchSpan &span);
+    virtual void DrawScaledBitmapRowLin8U(const AScaledRowInfo &span);
 
     /**
      * Slot 83.
@@ -160,5 +157,6 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00618968
      * @ghidraAddress PAL: 0x006594f8
      */
-    virtual void StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap);
+    virtual void DrawScaledClutBitmapRowLin8U(const AScaledRowInfo &span,
+                                              const unsigned char *pRemap);
 };

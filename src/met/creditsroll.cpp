@@ -365,7 +365,7 @@ float CreditsRoll::AddLeadingCredit(const HxStr &text, const unsigned char *pTex
     if (ACanvas *pCanvas = pTex->LockMipBitmap(0, 0, 0)) {
         const ABitmap avatar(
             const_cast<unsigned char *>(pTexels), kABitmapFormatLinear32, false, nSize, nSize, 0);
-        pCanvas->Blit(avatar, 0, 0);
+        pCanvas->DrawBitmap(avatar, 0, 0);
         pTex->UnlockMipBitmap();
     }
 

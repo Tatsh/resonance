@@ -30,7 +30,7 @@ struct BmpInfoHeader {
     unsigned int mColorsImportant;
 };
 
-// Both headers with the file header unpacked, as ReadHeader() and Write() build them on the stack.
+// Both headers with the file header unpacked, as StartRead() and Write() build them on the stack.
 struct BmpHeader {
     unsigned short mType;
     unsigned int mFileSize;
@@ -103,7 +103,7 @@ inline unsigned char SwapNibbles(unsigned char nByte) {
 } // namespace
 
 // NTSC-U/C: 0x0061c688, PAL: 0x0065d218
-int ABmpFile::ReadHeader() {
+int ABmpFile::StartRead() {
     fread(&s_readFileHeader, 1, kFileHeaderSize, mFile);
     fread(&s_readInfoHeader, 1, kInfoHeaderSize, mFile);
     BmpHeader header;
@@ -192,7 +192,7 @@ int ABmpFile::ReadImage(ABitmap *pImage, int *pbEnd) {
         }
         return kAGfxFileNoMemory;
     }
-    const int nResult = ReadPixels(pImage);
+    const int nResult = ReadBitsFromFile(pImage);
     if (nResult != kAGfxFileOk) {
         if (pImage->mPixels != nullptr) {
             // Yes, the single-object release, although the tagged allocator made the block.
@@ -296,16 +296,16 @@ APalette *ABmpFile::ReadPalette() {
 }
 
 // NTSC-U/C: 0x0061d5c0, PAL: 0x0065e150
-int ABmpFile::ReadPixels(ABitmap *pImage) {
+int ABmpFile::ReadBitsFromFile(ABitmap *pImage) {
     fseek(mFile, mPixelOffset, SEEK_SET);
     if (mCompression == kCompressionNone) {
-        return ReadUncompressedPixels(pImage);
+        return ReadBitmapNotCompressed(pImage);
     }
-    return ReadRlePixels(pImage);
+    return ReadBitmapCompressed(pImage);
 }
 
 // NTSC-U/C: 0x0061cef8, PAL: 0x0065da88
-int ABmpFile::ReadUncompressedPixels(ABitmap *pImage) {
+int ABmpFile::ReadBitmapNotCompressed(ABitmap *pImage) {
     unsigned char *pRow = static_cast<unsigned char *>(pImage->mPixels);
     int nStride = pImage->mBytesPerRow;
     int nFirstRow = 0;
@@ -326,15 +326,15 @@ int ABmpFile::ReadUncompressedPixels(ABitmap *pImage) {
             }
         } else if (pImage->mFormat == kABitmapFormatLinear32) {
             fread(pRow, 1, pImage->mWidth * kRGBByteCount, mFile);
-            ABitmap::SwapRedBlue24(pRow, pImage->mWidth);
+            ABitmap::Reverse24(pRow, pImage->mWidth);
             ExpandRow24To32(pRow, pImage->mWidth);
         } else {
             fread(pRow, 1, pImage->mBytesPerRow, mFile);
             if (pImage->mFormat == kABitmapFormatLinear15) {
-                ABitmap::SwapRedBlue15(static_cast<unsigned short *>(static_cast<void *>(pRow)),
-                                       pImage->mWidth);
+                ABitmap::Reverse15(static_cast<unsigned short *>(static_cast<void *>(pRow)),
+                                   pImage->mWidth);
             } else if (pImage->mFormat == kABitmapFormatLinear24) {
-                ABitmap::SwapRedBlue24(pRow, pImage->mWidth);
+                ABitmap::Reverse24(pRow, pImage->mWidth);
             }
         }
         pRow += nStride;
@@ -343,7 +343,7 @@ int ABmpFile::ReadUncompressedPixels(ABitmap *pImage) {
 }
 
 // NTSC-U/C: 0x0061d0e8, PAL: 0x0065dc78
-int ABmpFile::ReadRlePixels(ABitmap *pImage) {
+int ABmpFile::ReadBitmapCompressed(ABitmap *pImage) {
     unsigned char *pRow = static_cast<unsigned char *>(pImage->mPixels);
     int nStride = pImage->mBytesPerRow;
     memset(pRow, 0, pImage->mByteCount);
@@ -409,7 +409,7 @@ int ABmpFile::ReadRlePixels(ABitmap *pImage) {
                     *pDest++ = SwapNibbles(nByte);
                 }
                 // Yes, the column advances by the exhausted counter, which is -1 here, so it moves
-                // back by two. See ACanvasLin4::WriteIndexedRow() for the same pattern.
+                // back by two. See ACanvasLin4::DrawBitmapRowLin8U() for the same pattern.
                 nColumn += nPairs * 2;
                 if ((abPair[1] & 1) != 0) {
                     unsigned char nByte;

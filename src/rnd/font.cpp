@@ -152,7 +152,7 @@ inline int ScanForInkedColumn(ACanvas &canvas, int nFrom, int nTo, int nTop, int
     int x = nFrom;
     while (x != nTo) {
         for (int y = nTop; y < nBottom; ++y) {
-            if ((canvas.GetPixel(x, y) & kPixelAlphaMask) != 0) {
+            if ((canvas.GetPixel32(x, y) & kPixelAlphaMask) != 0) {
                 return x;
             }
         }

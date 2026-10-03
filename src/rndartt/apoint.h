@@ -7,7 +7,7 @@
  * here follows the `A` prefix every other art library type uses, and is therefore inferred rather
  * than recovered.
  *
- * The record is eight bytes, two signed words. ACanvas::TextureRowIndexed() reads the horizontal
+ * The record is eight bytes, two signed words. ACanvas::DrawTmapRow8U() reads the horizontal
  * component at 0x00 and the vertical one at 0x04, and advances both by a second record of the same
  * shape, which is the only evidence of the layout.
  *

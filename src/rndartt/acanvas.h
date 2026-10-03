@@ -7,20 +7,16 @@
 #include "rndartt/arle8reader.h"
 
 class APalette;
-struct AClipSpan;
 struct AFont;
 struct APoint;
 struct APolygon;
-struct ARowSpan;
-struct AStretchBlit;
-struct AStretchSpan;
 struct Color;
 
-/** Fractional bits in the coordinates DrawLine() and TextureRowIndexed() take. */
+/** Fractional bits in the coordinates DrawLine() and DrawTmapRow8U() take. */
 constexpr int kACanvasFractionBits = 8;
 
 /**
- * Bits ACanvas::ClipCodeForPoint() returns.
+ * Bits ACanvas::ClipCode() returns.
  *
  * The four bits form a Cohen and Sutherland outcode against the canvas clip rectangle. A point
  * inside the rectangle produces zero.
@@ -58,9 +54,9 @@ enum ACanvasClipCode {
  * those two, plus whichever bulk operation benefits from direct addressing.
  *
  * Every operation appears twice, once with the clip test and once without. The unclipped form
- * takes the NoClip suffix. For the pixel accessors and the row, column, and rectangle fills the
+ * takes the U suffix. For the pixel accessors and the row, column, and rectangle fills the
  * unclipped form is pure virtual here and the clipped form is implemented here in terms of it. For
- * the copy and read slots both forms are implemented here, the clipped one calling ClipBlitToRect()
+ * the copy and read slots both forms are implemented here, the clipped one calling ClipBitmap()
  * and then the unclipped one.
  *
  * Six colour formats arrive at a pixel. The pen colour form uses no argument. The indexed form
@@ -68,8 +64,6 @@ enum ACanvasClipCode {
  * palette index, the 1555 form a halfword, the RGB form three bytes, the 8888 form a word, and the
  * native form a value in the canvas storage width. On a 32 bit canvas the 8888 and native forms
  * coincide, and ACanvas32 implements the native pair by forwarding to the 8888 pair.
- *
- * The 8888 accessors are an overload set, as the toolchain compiled them.
  *
  * Both data members are public. Rnd::Font::ComputeCharUV() reads mBitmap.mWidth and
  * mBitmap.mHeight from outside the hierarchy and the image supplies no accessor, so the access
@@ -79,6 +73,10 @@ enum ACanvasClipCode {
  */
 class ACanvas {
 public:
+    struct ARowInfo;
+    struct AScaledRowInfo;
+    struct Rle8Clip;
+
     /**
      * Adopt a pixel description.
      *
@@ -111,26 +109,26 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005e8bc8
      * @ghidraAddress PAL: 0x0062ad10
      */
-    static ACanvas *CreateForBitmap(const ABitmap &bitmap, bool bAllocatePixels);
+    static ACanvas *NewCompatibleCanvas(const ABitmap &bitmap, bool bAllocatePixels);
 
     /**
      * Construct a canvas over a fresh pixel rectangle shaped like a bitmap.
      *
      * Rewrites a format code of kABitmapFormatRle8 to kABitmapFormatLinear8 in a copy, then calls
-     * CreateForBitmap() with allocation requested. The image has no caller.
+     * NewCompatibleCanvas() with allocation requested. The image has no caller.
      *
      * @param bitmap The description to copy.
      * @return The new canvas, or null.
      * @ghidraAddress NTSC-U/C: 0x005eb200
      * @ghidraAddress PAL: 0x0062d348
      */
-    static ACanvas *CreateWithOwnedPixels(const ABitmap &bitmap);
+    static ACanvas *NewCompatibleLinearCanvas(const ABitmap &bitmap);
 
     /**
      * Construct a canvas over a rectangle of a bitmap's pixels, sharing them.
      *
      * Builds the rectangle through the sub-rectangle ABitmap constructor and selects the subclass
-     * through the jump table at 0x00837db0. Unlike CreateForBitmap(), a kABitmapFormatLinear4
+     * through the jump table at 0x00837db0. Unlike NewCompatibleCanvas(), a kABitmapFormatLinear4
      * rectangle gets an ACanvasLin8, and kABitmapFormatRle8 gets no canvas. The image has no
      * caller.
      *
@@ -143,8 +141,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005e8e38
      * @ghidraAddress PAL: 0x0062af80
      */
-    static ACanvas *
-    CreateForSubBitmap(const ABitmap &source, int nX, int nY, int nWidth, int nHeight);
+    static ACanvas *SubCanvas(const ABitmap &source, int nX, int nY, int nWidth, int nHeight);
 
     /**
      * Reduce this canvas's 32 bit pixels to palette indices over ramps of the given colours.
@@ -171,8 +168,9 @@ public:
      * Copy a source bitmap, clipped, choosing the slot by source format.
      *
      * Calls through the six entry table of pointers to member functions at 0x0077dcc8, the same
-     * table DrawGlyph() uses, whose entries are Blit4() through Blit32() and then BlitRle8(). The
-     * one caller in the image is Rnd::Movie::OnChunk() at 0x005cf4c0, outside the art library.
+     * table DrawChar() uses, whose entries are DrawBitmapLin4() through DrawBitmapLin32() and then
+     * DrawBitmapRle8(). The one caller in the image is Rnd::Movie::OnChunk() at 0x005cf4c0, outside
+     * the art library.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -180,7 +178,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ec1d8
      * @ghidraAddress PAL: 0x0062e320
      */
-    void Blit(const ABitmap &source, int nX, int nY);
+    void DrawBitmap(const ABitmap &source, int nX, int nY);
 
     /**
      * Release the canvas.
@@ -203,7 +201,7 @@ public:
      *
      * @param nIndex The palette index.
      */
-    virtual void SetColorIndex(int nIndex) = 0;
+    virtual void SetColor8(int nIndex) = 0;
 
     /**
      * Set the pen colour from a 1555 halfword.
@@ -219,7 +217,7 @@ public:
      *
      * @param pRGB The three channel bytes.
      */
-    virtual void SetColorRGB(const unsigned char *pRGB) = 0;
+    virtual void SetColor24(const unsigned char *pRGB) = 0;
 
     /**
      * Set the pen colour from an 8888 word.
@@ -240,7 +238,7 @@ public:
      *
      * @return The palette index.
      */
-    virtual int GetColorIndex() = 0;
+    virtual int GetColor8() = 0;
 
     /**
      * Return the pen colour packed to 1555.
@@ -254,7 +252,7 @@ public:
      *
      * @param pRGB The three channel bytes to write.
      */
-    virtual void GetColorRGB(unsigned char *pRGB) = 0;
+    virtual void GetColor24(unsigned char *pRGB) = 0;
 
     /**
      * Return the pen colour as an 8888 word.
@@ -278,7 +276,7 @@ public:
      *
      * @param nColorKey The colour to treat as transparent.
      */
-    virtual void BuildAlphaFromColorKey(unsigned int nColorKey) = 0;
+    virtual void SetAlphaValues(unsigned int nColorKey) = 0;
 
     /**
      * Store the pen colour at one point, with no clip test.
@@ -286,7 +284,7 @@ public:
      * @param nX The column.
      * @param nY The row.
      */
-    virtual void PutPixelNoClip(int nX, int nY) = 0;
+    virtual void DrawPixelU(int nX, int nY) = 0;
 
     /**
      * Store the pen colour at one point.
@@ -298,7 +296,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eb520
      * @ghidraAddress PAL: 0x0062d668
      */
-    virtual void PutPixel(int nX, int nY);
+    virtual void DrawPixel(int nX, int nY);
 
     /**
      * Store one palette index at one point, with no clip test.
@@ -307,7 +305,7 @@ public:
      * @param nY The row.
      * @param nIndex The palette index.
      */
-    virtual void PutPixelIndexedNoClip(int nX, int nY, int nIndex) = 0;
+    virtual void DrawPixel8U(int nX, int nY, int nIndex) = 0;
 
     /**
      * Store one palette index at one point, clipped.
@@ -318,7 +316,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eb590
      * @ghidraAddress PAL: 0x0062d6d8
      */
-    virtual void PutPixelIndexed(int nX, int nY, int nIndex);
+    virtual void DrawPixel8(int nX, int nY, int nIndex);
 
     /**
      * Store one 1555 colour at one point, with no clip test.
@@ -327,7 +325,7 @@ public:
      * @param nY The row.
      * @param nColor The colour.
      */
-    virtual void PutPixel15NoClip(int nX, int nY, unsigned short nColor) = 0;
+    virtual void DrawPixel15U(int nX, int nY, unsigned short nColor) = 0;
 
     /**
      * Store one 1555 colour at one point, clipped.
@@ -338,7 +336,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eb608
      * @ghidraAddress PAL: 0x0062d750
      */
-    virtual void PutPixel15(int nX, int nY, unsigned short nColor);
+    virtual void DrawPixel15(int nX, int nY, unsigned short nColor);
 
     /**
      * Store one red, green, blue triple at one point, with no clip test.
@@ -347,7 +345,7 @@ public:
      * @param nY The row.
      * @param pRGB The three channel bytes.
      */
-    virtual void PutPixelRGBNoClip(int nX, int nY, const unsigned char *pRGB) = 0;
+    virtual void DrawPixel24U(int nX, int nY, const unsigned char *pRGB) = 0;
 
     /**
      * Store one red, green, blue triple at one point, clipped.
@@ -358,7 +356,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eb680
      * @ghidraAddress PAL: 0x0062d7c8
      */
-    virtual void PutPixelRGB(int nX, int nY, const unsigned char *pRGB);
+    virtual void DrawPixel24(int nX, int nY, const unsigned char *pRGB);
 
     /**
      * Store one 8888 colour at one point, with no clip test.
@@ -367,7 +365,7 @@ public:
      * @param nY The row.
      * @param nColor The colour.
      */
-    virtual void PutPixelNoClip(int nX, int nY, unsigned int nColor) = 0;
+    virtual void DrawPixel32U(int nX, int nY, unsigned int nColor) = 0;
 
     /**
      * Store one 8888 colour at one point, clipped.
@@ -378,7 +376,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eb6f0
      * @ghidraAddress PAL: 0x0062d838
      */
-    virtual void PutPixel(int nX, int nY, unsigned int nColor);
+    virtual void DrawPixel32(int nX, int nY, unsigned int nColor);
 
     /**
      * Store one value in the canvas storage width at one point, with no clip test.
@@ -387,7 +385,7 @@ public:
      * @param nY The row.
      * @param nColor The colour in the canvas pixel format.
      */
-    virtual void PutPixelNativeNoClip(int nX, int nY, unsigned int nColor) = 0;
+    virtual void DrawPixelNativeU(int nX, int nY, unsigned int nColor) = 0;
 
     /**
      * Store one value in the canvas storage width at one point, clipped.
@@ -398,7 +396,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eb760
      * @ghidraAddress PAL: 0x0062d8a8
      */
-    virtual void PutPixelNative(int nX, int nY, unsigned int nColor);
+    virtual void DrawPixelNative(int nX, int nY, unsigned int nColor);
 
     /**
      * Read one point as a palette index, with no clip test.
@@ -407,7 +405,7 @@ public:
      * @param nY The row.
      * @return The palette index.
      */
-    virtual int GetPixelIndexedNoClip(int nX, int nY) = 0;
+    virtual int GetPixel8U(int nX, int nY) = 0;
 
     /**
      * Read one point as a palette index, clipped.
@@ -418,7 +416,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eb7d0
      * @ghidraAddress PAL: 0x0062d918
      */
-    virtual int GetPixelIndexed(int nX, int nY);
+    virtual int GetPixel8(int nX, int nY);
 
     /**
      * Read one point as a 1555 colour, with no clip test.
@@ -427,7 +425,7 @@ public:
      * @param nY The row.
      * @return The colour.
      */
-    virtual unsigned short GetPixel15NoClip(int nX, int nY) = 0;
+    virtual unsigned short GetPixel15U(int nX, int nY) = 0;
 
     /**
      * Read one point as a 1555 colour, clipped.
@@ -447,7 +445,7 @@ public:
      * @param nY The row.
      * @param pRGB The three channel bytes to write.
      */
-    virtual void GetPixelRGBNoClip(int nX, int nY, unsigned char *pRGB) = 0;
+    virtual void GetPixel24U(int nX, int nY, unsigned char *pRGB) = 0;
 
     /**
      * Read one point into three bytes in red, green, blue order, clipped.
@@ -460,7 +458,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eb8c0
      * @ghidraAddress PAL: 0x0062da08
      */
-    virtual void GetPixelRGB(int nX, int nY, unsigned char *pRGB);
+    virtual void GetPixel24(int nX, int nY, unsigned char *pRGB);
 
     /**
      * Read one point as an 8888 colour, with no clip test.
@@ -473,7 +471,7 @@ public:
      * @param nY The row.
      * @return The colour.
      */
-    virtual unsigned int GetPixelNoClip(int nX, int nY) = 0;
+    virtual unsigned int GetPixel32U(int nX, int nY) = 0;
 
     /**
      * Read one point as an 8888 colour, clipped.
@@ -484,7 +482,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eb948
      * @ghidraAddress PAL: 0x0062da90
      */
-    virtual unsigned int GetPixel(int nX, int nY);
+    virtual unsigned int GetPixel32(int nX, int nY);
 
     /**
      * Read one point in the canvas storage width, with no clip test.
@@ -493,7 +491,7 @@ public:
      * @param nY The row.
      * @return The value in the canvas pixel format.
      */
-    virtual unsigned int GetPixelNativeNoClip(int nX, int nY) = 0;
+    virtual unsigned int GetPixelNativeU(int nX, int nY) = 0;
 
     /**
      * Read one point in the canvas storage width, clipped.
@@ -515,7 +513,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eba38
      * @ghidraAddress PAL: 0x0062db80
      */
-    virtual void FillRowNoClip(int nY, int nLeft, int nRight);
+    virtual void DrawHorzLineU(int nY, int nLeft, int nRight);
 
     /**
      * Fill part of one row with the pen colour.
@@ -528,7 +526,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ebab8
      * @ghidraAddress PAL: 0x0062dc00
      */
-    virtual void FillRow(int nY, int nLeft, int nRight);
+    virtual void DrawHorzLine(int nY, int nLeft, int nRight);
 
     /**
      * Fill part of one column with the pen colour, with no clip test.
@@ -539,7 +537,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ebb30
      * @ghidraAddress PAL: 0x0062dc78
      */
-    virtual void FillColumnNoClip(int nX, int nTop, int nBottom);
+    virtual void DrawVertLineU(int nX, int nTop, int nBottom);
 
     /**
      * Fill part of one column with the pen colour, clamped to the clip rectangle.
@@ -550,7 +548,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ebbb0
      * @ghidraAddress PAL: 0x0062dcf8
      */
-    virtual void FillColumn(int nX, int nTop, int nBottom);
+    virtual void DrawVertLine(int nX, int nTop, int nBottom);
 
     /**
      * Fill a rectangle with the pen colour, with no clip test.
@@ -559,7 +557,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ebc28
      * @ghidraAddress PAL: 0x0062dd70
      */
-    virtual void FillRectNoClip(ARect rect);
+    virtual void DrawRectU(ARect rect);
 
     /**
      * Fill a rectangle with the pen colour.
@@ -570,7 +568,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ebc98
      * @ghidraAddress PAL: 0x0062dde0
      */
-    virtual void FillRect(ARect rect);
+    virtual void DrawRect(ARect rect);
 
     /**
      * Draw the four edges of a rectangle in the pen colour, with no clip test.
@@ -579,7 +577,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005e9378
      * @ghidraAddress PAL: 0x0062b4c0
      */
-    virtual void FrameRectNoClip(ARect rect);
+    virtual void DrawBoxU(ARect rect);
 
     /**
      * Draw the four edges of a rectangle in the pen colour, through the clipped fills.
@@ -588,7 +586,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005e9440
      * @ghidraAddress PAL: 0x0062b588
      */
-    virtual void FrameRect(ARect rect);
+    virtual void DrawBox(ARect rect);
 
     /**
      * Rewrite every palette index inside a rectangle through a remap table.
@@ -598,12 +596,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ebd40
      * @ghidraAddress PAL: 0x0062de88
      */
-    virtual void RemapRectIndices(ARect rect, const unsigned char *pRemap);
+    virtual void DrawClutRectU(ARect rect, const unsigned char *pRemap);
 
     /**
      * Draw a line in the pen colour, with no clip test.
      *
-     * Every coordinate is 24.8 fixed point. SetupLineSteps() supplies a step of one whole unit
+     * Every coordinate is 24.8 fixed point. SetupLine() supplies a step of one whole unit
      * along the major axis and the pixel count.
      *
      * @param nX0 The first column.
@@ -613,7 +611,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ebec8
      * @ghidraAddress PAL: 0x0062e010
      */
-    virtual void DrawLineNoClip(int nX0, int nY0, int nX1, int nY1);
+    virtual void DrawLineU(int nX0, int nY0, int nX1, int nY1);
 
     /**
      * Draw a line in the pen colour, clipped.
@@ -646,12 +644,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ec050
      * @ghidraAddress PAL: 0x0062e198
      */
-    virtual void TextureRowIndexed(int nY,
-                                   int nLeft,
-                                   int nRight,
-                                   const ABitmap *pSource,
-                                   APoint *pSourcePosition,
-                                   const APoint *pSourceStep);
+    virtual void DrawTmapRow8U(int nY,
+                               int nLeft,
+                               int nRight,
+                               const ABitmap *pSource,
+                               APoint *pSourcePosition,
+                               const APoint *pSourceStep);
 
     /**
      * Copy a four bit source bitmap, with no clip test.
@@ -669,7 +667,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ec280
      * @ghidraAddress PAL: 0x0062e3c8
      */
-    virtual void Blit4NoClip(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin4U(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy a four bit source bitmap, clipped.
@@ -680,7 +678,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ec3c0
      * @ghidraAddress PAL: 0x0062e508
      */
-    virtual void Blit4(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin4(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy an eight bit source bitmap, with no clip test.
@@ -691,7 +689,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ec450
      * @ghidraAddress PAL: 0x0062e598
      */
-    virtual void Blit8NoClip(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin8U(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy an eight bit source bitmap, clipped.
@@ -702,7 +700,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ec570
      * @ghidraAddress PAL: 0x0062e6b8
      */
-    virtual void Blit8(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin8(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy a 1555 source bitmap, with no clip test.
@@ -713,7 +711,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ec600
      * @ghidraAddress PAL: 0x0062e748
      */
-    virtual void Blit15NoClip(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin15U(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy a 1555 source bitmap, clipped.
@@ -724,7 +722,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ec738
      * @ghidraAddress PAL: 0x0062e880
      */
-    virtual void Blit15(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin15(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy a 24 bit source bitmap, with no clip test.
@@ -735,7 +733,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ec7c8
      * @ghidraAddress PAL: 0x0062e910
      */
-    virtual void Blit24NoClip(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin24U(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy a 24 bit source bitmap, clipped.
@@ -746,7 +744,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ec928
      * @ghidraAddress PAL: 0x0062ea70
      */
-    virtual void Blit24(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin24(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy a 32 bit source bitmap, with no clip test.
@@ -757,7 +755,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ec9b8
      * @ghidraAddress PAL: 0x0062eb00
      */
-    virtual void Blit32NoClip(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin32U(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy a 32 bit source bitmap, clipped.
@@ -768,13 +766,13 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ecad8
      * @ghidraAddress PAL: 0x0062ec20
      */
-    virtual void Blit32(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin32(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy a run length encoded eight bit source bitmap, with no clip test.
      *
      * Decodes one row into g_abCanvasRowScratch, describes the decoded row as an
-     * eight bit ABitmap of one row, and copies it with Blit8NoClip().
+     * eight bit ABitmap of one row, and copies it with DrawBitmapLin8U().
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -782,12 +780,12 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ecb68
      * @ghidraAddress PAL: 0x0062ecb0
      */
-    virtual void BlitRle8NoClip(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapRle8U(const ABitmap &source, int nX, int nY);
 
     /**
      * Copy a run length encoded eight bit source bitmap, clipped.
      *
-     * Forwards to BlitRle8NoClip() when the whole source fits inside the clip rectangle, and
+     * Forwards to DrawBitmapRle8U() when the whole source fits inside the clip rectangle, and
      * otherwise decodes and copies the surviving rows one at a time.
      *
      * @param source The source bitmap.
@@ -796,7 +794,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005e9cb8
      * @ghidraAddress PAL: 0x0062be00
      */
-    virtual void BlitRle8(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapRle8(const ABitmap &source, int nX, int nY);
 
     /**
      * Read a rectangle of the canvas into a four bit bitmap, clipped.
@@ -807,7 +805,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ecef0
      * @ghidraAddress PAL: 0x0062f038
      */
-    virtual void ReadRect4(const ABitmap &dest, int nX, int nY);
+    virtual void GetBitmapLin4(const ABitmap &dest, int nX, int nY);
 
     /**
      * Read a rectangle of the canvas into a four bit bitmap, with no clip test.
@@ -818,7 +816,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ecdb8
      * @ghidraAddress PAL: 0x0062ef00
      */
-    virtual void ReadRect4NoClip(const ABitmap &dest, int nX, int nY);
+    virtual void GetBitmapLin4U(const ABitmap &dest, int nX, int nY);
 
     /**
      * Read a rectangle of the canvas into an eight bit bitmap, clipped.
@@ -829,7 +827,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ed070
      * @ghidraAddress PAL: 0x0062f1b8
      */
-    virtual void ReadRect8(const ABitmap &dest, int nX, int nY);
+    virtual void GetBitmapLin8(const ABitmap &dest, int nX, int nY);
 
     /**
      * Read a rectangle of the canvas into an eight bit bitmap, with no clip test.
@@ -840,7 +838,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ecf80
      * @ghidraAddress PAL: 0x0062f0c8
      */
-    virtual void ReadRect8NoClip(const ABitmap &dest, int nX, int nY);
+    virtual void GetBitmapLin8U(const ABitmap &dest, int nX, int nY);
 
     /**
      * Read a rectangle of the canvas into a 1555 bitmap, clipped.
@@ -851,7 +849,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ed208
      * @ghidraAddress PAL: 0x0062f350
      */
-    virtual void ReadRect15(const ABitmap &dest, int nX, int nY);
+    virtual void GetBitmapLin15(const ABitmap &dest, int nX, int nY);
 
     /**
      * Read a rectangle of the canvas into a 1555 bitmap, with no clip test.
@@ -862,7 +860,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ed100
      * @ghidraAddress PAL: 0x0062f248
      */
-    virtual void ReadRect15NoClip(const ABitmap &dest, int nX, int nY);
+    virtual void GetBitmapLin15U(const ABitmap &dest, int nX, int nY);
 
     /**
      * Read a rectangle of the canvas into a 24 bit bitmap, clipped.
@@ -873,7 +871,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ed398
      * @ghidraAddress PAL: 0x0062f4e0
      */
-    virtual void ReadRect24(const ABitmap &dest, int nX, int nY);
+    virtual void GetBitmapLin24(const ABitmap &dest, int nX, int nY);
 
     /**
      * Read a rectangle of the canvas into a 24 bit bitmap, with no clip test.
@@ -884,7 +882,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ed298
      * @ghidraAddress PAL: 0x0062f3e0
      */
-    virtual void ReadRect24NoClip(const ABitmap &dest, int nX, int nY);
+    virtual void GetBitmapLin24U(const ABitmap &dest, int nX, int nY);
 
     /**
      * Read a rectangle of the canvas into a 32 bit bitmap, clipped.
@@ -895,7 +893,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ed520
      * @ghidraAddress PAL: 0x0062f668
      */
-    virtual void ReadRect32(const ABitmap &dest, int nX, int nY);
+    virtual void GetBitmapLin32(const ABitmap &dest, int nX, int nY);
 
     /**
      * Read a rectangle of the canvas into a 32 bit bitmap, with no clip test.
@@ -906,7 +904,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ed428
      * @ghidraAddress PAL: 0x0062f570
      */
-    virtual void ReadRect32NoClip(const ABitmap &dest, int nX, int nY);
+    virtual void GetBitmapLin32U(const ABitmap &dest, int nX, int nY);
 
     /**
      * Draw one glyph of a font, with no clip test.
@@ -923,7 +921,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005e9ee8
      * @ghidraAddress PAL: 0x0062c030
      */
-    virtual void DrawGlyphNoClip(int nCharCode, const AFont *pFont, int nX, int nY);
+    virtual void DrawCharU(int nCharCode, const AFont *pFont, int nX, int nY);
 
     /**
      * Draw one glyph of a font, clipped.
@@ -937,7 +935,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005e9fc8
      * @ghidraAddress PAL: 0x0062c110
      */
-    virtual void DrawGlyph(int nCharCode, const AFont *pFont, int nX, int nY);
+    virtual void DrawChar(int nCharCode, const AFont *pFont, int nX, int nY);
 
     /**
      * Draw a null terminated string, with no clip test.
@@ -952,7 +950,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ed5b0
      * @ghidraAddress PAL: 0x0062f6f8
      */
-    virtual void DrawTextNoClip(const char *pText, const AFont *pFont, int nX, int nY);
+    virtual void DrawTextU(const char *pText, const AFont *pFont, int nX, int nY);
 
     /**
      * Draw a null terminated string, clipped.
@@ -978,7 +976,8 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ed858
      * @ghidraAddress PAL: 0x0062f9a0
      */
-    virtual void BlitRemap4(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+    virtual void
+    DrawClutBitmapLin4U(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
 
     /**
      * Copy an eight bit source bitmap through a remap table, one row at a time.
@@ -990,7 +989,8 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eda30
      * @ghidraAddress PAL: 0x0062fb78
      */
-    virtual void BlitRemap8(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+    virtual void
+    DrawClutBitmapLin8U(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
 
     /**
      * Store one row of palette indices through a remap table.
@@ -1002,7 +1002,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005edd08
      * @ghidraAddress PAL: 0x0062fe50
      */
-    virtual void RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap);
+    virtual void DrawClutBitmapRowLin8U(const ARowInfo &span, const unsigned char *pRemap);
 
     /**
      * Copy a four bit source bitmap through a blend table.
@@ -1014,8 +1014,10 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005edfb8
      * @ghidraAddress PAL: 0x00630100
      */
-    virtual void
-    BlitBlend4(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+    virtual void DrawBlendBitmapLin4U(const ABitmap &source,
+                                      int nX,
+                                      int nY,
+                                      const unsigned char *const *ppBlend);
 
     /**
      * Copy an eight bit source bitmap through a blend table.
@@ -1027,22 +1029,24 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ee1c8
      * @ghidraAddress PAL: 0x00630310
      */
-    virtual void
-    BlitBlend8(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+    virtual void DrawBlendBitmapLin8U(const ABitmap &source,
+                                      int nX,
+                                      int nY,
+                                      const unsigned char *const *ppBlend);
 
     /**
      * Store one row of palette indices blended against the destination.
      *
      * Reads the destination index, then selects the replacement from the blend row of the source
      * index. Index zero is transparent when the span requests transparency, which differs from
-     * RemapRowIndexed(), where the span transparent colour applies instead.
+     * DrawClutBitmapRowLin8U(), where the span transparent colour applies instead.
      *
      * @param span The row to store.
      * @param ppBlend 256 rows of 256 replacement indices, selected by source then destination.
      * @ghidraAddress NTSC-U/C: 0x005ee4a0
      * @ghidraAddress PAL: 0x006305e8
      */
-    virtual void BlendRowIndexed(const ARowSpan &span, const unsigned char *const *ppBlend);
+    virtual void DrawBlendBitmapRowLin8U(const ARowInfo &span, const unsigned char *const *ppBlend);
 
     /**
      * Store one row of palette indices sampled along a fixed step.
@@ -1051,7 +1055,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005ee968
      * @ghidraAddress PAL: 0x00630ab0
      */
-    virtual void StretchRowIndexed(const AStretchSpan &span);
+    virtual void DrawScaledBitmapRowLin8U(const AScaledRowInfo &span);
 
     /**
      * Store one row of 1555 colours sampled along a fixed step.
@@ -1060,7 +1064,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eea18
      * @ghidraAddress PAL: 0x00630b60
      */
-    virtual void StretchRow15(const AStretchSpan &span);
+    virtual void DrawScaledBitmapRowLin15U(const AScaledRowInfo &span);
 
     /**
      * Store one row of red, green, blue triples sampled along a fixed step.
@@ -1069,7 +1073,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eeac8
      * @ghidraAddress PAL: 0x00630c10
      */
-    virtual void StretchRow24(const AStretchSpan &span);
+    virtual void DrawScaledBitmapRowLin24U(const AScaledRowInfo &span);
 
     /**
      * Store one row of 8888 colours sampled along a fixed step.
@@ -1078,7 +1082,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eebb8
      * @ghidraAddress PAL: 0x00630d00
      */
-    virtual void StretchRow32(const AStretchSpan &span);
+    virtual void DrawScaledBitmapRowLin32U(const AScaledRowInfo &span);
 
     /**
      * Store one row of palette indices sampled along a fixed step, through a remap table.
@@ -1088,7 +1092,8 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eedb8
      * @ghidraAddress PAL: 0x00630f00
      */
-    virtual void StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap);
+    virtual void DrawScaledClutBitmapRowLin8U(const AScaledRowInfo &span,
+                                              const unsigned char *pRemap);
 
     /**
      * Store one row of palette indices sampled along a fixed step, blended against the
@@ -1099,7 +1104,8 @@ public:
      * @ghidraAddress NTSC-U/C: 0x005eefc0
      * @ghidraAddress PAL: 0x00631108
      */
-    virtual void StretchRowBlend(const AStretchSpan &span, const unsigned char *const *ppBlend);
+    virtual void DrawScaledBlendBitmapRowLin8U(const AScaledRowInfo &span,
+                                               const unsigned char *const *ppBlend);
 
     ABitmap mBitmap; /*!< The pixel rectangle this canvas draws into. +0x00 */
     ARect mClip;     /*!< The clip rectangle every clipped operation tests against. +0x18 */
@@ -1111,7 +1117,7 @@ protected:
     /**
      * Classify a point against the clip rectangle.
      *
-     * The code is formed in eight bits, and ClipLineToRect() compares combinations of two codes
+     * The code is formed in eight bits, and ClipLine() compares combinations of two codes
      * in eight bits as well.
      *
      * @param nX The horizontal coordinate.
@@ -1120,18 +1126,18 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005eb3d0
      * @ghidraAddress PAL: 0x0062d518
      */
-    unsigned char ClipCodeForPoint(int nX, int nY) const;
+    unsigned char ClipCode(int nX, int nY) const;
 
     /**
      * Clip a run length encoded copy against the clip rectangle.
      *
      * Records the decoded columns that remain and the destination row the copy stops at, and
      * moves the destination position onto the clip rectangle. Rows above the clip rectangle are
-     * consumed through ARle8Reader::SkipRows(), so the reader then addresses the first row that
+     * consumed through ARle8Reader::SkipRow(), so the reader then addresses the first row that
      * remains. The row fields are not written when no column remains.
      *
-     * The image has no caller. BlitRle8(), BlitRemapRle8(), and BlitBlendRle8() each compile
-     * an inlined copy.
+     * The image has no caller. DrawBitmapRle8(), DrawClutBitmapRle8(), and DrawBlendBitmapRle8()
+     * each compile an inlined copy.
      *
      * @param source The source bitmap.
      * @param pnX The destination column, moved right to the clip rectangle when it lies left of
@@ -1143,8 +1149,8 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005eb418
      * @ghidraAddress PAL: 0x0062d560
      */
-    int ClipBlitSpan(
-        const ABitmap &source, int *pnX, int *pnY, ARle8Reader *pReader, AClipSpan *pSpan) const;
+    int ClipRle8Bitmap(
+        const ABitmap &source, int *pnX, int *pnY, ARle8Reader *pReader, Rle8Clip *pSpan) const;
 
     /**
      * Clip a line against the clip rectangle, rewriting both endpoints in place.
@@ -1165,7 +1171,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005e8fd8
      * @ghidraAddress PAL: 0x0062b120
      */
-    int ClipLineToRect(int *pnX0, int *pnY0, int *pnX1, int *pnY1) const;
+    int ClipLine(int *pnX0, int *pnY0, int *pnX1, int *pnY1) const;
 
     /**
      * Clip a source bitmap and a destination position against the clip rectangle.
@@ -1185,7 +1191,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005e91b8
      * @ghidraAddress PAL: 0x0062b300
      */
-    int ClipBlitToRect(ABitmap *pBitmap, int *pnX, int *pnY) const;
+    int ClipBitmap(ABitmap *pBitmap, int *pnX, int *pnY) const;
 
     /**
      * Intersect a rectangle with the clip rectangle in place.
@@ -1202,7 +1208,7 @@ protected:
     /**
      * Rewrite the palette indices inside a rectangle through a remap table, clipped.
      *
-     * Intersects the rectangle with the clip rectangle and calls RemapRectIndices() when the
+     * Intersects the rectangle with the clip rectangle and calls DrawClutRectU() when the
      * result is not empty. Non-virtual and orphaned.
      *
      * @param rect The rectangle.
@@ -1210,12 +1216,12 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005ebe10
      * @ghidraAddress PAL: 0x0062df58
      */
-    void RemapRectIndicesClipped(ARect rect, const unsigned char *pRemap);
+    void DrawClutRect(ARect rect, const unsigned char *pRemap);
 
     /**
      * Copy a source bitmap, with no clip test, choosing the slot by source format.
      *
-     * Calls through the table at 0x0077dc98, the one DrawGlyphNoClip() uses. Non-virtual and
+     * Calls through the table at 0x0077dc98, the one DrawCharU() uses. Non-virtual and
      * orphaned.
      *
      * @param source The source bitmap.
@@ -1224,7 +1230,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005ec130
      * @ghidraAddress PAL: 0x0062e278
      */
-    void BlitNoClip(const ABitmap &source, int nX, int nY);
+    void DrawBitmapU(const ABitmap &source, int nX, int nY);
 
     /**
      * Clip against the clip rectangle and then copy a four bit source through a remap table.
@@ -1238,7 +1244,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005ed990
      * @ghidraAddress PAL: 0x0062fad8
      */
-    void BlitRemap4Clipped(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+    void DrawClutBitmapLin4(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
 
     /**
      * Clip against the clip rectangle and then copy an eight bit source through a remap table.
@@ -1252,7 +1258,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005edb38
      * @ghidraAddress PAL: 0x0062fc80
      */
-    void BlitRemap8Clipped(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+    void DrawClutBitmapLin8(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
 
     /**
      * Clip against the clip rectangle and then copy a four bit source through a blend table.
@@ -1267,7 +1273,7 @@ protected:
      * @ghidraAddress PAL: 0x00630270
      */
     void
-    BlitBlend4Clipped(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+    DrawBlendBitmapLin4(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
 
     /**
      * Clip against the clip rectangle and then copy an eight bit source through a blend table.
@@ -1282,16 +1288,16 @@ protected:
      * @ghidraAddress PAL: 0x00630418
      */
     void
-    BlitBlend8Clipped(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+    DrawBlendBitmapLin8(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
 
     /**
      * Fill a convex polygon with its colour.
      *
      * Sets the pen colour through SetColorNative() from APolygon::mColor, then walks two edges
      * down from the top vertex, one forward and one backward through the vertex list, filling
-     * each row between them with FillRow(). Each edge column is rounded to the nearest whole column
-     * with g_nFixedHalf. Rows above the clip rectangle advance the edges without drawing, and the
-     * walk stops at the bottom of the clip rectangle or when the two edges meet.
+     * each row between them with DrawHorzLine(). Each edge column is rounded to the nearest whole
+     * column with g_nFixedHalf. Rows above the clip rectangle advance the edges without drawing,
+     * and the walk stops at the bottom of the clip rectangle or when the two edges meet.
      *
      * Non-virtual and orphaned.
      *
@@ -1299,15 +1305,15 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005e95e8
      * @ghidraAddress PAL: 0x0062b730
      */
-    void FillPolygon(const APolygon &polygon);
+    void DrawFlatConvexPolygon(const APolygon &polygon);
 
     /**
      * Fill a convex polygon by sampling its texture.
      *
-     * Walks the edges as FillPolygon() does. Each row interpolates the texture position between
-     * the two edges, clamps its columns to the clip rectangle, advancing the start position by the
-     * columns clamped away on the left, and draws with TextureRowIndexed(). A row of no columns
-     * draws nothing. APolygon::FindTopVertex() is compiled inline here.
+     * Walks the edges as DrawFlatConvexPolygon() does. Each row interpolates the texture position
+     * between the two edges, clamps its columns to the clip rectangle, advancing the start position
+     * by the columns clamped away on the left, and draws with DrawTmapRow8U(). A row of no columns
+     * draws nothing. FindTopmostPolyVertex() is compiled inline here.
      *
      * Non-virtual and orphaned.
      *
@@ -1315,15 +1321,15 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005e98c8
      * @ghidraAddress PAL: 0x0062ba10
      */
-    void FillTexturedPolygon(const APolygon &polygon);
+    void DrawTmappedConvexPolygon(const APolygon &polygon);
 
     /**
      * Copy a source bitmap through a remap table, choosing the arm by source format.
      *
      * Non-virtual, and orphaned in the shipped image: it fills no slot of this class's table and
-     * the image has no caller and no data reference. Format code 0 goes to BlitRemap4(), code 1
-     * to BlitRemap8(), and code 5 to BlitRemapRle8NoClip(). Every other code returns without
-     * drawing, so only the three indexed formats are handled.
+     * the image has no caller and no data reference. Format code 0 goes to DrawClutBitmapLin4U(),
+     * code 1 to DrawClutBitmapLin8U(), and code 5 to DrawClutBitmapRle8U(). Every other code
+     * returns without drawing.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -1332,12 +1338,12 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005ed6a8
      * @ghidraAddress PAL: 0x0062f7f0
      */
-    void BlitRemapNoClip(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+    void DrawClutBitmapU(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
 
     /**
      * Clip against the clip rectangle and then copy through a remap table.
      *
-     * The clip runs against a stack copy of the source description, because ClipBlitToRect()
+     * The clip runs against a stack copy of the source description, because ClipBitmap()
      * rewrites what it is given. A zero result returns without drawing.
      *
      * @param source The source bitmap.
@@ -1347,16 +1353,17 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005ed718
      * @ghidraAddress PAL: 0x0062f860
      */
-    void BlitRemap(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+    void DrawClutBitmap(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
 
     /**
      * Copy a run length encoded source through a remap table.
      *
-     * The run length encoded arm of BlitRemapNoClip(), reached only for format code 5. It decodes
-     * each row into g_abCanvasRowScratch through ARle8Reader and stores it with RemapRowIndexed().
+     * The run length encoded arm of DrawClutBitmapU(), reached only for format code 5. It decodes
+     * each row into g_abCanvasRowScratch through ARle8Reader and stores it with
+     * DrawClutBitmapRowLin8U().
      *
      * The row loop advances nY rather than the span row, so its bound recedes with the row and a
-     * source of one row or more never finishes. BlitRemapNoClip() has no caller in the image, so
+     * source of one row or more never finishes. DrawClutBitmapU() has no caller in the image, so
      * the defect is unreachable.
      *
      * @param source The source bitmap.
@@ -1366,13 +1373,13 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005edbd8
      * @ghidraAddress PAL: 0x0062fd20
      */
-    void BlitRemapRle8NoClip(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+    void DrawClutBitmapRle8U(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
 
     /**
      * Clip and copy a run length encoded source through a remap table.
      *
-     * The clipped counterpart of BlitRemapRle8NoClip(), reached only from BlitRemap(). Rows above
-     * the clip rectangle are consumed through ARle8Reader::SkipRows() rather than decoded.
+     * The clipped counterpart of DrawClutBitmapRle8U(), reached only from DrawClutBitmap(). Rows
+     * above the clip rectangle are consumed through ARle8Reader::SkipRow() rather than decoded.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -1381,13 +1388,14 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005ea280
      * @ghidraAddress PAL: 0x0062c3c8
      */
-    void BlitRemapRle8(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
+    void DrawClutBitmapRle8(const ABitmap &source, int nX, int nY, const unsigned char *pRemap);
 
     /**
      * Copy a source bitmap through a table of blend tables, choosing the arm by source format.
      *
-     * Non-virtual and orphaned, with the same shape as BlitRemapNoClip(). Format code 0 goes to
-     * BlitBlend4(), code 1 to BlitBlend8(), and code 5 to BlitBlendRle8NoClip().
+     * Non-virtual and orphaned, with the same shape as DrawClutBitmapU(). Format code 0 goes to
+     * DrawBlendBitmapLin4U(), code 1 to DrawBlendBitmapLin8U(), and code 5 to
+     * DrawBlendBitmapRle8U().
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -1397,7 +1405,7 @@ protected:
      * @ghidraAddress PAL: 0x0062ff50
      */
     void
-    BlitBlendNoClip(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+    DrawBlendBitmapU(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
 
     /**
      * Clip against the clip rectangle and then copy through a table of blend tables.
@@ -1409,13 +1417,15 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005ede78
      * @ghidraAddress PAL: 0x0062ffc0
      */
-    void BlitBlend(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+    void
+    DrawBlendBitmap(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
 
     /**
      * Copy a run length encoded source through a table of blend tables.
      *
-     * The same code as BlitRemapRle8NoClip() with BlendRowIndexed() in place of RemapRowIndexed(),
-     * including the row loop that never finishes. BlitBlendNoClip() has no caller in the image.
+     * The same code as DrawClutBitmapRle8U() with DrawBlendBitmapRowLin8U() in place of
+     * DrawClutBitmapRowLin8U(), including the row loop that never finishes. DrawBlendBitmapU() has
+     * no caller in the image.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -1424,13 +1434,16 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005ee370
      * @ghidraAddress PAL: 0x006304b8
      */
-    void
-    BlitBlendRle8NoClip(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+    void DrawBlendBitmapRle8U(const ABitmap &source,
+                              int nX,
+                              int nY,
+                              const unsigned char *const *ppBlend);
 
     /**
      * Clip and copy a run length encoded source through a table of blend tables.
      *
-     * The same code as BlitRemapRle8() with BlendRowIndexed() in place of RemapRowIndexed().
+     * The same code as DrawClutBitmapRle8() with DrawBlendBitmapRowLin8U() in place of
+     * DrawClutBitmapRowLin8U().
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -1439,14 +1452,15 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005ea460
      * @ghidraAddress PAL: 0x0062c5a8
      */
-    void BlitBlendRle8(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
+    void
+    DrawBlendBitmapRle8(const ABitmap &source, int nX, int nY, const unsigned char *const *ppBlend);
 
     /**
      * Read a rectangle of the canvas into a bitmap, choosing the slot by destination format.
      *
-     * Non-virtual and orphaned, like BlitRemapNoClip(). Calls through the six entry table of
+     * Non-virtual and orphaned, like DrawClutBitmapU(). Calls through the six entry table of
      * pointers to member functions at 0x0077dcf8, whose first five entries address the unclipped
-     * read slots ReadRect4NoClip() through ReadRect32NoClip() and whose sixth is ReadRectRle8().
+     * read slots GetBitmapLin4U() through GetBitmapLin32U() and whose sixth is ReadRectRle8().
      *
      * @param dest The destination bitmap, whose extent selects the rectangle.
      * @param nX The source column.
@@ -1454,14 +1468,14 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005ecc68
      * @ghidraAddress PAL: 0x0062edb0
      */
-    void ReadRectNoClip(const ABitmap &dest, int nX, int nY);
+    void GetBitmapU(const ABitmap &dest, int nX, int nY);
 
     /**
      * Read a rectangle of the canvas into a bitmap, clipped, choosing the slot by destination
      * format.
      *
      * Non-virtual and orphaned. Calls through the table at 0x0077dd28, which addresses the clipped
-     * read slots ReadRect4() through ReadRect32() and then ReadRectRle8().
+     * read slots GetBitmapLin4() through GetBitmapLin32() and then ReadRectRle8().
      *
      * @param dest The destination bitmap, whose extent selects the rectangle.
      * @param nX The source column.
@@ -1469,7 +1483,7 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005ecd10
      * @ghidraAddress PAL: 0x0062ee58
      */
-    void ReadRect(const ABitmap &dest, int nX, int nY);
+    void GetBitmap(const ABitmap &dest, int nX, int nY);
 
     /**
      * Read a rectangle of the canvas into a run length encoded bitmap.
@@ -1491,7 +1505,7 @@ protected:
      * Both steps are the source extent in 24.8 fixed point divided by the destination extent, and
      * each position starts at half its step, so the walk samples the centre of each source cell.
      * The destination rectangle is clamped to the clip rectangle, and the positions advance by one
-     * step per row or column clamped away. AStretchSpan::mSource addresses the first source row
+     * step per row or column clamped away. AScaledRowInfo::mSource addresses the first source row
      * the walk samples.
      *
      * The palette resolves from the source, then the canvas, then g_pDefaultPalette.
@@ -1503,94 +1517,101 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005ea780
      * @ghidraAddress PAL: 0x0062c8c8
      */
-    int SetupStretchBlit(const ABitmap &source, const ARect &rect, AStretchBlit *pBlit) const;
+    int
+    ClipAndSetupScaledBitmap(const ABitmap &source, const ARect &rect, AScaledRowInfo *pBlit) const;
 
     /**
      * Stretch a source bitmap into a destination rectangle, choosing the arm by source format.
      *
      * Non-virtual and orphaned. Calls through the six entry table of pointers to member functions
-     * at 0x0077dd58, whose entries are StretchBlit4() through StretchBlit32() and then
-     * StretchBlitRle8(). Every arm clips against the clip rectangle.
+     * at 0x0077dd58, whose entries are DrawScaledBitmapLin4() through DrawScaledBitmapLin32() and
+     * then DrawScaledBitmapRle8(). Every arm clips against the clip rectangle.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @ghidraAddress NTSC-U/C: 0x005ee580
      * @ghidraAddress PAL: 0x006306c8
      */
-    void StretchBlit(const ABitmap &source, const ARect &rect);
+    void DrawScaledBitmap(const ABitmap &source, const ARect &rect);
 
     /**
      * Stretch a four bit source bitmap into a destination rectangle.
      *
-     * Unpacks each sampled row into g_abCanvasRowScratch and stores it with StretchRowIndexed().
-     * The row walk starts at the first source row rather than at the row SetupStretchBlit()
-     * selected, so a rectangle clipped at the top samples rows from too high in the source.
+     * Unpacks each sampled row into g_abCanvasRowScratch and stores it with
+     * DrawScaledBitmapRowLin8U(). The row walk starts at the first source row rather than at the
+     * row ClipAndSetupScaledBitmap() selected. A rectangle clipped at the top samples rows from too
+     * high in the source.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @ghidraAddress NTSC-U/C: 0x005ea640
      * @ghidraAddress PAL: 0x0062c788
      */
-    void StretchBlit4(const ABitmap &source, const ARect &rect);
+    void DrawScaledBitmapLin4(const ABitmap &source, const ARect &rect);
 
     /**
-     * Stretch an eight bit source bitmap into a destination rectangle, through StretchRowIndexed().
+     * Stretch an eight bit source bitmap into a destination rectangle, through
+     * DrawScaledBitmapRowLin8U().
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @ghidraAddress NTSC-U/C: 0x005ee628
      * @ghidraAddress PAL: 0x00630770
      */
-    void StretchBlit8(const ABitmap &source, const ARect &rect);
+    void DrawScaledBitmapLin8(const ABitmap &source, const ARect &rect);
 
     /**
-     * Stretch a 1555 source bitmap into a destination rectangle, through StretchRow15().
+     * Stretch a 1555 source bitmap into a destination rectangle, through
+     * DrawScaledBitmapRowLin15U().
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @ghidraAddress NTSC-U/C: 0x005ee6f8
      * @ghidraAddress PAL: 0x00630840
      */
-    void StretchBlit15(const ABitmap &source, const ARect &rect);
+    void DrawScaledBitmapLin15(const ABitmap &source, const ARect &rect);
 
     /**
-     * Stretch a 24 bit source bitmap into a destination rectangle, through StretchRow24().
+     * Stretch a 24 bit source bitmap into a destination rectangle, through
+     * DrawScaledBitmapRowLin24U().
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @ghidraAddress NTSC-U/C: 0x005ee7c8
      * @ghidraAddress PAL: 0x00630910
      */
-    void StretchBlit24(const ABitmap &source, const ARect &rect);
+    void DrawScaledBitmapLin24(const ABitmap &source, const ARect &rect);
 
     /**
-     * Stretch a 32 bit source bitmap into a destination rectangle, through StretchRow32().
+     * Stretch a 32 bit source bitmap into a destination rectangle, through
+     * DrawScaledBitmapRowLin32U().
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @ghidraAddress NTSC-U/C: 0x005ee898
      * @ghidraAddress PAL: 0x006309e0
      */
-    void StretchBlit32(const ABitmap &source, const ARect &rect);
+    void DrawScaledBitmapLin32(const ABitmap &source, const ARect &rect);
 
     /**
      * Stretch a run length encoded source into a destination rectangle.
      *
      * Decodes the first sampled row into g_abCanvasRowScratch, then decodes again only when the
-     * sampled row changes, consuming any rows between through ARle8Reader::SkipRows().
+     * sampled row changes, consuming any rows between through ARle8Reader::SkipRow().
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
      * @ghidraAddress NTSC-U/C: 0x005ea960
      * @ghidraAddress PAL: 0x0062caa8
      */
-    void StretchBlitRle8(const ABitmap &source, const ARect &rect);
+    void DrawScaledBitmapRle8(const ABitmap &source, const ARect &rect);
 
     /**
      * Stretch an indexed source through a remap table, choosing the arm by source format.
      *
-     * Non-virtual and orphaned. Format code 0 goes to StretchBlitRemap4(), code 1 to
-     * StretchBlitRemap8(), and code 5 to StretchBlitRemapRle8(). Every other code draws nothing.
+     * Non-virtual and orphaned. Format code 0 goes to DrawScaledClutBitmapLin4(), code 1 to
+     * DrawScaledClutBitmapLin8(), and code 5 to DrawScaledClutBitmapRle8(). Every other code draws
+     * nothing.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1598,7 +1619,8 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005eec70
      * @ghidraAddress PAL: 0x00630db8
      */
-    void StretchBlitRemap(const ABitmap &source, const ARect &rect, const unsigned char *pRemap);
+    void
+    DrawScaledClutBitmap(const ABitmap &source, const ARect &rect, const unsigned char *pRemap);
 
     /**
      * Stretch a four bit source through a remap table. Empty.
@@ -1609,10 +1631,11 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005eecd0
      * @ghidraAddress PAL: 0x00630e18
      */
-    void StretchBlitRemap4(const ABitmap &source, const ARect &rect, const unsigned char *pRemap);
+    void
+    DrawScaledClutBitmapLin4(const ABitmap &source, const ARect &rect, const unsigned char *pRemap);
 
     /**
-     * Stretch an eight bit source through a remap table, through StretchRowRemap().
+     * Stretch an eight bit source through a remap table, through DrawScaledClutBitmapRowLin8U().
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1620,12 +1643,14 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005eecd8
      * @ghidraAddress PAL: 0x00630e20
      */
-    void StretchBlitRemap8(const ABitmap &source, const ARect &rect, const unsigned char *pRemap);
+    void
+    DrawScaledClutBitmapLin8(const ABitmap &source, const ARect &rect, const unsigned char *pRemap);
 
     /**
      * Stretch a run length encoded source through a remap table.
      *
-     * The same code as StretchBlitRle8() with StretchRowRemap() in place of StretchRowIndexed().
+     * The same code as DrawScaledBitmapRle8() with DrawScaledClutBitmapRowLin8U() in place of
+     * DrawScaledBitmapRowLin8U().
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1634,16 +1659,15 @@ protected:
      * @ghidraAddress PAL: 0x0062cbe0
      */
     void
-    StretchBlitRemapRle8(const ABitmap &source, const ARect &rect, const unsigned char *pRemap);
+    DrawScaledClutBitmapRle8(const ABitmap &source, const ARect &rect, const unsigned char *pRemap);
 
     /**
      * Stretch an indexed source blended against the destination, choosing the arm by source
      * format.
      *
-     * Non-virtual and orphaned. The first two cases are exchanged relative to StretchBlitRemap().
-     * Format code 0 goes to StretchBlitBlend8() and code 1 to the empty StretchBlitBlend4(), so a
-     * four bit source is read as eight bit and an eight bit source draws nothing. Code 5 goes to
-     * StretchBlitBlendRle8().
+     * Non-virtual and orphaned. Format code 0 goes to DrawScaledBlendBitmapLin4(), code 1 to
+     * DrawScaledBlendBitmapLin8(), and code 5 to DrawScaledBlendBitmapRle8(). The four bit arm
+     * reads its source as eight bit and the eight bit arm is empty.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1651,11 +1675,12 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005eee78
      * @ghidraAddress PAL: 0x00630fc0
      */
-    void
-    StretchBlitBlend(const ABitmap &source, const ARect &rect, const unsigned char *const *ppBlend);
+    void DrawScaledBlendBitmap(const ABitmap &source,
+                               const ARect &rect,
+                               const unsigned char *const *ppBlend);
 
     /**
-     * Stretch a four bit source blended against the destination. Empty.
+     * Stretch an eight bit source blended against the destination. Empty.
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1663,12 +1688,14 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005eeed8
      * @ghidraAddress PAL: 0x00631020
      */
-    void StretchBlitBlend4(const ABitmap &source,
-                           const ARect &rect,
-                           const unsigned char *const *ppBlend);
+    void DrawScaledBlendBitmapLin8(const ABitmap &source,
+                                   const ARect &rect,
+                                   const unsigned char *const *ppBlend);
 
     /**
-     * Stretch an eight bit source blended against the destination, through StretchRowBlend().
+     * Stretch a four bit source blended against the destination.
+     *
+     * The source is read as eight bit, through DrawScaledBlendBitmapRowLin8U().
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1676,14 +1703,15 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005eeee0
      * @ghidraAddress PAL: 0x00631028
      */
-    void StretchBlitBlend8(const ABitmap &source,
-                           const ARect &rect,
-                           const unsigned char *const *ppBlend);
+    void DrawScaledBlendBitmapLin4(const ABitmap &source,
+                                   const ARect &rect,
+                                   const unsigned char *const *ppBlend);
 
     /**
      * Stretch a run length encoded source blended against the destination.
      *
-     * The same code as StretchBlitRle8() with StretchRowBlend() in place of StretchRowIndexed().
+     * The same code as DrawScaledBitmapRle8() with DrawScaledBlendBitmapRowLin8U() in place of
+     * DrawScaledBitmapRowLin8U().
      *
      * @param source The source bitmap.
      * @param rect The destination rectangle.
@@ -1691,9 +1719,9 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005eabe0
      * @ghidraAddress PAL: 0x0062cd28
      */
-    void StretchBlitBlendRle8(const ABitmap &source,
-                              const ARect &rect,
-                              const unsigned char *const *ppBlend);
+    void DrawScaledBlendBitmapRle8(const ABitmap &source,
+                                   const ARect &rect,
+                                   const unsigned char *const *ppBlend);
 
     /**
      * Derive the per pixel step of a line and return the pixel count.
@@ -1711,7 +1739,19 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005e9508
      * @ghidraAddress PAL: 0x0062b650
      */
-    static int SetupLineSteps(int nX0, int nY0, int nX1, int nY1, int *pnStepX, int *pnStepY);
+    static int SetupLine(int nX0, int nY0, int nX1, int nY1, int *pnStepX, int *pnStepY);
+
+    /**
+     * Return the position in APolygon::mIndices of the vertex with the smallest row.
+     *
+     * A tie resolves to the earlier position.
+     *
+     * @param polygon The polygon.
+     * @return The index into APolygon::mIndices.
+     * @ghidraAddress NTSC-U/C: 0x005ebfe0
+     * @ghidraAddress PAL: 0x0062e128
+     */
+    static int FindTopmostPolyVertex(const APolygon &polygon);
 
     /**
      * Unpack one row of four bit pixels into one byte each.
@@ -1725,16 +1765,14 @@ protected:
      * @ghidraAddress NTSC-U/C: 0x005eddb8
      * @ghidraAddress PAL: 0x0062ff00
      */
-    static void UnpackNibbleRow(const unsigned char *pSource,
-                                unsigned char *pDest,
-                                int nCount,
-                                int bStartHighNibble);
+    static void
+    Unpack4(const unsigned char *pSource, unsigned char *pDest, int nCount, int bStartHighNibble);
 };
 
 /**
  * Palette every canvas falls back to when neither its bitmap nor its source supplies one.
  *
- * Read by ACanvas8::SetColorIndex() and every other slot that resolves a palette index, always
+ * Read by ACanvas8::SetColor8() and every other slot that resolves a palette index, always
  * after the bitmap palette is found null.
  *
  * No writer was located. The fallback may be permanently null.

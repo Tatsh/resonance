@@ -47,16 +47,13 @@ public:
      */
     virtual ~ACanvasLin4();
 
-    // Lookup only, as in the base: this overload would otherwise hide the base's other one.
-    using ACanvas8::PutPixelNoClip;
-
     /**
      * Slot 13. Writes the stored colour into the addressed nibble.
      *
      * @ghidraAddress NTSC-U/C: 0x00628108
      * @ghidraAddress PAL: 0x00668c98
      */
-    virtual void PutPixelNoClip(int nX, int nY);
+    virtual void DrawPixelU(int nX, int nY);
 
     /**
      * Slot 15.
@@ -64,7 +61,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00628180
      * @ghidraAddress PAL: 0x00668d10
      */
-    virtual void PutPixelIndexedNoClip(int nX, int nY, int nIndex);
+    virtual void DrawPixel8U(int nX, int nY, int nIndex);
 
     /**
      * Slot 25.
@@ -72,7 +69,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006281f0
      * @ghidraAddress PAL: 0x00668d80
      */
-    virtual int GetPixelIndexedNoClip(int nX, int nY);
+    virtual int GetPixel8U(int nX, int nY);
 
     /**
      * Slot 47.
@@ -83,7 +80,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00627e88
      * @ghidraAddress PAL: 0x00668a18
      */
-    virtual void Blit4NoClip(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin4U(const ABitmap &source, int nX, int nY);
 
     /**
      * Slot 49.
@@ -94,7 +91,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x00628248
      * @ghidraAddress PAL: 0x00668dd8
      */
-    virtual void Blit8NoClip(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapLin8U(const ABitmap &source, int nX, int nY);
 
     /**
      * Slot 57.
@@ -105,7 +102,7 @@ public:
      * @ghidraAddress NTSC-U/C: 0x006282e0
      * @ghidraAddress PAL: 0x00668e70
      */
-    virtual void BlitRle8NoClip(const ABitmap &source, int nX, int nY);
+    virtual void DrawBitmapRle8U(const ABitmap &source, int nX, int nY);
 
 private:
     /**
@@ -127,7 +124,7 @@ private:
      * pixel loop also advances the destination byte on the parity of the column alone, ignoring
      * mOddNibbleStart, where the nibble choice takes it into account.
      *
-     * ABmpFile::ReadRlePixels() advances its column by the same exhausted counter after an
+     * ABmpFile::ReadBitmapCompressed() advances its column by the same exhausted counter after an
      * identical pair loop. Two sites with one shape leave open whether the source or the
      * compiler's handling of the loop counter produced the adjustment.
      *
@@ -138,5 +135,5 @@ private:
      * @ghidraAddress NTSC-U/C: 0x00627cf8
      * @ghidraAddress PAL: 0x00668888
      */
-    void WriteIndexedRow(const ABitmap *pSource, const unsigned char *pRow, int nX, int nY);
+    void DrawBitmapRowLin8U(const ABitmap *pSource, const unsigned char *pRow, int nX, int nY);
 };

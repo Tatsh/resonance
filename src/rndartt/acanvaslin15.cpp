@@ -5,7 +5,7 @@
 #include "rndartt/apalette.h"
 #include "rndartt/apoint.h"
 #include "rndartt/arowspan.h"
-#include "rndartt/astretchspan.h"
+#include "rndartt/astretchblit.h"
 
 namespace {
 
@@ -38,8 +38,8 @@ inline const unsigned char *SourceByteAt(const ABitmap &source, int nX, int nY) 
     return static_cast<const unsigned char *>(source.mPixels) + (nY * source.mBytesPerRow) + nX;
 }
 
-// Blit15NoClip() walks both rectangles as bytes, because its row advance is not a whole number of
-// pixels.
+// DrawBitmapLin15U() walks both rectangles as bytes, because its row advance is not a whole number
+// of pixels.
 inline const unsigned short *HalfwordAt(const unsigned char *pByte) {
     return static_cast<const unsigned short *>(static_cast<const void *>(pByte));
 }
@@ -82,7 +82,7 @@ ACanvasLin15::~ACanvasLin15() {
 // NTSC-U/C: 0x00619040, PAL: 0x00659bd0
 // The width, the height, and the row pitch are all re-read inside the loops rather
 // than hoisted, which is what the binary does.
-void ACanvasLin15::BuildAlphaFromColorKey(unsigned int nColorKey) {
+void ACanvasLin15::SetAlphaValues(unsigned int nColorKey) {
     const unsigned int nKey = nColorKey & 0xffff;
     for (int nY = 0; nY < mBitmap.mHeight; ++nY) {
         unsigned short *pPixel = RowAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nY);
@@ -99,24 +99,24 @@ void ACanvasLin15::BuildAlphaFromColorKey(unsigned int nColorKey) {
 }
 
 // NTSC-U/C: 0x006190c0, PAL: 0x00659c50
-void ACanvasLin15::PutPixelNoClip(int nX, int nY) {
+void ACanvasLin15::DrawPixelU(int nX, int nY) {
     *PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY) = mColor;
 }
 
 // NTSC-U/C: 0x006190e8, PAL: 0x00659c78
-void ACanvasLin15::PutPixel15NoClip(int nX, int nY, unsigned short nColor) {
+void ACanvasLin15::DrawPixel15U(int nX, int nY, unsigned short nColor) {
     *PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY) = nColor;
 }
 
 // NTSC-U/C: 0x00619108, PAL: 0x00659c98
-unsigned short ACanvasLin15::GetPixel15NoClip(int nX, int nY) {
+unsigned short ACanvasLin15::GetPixel15U(int nX, int nY) {
     return *PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
 }
 
 // NTSC-U/C: 0x00619128, PAL: 0x00659cb8
 // A halfword store per pixel rather than a memset, and the colour is re-read on every
 // iteration.
-void ACanvasLin15::FillRowNoClip(int nY, int nLeft, int nRight) {
+void ACanvasLin15::DrawHorzLineU(int nY, int nLeft, int nRight) {
     unsigned short *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nLeft, nY);
     for (int nCount = nRight - nLeft; nCount != 0; --nCount) {
         *pPixel = mColor;
@@ -127,7 +127,7 @@ void ACanvasLin15::FillRowNoClip(int nY, int nLeft, int nRight) {
 // NTSC-U/C: 0x00619170, PAL: 0x00659d00
 // The colour and the row pitch are both re-read on every iteration, which recomputing
 // the address per row reproduces.
-void ACanvasLin15::FillColumnNoClip(int nX, int nTop, int nBottom) {
+void ACanvasLin15::DrawVertLineU(int nX, int nTop, int nBottom) {
     // Yes, the binary counts the rows down to zero exactly. A reversed span runs on.
     for (int nY = nTop; nY != nBottom; ++nY) {
         *PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY) = mColor;
@@ -135,7 +135,7 @@ void ACanvasLin15::FillColumnNoClip(int nX, int nTop, int nBottom) {
 }
 
 // NTSC-U/C: 0x006191c0, PAL: 0x00659d50
-void ACanvasLin15::FillRectNoClip(ARect rect) {
+void ACanvasLin15::DrawRectU(ARect rect) {
     const short nColumns = static_cast<short>(rect.mRight - rect.mLeft);
     unsigned short *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, rect.mLeft, rect.mTop);
     for (short nRows = static_cast<short>(rect.mBottom - rect.mTop); nRows > 0; --nRows) {
@@ -151,12 +151,12 @@ void ACanvasLin15::FillRectNoClip(ARect rect) {
 }
 
 // NTSC-U/C: 0x00619518, PAL: 0x0065a0a8
-void ACanvasLin15::TextureRowIndexed(int nY,
-                                     int nLeft,
-                                     int nRight,
-                                     const ABitmap *pSource,
-                                     APoint *pSourcePosition,
-                                     const APoint *pSourceStep) {
+void ACanvasLin15::DrawTmapRow8U(int nY,
+                                 int nLeft,
+                                 int nRight,
+                                 const ABitmap *pSource,
+                                 APoint *pSourcePosition,
+                                 const APoint *pSourceStep) {
     const APalette *pPalette = ResolvePalette(*pSource, mBitmap);
     if (pPalette == nullptr) {
         return;
@@ -176,7 +176,7 @@ void ACanvasLin15::TextureRowIndexed(int nY,
 // NTSC-U/C: 0x00618b00, PAL: 0x00659690
 // Each row is unpacked into g_abCanvasRowScratch first, and the key is compared against
 // the low byte of the transparent colour.
-void ACanvasLin15::Blit4NoClip(const ABitmap &source, int nX, int nY) {
+void ACanvasLin15::DrawBitmapLin4U(const ABitmap &source, int nX, int nY) {
     const APalette *pPalette = ResolvePalette(source, mBitmap);
     if (pPalette == nullptr) {
         return;
@@ -184,7 +184,7 @@ void ACanvasLin15::Blit4NoClip(const ABitmap &source, int nX, int nY) {
     unsigned short *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
     const unsigned char *pSourceRow = static_cast<const unsigned char *>(source.mPixels);
     for (int nRows = source.mHeight; nRows > 0; --nRows) {
-        UnpackNibbleRow(pSourceRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
+        Unpack4(pSourceRow, g_abCanvasRowScratch, source.mWidth, source.mOddNibbleStart);
         const unsigned char *pIndex = g_abCanvasRowScratch;
         for (int nRemaining = source.mWidth; nRemaining > 0; --nRemaining) {
             if (source.mHasTransparentColor == 0 ||
@@ -202,7 +202,7 @@ void ACanvasLin15::Blit4NoClip(const ABitmap &source, int nX, int nY) {
 // NTSC-U/C: 0x00618c78, PAL: 0x00659808
 // The transparency flag is tested once per row, choosing between a keyed and an
 // opaque walk.
-void ACanvasLin15::Blit8NoClip(const ABitmap &source, int nX, int nY) {
+void ACanvasLin15::DrawBitmapLin8U(const ABitmap &source, int nX, int nY) {
     const APalette *pPalette = ResolvePalette(source, mBitmap);
     if (pPalette == nullptr) {
         return;
@@ -231,8 +231,8 @@ void ACanvasLin15::Blit8NoClip(const ABitmap &source, int nX, int nY) {
 }
 
 // NTSC-U/C: 0x00618e00, PAL: 0x00659990
-// Three tiers, as in ACanvasLin8::Blit8NoClip().
-void ACanvasLin15::Blit15NoClip(const ABitmap &source, int nX, int nY) {
+// Three tiers, as in ACanvasLin8::DrawBitmapLin8U().
+void ACanvasLin15::DrawBitmapLin15U(const ABitmap &source, int nX, int nY) {
     const unsigned char *pSourceByte = static_cast<const unsigned char *>(source.mPixels);
     unsigned char *pDestByte = static_cast<unsigned char *>(
         static_cast<void *>(PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY)));
@@ -265,7 +265,7 @@ void ACanvasLin15::Blit15NoClip(const ABitmap &source, int nX, int nY) {
 
 // NTSC-U/C: 0x00619280, PAL: 0x00659e10
 // The key is compared against the low byte of the transparent colour.
-void ACanvasLin15::RemapRowIndexed(const ARowSpan &span, const unsigned char *pRemap) {
+void ACanvasLin15::DrawClutBitmapRowLin8U(const ARowInfo &span, const unsigned char *pRemap) {
     if (span.mPalette == nullptr) {
         return;
     }
@@ -283,8 +283,8 @@ void ACanvasLin15::RemapRowIndexed(const ARowSpan &span, const unsigned char *pR
 
 // NTSC-U/C: 0x00619360, PAL: 0x00659ef0
 // The key comparison here is against the whole transparent colour word, where
-// StretchRowRemap() compares its low byte.
-void ACanvasLin15::StretchRowIndexed(const AStretchSpan &span) {
+// DrawScaledClutBitmapRowLin8U() compares its low byte.
+void ACanvasLin15::DrawScaledBitmapRowLin8U(const AScaledRowInfo &span) {
     if (span.mPalette == nullptr) {
         return;
     }
@@ -301,7 +301,8 @@ void ACanvasLin15::StretchRowIndexed(const AStretchSpan &span) {
 }
 
 // NTSC-U/C: 0x00619430, PAL: 0x00659fc0
-void ACanvasLin15::StretchRowRemap(const AStretchSpan &span, const unsigned char *pRemap) {
+void ACanvasLin15::DrawScaledClutBitmapRowLin8U(const AScaledRowInfo &span,
+                                                const unsigned char *pRemap) {
     if (span.mPalette == nullptr) {
         return;
     }
