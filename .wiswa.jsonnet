@@ -37,11 +37,36 @@
   },
   package_json+: {
     cspell+: {
-      ignorePaths+: ['src/python/PC/**', 'src/python/patches/**'],
+      ignorePaths+: ['3rdparty/**', 'src/python/PC/**', 'src/python/patches/**'],
+    },
+    'markdownlint-cli2'+: {
+      ignores: ['3rdparty/**'],
     },
   },
   pre_commit_config+: {
     exclude: '^src/python/(PC|patches)/',
   },
-  gitignore+: ['*.iso'],
+  gitattributes+: ['/3rdparty/** -text linguist-vendored'],
+  gitignore+: ['*.iso', '/.sbclaude-venv/'],
+  // Vendored upstream sources are not reformatted.
+  prettierignore+: ['/3rdparty/'],
+  vscode+: {
+    c_cpp+: {
+      configurations: [
+        {
+          cStandard: 'gnu23',
+          compilerPath: '/usr/bin/gcc',
+          cppStandard: 'gnu++23',
+          defines: ['VERSION="unknown"'],
+          includePath: [
+            '${workspaceFolder}/compat/**',
+            '${workspaceFolder}/sce/**/include/**',
+            '${workspaceFolder}/src/**',
+            '${workspaceFolder}/.wiswa-ci/**/include/**',
+          ],
+          name: 'Linux',
+        },
+      ],
+    },
+  },
 }
