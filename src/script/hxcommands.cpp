@@ -1,5 +1,6 @@
 #include <cstring>
 #include <exception>
+#include <libscf.h>
 #include <sstream>
 
 #include "app/application.h"
@@ -118,6 +119,88 @@ PyObject *PyInvokeMemlogTerm(PyObject *, PyObject *pArgs) {
         return nullptr;
     }
 }
+
+#ifdef VIDEO_STANDARD_PAL
+// Record the language that the script's one argument identifies.
+//
+// `french`, `german`, `italian`, and `spanish` select their language, and any other text selects
+// English. The European disc's scripts call it at start-up.
+// PAL: 0x00156d58
+Py::Object ScriptSetLang(const Py::Tuple &args) {
+    if (args.length() == 0) {
+        throw Py::TypeError(HxStr("requires 1 arg: language"));
+    }
+    Py::Object element = args.getItem(0);
+    Py::String text(element);
+    HxStr language = text;
+    int nLanguage = SCE_ENGLISH_LANGUAGE;
+    if (language == "french") {
+        nLanguage = SCE_FRENCH_LANGUAGE;
+    } else if (language == "german") {
+        nLanguage = SCE_GERMAN_LANGUAGE;
+    } else if (language == "italian") {
+        nLanguage = SCE_ITALIAN_LANGUAGE;
+    } else if (language == "spanish") {
+        nLanguage = SCE_SPANISH_LANGUAGE;
+    }
+    SetLanguage(nLanguage);
+    return Py::Object();
+}
+
+// Run ScriptSetLang() on the interpreter's argument tuple.
+// PAL: 0x001571d8
+PyObject *PyInvokeSetLang(PyObject *, PyObject *pArgs) {
+    try {
+        Py::Tuple args(pArgs);
+        Py::Object result = ScriptSetLang(args);
+        return Py::new_reference_to(result);
+    } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
+    }
+}
+
+// Report the file-name suffix of the current language, empty for English.
+// PAL: 0x00157388
+Py::Object ScriptGetLanguageSuffix([[maybe_unused]] Py::Tuple args) {
+    const char *pszSuffix;
+    switch (GetLanguage()) {
+    case SCE_FRENCH_LANGUAGE:
+        pszSuffix = "_fre";
+        break;
+    case SCE_SPANISH_LANGUAGE:
+        pszSuffix = "_spa";
+        break;
+    case SCE_GERMAN_LANGUAGE:
+        pszSuffix = "_ger";
+        break;
+    case SCE_ITALIAN_LANGUAGE:
+        pszSuffix = "_ita";
+        break;
+    default:
+        pszSuffix = "";
+        break;
+    }
+    return Py::String(pszSuffix);
+}
+
+// Run ScriptGetLanguageSuffix() on the interpreter's argument tuple.
+// PAL: 0x00157590
+PyObject *PyInvokeGetLanguageSuffix(PyObject *, PyObject *pArgs) {
+    try {
+        Py::Tuple args(pArgs);
+        Py::Object result = ScriptGetLanguageSuffix(args);
+        return Py::new_reference_to(result);
+    } catch (Py::Exception &) {
+        return nullptr;
+    } catch (std::exception &error) {
+        PyErr_SetString(PyExc_RuntimeError, const_cast<char *>(error.what()));
+        return nullptr;
+    }
+}
+#endif
 
 // Stop the game.
 //
@@ -785,6 +868,11 @@ const ScriptFunc kEnableFreestyleFunc("enable_freestyle", PyInvokeEnableFreestyl
 const ScriptFunc kFreezeJuiceFunc("freeze_juice", PyInvokeFreezeJuice);
 // 0x00157418
 const ScriptFunc kMemlogTermFunc("memlog_term", PyInvokeMemlogTerm);
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x00157740
+const ScriptFunc kSetLangFunc("set_lang", PyInvokeSetLang);
+const ScriptFunc kGetLanguageSuffixFunc("get_language_suffix", PyInvokeGetLanguageSuffix);
+#endif
 // 0x00159248
 const ScriptFunc kSetVolumeFunc("set_volume", PyInvokeSetVolume);
 const ScriptFunc kMidiFunc("midi", PyInvokeMidi);

@@ -102,7 +102,11 @@ void InitDebugConsole();
  *
  * The name is inferred. Nothing in the image attests it, and InitIop() is the only caller.
  *
- * @ghidraAddress 0x0050f080
+ * In the PAL build the routine then records the console's language setting through
+ * SetLanguage(), as the European release does.
+ *
+ * @ghidraAddress NTSC-U/C: 0x0050f080
+ * @ghidraAddress PAL: 0x0054e618
  */
 void InitBootConfig();
 

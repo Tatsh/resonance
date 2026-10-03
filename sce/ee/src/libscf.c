@@ -24,6 +24,12 @@ enum {
     kVersionShift = 13,
     // The version field uses this mask after the shift.
     kVersionMask = 7,
+    // The language field starts after this many bits in the configuration word.
+    kLanguageShift = 16,
+    // The language field uses this mask after the shift.
+    kLanguageMask = 0x1f,
+    // A version 0 configuration word has a one-bit language at this position instead.
+    kLegacyLanguageShift = 4,
     // The timezone field starts after this many bits in the configuration word.
     kTimezoneShift = 21,
     // The daylight flag starts after this many bits in the detail byte.
@@ -41,6 +47,10 @@ enum {
 // The timezone a tool console reports, in minutes east of UTC.
 // 0x0077fbf0
 static short g_nScfDefaultTimezone = 540;
+
+// The language a tool console reports.
+// NTSC-U/C: 0x0077fbf4, PAL: 0x007a467c
+static unsigned char g_nScfDefaultLanguage = SCE_JAPANESE_LANGUAGE;
 
 // The summer time flag a tool console reports.
 // 0x0077fbf6
@@ -230,6 +240,23 @@ int sceScfGetTimezone(void) {
     nTimezone = (int)nConfig >> kTimezoneShift;
     LogPrintf("Timezone=%d\n", nTimezone);
     return nTimezone;
+}
+
+// NTSC-U/C: absent, PAL: 0x005a59f0
+int sceScfGetLanguage(void) {
+    unsigned int nConfig;
+    unsigned int nVersion;
+
+    GetOsdConfigParam(&nConfig); // Yes, the binary reads the word before the tool check too.
+    if (sceScfEnsureRomVersionRead() != 0) {
+        return g_nScfDefaultLanguage;
+    }
+    GetOsdConfigParam(&nConfig);
+    nVersion = (nConfig >> kVersionShift) & (unsigned int)kVersionMask;
+    if (nVersion == 0u) {
+        return (int)((nConfig >> kLegacyLanguageShift) & 1u);
+    }
+    return (int)((nConfig >> kLanguageShift) & (unsigned int)kLanguageMask);
 }
 
 // 0x005f2fd0

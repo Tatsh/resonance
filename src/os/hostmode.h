@@ -147,6 +147,31 @@ int MemAccountingEnabled();
  */
 int IntroMovieEnabled();
 
+#ifdef VIDEO_STANDARD_PAL
+/**
+ * Report the language the text and fonts are chosen by.
+ *
+ * The value is a system-configuration language code (English 1, French 2, Spanish 3, German 4,
+ * Italian 5). It starts at French, and InitBootConfig() replaces it with the console's setting.
+ * The European release added the routine. The name is inferred.
+ *
+ * @return The language code.
+ * @ghidraAddress PAL: 0x0054e5a8
+ */
+int GetLanguage();
+
+/**
+ * Record the language the text and fonts are chosen by.
+ *
+ * The `set_lang` script command and InitBootConfig() are the writers. The European release added
+ * the routine. The name is inferred.
+ *
+ * @param nLanguage The language code.
+ * @ghidraAddress PAL: 0x0054e5b8
+ */
+void SetLanguage(int nLanguage);
+#endif
+
 /**
  * Report the build version, "198" in the shipped build.
  *

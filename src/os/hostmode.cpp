@@ -1,5 +1,6 @@
 #include "os/hostmode.h"
 
+#include <libscf.h>
 #include <sifdev.h>
 
 #include "os/iop.h"
@@ -46,6 +47,12 @@ int g_nIntroMovieEnabled = 1;
 
 // 0x0070bf38
 HxStr g_versionString("198");
+
+#ifdef VIDEO_STANDARD_PAL
+// The language code GetLanguage() reports. The name is inferred.
+// PAL: 0x0074fad0
+int g_nLanguage = SCE_FRENCH_LANGUAGE;
+#endif
 
 // Report that no configuration file was found, force the disc configuration, and open the memory
 // report. InitBootConfig() is the one caller.
@@ -118,6 +125,18 @@ int IntroMovieEnabled() {
     return g_nIntroMovieEnabled;
 }
 
+#ifdef VIDEO_STANDARD_PAL
+// PAL: 0x0054e5a8
+int GetLanguage() {
+    return g_nLanguage;
+}
+
+// PAL: 0x0054e5b8
+void SetLanguage(int nLanguage) {
+    g_nLanguage = nLanguage;
+}
+#endif
+
 // 0x0050ef60
 HxStr GetVersionString() {
     return g_versionString;
@@ -135,10 +154,13 @@ void ConfigureRetailBoot() {
     g_nMemAccountingEnabled = 0;
 }
 
-// 0x0050f080
+// NTSC-U/C: 0x0050f080, PAL: 0x0054e618
 void InitBootConfig() {
     ForceCdOnlyBoot();
     InitializeZoneList();
+#ifdef VIDEO_STANDARD_PAL
+    SetLanguage(sceScfGetLanguage());
+#endif
 }
 
 // 0x0050f0a8
