@@ -4,8 +4,12 @@ concurrency:
   group: build-${{ github.ref }}
 jobs:
   compile:
-    name: 'Compile'
+    name: 'Compile (${{ matrix.video-standard }})'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        video-standard: ['NTSC', 'PAL']
     container:
       image: 'ghcr.io/ps2dev/ps2dev:latest'
     steps:
@@ -26,7 +30,10 @@ jobs:
         run: |
           cmake -B build -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="$PWD/cmake/ps2-ee-toolchain.cmake" \
-            -DCMAKE_BUILD_TYPE=Debug
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DVIDEO_STANDARD="$VIDEO_STANDARD"
+        env:
+          VIDEO_STANDARD: '${{ matrix.video-standard }}'
       - name: 'Compile'
         run: |
           echo "::add-matcher::.github/problem-matchers/gcc.json"
@@ -36,6 +43,8 @@ jobs:
       - name: 'Link executable'
         run: cmake --build build --target resonance
       - name: 'Package release assets'
+        env:
+          VIDEO_STANDARD: '${{ matrix.video-standard }}'
         run: |
           # A tag build is versioned by its tag. Branch and pull request builds have no version, so
           # the commit identifies them instead.
@@ -56,25 +65,26 @@ jobs:
           test -n "$IRX" || { echo '::error::EZMIDI.IRX was not built.'; exit 1; }
           rm -rf release
           mkdir release
-          # The executable is the NTSC (SCUS-97125) build. The module keeps the name the disc
-          # loads it by and its symbols, as the original does.
+          # NTSC is the North American (SCUS-97125) build and PAL the European (SCES-50791) build.
+          # The two modules differ, so each carries its standard in the file name. The disc loads
+          # it as EZMIDI.IRX. The module retains its symbols, as the original does.
           mips64r5900el-ps2-elf-objcopy --strip-debug "$ELF" \
-            "release/resonance-${VERSION}-NTSC.elf"
-          cp "$IRX" release/EZMIDI.IRX
+            "release/resonance-${VERSION}-${VIDEO_STANDARD}.elf"
+          cp "$IRX" "release/EZMIDI-${VIDEO_STANDARD}.IRX"
           ls -l release
       - name: 'Upload release assets'
         uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         with:
-          # The artifact keeps an unversioned name so release.yml can request it by a fixed name.
+          # The artifact has an unversioned name so release.yml can request it by a fixed name.
           # The versioned file names it includes are what reach the release page.
-          name: release-assets
+          name: 'release-assets-${{ matrix.video-standard }}'
           path: 'release/*'
           if-no-files-found: error
       - name: 'Upload resonance'
         if: always()
         uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         with:
-          name: resonance
+          name: 'resonance-${{ matrix.video-standard }}'
           path: 'build/**/resonance'
           if-no-files-found: warn
 name: 'Build'
