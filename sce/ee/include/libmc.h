@@ -54,7 +54,7 @@ extern "C" {
 #define sceMcFuncNoRead 5      /*!< sceMcRead(). */
 #define sceMcFuncNoWrite 6     /*!< sceMcWrite(). */
 #define sceMcFuncNoFlush 10    /*!< sceMcFlush(). */
-#define sceMcFuncNoMkdir 11    /*!< sceMcMkDir(). */
+#define sceMcFuncNoMkdir 11    /*!< sceMcMkdir(). */
 #define sceMcFuncNoChDir 12    /*!< sceMcChdir(). */
 #define sceMcFuncNoGetDir 13   /*!< sceMcGetDir(). */
 #define sceMcFuncNoFileInfo 14 /*!< sceMcSetFileInfo(). */
@@ -150,7 +150,7 @@ int sceMcOpen(int nPort, int nSlot, const char *pszName, int nMode);
  * @param pszName Path of the directory.
  * @return As sceMcOpen().
  */
-int sceMcMkDir(int nPort, int nSlot, const char *pszName);
+int sceMcMkdir(int nPort, int nSlot, const char *pszName);
 
 /**
  * Start closing a file.

@@ -588,7 +588,7 @@ int Deci2Call(int function, unsigned int *args);
  * @ghidraAddress NTSC-U/C: 0x005fa8c0
  * @ghidraAddress PAL: 0x0063b5d0
  */
-int PutSioByte(int c);
+int kputchar(int c);
 
 /**
  * Formats text to the current console output, the serial port unless scePrintf() is running. The
@@ -599,12 +599,12 @@ int PutSioByte(int c);
  * @ghidraAddress NTSC-U/C: 0x005fb1a0
  * @ghidraAddress PAL: 0x0063beb0
  */
-void PrintfToSioRaw(const char *format, ...);
+void kprintf(const char *format, ...);
 
 /**
  * Formats text to the DECI2 kernel console. Output is sent a line at a time.
  *
- * @param format Format string, as PrintfToSioRaw() accepts.
+ * @param format Format string, as kprintf() accepts.
  * @ghidraAddress NTSC-U/C: 0x005fb1d8
  * @ghidraAddress PAL: 0x0063bee8
  */

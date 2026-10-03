@@ -52,7 +52,7 @@ static sceSifClientData g_aMtapClients[kMtapClientCount] __attribute__((aligned(
 static MtapRpcBuffer g_mtapRpc __attribute__((aligned(64)));
 
 // NTSC-U/C: 0x0053a598, PAL: 0x00579fe0
-static void sceMtapPrintfStub(const char *pszFormat, ...) {
+static void DPRINT(const char *pszFormat, ...) {
     (void)pszFormat; // Yes, the binary's library prints its RPC errors through an empty routine.
 }
 
@@ -78,7 +78,7 @@ int sceMtapInit(void) {
     for (k = 0; k < kMtapClientCount; ++k) {
         for (;;) {
             if (sceSifBindRpc(&g_aMtapClients[k], kMtapServerId + k, 0) < 0) {
-                sceMtapPrintfStub("libmtap: bind failed\n");
+                DPRINT("libmtap: bind failed\n");
                 exit(kMtapBindFailedStatus);
             }
             if (g_aMtapClients[k].serve != NULL) {
@@ -107,7 +107,7 @@ int sceMtapInit(void) {
 int sceMtapPortOpen(int nPort) {
     g_mtapRpc.port.nPort = nPort;
     if (MtapCall(kMtapClientPortOpen) < 0) {
-        sceMtapPrintfStub("sceMtapPortOpen: rpc error\n");
+        DPRINT("sceMtapPortOpen: rpc error\n");
         return 0;
     }
     return g_mtapRpc.port.nResult;
@@ -117,7 +117,7 @@ int sceMtapPortOpen(int nPort) {
 int sceMtapPortClose(int nPort) {
     g_mtapRpc.port.nPort = nPort;
     if (MtapCall(kMtapClientPortClose) < 0) {
-        sceMtapPrintfStub("sceMtapPortClose: rpc error\n");
+        DPRINT("sceMtapPortClose: rpc error\n");
         return 0;
     }
     return g_mtapRpc.port.nResult;
@@ -127,7 +127,7 @@ int sceMtapPortClose(int nPort) {
 int sceMtapGetConnection(int nPort) {
     g_mtapRpc.port.nPort = nPort;
     if (MtapCall(kMtapClientGetConnection) < 0) {
-        sceMtapPrintfStub("sceMtapGetConnection: rpc error\n");
+        DPRINT("sceMtapGetConnection: rpc error\n");
         return 0;
     }
     return g_mtapRpc.port.nResult;
@@ -138,7 +138,7 @@ int sceMtapChangeThreadPriority(int nFirstPriority, int nSecondPriority) {
     g_mtapRpc.priority.nFirstPriority = nFirstPriority;
     g_mtapRpc.priority.nSecondPriority = nSecondPriority;
     if (MtapCall(kMtapClientChangePriority) < 0) {
-        sceMtapPrintfStub("sceMtapChangeThreadPriority: rpc error\n");
+        DPRINT("sceMtapChangeThreadPriority: rpc error\n");
         return 0;
     }
     return g_mtapRpc.priority.nResult;
@@ -147,7 +147,7 @@ int sceMtapChangeThreadPriority(int nFirstPriority, int nSecondPriority) {
 // NTSC-U/C: 0x0053aa00, PAL: 0x0057a448
 int sceMtapGetModVersion(void) {
     if (MtapCall(kMtapClientGetModVersion) < 0) {
-        sceMtapPrintfStub("sceMtapGetModVersion: rpc error\n");
+        DPRINT("sceMtapGetModVersion: rpc error\n");
         return 0;
     }
     return g_mtapRpc.version.nVersion;

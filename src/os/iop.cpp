@@ -194,7 +194,7 @@ void LoadIopModule(const IopModule *pModule, unsigned nSources) {
 // NTSC-U/C: 0x004de600, PAL: 0x0051ccd0
 void LoadIopModules() {
     const HostMode mode = GetHostMode();
-    WaitVsync();
+    VSync();
 
     switch (mode) {
     case kHostModeCdHost:

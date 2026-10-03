@@ -77,7 +77,7 @@ static sceSifCmdData g_aSystemHandlers[kSystemHandlerCount];
 static int g_anSoftwareRegisters[kSoftwareRegisterCount];
 
 // NTSC-U/C: 0x005d3558, PAL: 0x006155c0
-static void setSoftwareRegisterHandler(void *pPacket, void *pData) {
+static void _set_sreg(void *pPacket, void *pData) {
     const sceSifCmdSRData *pRequest = pPacket;
     SifCmdState *pState = pData;
 
@@ -139,13 +139,13 @@ static int cmdInterruptHandler(int nChannel) {
 // NTSC-U/C: 0x005d3910, PAL: 0x00615978
 // The common body of sceSifSendCmd() and isceSifSendCmd(). The extra data travels in the same DMA
 // chain, ahead of the packet.
-static unsigned int sendCmd(unsigned int fcode,
-                            unsigned int nMode,
-                            sceSifCmdHdr *pPacket,
-                            int nPacketSize,
-                            void *pSrc,
-                            void *pDest,
-                            int nSize) {
+static unsigned int _sceSifSendCmd(unsigned int fcode,
+                                   unsigned int nMode,
+                                   sceSifCmdHdr *pPacket,
+                                   int nPacketSize,
+                                   void *pSrc,
+                                   void *pDest,
+                                   int nSize) {
     sceSifDmaData aTransfers[2];
     int nCount = 0;
 
@@ -221,7 +221,7 @@ void sceSifInitCmd(void) {
     }
     g_aSystemHandlers[kChangeAddressSlot].func = changeAddressHandler;
     g_aSystemHandlers[kChangeAddressSlot].data = &g_sifCmdState;
-    g_aSystemHandlers[kSetSoftwareRegisterSlot].func = setSoftwareRegisterHandler;
+    g_aSystemHandlers[kSetSoftwareRegisterSlot].func = _set_sreg;
     g_aSystemHandlers[kSetSoftwareRegisterSlot].data = &g_sifCmdState;
     EIntr();
 
@@ -307,7 +307,7 @@ unsigned int sceSifSendCmd(unsigned int fcode,
                            void *src_extra,
                            void *dest_extra,
                            int size_extra) {
-    return sendCmd(fcode, 0, packet, packet_size, src_extra, dest_extra, size_extra);
+    return _sceSifSendCmd(fcode, 0, packet, packet_size, src_extra, dest_extra, size_extra);
 }
 
 // NTSC-U/C: 0x005d3a88, PAL: 0x00615af0
@@ -317,7 +317,8 @@ unsigned int isceSifSendCmd(unsigned int fcode,
                             void *src_extra,
                             void *dest_extra,
                             int size_extra) {
-    return sendCmd(fcode, SIF_CMDM_INTR, packet, packet_size, src_extra, dest_extra, size_extra);
+    return _sceSifSendCmd(
+        fcode, SIF_CMDM_INTR, packet, packet_size, src_extra, dest_extra, size_extra);
 }
 
 // NTSC-U/C: 0x005d3bf0, PAL: 0x00615c58

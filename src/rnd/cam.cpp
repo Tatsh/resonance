@@ -469,7 +469,7 @@ void Cam::UpdateProjection() {
 
 // NTSC-U/C: 0x004afc18, PAL: 0x004ede08
 void Cam::UpdateWorldProject() {
-    sceVu0InversMatrix(&mWorldToCam[0].x, &mWorldXfm[0][0]);
+    InversMatrix(&mWorldToCam[0].x, &mWorldXfm[0][0]);
 
     Frustum worldFrustum;
     worldFrustum.mFront = TransformPlaneToWorld(mLocalFrustum.mFront, &mWorldXfm[0][0]);

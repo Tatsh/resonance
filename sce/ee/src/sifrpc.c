@@ -160,7 +160,7 @@ static RpcPacket *nextReplyPacket(RpcState *pState) {
 }
 
 // NTSC-U/C: 0x00564d48, PAL: 0x005a34b8
-static RpcPacket *replyPacketFor(RpcState *pState, int nIndex) {
+static RpcPacket *_sceRpcGetFPacket2(RpcState *pState, int nIndex) {
     if (nIndex >= 0 && nIndex < pState->nClientPacketCount) {
         return &pState->pClientPackets[nIndex];
     }
@@ -168,7 +168,7 @@ static RpcPacket *replyPacketFor(RpcState *pState, int nIndex) {
 }
 
 // NTSC-U/C: 0x00564d88, PAL: 0x005a34f8
-static void requestEndHandler(void *pPacket, void *pData) {
+static void _request_end(void *pPacket, void *pData) {
     const RpcEndPacket *pEnd = pPacket;
     sceSifRpcData *pRequest = pEnd->pRequest;
     sceSifClientData *pClient = (sceSifClientData *)pRequest;
@@ -191,7 +191,7 @@ static void requestEndHandler(void *pPacket, void *pData) {
 }
 
 // NTSC-U/C: 0x00564e40, PAL: 0x005a35b0
-static void requestDataHandler(void *pPacket, void *pData) {
+static void _request_rdata(void *pPacket, void *pData) {
     const RpcDataPacket *pRequest = pPacket;
     RpcPacket *pReply = nextReplyPacket(pData);
 
@@ -203,7 +203,7 @@ static void requestDataHandler(void *pPacket, void *pData) {
 }
 
 // NTSC-U/C: 0x00564ff8, PAL: 0x005a3768
-static sceSifServeData *findServer(unsigned int nCommand, RpcState *pState) {
+static sceSifServeData *_search_svdata(unsigned int nCommand, RpcState *pState) {
     sceSifQueueData *pQueue;
     sceSifServeData *pServe;
 
@@ -218,7 +218,7 @@ static sceSifServeData *findServer(unsigned int nCommand, RpcState *pState) {
 }
 
 // NTSC-U/C: 0x00565048, PAL: 0x005a37b8
-static void requestBindHandler(void *pPacket, void *pData) {
+static void _request_bind(void *pPacket, void *pData) {
     const RpcBindPacket *pRequest = pPacket;
     RpcState *pState = pData;
     RpcPacket *pReply = nextReplyPacket(pState);
@@ -227,7 +227,7 @@ static void requestBindHandler(void *pPacket, void *pData) {
     pReply->end.pRequest = pRequest->pRequest;
     pReply->end.header.pPacket = pRequest->header.pPacket;
     pReply->end.nCommand = SIF_CMDC_RPC_BIND;
-    pServe = findServer(pRequest->nCommand, pState);
+    pServe = _search_svdata(pRequest->nCommand, pState);
     if (pServe != NULL) {
         pReply->end.pServe = pServe;
         pReply->end.pBuff = pServe->buff;
@@ -242,7 +242,7 @@ static void requestBindHandler(void *pPacket, void *pData) {
 
 // NTSC-U/C: 0x00565238, PAL: 0x005a39a8
 // Queues the call on its server and wakes the queue's thread when it is idle.
-static void requestCallHandler(void *pPacket, void *pData) {
+static void _request_call(void *pPacket, void *pData) {
     const RpcCallPacket *pRequest = pPacket;
     sceSifServeData *pServe = pRequest->pServe;
     sceSifQueueData *pQueue = pServe->base;
@@ -293,10 +293,10 @@ void sceSifInitRpc(unsigned int mode) {
     g_rpcState.pClientPackets = UNCACHED_SEG(g_aRpcClientPackets);
     g_rpcState.nClientPacketCount = kRpcPacketCount;
     g_rpcState.nNextReply = 0;
-    sceSifAddCmdHandler(SIF_CMDC_RPC_END, requestEndHandler, &g_rpcState);
-    sceSifAddCmdHandler(SIF_CMDC_RPC_BIND, requestBindHandler, &g_rpcState);
-    sceSifAddCmdHandler(SIF_CMDC_RPC_CALL, requestCallHandler, &g_rpcState);
-    sceSifAddCmdHandler(SIF_CMDC_RPC_RDATA, requestDataHandler, &g_rpcState);
+    sceSifAddCmdHandler(SIF_CMDC_RPC_END, _request_end, &g_rpcState);
+    sceSifAddCmdHandler(SIF_CMDC_RPC_BIND, _request_bind, &g_rpcState);
+    sceSifAddCmdHandler(SIF_CMDC_RPC_CALL, _request_call, &g_rpcState);
+    sceSifAddCmdHandler(SIF_CMDC_RPC_RDATA, _request_rdata, &g_rpcState);
     EIntr();
 
     if (sceSifGetReg(SIF_SYSREG_RPCINIT) != 0) {
@@ -602,7 +602,7 @@ void sceSifExecRequest(sceSifServeData *sd) {
 
     DIntr();
     if ((sd->rid & kRecordIndexed) != 0) {
-        pReply = replyPacketFor(&g_rpcState, (int)(sd->rid >> kRecordIndexShift));
+        pReply = _sceRpcGetFPacket2(&g_rpcState, (int)(sd->rid >> kRecordIndexShift));
     } else {
         pReply = nextReplyPacket(&g_rpcState);
     }

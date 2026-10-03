@@ -81,8 +81,8 @@ typedef struct {
     unsigned int nIopAddress; // The pair of direct packet buffers on the IOP.
     unsigned int nDmaId;
     int nOpen;
-    int nUnusedFirst; // +0x14, cleared by scePadPortInit() and never read.
-    int nUnusedSecond; // +0x18, cleared by scePadPortInit() and never read.
+    int nUnusedFirst;  // +0x14, cleared by scePadInit2() and never read.
+    int nUnusedSecond; // +0x18, cleared by scePadInit2() and never read.
 } PadPortState;
 
 // The server reads its arguments from and writes its reply to the same 128 bytes.
@@ -165,7 +165,7 @@ static inline int PadAccepted(int nPort, int nSlot, const int *pnResult) {
 }
 
 // NTSC-U/C: 0x0059bfd8, PAL: 0x005a62c0
-static void PadSendDirect(int nPort, int nSlot) {
+static void _send_to_iop(int nPort, int nSlot) {
     PadPortState *pState = &g_aaPadPorts[nPort][nSlot];
     PadDirectBlock *pDirect = pState->pDirect;
     sceSifDmaData dma;
@@ -221,11 +221,11 @@ int scePadInit(int nMode) {
         }
         return 0;
     }
-    return scePadPortInit(nMode);
+    return scePadInit2(nMode);
 }
 
 // NTSC-U/C: 0x0059c248, PAL: 0x005a6530
-int scePadPortInit(int nMode) {
+int scePadInit2(int nMode) {
     int nPort;
     int nSlot;
 
@@ -522,7 +522,7 @@ int scePadSetActDirect(int nPort, int nSlot, const unsigned char *pData) {
     }
     pPacket->nCommand = kPadDirectCommandActuators;
     pPacket->nSize = kPadActuatorByteCount;
-    PadSendDirect(nPort, nSlot);
+    _send_to_iop(nPort, nSlot);
     return 1;
 }
 

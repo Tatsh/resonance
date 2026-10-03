@@ -35,6 +35,7 @@ animatables
 animhelper
 anims
 apalette
+apdx
 apolygon
 appactivefilter
 appticktask
@@ -402,6 +403,7 @@ grvscript
 gscripts
 gsdoublebuffer
 gsperiodical
+gszbufaddr
 gtdf
 handoff
 hangpoint
@@ -531,6 +533,7 @@ killsch
 kind's
 kochanek
 koff
+kputchar
 kputs
 kscope
 kseg
@@ -647,6 +650,7 @@ memcardps
 memcardsavepaths
 memcardtask
 memcarduser
+memclr
 memcmp
 memcpy
 memstream
@@ -1025,6 +1029,7 @@ rdonly
 rdparty
 readbuf
 readop
+reax
 recalc
 recinfo
 recolor
@@ -1212,6 +1217,7 @@ suby
 susgemmsg
 sustainnotemsg
 sutructure
+svdata
 synthsustainer
 sysclib
 sysconf
@@ -1383,6 +1389,7 @@ wmaybe
 wnohang
 wnonnull
 writeop
+writx
 wstringop
 wuninitialized
 wuse

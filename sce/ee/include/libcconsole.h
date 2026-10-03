@@ -21,7 +21,7 @@ extern "C" {
  * @ghidraAddress NTSC-U/C: 0x00596500
  * @ghidraAddress PAL: 0x005d9908
  */
-int LibcConsoleRead(int nFile, void *pBuffer, int nLength);
+int reax(int nFile, void *pBuffer, int nLength);
 
 /**
  * Write to the console, for standard output and standard error only.
@@ -33,7 +33,7 @@ int LibcConsoleRead(int nFile, void *pBuffer, int nLength);
  * @ghidraAddress NTSC-U/C: 0x00596480
  * @ghidraAddress PAL: 0x005d9888
  */
-int LibcConsoleWrite(int nFile, const void *pBuffer, int nLength);
+int writx(int nFile, const void *pBuffer, int nLength);
 
 /**
  * Close a console descriptor.

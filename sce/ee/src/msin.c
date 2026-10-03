@@ -11,10 +11,7 @@ enum {
 };
 
 // NTSC-U/C: 0x005e4600, PAL: 0x006267c0
-static int putStreamBytes(sceCslCtx *pCtx,
-                          unsigned int nPort,
-                          unsigned char *pBytes,
-                          int nCount) {
+static int put_message(sceCslCtx *pCtx, unsigned int nPort, unsigned char *pBytes, int nCount) {
     sceCslBuffGrp *pGroups;
     sceCslMidiStream *pStream;
     unsigned char *pDest;
@@ -106,5 +103,5 @@ int sceMSIn_PutMsg(sceCslCtx *pCtx, unsigned int nPort, unsigned int nMsg) {
         // The module rejects any other status.
         return -1;
     }
-    return putStreamBytes(pCtx, nPort, (unsigned char *)&nCopy, nCount);
+    return put_message(pCtx, nPort, (unsigned char *)&nCopy, nCount);
 }

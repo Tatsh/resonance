@@ -38,11 +38,11 @@ static void initConsoleContext(unsigned int *pContext, unsigned int nGsX, unsign
 
 // Take nSize bytes from the static heap, returning null when no block fits. The first call
 // initialises the heap and its end marker.
-static void *heapAllocate(unsigned int nSize);
+static void *chaMemAlloc(unsigned int nSize);
 
-// Return a block heapAllocate() handed out, merging it with a free neighbour on either side. A
+// Return a block chaMemAlloc() handed out, merging it with a free neighbour on either side. A
 // null pointer, an uninitialised heap, and an empty heap are ignored.
-static void heapFree(void *pBlock);
+static void chaMemFree(void *pBlock);
 
 // NTSC-U/C: 0x0062bfd0, PAL: 0x0066cb60
 void sceDevVif0Reset(void) {
@@ -84,7 +84,7 @@ int sceDevConsOpen(
             }
         }
         if (pConsole != NULL) {
-            pConsole->pBuffer = heapAllocate(nColumns * nRows * 2u);
+            pConsole->pBuffer = chaMemAlloc(nColumns * nRows * 2u);
             if (pConsole->pBuffer != NULL) {
                 pConsole->nColumns = (int)nColumns;
                 pConsole->nRows = (int)nRows;
@@ -102,7 +102,7 @@ int sceDevConsOpen(
 void sceDevConsClose(int nConsole) {
     DevConsole *pConsole = (DevConsole *)(uintptr_t)nConsole;
 
-    heapFree(pConsole->pBuffer);
+    chaMemFree(pConsole->pBuffer);
     pConsole->nRows = 0;
     pConsole->pBuffer = NULL;
     pConsole->nColumns = 0;
@@ -143,7 +143,7 @@ static void initConsoleContext(unsigned int *pContext, unsigned int nGsX, unsign
 }
 
 // NTSC-U/C: 0x00623b10, PAL: 0x00664520
-static void *heapAllocate(unsigned int nSize) {
+static void *chaMemAlloc(unsigned int nSize) {
     unsigned int *pHeap = g_anDevHeap;
     unsigned int nWords = (nSize + 3u) >> 2;
     unsigned int nIndex = 0u;
@@ -197,7 +197,7 @@ static void *heapAllocate(unsigned int nSize) {
 }
 
 // NTSC-U/C: 0x00623c90, PAL: 0x006646a0
-static void heapFree(void *pBlock) {
+static void chaMemFree(void *pBlock) {
     unsigned int *pHeap = g_anDevHeap;
     unsigned int nPrevious = 0u;
     unsigned int nIndex = 0u;

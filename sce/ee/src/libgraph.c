@@ -113,7 +113,7 @@ static GsState *sceGsGetGParam(void) {
 }
 
 // NTSC-U/C: 0x005963e0, PAL: 0x005d97e8
-void WaitVsync(void) {
+void VSync(void) {
     INTC_STAT = kIntcVblankStartBit;
     while ((INTC_STAT & kIntcVblankStartBit) == 0U) {
     }
@@ -123,7 +123,7 @@ void WaitVsync(void) {
 // NTSC-U/C: 0x00596420, PAL: 0x005d9828
 // Waits for the next vertical blank while a handler is installed and returns the GS status word
 // the kernel captured at the blank. Bit 13 of the word records the field the blank began.
-static unsigned long long WaitVsyncFlag(void) {
+static unsigned long long VSync2(void) {
     unsigned int flag = 0U;
     unsigned long long status;
 
@@ -144,7 +144,7 @@ static unsigned long long WaitVsyncFlag(void) {
 // of a depth buffer placed after the frame buffer. Sixteen-bit formats count rows in 64-pixel
 // units, and the other formats in 32-pixel units. Only interlaced field mode retains a single
 // count; every other mode doubles it. The result is truncated to 16 bits.
-static int FramePageCount(short nPsm, short nWidth, short nHeight) {
+static int sceGszbufaddr(short nPsm, short nWidth, short nHeight) {
     GsState *state = sceGsGetGParam();
     int columns = (nWidth + 63) / 64;
     int rows;
@@ -166,7 +166,7 @@ static int FramePageCount(short nPsm, short nWidth, short nHeight) {
 // Writes one display environment to the privileged registers. The first
 // GS revision uses the first video circuit, and any other revision uses the
 // second circuit together with the output mode register.
-static void WriteDisplayEnv(const sceGsDispEnv *pDisp) {
+static void sceGsPutDispEnv(const sceGsDispEnv *pDisp) {
     GsState *state = sceGsGetGParam();
 
     if (state->gsVersion == 1) {
@@ -254,13 +254,13 @@ int sceGsSyncV(int nMode) {
 
     (void)nMode;
     if (state->vblankHandler == NULL) {
-        WaitVsync();
+        VSync();
         if (state->interlaceMode != 1) {
             return 1;
         }
         return (int)((GS_CSR >> 13) & 1ULL);
     }
-    status = WaitVsyncFlag() >> 13;
+    status = VSync2() >> 13;
     field = (int)(status & 1ULL);
     if (state->interlaceMode != 1) {
         return 1;
@@ -361,7 +361,7 @@ int sceGsSetDefDrawEnv(
     pDraw->frame1 = frame;
     pDraw->frame1addr = 0x4CULL;
     pDraw->zbuf1addr = 0x4EULL;
-    depth = (unsigned long long)FramePageCount(nPsm, nWidth, nHeight);
+    depth = (unsigned long long)sceGszbufaddr(nPsm, nWidth, nHeight);
     depth |= ((unsigned long long)(nZPsm & 0xF)) << 24;
     if (nZTest == 0) {
         depth |= 0x8000ULL << 17;
@@ -476,7 +476,7 @@ int sceGsSetDefDBuff(sceGsDBuff *pDBuff,
     pDBuff->giftag0.mWords[1] = 0xEULL;
     pDBuff->giftag1.mWords[0] = loops | 0x8000ULL | 0x1000000000000000ULL;
     pDBuff->giftag1.mWords[1] = 0xEULL;
-    pages = FramePageCount(nPsm, nWidth, nHeight);
+    pages = sceGszbufaddr(nPsm, nWidth, nHeight);
     // Interlaced frame mode and progressive output place the second buffer after the first.
     if (!(state->interlaceMode == kGsInterlace && state->fieldMode == kGsFrameMode) &&
         state->interlaceMode != 0) {
@@ -1015,7 +1015,7 @@ void sceGsSwapDBuff(sceGsDBuff *pDBuff, int nField) {
     const sceGsDispEnv *shown;
 
     shown = (const sceGsDispEnv *)(base + (unsigned int)(field * 0x28));
-    WriteDisplayEnv(shown);
+    sceGsPutDispEnv(shown);
     if (field == 0) {
         sceGsPutDrawEnv(&pDBuff->giftag0);
     } else {

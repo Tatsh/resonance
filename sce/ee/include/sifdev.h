@@ -46,7 +46,7 @@ typedef struct {
 /** Bit of #SIF_REG_SMFLAG the IOP sets once it has booted. */
 #define SIF_STAT_BOOTEND 0x40000
 
-/** Width of the value sceSifGetIopValue() and sceSifSetIopValue() move. */
+/** Width of the value sceSifGetIopAddr() and sceSifSetIopAddr() move. */
 enum {
     SIF_IOP_VALUE_BYTE = 0, /*!< One byte. */
     SIF_IOP_VALUE_HALF = 1, /*!< Two bytes. */
@@ -353,8 +353,7 @@ int sceSifLoadElfPart(const char *name, const char *secname, sceExecData *data);
 int sceSifLoadElf(const char *name, sceExecData *data);
 
 /**
- * Read a value from IOP memory through the module loader. The name is inferred from the
- * behaviour.
+ * Read a value from IOP memory through the module loader.
  *
  * @param addr IOP address.
  * @param value Receives the value.
@@ -363,10 +362,10 @@ int sceSifLoadElf(const char *name, sceExecData *data);
  * @ghidraAddress NTSC-U/C: 0x005fbdc8
  * @ghidraAddress PAL: 0x0063cad8
  */
-int sceSifGetIopValue(unsigned int addr, void *value, int type);
+int sceSifGetIopAddr(unsigned int addr, void *value, int type);
 
 /**
- * Write a value to IOP memory through the module loader. The name is inferred from the behaviour.
+ * Write a value to IOP memory through the module loader.
  *
  * @param addr IOP address.
  * @param value Value to write.
@@ -375,7 +374,7 @@ int sceSifGetIopValue(unsigned int addr, void *value, int type);
  * @ghidraAddress NTSC-U/C: 0x005fbeb8
  * @ghidraAddress PAL: 0x0063cbc8
  */
-int sceSifSetIopValue(unsigned int addr, const void *value, int type);
+int sceSifSetIopAddr(unsigned int addr, const void *value, int type);
 
 /**
  * Send the IOP a reset command that reboots it with an argument string.

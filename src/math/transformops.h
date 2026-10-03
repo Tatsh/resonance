@@ -14,7 +14,7 @@ extern "C" {
  * @ghidraAddress NTSC-U/C: 0x005e7b08
  * @ghidraAddress PAL: 0x00629cf0
  */
-void sceVu0InversMatrix(float *pDst, const float *pSrc);
+void InversMatrix(float *pDst, const float *pSrc);
 
 /**
  * Multiply two affine transforms across all four words of every row.

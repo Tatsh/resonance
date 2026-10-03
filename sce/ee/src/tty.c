@@ -73,7 +73,7 @@ static TtyPacket g_ttyReceivePacket __attribute__((aligned(64)));
 static int g_bConsoleOpen;
 
 // NTSC-U/C: 0x006277d8, PAL: 0x00668368
-static TtyQueue *TtyQueueInit(int nCapacity) {
+static TtyQueue *QueueInit(int nCapacity) {
     g_ttyQueue.nCapacity = nCapacity;
     g_ttyQueue.pHead = g_ttyQueue.mData;
     g_ttyQueue.nCount = 0;
@@ -82,7 +82,7 @@ static TtyQueue *TtyQueueInit(int nCapacity) {
 }
 
 // NTSC-U/C: 0x00627800, PAL: 0x00668390
-static void TtyQueuePush(TtyQueue *pQueue) {
+static void QueuePeekWriteDone(TtyQueue *pQueue) {
     ++pQueue->nCount;
     ++pQueue->pTail;
     if (pQueue->pTail == &pQueue->mData[pQueue->nCapacity]) {
@@ -91,7 +91,7 @@ static void TtyQueuePush(TtyQueue *pQueue) {
 }
 
 // NTSC-U/C: 0x00627840, PAL: 0x006683d0
-static void TtyQueuePop(TtyQueue *pQueue) {
+static void QueuePeekReadDone(TtyQueue *pQueue) {
     --pQueue->nCount;
     ++pQueue->pHead;
     if (pQueue->pHead == &pQueue->mData[pQueue->nCapacity]) {
@@ -100,7 +100,7 @@ static void TtyQueuePop(TtyQueue *pQueue) {
 }
 
 // NTSC-U/C: 0x00627880, PAL: 0x00668410
-static void TtyHandler(int nEvent, int nParam, void *pOpt) {
+static void sceTtyHandler(int nEvent, int nParam, void *pOpt) {
     TtyState *pState = (TtyState *)pOpt;
     int nDone;
 
@@ -109,12 +109,12 @@ static void TtyHandler(int nEvent, int nParam, void *pOpt) {
     case kDeci2EventReadDone:
         if (nParam != 0) {
             if ((unsigned int)(pState->nReceived + nParam) > kTtyBufferSize) {
-                PrintfToSioRaw("TTY: packet size larger than expect\n");
+                kprintf("TTY: packet size larger than expect\n");
             }
             nDone = sceDeci2ExRecv(
                 pState->mSocket, pState->pReceive + pState->nReceived, (unsigned short)nParam);
             if (nDone < 0) {
-                PrintfToSioRaw("TTY: receive error");
+                kprintf("TTY: receive error");
             }
             pState->nReceived += nDone; // Yes, the binary adds a failed receive's result.
         } else {
@@ -123,7 +123,7 @@ static void TtyHandler(int nEvent, int nParam, void *pOpt) {
 
             for (i = kTtyHeaderSize; i < pPacket->nLength; ++i) {
                 *pState->pQueue->pTail = pState->pReceive[i];
-                TtyQueuePush(pState->pQueue);
+                QueuePeekWriteDone(pState->pQueue);
             }
             pState->nReceived = 0;
         }
@@ -131,7 +131,7 @@ static void TtyHandler(int nEvent, int nParam, void *pOpt) {
     case kDeci2EventWrite:
         nDone = sceDeci2ExSend(pState->mSocket, pState->pSend, (unsigned short)pState->nSendLength);
         if (nDone < 0) {
-            PrintfToSioRaw("TTY: send err %d\n", nDone);
+            kprintf("TTY: send err %d\n", nDone);
             pState->bBusy = 0;
             break;
         }
@@ -140,7 +140,7 @@ static void TtyHandler(int nEvent, int nParam, void *pOpt) {
         break;
     case kDeci2EventWriteDone:
         if (pState->nSendLength != 0) {
-            PrintfToSioRaw("TTY: err ti->wlen=%08x\n", pState->nSendLength);
+            kprintf("TTY: err ti->wlen=%08x\n", pState->nSendLength);
         }
         pState->bBusy = 0;
         break;
@@ -150,11 +150,11 @@ static void TtyHandler(int nEvent, int nParam, void *pOpt) {
 }
 
 // NTSC-U/C: 0x00627c38, PAL: 0x006687c8
-static int TtyOpen(void) {
+static int sceTtyInit(void) {
     TtyPacket *pSend;
 
     FlushCache(0);
-    g_ttyState.mSocket = sceDeci2Open(kTtyProtocol, &g_ttyState, TtyHandler);
+    g_ttyState.mSocket = sceDeci2Open(kTtyProtocol, &g_ttyState, sceTtyHandler);
     if (g_ttyState.mSocket < 0) {
         return 0;
     }
@@ -169,7 +169,7 @@ static int TtyOpen(void) {
     pSend->nDestination = kTtyDestinationHost;
     pSend->nTtyId = 0;
     pSend->nReserved = 0;
-    g_ttyState.pQueue = TtyQueueInit(kTtyQueueSize);
+    g_ttyState.pQueue = QueueInit(kTtyQueueSize);
     return 1;
 }
 
@@ -217,7 +217,7 @@ static int TtyWrite(const char *pBuffer, int nLength) {
 
 // NTSC-U/C: 0x00627b68, PAL: 0x006686f8
 // Returns once a newline or a carriage return arrives, or when the buffer is full.
-static int TtyRead(char *pBuffer, int nLength) {
+static int sceTtyRead(char *pBuffer, int nLength) {
     int nRead = 0;
 
     while (nRead < nLength) {
@@ -228,7 +228,7 @@ static int TtyRead(char *pBuffer, int nLength) {
         }
         c = (char)*g_ttyState.pQueue->pHead;
         pBuffer[nRead++] = c;
-        TtyQueuePop(g_ttyState.pQueue);
+        QueuePeekReadDone(g_ttyState.pQueue);
         if (c == '\n' || c == '\r') {
             break;
         }
@@ -237,12 +237,12 @@ static int TtyRead(char *pBuffer, int nLength) {
 }
 
 // NTSC-U/C: 0x00596480, PAL: 0x005d9888
-int LibcConsoleWrite(int nFile, const void *pBuffer, int nLength) {
+int writx(int nFile, const void *pBuffer, int nLength) {
     if (nFile != kConsoleOutput && nFile != kConsoleError) {
         return -1;
     }
     if (g_bConsoleOpen == 0) {
-        if (TtyOpen() == 0) {
+        if (sceTtyInit() == 0) {
 #ifdef ENABLE_PATCHES
             // Without a DECI2 host (after an IOP reboot, or on a retail console) the original drops
             // the text. The serial port shows it instead.
@@ -250,7 +250,7 @@ int LibcConsoleWrite(int nFile, const void *pBuffer, int nLength) {
             int i;
 
             for (i = 0; i < nLength; ++i) {
-                PutSioByte(pBytes[i]);
+                kputchar(pBytes[i]);
             }
             return nLength;
 #else
@@ -263,17 +263,17 @@ int LibcConsoleWrite(int nFile, const void *pBuffer, int nLength) {
 }
 
 // NTSC-U/C: 0x00596500, PAL: 0x005d9908
-int LibcConsoleRead(int nFile, void *pBuffer, int nLength) {
+int reax(int nFile, void *pBuffer, int nLength) {
     if (nFile != kConsoleInput) {
         return -1;
     }
     if (g_bConsoleOpen == 0) {
-        if (TtyOpen() == 0) {
+        if (sceTtyInit() == 0) {
             return -1;
         }
         g_bConsoleOpen = 1;
     }
-    return TtyRead((char *)pBuffer, nLength);
+    return sceTtyRead((char *)pBuffer, nLength);
 }
 
 // NTSC-U/C: 0x005965a0, PAL: 0x005d99a8

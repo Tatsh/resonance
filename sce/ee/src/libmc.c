@@ -302,7 +302,7 @@ int sceMcOpen(int nPort, int nSlot, const char *pszName, int nMode) {
 }
 
 // NTSC-U/C: 0x00565e80, PAL: 0x005a45f0
-int sceMcMkDir(int nPort, int nSlot, const char *pszName) {
+int sceMcMkdir(int nPort, int nSlot, const char *pszName) {
     const int nResult = sceMcOpen(nPort, nSlot, pszName, sceMcFileCreateDir);
 
     if (nResult == 0) {
@@ -336,7 +336,7 @@ int sceMcSeek(int nFd, int nOffset, int nMode) {
 }
 
 // NTSC-U/C: 0x00566048, PAL: 0x005a47b8
-static void McReadEnd(void *pParameter) {
+static void mceIntrReadFixAlign(void *pParameter) {
     const McEndData *pEnd = UNCACHED_SEG(pParameter);
     int i;
 
@@ -361,7 +361,8 @@ int sceMcRead(int nFd, void *pBuffer, int nSize) {
     g_mcDescPacket.nSize = nSize;
     sceSifWriteBackDCache(pBuffer, nSize);
     sceSifWriteBackDCache(&g_mcEndData, sizeof(g_mcEndData));
-    return McEndCommand(McCallDesc(kMcFunctionRead, McReadEnd, &g_mcEndData), sceMcFuncNoRead);
+    return McEndCommand(McCallDesc(kMcFunctionRead, mceIntrReadFixAlign, &g_mcEndData),
+                        sceMcFuncNoRead);
 }
 
 // NTSC-U/C: 0x005661f8, PAL: 0x005a4968
@@ -438,7 +439,7 @@ int sceMcSync(int nMode, int *pnCommand, int *pnResult) {
 }
 
 // NTSC-U/C: 0x005664c8, PAL: 0x005a4c38
-static void McGetInfoEnd(void *pParameter) {
+static void mceGetInfoApdx(void *pParameter) {
     const McEndData *pEnd = UNCACHED_SEG(pParameter);
 
     if (g_pnMcInfoType != NULL) {
@@ -469,7 +470,7 @@ int sceMcGetInfo(int nPort, int nSlot, int *pnType, int *pnFree, int *pnFormat) 
     g_pnMcInfoFree = pnFree;
     g_pnMcInfoFormat = pnFormat;
     sceSifWriteBackDCache(&g_mcEndData, sizeof(g_mcEndData));
-    return McEndCommand(McCallDesc(kMcFunctionCardInfo, McGetInfoEnd, &g_mcEndData),
+    return McEndCommand(McCallDesc(kMcFunctionCardInfo, mceGetInfoApdx, &g_mcEndData),
                         sceMcFuncNoCardInfo);
 }
 
@@ -502,7 +503,7 @@ int sceMcGetDir(int nPort,
 }
 
 // NTSC-U/C: 0x00566800, PAL: 0x005a4f70
-static void McChdirEnd(void *pParameter) {
+static void mceStorePwd(void *pParameter) {
     char *pszDest = pParameter;
     const char *pszDirectory;
     size_t nLength;
@@ -532,7 +533,7 @@ int sceMcChdir(int nPort, int nSlot, const char *pszNewDir, char *pszCurrentDir)
     g_mcNamePacket.nSlot = nSlot;
     McSetName(pszNewDir);
     sceSifWriteBackDCache(g_szMcCurrentDir, sizeof(g_szMcCurrentDir));
-    return McEndCommand(McCallName(kMcFunctionChdir, McChdirEnd, pszCurrentDir), sceMcFuncNoChDir);
+    return McEndCommand(McCallName(kMcFunctionChdir, mceStorePwd, pszCurrentDir), sceMcFuncNoChDir);
 }
 
 // NTSC-U/C: 0x005669d8, PAL: 0x005a5148

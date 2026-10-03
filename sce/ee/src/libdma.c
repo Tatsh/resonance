@@ -157,7 +157,7 @@ typedef struct {
 
 // NTSC-U/C: 0x005f36b8, PAL: 0x00596dd8
 // Clears a byte range one byte at a time.
-static void DmaClearBytes(unsigned char *pBytes, int nCount) {
+static void memclr(unsigned char *pBytes, int nCount) {
     while (nCount-- > 0) {
         *pBytes++ = 0U;
     }
@@ -198,7 +198,7 @@ int sceDmaReset(int nMode) {
     DMAC_STAT = 0xFF1FU;
     stat = DMAC_STAT;
     DMAC_STAT = stat & 0xFF1F0000U;
-    DmaClearBytes(clearEnv, sizeof(clearEnv));
+    memclr(clearEnv, sizeof(clearEnv));
     sceDmaPutEnv((sceDmaEnv *)clearEnv);
     if (nMode == 1) {
         unsigned int ctrl;

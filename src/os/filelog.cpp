@@ -255,7 +255,7 @@ int FileRead(int nFile, void *pBuffer, int nLength) {
         sceCdSync(SCECdBlock);
         nRead = sceRead(nFile & ~kFileHandleSceFile, pBuffer, nLength);
     } else {
-        nRead = LibcConsoleRead(nFile, pBuffer, nLength);
+        nRead = reax(nFile, pBuffer, nLength);
     }
 
     char szTrace[kFileTraceSize];
@@ -275,7 +275,7 @@ int FileWrite(int nFile, const void *pBuffer, int nLength) {
         return -1;
     }
     if ((nFile & kFileHandleSceFile) == 0) {
-        return LibcConsoleWrite(nFile, pBuffer, nLength);
+        return writx(nFile, pBuffer, nLength);
     }
     return sceWrite(nFile & ~kFileHandleSceFile, pBuffer, nLength);
 }

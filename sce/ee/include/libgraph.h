@@ -168,12 +168,12 @@ int sceGsSyncV(int nMode);
  * Acknowledge the vertical blank start interrupt, spin until it is raised again, and acknowledge it
  * once more.
  *
- * The library has no published name for the routine. sceGsSyncV() and the game both call it.
+ * sceGsSyncV() and the game both call it.
  *
  * @ghidraAddress NTSC-U/C: 0x005963e0
  * @ghidraAddress PAL: 0x005d97e8
  */
-void WaitVsync(void);
+void VSync(void);
 
 /**
  * Fill the four alpha environment pairs.

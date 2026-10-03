@@ -70,8 +70,8 @@ typedef struct {
 /**
  * Bind the pad servers, check the padman version, and reset the ports.
  *
- * @param nMode Passed to scePadPortInit().
- * @return The scePadPortInit() result, or zero on a version mismatch.
+ * @param nMode Passed to scePadInit2().
+ * @return The scePadInit2() result, or zero on a version mismatch.
  */
 int scePadInit(int nMode);
 
@@ -81,7 +81,7 @@ int scePadInit(int nMode);
  * @param nMode Not used.
  * @return padman's result, or zero when the call failed.
  */
-int scePadPortInit(int nMode);
+int scePadInit2(int nMode);
 
 /**
  * Stop padman.

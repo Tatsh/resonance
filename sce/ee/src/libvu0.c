@@ -79,7 +79,7 @@ void sceVu0MulAffineMatrixXyz(float *pDst, const float *pA, const float *pB) {
 }
 
 // NTSC-U/C: 0x005e7b08, PAL: 0x00629cf0
-void sceVu0InversMatrix(float *pDst, const float *pSrc) {
+void InversMatrix(float *pDst, const float *pSrc) {
     // The image shuffles the source rows through registers before storing anything, so every
     // value below is read before the destination is written and the pointers may alias.
     const float flXx = pSrc[0];
@@ -166,7 +166,7 @@ static float foldedSine(float flFolded) {
 }
 
 // NTSC-U/C: 0x005e84e0, PAL: 0x0062a6c8
-void _sceVu0ecossin(float flFolded, int nNegative, float *pOut) {
+void _ecossin(float flFolded, int nNegative, float *pOut) {
     // The rotation builders fold the angle about half pi and record whether it was negative, so
     // the folded sine below is the cosine of the original angle and the root below is the
     // magnitude of its sine.

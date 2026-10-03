@@ -93,7 +93,7 @@ typedef struct {
 
 typedef void (*PutCharFunction)(int c);
 
-// The fraction PrintFloat() prints has six digits.
+// The fraction printfloat() prints has six digits.
 static const double kFractionScale = 1000000.0;
 
 // NTSC-U/C: 0x00769820, PAL: 0x007ad578
@@ -280,7 +280,7 @@ void _InitSys(void) {
 }
 
 // NTSC-U/C: 0x005f1fb0, PAL: 0x006340f8
-static void HelperThreadMain(void *arg) {
+static void topThread(void *arg) {
     ThreadRequestQueue *pQueue = (ThreadRequestQueue *)arg;
 
     for (;;) {
@@ -302,7 +302,7 @@ static void HelperThreadMain(void *arg) {
             SuspendThread(pRequest->nId);
             break;
         default:
-            PrintfToSioRaw("## internel error in libkernl.a!\n");
+            kprintf("## internel error in libkernl.a!\n");
             break;
         }
     }
@@ -322,7 +322,7 @@ int InitThread(void) {
     if (g_nThreadRequestSema < 0) {
         return -1;
     }
-    thread.entry = HelperThreadMain;
+    thread.entry = topThread;
     thread.stack = g_helperStack;
     thread.stackSize = kHelperStackSize;
     thread.gpReg = _gp;
@@ -363,7 +363,7 @@ int iWakeupThread(int thid) {
 // Writes back every data cache line whose tag lies in the range. Cache operation 0x10 loads the tag
 // of a line into TagLo, and 0x14 writes the line back and invalidates it. Bit 0 of the index
 // selects the way.
-static void SyncDCacheLines(uintptr_t start, uintptr_t end) {
+static void _sceSDC(uintptr_t start, uintptr_t end) {
     unsigned int nIndex;
 
     for (nIndex = 0; nIndex < kDCacheIndexEnd; nIndex += kDCacheLineSize) {
@@ -397,8 +397,8 @@ void SyncDCache(void *start, void *end) {
     if (bEnabled) {
         DIntr();
     }
-    SyncDCacheLines((uintptr_t)start & ~(uintptr_t)(kDCacheLineSize - 1),
-                    (uintptr_t)end & ~(uintptr_t)(kDCacheLineSize - 1));
+    _sceSDC((uintptr_t)start & ~(uintptr_t)(kDCacheLineSize - 1),
+            (uintptr_t)end & ~(uintptr_t)(kDCacheLineSize - 1));
     if (bEnabled) {
         EIntr();
     }
@@ -469,7 +469,7 @@ static char g_szConsoleLine[kConsoleLineSize];
 static int g_nConsoleLineLength;
 
 // NTSC-U/C: 0x005fa8c0, PAL: 0x0063b5d0
-int PutSioByte(int c) {
+int kputchar(int c) {
     while ((*SIO_ISR & kSioIsrTxFull) != 0) {
     }
     *SIO_TXFIFO = (unsigned char)c;
@@ -499,22 +499,22 @@ static void PutConsoleLineChar(int c) {
 }
 
 // NTSC-U/C: 0x005fa9a8, PAL: 0x0063b6b8
-static void PutSioCharCrlf(int c) {
+static void serialPutchar(int c) {
     if (c == '\n') {
-        PutSioByte('\r');
-        PutSioByte('\n');
+        kputchar('\r');
+        kputchar('\n');
         return;
     }
-    PutSioByte(c);
+    kputchar(c);
 }
 
 // NTSC-U/C: 0x00780dc4, PAL: 0x007c4adc
-static PutCharFunction g_pfnPutChar = PutSioCharCrlf;
+static PutCharFunction g_pfnPutChar = serialPutchar;
 
 // NTSC-U/C: 0x005fa9e0, PAL: 0x0063b6f0
 // Converts the bits of a double to an integer. A fraction of three quarters or more rounds up, and
 // a value of 2^13 or more returns 9999.
-static int DoubleBitsToInt(unsigned long long bits) {
+static int ftoi(unsigned long long bits) {
     int nExponent = (int)((bits << 1) >> kDoubleExponentShift) - kDoubleExponentBias;
     unsigned long long mantissa;
 
@@ -542,7 +542,7 @@ static int DoubleBitsToInt(unsigned long long bits) {
 
 // NTSC-U/C: 0x005faa70, PAL: 0x0063b780
 // Prints a value as 0.digits and a power of ten.
-static void PrintFloat(double value) {
+static void printfloat(double value) {
     int nExponent = 0;
 
     if (value < 0.0) {
@@ -561,12 +561,12 @@ static void PrintFloat(double value) {
             ++nExponent;
         }
     }
-    // Yes, the binary passes the converted integer where DoubleBitsToInt() expects double bits.
-    PrintfToSioRaw("0.%d", DoubleBitsToInt((unsigned long long)(value * kFractionScale)));
+    // Yes, the binary passes the converted integer where ftoi() expects double bits.
+    kprintf("0.%d", ftoi((unsigned long long)(value * kFractionScale)));
     if (nExponent >= 0) {
-        PrintfToSioRaw("e+%d", nExponent);
+        kprintf("e+%d", nExponent);
     } else {
-        PrintfToSioRaw("e%d", nExponent);
+        kprintf("e%d", nExponent);
     }
 }
 
@@ -585,7 +585,7 @@ static const char *ApplyPadding(const char *pDigits, const char *pPad) {
 }
 
 // NTSC-U/C: 0x005fabd8, PAL: 0x0063b8e8
-static void VPrintfToConsole(const char *pszFormat, va_list args) {
+static void _printf(const char *pszFormat, va_list args) {
     char szDigits[kPrintfBufferSize];
     const char *p = pszFormat;
 
@@ -702,7 +702,7 @@ static void VPrintfToConsole(const char *pszFormat, va_list args) {
             if (flReal == 0.0f) {
                 g_pfnPutChar('0');
             } else {
-                PrintFloat(flReal);
+                printfloat(flReal);
             }
             ++p;
             break;
@@ -728,11 +728,11 @@ static void VPrintfToConsole(const char *pszFormat, va_list args) {
 }
 
 // NTSC-U/C: 0x005fb1a0, PAL: 0x0063beb0
-void PrintfToSioRaw(const char *format, ...) {
+void kprintf(const char *format, ...) {
     va_list args;
 
     va_start(args, format);
-    VPrintfToConsole(format, args);
+    _printf(format, args);
     va_end(args);
 }
 
@@ -743,7 +743,7 @@ void scePrintf(const char *format, ...) {
 
     g_pfnPutChar = PutConsoleLineChar;
     va_start(args, format);
-    VPrintfToConsole(format, args);
+    _printf(format, args);
     va_end(args);
     g_pfnPutChar = pfnSaved;
 }
