@@ -1417,9 +1417,9 @@ void sceMpegResetIpuChannels(void *pDecoder) {
 
     (void)pDecoder;
     g_nMpegResetDcPredictor = 0;
-    DIntr();
-    // The enable store falls in the disable call delay slot, so it lands first.
+    // The busy flag store falls in the delay slot of the disable call and lands first.
     g_mpegIpuBusyFlag = 1;
+    DIntr();
     pStatus = (volatile unsigned int *)(uintptr_t)0x1000f520;
     pStatusSet = (volatile unsigned int *)(uintptr_t)0x1000f590;
     value = *pStatus;
@@ -1433,9 +1433,9 @@ void sceMpegResetIpuChannels(void *pDecoder) {
     *pClearC = 0;
     value = *pStatus;
     value = value & 0xfffeffffu;
-    EIntr();
-    // The clear store falls in the reenable call delay slot, so it lands first.
+    // The clear store falls in the delay slot of the reenable call and lands first.
     *pStatusSet = value;
+    EIntr();
     pMaskA = (volatile unsigned int *)(uintptr_t)0x1000b020;
     *pMaskA = 0;
     pMaskB = (volatile unsigned int *)(uintptr_t)0x1000b420;
