@@ -747,7 +747,10 @@ void Tunnel::BuildMesh() {
     for (Vector3 &normal : blankProfile.mNormals) {
         normal.w = 1.0f;
     }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     mLaneProfiles.resize(mRingCount, blankProfile);
+#pragma GCC diagnostic pop
 
     // Each ring faces its own angle, with its translation half a ring back around the axis.
     const float flHalfRing = kPi / mRingCount;
