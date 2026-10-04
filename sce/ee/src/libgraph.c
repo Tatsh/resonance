@@ -186,11 +186,11 @@ void sceGsResetPath(void) {
 
     VIF1_FBRST = 1U;
     VIF1_ERR = 2U;
-    __sync_synchronize();
+    __asm__ volatile("sync" ::: "memory");
     __asm__ volatile("cfc2 %0, $vi28" : "=r"(clip));
     clip |= 0x200U;
     __asm__ volatile("ctc2 %0, $vi28" ::"r"(clip));
-    __sync_synchronize();
+    __asm__ volatile("sync.p" ::: "memory");
     ee_store_quadword(VIF1_FIFO, g_dwVif1InitPacket.mQuads[0]);
     ee_store_quadword(VIF1_FIFO, g_dwVif1InitPacket.mQuads[1]);
     GIF_CTRL = 1U;
@@ -275,7 +275,7 @@ int sceGsSetDefAlphaEnv(sceGsAlphaEnv *pAlpha, short nPabe) {
     pAlpha->mWords[4] = (0x81ULL << 32) | 0x807FULL;
     pAlpha->mWords[7] = 0x4AULL;
     pAlpha->mWords[6] = 0ULL;
-    __sync_synchronize();
+    __asm__ volatile("sync" ::: "memory");
     return 4;
 }
 
@@ -388,7 +388,7 @@ int sceGsSetDefDrawEnv(
     }
     pDraw->test1 = test;
     pDraw->test1addr = 0x47ULL;
-    __sync_synchronize();
+    __asm__ volatile("sync" ::: "memory");
     return 8;
 }
 
@@ -437,7 +437,7 @@ int sceGsSetDefClear(sceGsClear *pClear,
         test = (((unsigned long long)(nZTest & 3)) << 17) | 0x10000ULL;
     }
     pClear->testb = test;
-    __sync_synchronize();
+    __asm__ volatile("sync" ::: "memory");
     return 6;
 }
 
@@ -592,7 +592,7 @@ int sceGsSetDefLoadImage(sceGsLoadImage *pLoadImage,
     pLoadImage->mWords[7] = 0x52ULL;
     pLoadImage->mWords[9] = 0x53ULL;
     pLoadImage->mWords[8] = 0ULL;
-    __sync_synchronize();
+    __asm__ volatile("sync" ::: "memory");
     return 6;
 }
 
@@ -681,7 +681,7 @@ int sceGsSetDefStoreImage(sceGsStoreImage *pStoreImage,
     words[13] = 0x53ULL;
     halfWords[0] = 0U;
     words[10] = 0ULL;
-    __sync_synchronize();
+    __asm__ volatile("sync" ::: "memory");
     return 7;
 }
 
