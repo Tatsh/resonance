@@ -97,14 +97,8 @@ enum {
 // NTSC-U/C: 0x0070cae0, PAL: 0x007509d0
 static int g_is_with_audio = 1;
 
-// NTSC-U/C: 0x0070cae8, PAL: 0x007509d8
-// The queue starts a cache line of its own. Its cached updates then never share a line with the
-// display buffer placed before it.
 VoBuf voBuf __attribute__((aligned(kBufferAlign)));
 
-// NTSC-U/C: 0x0070cb00, PAL: 0x007509f0
-// The vertical blank handler writes the draw environments through the uncached segment while the
-// GIF channel reads the buffer. The buffer therefore starts on a cache line.
 sceGsDBuff db __attribute__((aligned(kBufferAlign)));
 
 // NTSC-U/C: 0x0070cd30, PAL: 0x00750c20
@@ -119,10 +113,8 @@ static int g_default_thread;
 // NTSC-U/C: 0x0070cd40, PAL: 0x00750c30
 static StrFile g_in_file;
 
-// NTSC-U/C: 0x0070cd78, PAL: 0x00750c68
 VideoDec videoDec;
 
-// NTSC-U/C: 0x0070ce30, PAL: 0x00750d20
 AudioDec audioDec;
 
 // NTSC-U/C: 0x0070ce90, PAL: 0x00750d80

@@ -11,23 +11,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "app/cutscene.h"
 #include "ezmpeg/videodec.h"
 #include "ezmpeg/vobuf.h"
-
-// The decoder instance, which the playback driver owns. The stream callbacks address it directly.
-extern VideoDec videoDec;
-
-// The audio decoder instance, which the playback driver owns. The audio callback addresses it
-// directly.
-extern AudioDec audioDec;
-
-// The decoded frame queue, which the playback driver owns. The display handlers take entries
-// from it and release them through it.
-extern VoBuf voBuf;
-
-// The display double buffer, which the playback driver owns. The endimage handler swaps its
-// halves as fields are shown.
-extern sceGsDBuff db;
 
 enum {
     kPacketAlign = 0x10,

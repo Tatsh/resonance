@@ -6,17 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "app/cutscene.h"
 #include "ezmpeg/disp.h"
 #include "ezmpeg/vibuf.h"
 #include "ezmpeg/vobuf.h"
 #include "os/log.h"
-
-// The decoded frame queue, which the playback driver owns. The worker stages pictures into it.
-extern VoBuf voBuf;
-
-// The decoder instance, which the playback driver owns. The decoder callbacks address it directly
-// because the sample registers them with a null context.
-extern VideoDec videoDec;
 
 enum {
 #ifdef VIDEO_STANDARD_PAL
