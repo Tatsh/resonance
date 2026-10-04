@@ -7,6 +7,9 @@
 
 #include "error.h"
 
+/** Writer of the module name into the `.iopmod` header of an IRX. */
+namespace Tools::NameIrx {
+
 /**
  * Return the IRX with the module name written into its `.iopmod` header.
  *
@@ -19,3 +22,5 @@
  * `ErrorCode::InvalidInput` error when the file is not an IRX or its layout cannot be rewritten.
  */
 std::expected<std::vector<std::uint8_t>, Error> nameIrx(std::span<const std::uint8_t> data);
+
+} // namespace Tools::NameIrx

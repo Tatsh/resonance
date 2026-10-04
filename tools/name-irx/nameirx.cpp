@@ -10,6 +10,8 @@
 #include <string>
 #include <utility>
 
+namespace Tools::NameIrx {
+
 namespace {
 
 constexpr std::array<std::uint8_t, 4> kElfMagic{0x7f, 'E', 'L', 'F'};
@@ -209,3 +211,5 @@ std::expected<std::vector<std::uint8_t>, Error> nameIrx(std::span<const std::uin
     spdlog::debug("Named the module `{}`.", std::string(name.begin(), name.end()));
     return out;
 }
+
+} // namespace Tools::NameIrx

@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <array>
 
+namespace Tools::BuildImage {
+
 namespace {
 
 constexpr std::uint32_t kLeadInSectors = 150;
@@ -128,3 +130,5 @@ void SectorEncoder::encode(std::uint32_t lba,
     raw[kHeaderOffset + 2] = bcd(address % kSectorsPerSecond);
     raw[kHeaderOffset + 3] = kMode2;
 }
+
+} // namespace Tools::BuildImage

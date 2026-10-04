@@ -11,6 +11,8 @@
 #include "byteorder.h"
 #include "imageerror.h"
 
+namespace Tools::BuildImage {
+
 namespace {
 
 constexpr std::size_t kSectorRaw = 2352;
@@ -279,3 +281,5 @@ std::expected<std::vector<SourceImage::Record>, Error> SourceImage::records(std:
     }
     return found;
 }
+
+} // namespace Tools::BuildImage

@@ -7,6 +7,8 @@
 
 #include "imageerror.h"
 
+namespace Tools::BuildImage {
+
 namespace {
 
 constexpr std::string_view kGitHubApi = "https://api.github.com";
@@ -143,3 +145,5 @@ std::expected<nlohmann::json, Error> GitHubClient::apiJson(const std::string &ur
             return data;
         });
 }
+
+} // namespace Tools::BuildImage

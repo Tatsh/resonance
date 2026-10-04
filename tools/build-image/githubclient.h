@@ -8,6 +8,8 @@
 
 #include "error.h"
 
+namespace Tools::BuildImage {
+
 /** Client of the GitHub Actions API for the build artifacts of one repository. */
 class GitHubClient {
 public:
@@ -44,3 +46,5 @@ private:
     std::string repo_;
     std::string token_;
 };
+
+} // namespace Tools::BuildImage

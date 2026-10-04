@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+namespace Tools::CreditsAvatar {
+
 /**
  * Compose the credits avatar header.
  *
@@ -21,3 +23,5 @@
 std::string composeCreditsHeader(const std::string &text,
                                  int size,
                                  const std::optional<std::vector<std::uint8_t>> &texels);
+
+} // namespace Tools::CreditsAvatar

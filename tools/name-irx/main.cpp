@@ -10,13 +10,19 @@
 #include "logging.h"
 #include "nameirx.h"
 
+namespace Tools::NameIrx {
+
 namespace {
 
 constexpr int kUsageErrorStatus = 2;
 
 } // namespace
 
+} // namespace Tools::NameIrx
+
 int main(int argc, char *argv[]) {
+    using namespace Tools;
+    using namespace Tools::NameIrx;
     argparse::ArgumentParser parser("name-irx", "", argparse::default_arguments::help);
     parser.add_description("Write an IRX module's name into its .iopmod header, in place.");
     parser.add_argument("irx").help("The IRX file to rewrite.");

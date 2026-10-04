@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+/** Generator of the credits avatar header. */
+namespace Tools::CreditsAvatar {
+
 /**
  * Fetch a GitHub avatar over HTTPS and convert it to RGBA texels with ImageMagick.
  *
@@ -18,3 +21,5 @@
  */
 std::optional<std::vector<std::uint8_t>>
 fetchAvatar(const std::string &user, int size, const std::string &magick);
+
+} // namespace Tools::CreditsAvatar

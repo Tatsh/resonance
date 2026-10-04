@@ -8,6 +8,8 @@
 
 #include "error.h"
 
+namespace Tools::BuildImage {
+
 /** Reader of the stored and deflated members of a zip archive in memory. */
 class ZipArchive {
 public:
@@ -50,3 +52,5 @@ private:
     std::vector<std::uint8_t> data_;
     std::vector<Member> members_;
 };
+
+} // namespace Tools::BuildImage

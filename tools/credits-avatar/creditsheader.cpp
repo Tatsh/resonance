@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <format>
 
+namespace Tools::CreditsAvatar {
+
 namespace {
 
 constexpr std::size_t kBytesPerLine = 16;
@@ -61,3 +63,5 @@ std::string composeCreditsHeader(const std::string &text,
     }
     return header + "};\n";
 }
+
+} // namespace Tools::CreditsAvatar

@@ -11,6 +11,8 @@
 
 #include "volume.h"
 
+namespace Tools::BuildImage {
+
 /** Random access to the data track of a cue, raw, or ISO disc image. */
 class SourceImage final : public Volume {
 public:
@@ -24,11 +26,15 @@ public:
     static std::expected<std::unique_ptr<SourceImage>, Error>
     open(const std::filesystem::path &path);
 
+    /** @copydoc Volume::find */
     std::expected<LocatedFile, Error> find(const std::string &name) override;
+    /** @copydoc Volume::readSector */
     std::expected<void, Error> readSector(std::uint32_t lba,
                                           std::span<std::uint8_t, kSectorData> sector) override;
+    /** @copydoc Volume::readSectors */
     std::expected<std::size_t, Error> readSectors(std::uint32_t lba,
                                                   std::span<std::uint8_t> sectors) override;
+    /** @copydoc Volume::volumeSectors */
     [[nodiscard]] std::uint32_t volumeSectors() const override;
 
 private:
@@ -61,3 +67,5 @@ private:
     std::uint32_t volumeSectors_ = 0;
     std::vector<char> rawBuffer_;
 };
+
+} // namespace Tools::BuildImage

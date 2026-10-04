@@ -13,6 +13,8 @@
 #include "imageerror.h"
 #include "sectorencoder.h"
 
+namespace Tools::BuildImage {
+
 namespace {
 
 constexpr std::uint32_t kPostgapSectors = 150;
@@ -230,3 +232,5 @@ std::expected<void, Error> ImageBuilder::verify(const std::filesystem::path &ima
     }
     return {};
 }
+
+} // namespace Tools::BuildImage

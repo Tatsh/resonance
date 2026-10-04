@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <span>
 
+namespace Tools::BuildImage {
+
 /** Encoder of CD-ROM XA Mode 2 Form 1 sectors with table-driven EDC and ECC. */
 class SectorEncoder {
 public:
@@ -25,3 +27,5 @@ public:
                        std::span<const std::uint8_t, kDataSize> data,
                        std::span<std::uint8_t, kRawSize> sector);
 };
+
+} // namespace Tools::BuildImage

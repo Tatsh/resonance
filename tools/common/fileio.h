@@ -9,6 +9,8 @@
 
 #include "error.h"
 
+namespace Tools {
+
 /**
  * Read a whole file.
  *
@@ -35,3 +37,5 @@ std::expected<void, Error> writeFile(const std::filesystem::path &path,
  * @return Nothing, or an `ErrorCode::Io` error.
  */
 std::expected<void, Error> writeFile(const std::filesystem::path &path, std::string_view text);
+
+} // namespace Tools

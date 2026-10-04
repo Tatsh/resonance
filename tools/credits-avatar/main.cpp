@@ -13,6 +13,8 @@
 #include "fileio.h"
 #include "logging.h"
 
+namespace Tools::CreditsAvatar {
+
 namespace {
 
 constexpr int kUsageErrorStatus = 2;
@@ -30,7 +32,11 @@ std::string unescapeNewlines(std::string text) {
 
 } // namespace
 
+} // namespace Tools::CreditsAvatar
+
 int main(int argc, char *argv[]) {
+    using namespace Tools;
+    using namespace Tools::CreditsAvatar;
     argparse::ArgumentParser parser("credits-avatar", "", argparse::default_arguments::help);
     parser.add_description("Write the credits avatar header.");
     parser.add_argument("output").help("The header to write.");

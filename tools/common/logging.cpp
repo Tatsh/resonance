@@ -6,6 +6,8 @@
 #include <spdlog/spdlog.h>
 #include <string_view>
 
+namespace Tools {
+
 namespace {
 
 constexpr char kLevelFlag = '*';
@@ -54,3 +56,5 @@ void setupLogging(bool debug) {
     logger->set_level(debug ? spdlog::level::debug : spdlog::level::info);
     spdlog::set_default_logger(std::move(logger));
 }
+
+} // namespace Tools

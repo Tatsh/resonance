@@ -7,6 +7,8 @@
 #include "byteorder.h"
 #include "imageerror.h"
 
+namespace Tools::BuildImage {
+
 namespace {
 
 constexpr std::uint32_t kEndSignature = 0x06054B50;
@@ -145,3 +147,5 @@ std::expected<std::vector<std::uint8_t>, Error> ZipArchive::extract(const std::s
     }
     return contents;
 }
+
+} // namespace Tools::BuildImage

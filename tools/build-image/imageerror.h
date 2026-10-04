@@ -6,6 +6,8 @@
 
 #include "error.h"
 
+namespace Tools::BuildImage {
+
 /**
  * Report that the disc image cannot be read or rewritten.
  *
@@ -35,3 +37,5 @@ inline std::unexpected<Error> artifactError(std::string message) {
 inline std::unexpected<Error> ioError(std::string message) {
     return std::unexpected(Error{ErrorCode::Io, std::move(message)});
 }
+
+} // namespace Tools::BuildImage

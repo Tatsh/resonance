@@ -10,6 +10,9 @@
 
 #include "error.h"
 
+/** Writer of a FreQuency disc image with the built executable and module in place. */
+namespace Tools::BuildImage {
+
 /** A file found in the ISO9660 tree. */
 struct LocatedFile {
     std::uint32_t lba = 0;        /*!< First data sector, relative to the track start. */
@@ -37,6 +40,7 @@ public:
     /** The data bytes of one sector. */
     using Sector = std::array<std::uint8_t, kSectorData>;
 
+    /** Release the medium. */
     virtual ~Volume() = default;
 
     /**
@@ -124,3 +128,5 @@ public:
      */
     static std::unexpected<Error> pastEnd(std::uint32_t lba);
 };
+
+} // namespace Tools::BuildImage

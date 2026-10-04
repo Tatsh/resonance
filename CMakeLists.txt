@@ -52,10 +52,10 @@ if(BUILD_DOCS OR BUILD_DOCS_ONLY)
   set(DOXYGEN_VERBATIM_VARS DOXYGEN_ALIASES)
   set(DOXYGEN_ALIASES [[ghidraAddress="\par Ghidra address:^^"]])
   set(DOXYGEN_EXCLUDE_PATTERNS "*/node_modules/*" "*/build/*" "*/src/python/*")
-  # Headers sit beside their implementations under src, and only headers are documented.
+  # Headers sit beside their implementations under src and tools, and only headers are documented.
   set(DOXYGEN_FILE_PATTERNS "*.h")
   find_package(Doxygen REQUIRED COMPONENTS dot)
-  doxygen_add_docs(docs README.md src ALL)
+  doxygen_add_docs(docs README.md src tools ALL)
   if(INSTALL_DOCS)
     install(
       DIRECTORY "${CMAKE_BINARY_DIR}/html"

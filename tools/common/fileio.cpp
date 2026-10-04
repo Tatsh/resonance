@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iterator>
 
+namespace Tools {
+
 namespace {
 
 std::unexpected<Error> ioError(std::string_view action, const std::filesystem::path &path) {
@@ -45,3 +47,5 @@ std::expected<void, Error> writeFile(const std::filesystem::path &path,
 std::expected<void, Error> writeFile(const std::filesystem::path &path, std::string_view text) {
     return writeChars(path, text.data(), text.size());
 }
+
+} // namespace Tools

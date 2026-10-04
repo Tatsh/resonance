@@ -11,6 +11,8 @@
 #include "fileio.h"
 #include "imageerror.h"
 
+namespace Tools::BuildImage {
+
 namespace {
 
 // The first 12 sectors of a PlayStation 2 disc store the encrypted boot logo the console checks.
@@ -441,3 +443,5 @@ void DirectoryVolume::writeDirectory(std::size_t directory) {
                     sector.begin());
     }
 }
+
+} // namespace Tools::BuildImage

@@ -26,6 +26,8 @@
 #include "sourceimage.h"
 #include "ziparchive.h"
 
+namespace Tools::BuildImage {
+
 namespace {
 
 namespace fs = std::filesystem;
@@ -284,7 +286,11 @@ int usageError(const argparse::ArgumentParser &parser, const std::string &messag
 
 } // namespace
 
+} // namespace Tools::BuildImage
+
 int main(int argc, char *argv[]) {
+    using namespace Tools;
+    using namespace Tools::BuildImage;
     argparse::ArgumentParser parser(std::string(kProgram), "", argparse::default_arguments::help);
     parser.add_description(
         "Rebuild a FreQuency CD image with replacement binaries. The raw MODE2/2352 bin is "

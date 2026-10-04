@@ -13,6 +13,8 @@
 
 extern char **environ;
 
+namespace Tools::CreditsAvatar {
+
 namespace {
 
 struct FileCloser {
@@ -123,3 +125,5 @@ fetchAvatar(const std::string &user, int size, const std::string &magick) {
     }
     return texels;
 }
+
+} // namespace Tools::CreditsAvatar

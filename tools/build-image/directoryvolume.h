@@ -15,6 +15,8 @@
 
 #include "volume.h"
 
+namespace Tools::BuildImage {
+
 /**
  * An ISO9660 volume built from the files of a disc root directory.
  *
@@ -45,9 +47,12 @@ public:
      */
     static std::expected<std::string, Error> identify(const std::filesystem::path &root);
 
+    /** @copydoc Volume::find */
     std::expected<LocatedFile, Error> find(const std::string &name) override;
+    /** @copydoc Volume::readSector */
     std::expected<void, Error> readSector(std::uint32_t lba,
                                           std::span<std::uint8_t, kSectorData> sector) override;
+    /** @copydoc Volume::volumeSectors */
     [[nodiscard]] std::uint32_t volumeSectors() const override;
 
 private:
@@ -91,3 +96,5 @@ private:
     std::map<std::filesystem::path, std::ifstream> handles_;
     std::uint32_t volumeSectors_ = 0;
 };
+
+} // namespace Tools::BuildImage

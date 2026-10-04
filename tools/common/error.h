@@ -2,6 +2,9 @@
 
 #include <string>
 
+/** Host tools that the build runs. */
+namespace Tools {
+
 /** Kind of failure a tool reports. */
 enum class ErrorCode {
     InvalidInput, /*!< An input file does not have the expected format. */
@@ -15,3 +18,5 @@ struct Error {
     ErrorCode code;      /*!< Kind of failure. */
     std::string message; /*!< Sentence describing the failure, for the log. */
 };
+
+} // namespace Tools

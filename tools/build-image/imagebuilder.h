@@ -10,6 +10,8 @@
 
 #include "volume.h"
 
+namespace Tools::BuildImage {
+
 /** A file of the original disc and the payload that replaces it. */
 struct Replacement {
     std::string target;                /*!< File name without the version suffix. */
@@ -64,3 +66,5 @@ private:
     std::uint32_t volumeSectors_ = 0;
     std::vector<std::pair<std::string, std::uint32_t>> written_;
 };
+
+} // namespace Tools::BuildImage
