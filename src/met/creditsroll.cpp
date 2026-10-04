@@ -359,24 +359,32 @@ float CreditsRoll::AddLeadingCredit(const HxStr &text, const unsigned char *pTex
     pText->SetText(text);
     Translate(pText, afStep, flSteps);
 
-    Rnd::Tex *pTex = Rnd::NewTexThroughHook(HxStr(kLeadingTexName));
-    pTex->SetBitmapConfig(nSize, nSize, kAvatarBitsPerPixel, HxStr(""), pTex->mMipSelect, 0);
-    pTex->ReloadBitmaps();
-    if (ACanvas *pCanvas = pTex->LockMipBitmap(0, 0, 0)) {
-        const ABitmap avatar(
-            const_cast<unsigned char *>(pTexels), kABitmapFormatLinear32, false, nSize, nSize, 0);
-        pCanvas->DrawBitmap(avatar, 0, 0);
-        pTex->UnlockMipBitmap();
+    // Without texels the entry is text only, like the credits without a persona picture.
+    Rnd::Mesh *pPicture = nullptr;
+    if (pTexels != nullptr) {
+        Rnd::Tex *pTex = Rnd::NewTexThroughHook(HxStr(kLeadingTexName));
+        pTex->SetBitmapConfig(nSize, nSize, kAvatarBitsPerPixel, HxStr(""), pTex->mMipSelect, 0);
+        pTex->ReloadBitmaps();
+        if (ACanvas *pCanvas = pTex->LockMipBitmap(0, 0, 0)) {
+            const ABitmap avatar(const_cast<unsigned char *>(pTexels),
+                                 kABitmapFormatLinear32,
+                                 false,
+                                 nSize,
+                                 nSize,
+                                 0);
+            pCanvas->DrawBitmap(avatar, 0, 0);
+            pTex->UnlockMipBitmap();
+        }
+
+        Rnd::Mat *pMat = Rnd::NewMatThroughHook(HxStr(kLeadingMatName));
+        pMat->Copy(pTemplatePicture->mMat, 0);
+        pMat->mStages[kBurnStage].SetTex(pTex);
+
+        pPicture = Rnd::NewMeshThroughHook(HxStr(kLeadingPictureName));
+        pPicture->Copy(pTemplatePicture, Rnd::Mesh::kCopyShareVerts | Rnd::Mesh::kCopyShareFaces);
+        pPicture->SetMat(pMat);
+        Translate(pPicture, afStep, flSteps);
     }
-
-    Rnd::Mat *pMat = Rnd::NewMatThroughHook(HxStr(kLeadingMatName));
-    pMat->Copy(pTemplatePicture->mMat, 0);
-    pMat->mStages[kBurnStage].SetTex(pTex);
-
-    Rnd::Mesh *pPicture = Rnd::NewMeshThroughHook(HxStr(kLeadingPictureName));
-    pPicture->Copy(pTemplatePicture, Rnd::Mesh::kCopyShareVerts | Rnd::Mesh::kCopyShareFaces);
-    pPicture->SetMat(pMat);
-    Translate(pPicture, afStep, flSteps);
 
     // Every other credit moves one step further along the roll.
     for (Rnd::Text *pOther : texts_) {
@@ -392,8 +400,10 @@ float CreditsRoll::AddLeadingCredit(const HxStr &text, const unsigned char *pTex
 
     static_cast<Rnd::Drawable *>(pTemplateText)->Parent()->AddDraw(pText);
     static_cast<Rnd::Transformable *>(pTemplateText)->Parent()->AddTrans(pText);
-    static_cast<Rnd::Drawable *>(pTemplatePicture)->Parent()->AddDraw(pPicture);
-    static_cast<Rnd::Transformable *>(pTemplatePicture)->Parent()->AddTrans(pPicture);
+    if (pPicture != nullptr) {
+        static_cast<Rnd::Drawable *>(pTemplatePicture)->Parent()->AddDraw(pPicture);
+        static_cast<Rnd::Transformable *>(pTemplatePicture)->Parent()->AddTrans(pPicture);
+    }
     SetShowing(pPicture, pText, 0);
 
     texts_.insert(texts_.begin(), pText);
