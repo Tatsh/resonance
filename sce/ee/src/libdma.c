@@ -805,11 +805,9 @@ void viBufModifyPts(ViBuf *buffer, ViTimeStamp *timeStamp) {
                 int avail;
                 int total;
 
-                if (capacity == 0) {
-                    __builtin_trap();
-                }
                 avail = slot->mSize;
-                total = (timeStamp->mOffset + want - base) % capacity;
+                // Yes, the binary does not wrap this span at the ring size.
+                total = timeStamp->mOffset + want - base;
                 span = total;
                 if (avail < total) {
                     span = avail;
