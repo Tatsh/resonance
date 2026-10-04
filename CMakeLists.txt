@@ -23,9 +23,7 @@ if(VIDEO_STANDARD STREQUAL "PAL")
   add_compile_definitions(VIDEO_STANDARD_PAL)
 endif()
 
-# The reconstruction is checked as C++17. The target toolchain accepts a later standard, and raising
-# it here would mean the tree is no longer checked at the level it is written to.
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD 99)

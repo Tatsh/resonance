@@ -397,7 +397,7 @@ void GfxDevice::Terminate() {
 
 // NTSC-U/C: 0x0049fea0, PAL: 0x004ddf28
 int DrawVSyncCB([[maybe_unused]] int nCause) {
-    ++gVCount;
+    gVCount = gVCount + 1;
     ExitHandler();
     return 0;
 }
