@@ -206,7 +206,6 @@ public:
      */
     std::vector<Rnd::Button *> mButtons;
 
-public:
     /**
      * Index of the selected button, or -1 for none.
      *

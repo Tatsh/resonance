@@ -43,6 +43,43 @@ namespace Rnd {
  * the field is the animated mesh. The label is a copy-paste remnant from a sibling class.
  */
 class MeshAnim : public Animatable {
+private:
+    /**
+     * Take a reference on the mesh and on the keys owner.
+     *
+     * Load() and Copy() inline it as their own second half, and the standalone copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00494288
+     * @ghidraAddress PAL: 0x004d2138
+     */
+    void AddRefObjects();
+
+    /**
+     * Empty the three channels unless this animation owns its keys.
+     *
+     * SetKeysOwner() inlines it, and the standalone copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00494178
+     * @ghidraAddress PAL: 0x004d2028
+     */
+    void ClearKeys();
+
+    /**
+     * Drop the reference on the mesh and on the keys owner.
+     *
+     * The destructor calls it and Load(), Copy(), and Replace() inline it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00494238
+     * @ghidraAddress PAL: 0x004d20e8
+     */
+    void ReleaseObjects();
+
+    // Data members follow the recovered offset order.
+
+    // The mesh whose vertices this animation drives. The dump labels it "light:"; see the class
+    // documentation for why the label is wrong.
+    Mesh *mMesh; // +0x18
+
 public:
     /** Serial version this build writes, and the highest version it loads. */
     enum { kSerialVersion = 0 };
@@ -231,59 +268,6 @@ public:
      */
     void SetKeysOwner(MeshAnim *pOwner);
 
-protected:
-    /**
-     * Interpolate the three channels at a frame and write the result into the mesh.
-     *
-     * Rnd::Animatable vtable slot 3. Does nothing while mMesh is null. Each channel selects the
-     * keyframe pair bracketing the frame, clamping to the first and the last key outside the
-     * recorded range, and blends into the vertices of `mMesh->mVertsOwner`. Each channel then
-     * reports its own bit to Rnd::Mesh::SyncChanged().
-     *
-     * @param flFrame The filtered frame to animate to.
-     * @ghidraAddress NTSC-U/C: 0x00487518
-     * @ghidraAddress PAL: 0x004c5338
-     */
-    virtual void SetFrameSelf(float flFrame);
-
-private:
-    /**
-     * Take a reference on the mesh and on the keys owner.
-     *
-     * Load() and Copy() inline it as their own second half, and the standalone copy has no caller.
-     *
-     * @ghidraAddress NTSC-U/C: 0x00494288
-     * @ghidraAddress PAL: 0x004d2138
-     */
-    void AddRefObjects();
-
-    /**
-     * Empty the three channels unless this animation owns its keys.
-     *
-     * SetKeysOwner() inlines it, and the standalone copy has no caller.
-     *
-     * @ghidraAddress NTSC-U/C: 0x00494178
-     * @ghidraAddress PAL: 0x004d2028
-     */
-    void ClearKeys();
-
-    /**
-     * Drop the reference on the mesh and on the keys owner.
-     *
-     * The destructor calls it and Load(), Copy(), and Replace() inline it.
-     *
-     * @ghidraAddress NTSC-U/C: 0x00494238
-     * @ghidraAddress PAL: 0x004d20e8
-     */
-    void ReleaseObjects();
-
-    // Data members follow the recovered offset order, and the access specifiers interleave.
-
-    // The mesh whose vertices this animation drives. The dump labels it "light:"; see the class
-    // documentation for why the label is wrong.
-    Mesh *mMesh; // +0x18
-
-public:
     /**
      * Position keyframes.
      *
@@ -300,6 +284,21 @@ public:
          Public because Rnd::Mesh::WeldVerts() reads it at `0x00483f88` to decide whether an
          animation may be rebuilt, and the image has no accessor for it. +0x28 */
     MeshAnim *mKeysOwner;
+
+protected:
+    /**
+     * Interpolate the three channels at a frame and write the result into the mesh.
+     *
+     * Rnd::Animatable vtable slot 3. Does nothing while mMesh is null. Each channel selects the
+     * keyframe pair bracketing the frame, clamping to the first and the last key outside the
+     * recorded range, and blends into the vertices of `mMesh->mVertsOwner`. Each channel then
+     * reports its own bit to Rnd::Mesh::SyncChanged().
+     *
+     * @param flFrame The filtered frame to animate to.
+     * @ghidraAddress NTSC-U/C: 0x00487518
+     * @ghidraAddress PAL: 0x004c5338
+     */
+    virtual void SetFrameSelf(float flFrame);
 };
 
 /**

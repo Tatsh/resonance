@@ -19,6 +19,11 @@ class Player;
  * The destructor at `0x003dcfc8` is compiler-generated and has no declaration here.
  */
 class ChoosePowerupMsg : public Message {
+private:
+    // The three names come from the two collections, the only producers of the message, which
+    // write the selected entry, the owning player, and the selected kind into them in this order.
+    int mIndex; // +0x04
+
 public:
     /**
      * Construct a message with the payload unset.
@@ -90,12 +95,6 @@ public:
      */
     virtual void PrintExtra(std::ostream &stream) const;
 
-private:
-    // The three names come from the two collections, the only producers of the message, which
-    // write the selected entry, the owning player, and the selected kind into them in this order.
-    int mIndex; // +0x04
-
-public:
     Player *mOwner; /*!< The player whose selection changed. +0x08 */
     int mType;      /*!< The selected PowerupType value, or kHudItemNone. +0x0c */
 };

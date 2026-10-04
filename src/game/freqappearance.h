@@ -294,7 +294,6 @@ public:
         return mSkillStatus;
     }
 
-public:
     /**
      * Player username, starting as the literal `initial name`.
      *
@@ -303,6 +302,14 @@ public:
      * route that read through. A friend declaration fits the image equally well. +0x00
      */
     HxStr mUserName;
+
+    /**
+     * The avatar, owned, 0xb0 bytes. +0x08
+     *
+     * Public because MetFreqMakerCanvasScreen::CommitPersona(), LoadPersona(), and LoadPrefab()
+     * copy the avatar in and out of it directly, and the image has no accessor.
+     */
+    FreqAppearanceDetail *mDetail;
 
 private:
     /**
@@ -316,15 +323,5 @@ private:
      */
     static void EncodeNonZeroBytes(const unsigned char *pSource, unsigned char *pDest);
 
-public:
-    /**
-     * The avatar, owned, 0xb0 bytes. +0x08
-     *
-     * Public because MetFreqMakerCanvasScreen::CommitPersona(), LoadPersona(), and LoadPrefab()
-     * copy the avatar in and out of it directly, and the image has no accessor.
-     */
-    FreqAppearanceDetail *mDetail;
-
-private:
     int mSkillStatus; // +0x0c
 };

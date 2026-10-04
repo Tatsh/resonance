@@ -119,7 +119,6 @@ public:
      */
     virtual void restoreGuts(IBStream &stream);
 
-public:
     /** The identifier of the scoring player. Player::DispatchPriv() reads it. +0x14 */
     int mPlayerId;
 

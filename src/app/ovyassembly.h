@@ -18,6 +18,9 @@ class Animatable;
  * `HUD1 label swap.tnm`.
  */
 class OvyAssembly {
+private:
+    Rnd::Animatable *mAnim;
+
 public:
     /**
      * Resolve the animation, rewind it to frame 0, and set the ramp's range.
@@ -66,10 +69,6 @@ public:
      */
     void Execute(float flTime);
 
-private:
-    Rnd::Animatable *mAnim;
-
-public:
     // Public because the activator-label script command drives it with no accessor in the image.
     LinearAnim mRamp;
 };

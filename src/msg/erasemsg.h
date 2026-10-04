@@ -108,7 +108,6 @@ public:
      */
     virtual void PrintExtra(std::ostream &stream) const;
 
-public:
     // Public because Voxer::DispatchPriv(), Scratcher::DispatchPriv(), and
     // NotePitcher::DispatchPriv() read the members below directly, through an EraseMsg pointer
     // from outside the hierarchy, and the image exposes no accessor. A friend declaration fits

@@ -367,7 +367,6 @@ public:
      */
     int mBarCount;
 
-public:
     /**
      * Ascending sequence of positions.
      *

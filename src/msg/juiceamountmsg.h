@@ -91,7 +91,6 @@ public:
      */
     float GetJuiceFraction();
 
-public:
     /**
      * Player the message is about.
      *

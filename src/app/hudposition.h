@@ -65,6 +65,19 @@ public:
         }
     }
 
+    /**
+     * Style every section block for the current bar.
+     *
+     * Gives each block the material, the scale, and the label font for its place relative to the
+     * section of mBar, and places the repeat marker on that section when the play map reports it
+     * as repeating. Public because Overlay's AdvanceSectionToggleMsg handler at `0x0041f440`
+     * calls it. The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041ad88
+     * @ghidraAddress PAL: 0x004556c0
+     */
+    void Update();
+
 private:
     // One section of the level, with its block and its label.
     struct Section {
@@ -80,21 +93,6 @@ private:
     // MIDI ticks in one bar.
     static constexpr float kTicksPerBar = 1920.0f;
 
-public:
-    /**
-     * Style every section block for the current bar.
-     *
-     * Gives each block the material, the scale, and the label font for its place relative to the
-     * section of mBar, and places the repeat marker on that section when the play map reports it
-     * as repeating. Public because Overlay's AdvanceSectionToggleMsg handler at `0x0041f440`
-     * calls it. The title is inferred.
-     *
-     * @ghidraAddress NTSC-U/C: 0x0041ad88
-     * @ghidraAddress PAL: 0x004556c0
-     */
-    void Update();
-
-private:
     std::vector<Section> mSections;
     PlayMap *mPlayMap;
     Rnd::View *mView;       // `<layout> pos.view`

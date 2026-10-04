@@ -57,7 +57,6 @@ public:
      */
     virtual const char *GetName() const;
 
-public:
     /**
      * Player the message is about.
      *

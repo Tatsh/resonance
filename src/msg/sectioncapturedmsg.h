@@ -22,6 +22,9 @@ class Player;
  * The destructor at `0x003ded28` is compiler-generated and has no declaration here.
  */
 class SectionCapturedMsg : public Message {
+private:
+    int mFirstBar; // +0x04
+
 public:
     /**
      * Construct a message with the payload unset.
@@ -97,10 +100,6 @@ public:
      */
     virtual void PrintExtra(std::ostream &stream) const;
 
-private:
-    int mFirstBar; // +0x04
-
-public:
     int mEndBar;     /*!< The end of the bar range. +0x08 */
     int mTrack;      /*!< The track. +0x0c */
     Player *mPlayer; /*!< The capturing player. +0x10 */

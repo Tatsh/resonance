@@ -14,6 +14,10 @@ class Mesh;
  * shared bar.
  */
 class HudEnergy {
+private:
+    Rnd::Animatable *mAnim; // `HUD1 energy bar.msnm`
+    Rnd::Mesh *mBar;        // `HUD1 energy bar.mesh`
+
 public:
     /**
      * Resolve the bar and its animation, and empty it.
@@ -39,11 +43,6 @@ public:
      */
     void SetFrame(float flFrame);
 
-private:
-    Rnd::Animatable *mAnim; // `HUD1 energy bar.msnm`
-    Rnd::Mesh *mBar;        // `HUD1 energy bar.mesh`
-
-public:
     /**
      * The level, 0 through 1. +0x08
      *

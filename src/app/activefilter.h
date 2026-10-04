@@ -25,6 +25,18 @@ class TickClock;
  * and runs the first step at once.
  */
 class ActiveFilter {
+private:
+    float mTarget;
+    // The share of the previous value each step keeps.
+    float mRetention;
+    float mValue;
+    FilterLover *mLover;
+    Sch::TickClock *mClock;
+    // The handle the command is queued under.
+    Sch::CmdID mCommand;
+    // The file-local command, created by the first SetTarget().
+    Sch::Command *mStepCommand;
+
 public:
     /**
      * Prepare an idle filter.
@@ -83,19 +95,6 @@ public:
      */
     void Update();
 
-private:
-    float mTarget;
-    // The share of the previous value each step keeps.
-    float mRetention;
-    float mValue;
-    FilterLover *mLover;
-    Sch::TickClock *mClock;
-    // The handle the command is queued under.
-    Sch::CmdID mCommand;
-    // The file-local command, created by the first SetTarget().
-    Sch::Command *mStepCommand;
-
-public:
     /**
      * Time between steps, in nanoseconds.
      *

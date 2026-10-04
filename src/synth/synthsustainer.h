@@ -23,34 +23,6 @@
  * The descriptor at `0x008f2a70` is what settles the name.
  */
 class SynthSustainer : public MsgSink {
-public:
-    /**
-     * Construct a filter with both sets empty and no downstream sink.
-     *
-     * @ghidraAddress NTSC-U/C: 0x001d2060
-     * @ghidraAddress PAL: 0x001d7f18
-     */
-    SynthSustainer();
-
-    /**
-     * @ghidraAddress NTSC-U/C: 0x001d2860
-     * @ghidraAddress PAL: 0x001d8718
-     */
-    virtual ~SynthSustainer();
-
-protected:
-    /**
-     * Dispatch on the message's registered identity.
-     *
-     * Vtable slot 3. A SustainNoteMsg and a StdMidiMsg arrive at their handlers and every other
-     * message is discarded.
-     *
-     * @param pMsg The message.
-     * @ghidraAddress NTSC-U/C: 0x001d2a10
-     * @ghidraAddress PAL: 0x001d88c8
-     */
-    virtual void DispatchPriv(Message *pMsg);
-
 private:
     /**
      * Add the requested note to the sustained set unless it is already sounding.
@@ -73,6 +45,20 @@ private:
 
 public:
     /**
+     * Construct a filter with both sets empty and no downstream sink.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d2060
+     * @ghidraAddress PAL: 0x001d7f18
+     */
+    SynthSustainer();
+
+    /**
+     * @ghidraAddress NTSC-U/C: 0x001d2860
+     * @ghidraAddress PAL: 0x001d8718
+     */
+    virtual ~SynthSustainer();
+
+    /**
      * Sink that receives every message the filter passes on.
      *
      * The constructor zeroes it and nothing in this translation unit assigns it, so the writer is
@@ -81,4 +67,17 @@ public:
      * vectors because the member sits after them in the object.
      */
     MsgSink *mSink; /*!< The downstream sink. +0x1c */
+
+protected:
+    /**
+     * Dispatch on the message's registered identity.
+     *
+     * Vtable slot 3. A SustainNoteMsg and a StdMidiMsg arrive at their handlers and every other
+     * message is discarded.
+     *
+     * @param pMsg The message.
+     * @ghidraAddress NTSC-U/C: 0x001d2a10
+     * @ghidraAddress PAL: 0x001d88c8
+     */
+    virtual void DispatchPriv(Message *pMsg);
 };

@@ -166,6 +166,15 @@ public:
      */
     void RemoveView(View *pChild);
 
+    // Declared in recovered offset order. Each flag is named after the class key of the factory
+    // that sets it. Every writer is one of those factories and no reader was located, so the four
+    // are public because nothing in the image constrains them further.
+
+    int mAnimatable;    /*!< Set when the class key was "Animatable". +0xf0 */
+    int mTransformable; /*!< Set when the class key was "Transformable". +0xf4 */
+    int mDrawable;      /*!< Set when the class key was "Drawable". +0xf8 */
+    int mCollideable;   /*!< Set when the class key was "Collideable". +0xfc */
+
 private:
     /**
      * Drop the references this view holds, of which there are none, so the body is empty.
@@ -177,16 +186,6 @@ private:
      * @ghidraAddress PAL: 0x00520fe8
      */
     void RemoveObjectRefs();
-
-public:
-    // Declared in recovered offset order. Each flag is named after the class key of the factory
-    // that sets it. Every writer is one of those factories and no reader was located, so the four
-    // are public because nothing in the image constrains them further.
-
-    int mAnimatable;    /*!< Set when the class key was "Animatable". +0xf0 */
-    int mTransformable; /*!< Set when the class key was "Transformable". +0xf4 */
-    int mDrawable;      /*!< Set when the class key was "Drawable". +0xf8 */
-    int mCollideable;   /*!< Set when the class key was "Collideable". +0xfc */
 };
 
 /**

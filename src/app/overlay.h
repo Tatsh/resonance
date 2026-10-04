@@ -126,6 +126,10 @@ public:
      */
     void OnLeaderChanged(Player *pOldLeader, Player *pNewLeader);
 
+    // The parts that belong to the whole screen, deleted by the destructor. Public because
+    // the heads-up script commands drive them with no accessor in the image.
+    HudPanel *mPanel;
+
 private:
     // DispatchPriv() runs one of the handlers below per message identity. Each handler written
     // "inlined" is expanded in place there, and its out-of-line copy has no caller. Most handlers
@@ -407,12 +411,6 @@ private:
      */
     static void SetLayoutName(int nLayout);
 
-public:
-    // The parts that belong to the whole screen, deleted by the destructor. Public because
-    // the heads-up script commands drive them with no accessor in the image.
-    HudPanel *mPanel;
-
-private:
     // One track display per world player that has a slot, deleted by the destructor.
     std::vector<HudTrack *> mTracks;
     // One badge per world player.

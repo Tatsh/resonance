@@ -116,7 +116,6 @@ public:
      */
     virtual void restoreGuts(IBStream &stream);
 
-public:
     /** The bumping player. TrackSelector::RebuildChannelGrid() resolves it. +0x14 */
     IDablePtr<Player> mPlayer;
 

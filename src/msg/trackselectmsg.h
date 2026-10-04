@@ -72,7 +72,6 @@ public:
      */
     virtual void PrintExtra(std::ostream &stream) const;
 
-public:
     /**
      * The selected track. Copied into NetPlayer `+0x48` by its handler at `0x00125f70`. +0x04
      *

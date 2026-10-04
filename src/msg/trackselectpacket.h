@@ -119,7 +119,6 @@ public:
      */
     virtual void restoreGuts(IBStream &stream);
 
-public:
     /** The song position of the selection. NetPlayer's handler at `0x00122f78` reads it. +0x14 */
     Sch::Tick mPosition;
 

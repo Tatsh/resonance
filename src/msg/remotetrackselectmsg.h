@@ -74,7 +74,6 @@ public:
      */
     virtual void PrintExtra(std::ostream &stream) const;
 
-public:
     /**
      * The selected track. NetPlayer's packet handler at `0x00122f78` writes it from the packet's
      * track, and TrackSelector::DispatchPriv() reads it. +0x04

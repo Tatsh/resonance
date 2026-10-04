@@ -41,6 +41,24 @@ constexpr unsigned kCopyChildLists = 0x200;
  * goes away.
  */
 class Object {
+protected:
+    /**
+     * Tell every referrer to drop its pointer to this object.
+     *
+     * Sets mDeleting, collapses adjacent duplicates in mRefs, calls Replace() on each referrer
+     * with a null replacement, then empties mRefs. Every derived destructor runs this immediately
+     * before the object goes away.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0053fca0
+     * @ghidraAddress PAL: 0x0057f960
+     */
+    void ReleaseAllRefs();
+
+    // Declared in recovered offset order.
+
+    // Objects that store a pointer to this one. Rnd::Drawable::Parent() and its siblings walk it.
+    std::list<Object *> mRefs; // +0x00
+
 public:
     /**
      * Construct an unnamed object.
@@ -172,25 +190,6 @@ public:
      */
     virtual void Load(Stream &stream) = 0;
 
-protected:
-    /**
-     * Tell every referrer to drop its pointer to this object.
-     *
-     * Sets mDeleting, collapses adjacent duplicates in mRefs, calls Replace() on each referrer
-     * with a null replacement, then empties mRefs. Every derived destructor runs this immediately
-     * before the object goes away.
-     *
-     * @ghidraAddress NTSC-U/C: 0x0053fca0
-     * @ghidraAddress PAL: 0x0057f960
-     */
-    void ReleaseAllRefs();
-
-    // Declared in recovered offset order, with the access specifiers interleaved.
-
-    // Objects that store a pointer to this one. Rnd::Drawable::Parent() and its siblings walk it.
-    std::list<Object *> mRefs; // +0x00
-
-public:
     HxStr mName; /*!< Registry key. Public because the draws-list writer and the reference dumper
                       both read the name of an unrelated object, and the image exposes no accessor
                       for it; either call could equally be an inlined accessor. +0x04 */

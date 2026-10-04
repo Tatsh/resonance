@@ -272,6 +272,11 @@ public:
      */
     virtual void Load(Stream &stream);
 
+    // Declared in recovered offset order. Protected because Rnd::Mesh derives from this class and
+    // Mesh::FindCollisions tests this flag at its top.
+    // Public because the drawable show commands read it with no accessor in the image.
+    int mShowing; // +0x04
+
 protected:
     /**
      * Draw this object alone.
@@ -294,13 +299,6 @@ protected:
      * @ghidraAddress PAL: 0x00545a70
      */
     void ReleaseDrawsRefs();
-
-public:
-    // Declared in recovered offset order, with the access specifiers interleaved. Protected
-    // because Rnd::Mesh derives from this class and Mesh::FindCollisions tests this flag at its
-    // top.
-    // Public because the drawable show commands read it with no accessor in the image.
-    int mShowing; // +0x04
 
 private:
     /**

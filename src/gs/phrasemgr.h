@@ -484,22 +484,6 @@ public:
      */
     void SetPhraseOwner(Player *pPlayer, int nBar);
 
-protected:
-    /**
-     * Act on a message.
-     *
-     * Primary table slot 3. A PhrasePacket runs OnPhrasePacket(), a CaughtPhrasePacket runs
-     * OnCaughtPhrasePacket(), a GemPacket runs PostGemMsg(), an InvalidateTrackMsg runs
-     * OnInvalidateTrack(), a RefreshNetMsg runs OnRefreshNet(), and a GameBeginMsg runs
-     * RefreshAllBars(). The two On routines and RefreshAllBars() are expanded inline.
-     *
-     * @param pMsg The message or packet.
-     * @ghidraAddress NTSC-U/C: 0x001bc718
-     * @ghidraAddress PAL: 0x001c24f0
-     */
-    virtual void DispatchPriv(Message *pMsg);
-
-public:
     /**
      * Player of this track's phrases.
      *
@@ -521,6 +505,21 @@ public:
      * +0x1c
      */
     MsgSink *mNetSink;
+
+protected:
+    /**
+     * Act on a message.
+     *
+     * Primary table slot 3. A PhrasePacket runs OnPhrasePacket(), a CaughtPhrasePacket runs
+     * OnCaughtPhrasePacket(), a GemPacket runs PostGemMsg(), an InvalidateTrackMsg runs
+     * OnInvalidateTrack(), a RefreshNetMsg runs OnRefreshNet(), and a GameBeginMsg runs
+     * RefreshAllBars(). The two On routines and RefreshAllBars() are expanded inline.
+     *
+     * @param pMsg The message or packet.
+     * @ghidraAddress NTSC-U/C: 0x001bc718
+     * @ghidraAddress PAL: 0x001c24f0
+     */
+    virtual void DispatchPriv(Message *pMsg);
 
 private:
     // Post again, with its gems cleared, the first window bar that mMap maps to a step.

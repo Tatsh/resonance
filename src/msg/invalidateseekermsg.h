@@ -85,7 +85,6 @@ public:
      */
     virtual const char *GetName() const;
 
-public:
     // Public because Voxer::DispatchPriv(), Scratcher::DispatchPriv(), and
     // NotePitcher::DispatchPriv() read the members below directly, through an InvalidateSeekerMsg
     // pointer from outside the hierarchy, and the image exposes no accessor. A friend declaration

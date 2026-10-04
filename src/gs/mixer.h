@@ -111,6 +111,14 @@ public:
      */
     void SendPan();
 
+    /**
+     * The sink every message this mixer emits is sent to.
+     *
+     * The constructor does not write it. Public because BGTrackGraph::AttachMixerToSynth() stores
+     * it directly at `0x001404c4`, and the image has no accessor. +0x04
+     */
+    MsgSink *mOutput;
+
 protected:
     /**
      * React to a TrackSelectMsg.
@@ -161,15 +169,6 @@ protected:
      * @ghidraAddress PAL: 0x001ad4e8
      */
     virtual void DispatchPriv(Message *pMsg);
-
-public:
-    /**
-     * The sink every message this mixer emits is sent to.
-     *
-     * The constructor does not write it. Public because BGTrackGraph::AttachMixerToSynth() stores
-     * it directly at `0x001404c4`, and the image has no accessor. +0x04
-     */
-    MsgSink *mOutput;
 
 private:
     unsigned char mChannel; // +0x08

@@ -112,6 +112,29 @@ public:
      */
     void Step(int nFrames);
 
+    /**
+     * Drive the two periodic timers while the frame loop is blocked.
+     *
+     * The long-operation poll callback. Renderer's constructor also calls it directly, at
+     * `0x0042c3bc`, before it waits for the common loads.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ec7d0
+     * @ghidraAddress PAL: 0x001f2a58
+     */
+    static void PumpTimers();
+
+    /**
+     * Redraw the display during a long operation.
+     *
+     * Refreshes the display at most once every 18 milliseconds of the profiler clock, or
+     * every 21 milliseconds in the PAL build. Public because GrooveWorld::EndLevel() at
+     * `0x0018eb70` installs it as the bank-load progress hook.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ec8c0
+     * @ghidraAddress PAL: 0x001f2b48
+     */
+    static void KeepAliveDraw();
+
 protected:
     /**
      * Report no progress, because the frame loop never finishes.
@@ -139,30 +162,6 @@ protected:
      * @ghidraAddress PAL: 0x001f2f98
      */
     virtual int Poll();
-
-public:
-    /**
-     * Drive the two periodic timers while the frame loop is blocked.
-     *
-     * The long-operation poll callback. Renderer's constructor also calls it directly, at
-     * `0x0042c3bc`, before it waits for the common loads.
-     *
-     * @ghidraAddress NTSC-U/C: 0x001ec7d0
-     * @ghidraAddress PAL: 0x001f2a58
-     */
-    static void PumpTimers();
-
-    /**
-     * Redraw the display during a long operation.
-     *
-     * Refreshes the display at most once every 18 milliseconds of the profiler clock, or
-     * every 21 milliseconds in the PAL build. Public because GrooveWorld::EndLevel() at
-     * `0x0018eb70` installs it as the bank-load progress hook.
-     *
-     * @ghidraAddress NTSC-U/C: 0x001ec8c0
-     * @ghidraAddress PAL: 0x001f2b48
-     */
-    static void KeepAliveDraw();
 
 private:
     /**

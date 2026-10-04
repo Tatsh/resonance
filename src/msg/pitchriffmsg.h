@@ -108,7 +108,6 @@ public:
      */
     virtual void PrintExtra(std::ostream &stream) const;
 
-public:
     // Public because Scratcher::DispatchPriv() reads these directly, through a PitchRiffMsg
     // pointer from outside the hierarchy, and the image exposes no accessor. A friend declaration
     // fits equally well.

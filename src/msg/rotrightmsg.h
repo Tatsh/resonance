@@ -81,7 +81,6 @@ public:
      */
     virtual const char *GetName() const;
 
-public:
     /** The player to rotate. TrackSelector::DispatchPriv() reads it at `0x0013b8f8`. +0x04 */
     Player *mPlayer;
 

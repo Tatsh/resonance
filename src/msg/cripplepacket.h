@@ -26,6 +26,9 @@ class Player;
  * The destructor at `0x003ee2d8` is compiler-generated and has no declaration here.
  */
 class CripplePacket : public ToAllOtherGameSystemsPacket {
+private:
+    IDablePtr<Player> mAttacker; // +0x14
+
 public:
     /**
      * Construct a packet with no references.
@@ -119,10 +122,6 @@ public:
      */
     virtual void restoreGuts(IBStream &stream);
 
-private:
-    IDablePtr<Player> mAttacker; // +0x14
-
-public:
     /**
      * The players the crippler strikes. +0x1c
      *
