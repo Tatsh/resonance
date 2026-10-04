@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(resonance VERSION 0.0.2 LANGUAGES C CXX ASM)
+project(resonance VERSION 0.0.0 LANGUAGES C CXX ASM)
 
 option(BUILD_DOCS "Build documentation alongside the sources." OFF)
 option(BUILD_DOCS_ONLY "Build documentation and nothing else." OFF)
