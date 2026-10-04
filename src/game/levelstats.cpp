@@ -113,7 +113,12 @@ void LevelStats::Assign(const LevelStats &other) {
     mName = other.mName;
     mStage = other.mStage;
     mSkills.clear();
+    // Yes, the binary fills with a temporary whose members are never set. The loop below overwrites
+    // every element.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     mSkills.resize(other.mSkills.size(), SkillStats());
+#pragma GCC diagnostic pop
     for (unsigned i = 0; i < mSkills.size(); ++i) {
         mSkills[i] = other.mSkills[i];
     }
