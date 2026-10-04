@@ -47,9 +47,10 @@
     exclude: '^src/python/(PC|patches)/',
   },
   gitattributes+: ['/3rdparty/** -text linguist-vendored'],
-  gitignore+: ['*.iso', '/.sbclaude-venv/'],
   // Vendored upstream sources are not reformatted.
   prettierignore+: ['/3rdparty/'],
+  // Disc images built for testing.
+  shared_ignore+: ['*.bin', '*.cue', '*.iso'],
   vscode+: {
     c_cpp+: {
       configurations: [
