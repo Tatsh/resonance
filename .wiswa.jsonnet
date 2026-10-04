@@ -7,7 +7,7 @@
   want_codeql: false,
   want_tests: false,
   want_winget: false,
-  clang_format_args: "$(git ls-files 'src/*.h' 'src/*.cpp' ':!:src/python/*')",
+  clang_format_args: "$(git ls-files 'src/*.h' 'src/*.cpp' 'tools/*.h' 'tools/*.cpp' ':!:src/python/*')",
   clang_format+: {
     BreakInheritanceList: 'AfterColon',
     IncludeBlocks: 'Regroup',
@@ -51,6 +51,18 @@
   prettierignore+: ['/3rdparty/'],
   // Disc images built for testing.
   shared_ignore+: ['*.bin', '*.cue', '*.iso'],
+  // The host tools under tools/ need these packages to build. The PS2 build does not use vcpkg.
+  vcpkg+: {
+    dependencies: [
+      { host: true, name: 'argparse' },
+      { features: ['openssl'], host: true, name: 'cpp-httplib' },
+      { host: true, name: 'elfio' },
+      { host: true, name: 'nlohmann-json' },
+      { host: true, name: 'openssl' },
+      { host: true, name: 'spdlog' },
+      { host: true, name: 'zlib' },
+    ],
+  },
   vscode+: {
     c_cpp+: {
       configurations: [

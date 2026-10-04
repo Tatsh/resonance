@@ -1,6 +1,36 @@
 {
   "dependencies": [
-
+    {
+      "host": true,
+      "name": "argparse"
+    },
+    {
+      "features": [
+        "openssl"
+      ],
+      "host": true,
+      "name": "cpp-httplib"
+    },
+    {
+      "host": true,
+      "name": "elfio"
+    },
+    {
+      "host": true,
+      "name": "nlohmann-json"
+    },
+    {
+      "host": true,
+      "name": "openssl"
+    },
+    {
+      "host": true,
+      "name": "spdlog"
+    },
+    {
+      "host": true,
+      "name": "zlib"
+    }
   ],
   "description": "Reconstructed source of the PlayStation 2 game FreQuency.",
   "documentation": "https://resonance.readthedocs.org",

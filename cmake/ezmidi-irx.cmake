@@ -24,8 +24,6 @@ if(EZMIDI_MISSING)
   return()
 endif()
 
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
-
 set(EZMIDI_SRC_DIR "${CMAKE_SOURCE_DIR}/src/ezmidi")
 set(EZMIDI_BUILD_DIR "${CMAKE_BINARY_DIR}/ezmidi")
 set(EZMIDI_LINKFILE "${CMAKE_SOURCE_DIR}/sce/iop/iop.ld")
@@ -87,9 +85,8 @@ add_custom_command(
   COMMAND ${EZMIDI_IOP_FIXUP} --rb --irx1 --allow-zero-text ${_ezmidi_fixup_output}
           "${EZMIDI_BUILD_DIR}/EZMIDI.IRX" "${_ezmidi_fixup_input}"
   # srxfixup leaves the name in the .iopmod header empty. The shipped module has it there.
-  COMMAND Python3::Interpreter "${CMAKE_SOURCE_DIR}/scripts/name-irx.py"
-          "${EZMIDI_BUILD_DIR}/EZMIDI.IRX"
-  DEPENDS ${EZMIDI_OBJS} "${EZMIDI_LINKFILE}" "${CMAKE_SOURCE_DIR}/scripts/name-irx.py"
+  COMMAND "${RESONANCE_TOOL_NAME_IRX}" "${EZMIDI_BUILD_DIR}/EZMIDI.IRX"
+  DEPENDS ${EZMIDI_OBJS} "${EZMIDI_LINKFILE}" resonance_tools "${RESONANCE_TOOL_NAME_IRX}"
   COMMENT "Linking EZMIDI.IRX"
   VERBATIM)
 

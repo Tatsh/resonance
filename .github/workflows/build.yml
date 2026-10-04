@@ -14,10 +14,13 @@ jobs:
     container:
       image: 'ghcr.io/ps2dev/ps2dev:latest@sha256:06ace7056f19de9bb96608fc261c050c770686a8cc79e0488ac07cc055131777'
     steps:
+      # The host tools under tools/ use the Alpine packages of nlohmann-json, OpenSSL, spdlog, and
+      # zlib. Alpine does not package argparse, cpp-httplib, or ELFIO, and the configure step
+      # downloads their pinned releases.
       - name: 'Install build dependencies'
         run: |
           apk add --no-cache build-base cmake git gmp-dev imagemagick mpc1-dev mpfr-dev ninja \
-            python3
+            nlohmann-json openssl-dev spdlog-dev zlib-dev
       - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         with:
           persist-credentials: false

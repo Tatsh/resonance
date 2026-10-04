@@ -7,10 +7,8 @@ set(RESONANCE_DISC_IMAGE
 that the image target rebuilds. It must be the release VIDEO_STANDARD selects.")
 
 if(RESONANCE_DISC_IMAGE AND NOT BUILD_DOCS_ONLY)
-  find_package(Python3 REQUIRED COMPONENTS Interpreter)
   execute_process(
-    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/scripts/build-image.py" --identify
-            "${RESONANCE_DISC_IMAGE}"
+    COMMAND "${RESONANCE_TOOL_BUILD_IMAGE}" --identify "${RESONANCE_DISC_IMAGE}"
     OUTPUT_VARIABLE _resonance_disc_executable
     ERROR_VARIABLE _resonance_disc_error
     RESULT_VARIABLE _resonance_disc_result

@@ -46,6 +46,7 @@ apptunnelscript
 apsz
 arect
 argn
+argparse
 arkfile
 arkfiles
 arle
@@ -172,11 +173,13 @@ cpdist
 cpic
 cplens
 cplext
+cpphttplib
 cpprtti
 cppv
 cpsm
 createdirop
 creditsavatar
+creditsheader
 creditsroll
 crip
 cripfx
@@ -213,6 +216,7 @@ devirtualised
 dfan
 dictobject
 dimx
+directoryvolume
 discon
 discswap
 dispfb
@@ -222,6 +226,7 @@ dmacnt
 dmaend
 docstrings
 dogamesystemplaycmd
+dopenssl
 doutput
 drawverts
 dresonance
@@ -237,6 +242,7 @@ durgemmsg
 durgemrowstring
 durgemstrip
 durgemtrails
+dvcpkg
 dvideo
 dynload
 easywarn
@@ -253,6 +259,9 @@ egsl
 egsr
 egsw
 egwb
+elfclass
+elfdata
+elfio
 elif
 enablefreestylemsg
 enablemgr
@@ -393,6 +402,7 @@ ghostnoteseffector
 ghostnotespowerup
 giftag
 gimple
+githubclient
 globalsettings
 globl
 gouraud
@@ -423,6 +433,7 @@ hilite
 hisquare
 hostmode
 hsyn
+httplib
 hudanalogstick
 hudbadge
 hudcountdown
@@ -472,6 +483,7 @@ ibstream
 idablebase
 ifdef
 ifndef
+imagebuilder
 immediates
 inbuf
 ingame
@@ -829,6 +841,7 @@ mvolr
 mypy
 myreadline
 mystrtoul
+nameirx
 namenogood
 nearesttrackmsg
 netdb
@@ -845,6 +858,7 @@ newmodule
 ngroups
 njgb
 nlfilebuf
+nlohmann
 noat
 nobits
 nocard
@@ -1120,6 +1134,7 @@ sdata
 sdrdrv
 seccache
 sectioncapturedmsg
+sectorencoder
 seekermsg
 seekop
 seermusic
@@ -1180,6 +1195,7 @@ songtitle
 sonylib
 sonylibs
 soundbank
+sourceimage
 spewregister
 spewtable
 spindlctrl
@@ -1407,9 +1423,11 @@ xyoffset
 xyzf
 yarnrc
 zbuf
+ziparchive
 zizmor
 zmsk
 zpsm
+zstd
 ztest
 ztst
 Ångström

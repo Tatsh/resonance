@@ -1,10 +1,9 @@
 # Defines the image target, which writes a bootable FreQuency CD image, a raw MODE2/2352 bin and
 # its cue sheet, with the built executable and EZMIDI.IRX in place of the originals.
 #
-# scripts/build-image.py rebuilds the image from an original disc image, so the target exists only
-# once RESONANCE_DISC_IMAGE specifies one (cue, bin, or ISO) or the disc root directory.
-# The script needs requests. Point Python3_EXECUTABLE at an interpreter that has it when the
-# default one does not.
+# The build-image tool rebuilds the image from an original disc image. The target exists only once
+# RESONANCE_DISC_IMAGE specifies an original disc image (cue, bin, or ISO) or the disc root
+# directory.
 
 # RESONANCE_DISC_IMAGE is defined in disc-region.cmake. disc-region.cmake reads it before the
 # compile definitions are set.
@@ -27,8 +26,6 @@ if(NOT TARGET ezmidi_irx)
   message(STATUS "The image target needs the IOP toolchain for EZMIDI.IRX, and it is disabled.")
   return()
 endif()
-
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 # A disc root is rebuilt whenever one of its files changes.
 if(IS_DIRECTORY "${RESONANCE_DISC_IMAGE}")
@@ -63,11 +60,11 @@ endif()
 add_custom_command(
   OUTPUT "${RESONANCE_IMAGE_OUTPUT}" "${_resonance_image_dir}/${_resonance_image_stem}.bin"
   COMMAND
-    Python3::Interpreter "${CMAKE_SOURCE_DIR}/scripts/build-image.py" "${RESONANCE_DISC_IMAGE}"
-    "${RESONANCE_IMAGE_OUTPUT}" --overwrite --resonance-bin "${_resonance_executable}"
-    --ezmidi-irx "${_resonance_irx}" ${_resonance_system_area_args}
+    "${RESONANCE_TOOL_BUILD_IMAGE}" "${RESONANCE_DISC_IMAGE}" "${RESONANCE_IMAGE_OUTPUT}"
+    --overwrite --resonance-bin "${_resonance_executable}" --ezmidi-irx "${_resonance_irx}"
+    ${_resonance_system_area_args}
   DEPENDS ${CMAKE_PROJECT_NAME} ezmidi_irx "${_resonance_executable}" "${_resonance_irx}"
-          ${_resonance_disc_inputs} "${CMAKE_SOURCE_DIR}/scripts/build-image.py"
+          ${_resonance_disc_inputs} resonance_tools "${RESONANCE_TOOL_BUILD_IMAGE}"
   COMMENT "Writing ${RESONANCE_IMAGE_OUTPUT}"
   VERBATIM)
 add_custom_target(image DEPENDS "${RESONANCE_IMAGE_OUTPUT}")
