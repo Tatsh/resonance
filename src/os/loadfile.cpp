@@ -123,25 +123,6 @@ void *AllocateLoadBuffer(unsigned nSize, const char *pszFile, int nLine) {
 
 } // namespace
 
-extern "C" {
-
-// Record the destination for the inflate output.
-void GzipSetMemoryOutput(void *pDest);
-
-// Clear the inflate state before a run.
-void gzip_clear_bufs();
-
-// Run the inflate and report the status word.
-int GzipInflate(int nDescriptor);
-
-// Report the inflate status and return zero on success.
-int GzipReportInflateError();
-
-// Report the number of bytes the inflate produced.
-int GzipInflatedSize();
-
-} // extern "C"
-
 // NTSC-U/C: 0x00761488, PAL: 0x007a43b8
 // The inflate input descriptor always reads minus one for a memory source.
 int gzip_ifd = 0;
@@ -302,38 +283,6 @@ unsigned GetGzFileSize(int nFile) {
     return nSize;
 }
 
-int GzipDecompressRamToRam(const void *pSource, int nSourceLength, void *pDest) {
-    gzipInSrcPtr = pSource;
-    gzipInSrcSize = nSourceLength;
-    gzipInSrcBuff = pSource;
-    memcpy(gzipIfname, kMemoryInputName, sizeof(gzipIfname));
-    if (bInit == 0) {
-        bInit = kGzipInitialised;
-    }
-    gzip_ifd = kMemoryInputDescriptor;
-    GzipSetMemoryOutput(pDest);
-    gzip_clear_bufs();
-    decompress = kGzipOutputEnabled;
-    const int nResult = GzipInflate(gzip_ifd);
-    gzipMethod = nResult;
-    if (nResult < 0) {
-        if (gzip_ifd != kMemoryInputDescriptor) {
-            close(gzip_ifd);
-        }
-        return -1;
-    }
-    if (GzipReportInflateError() != 0) {
-        if (gzip_ifd != kMemoryInputDescriptor) {
-            close(gzip_ifd);
-        }
-        return -1;
-    }
-    if (gzip_ifd != kMemoryInputDescriptor) {
-        close(gzip_ifd);
-    }
-    return GzipInflatedSize();
-}
-
 int FileTrueSize(const char *pszPath) {
     const int nFile = FileOpen(pszPath, kFileOpenRead);
     if (nFile < 0) {
@@ -365,7 +314,7 @@ int FileTrueSize(const char *pszPath) {
 
 // NTSC-U/C: 0x0062db60, PAL: 0x0066e6f0
 // Prints a system error for the input name.
-void GzipPrintSystemError(const char *pszName) {
+static void GzipPrintSystemError(const char *pszName) {
     if (pszName != nullptr && *pszName != '\0') {
         fputs(pszName, stderr);
         fputs(": ", stderr);
@@ -379,7 +328,7 @@ void GzipPrintSystemError(const char *pszName) {
 
 // NTSC-U/C: 0x00612508, PAL: 0x00653098
 // Prints a stream error under the input name and reports one.
-int gzip_error(const char *pszMessage) {
+static int gzip_error(const char *pszMessage) {
     fprintf(stderr, kStreamErrorFormat, gzipIfname, pszMessage);
     gzipExitCode = 1;
     return 1;
@@ -387,7 +336,7 @@ int gzip_error(const char *pszMessage) {
 
 // NTSC-U/C: 0x00612550, PAL: 0x006530e0
 // Reports running out of input bytes and reports one.
-int gzip_read_error() {
+static int gzip_read_error() {
     if (errno != 0) {
         GzipPrintSystemError(gzipIfname);
     } else {
@@ -441,7 +390,7 @@ int GzipRefillInputBuffer(int nSilentEof) {
 // NTSC-U/C: 0x006123f0, PAL: 0x00652f80
 // Resets the checksum with null data and updates it otherwise, reporting the checksum so far. The
 // register is stored inverted.
-unsigned long long GzipUpdateCrc(const unsigned char *pData, unsigned nLength) {
+static unsigned long long GzipUpdateCrc(const unsigned char *pData, unsigned nLength) {
     // NTSC-U/C: 0x007a3ea0, PAL: 0x007e7ba0
     // The running checksum of the inflate output.
     static unsigned long long crc = 0xffffffff;
@@ -474,13 +423,13 @@ void GzipFlushWindow() {
 }
 
 // NTSC-U/C: 0x006125b8, PAL: 0x00653148
-void GzipSetMemoryOutput(void *pDest) {
+static void GzipSetMemoryOutput(void *pDest) {
     g_pGzipOutputStart = static_cast<unsigned char *>(pDest);
     currOutBuf = static_cast<unsigned char *>(pDest);
 }
 
 // NTSC-U/C: 0x00612468, PAL: 0x00652ff8
-void gzip_clear_bufs() {
+static void gzip_clear_bufs() {
     gzipOutcnt = 0;
     gzipInptr = 0;
     gzipInsize = 0;
@@ -491,7 +440,7 @@ void gzip_clear_bufs() {
 // NTSC-U/C: 0x00562f88, PAL: 0x005a16f8
 // Parses the gzip header and reports the compression method. The descriptor is unused because the
 // input always arrives through the globals.
-int GzipInflate(int nDescriptor) {
+static int GzipInflate(int nDescriptor) {
     (void)nDescriptor;
 
     gzipMethod = -1;
@@ -562,13 +511,13 @@ int GzipInflate(int nDescriptor) {
 }
 
 // NTSC-U/C: 0x006125d0, PAL: 0x00653160
-int GzipInflatedSize() {
+static int GzipInflatedSize() {
     return static_cast<int>(currOutBuf - g_pGzipOutputStart);
 }
 
 // NTSC-U/C: 0x0061d778, PAL: 0x0065e308
 // Runs the inflate and reports the status. The trailer checksum and length are not checked.
-int GzipReportInflateError() {
+static int GzipReportInflateError() {
     GzipUpdateCrc(nullptr, 0);
     if (gzipMethod != kGzipDeflated) {
         gzip_error(kInvalidMethodError);
@@ -584,6 +533,38 @@ int GzipReportInflateError() {
         return 1;
     }
     return 0;
+}
+
+int GzipDecompressRamToRam(const void *pSource, int nSourceLength, void *pDest) {
+    gzipInSrcPtr = pSource;
+    gzipInSrcSize = nSourceLength;
+    gzipInSrcBuff = pSource;
+    memcpy(gzipIfname, kMemoryInputName, sizeof(gzipIfname));
+    if (bInit == 0) {
+        bInit = kGzipInitialised;
+    }
+    gzip_ifd = kMemoryInputDescriptor;
+    GzipSetMemoryOutput(pDest);
+    gzip_clear_bufs();
+    decompress = kGzipOutputEnabled;
+    const int nResult = GzipInflate(gzip_ifd);
+    gzipMethod = nResult;
+    if (nResult < 0) {
+        if (gzip_ifd != kMemoryInputDescriptor) {
+            close(gzip_ifd);
+        }
+        return -1;
+    }
+    if (GzipReportInflateError() != 0) {
+        if (gzip_ifd != kMemoryInputDescriptor) {
+            close(gzip_ifd);
+        }
+        return -1;
+    }
+    if (gzip_ifd != kMemoryInputDescriptor) {
+        close(gzip_ifd);
+    }
+    return GzipInflatedSize();
 }
 
 void GzipDecompressFdToRam(int nFile, void *pDest) {

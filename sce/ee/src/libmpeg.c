@@ -186,33 +186,6 @@ static unsigned int g_mpegNibbleTable[16] = {
     0x00000000u, 0x00000000u, 0x0060e880u, 0x0060e668u,
 };
 
-// Extension handlers at 0x007a3440, indexed by extension_start_code_identifier. The last two
-// nibble table words above are the first two entries.
-int sceMpegReservedExtension(void);
-int sceMpegSequenceExtension(void);
-int sceMpegSequenceDisplayExtension(void);
-int sceMpegQuantMatrixExtension(void);
-int sceMpegCopyrightExtension(void);
-int sceMpegSequenceScalableExtension(void);
-int sceMpegPictureSpatialScalableExtension(void);
-int sceMpegPictureDisplayExtension(void);
-int sceMpegPictureCodingExtension(void);
-int sceMpegPictureTemporalScalableExtension(void);
-typedef int (*MpegExtensionHandler)(void);
-static MpegExtensionHandler g_mpegExtensionHandlers[11] = {
-    sceMpegReservedExtension,
-    sceMpegSequenceExtension,
-    sceMpegSequenceDisplayExtension,
-    sceMpegQuantMatrixExtension,
-    sceMpegCopyrightExtension,
-    sceMpegSequenceScalableExtension,
-    sceMpegReservedExtension,
-    sceMpegPictureDisplayExtension,
-    sceMpegPictureCodingExtension,
-    sceMpegPictureSpatialScalableExtension,
-    sceMpegPictureTemporalScalableExtension,
-};
-
 // The scratchpad offsets of the two macroblock buffers sceMpegResetMcBuffers() places.
 enum {
     kMcFirstCoefficientsOffset = 0x1800,
@@ -371,34 +344,8 @@ static int g_nMpegQScaleType;
 // Word at NTSC-U/C: 0x007a33b8, PAL: 0x007e70b8, alternate_scan.
 static int g_nMpegAlternateScan;
 
-// Forward declarations for the header parsers, whose routines call one another in an order the
-// file layout does not match.
-static void sceMpegExtensionAndUserData(void);
-static int sceMpegUpdatePictureNumber(void);
-static int sceMpegSequenceHeader(void);
-static int sceMpegIssueIpuCommand(unsigned int nCommand);
-static int sceMpegLoadDefaultMatrix(unsigned int nCommand, const unsigned char *pMatrix);
-static int sceMpegSetTableSize(MpegSeqTable *pTable, int nWidth, int nHeight);
-static void sceMpegAssignFrameBuffers(MpegSeqTable *pFrameForward,
-                                      MpegSeqTable *pFrameBackward,
-                                      MpegSeqTable *pFrameBidirectional,
-                                      MpegSeqTable *pTopForward,
-                                      MpegSeqTable *pTopBackward,
-                                      MpegSeqTable *pTopBidirectional,
-                                      MpegSeqTable *pBottomForward,
-                                      MpegSeqTable *pBottomBackward,
-                                      MpegSeqTable *pBottomBidirectional,
-                                      int nForwardBuffer,
-                                      int nBackwardBuffer,
-                                      int nBidirectionalBuffer);
-static int sceMpegReportNoData(void *pDecoder);
-static int sceMpegWaitIpuIdle(void);
-static int sceMpegReadIpuData(void);
-static int sceMpegSkipBits(int nBits);
-static int sceMpegPeekBits(int nBits);
-static int sceMpegNextStartCode(void);
-int sceIpuSetMpeg1Mode(int nMpeg1);
-static void sceMpegSkipExtraInformation(void);
+// The decoder instance address retained for the interrupt handlers.
+// NTSC-U/C: 0x007a38bc, PAL: 0x007e75bc
 static void *g_decoderInstance;
 
 // IPU register words and the watchdog limit the bit readers share.
@@ -535,6 +482,158 @@ static volatile int g_nColourConvertError;
 // NTSC-U/C: 0x007c3820, PAL: 0x00807520
 static volatile int g_nFromIpuInterrupts;
 
+// NTSC-U/C: 0x005e0a08, PAL: 0x00622948
+static int sceMpegReportNoData(void *pDecoder) {
+    StreamEntry entry;
+
+    // The image stores only the low key word and leaves the rest of the stack entry as garbage.
+    // The reconstruction zeroes it instead, which no observed reader distinguishes.
+    entry.key = 1;
+    entry.templateBits = 0;
+    entry.callback = NULL;
+    entry.data = NULL;
+    return sceMpegInvokeCallbackSlot(pDecoder, &entry);
+}
+
+// NTSC-U/C: 0x0060b2c0, PAL: 0x0064bf30
+static int sceMpegWaitIpuIdle(void) {
+    volatile unsigned int *pControl;
+    unsigned int count;
+
+    pControl = (volatile unsigned int *)(uintptr_t)kIpuControlAddress;
+    count = 0;
+    if ((*pControl & kIpuBusyMask) != kIpuBusyValue) {
+        return (int)kIpuBusyValue; // The image returns the mask word still in the result register.
+    }
+    do {
+        if (count >= kIpuWatchdogLimit) {
+            sceMpegReportNoData(g_decoderInstance);
+            count = 0;
+        } else {
+            ++count;
+        }
+    } while ((*pControl & kIpuBusyMask) == kIpuBusyValue);
+    return (int)count;
+}
+
+// NTSC-U/C: 0x0060b368, PAL: 0x0064bfd8
+static int sceMpegReadIpuData(void) {
+    volatile unsigned long long *pData;
+    volatile unsigned int *pControl;
+    long long value;
+    unsigned int count;
+
+    pData = (volatile unsigned long long *)(uintptr_t)kIpuCommandAddress;
+    pControl = (volatile unsigned int *)(uintptr_t)kIpuControlAddress;
+    value = (long long)*pData;
+    count = 0;
+    for (;;) {
+        if (value >= 0) {
+            return (int)value;
+        }
+        if ((*pControl & kIpuDataReadyBit) != 0) {
+            return (int)value;
+        }
+        if (count >= kIpuWatchdogLimit) {
+            sceMpegReportNoData(g_decoderInstance);
+            count = 0;
+        } else {
+            ++count;
+        }
+        value = (long long)*pData;
+    }
+}
+
+// Issues an IPU command word and returns the nibble table word its top nibble selects.
+// NTSC-U/C: 0x0060b290, PAL: 0x0064bf00
+static int sceMpegIssueIpuCommand(unsigned int nCommand) {
+    unsigned int index;
+    int value;
+
+    *(volatile unsigned int *)(uintptr_t)kIpuCommandAddress = nCommand;
+    index = (nCommand >> 28) & 0xfu;
+    value = (int)g_mpegNibbleTable[index];
+    g_mpegIpuBusyFlag = value;
+    return value;
+}
+
+// NTSC-U/C: 0x0060e5a8, PAL: 0x0064f218
+static int sceMpegLoadDefaultMatrix(unsigned int nCommand, const unsigned char *pMatrix) {
+    StreamEntry entry;
+    volatile unsigned int *pData;
+    volatile unsigned int *pGifA;
+    volatile unsigned int *pGifB;
+
+    entry.key = 2;
+    entry.templateBits = 0;
+    entry.callback = NULL;
+    entry.data = NULL;
+    sceMpegInvokeCallbackSlot(g_decoderInstance, &entry);
+    sceMpegWaitIpuIdle();
+    pData = (volatile unsigned int *)(uintptr_t)kIpuCommandAddress;
+    *pData = 0u; // Clears the IPU input FIFO.
+    sceMpegWaitIpuIdle();
+    pGifA = (volatile unsigned int *)(uintptr_t)0x1000b410;
+    *pGifA = (unsigned int)(uintptr_t)pMatrix & 0x0fffffffu;
+    pGifB = (volatile unsigned int *)(uintptr_t)0x1000b420;
+    *pGifB = 4u;
+    // Start the IPU input channel on the matrix.
+    *(volatile unsigned int *)(uintptr_t)0x1000b400 = 0x101u;
+    sceMpegIssueIpuCommand(nCommand);
+    sceMpegWaitIpuIdle();
+    entry.key = 3;
+    return sceMpegInvokeCallbackSlot(g_decoderInstance, &entry);
+}
+
+// Sets picture dimensions into a sequence table and reports one.
+// NTSC-U/C: 0x0060e000, PAL: 0x0064ec70
+static int sceMpegSetTableSize(MpegSeqTable *pTable, int nWidth, int nHeight) {
+    pTable->mMbWidth = nWidth >> 4;
+    pTable->mMbHeight = nHeight >> 4;
+    pTable->mWidth = nWidth;
+    pTable->mHeight = nHeight;
+    return 1;
+}
+
+// NTSC-U/C: 0x0060e4c0, PAL: 0x0064f130
+static void sceMpegAssignFrameBuffers(MpegSeqTable *pFrameForward,
+                                      MpegSeqTable *pFrameBackward,
+                                      MpegSeqTable *pFrameBidirectional,
+                                      MpegSeqTable *pTopForward,
+                                      MpegSeqTable *pTopBackward,
+                                      MpegSeqTable *pTopBidirectional,
+                                      MpegSeqTable *pBottomForward,
+                                      MpegSeqTable *pBottomBackward,
+                                      MpegSeqTable *pBottomBidirectional,
+                                      int nForwardBuffer,
+                                      int nBackwardBuffer,
+                                      int nBidirectionalBuffer) {
+    // A field starts half a frame of macroblocks into its frame buffer.
+    const int fieldBytes = g_nMpegCodedWidth * g_nMpegCodedHeight / (kMacroblockPixels * 2) * kMacroblockBytes;
+    const int forward =
+        (int)(((unsigned int)nForwardBuffer & kPhysicalAddressMask) | kUncachedSegment);
+    const int backward =
+        (int)(((unsigned int)nBackwardBuffer & kPhysicalAddressMask) | kUncachedSegment);
+    const int bidirectional =
+        (int)(((unsigned int)nBidirectionalBuffer & kPhysicalAddressMask) | kUncachedSegment);
+
+    pFrameForward->mBuffer = forward;
+    pFrameBackward->mBuffer = backward;
+    pFrameBidirectional->mBuffer = bidirectional;
+    pTopForward->mBuffer = forward;
+    pTopBackward->mBuffer = backward;
+    pTopBidirectional->mBuffer = bidirectional;
+    pBottomForward->mBuffer = (int)(((unsigned int)(fieldBytes + nForwardBuffer) &
+                                     kPhysicalAddressMask) |
+                                    kUncachedSegment);
+    pBottomBackward->mBuffer = (int)(((unsigned int)(fieldBytes + nBackwardBuffer) &
+                                      kPhysicalAddressMask) |
+                                     kUncachedSegment);
+    pBottomBidirectional->mBuffer = (int)(((unsigned int)(fieldBytes + nBidirectionalBuffer) &
+                                           kPhysicalAddressMask) |
+                                          kUncachedSegment);
+}
+
 // NTSC-U/C: 0x0060b820, PAL: 0x0064c490
 static int sceMpegGetBits(int nBits) {
     volatile unsigned int *pControl;
@@ -575,237 +674,16 @@ static int sceMpegGetBits(int nBits) {
     return shifted;
 }
 
-// NTSC-U/C: 0x0060bb88, PAL: 0x0064c7f8
-static int sceMpegPictureHeader(void) {
-    g_nMpegTemporalReference = sceMpegGetBits(0xa);
-    g_nMpegPictureCodingType = sceMpegGetBits(3);
-    g_nMpegVbvDelay = sceMpegGetBits(0x10);
-    if ((unsigned int)(g_nMpegPictureCodingType - 2) < 2u) {
-        g_nMpegFullPelForwardVector = sceMpegGetBits(1);
-        g_nMpegForwardFCode = sceMpegGetBits(3);
-    }
-    if (g_nMpegPictureCodingType == 3) {
-        g_nMpegFullPelBackwardVector = sceMpegGetBits(1);
-        g_nMpegBackwardFCode = sceMpegGetBits(3);
-    }
-    sceMpegSkipExtraInformation();
-    sceMpegExtensionAndUserData();
-    return sceMpegUpdatePictureNumber();
-}
+// NTSC-U/C: 0x0060a038, PAL: 0x0064aca8
+int sceIpuSetMpeg1Mode(int nMpeg1) {
+    volatile unsigned int *pControl;
+    unsigned int value;
 
-// NTSC-U/C: 0x0060c050, PAL: 0x0064ccc0
-static void sceMpegGroupOfPicturesHeader(void) {
-    sceMpeg *decoder;
-    MpegWork *work;
-
-    decoder = (sceMpeg *)g_decoderInstance;
-    work = (MpegWork *)decoder->pContext;
-    work->mForceBrokenLink = 0;
-    g_nMpegGopPictureBase = g_nMpegLatestPictureNumber + 1;
-    g_nMpegGopStarted = 1;
-    g_nMpegDropFrameFlag = sceMpegGetBits(1);
-    g_nMpegTimeCodeHours = sceMpegGetBits(5);
-    g_nMpegTimeCodeMinutes = sceMpegGetBits(6);
-    (void)sceMpegGetBits(1);
-    g_nMpegTimeCodeSeconds = sceMpegGetBits(6);
-    g_nMpegTimeCodePictures = sceMpegGetBits(6);
-    g_nMpegClosedGop = sceMpegGetBits(1);
-    g_nMpegBrokenLink = sceMpegGetBits(1);
-    sceMpegExtensionAndUserData();
-}
-
-// NTSC-U/C: 0x0060bf38, PAL: 0x0064cba8
-static void sceMpegSkipExtraInformation(void) {
-    for (;;) {
-        if (sceMpegGetBits(1) == 0) {
-            return;
-        }
-        sceMpegSkipBits(8);
-    }
-}
-
-// NTSC-U/C: 0x0060bc58, PAL: 0x0064c8c8
-static void sceMpegExtensionAndUserData(void) {
-    int index;
-
-    sceMpegNextStartCode();
-    for (;;) {
-        index = sceMpegPeekBits(0x20);
-        if (index == 0x1b5) {
-            sceMpegSkipBits(0x20);
-            index = sceMpegGetBits(4);
-            if ((unsigned int)index > 10u) {
-                index = 0;
-            }
-            g_mpegExtensionHandlers[index]();
-            sceMpegNextStartCode();
-            continue;
-        }
-        if (index != 0x1b2) {
-            return;
-        }
-        sceMpegSkipBits(0x20);
-        sceMpegNextStartCode();
-    }
-}
-
-// NTSC-U/C: 0x0060bf70, PAL: 0x0064cbe0
-static int sceMpegUpdatePictureNumber(void) {
-    if (g_nMpegPictureCodingType != 3 && g_nMpegTemporalReference != g_nMpegPreviousTemporalReference) {
-        if (g_nMpegTemporalReferenceWrapped != 0) {
-            g_nMpegTemporalReferenceWrapped = 0;
-            g_nMpegGopPictureBase += 0x400;
-        }
-        if (g_nMpegTemporalReference < g_nMpegPreviousTemporalReference && g_nMpegGopStarted == 0) {
-            g_nMpegTemporalReferenceWrapped = 1;
-        }
-        g_nMpegGopStarted = 0;
-        g_nMpegPreviousTemporalReference = g_nMpegTemporalReference;
-    }
-    g_nMpegPictureNumber = g_nMpegGopPictureBase + g_nMpegTemporalReference;
-    if (g_nMpegTemporalReferenceWrapped != 0 && g_nMpegPreviousTemporalReference >= g_nMpegTemporalReference) {
-        g_nMpegPictureNumber += 0x400;
-    }
-    if (g_nMpegLatestPictureNumber < g_nMpegPictureNumber) {
-        g_nMpegLatestPictureNumber = g_nMpegPictureNumber;
-    }
-    return g_nMpegLatestPictureNumber;
-}
-
-int sceMpegNextPictureHeader(void) {
-    StreamEntry entry;
-
-    for (;;) {
-        sceMpegNextStartCode(); // Yes, the binary discards the result and reads the code itself.
-        int status = sceMpegGetBits(0x20);
-        if (status == 0x1b3) {
-            sceMpegSequenceHeader();
-            continue;
-        }
-        if ((unsigned int)status >= 0x1b4u) {
-            if (status == 0x1b7) {
-                return 0;
-            }
-            if (status == 0x1b8) {
-                sceMpegGroupOfPicturesHeader();
-            }
-            continue;
-        }
-        if (status != 0x100) {
-            continue;
-        }
-        sceMpegPictureHeader();
-        entry.key = 5;
-        entry.templateBits = ~(unsigned long long)0;
-        entry.callback = (void *)~(uintptr_t)0;
-        entry.data = (void *)~(uintptr_t)0;
-        sceMpegInvokeCallbackSlot(g_decoderInstance, &entry);
-        g_llMpegNextPts = entry.templateBits;
-        g_llMpegNextDts = (unsigned long long)(unsigned int)(uintptr_t)entry.data << 32 |
-            (unsigned int)(uintptr_t)entry.callback;
-        return g_nMpegPictureCodingType;
-    }
-}
-
-// NTSC-U/C: 0x0060e020, PAL: 0x0064ec90
-static int sceMpegSequenceHeader(void) {
-    sceMpeg *decoder;
-    MpegWork *work;
-    int bits;
-    int half;
-    int frameBytes;
-
-    decoder = (sceMpeg *)g_decoderInstance;
-    work = (MpegWork *)decoder->pContext;
-    // The clear falls in the setup call delay slot, so it lands before the setup body.
-    work->mFirstFieldStructure = 0;
-    bits = sceMpegGetBits(0x20);
-    g_nMpegFrameRateCode = bits & 0xf;
-    g_nMpegAspectRatioInformation = (bits >> 4) & 0xf;
-    g_nMpegHorizontalSize = (unsigned int)bits >> 0x14;
-    if (((bits >> 8) & 0xfff) >= 0xaf1) {
-        sceMpegRaiseError("vertical size > 2800");
-    }
-    g_nMpegVerticalSize = (bits >> 8) & 0xfff;
-    bits = sceMpegGetBits(0x1e);
-    g_nMpegConstrainedParametersFlag = bits & 1;
-    g_nMpegVbvBufferSize = (bits >> 1) & 0x3ff;
-    g_nMpegBitRate = (unsigned int)bits >> 12;
-    bits = sceMpegGetBits(1);
-    g_nMpegLoadIntraQuantiserMatrix = bits;
-    if (bits == 0) {
-        sceMpegLoadDefaultMatrix(0x50000000u, g_abMpegDefaultIntraMatrix);
-    } else {
-        sceMpegWaitIpuIdle();
-        sceMpegIssueIpuCommand(0x50000000u);
-        sceMpegWaitIpuIdle();
-    }
-    bits = sceMpegGetBits(1);
-    g_nMpegLoadNonIntraQuantiserMatrix = bits;
-    if (bits == 0) {
-        sceMpegLoadDefaultMatrix(0x58000000u, g_abMpegDefaultNonIntraMatrix);
-    } else {
-        sceMpegWaitIpuIdle();
-        sceMpegIssueIpuCommand(0x58000000u);
-        sceMpegWaitIpuIdle();
-    }
-    sceMpegExtensionAndUserData();
-    decoder = (sceMpeg *)g_decoderInstance;
-    work = (MpegWork *)decoder->pContext;
-    if (g_nMpegIsMpeg2 == 0) {
-        g_nMpegPictureStructure = 3;
-        g_nMpegFramePredFrameDct = 1;
-        g_nMpegMatrixCoefficients = 5;
-        g_nMpegProgressiveSequence = 1;
-        g_nMpegChromaFormat = 1;
-        g_nMpegProgressiveFrame = 1;
-    }
-    g_nMpegMbWidth = (g_nMpegHorizontalSize + 0xf) >> 4;
-    if (g_nMpegIsMpeg2 == 0 || g_nMpegProgressiveSequence != 0) {
-        g_nMpegMbHeight = (g_nMpegVerticalSize + 0xf) >> 4;
-    } else {
-        g_nMpegMbHeight = ((g_nMpegVerticalSize + 0x1f) >> 5) << 1;
-    }
-    g_nMpegCodedWidth = g_nMpegMbWidth << 4;
-    g_nMpegCodedHeight = g_nMpegMbHeight << 4;
-    if (g_nMpegCodedWidth == decoder->width && g_nMpegCodedHeight == decoder->height) {
-        return decoder->height;
-    }
-    decoder->height = g_nMpegCodedHeight;
-    decoder->width = g_nMpegCodedWidth;
-    g_nMpegChromaWidth = g_nMpegCodedWidth >> 1;
-    g_nMpegChromaHeight = g_nMpegCodedHeight >> 1;
-    sceMpegRewindWritePointer(&work->mRing);
-    // A macroblock stores 384 bytes for each 256 pixels.
-    frameBytes = (int)((unsigned int)(g_nMpegCodedWidth * (g_nMpegCodedHeight * kMacroblockBytes)) >> 8);
-    work->mFirstFrameBuffer =
-        (int)(uintptr_t)sceMpegCheckWorkAreaSize(&work->mRing, frameBytes, 0x40);
-    work->mSecondFrameBuffer =
-        (int)(uintptr_t)sceMpegCheckWorkAreaSize(&work->mRing, frameBytes, 0x40);
-    work->mThirdFrameBuffer =
-        (int)(uintptr_t)sceMpegCheckWorkAreaSize(&work->mRing, frameBytes, 0x40);
-    sceMpegAssignFrameBuffers(&g_mpegSeqAreas[0],
-                        &g_mpegSeqAreas[1],
-                        &g_mpegSeqAreas[2],
-                        &g_mpegSeqAreas[3],
-                        &g_mpegSeqAreas[4],
-                        &g_mpegSeqAreas[5],
-                        &g_mpegSeqAreas[6],
-                        &g_mpegSeqAreas[7],
-                        &g_mpegSeqAreas[8],
-                        work->mFirstFrameBuffer,
-                        work->mSecondFrameBuffer,
-                        work->mThirdFrameBuffer);
-    sceMpegSetTableSize(&g_mpegSeqAreas[0], g_nMpegCodedWidth, g_nMpegCodedHeight);
-    sceMpegSetTableSize(&g_mpegSeqAreas[1], g_nMpegCodedWidth, g_nMpegCodedHeight);
-    sceMpegSetTableSize(&g_mpegSeqAreas[2], g_nMpegCodedWidth, g_nMpegCodedHeight);
-    half = g_nMpegCodedHeight / 2;
-    sceMpegSetTableSize(&g_mpegSeqAreas[3], g_nMpegCodedWidth, half);
-    sceMpegSetTableSize(&g_mpegSeqAreas[4], g_nMpegCodedWidth, half);
-    sceMpegSetTableSize(&g_mpegSeqAreas[5], g_nMpegCodedWidth, half);
-    sceMpegSetTableSize(&g_mpegSeqAreas[6], g_nMpegCodedWidth, half);
-    sceMpegSetTableSize(&g_mpegSeqAreas[7], g_nMpegCodedWidth, half);
-    return sceMpegSetTableSize(&g_mpegSeqAreas[8], g_nMpegCodedWidth, half);
+    pControl = (volatile unsigned int *)(uintptr_t)0x10002010;
+    value = (*pControl & 0xff7fffffu) | ((unsigned int)nMpeg1 << 23);
+    // The store falls in the return delay slot, so it lands before the return either way.
+    *pControl = value;
+    return (int)value;
 }
 
 // NTSC-U/C: 0x0060e668, PAL: 0x0064f2d8
@@ -1000,96 +878,6 @@ int sceMpegPictureTemporalScalableExtension(void) {
     return 0;
 }
 
-// Issues an IPU command word and returns the nibble table word its top nibble selects.
-// NTSC-U/C: 0x0060b290, PAL: 0x0064bf00
-static int sceMpegIssueIpuCommand(unsigned int nCommand) {
-    unsigned int index;
-    int value;
-
-    *(volatile unsigned int *)(uintptr_t)kIpuCommandAddress = nCommand;
-    index = (nCommand >> 28) & 0xfu;
-    value = (int)g_mpegNibbleTable[index];
-    g_mpegIpuBusyFlag = value;
-    return value;
-}
-
-// NTSC-U/C: 0x0060e5a8, PAL: 0x0064f218
-static int sceMpegLoadDefaultMatrix(unsigned int nCommand, const unsigned char *pMatrix) {
-    StreamEntry entry;
-    volatile unsigned int *pData;
-    volatile unsigned int *pGifA;
-    volatile unsigned int *pGifB;
-
-    entry.key = 2;
-    entry.templateBits = 0;
-    entry.callback = NULL;
-    entry.data = NULL;
-    sceMpegInvokeCallbackSlot(g_decoderInstance, &entry);
-    sceMpegWaitIpuIdle();
-    pData = (volatile unsigned int *)(uintptr_t)kIpuCommandAddress;
-    *pData = 0u; // Clears the IPU input FIFO.
-    sceMpegWaitIpuIdle();
-    pGifA = (volatile unsigned int *)(uintptr_t)0x1000b410;
-    *pGifA = (unsigned int)(uintptr_t)pMatrix & 0x0fffffffu;
-    pGifB = (volatile unsigned int *)(uintptr_t)0x1000b420;
-    *pGifB = 4u;
-    // Start the IPU input channel on the matrix.
-    *(volatile unsigned int *)(uintptr_t)0x1000b400 = 0x101u;
-    sceMpegIssueIpuCommand(nCommand);
-    sceMpegWaitIpuIdle();
-    entry.key = 3;
-    return sceMpegInvokeCallbackSlot(g_decoderInstance, &entry);
-}
-
-// Sets picture dimensions into a sequence table and reports one.
-// NTSC-U/C: 0x0060e000, PAL: 0x0064ec70
-static int sceMpegSetTableSize(MpegSeqTable *pTable, int nWidth, int nHeight) {
-    pTable->mMbWidth = nWidth >> 4;
-    pTable->mMbHeight = nHeight >> 4;
-    pTable->mWidth = nWidth;
-    pTable->mHeight = nHeight;
-    return 1;
-}
-
-// NTSC-U/C: 0x0060e4c0, PAL: 0x0064f130
-static void sceMpegAssignFrameBuffers(MpegSeqTable *pFrameForward,
-                                      MpegSeqTable *pFrameBackward,
-                                      MpegSeqTable *pFrameBidirectional,
-                                      MpegSeqTable *pTopForward,
-                                      MpegSeqTable *pTopBackward,
-                                      MpegSeqTable *pTopBidirectional,
-                                      MpegSeqTable *pBottomForward,
-                                      MpegSeqTable *pBottomBackward,
-                                      MpegSeqTable *pBottomBidirectional,
-                                      int nForwardBuffer,
-                                      int nBackwardBuffer,
-                                      int nBidirectionalBuffer) {
-    // A field starts half a frame of macroblocks into its frame buffer.
-    const int fieldBytes = g_nMpegCodedWidth * g_nMpegCodedHeight / (kMacroblockPixels * 2) * kMacroblockBytes;
-    const int forward =
-        (int)(((unsigned int)nForwardBuffer & kPhysicalAddressMask) | kUncachedSegment);
-    const int backward =
-        (int)(((unsigned int)nBackwardBuffer & kPhysicalAddressMask) | kUncachedSegment);
-    const int bidirectional =
-        (int)(((unsigned int)nBidirectionalBuffer & kPhysicalAddressMask) | kUncachedSegment);
-
-    pFrameForward->mBuffer = forward;
-    pFrameBackward->mBuffer = backward;
-    pFrameBidirectional->mBuffer = bidirectional;
-    pTopForward->mBuffer = forward;
-    pTopBackward->mBuffer = backward;
-    pTopBidirectional->mBuffer = bidirectional;
-    pBottomForward->mBuffer = (int)(((unsigned int)(fieldBytes + nForwardBuffer) &
-                                     kPhysicalAddressMask) |
-                                    kUncachedSegment);
-    pBottomBackward->mBuffer = (int)(((unsigned int)(fieldBytes + nBackwardBuffer) &
-                                      kPhysicalAddressMask) |
-                                     kUncachedSegment);
-    pBottomBidirectional->mBuffer = (int)(((unsigned int)(fieldBytes + nBidirectionalBuffer) &
-                                           kPhysicalAddressMask) |
-                                          kUncachedSegment);
-}
-
 // NTSC-U/C: 0x0060b708, PAL: 0x0064c378
 static int sceMpegSkipBits(int nBits) {
     volatile unsigned int *pControl;
@@ -1174,71 +962,255 @@ static int sceMpegNextStartCode(void) {
     }
 }
 
-// NTSC-U/C: 0x005e0a08, PAL: 0x00622948
-static int sceMpegReportNoData(void *pDecoder) {
+// Extension handlers at 0x007a3440, indexed by extension_start_code_identifier. The last two
+// nibble table words above are the first two entries.
+typedef int (*MpegExtensionHandler)(void);
+static MpegExtensionHandler g_mpegExtensionHandlers[11] = {
+    sceMpegReservedExtension,
+    sceMpegSequenceExtension,
+    sceMpegSequenceDisplayExtension,
+    sceMpegQuantMatrixExtension,
+    sceMpegCopyrightExtension,
+    sceMpegSequenceScalableExtension,
+    sceMpegReservedExtension,
+    sceMpegPictureDisplayExtension,
+    sceMpegPictureCodingExtension,
+    sceMpegPictureSpatialScalableExtension,
+    sceMpegPictureTemporalScalableExtension,
+};
+
+// NTSC-U/C: 0x0060bf38, PAL: 0x0064cba8
+static void sceMpegSkipExtraInformation(void) {
+    for (;;) {
+        if (sceMpegGetBits(1) == 0) {
+            return;
+        }
+        sceMpegSkipBits(8);
+    }
+}
+
+// NTSC-U/C: 0x0060bc58, PAL: 0x0064c8c8
+static void sceMpegExtensionAndUserData(void) {
+    int index;
+
+    sceMpegNextStartCode();
+    for (;;) {
+        index = sceMpegPeekBits(0x20);
+        if (index == 0x1b5) {
+            sceMpegSkipBits(0x20);
+            index = sceMpegGetBits(4);
+            if ((unsigned int)index > 10u) {
+                index = 0;
+            }
+            g_mpegExtensionHandlers[index]();
+            sceMpegNextStartCode();
+            continue;
+        }
+        if (index != 0x1b2) {
+            return;
+        }
+        sceMpegSkipBits(0x20);
+        sceMpegNextStartCode();
+    }
+}
+
+// NTSC-U/C: 0x0060bf70, PAL: 0x0064cbe0
+static int sceMpegUpdatePictureNumber(void) {
+    if (g_nMpegPictureCodingType != 3 && g_nMpegTemporalReference != g_nMpegPreviousTemporalReference) {
+        if (g_nMpegTemporalReferenceWrapped != 0) {
+            g_nMpegTemporalReferenceWrapped = 0;
+            g_nMpegGopPictureBase += 0x400;
+        }
+        if (g_nMpegTemporalReference < g_nMpegPreviousTemporalReference && g_nMpegGopStarted == 0) {
+            g_nMpegTemporalReferenceWrapped = 1;
+        }
+        g_nMpegGopStarted = 0;
+        g_nMpegPreviousTemporalReference = g_nMpegTemporalReference;
+    }
+    g_nMpegPictureNumber = g_nMpegGopPictureBase + g_nMpegTemporalReference;
+    if (g_nMpegTemporalReferenceWrapped != 0 && g_nMpegPreviousTemporalReference >= g_nMpegTemporalReference) {
+        g_nMpegPictureNumber += 0x400;
+    }
+    if (g_nMpegLatestPictureNumber < g_nMpegPictureNumber) {
+        g_nMpegLatestPictureNumber = g_nMpegPictureNumber;
+    }
+    return g_nMpegLatestPictureNumber;
+}
+
+// NTSC-U/C: 0x0060bb88, PAL: 0x0064c7f8
+static int sceMpegPictureHeader(void) {
+    g_nMpegTemporalReference = sceMpegGetBits(0xa);
+    g_nMpegPictureCodingType = sceMpegGetBits(3);
+    g_nMpegVbvDelay = sceMpegGetBits(0x10);
+    if ((unsigned int)(g_nMpegPictureCodingType - 2) < 2u) {
+        g_nMpegFullPelForwardVector = sceMpegGetBits(1);
+        g_nMpegForwardFCode = sceMpegGetBits(3);
+    }
+    if (g_nMpegPictureCodingType == 3) {
+        g_nMpegFullPelBackwardVector = sceMpegGetBits(1);
+        g_nMpegBackwardFCode = sceMpegGetBits(3);
+    }
+    sceMpegSkipExtraInformation();
+    sceMpegExtensionAndUserData();
+    return sceMpegUpdatePictureNumber();
+}
+
+// NTSC-U/C: 0x0060c050, PAL: 0x0064ccc0
+static void sceMpegGroupOfPicturesHeader(void) {
+    sceMpeg *decoder;
+    MpegWork *work;
+
+    decoder = (sceMpeg *)g_decoderInstance;
+    work = (MpegWork *)decoder->pContext;
+    work->mForceBrokenLink = 0;
+    g_nMpegGopPictureBase = g_nMpegLatestPictureNumber + 1;
+    g_nMpegGopStarted = 1;
+    g_nMpegDropFrameFlag = sceMpegGetBits(1);
+    g_nMpegTimeCodeHours = sceMpegGetBits(5);
+    g_nMpegTimeCodeMinutes = sceMpegGetBits(6);
+    (void)sceMpegGetBits(1);
+    g_nMpegTimeCodeSeconds = sceMpegGetBits(6);
+    g_nMpegTimeCodePictures = sceMpegGetBits(6);
+    g_nMpegClosedGop = sceMpegGetBits(1);
+    g_nMpegBrokenLink = sceMpegGetBits(1);
+    sceMpegExtensionAndUserData();
+}
+
+// NTSC-U/C: 0x0060e020, PAL: 0x0064ec90
+static int sceMpegSequenceHeader(void) {
+    sceMpeg *decoder;
+    MpegWork *work;
+    int bits;
+    int half;
+    int frameBytes;
+
+    decoder = (sceMpeg *)g_decoderInstance;
+    work = (MpegWork *)decoder->pContext;
+    // The clear falls in the setup call delay slot, so it lands before the setup body.
+    work->mFirstFieldStructure = 0;
+    bits = sceMpegGetBits(0x20);
+    g_nMpegFrameRateCode = bits & 0xf;
+    g_nMpegAspectRatioInformation = (bits >> 4) & 0xf;
+    g_nMpegHorizontalSize = (unsigned int)bits >> 0x14;
+    if (((bits >> 8) & 0xfff) >= 0xaf1) {
+        sceMpegRaiseError("vertical size > 2800");
+    }
+    g_nMpegVerticalSize = (bits >> 8) & 0xfff;
+    bits = sceMpegGetBits(0x1e);
+    g_nMpegConstrainedParametersFlag = bits & 1;
+    g_nMpegVbvBufferSize = (bits >> 1) & 0x3ff;
+    g_nMpegBitRate = (unsigned int)bits >> 12;
+    bits = sceMpegGetBits(1);
+    g_nMpegLoadIntraQuantiserMatrix = bits;
+    if (bits == 0) {
+        sceMpegLoadDefaultMatrix(0x50000000u, g_abMpegDefaultIntraMatrix);
+    } else {
+        sceMpegWaitIpuIdle();
+        sceMpegIssueIpuCommand(0x50000000u);
+        sceMpegWaitIpuIdle();
+    }
+    bits = sceMpegGetBits(1);
+    g_nMpegLoadNonIntraQuantiserMatrix = bits;
+    if (bits == 0) {
+        sceMpegLoadDefaultMatrix(0x58000000u, g_abMpegDefaultNonIntraMatrix);
+    } else {
+        sceMpegWaitIpuIdle();
+        sceMpegIssueIpuCommand(0x58000000u);
+        sceMpegWaitIpuIdle();
+    }
+    sceMpegExtensionAndUserData();
+    decoder = (sceMpeg *)g_decoderInstance;
+    work = (MpegWork *)decoder->pContext;
+    if (g_nMpegIsMpeg2 == 0) {
+        g_nMpegPictureStructure = 3;
+        g_nMpegFramePredFrameDct = 1;
+        g_nMpegMatrixCoefficients = 5;
+        g_nMpegProgressiveSequence = 1;
+        g_nMpegChromaFormat = 1;
+        g_nMpegProgressiveFrame = 1;
+    }
+    g_nMpegMbWidth = (g_nMpegHorizontalSize + 0xf) >> 4;
+    if (g_nMpegIsMpeg2 == 0 || g_nMpegProgressiveSequence != 0) {
+        g_nMpegMbHeight = (g_nMpegVerticalSize + 0xf) >> 4;
+    } else {
+        g_nMpegMbHeight = ((g_nMpegVerticalSize + 0x1f) >> 5) << 1;
+    }
+    g_nMpegCodedWidth = g_nMpegMbWidth << 4;
+    g_nMpegCodedHeight = g_nMpegMbHeight << 4;
+    if (g_nMpegCodedWidth == decoder->width && g_nMpegCodedHeight == decoder->height) {
+        return decoder->height;
+    }
+    decoder->height = g_nMpegCodedHeight;
+    decoder->width = g_nMpegCodedWidth;
+    g_nMpegChromaWidth = g_nMpegCodedWidth >> 1;
+    g_nMpegChromaHeight = g_nMpegCodedHeight >> 1;
+    sceMpegRewindWritePointer(&work->mRing);
+    // A macroblock stores 384 bytes for each 256 pixels.
+    frameBytes = (int)((unsigned int)(g_nMpegCodedWidth * (g_nMpegCodedHeight * kMacroblockBytes)) >> 8);
+    work->mFirstFrameBuffer =
+        (int)(uintptr_t)sceMpegCheckWorkAreaSize(&work->mRing, frameBytes, 0x40);
+    work->mSecondFrameBuffer =
+        (int)(uintptr_t)sceMpegCheckWorkAreaSize(&work->mRing, frameBytes, 0x40);
+    work->mThirdFrameBuffer =
+        (int)(uintptr_t)sceMpegCheckWorkAreaSize(&work->mRing, frameBytes, 0x40);
+    sceMpegAssignFrameBuffers(&g_mpegSeqAreas[0],
+                        &g_mpegSeqAreas[1],
+                        &g_mpegSeqAreas[2],
+                        &g_mpegSeqAreas[3],
+                        &g_mpegSeqAreas[4],
+                        &g_mpegSeqAreas[5],
+                        &g_mpegSeqAreas[6],
+                        &g_mpegSeqAreas[7],
+                        &g_mpegSeqAreas[8],
+                        work->mFirstFrameBuffer,
+                        work->mSecondFrameBuffer,
+                        work->mThirdFrameBuffer);
+    sceMpegSetTableSize(&g_mpegSeqAreas[0], g_nMpegCodedWidth, g_nMpegCodedHeight);
+    sceMpegSetTableSize(&g_mpegSeqAreas[1], g_nMpegCodedWidth, g_nMpegCodedHeight);
+    sceMpegSetTableSize(&g_mpegSeqAreas[2], g_nMpegCodedWidth, g_nMpegCodedHeight);
+    half = g_nMpegCodedHeight / 2;
+    sceMpegSetTableSize(&g_mpegSeqAreas[3], g_nMpegCodedWidth, half);
+    sceMpegSetTableSize(&g_mpegSeqAreas[4], g_nMpegCodedWidth, half);
+    sceMpegSetTableSize(&g_mpegSeqAreas[5], g_nMpegCodedWidth, half);
+    sceMpegSetTableSize(&g_mpegSeqAreas[6], g_nMpegCodedWidth, half);
+    sceMpegSetTableSize(&g_mpegSeqAreas[7], g_nMpegCodedWidth, half);
+    return sceMpegSetTableSize(&g_mpegSeqAreas[8], g_nMpegCodedWidth, half);
+}
+
+int sceMpegNextPictureHeader(void) {
     StreamEntry entry;
 
-    // The image stores only the low key word and leaves the rest of the stack entry as garbage.
-    // The reconstruction zeroes it instead, which no observed reader distinguishes.
-    entry.key = 1;
-    entry.templateBits = 0;
-    entry.callback = NULL;
-    entry.data = NULL;
-    return sceMpegInvokeCallbackSlot(pDecoder, &entry);
-}
-
-// NTSC-U/C: 0x0060b2c0, PAL: 0x0064bf30
-static int sceMpegWaitIpuIdle(void) {
-    volatile unsigned int *pControl;
-    unsigned int count;
-
-    pControl = (volatile unsigned int *)(uintptr_t)kIpuControlAddress;
-    count = 0;
-    if ((*pControl & kIpuBusyMask) != kIpuBusyValue) {
-        return (int)kIpuBusyValue; // The image returns the mask word still in the result register.
-    }
-    do {
-        if (count >= kIpuWatchdogLimit) {
-            sceMpegReportNoData(g_decoderInstance);
-            count = 0;
-        } else {
-            ++count;
-        }
-    } while ((*pControl & kIpuBusyMask) == kIpuBusyValue);
-    return (int)count;
-}
-
-// NTSC-U/C: 0x0060b368, PAL: 0x0064bfd8
-static int sceMpegReadIpuData(void) {
-    volatile unsigned long long *pData;
-    volatile unsigned int *pControl;
-    long long value;
-    unsigned int count;
-
-    pData = (volatile unsigned long long *)(uintptr_t)kIpuCommandAddress;
-    pControl = (volatile unsigned int *)(uintptr_t)kIpuControlAddress;
-    value = (long long)*pData;
-    count = 0;
     for (;;) {
-        if (value >= 0) {
-            return (int)value;
+        sceMpegNextStartCode(); // Yes, the binary discards the result and reads the code itself.
+        int status = sceMpegGetBits(0x20);
+        if (status == 0x1b3) {
+            sceMpegSequenceHeader();
+            continue;
         }
-        if ((*pControl & kIpuDataReadyBit) != 0) {
-            return (int)value;
+        if ((unsigned int)status >= 0x1b4u) {
+            if (status == 0x1b7) {
+                return 0;
+            }
+            if (status == 0x1b8) {
+                sceMpegGroupOfPicturesHeader();
+            }
+            continue;
         }
-        if (count >= kIpuWatchdogLimit) {
-            sceMpegReportNoData(g_decoderInstance);
-            count = 0;
-        } else {
-            ++count;
+        if (status != 0x100) {
+            continue;
         }
-        value = (long long)*pData;
+        sceMpegPictureHeader();
+        entry.key = 5;
+        entry.templateBits = ~(unsigned long long)0;
+        entry.callback = (void *)~(uintptr_t)0;
+        entry.data = (void *)~(uintptr_t)0;
+        sceMpegInvokeCallbackSlot(g_decoderInstance, &entry);
+        g_llMpegNextPts = entry.templateBits;
+        g_llMpegNextDts = (unsigned long long)(unsigned int)(uintptr_t)entry.data << 32 |
+            (unsigned int)(uintptr_t)entry.callback;
+        return g_nMpegPictureCodingType;
     }
 }
-
-// The decoder instance address retained for the interrupt handlers.
-// NTSC-U/C: 0x007a38bc, PAL: 0x007e75bc
-static void *g_decoderInstance;
 // The count of pictures decoded since sceMpegReset() last reset it. The frame count is its
 // distance from the work area's base count.
 // NTSC-U/C: 0x007a2c04, PAL: 0x007e6904
@@ -1355,18 +1327,6 @@ void sceMpegReportErrorFormatted(const char *pFormat, ...) {
     vsprintf(buffer, pFormat, args);
     va_end(args);
     sceMpegRaiseError(buffer);
-}
-
-// NTSC-U/C: 0x0060a038, PAL: 0x0064aca8
-int sceIpuSetMpeg1Mode(int nMpeg1) {
-    volatile unsigned int *pControl;
-    unsigned int value;
-
-    pControl = (volatile unsigned int *)(uintptr_t)0x10002010;
-    value = (*pControl & 0xff7fffffu) | ((unsigned int)nMpeg1 << 23);
-    // The store falls in the return delay slot, so it lands before the return either way.
-    *pControl = value;
-    return (int)value;
 }
 
 // NTSC-U/C: 0x00637178, PAL: 0x00677d08

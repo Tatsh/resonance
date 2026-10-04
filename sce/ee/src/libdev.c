@@ -33,16 +33,125 @@ static DevConsole s_Cons[kConsoleCount];
 // NTSC-U/C: 0x007a8530, PAL: 0x007ec230
 static unsigned int g_anDevHeap[kHeapWords] __attribute__((aligned(16))) = {0xffffffffu};
 
+// NTSC-U/C: 0x00622610, PAL: 0x00663020
 // Fill the console state words with their defaults, and record the GS primitive position.
-static void initConsoleContext(unsigned int *pContext, unsigned int nGsX, unsigned int nGsY);
+static void initConsoleContext(unsigned int *pContext, unsigned int nGsX, unsigned int nGsY) {
+    pContext[0] = nGsX;
+    pContext[1] = nGsY;
+    pContext[2] = 0x80u;
+    pContext[3] = 0x80u;
+    pContext[4] = 0x10u;
+    pContext[5] = 0u;
+    pContext[6] = 0u;
+    pContext[7] = 0x3cu;
+    pContext[8] = 0x80000000u;
+    pContext[9] = 0x80ff0000u;
+    pContext[10] = 0x800000ffu;
+    pContext[11] = 0x80ff00ffu;
+    pContext[12] = 0x8000ff00u;
+    pContext[13] = 0x80ffff00u;
+    pContext[14] = 0x8000ffffu;
+    pContext[15] = 0x80ffffffu;
+}
 
+// NTSC-U/C: 0x00623b10, PAL: 0x00664520
 // Take nSize bytes from the static heap, returning null when no block fits. The first call
 // initialises the heap and its end marker.
-static void *chaMemAlloc(unsigned int nSize);
+static void *chaMemAlloc(unsigned int nSize) {
+    unsigned int *pHeap = g_anDevHeap;
+    unsigned int nWords = (nSize + 3u) >> 2;
+    unsigned int nIndex = 0u;
+    unsigned int nOffset = 0u;
+    unsigned int nHeader;
+    unsigned int nBlockSize;
+    void *pResult = NULL;
 
+    if ((*pHeap & 0x0fffffffu) == 0x0fffffffu) {
+        unsigned long long *pHeapWide = (unsigned long long *)pHeap;
+        unsigned char *pHeapEnd = (unsigned char *)pHeap + 0x8000u;
+        unsigned long long *pEndMark = (unsigned long long *)(pHeapEnd + 0x1ff8u);
+        unsigned long long nHeap = *pHeapWide & 0xfffffffff0000000ull;
+        unsigned long long nMark = *pEndMark & 0xf0000000ffffffffull;
+
+        nHeap |= 0x27feull;
+        nHeap &= 0xffffffff0fffffffull;
+        *pHeapWide = nHeap;
+        nMark &= 0x0fffffffffffffffull;
+        nMark |= 0x3000000000000000ull;
+        *pEndMark = nMark;
+    }
+    if ((*pHeap >> 28) != 3u) {
+        for (;;) {
+            unsigned int *pHeader = (unsigned int *)((unsigned char *)pHeap + nOffset);
+
+            nHeader = *pHeader;
+            nBlockSize = nHeader & 0x0fffffffu;
+            if ((nHeader >> 28) == 0u && nBlockSize >= nWords) {
+                if (nBlockSize != nWords) {
+                    unsigned int *pSplit;
+
+                    nBlockSize -= nWords + 1u;
+                    pSplit = (unsigned int *)((unsigned char *)pHeap + (nIndex + nWords + 1u) * 4u);
+                    *pSplit = nBlockSize;
+                    nHeader = (nHeader & 0xf0000000u) | nWords;
+                    *pHeader = nHeader;
+                }
+                pResult = pHeader + 1;
+                *pHeader = (nHeader & 0x0fffffffu) | 0x10000000u;
+                break;
+            }
+            nIndex += nBlockSize + 1u;
+            nOffset = nIndex << 2;
+            if ((*((unsigned int *)((unsigned char *)pHeap + nOffset)) >> 28) == 3u) {
+                break;
+            }
+        }
+    }
+    return pResult;
+}
+
+// NTSC-U/C: 0x00623c90, PAL: 0x006646a0
 // Return a block chaMemAlloc() handed out, merging it with a free neighbour on either side. A
 // null pointer, an uninitialised heap, and an empty heap are ignored.
-static void chaMemFree(void *pBlock);
+static void chaMemFree(void *pBlock) {
+    unsigned int *pHeap = g_anDevHeap;
+    unsigned int nPrevious = 0u;
+    unsigned int nIndex = 0u;
+
+    if ((*pHeap & 0x0fffffffu) == 0x0fffffffu || pBlock == NULL || (*pHeap >> 28) == 3u) {
+        return;
+    }
+    do {
+        unsigned int *pHeader = &pHeap[nIndex];
+        unsigned int nHeader = *pHeader;
+        const unsigned int nNext = nIndex + (nHeader & 0x0fffffffu) + 1u;
+
+        if (pBlock == pHeader + 1) {
+            const unsigned int nNextHeader = pHeap[nNext];
+            unsigned int *pPrevious = &pHeap[nPrevious];
+            unsigned int nPreviousHeader;
+
+            if ((nNextHeader >> 28) == 0u) {
+                nHeader = (nHeader & 0xf0000000u) |
+                          (((nHeader & 0x0fffffffu) + 1u + (nNextHeader & 0x0fffffffu)) &
+                           0x0fffffffu);
+                *pHeader = nHeader;
+            }
+            // The first block is its own predecessor.
+            nPreviousHeader = *pPrevious;
+            if ((nPreviousHeader >> 28) == 0u) {
+                *pPrevious = (nPreviousHeader & 0xf0000000u) |
+                             (((nPreviousHeader & 0x0fffffffu) + 1u + (nHeader & 0x0fffffffu)) &
+                              0x0fffffffu);
+                return;
+            }
+            *pHeader = nHeader & 0x0fffffffu;
+            return;
+        }
+        nPrevious = nIndex;
+        nIndex = nNext;
+    } while ((pHeap[nIndex] >> 28) != 3u);
+}
 
 void sceDevVif0Reset(void) {
     *(volatile unsigned int *)0x10003810u = 1u;
@@ -114,119 +223,4 @@ void sceDevConsClear(int nConsole) {
     }
     pConsole->nCursorRow = 0;
     pConsole->nCursorColumn = 0;
-}
-
-// NTSC-U/C: 0x00622610, PAL: 0x00663020
-static void initConsoleContext(unsigned int *pContext, unsigned int nGsX, unsigned int nGsY) {
-    pContext[0] = nGsX;
-    pContext[1] = nGsY;
-    pContext[2] = 0x80u;
-    pContext[3] = 0x80u;
-    pContext[4] = 0x10u;
-    pContext[5] = 0u;
-    pContext[6] = 0u;
-    pContext[7] = 0x3cu;
-    pContext[8] = 0x80000000u;
-    pContext[9] = 0x80ff0000u;
-    pContext[10] = 0x800000ffu;
-    pContext[11] = 0x80ff00ffu;
-    pContext[12] = 0x8000ff00u;
-    pContext[13] = 0x80ffff00u;
-    pContext[14] = 0x8000ffffu;
-    pContext[15] = 0x80ffffffu;
-}
-
-// NTSC-U/C: 0x00623b10, PAL: 0x00664520
-static void *chaMemAlloc(unsigned int nSize) {
-    unsigned int *pHeap = g_anDevHeap;
-    unsigned int nWords = (nSize + 3u) >> 2;
-    unsigned int nIndex = 0u;
-    unsigned int nOffset = 0u;
-    unsigned int nHeader;
-    unsigned int nBlockSize;
-    void *pResult = NULL;
-
-    if ((*pHeap & 0x0fffffffu) == 0x0fffffffu) {
-        unsigned long long *pHeapWide = (unsigned long long *)pHeap;
-        unsigned char *pHeapEnd = (unsigned char *)pHeap + 0x8000u;
-        unsigned long long *pEndMark = (unsigned long long *)(pHeapEnd + 0x1ff8u);
-        unsigned long long nHeap = *pHeapWide & 0xfffffffff0000000ull;
-        unsigned long long nMark = *pEndMark & 0xf0000000ffffffffull;
-
-        nHeap |= 0x27feull;
-        nHeap &= 0xffffffff0fffffffull;
-        *pHeapWide = nHeap;
-        nMark &= 0x0fffffffffffffffull;
-        nMark |= 0x3000000000000000ull;
-        *pEndMark = nMark;
-    }
-    if ((*pHeap >> 28) != 3u) {
-        for (;;) {
-            unsigned int *pHeader = (unsigned int *)((unsigned char *)pHeap + nOffset);
-
-            nHeader = *pHeader;
-            nBlockSize = nHeader & 0x0fffffffu;
-            if ((nHeader >> 28) == 0u && nBlockSize >= nWords) {
-                if (nBlockSize != nWords) {
-                    unsigned int *pSplit;
-
-                    nBlockSize -= nWords + 1u;
-                    pSplit = (unsigned int *)((unsigned char *)pHeap + (nIndex + nWords + 1u) * 4u);
-                    *pSplit = nBlockSize;
-                    nHeader = (nHeader & 0xf0000000u) | nWords;
-                    *pHeader = nHeader;
-                }
-                pResult = pHeader + 1;
-                *pHeader = (nHeader & 0x0fffffffu) | 0x10000000u;
-                break;
-            }
-            nIndex += nBlockSize + 1u;
-            nOffset = nIndex << 2;
-            if ((*((unsigned int *)((unsigned char *)pHeap + nOffset)) >> 28) == 3u) {
-                break;
-            }
-        }
-    }
-    return pResult;
-}
-
-// NTSC-U/C: 0x00623c90, PAL: 0x006646a0
-static void chaMemFree(void *pBlock) {
-    unsigned int *pHeap = g_anDevHeap;
-    unsigned int nPrevious = 0u;
-    unsigned int nIndex = 0u;
-
-    if ((*pHeap & 0x0fffffffu) == 0x0fffffffu || pBlock == NULL || (*pHeap >> 28) == 3u) {
-        return;
-    }
-    do {
-        unsigned int *pHeader = &pHeap[nIndex];
-        unsigned int nHeader = *pHeader;
-        const unsigned int nNext = nIndex + (nHeader & 0x0fffffffu) + 1u;
-
-        if (pBlock == pHeader + 1) {
-            const unsigned int nNextHeader = pHeap[nNext];
-            unsigned int *pPrevious = &pHeap[nPrevious];
-            unsigned int nPreviousHeader;
-
-            if ((nNextHeader >> 28) == 0u) {
-                nHeader = (nHeader & 0xf0000000u) |
-                          (((nHeader & 0x0fffffffu) + 1u + (nNextHeader & 0x0fffffffu)) &
-                           0x0fffffffu);
-                *pHeader = nHeader;
-            }
-            // The first block is its own predecessor.
-            nPreviousHeader = *pPrevious;
-            if ((nPreviousHeader >> 28) == 0u) {
-                *pPrevious = (nPreviousHeader & 0xf0000000u) |
-                             (((nPreviousHeader & 0x0fffffffu) + 1u + (nHeader & 0x0fffffffu)) &
-                              0x0fffffffu);
-                return;
-            }
-            *pHeader = nHeader & 0x0fffffffu;
-            return;
-        }
-        nPrevious = nIndex;
-        nIndex = nNext;
-    } while ((pHeap[nIndex] >> 28) != 3u);
 }

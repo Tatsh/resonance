@@ -46,11 +46,58 @@ static ViBuf *inputBuf(VideoDec *pVideoDec) {
     return (ViBuf *)((unsigned char *)pVideoDec + sizeof(sceMpeg));
 }
 
-static int mpegError(sceMpeg *pMpeg, void *pCallbackData, void *pData);
-static int mpegNodata(sceMpeg *pMpeg, void *pCallbackData, void *pData);
-static int mpegStopDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData);
-static int mpegRestartDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData);
-static int mpegTS(sceMpeg *pMpeg, void *pCallbackData, void *pData);
+// NTSC-U/C: 0x00569700, PAL: 0x005a9bc8
+static int mpegError(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
+    char *pMessage;
+
+    (void)pMpeg;
+    (void)pData;
+    pMessage = *(char **)((unsigned char *)pCallbackData + 4);
+    printf("%s\n", pMessage);
+    return 1;
+}
+
+// NTSC-U/C: 0x00569728, PAL: 0x005a9bf0
+static int mpegNodata(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
+    (void)pMpeg;
+    (void)pCallbackData;
+    (void)pData;
+    switchThread();
+    viBufAddDMA(inputBuf(&videoDec));
+    return 1;
+}
+
+// NTSC-U/C: 0x00569758, PAL: 0x005a9c20
+static int mpegStopDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
+    (void)pMpeg;
+    (void)pCallbackData;
+    (void)pData;
+    viBufStopDMA(inputBuf(&videoDec));
+    return 1;
+}
+
+// NTSC-U/C: 0x00569780, PAL: 0x005a9c48
+static int mpegRestartDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
+    (void)pMpeg;
+    (void)pCallbackData;
+    (void)pData;
+    viBufRestartDMA(inputBuf(&videoDec));
+    return 1;
+}
+
+// NTSC-U/C: 0x005697a8, PAL: 0x005a9c70
+static int mpegTS(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
+    long long stamps[2];
+    long long *pDest;
+
+    (void)pMpeg;
+    (void)pData;
+    viBufGetTs(inputBuf(&videoDec), stamps);
+    pDest = (long long *)pCallbackData;
+    pDest[1] = stamps[0];
+    pDest[2] = stamps[1];
+    return 1;
+}
 
 // NTSC-U/C: 0x00569128, PAL: 0x005a95f0
 static int decode(VideoDec *pVideoDec) {
@@ -240,59 +287,6 @@ void videoDecMain(VideoDec *pVideoDec) {
     while (voBuf.count != 0) {
     }
     pVideoDec->state = VD_STATE_END;
-}
-
-// NTSC-U/C: 0x00569700, PAL: 0x005a9bc8
-static int mpegError(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
-    char *pMessage;
-
-    (void)pMpeg;
-    (void)pData;
-    pMessage = *(char **)((unsigned char *)pCallbackData + 4);
-    printf("%s\n", pMessage);
-    return 1;
-}
-
-// NTSC-U/C: 0x00569728, PAL: 0x005a9bf0
-static int mpegNodata(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
-    (void)pMpeg;
-    (void)pCallbackData;
-    (void)pData;
-    switchThread();
-    viBufAddDMA(inputBuf(&videoDec));
-    return 1;
-}
-
-// NTSC-U/C: 0x00569758, PAL: 0x005a9c20
-static int mpegStopDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
-    (void)pMpeg;
-    (void)pCallbackData;
-    (void)pData;
-    viBufStopDMA(inputBuf(&videoDec));
-    return 1;
-}
-
-// NTSC-U/C: 0x00569780, PAL: 0x005a9c48
-static int mpegRestartDMA(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
-    (void)pMpeg;
-    (void)pCallbackData;
-    (void)pData;
-    viBufRestartDMA(inputBuf(&videoDec));
-    return 1;
-}
-
-// NTSC-U/C: 0x005697a8, PAL: 0x005a9c70
-static int mpegTS(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
-    long long stamps[2];
-    long long *pDest;
-
-    (void)pMpeg;
-    (void)pData;
-    viBufGetTs(inputBuf(&videoDec), stamps);
-    pDest = (long long *)pCallbackData;
-    pDest[1] = stamps[0];
-    pDest[2] = stamps[1];
-    return 1;
 }
 
 // NTSC-U/C: 0x005697f0, PAL: 0x005a9cb8

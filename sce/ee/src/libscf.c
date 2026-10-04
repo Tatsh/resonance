@@ -60,23 +60,10 @@ static unsigned char g_nScfDefaultSummerTime = 0;
 // NTSC-U/C: 0x0077fbf8, PAL: 0x007a4680
 static char g_szScfRomVersion[16];
 
-// Helpers defined below for the minute offset path.
-char *sceScfReadRomVersion(void);
-void sceScfClockFromBcd(sceCdCLOCK *pClock);
-
 // Month lengths for the day arithmetic below, read from the image.
 static const unsigned char kMonthLengths[12] = {
     31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
 };
-
-// NTSC-U/C: 0x005f2da8, PAL: 0x005a59b0
-// Reports whether the console runs a tool ROM, reading the ROM version first if needed.
-int sceScfEnsureRomVersionRead(void) {
-    if (g_szScfRomVersion[0] == '\0') {
-        sceScfReadRomVersion();
-    }
-    return g_szScfRomVersion[kRomRegionIndex] == kRomRegionTool;
-}
 
 // NTSC-U/C: 0x005f2d08, PAL: 0x005a5910
 char *sceScfReadRomVersion(void) {
@@ -95,6 +82,15 @@ char *sceScfReadRomVersion(void) {
     }
     sceClose(fd);
     return g_szScfRomVersion;
+}
+
+// NTSC-U/C: 0x005f2da8, PAL: 0x005a59b0
+// Reports whether the console runs a tool ROM, reading the ROM version first if needed.
+int sceScfEnsureRomVersionRead(void) {
+    if (g_szScfRomVersion[0] == '\0') {
+        sceScfReadRomVersion();
+    }
+    return g_szScfRomVersion[kRomRegionIndex] == kRomRegionTool;
 }
 
 // NTSC-U/C: 0x005f3138, PAL: 0x005a5d40
