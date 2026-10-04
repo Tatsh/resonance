@@ -99,13 +99,6 @@ jobs:
             format('-{0}', matrix.build-type) || '' }}
           path: 'release/*'
           if-no-files-found: error
-      - name: 'Upload resonance'
-        if: always()
-        uses: 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
-        with:
-          name: 'resonance-${{ matrix.video-standard }}-${{ matrix.build-type }}'
-          path: 'build/**/resonance'
-          if-no-files-found: warn
 name: 'Build'
 'on':
   push:
