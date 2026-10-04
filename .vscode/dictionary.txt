@@ -113,7 +113,6 @@ bumppacket
 bumppowerup
 buttonpowmsg
 cacceler
-calcsize
 callbackxferbdtoiop
 callbackxferhdtoiop
 campaignstats
@@ -426,7 +425,6 @@ hdbd
 hdemo
 heapdump
 heff
-hhiiiiihhhhhh
 hialloc
 hibytes
 hilite
@@ -860,7 +858,6 @@ njgb
 nlfilebuf
 nlohmann
 noat
-nobits
 nocard
 nodefaultlibs
 nodisc
@@ -932,8 +929,6 @@ pextlb
 pextub
 phdrs
 phello
-phnum
-phoff
 phrasecapturedmsg
 phrasedatabase
 phraseeraser
@@ -992,7 +987,6 @@ preapproved
 primaddr
 prmodecont
 prmodecontaddr
-progbits
 pscam
 psenviron
 psgr
@@ -1154,9 +1148,7 @@ setmat
 shellcheck
 shellformat
 shiftjis
-shnum
 shoemake
-shoff
 showeraseeffectmsg
 sifcmd
 sifdev
@@ -1210,7 +1202,6 @@ statusline
 stcycl
 stdarg
 stdc
-stdint
 stdmidimsg
 stmask
 stmblk
@@ -1257,7 +1248,6 @@ testmap
 testregistry
 texa
 texburn
-texels
 texs
 textmsg
 texturepairrecord
