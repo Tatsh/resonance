@@ -40,6 +40,9 @@ enum {
 enum {
     kFrameCount = 2,
     kVideoTagCount = 0x100,
+    kVideoTagSize = 16,
+    kVideoTagSlots = ((kVideoTagCount + 1) * kVideoTagSize + kBufferAlign - 1) / kBufferAlign *
+                     kBufferAlign / kVideoTagSize,
     kTimeStampCount = 0x200,
     kTimeStampSize = 0x18,
     kDefaultStackSize = 0x800,
@@ -95,10 +98,14 @@ enum {
 static int g_is_with_audio = 1;
 
 // NTSC-U/C: 0x0070cae8, PAL: 0x007509d8
-VoBuf voBuf;
+// The queue starts a cache line of its own. Its cached updates then never share a line with the
+// display buffer placed before it.
+VoBuf voBuf __attribute__((aligned(kBufferAlign)));
 
 // NTSC-U/C: 0x0070cb00, PAL: 0x007509f0
-sceGsDBuff db;
+// The vertical blank handler writes the draw environments through the uncached segment while the
+// GIF channel reads the buffer. The buffer therefore starts on a cache line.
+sceGsDBuff db __attribute__((aligned(kBufferAlign)));
 
 // NTSC-U/C: 0x0070cd30, PAL: 0x00750c20
 static ReadBuf *g_read_buf;
@@ -132,8 +139,11 @@ static void *g_frame_images;
 static void *g_frame_tags;
 
 // NTSC-U/C: 0x00895440, PAL: 0x008da480
-// The ring the input buffer builds ends in one more tag that points back to the first.
-static unsigned long long g_video_tags[kVideoTagCount + 1][2];
+// The ring the input buffer builds ends in one more tag that points back to the first. The input
+// buffer rewrites the tags through the uncached segment while the DMA controller follows them. The
+// ring therefore starts on a cache line and fills its last line. A cached variable sharing a line
+// with the tags would write a stale copy of them back when the line is evicted.
+static unsigned long long g_video_tags[kVideoTagSlots][2] __attribute__((aligned(kBufferAlign)));
 
 // NTSC-U/C: 0x00896450, PAL: 0x008db490
 static unsigned char *g_mpeg_work;
