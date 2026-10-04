@@ -5,10 +5,9 @@
  * Bipartite matching from the netflow package.
  *
  * The package is vendored into the image, which its diagnostics establish
- * ("Inconsistent matching between %d(U) and %d(V)" and "matching NOT maximum; augm. path:"). It is
- * upstream code and its bodies are not reconstructed. This header declares only the part that
- * Rnd::Mesh::AssignFlatVerts() uses, with the layouts that routine and the four entry points below
- * read and write. The upstream identifiers are not recovered, so every name here is inferred.
+ * ("Inconsistent matching between %d(U) and %d(V)" and "matching NOT maximum; augm. path:"). This
+ * header declares only the part that Rnd::Mesh::AssignFlatVerts() uses, with the layouts that
+ * routine and the four entry points below read and write. The type names are inferred.
  *
  * Both vertex sets are numbered from 1, and a mate of 0 means unmatched.
  */
@@ -28,9 +27,9 @@ struct netflow_edge {
 
 /** One vertex of the U set. */
 struct netflow_u_vertex {
-    struct netflow_edge *edges; /*!< Adjacency list, most recently added edge first. */
-    int reserved;               // +0x04 Not written by the entry points below.
-    int mate;                   /*!< The matched V vertex, or 0. */
+    struct netflow_edge *edges;  /*!< Adjacency list, most recently added edge first. */
+    struct netflow_edge *cursor; /*!< The next edge the path search examines, or null. */
+    int mate;                    /*!< The matched V vertex, or 0. */
 };
 
 /** The U set and its adjacency lists. */
