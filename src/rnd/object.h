@@ -4,6 +4,12 @@
 
 #include "os/hxstr.h"
 
+/**
+ * The rendering engine.
+ *
+ * Scene objects, meshes, materials, textures, cameras, lights, and their animations, with the
+ * PlayStation 2 renderer that draws them.
+ */
 namespace Rnd {
 class Dbg;
 class Stream;

@@ -211,11 +211,11 @@ public:
      * Success anywhere else exits MetMsgScreen. A full card raises `save_fail_no_space`, or
      * `copy_fail_no_space` for a copy with the space GlobalSettings::mMinimumFreeClusters requires,
      * and any other status raises `save_fail_no_space` with the `save_fail_general` text. In the
-     * European release the `save_fail_no_space` text for a full card receives nKilobytes.
+     * European release the routine takes a third argument, nKilobytes, the kilobytes the card
+     * lacked, and the `save_fail_no_space` text for a full card receives it.
      *
      * @param nPortSlot The packed port and slot. The body does not read it.
      * @param nStatus The save status.
-     * @param nKilobytes The kilobytes the card lacked. European release only.
      * @ghidraAddress NTSC-U/C: 0x00374b58
      * @ghidraAddress PAL: 0x003a4158
      */

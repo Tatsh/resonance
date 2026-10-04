@@ -7,6 +7,7 @@
 class HxIListChunk;
 class HxStream;
 
+/** Reading of Standard MIDI Files and the receivers their events go to. */
 namespace Mid {
 
 class Receiver;

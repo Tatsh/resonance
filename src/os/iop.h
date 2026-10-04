@@ -35,8 +35,8 @@ void InitIop();
 /**
  * Load one IOP module from the disc or over the host link.
  *
- * The disc arm upper-cases the module name and composes `cdrom0:\IOP\`…`.IRX;1`. The host arm
- * composes `host0:iop/`…`.irx` from the name as the table records it, with no case conversion.
+ * The disc arm upper-cases the module name and composes `cdrom0:\IOP\NAME.IRX;1`. The host arm
+ * composes `host0:iop/name.irx` from the name as the table records it, with no case conversion.
  *
  * The two arms are exclusive rather than a fallback chain. kIopModuleSourceDisc wins wherever it is
  * set, so a mask with both bits never arrives at the host arm. A failed load reports through

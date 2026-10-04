@@ -6,6 +6,7 @@
 #include "script/cxx/fromapi.h"
 #include "script/cxx/typeerror.h"
 
+/** C++ wrappers for the embedded Python interpreter's objects, types, and extension modules. */
 namespace Py {
 
 // Py::String derives from Py::SeqBase<Py::Char>, which derives from this class, so the two

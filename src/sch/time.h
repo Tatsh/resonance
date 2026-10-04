@@ -5,6 +5,12 @@
 class IBStream;
 class OBStream;
 
+/**
+ * Scheduling of timed commands.
+ *
+ * The scheduler, its clocks, the recorder and play-back of command streams, and the time and
+ * song-position types they use.
+ */
 namespace Sch {
 
 /**

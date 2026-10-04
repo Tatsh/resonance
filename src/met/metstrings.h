@@ -63,7 +63,7 @@ inline HxStr MetText([[maybe_unused]] MetStringId nId, [[maybe_unused]] const ch
 /**
  * A text the North American release reads through a configuration query.
  *
- * The North American release evaluates `get_met_string('<key>')` through QueryConfigString(), and
+ * The North American release evaluates `get_met_string('KEY')` through QueryConfigString(), and
  * the European release looks the text up in the current language instead.
  *
  * @param nId The identifier the European release looks up.
