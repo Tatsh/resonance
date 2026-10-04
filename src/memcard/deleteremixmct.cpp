@@ -53,10 +53,10 @@ constexpr int kWriteIconFiles = 0;
 DeleteRemixMCT::DeleteRemixMCT(
     MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, const HxStr &remixName)
     : MemcardTask(pUser, pCard, nPortSlot, nCookie), mRemixName(remixName), mLoadTask(nullptr),
-      mSaveTask(nullptr), mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize) {
-    // The load at 0x0017cee4 reads the member rather than dispatching through
-    // IOBPreallocMemStream::Buffer(). The image never calls Buffer().
-    mBuffer = mStream.mBuffer;
+      mSaveTask(nullptr), mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize),
+      // The load at 0x0017cee4 reads the member rather than dispatching through
+      // IOBPreallocMemStream::Buffer(). The image never calls Buffer().
+      mBuffer(mStream.mBuffer) {
 }
 
 // NTSC-U/C: 0x001854e0, PAL: 0x0018ae48

@@ -66,8 +66,7 @@ AxePhraseMaker::AxePhraseMaker(PhraseMgr *pPhraseMgr,
     : mPhraseMgr(pPhraseMgr), mQuantizer(pQuantizer), mTrack(pTrackData->mIndex),
       mChannel(pTrackData->mChannel), mPhrase(nullptr), mPhraseBar(kNoBar),
       mPlayer(&NullPlayer::sInstance), mBarTicks(kBarTicks), mTrackData(pTrackData),
-      mValue(kAxisCenter) {
-    mSwitchBanks = 0;
+      mSwitchBanks(0), mValue(kAxisCenter) {
     if (QueryConfigFlag(kBankSwitchConfigCode) != 0) {
         mSwitchBanks = QueryConfigFlag(kBankSwitchOverrideConfigCode) == 0;
     }

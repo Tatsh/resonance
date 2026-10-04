@@ -17,12 +17,9 @@
 char g_abLogBuffer[kLogBufferSize];
 
 // NTSC-U/C: 0x00118c40, PAL: 0x00119190
-Globals::Globals() {
-    mGameManager = nullptr;
-    mMainLoop = nullptr;
-    mWatchdog = nullptr;
-    mWatchdogTimer = nullptr;
-    mLog = nullptr;
+Globals::Globals()
+    : mGameManager(nullptr), mMainLoop(nullptr), mWatchdog(nullptr), mWatchdogTimer(nullptr),
+      mLog(nullptr) {
     // Yes, the binary clears neither mSynth nor mScriptSink here.
 }
 

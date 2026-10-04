@@ -9,10 +9,7 @@ const int HxStream::failbit = 2;
 const int HxStream::badbit = 4;
 
 // NTSC-U/C: 0x004057a8, PAL: 0x0043f098
-HxStream::HxStream() {
-    mSwapBytes = 0;
-    mStatus = 0;
-    mFatalOnEnd = 0;
+HxStream::HxStream() : mSwapBytes(0), mStatus(0), mFatalOnEnd(0) {
 }
 
 // NTSC-U/C: 0x00145ee8, PAL: 0x00146a00

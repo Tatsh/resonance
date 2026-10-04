@@ -11,8 +11,7 @@ constexpr unsigned char kMidiNoteOn = 0x90;
 } // namespace
 
 // NTSC-U/C: 0x001d2060, PAL: 0x001d7f18
-SynthSustainer::SynthSustainer() {
-    mSink = nullptr;
+SynthSustainer::SynthSustainer() : mSink(nullptr) {
 }
 
 // NTSC-U/C: 0x001d2860, PAL: 0x001d8718

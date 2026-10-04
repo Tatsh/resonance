@@ -53,8 +53,7 @@ HxStr::HxStr(const HxStr &other) {
 }
 
 // NTSC-U/C: 0x004b7bd0, PAL: 0x004f6010
-HxStr::HxStr(unsigned nCount, char ch) {
-    mLen = nCount;
+HxStr::HxStr(unsigned nCount, char ch) : mLen(nCount) {
     mStr = new char[nCount + 1];
     HX_ASSERT(mStr != 0)
     for (unsigned i = 0; i < nCount; ++i) {

@@ -96,10 +96,12 @@ inline HxStr ConfigText(const char *pszKey) {
 
 // NTSC-U/C: 0x0029bcf0, PAL: 0x002b94b0
 MetLoadFreqScreen::MetLoadFreqScreen(MetRenderer *pRenderer, int nPriority)
-    : MetLoadFreqBaseScreen(pRenderer, nPriority) {
+    : MetLoadFreqBaseScreen(pRenderer, nPriority)
 #ifndef VIDEO_STANDARD_PAL
-    mFreqLimitPending = kInitialFreqLimitPending;
+      ,
+      mFreqLimitPending(kInitialFreqLimitPending)
 #endif
+{
 }
 
 // NTSC-U/C: 0x0029bd38, PAL: 0x002b94f0

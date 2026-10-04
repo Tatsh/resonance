@@ -35,8 +35,7 @@ ListRemixesMCT::ListRemixesMCT(MemcardUser *pUser,
                                int nCookie,
                                std::vector<MetRemixRecord> *pRecords)
     : MemcardTask(pUser, pCard, nPortSlot, nCookie), mLoadTask(nullptr), mRecords(pRecords),
-      mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize) {
-    mBuffer = mStream.mBuffer;
+      mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize), mBuffer(mStream.mBuffer) {
 }
 
 // NTSC-U/C: 0x001856a8, PAL: 0x0018b060

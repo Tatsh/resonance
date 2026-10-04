@@ -6,13 +6,8 @@
 #include "stream/obstream.h"
 
 // NTSC-U/C: 0x004ee2f8, PAL: 0x0052cea0
-IOBPreallocMemStream::IOBPreallocMemStream(char *pBuffer, int nCapacity) {
-    mBuffer = pBuffer;
-    mCapacity = nCapacity;
-    mWritePos = 0;
-    mReadPos = 0;
-    mEof = 0;
-    mFail = 0;
+IOBPreallocMemStream::IOBPreallocMemStream(char *pBuffer, int nCapacity)
+    : mBuffer(pBuffer), mCapacity(nCapacity), mWritePos(0), mReadPos(0), mEof(0), mFail(0) {
 }
 
 // NTSC-U/C: 0x004edb00, PAL: 0x0052c6a8

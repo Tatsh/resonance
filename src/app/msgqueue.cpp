@@ -16,9 +16,7 @@ inline void DeleteStoredMessages(std::vector<Message *> &messages) {
 } // namespace
 
 // NTSC-U/C: 0x0054a738, PAL: 0x0058ac68
-MsgQueue::MsgQueue() {
-    mTarget = &mFirst;
-    mInPoll = 0;
+MsgQueue::MsgQueue() : mTarget(&mFirst), mInPoll(0) {
 }
 
 // NTSC-U/C: 0x0054a7a0, PAL: 0x0058acd0

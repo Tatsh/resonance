@@ -85,9 +85,8 @@ constexpr int kNoRandomize = 0;
 
 // NTSC-U/C: 0x0029c130, PAL: 0x002b9950
 MetFreqCreateScreen::MetFreqCreateScreen(MetRenderer *pRenderer, int nPriority)
-    : MetScreen(
-          pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
-    mSelectedIdentity = 0;
+    : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
+      mSelectedIdentity(0) {
     mButtonList = new MetButtonList;
     MetFreqMakerAssetManager::shared()->WaitForLoad();
     // Yes, the binary polls once more after the wait and discards the result.

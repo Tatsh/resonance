@@ -64,8 +64,8 @@ constexpr int kPortCount = 4;
 InputMap *g_pInputMap;
 
 // NTSC-U/C: 0x00119160, PAL: 0x001196c0
-InputMap::InputMap(Globals *pGlobals, std::vector<Player *> *pPlayers) : mGlobals(pGlobals) {
-    mPlayers = pPlayers;
+InputMap::InputMap(Globals *pGlobals, std::vector<Player *> *pPlayers)
+    : mGlobals(pGlobals), mPlayers(pPlayers) {
     g_pInputMap = this;
     for (unsigned i = 0; i < kSlotCount; ++i) {
         for (unsigned j = 0; j < kRiffCount; ++j) {

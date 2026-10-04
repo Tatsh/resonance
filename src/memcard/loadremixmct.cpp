@@ -33,8 +33,7 @@ constexpr int kStepReadPayload = 2;
 LoadRemixMCT::LoadRemixMCT(
     MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, const HxStr &remixName)
     : MemcardTask(pUser, pCard, nPortSlot, nCookie), mRemixName(remixName), mLoadTask(nullptr),
-      mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize) {
-    mBuffer = mStream.mBuffer;
+      mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize), mBuffer(mStream.mBuffer) {
     mPayload = Application::shared()->GetResetLog();
 }
 

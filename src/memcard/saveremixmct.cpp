@@ -108,10 +108,12 @@ SaveRemixMCT::SaveRemixMCT(MemcardUser *pUser,
 #endif
       mAlbumNum(nAlbumNum), mReplacing(0), mRemixName(remixName), mAppearances(appearances),
       mLevelName(levelName), mStream(g_abRemixStagingBuffer, kRemixStagingBufferSize),
-      mLoadTask(nullptr) {
+      mLoadTask(nullptr)
 #ifndef VIDEO_STANDARD_PAL
-    mSaveTask = nullptr;
+      ,
+      mSaveTask(nullptr)
 #endif
+{
 }
 
 // NTSC-U/C: 0x001850a8, PAL: 0x0018a898

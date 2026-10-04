@@ -146,8 +146,8 @@ MetLoadFreqBaseScreen::MetLoadFreqBaseScreen(MetRenderer *pRenderer, int nPriori
 #else
     : MetScreen(
 #endif
-          pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
-    mSelectedIdentity = 0;
+          pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
+      mSelectedIdentity(0) {
 #ifdef VIDEO_STANDARD_PAL
     mUsingMemcardOnEnter = kUsingMemcard;
 #endif

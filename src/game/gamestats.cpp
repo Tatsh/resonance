@@ -1,10 +1,7 @@
 #include "game/gamestats.h"
 
 // NTSC-U/C: 0x0010f150, PAL: 0x0010f5b0
-GameStats::GameStats() {
-    mPlayerCount = 0;
-    mCompleted = 0;
-    mUnreadCounter = 0;
+GameStats::GameStats() : mPlayerCount(0), mCompleted(0), mUnreadCounter(0) {
 }
 
 // NTSC-U/C: 0x0010b648, PAL: 0x0010b7d0
