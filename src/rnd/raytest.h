@@ -3,7 +3,7 @@
 namespace Rnd {
 struct Segment;
 }
-struct Sphere;
+class Sphere;
 
 namespace Rnd {
 

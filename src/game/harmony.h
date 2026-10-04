@@ -21,7 +21,8 @@
  * The constructors, the destructor, and the assignment are implicitly declared. The copy
  * constructor is the vector copy constructor instantiation at `0x001d73f8`.
  */
-struct Harmony {
+class Harmony {
+public:
     /**
      * Allocate a harmony from the tagged heap under the tag `Harmony`.
      *

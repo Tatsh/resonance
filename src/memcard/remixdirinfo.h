@@ -34,7 +34,7 @@ constexpr int kRemixDirNumberOffset = 14;
  * of the four field names is attested. Every one of the four fields is recovered from the
  * disassembly.
  *
- * The record is a `struct` with public members. SaveRemixMCT::AppendDirInfo copies a stack
+ * The record is a `class` with public members. SaveRemixMCT::AppendDirInfo copies a stack
  * temporary into the vector through the implicit copy constructor.
  *
  * Three routines fix the layout between them. SaveRemixMCT::AppendDirInfo at `0x00179c28` writes
@@ -47,7 +47,8 @@ constexpr int kRemixDirNumberOffset = 14;
  * The constructor and the two static members are inline. Their out-of-line copies at `0x00186828`,
  * `0x001868b8`, and `0x00186978` have no caller.
  */
-struct RemixDirInfo {
+class RemixDirInfo {
+public:
     /**
      * Record a directory the listing found, with no file number seen yet.
      *

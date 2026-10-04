@@ -37,7 +37,8 @@ public:
      * Both members are public, because the only code that reads either is a member of
      * PowerupCollection and the record has no behaviour of its own.
      */
-    struct PowCount {
+    class PowCount {
+    public:
         /**
          * Report whether the entry holds a powerup of one kind.
          *

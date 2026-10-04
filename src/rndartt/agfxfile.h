@@ -4,7 +4,7 @@
 
 #include "rndartt/arect.h"
 
-struct ABitmap;
+class ABitmap;
 
 /** Results the AGfxFile members return. */
 enum AGfxFileResult {

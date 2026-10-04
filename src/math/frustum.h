@@ -5,7 +5,7 @@
 namespace Rnd {
 class Dbg;
 } // namespace Rnd
-struct Sphere;
+class Sphere;
 
 /**
  * Six-plane view volume.
@@ -16,7 +16,8 @@ struct Sphere;
  * "\n\tright:", "\n\ttop:", and "\n\tbottom:". The order is therefore recovered rather than
  * assumed, and it is not the order the per-vertex clip flags of Rnd::DrawVert use.
  */
-struct Frustum {
+class Frustum {
+public:
     /**
      * Build the six planes of a perspective view volume.
      *

@@ -1,6 +1,6 @@
 #pragma once
 
-struct ABitmap;
+class ABitmap;
 
 /**
  * Bitmap font of one glyph image per character code.

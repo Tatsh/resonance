@@ -111,7 +111,8 @@ public:
      * entry of the same index, sorts the list, and DrawShowing() then draws the views in list
      * order.
      */
-    struct DrawEntry {
+    class DrawEntry {
+    public:
         /**
          * Construct an entry with no view.
          *

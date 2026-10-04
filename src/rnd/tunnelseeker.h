@@ -30,7 +30,8 @@ class Tunnel;
  * current frame. The position and look offsets orient the transform handed to SetTransXfm(), and
  * the mesh offset places the transform handed to SetMeshXfm().
  */
-struct TunnelSeeker {
+class TunnelSeeker {
+public:
     /**
      * Construct a seeker with no tunnel.
      *

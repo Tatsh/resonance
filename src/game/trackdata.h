@@ -15,8 +15,8 @@ class PhraseDatabase;
 class PlayMap;
 class Player;
 class Riff;
-struct Harmony;
-struct RiffSet;
+class Harmony;
+class RiffSet;
 
 /** The play modes of a track, as TrackData::Print() writes them. */
 enum TrackMode {
@@ -87,7 +87,8 @@ public:
      * except mCatchPoints. The type name is inferred. The record has no descriptor, allocation tag,
      * or literal, and its allocations are billed to the vector.
      */
-    struct Bar {
+    class Bar {
+    public:
         /**
          * Construct an empty bar quantised to 120 ticks.
          *

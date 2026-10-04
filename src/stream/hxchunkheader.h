@@ -18,7 +18,8 @@ class HxStream;
  * Every member is public, because HxIListChunk, HxIDataChunk, and Mid::Reader read the
  * fields directly and the image exposes no accessor.
  */
-struct HxChunkHeader {
+class HxChunkHeader {
+public:
     /**
      * Construct an unread header named `????`.
      *

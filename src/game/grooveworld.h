@@ -30,7 +30,7 @@ class Renderer;
 class RendererBase;
 class ScoreTrackGraph;
 class TrackSelector;
-struct MetControllerReading;
+class MetControllerReading;
 
 namespace Sch {
 class TickClock;

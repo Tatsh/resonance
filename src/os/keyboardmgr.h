@@ -15,7 +15,8 @@
  * InputPoller::mBytePairs. No routine reads the member again. No routine loads either byte, and
  * their signedness is unknown.
  */
-struct KeyboardMgr {
+class KeyboardMgr {
+public:
     /**
      * Construct the instance through Reset().
      *

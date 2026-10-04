@@ -9,7 +9,8 @@
  * name and the member titles are therefore inferred from GrowToContain(), the one routine that
  * treats the two quadwords as a lower and an upper corner.
  */
-struct Box {
+class Box {
+public:
     /**
      * Widen this box on each axis where a point falls outside it.
      *

@@ -30,7 +30,8 @@ public:
      *
      * The structure emits no RTTI. The name is inferred.
      */
-    struct MeshPair {
+    class MeshPair {
+    public:
         /**
          * Resolve both meshes.
          *

@@ -41,7 +41,8 @@ public:
      *
      * A 0x14-byte element of mBindings. The name is inferred.
      */
-    struct Binding {
+    class Binding {
+    public:
         /**
          * Release the axis state.
          *

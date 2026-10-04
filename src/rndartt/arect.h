@@ -22,7 +22,8 @@
  * through the pointer it received and then copies the result into a fresh stack record before
  * passing it on.
  */
-struct ARect {
+class ARect {
+public:
     /**
      * Intersect this rectangle with another.
      *

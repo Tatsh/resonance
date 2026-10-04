@@ -42,9 +42,10 @@ constexpr int kRemixIndexElementFormat = 2;
  * with its vptr at `+0x10`, the element MetRemixRecord::appearances and SaveRemixMCT's vector at
  * `+0x68` store.
  *
- * The record is plain data with public members, so it is a `struct`.
+ * The record is a `class` with public members.
  */
-struct RemixIndexElement {
+class RemixIndexElement {
+public:
     /**
      * Construct an element with only AlbumNum cleared.
      *
@@ -131,7 +132,8 @@ struct RemixIndexElement {
  * version unwritten, and the implicit destructor at `0x00360df8`. The four remix tasks and
  * MetRemixManager construct the record on the stack.
  */
-struct RemixIndex {
+class RemixIndex {
+public:
     /**
      * Read the index back from a stream.
      *

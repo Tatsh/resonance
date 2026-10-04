@@ -21,7 +21,8 @@ class Player;
  * Every member is public, because the three routines are the only code in the image that refers
  * to the subobject and no accessor exists.
  */
-struct Gem {
+class Gem {
+public:
     /**
      * Write the five values to a stream.
      *

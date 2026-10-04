@@ -91,7 +91,8 @@ public:
      * "useXfm:", " wrap:", " mat:", and " tex:". The dump writes the material reference before the
      * texture reference even though the texture is stored first.
      */
-    struct Stage {
+    class Stage {
+    public:
         BlendMode mBlend; // +0x00 Defaults to kBlendModeMultiply.
         int mCoordIndex;  // +0x04 Which of the two vertex texture coordinate sets to read.
         TexGen mGenMode;  // +0x08

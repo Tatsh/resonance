@@ -60,7 +60,8 @@ public:
      * default constructor at work. The inline comparison is recovered from its expansion in the
      * gem search AddGem() performs.
      */
-    struct Gem {
+    class Gem {
+    public:
         /**
          * Order two gems by position.
          *

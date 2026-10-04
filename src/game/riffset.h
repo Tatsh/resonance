@@ -20,7 +20,8 @@ constexpr int kRiffSetLevelCount = 4;
  * TrackData deletes every RiffSet it creates through TrackData::mRiffSetsOwned, and each bar the
  * set covers refers to it from the bar's riff list.
  */
-struct RiffSet {
+class RiffSet {
+public:
     /**
      * Allocate a set from the tagged heap under the tag `RiffSet`.
      *

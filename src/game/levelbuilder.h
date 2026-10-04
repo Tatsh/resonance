@@ -8,7 +8,7 @@
 
 class HxStr;
 class Riff;
-struct Harmony;
+class Harmony;
 
 /**
  * Collection LevelBuilder::SelectTrack() takes the current track from.

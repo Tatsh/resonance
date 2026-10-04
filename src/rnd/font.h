@@ -104,7 +104,8 @@ public:
      * advance is already scaled by mSize, so it arrives in the units Rnd::Text builds its mesh in
      * rather than in pixels.
      */
-    struct CharInfo {
+    class CharInfo {
+    public:
         /** Construct zeroed metrics, the value a new mCharMap entry starts with. */
         CharInfo() = default;
 

@@ -14,7 +14,8 @@
  * The type is a full quadword of meaningful data rather than a padded triple. The four-term dot
  * product in QuatSlerp() proves that.
  */
-struct Quat {
+class Quat {
+public:
     /**
      * Convert a rotation matrix to this quaternion.
      *

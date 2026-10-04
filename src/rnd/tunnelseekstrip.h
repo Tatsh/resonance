@@ -10,7 +10,7 @@ namespace Rnd {
 class Mat;
 class Object;
 class Tunnel;
-struct TunnelSeeker;
+class TunnelSeeker;
 
 /**
  * Run of consecutive tunnel slices a Rnd::TunnelSeeker highlights on one ring.
@@ -27,7 +27,8 @@ struct TunnelSeeker;
  * word by word, mColor as one quadword, and then mSections element by element through the implicit
  * copy constructor of Rnd::TunnelSeekSection.
  */
-struct TunnelSeekStrip {
+class TunnelSeekStrip {
+public:
     /**
      * Construct an empty strip with a white colour.
      *

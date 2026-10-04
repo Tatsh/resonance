@@ -179,7 +179,8 @@ private:
      * the 0x20-byte allocator bucket. The copy constructor at `0x00606678` is implicitly
      * defined, copying each member in turn.
      */
-    struct DrawRun {
+    class DrawRun {
+    public:
         /** Packed VIF index data, in halfwords. +0x00 */
         unsigned short *mIndices = {};
         /** Halfwords of index data at mIndices. +0x04 */

@@ -1,6 +1,6 @@
 #pragma once
 
-struct ABitmap;
+class ABitmap;
 struct APoint;
 struct APolygonEdge;
 
@@ -26,7 +26,8 @@ constexpr int kAPolygonMaxVertexCount = 8;
  * texture extent, because APolygon::SetupTexturedEdge() multiplies it by the texture width or
  * height.
  */
-struct APolygon {
+class APolygon {
+public:
     /**
      * Start an edge at one vertex and aim it at a neighbour.
      *

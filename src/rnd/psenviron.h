@@ -8,7 +8,7 @@
 
 class HxStr;
 struct GifQuadword;
-struct Sphere;
+class Sphere;
 namespace Rnd {
 class Light;
 }

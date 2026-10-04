@@ -40,7 +40,8 @@ constexpr int kTestFourthPlayer = 3;
 constexpr int kTestHomeChannel = 0;
 
 // Registers the self-test from the unit's static initialiser.
-struct SelfTestRegistration {
+class SelfTestRegistration {
+public:
     SelfTestRegistration() {
         TestRegistry::Register(kTestName, TrackSelector::RunSelfTest);
     }

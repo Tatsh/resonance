@@ -27,7 +27,8 @@ constexpr int kTunnelSeekNoSlice = -9999;
  * mDirty defers the geometry copy. Set() only records the slice, and Update() copies the vertices
  * of the matching tunnel cell the next time the section is drawn.
  */
-struct TunnelSeekSection {
+class TunnelSeekSection {
+public:
     /**
      * Construct an unplaced section.
      *

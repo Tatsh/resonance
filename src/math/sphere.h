@@ -12,7 +12,8 @@
  * alignment and a size of 0x20 bytes. Rnd::Mesh::CopyFrom() relies on that size and moves the
  * sphere as two quadwords.
  */
-struct Sphere {
+class Sphere {
+public:
     /**
      * Grow this sphere to the smallest sphere that encloses both it and other.
      *

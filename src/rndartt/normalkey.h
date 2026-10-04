@@ -14,7 +14,8 @@ struct Color;
  * to the nearest key's ramp. The class is not polymorphic and does not emit RTTI, and the image
  * does not include a string that identifies it. The name is inferred.
  */
-struct NormalKey {
+class NormalKey {
+public:
     /**
      * Build the key of one colour.
      *

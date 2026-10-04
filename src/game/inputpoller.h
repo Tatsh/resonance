@@ -4,7 +4,7 @@
 #include <vector>
 
 class JoypadPS2;
-struct KeyboardMgr;
+class KeyboardMgr;
 class RawController;
 
 /**

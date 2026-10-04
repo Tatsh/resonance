@@ -5,7 +5,7 @@
 
 #include "os/mem.h"
 
-struct NormalKey;
+class NormalKey;
 
 /** Entries a palette stores, one for every value an eight bit index can take. */
 constexpr int kAPaletteEntryCount = 256;

@@ -9,7 +9,7 @@
 class APalette;
 struct AFont;
 struct APoint;
-struct APolygon;
+class APolygon;
 struct Color;
 
 /** Fractional bits in the coordinates DrawLine() and DrawTmapRow8U() take. */

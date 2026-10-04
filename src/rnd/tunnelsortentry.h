@@ -13,7 +13,8 @@ namespace Rnd {
  * constructor, which sits in the Rnd::Tunnel unit and has no callers, so the name is inferred
  * from what the constructor computes.
  */
-struct TunnelSortEntry {
+class TunnelSortEntry {
+public:
     /**
      * Key a mesh by the squared distance from eye to the midpoint of its first two vertices.
      *

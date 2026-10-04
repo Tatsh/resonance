@@ -94,7 +94,8 @@ public:
          * `0x004d42f0` reads the frame at node `+0x0c`. The title is inferred on the same basis as
          * Rnd::ColorKey.
          */
-        struct TexKey {
+        class TexKey {
+        public:
             /**
              * Order two keys by frame, which is what `std::list::sort()` compares.
              *

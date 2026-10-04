@@ -43,7 +43,8 @@ public:
      *
      * An eight-byte record. The name is inferred.
      */
-    struct ScreenMesh {
+    class ScreenMesh {
+    public:
         /**
          * Put the recorded material back on the mesh.
          *
@@ -78,7 +79,8 @@ public:
      *
      * A plain eight-byte record allocated with the untagged scalar allocator. The name is inferred.
      */
-    struct PlayerMaterial {
+    class PlayerMaterial {
+    public:
         /**
          * Record the player and resolve its material.
          *

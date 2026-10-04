@@ -25,7 +25,8 @@ constexpr int kARleReaderNoTransparentValue = -1;
  * value of zero or more skips a byte equal to it, and kARleReaderNoTransparentValue stores every
  * byte.
  */
-struct ARle8Reader {
+class ARle8Reader {
+public:
     /**
      * Decode one row into a buffer.
      *

@@ -84,7 +84,8 @@ public:
      * the Kochanek-Bartels weighting, and it agrees with the "t:", "c:", and "b:" titles the
      * dumper writes in that order.
      */
-    struct TransKey {
+    class TransKey {
+    public:
         /**
          * Build the two Kochanek-Bartels tangents of this keyframe from its neighbours.
          *
@@ -161,7 +162,8 @@ public:
      * rather than a vector, so all four floats are read, written, and dumped. The dumper at
      * `0x004f9160` labels the value "q:" and its components "x:", "y:", "z:", and "w:".
      */
-    struct RotKey {
+    class RotKey {
+    public:
         /**
          * Build the two Kochanek-Bartels tangents of this keyframe from its neighbours.
          *

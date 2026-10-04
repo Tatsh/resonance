@@ -21,7 +21,8 @@ class OBStream;
  * Every member is public, because MetRenderer, MetCommandMap, GrooveWorld, and ControllerCmd all
  * read the record directly and the image exposes no accessor.
  */
-struct MetControllerReading {
+class MetControllerReading {
+public:
     /**
      * Write the reading to a diagnostic stream as the device label, the pad index, the button,
      * and the value.

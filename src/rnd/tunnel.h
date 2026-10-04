@@ -695,9 +695,9 @@ private:
     // vector through the assignment operator at 0x004728e8.
     std::vector<TunnelSeeker> mSeekers;
 
-    friend struct TunnelSeekSection;
-    friend struct TunnelSeekStrip;
-    friend struct TunnelSeeker;
+    friend class TunnelSeekSection;
+    friend class TunnelSeekStrip;
+    friend class TunnelSeeker;
 };
 
 /**

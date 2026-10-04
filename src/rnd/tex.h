@@ -14,7 +14,7 @@ class APalette;
 namespace Rnd {
 class Stream;
 }
-struct ABitmap;
+class ABitmap;
 
 namespace Rnd {
 

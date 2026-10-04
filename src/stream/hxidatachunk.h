@@ -3,7 +3,7 @@
 #include "stream/hxstream.h"
 
 class HxIListChunk;
-struct HxChunkHeader;
+class HxChunkHeader;
 
 /**
  * Input stream over the payload of one RIFF or Standard MIDI File chunk.

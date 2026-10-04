@@ -35,7 +35,8 @@ namespace Sch {
  * A song position is the separate type Sch::Tick, in MIDI ticks at 480 per quarter note, and
  * Sch::TempoMap converts between the two.
  */
-struct Time {
+class Time {
+public:
     /**
      * Write the count.
      *

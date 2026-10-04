@@ -282,7 +282,8 @@ private:
     static constexpr int kTrackCount = 8;
 
     // Gem flash record, the element of mGemFlashes. The name is inferred.
-    struct GemFlash {
+    class GemFlash {
+    public:
         // Release the flash particle. The destructor inlines the body. The deleting copy
         // at 0x00456cd0 has no callers.
         ~GemFlash();

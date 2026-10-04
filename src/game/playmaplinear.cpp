@@ -25,7 +25,8 @@ const int kTestLateProbe = 13;
 constexpr int kSkipStepRings = 0;
 
 // Registers the self-test from the unit's static initialiser.
-struct SelfTestRegistration {
+class SelfTestRegistration {
+public:
     SelfTestRegistration() {
         TestRegistry::Register(kTestName, PlayMapLinear::RunSelfTest);
     }

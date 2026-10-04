@@ -9,7 +9,8 @@ class TnlTrigger;
  * of the vector at AppTunnel `+0x60`. AppTunnel appends one per scheduled trigger and erases it
  * once Update() reports that the trigger has fired.
  */
-struct TnlPendingTrigger {
+class TnlPendingTrigger {
+public:
     /**
      * Fire and delete the trigger once flFrame reaches mFrame.
      *

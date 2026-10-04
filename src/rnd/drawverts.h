@@ -3,12 +3,12 @@
 #include "gfx/gfxdevice.h"
 
 struct Color;
-struct Frustum;
+class Frustum;
 namespace Rnd {
 struct MeshVert;
 struct Particle;
 } // namespace Rnd
-struct Sphere;
+class Sphere;
 
 namespace Rnd {
 

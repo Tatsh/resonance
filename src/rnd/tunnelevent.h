@@ -22,7 +22,8 @@ class Stream;
  * reports non-zero. Otherwise it draws mObject at once. The filter's class is not recovered,
  * because no call site passes one, so the member is not declared.
  */
-struct TunnelEvent {
+class TunnelEvent {
+public:
     /**
      * Construct an event with every member unset.
      *

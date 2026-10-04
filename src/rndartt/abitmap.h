@@ -92,7 +92,8 @@ extern int g_nSkipColorSwap;
  * a font glyph is a derived record with one further word, or the description is 0x1c bytes with a
  * member no canvas routine reads. The four bytes are unresolved.
  */
-struct ABitmap {
+class ABitmap {
+public:
     /**
      * Bytes one pixel of each ABitmapFormat occupies.
      *
