@@ -188,7 +188,6 @@ Sch::Tick ClampTick(int nTick) {
 
 } // namespace
 
-// NTSC-U/C: 0x001ea6e0, PAL: 0x001f0950
 inline void LevelConverter::ReportError(int nTick, const char *pszMessage) {
     if (g_bErrorLogPending) {
         if (MidiErrorLogEnabled()) {
@@ -208,33 +207,28 @@ inline void LevelConverter::ReportError(int nTick, const char *pszMessage) {
     }
 }
 
-// NTSC-U/C: 0x001e6278, PAL: 0x001ec410
-// The three HxStr members, the positions, and the six collections are default-constructed by the
-// expansions the compiler places ahead of and around these stores.
 LevelConverter::LevelConverter() : mIgnoreQuantization(0), mDifficulty(0) {
+    // The three HxStr members, the positions, and the six collections are default-constructed by
+    // the expansions the compiler places ahead of and around these stores.
 }
 
-// NTSC-U/C: 0x001e9ee0, PAL: 0x001f0128
-// Every statement in the body is the compiler expanding the destructor of a member,
-// the three span collections and the harmony first, then the pending-event collection, then the
-// three strings in reverse declaration order.
 LevelConverter::~LevelConverter() {
+    // Every statement in the body is the compiler expanding the destructor of a member, the three
+    // span collections and the harmony first, then the pending-event collection, then the three
+    // strings in reverse declaration order.
 }
 
-// NTSC-U/C: 0x001ea570, PAL: 0x001f07e0
 void LevelConverter::Tempo(int nTick, int nMicrosecondsPerQuarter) {
     mBuilder->AddTempo(nTick, nMicrosecondsPerQuarter);
     mHasTempo = 1;
 }
 
-// NTSC-U/C: 0x001ea5a0, PAL: 0x001f0810
 void LevelConverter::TextEvent(int nTick, const char *pText, unsigned char nType) {
     if (nTick == Sch::Tick(0).mTick && nType == kTrackNameMetaType) {
         ParseTrackTypeString(pText);
     }
 }
 
-// NTSC-U/C: 0x001e65e0, PAL: 0x001ec7b0
 void LevelConverter::Convert(const char *pszPath,
                              void *pBuffer,
                              int nLength,
@@ -280,7 +274,6 @@ void LevelConverter::Convert(const char *pszPath,
     FinishErrorLog();
 }
 
-// NTSC-U/C: 0x001e6880, PAL: 0x001eca50
 void LevelConverter::NewTrack(unsigned char nTrack) {
     mTrack = nTrack;
     mPairNotes = 0;
@@ -300,7 +293,6 @@ void LevelConverter::NewTrack(unsigned char nTrack) {
     mHarmonyStart = Sch::Tick(kUnsetTick);
 }
 
-// NTSC-U/C: 0x001e6fc0, PAL: 0x001ed190
 void LevelConverter::NoteOn(int nTick,
                             unsigned char nNote,
                             unsigned char nVelocity,
@@ -332,7 +324,6 @@ void LevelConverter::NoteOn(int nTick,
     mBuilder->AddEvent(nTick, kMidiNoteOn, nNote, nVelocity, nChannel);
 }
 
-// NTSC-U/C: 0x001e7188, PAL: 0x001ed358
 void LevelConverter::NoteOff(int nTick, unsigned char nNote, unsigned char nChannel) {
     CheckChannel(nChannel, nTick);
     if (mHarmonyTrack) {
@@ -370,7 +361,6 @@ void LevelConverter::NoteOff(int nTick, unsigned char nNote, unsigned char nChan
     mBuilder->AddEvent(nTick, kMidiNoteOff, nNote, 0, nChannel);
 }
 
-// NTSC-U/C: 0x001e7788, PAL: 0x001ed958
 void LevelConverter::Controller(int nTick,
                                 unsigned char nController,
                                 unsigned char nValue,
@@ -440,7 +430,6 @@ void LevelConverter::Controller(int nTick,
     mBuilder->AddEvent(nTick, kMidiControlChange, nController, nValue, nChannel);
 }
 
-// NTSC-U/C: 0x001ea370, PAL: 0x001f05e0
 void LevelConverter::ProgramChange(int nTick, unsigned char nProgram, unsigned char nChannel) {
     if (mHarmonyTrack || mGemSpanTrack) {
         ReportError(nTick, "Program Change message -- ignored in this track");
@@ -454,7 +443,6 @@ void LevelConverter::ProgramChange(int nTick, unsigned char nProgram, unsigned c
     mBuilder->AddEvent(nTick, kMidiProgramChange, nProgram, 0, nChannel);
 }
 
-// NTSC-U/C: 0x001ea420, PAL: 0x001f0690
 void LevelConverter::PitchBend(int nTick,
                                unsigned char nLow,
                                unsigned char nHigh,
@@ -477,7 +465,6 @@ void LevelConverter::PitchBend(int nTick,
     mBuilder->AddEvent(nTick, kMidiPitchBend, nLow, nHigh, nChannel);
 }
 
-// NTSC-U/C: 0x001e6a30, PAL: 0x001ecc00
 void LevelConverter::EndTrack() {
     if (mHarmonyStart.mTick != Sch::Tick(kUnsetTick).mTick) {
         mBuilder->AddHarmony(mHarmonyStart.mTick, mHarmony);
@@ -501,7 +488,6 @@ void LevelConverter::EndTrack() {
     }
 }
 
-// NTSC-U/C: 0x001e8318, PAL: 0x001ee4e8
 void LevelConverter::ParseTrackTypeString(const char *pText) {
     if (mTrackType != kTrackTypeUnknown) {
         ReportError(Sch::Tick(0).mTick, "Track Type can only be set once");
@@ -583,7 +569,6 @@ void LevelConverter::ParseTrackTypeString(const char *pText) {
     ApplyTrackType();
 }
 
-// NTSC-U/C: 0x001e7ac0, PAL: 0x001edc90
 void LevelConverter::AddHarmonyNote(int nTick, unsigned char nNote) {
     if (mHarmonyStart.mTick != nTick) {
         if (mHarmonyStart.mTick != Sch::Tick(kUnsetTick).mTick) {
@@ -595,7 +580,6 @@ void LevelConverter::AddHarmonyNote(int nTick, unsigned char nNote) {
     mHarmony.AddPitch(nNote);
 }
 
-// NTSC-U/C: 0x001e8120, PAL: 0x001ee2f0
 void LevelConverter::CheckChannel(unsigned char nChannel, int nTick) {
     if (mTrackType == kTrackTypeUnknown) {
         ReportError(nTick, "Track Type not recognized for this track.");
@@ -614,7 +598,6 @@ void LevelConverter::CheckChannel(unsigned char nChannel, int nTick) {
     }
 }
 
-// NTSC-U/C: 0x001e8af0, PAL: 0x001eed38
 void LevelConverter::FinishErrorLog() {
     mTrackName = kOverallFileName;
     mTrack = 0;
@@ -636,7 +619,6 @@ void LevelConverter::FinishErrorLog() {
     g_bErrorLogPending = 1;
 }
 
-// NTSC-U/C: 0x001e6bd0, PAL: 0x001ecda0
 void LevelConverter::ApplyTrackType() {
     mHarmonyTrack = 0;
     mGemSpanTrack = 0;
@@ -740,7 +722,6 @@ void LevelConverter::ApplyTrackType() {
     mNextSpan = mSpans[mDifficulty].begin();
 }
 
-// NTSC-U/C: 0x001e7420, PAL: 0x001ed5f0
 void LevelConverter::AddNote(int nTick,
                              unsigned char nNote,
                              unsigned char nVelocity,
@@ -785,7 +766,6 @@ void LevelConverter::AddNote(int nTick,
     mBuilder->AddNoteMsg(nTick, nNote, nVelocity, nDuration, nChannel);
 }
 
-// NTSC-U/C: 0x001e7c20, PAL: 0x001eddf0
 void LevelConverter::AddGemSpan(int nTick, unsigned char nNote, int nDuration) {
     const int nDifficulty = nNote / kNotesPerOctave - kFirstGemOctave;
     if (static_cast<unsigned>(nDifficulty) >= static_cast<unsigned>(kDifficultyCount)) {
@@ -822,7 +802,6 @@ void LevelConverter::AddGemSpan(int nTick, unsigned char nNote, int nDuration) {
     }
 }
 
-// NTSC-U/C: 0x001e7e00, PAL: 0x001edfd0
 int LevelConverter::CheckRiffPosition(int nTick) {
     if (mRiff == nullptr) {
         return kRiffPositionBefore;
@@ -843,7 +822,6 @@ int LevelConverter::CheckRiffPosition(int nTick) {
     return kRiffPositionInside;
 }
 
-// NTSC-U/C: 0x001e7eb0, PAL: 0x001ee080
 void LevelConverter::NextRiff() {
     if (mNextSpan == mSpans[mDifficulty].end()) {
         return;
@@ -876,7 +854,6 @@ void LevelConverter::NextRiff() {
     ++mNextSpan;
 }
 
-// NTSC-U/C: 0x001e8cb8, PAL: 0x001eef00
 void LevelConverter::EmitRiffProgram(int nTick) {
     if (mProgram == kNoProgram) {
         ReportError(nTick, "Program Change not specified for Riffs");
@@ -904,7 +881,6 @@ void LevelConverter::EmitRiffProgram(int nTick) {
         ClampTick(nTick - mRiffStart.mTick).mTick, kMidiProgramChange, mProgram, 0, mChannel);
 }
 
-// NTSC-U/C: 0x001ea618, PAL: 0x001f0888
 void LevelConverter::SyncRiff(int nTick) {
     int bOpenedHere = 0;
     if (mRiff == nullptr) {

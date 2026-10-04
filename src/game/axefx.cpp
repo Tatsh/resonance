@@ -29,7 +29,6 @@ constexpr float kFilterScale = 128.0f;
 
 } // namespace
 
-// NTSC-U/C: 0x0019aa20, PAL: 0x001a0788
 AxeFX::AxeFX(Globals *pGlobals, const TrackData *pTrackData)
     : mChannel(pTrackData->mChannel), mFilter(pGlobals->GetSongClock(), this), mPlaying(0),
       mValue(kValueCenter), mClock(pGlobals->GetSongClock()) {
@@ -37,7 +36,6 @@ AxeFX::AxeFX(Globals *pGlobals, const TrackData *pTrackData)
     mFilter.mInterval.mValue = kFilterInterval;
 }
 
-// NTSC-U/C: 0x0019abd8, PAL: 0x001a0940
 void AxeFX::SendController() {
     StdMidiMsg msg(mClock->SongTick(),
                    static_cast<unsigned char>(kStatusControlChange | mChannel),
@@ -46,18 +44,15 @@ void AxeFX::SendController() {
     Send(&msg);
 }
 
-// NTSC-U/C: 0x0019b498, PAL: 0x001a1200
 void AxeFX::OnAxisFX(AxisFXMsg *pMsg) {
     mFilter.SetTarget(pMsg->mValue);
 }
 
-// NTSC-U/C: 0x0019b4b8, PAL: 0x001a1220
 void AxeFX::OnMultiMuse() {
     mPlaying = 1;
     SendController();
 }
 
-// NTSC-U/C: 0x0019b4e0, PAL: 0x001a1248
 void AxeFX::OnFilterValue(float flValue) {
     const int nValue = kControllerMaximum - static_cast<int>(flValue * kFilterScale);
     if (nValue == mValue) {
@@ -69,7 +64,6 @@ void AxeFX::OnFilterValue(float flValue) {
     }
 }
 
-// NTSC-U/C: 0x0019b538, PAL: 0x001a12a0
 void AxeFX::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nAxisFXMsgType) {

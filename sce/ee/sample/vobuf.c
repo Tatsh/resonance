@@ -16,7 +16,6 @@ enum {
     kTagDecoded = 2,
 };
 
-// NTSC-U/C: 0x005d3fa0, PAL: 0x00616008
 void voBufCreate(VoBuf *pVoBuf, void *pData, void *pTag, int nFrames) {
     unsigned char *tagBytes;
     int offset;
@@ -40,18 +39,15 @@ void voBufCreate(VoBuf *pVoBuf, void *pData, void *pTag, int nFrames) {
     } while (remaining != 0);
 }
 
-// NTSC-U/C: 0x005d3fe8, PAL: 0x00616050
 void voBufReset(VoBuf *pVoBuf) {
     pVoBuf->count = 0;
     pVoBuf->write = 0;
 }
 
-// NTSC-U/C: 0x005d3ff8, PAL: 0x00616060
 int voBufIsFull(VoBuf *pVoBuf) {
     return pVoBuf->count == pVoBuf->size;
 }
 
-// NTSC-U/C: 0x005d4010, PAL: 0x00616078
 void voBufIncCount(VoBuf *pVoBuf) {
     DIntr();
     *(int *)((unsigned char *)pVoBuf->tag + pVoBuf->write * kTagEntrySize) = kTagDecoded;
@@ -60,7 +56,6 @@ void voBufIncCount(VoBuf *pVoBuf) {
     EIntr();
 }
 
-// NTSC-U/C: 0x005d4088, PAL: 0x006160f0
 void *voBufGetData(VoBuf *pVoBuf) {
     if (pVoBuf->count == pVoBuf->size) {
         return NULL;
@@ -68,12 +63,10 @@ void *voBufGetData(VoBuf *pVoBuf) {
     return (unsigned char *)pVoBuf->data + pVoBuf->write * kFrameDataSize;
 }
 
-// NTSC-U/C: 0x005d40c0, PAL: 0x00616128
 void voBufDelete(VoBuf *pVoBuf) {
     (void)pVoBuf;
 }
 
-// NTSC-U/C: 0x005d40d8, PAL: 0x00616140
 void *voBufGetTag(VoBuf *pVoBuf) {
     int readIndex;
 
@@ -84,7 +77,6 @@ void *voBufGetTag(VoBuf *pVoBuf) {
     return (unsigned char *)pVoBuf->tag + readIndex * kTagEntrySize;
 }
 
-// NTSC-U/C: 0x005d4130, PAL: 0x00616198
 void voBufDecCount(VoBuf *pVoBuf) {
     if (pVoBuf->count > 0) {
         --pVoBuf->count;

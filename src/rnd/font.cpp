@@ -163,32 +163,27 @@ inline int ScanForInkedColumn(ACanvas &canvas, int nFrom, int nTo, int nTop, int
 
 } // namespace
 
-// NTSC-U/C: 0x004cb1e8, PAL: 0x005094a8
 Font::Font(const HxStr &name)
     : Object(name), mType(kFontTypeDefault), mHeight(12), mWeight(kFontWeightNormal), mItalic(0),
       mFamily(kFontFamilyRoman), mMat(nullptr), mRows(1.0f), mCols(1.0f), mSize(0.0f),
       mSpace(0.0f) {
 }
 
-// NTSC-U/C: 0x004d0738, PAL: 0x0050eb70
 void Font::RemoveMatRef() {
     if (mMat != nullptr) {
         mMat->RemoveRef(this);
     }
 }
 
-// NTSC-U/C: 0x004cee70, PAL: 0x0050d1a8
 Font::~Font() {
     RemoveMatRef();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x004cefd0, PAL: 0x0050d330
 const HxStr &Font::ClassName() const {
     return g_fontClassName;
 }
 
-// NTSC-U/C: 0x004cedd0, PAL: 0x0050d108
 void Font::SetBuiltin(
     int nHeight, FontWeight weight, int nItalic, FontFamily family, const HxStr &name) {
     mHeight = nHeight;
@@ -198,7 +193,6 @@ void Font::SetBuiltin(
     mName = name;
 }
 
-// NTSC-U/C: 0x004cef88, PAL: 0x0050d2e8
 void Font::GetBuiltin(int *nHeightOut,
                       FontWeight *weightOut,
                       int *nItalicOut,
@@ -211,7 +205,6 @@ void Font::GetBuiltin(int *nHeightOut,
     nameOut = mName;
 }
 
-// NTSC-U/C: 0x004ca470, PAL: 0x005086d8
 void Font::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     if (sink.mDumpLevel <= 0) {
@@ -256,7 +249,6 @@ void Font::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x004ca720, PAL: 0x00508988
 void Font::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.WriteLE(&nVersion, sizeof(nVersion));
@@ -277,7 +269,6 @@ void Font::Save(Stream &stream) {
     WriteString(stream, mChars);
 }
 
-// NTSC-U/C: 0x004d0690, PAL: 0x0050eac8
 void Font::Replace(Object *pFrom, Object *pTo) {
     if (mMat != pFrom) {
         return;
@@ -291,7 +282,6 @@ void Font::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// NTSC-U/C: 0x004cb0b8, PAL: 0x00509378
 void Font::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
     // The cast result is dereferenced with no null check, so a pSource of another class faults here
     // rather than being rejected. No base implementation is invoked and nFlags is never read.
@@ -317,7 +307,6 @@ void Font::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
     mCharMap.clear();
 }
 
-// NTSC-U/C: 0x004cac20, PAL: 0x00508eb8
 void Font::Load(Stream &stream) {
     int nVersion = 0;
     stream.ReadLE(&nVersion, sizeof(nVersion));
@@ -379,7 +368,6 @@ void Font::Load(Stream &stream) {
     mCharMap.clear();
 }
 
-// NTSC-U/C: 0x004ca050, PAL: 0x005082b8
 Font::CharInfo::CharInfo(int nRow, int nCol, const Font *pFont) {
     ACanvas *pCanvas = nullptr;
     Tex *pTex = nullptr;
@@ -445,7 +433,6 @@ Font::CharInfo::CharInfo(int nRow, int nCol, const Font *pFont) {
     mV1 = mV0 + 1.0f / pFont->mRows;
 }
 
-// NTSC-U/C: 0x004ca978, PAL: 0x00508be0
 void Font::BuildCharMap() {
     int nRow = 0;
     int nCol = 0;
@@ -459,21 +446,18 @@ void Font::BuildCharMap() {
     }
 }
 
-// NTSC-U/C: 0x004d0600, PAL: 0x0050ea38
 void Font::SetMat(Mat *pMat) {
     RemoveMatRef();
     mMat = pMat;
     OnChanged();
 }
 
-// NTSC-U/C: 0x004d0648, PAL: 0x0050ea80
 void Font::SetSize(float flSize) {
     RemoveMatRef();
     mSize = flSize;
     OnChanged();
 }
 
-// NTSC-U/C: 0x004d0530, PAL: 0x0050e968
 void Font::SetAtlas(
     Mat *pMat, const HxStr &chars, float flRows, float flCols, float flSize, float flSpace) {
     RemoveMatRef();
@@ -486,7 +470,6 @@ void Font::SetAtlas(
     OnChanged();
 }
 
-// NTSC-U/C: 0x004d0768, PAL: 0x0050eba0
 void Font::OnChanged() {
     if (mMat != nullptr) {
         mMat->AddRef(this);
@@ -494,7 +477,6 @@ void Font::OnChanged() {
     mCharMap.clear();
 }
 
-// NTSC-U/C: 0x004d0988, PAL: 0x0050edc0
 float Font::GetCharAdvance(char ch) {
     if (mCharMap.empty()) {
         BuildCharMap();
@@ -506,7 +488,6 @@ float Font::GetCharAdvance(char ch) {
     return it->second.mAdvance;
 }
 
-// NTSC-U/C: 0x004d08d8, PAL: 0x0050ed10
 void Font::GetCharUV(char ch, Vector2 &uv0, Vector2 &uv1) {
     if (mCharMap.empty()) {
         BuildCharMap();
@@ -525,17 +506,14 @@ void Font::GetCharUV(char ch, Vector2 &uv0, Vector2 &uv1) {
     uv1.y = it->second.mV1;
 }
 
-// NTSC-U/C: 0x004cecc0, PAL: 0x0050cff8
 void *Font::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kFontTag);
 }
 
-// NTSC-U/C: 0x004cece0, PAL: 0x0050d018
 void Font::operator delete(void *pBlock) {
     OperatorDeleteOverride(pBlock, kFontTag);
 }
 
-// NTSC-U/C: 0x004cf060, PAL: 0x0050d3c0
 Font *NewFont(const HxStr &name) {
     // The binary bills the allocation to the tag "Rnd::Font" and requests exactly 0x60 bytes.
     return new Font(name);
@@ -546,7 +524,6 @@ Font *NewFont(const HxStr &name) {
 // unlike Text::sNew.
 Font *(*g_pfnNewFont)(const HxStr &name);
 
-// NTSC-U/C: 0x004ced40, PAL: 0x0050d078
 Font *NewFontThroughHook(const HxStr &name) {
     try {
         return g_pfnNewFont(name);
@@ -555,7 +532,6 @@ Font *NewFontThroughHook(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x004cefe0, PAL: 0x0050d340
 Object *CreateRegisteredFont(const HxStr &name) {
     try {
         return g_pfnNewFont(name);
@@ -564,7 +540,6 @@ Object *CreateRegisteredFont(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x004ced00, PAL: 0x0050d038
 void RegisterFontClass() {
     g_pfnNewFont = NewFont;
     TheManager.RegisterClass(g_fontClassName, CreateRegisteredFont);

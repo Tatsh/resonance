@@ -82,20 +82,32 @@ private:
     static constexpr double kAxisBlendScale = 0.6;
     static constexpr double kAxisBlendBase = 0.2;
 
-    // Sends a DurGemMsg from mPosition, lasting the note's length less 60 ticks and at least
-    // 60, blended by BlendForAxis() of the phrase's value at the position within its bar.
-    // NTSC-U/C: 0x001a32f0, PAL: 0x001a9058
+    /**
+     * Sends a DurGemMsg from mPosition, lasting the note's length less 60 ticks and at least 60,
+     * blended by BlendForAxis() of the phrase's value at the position within its bar.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001a32f0
+     * @ghidraAddress PAL: 0x001a9058
+     */
     void PostDurGemMsg(NoteMsg *pMsg);
 
-    // On controller 46, a zero value records mPosition as the sustain start when none is held,
-    // and a non-zero value sends a DurGemMsg from the sustain start to mPosition at blend 0.5
-    // and clears the start.
-    // NTSC-U/C: 0x001a34e8, PAL: 0x001a9250
+    /**
+     * On controller 46, a zero value records mPosition as the sustain start when none is held, and
+     * a non-zero value sends a DurGemMsg from the sustain start to mPosition at blend 0.5 and
+     * clears the start.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001a34e8
+     * @ghidraAddress PAL: 0x001a9250
+     */
     void OnStdMidi(StdMidiMsg *pMsg);
 
-    // Replays every entry of the phrase's sequence through DispatchPriv() with mPosition
-    // advanced to the entry, then clears mPhrase.
-    // NTSC-U/C: 0x001a3600, PAL: 0x001a9368
+    /**
+     * Replays every entry of the phrase's sequence through DispatchPriv() with mPosition advanced
+     * to the entry, then clears mPhrase.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001a3600
+     * @ghidraAddress PAL: 0x001a9368
+     */
     void OnPhrase(PhraseMsg *pMsg);
 
     int mTrack;              // +0x18, copied from TrackData::mIndex

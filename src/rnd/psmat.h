@@ -142,20 +142,41 @@ public:
     void SelectAlphaBlend();
 
 private:
-    // Program FBA_1, ALPHA_1, DIMX, and TEST_1 for the blend of the selected stage, or for the
-    // material blend while stage 0 is selected. 0x0058ec80.
+    /**
+     * Program FBA_1, ALPHA_1, DIMX, and TEST_1 for the blend of the selected stage, or for the
+     * material blend while stage 0 is selected.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0058ec80
+     * @ghidraAddress PAL: 0x005d1fd8
+     */
     void SelectBlendMode();
 
-    // Bind the texture of the selected stage, publishing the lighting enable and the texture
-    // bound flags the vertex paths read. 0x0058eef8.
+    /**
+     * Bind the texture of the selected stage, publishing the lighting enable and the texture bound
+     * flags the vertex paths read.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0058eef8
+     * @ghidraAddress PAL: 0x005d2250
+     */
     void BindStageTexture();
 
-    // Choose the UV transform the selected stage requires. 0x0058f038.
+    /**
+     * Choose the UV transform the selected stage requires.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0058f038
+     * @ghidraAddress PAL: 0x005d2390
+     */
     void SetupUvXfm();
 
-    // Program CLAMP_1 from a stage wrap mode. The compiler inlined this into BindStageTexture(),
-    // and no call site references the out-of-line body at 0x005911d8, so that body is dead in the
-    // shipped image.
+    /**
+     * Program CLAMP_1 from a stage wrap mode.
+     *
+     * The compiler inlined this into BindStageTexture(), and no call site references the
+     * out-of-line body, so that body is dead in the shipped image.
+     *
+     * @ghidraAddress NTSC-U/C: 0x005911d8
+     * @ghidraAddress PAL: 0x005d4558
+     */
     void SelectStageClamp(const Stage &stage);
 };
 

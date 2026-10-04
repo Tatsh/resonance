@@ -63,7 +63,6 @@ constexpr int kPortCount = 4;
 
 InputMap *g_pInputMap;
 
-// NTSC-U/C: 0x00119160, PAL: 0x001196c0
 InputMap::InputMap(Globals *pGlobals, std::vector<Player *> *pPlayers)
     : mGlobals(pGlobals), mPlayers(pPlayers) {
     g_pInputMap = this;
@@ -74,19 +73,16 @@ InputMap::InputMap(Globals *pGlobals, std::vector<Player *> *pPlayers)
     }
 }
 
-// NTSC-U/C: 0x001193d0, PAL: 0x00119930
 InputMap::~InputMap() {
     g_pInputMap = nullptr;
 }
 
-// NTSC-U/C: 0x0011dc20, PAL: 0x0011e1a8
 void InputMap::DispatchPriv(Message *pMsg) {
     if (pMsg->Type() == RawControllerMsg::sID) {
         OnControllerReading(static_cast<RawControllerMsg *>(pMsg));
     }
 }
 
-// NTSC-U/C: 0x00119518, PAL: 0x00119a78
 void InputMap::OnControllerReading(RawControllerMsg *pMsg) {
     const MetControllerReading &reading = pMsg->mReading;
     const int nKey = MakeKey(reading.mTag, reading.mPadIndex, reading.mButton);
@@ -221,44 +217,37 @@ void InputMap::OnControllerReading(RawControllerMsg *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0011da68, PAL: 0x0011dff0
 void InputMap::SendStopRiff(Sch::Tick position, Player *pPlayer, int nTrack, int nRiff) {
     StopRiffMsg msg(nRiff, pPlayer, position, nTrack);
     Send(&msg);
 }
 
-// NTSC-U/C: 0x0011d9b0, PAL: 0x0011df38
 void InputMap::SendPitchRiff(Sch::Tick position, Player *pPlayer, int nTrack, int nRiff) {
     pPlayer->GetInputSlot(); // Yes, the binary discards this call's result.
     PitchRiffMsg msg(nRiff, pPlayer, position, nTrack);
     Send(&msg);
 }
 
-// NTSC-U/C: 0x0011d9a0, PAL: 0x0011df28
 InputMap *InputMap::shared() {
     return g_pInputMap;
 }
 
-// NTSC-U/C: 0x0011dc08, PAL: 0x0011e190
 int InputMap::MakeKey(int nDevice, int nPort, int nButton) {
     return ((nDevice << kPortShift | nPort) << kButtonShift) | nButton;
 }
 
-// NTSC-U/C: 0x0011db78, PAL: 0x0011e100
 void InputMap::DisableEntries() {
     for (std::list<Binding>::iterator it = mBindings.begin(); it != mBindings.end(); ++it) {
         it->mEnabled = 0;
     }
 }
 
-// NTSC-U/C: 0x0011dbc0, PAL: 0x0011e148
 void InputMap::EnableEntries() {
     for (std::list<Binding>::iterator it = mBindings.begin(); it != mBindings.end(); ++it) {
         it->mEnabled = 1;
     }
 }
 
-// NTSC-U/C: 0x0011db18, PAL: 0x0011e0a0
 void InputMap::SetEnabled(int nSlot, int nAction, int nEnabled) {
     for (std::list<Binding>::iterator it = mBindings.begin(); it != mBindings.end(); ++it) {
         if (it->mSlot == nSlot && it->mAction == nAction) {
@@ -267,7 +256,6 @@ void InputMap::SetEnabled(int nSlot, int nAction, int nEnabled) {
     }
 }
 
-// NTSC-U/C: 0x00119f58, PAL: 0x0011a4b8
 std::list<InputMap::Binding>::iterator InputMap::FindOrAddBinding(const Binding &binding) {
     for (std::list<Binding>::iterator it = mBindings.begin(); it != mBindings.end(); ++it) {
         if (it->mSlot == binding.mSlot && it->mAction == binding.mAction &&
@@ -285,14 +273,12 @@ std::list<InputMap::Binding>::iterator InputMap::FindOrAddBinding(const Binding 
     return it;
 }
 
-// NTSC-U/C: 0x0011a0f0, PAL: 0x0011a650
 void InputMap::AddBinding(int nDevice, int nPort, int nButton, int nSlot, int nAction, int nExtra) {
     const int nKey = MakeKey(nDevice, nPort, nButton);
     const Binding binding = {nSlot, nAction, nExtra, kBindingEnabled, nullptr};
     mBindingMap[nKey] = FindOrAddBinding(binding);
 }
 
-// NTSC-U/C: 0x0011a230, PAL: 0x0011a790
 void InputMap::Rebuild() {
     mBindingMap.clear();
     for (int nPort = 0; nPort < kPortCount; ++nPort) {
@@ -310,7 +296,6 @@ void InputMap::Rebuild() {
     }
 }
 
-// NTSC-U/C: 0x00119dd0, PAL: 0x0011a330
 void InputMap::StopAllRiffs() {
     const int nNow = Application::shared()->GetSongClock()->SongTick();
     for (unsigned i = 0; i < mPlayers->size(); ++i) {
@@ -332,7 +317,6 @@ void InputMap::StopAllRiffs() {
     }
 }
 
-// NTSC-U/C: 0x0011d1a0, PAL: 0x0011d728
 void InputMap::ClearBindingMap() {
     mBindingMap.clear();
 }

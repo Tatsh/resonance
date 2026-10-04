@@ -36,7 +36,6 @@ static struct huft *pHuftNext = huftTable;
 // The most pool entries one block has used. Only HuftReset() reads the count.
 static int highWater = 0;
 
-// NTSC-U/C: 0x0063e1a8, PAL: 0x0067ed38
 void HuftReset(void) {
     const int nUsed = (int)(pHuftNext - huftTable);
     if (highWater < nUsed) {
@@ -45,7 +44,6 @@ void HuftReset(void) {
     pHuftNext = huftTable;
 }
 
-// NTSC-U/C: 0x0063e1e0, PAL: 0x0067ed70
 struct huft *HuftMalloc(unsigned nEntries) {
     struct huft *pTable = pHuftNext;
     pHuftNext = pTable + nEntries;

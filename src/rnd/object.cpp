@@ -45,14 +45,9 @@ static Dbg &operator<<(Dbg &sink, const std::list<Object *> &refs) {
 
 void (*g_pfnNameChanged)(Object *pObject);
 
-// NTSC-U/C: 0x0053fc08, PAL: 0x0057f8c0
-//
-// mInternal, mMerge, and mDeleting are not written here. The named constructor below does set all
-// three.
 Object::Object() : mName(nullptr) {
 }
 
-// NTSC-U/C: 0x0053e0d8, PAL: 0x0057dd08
 Object::Object(const HxStr &name) : mName(name), mInternal(0), mMerge(1), mDeleting(0) {
     if (TheManager.Find(name) != nullptr) {
         Rnd::TheDbg.Notify(kAlreadyExistsFormat, name.mStr != nullptr ? name.mStr : "");
@@ -67,7 +62,6 @@ Object::Object(const HxStr &name) : mName(name), mInternal(0), mMerge(1), mDelet
     TheManager.mObjects[mName] = this;
 }
 
-// NTSC-U/C: 0x0053e348, PAL: 0x0057dfa8
 Object::~Object() {
     if (g_pfnNameChanged != nullptr) {
         g_pfnNameChanged(this);
@@ -75,7 +69,6 @@ Object::~Object() {
     TheManager.mObjects.erase(mName);
 }
 
-// NTSC-U/C: 0x0053e400, PAL: 0x0057e070
 void Object::SetName(const HxStr &name) {
     if (mName == name) {
         return;
@@ -93,7 +86,6 @@ void Object::SetName(const HxStr &name) {
     TheManager.mObjects[mName] = this;
 }
 
-// NTSC-U/C: 0x0053e720, PAL: 0x0057e3b0
 void Object::AddRef(Object *pReferrer) {
     if (pReferrer == this) {
         return;
@@ -101,7 +93,6 @@ void Object::AddRef(Object *pReferrer) {
     mRefs.push_front(pReferrer);
 }
 
-// NTSC-U/C: 0x0053e7d0, PAL: 0x0057e460
 void Object::RemoveRef(Object *pReferrer) {
     if (mDeleting != 0) {
         return;
@@ -114,7 +105,6 @@ void Object::RemoveRef(Object *pReferrer) {
     }
 }
 
-// NTSC-U/C: 0x0053fca0, PAL: 0x0057f960
 void Object::ReleaseAllRefs() {
     mDeleting = 1;
     mRefs.unique();
@@ -124,7 +114,6 @@ void Object::ReleaseAllRefs() {
     mRefs.clear();
 }
 
-// NTSC-U/C: 0x0053e5a8, PAL: 0x0057e238
 void Object::DumpText(Dbg &sink) {
     sink.Print("[Object]\n");
     sink.Print("name:");

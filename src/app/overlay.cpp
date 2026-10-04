@@ -153,7 +153,6 @@ Overlay *g_pOverlay;
 // NTSC-U/C: 0x006dfdf0, PAL: 0x00723620
 HxStr g_hudLayoutName;
 
-// NTSC-U/C: 0x0041c940, PAL: 0x004573a0
 Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
     mTutorial = QueryConfigFlag(kTutorialConfigCode);
     mPlaybackOn = 0;
@@ -271,7 +270,6 @@ Overlay::Overlay(Renderer *pRenderer) : mPanel(nullptr), mRenderer(pRenderer) {
     g_pOverlay = this;
 }
 
-// NTSC-U/C: 0x0041da00, PAL: 0x004588b0
 Overlay::~Overlay() {
     g_pOverlay = nullptr;
     for (std::vector<HudBadge *>::iterator it = mBadges.begin(); it != mBadges.end(); ++it) {
@@ -284,7 +282,6 @@ Overlay::~Overlay() {
     Rnd::ThePs.mFeedbackEnabled = 0;
 }
 
-// NTSC-U/C: 0x0041dd20, PAL: 0x00458bf0
 void Overlay::SetFrame(float flFrame) {
     const int nBar = static_cast<int>(flFrame / kTicksPerBar);
     bool bBarChanged = false;
@@ -310,7 +307,6 @@ void Overlay::SetFrame(float flFrame) {
     }
 }
 
-// NTSC-U/C: 0x0042ad10, PAL: 0x00466128
 void Overlay::OnBarChanged(int nTrack, int nBar, BarStatusMsg::Effects effects) {
     if (nBar != mCurrentBar) {
         return;
@@ -332,7 +328,6 @@ inline HudTrack *Overlay::FindTrack(Player *pPlayer) {
     return nullptr;
 }
 
-// NTSC-U/C: 0x004206e0, PAL: 0x0045ba00
 void Overlay::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {
@@ -386,7 +381,6 @@ void Overlay::DispatchPriv(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0041fdd8, PAL: 0x0045b408
 void Overlay::OnTrackSelect(Message *pMsg) {
     TrackSelectMsg *pSelect = static_cast<TrackSelectMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pSelect->mPlayer);
@@ -404,7 +398,6 @@ void Overlay::OnTrackSelect(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0041e020, PAL: 0x00458fb0
 void Overlay::OnWin(Message *pMsg) {
     WinMsg *pWin = static_cast<WinMsg *>(pMsg);
     for (std::vector<HudTrack *>::iterator it = mTracks.begin(); it != mTracks.end(); ++it) {
@@ -456,7 +449,6 @@ void Overlay::OnWin(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0041e9b8, PAL: 0x00459b58
 void Overlay::OnChoosePowerup(Message *pMsg) {
     ChoosePowerupMsg *pChoose = static_cast<ChoosePowerupMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pChoose->mOwner);
@@ -474,7 +466,6 @@ void Overlay::OnChoosePowerup(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0041eba0, PAL: 0x00459d40
 void Overlay::OnCaughtPowerbar(Message *pMsg) {
     CaughtPowerbarMsg *pCaught = static_cast<CaughtPowerbarMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pCaught->mPlayer);
@@ -486,7 +477,6 @@ void Overlay::OnCaughtPowerbar(Message *pMsg) {
     pTrack->mTextMessage.Show(text, kMessageScale, kMessageHold);
 }
 
-// NTSC-U/C: 0x0041eda8, PAL: 0x00459ff8
 void Overlay::OnDeployedPowerup(Message *pMsg) {
     if (mPlayMode != kPlayModeGame) {
         return;
@@ -510,7 +500,6 @@ void Overlay::OnDeployedPowerup(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0042aff0, PAL: 0x00466408
 void Overlay::OnPointAmount(Message *pMsg) {
     PointAmountMsg *pPoints = static_cast<PointAmountMsg *>(pMsg);
     HudBadge *pBadge = FindBadge(pPoints->mPlayer);
@@ -522,7 +511,6 @@ void Overlay::OnPointAmount(Message *pMsg) {
     pBadge->mScore.mChangeTime = kScoreChangedNow;
 }
 
-// NTSC-U/C: 0x0041f310, PAL: 0x0045a7e8
 void Overlay::OnJuiceAmount(Message *pMsg) {
     if (mGameMode != kGameModeSolo || mPlayMode != kPlayModeGame) {
         return;
@@ -541,7 +529,6 @@ void Overlay::OnJuiceAmount(Message *pMsg) {
     FindBadge(pJuice->mPlayer)->mFreq.SetPulsing(pJuice->GetJuiceFraction() > kPulseJuice);
 }
 
-// NTSC-U/C: 0x0042b068, PAL: 0x00466480
 void Overlay::OnPhraseCaptured(Message *pMsg) {
     PhraseCapturedMsg *pCaptured = static_cast<PhraseCapturedMsg *>(pMsg);
     if (mTutorial != 0) {
@@ -561,7 +548,6 @@ void Overlay::OnPhraseCaptured(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0041f5e8, PAL: 0x0045ab90
 void Overlay::OnText(Message *pMsg) {
     // Yes, the binary reads the first display without testing for an empty vector.
     HudTrack *pTrack = mTracks[0];
@@ -573,7 +559,6 @@ void Overlay::OnText(Message *pMsg) {
         HxStr(static_cast<TextMsg *>(pMsg)->mText), kMessageScale, kMessageHold);
 }
 
-// NTSC-U/C: 0x0041f708, PAL: 0x0045acd0
 void Overlay::OnLoopToggle(Message *pMsg) {
     if (mPlayMode == kPlayModeGame) {
         return;
@@ -602,7 +587,6 @@ void Overlay::OnLoopToggle(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0041f440, PAL: 0x0045a918
 void Overlay::OnAdvanceSectionToggle(Message *pMsg) {
     if (mTutorial != 0) {
         return;
@@ -624,7 +608,6 @@ void Overlay::OnAdvanceSectionToggle(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0041fba0, PAL: 0x0045b1a8
 void Overlay::OnShowEraseEffect(Message *pMsg) {
     ShowEraseEffectMsg *pErase = static_cast<ShowEraseEffectMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pErase->mPlayer);
@@ -641,7 +624,6 @@ void Overlay::OnShowEraseEffect(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0041f9a8, PAL: 0x0045af98
 void Overlay::OnPlaybackToggle(Message *pMsg) {
     PlaybackToggleMsg *pPlayback = static_cast<PlaybackToggleMsg *>(pMsg);
     mPlaybackOn = pPlayback->mOn;
@@ -663,7 +645,6 @@ void Overlay::OnPlaybackToggle(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0042aef8, PAL: 0x00466310
 void Overlay::OnToggleGhost(Message *pMsg) {
     ToggleGhostMsg *pGhost = static_cast<ToggleGhostMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pGhost->mPlayer);
@@ -677,7 +658,6 @@ void Overlay::OnToggleGhost(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0041fed8, PAL: 0x0045b508
 void Overlay::OnCatch(Message *pMsg) {
     if (mPlayMode != kPlayModeGame) {
         return;
@@ -718,7 +698,6 @@ void Overlay::OnCatch(Message *pMsg) {
     pTrack->mBlockedCatches = 0;
 }
 
-// NTSC-U/C: 0x0042b178, PAL: 0x00466590
 void Overlay::OnPhraseMuffed(Message *pMsg) {
     if (mPlayMode != kPlayModeGame || mTutorial != 0) {
         return;
@@ -730,7 +709,6 @@ void Overlay::OnPhraseMuffed(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x004201c0, PAL: 0x00466610
 void Overlay::OnBeginPhraseCatch(Message *pMsg) {
     if (mPlayMode != kPlayModeGame) {
         return;
@@ -752,7 +730,6 @@ void Overlay::OnBeginPhraseCatch(Message *pMsg) {
     pTrack->mPoints.SetMultiplier(pBegin->mMultiplier);
 }
 
-// NTSC-U/C: 0x0042b1f8, PAL: 0x004667a0
 void Overlay::OnFadeGame(Message *pMsg) {
     FadeGameMsg *pFade = static_cast<FadeGameMsg *>(pMsg);
     mPanel->mScreenFlash.Start(static_cast<float>(pFade->mDuration), pFade->mFadeIn);
@@ -761,7 +738,6 @@ void Overlay::OnFadeGame(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x00420588, PAL: 0x0045b808
 void Overlay::OnPlayersTrackNeutralized(Message *pMsg) {
     PlayersTrackNeutralizedMsg *pNeutralized = static_cast<PlayersTrackNeutralizedMsg *>(pMsg);
 #ifdef VIDEO_STANDARD_PAL
@@ -776,7 +752,6 @@ void Overlay::OnPlayersTrackNeutralized(Message *pMsg) {
             HxStr(Rnd::MakeString(pszFormat, pNeutralized->mPoints)), kMessageScale, kMessageHold);
 }
 
-// NTSC-U/C: 0x00420408, PAL: 0x004666e0
 void Overlay::OnMultiplierState(Message *pMsg) {
     if (mTutorial != 0) {
         return;
@@ -795,7 +770,6 @@ void Overlay::OnMultiplierState(Message *pMsg) {
     pTrack->mPoints.mHot = pState->mBonus != 0;
 }
 
-// NTSC-U/C: 0x0041f138, PAL: 0x0045a470
 void Overlay::OnPowerupFailed(Message *pMsg) {
     PowerupFailedMsg *pFailed = static_cast<PowerupFailedMsg *>(pMsg);
     HudTrack *pTrack = FindTrack(pFailed->mPlayer);
@@ -826,26 +800,22 @@ void Overlay::OnPowerupFailed(Message *pMsg) {
     pTrack->mTextMessage.Show(text, kFailureScale, kMessageHold);
 }
 
-// NTSC-U/C: 0x0042aec8, PAL: 0x004662e0
 void Overlay::OnGameOver() {
     if (mTutorial != 0) {
         CallScriptTemplate(kGameOverScriptTemplate);
     }
 }
 
-// NTSC-U/C: 0x0042b130, PAL: 0x00466548
 void Overlay::OnJamEffect() {
     if (mTutorial != 0 && Application::shared()->GetPlayMode() == kPlayModeJam) {
         CallScriptTemplate(kJamEffectScriptTemplate);
     }
 }
 
-// NTSC-U/C: 0x0042acb8, PAL: 0x004660d0
 void Overlay::Draw() {
     mPanel->mWinMessage.Draw();
 }
 
-// NTSC-U/C: 0x0042ad98, PAL: 0x004661b0
 void Overlay::OnLeaderChanged(Player *pOldLeader, Player *pNewLeader) {
     if (pNewLeader == nullptr) {
         mPanel->mScorePulse.Hide();
@@ -860,7 +830,6 @@ void Overlay::OnLeaderChanged(Player *pOldLeader, Player *pNewLeader) {
     }
 }
 
-// NTSC-U/C: 0x0042ae88, PAL: 0x004662a0
 HudBadge *Overlay::FindBadge(Player *pPlayer) {
     for (std::vector<HudBadge *>::iterator it = mBadges.begin(); it != mBadges.end(); ++it) {
         if ((*it)->mPlayer == pPlayer) {
@@ -870,7 +839,6 @@ HudBadge *Overlay::FindBadge(Player *pPlayer) {
     return nullptr;
 }
 
-// NTSC-U/C: 0x00429938, PAL: 0x00464f78
 void Overlay::SetLayoutName(int nLayout) {
     g_hudLayoutName = Rnd::MakeString("HUD%d", nLayout);
 }

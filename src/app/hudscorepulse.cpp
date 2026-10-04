@@ -20,7 +20,6 @@ constexpr int kXfmRowTranslation = 3;
 
 } // namespace
 
-// NTSC-U/C: 0x0041bdb8, PAL: 0x004568c0
 HudScorePulse::HudScorePulse() {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
@@ -29,7 +28,6 @@ HudScorePulse::HudScorePulse() {
     mMesh->SetShowing(0);
 }
 
-// NTSC-U/C: 0x0041c2b0, PAL: 0x00456c48
 void HudScorePulse::MoveTo(HudBadge *pBadge) {
     mMesh->mMat->SetEmissive(HudColorFromName(pBadge->mPlayer->mColorName));
 

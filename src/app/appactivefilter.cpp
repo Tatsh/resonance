@@ -62,7 +62,6 @@ int Cmd::sCmdID;
 
 } // namespace
 
-// NTSC-U/C: 0x00100080, PAL: 0x00100080
 ActiveFilter::ActiveFilter(Sch::TickClock *pClock, FilterLover *pLover)
     : mTarget(0.0f), mRetention(kDefaultRetention), mValue(0.0f), mLover(pLover), mClock(pClock),
       mStepCommand(nullptr) {
@@ -70,7 +69,6 @@ ActiveFilter::ActiveFilter(Sch::TickClock *pClock, FilterLover *pLover)
     mInterval.mValue = 0;
 }
 
-// NTSC-U/C: 0x00100100, PAL: 0x00100100
 ActiveFilter::~ActiveFilter() {
     const Sch::CmdID command = mCommand;
     mClock->Withdraw(command);
@@ -80,7 +78,6 @@ ActiveFilter::~ActiveFilter() {
     mStepCommand = nullptr;
 }
 
-// NTSC-U/C: 0x00100150, PAL: 0x00100150
 void ActiveFilter::SetTarget(float flTarget) {
     mTarget = flTarget;
     if (mStepCommand != nullptr) {
@@ -92,7 +89,6 @@ void ActiveFilter::SetTarget(float flTarget) {
     Update();
 }
 
-// NTSC-U/C: 0x001001c8, PAL: 0x001001c8
 void ActiveFilter::Update() {
     mValue = (1.0 - mRetention) * mTarget + mRetention * mValue;
     mLover->OnFilterValue(mValue);

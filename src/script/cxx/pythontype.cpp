@@ -6,7 +6,6 @@
 
 namespace Py {
 
-// NTSC-U/C: 0x005ac120, PAL: 0x005ee648
 PythonType::PythonType(int nBasicSize, int nItemSize)
     : mTable(new PyTypeObject), mSequenceTable(nullptr), mMappingTable(nullptr),
       mNumberTable(nullptr), mBufferTable(nullptr) {
@@ -19,7 +18,6 @@ PythonType::PythonType(int nBasicSize, int nItemSize)
     mTable->tp_dealloc = standard_dealloc;
 }
 
-// NTSC-U/C: 0x005ac220, PAL: 0x005ee748
 PythonType::~PythonType() {
     delete mTable;
     delete mSequenceTable;
@@ -28,7 +26,6 @@ PythonType::~PythonType() {
     delete mBufferTable;
 }
 
-// NTSC-U/C: 0x005abf90, PAL: 0x005ee4b8
 void PythonType::supportSequenceType() {
     if (mSequenceTable != nullptr) {
         return;
@@ -44,7 +41,6 @@ void PythonType::supportSequenceType() {
     mSequenceTable->sq_ass_slice = PythonExtensionBase::sequence_ass_slice_handler;
 }
 
-// NTSC-U/C: 0x005ac040, PAL: 0x005ee568
 void PythonType::supportMappingType() {
     if (mMappingTable != nullptr) {
         return;
@@ -56,7 +52,6 @@ void PythonType::supportMappingType() {
     mMappingTable->mp_ass_subscript = PythonExtensionBase::mapping_ass_subscript_handler;
 }
 
-// NTSC-U/C: 0x005ac0b0, PAL: 0x005ee5d8
 void PythonType::supportBufferType() {
     if (mBufferTable != nullptr) {
         return;
@@ -68,7 +63,6 @@ void PythonType::supportBufferType() {
     mBufferTable->bf_getsegcount = PythonExtensionBase::buffer_getsegcount_handler;
 }
 
-// NTSC-U/C: 0x005abf60, PAL: 0x005ee488
 void PythonType::standard_dealloc(PyObject *pyob) {
     PyMem_DEL(pyob);
 }

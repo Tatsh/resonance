@@ -42,13 +42,11 @@ inline int ClampTick(int nTick) {
 
 } // namespace
 
-// NTSC-U/C: 0x001a2da0, PAL: 0x001a8b08
 AxeNewGemMaker::AxeNewGemMaker(const TrackData *pTrackData)
     : mTrack(pTrackData->mIndex), mTrackData(pTrackData), mStripId(0), mValue(kAxisCenter),
       mPlayer(&NullPlayer::sInstance) {
 }
 
-// NTSC-U/C: 0x001a2f18, PAL: 0x001a8c80
 void AxeNewGemMaker::PostGemMessages(StdMidiMsg *pMsg) {
     const int nTick = pMsg->mTick;
     const unsigned char nKind = pMsg->mStatus & kStatusKindMask;
@@ -96,7 +94,6 @@ void AxeNewGemMaker::PostGemMessages(StdMidiMsg *pMsg) {
     mStripId = 0;
 }
 
-// NTSC-U/C: 0x001a46e0, PAL: 0x001aa448
 void AxeNewGemMaker::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(g_dwTrackSelectMsgType)) {

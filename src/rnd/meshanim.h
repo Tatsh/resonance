@@ -247,16 +247,34 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
-    // Take a reference on the mesh and on the keys owner. Load() and Copy() inline it as their own
-    // second half, and the standalone copy at 0x00494288 has no caller.
+    /**
+     * Take a reference on the mesh and on the keys owner.
+     *
+     * Load() and Copy() inline it as their own second half, and the standalone copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00494288
+     * @ghidraAddress PAL: 0x004d2138
+     */
     void AddRefObjects();
 
-    // Empty the three channels unless this animation owns its keys. SetKeysOwner() inlines it, and
-    // the standalone copy at 0x00494178 has no caller.
+    /**
+     * Empty the three channels unless this animation owns its keys.
+     *
+     * SetKeysOwner() inlines it, and the standalone copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00494178
+     * @ghidraAddress PAL: 0x004d2028
+     */
     void ClearKeys();
 
-    // Drop the reference on the mesh and on the keys owner. 0x00494238. The destructor calls it and
-    // Load(), Copy(), and Replace() inline it.
+    /**
+     * Drop the reference on the mesh and on the keys owner.
+     *
+     * The destructor calls it and Load(), Copy(), and Replace() inline it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00494238
+     * @ghidraAddress PAL: 0x004d20e8
+     */
     void ReleaseObjects();
 
     // Data members follow the recovered offset order, and the access specifiers interleave.

@@ -28,7 +28,6 @@ inline void FormatBcdByte(unsigned char nBcd, HxStr &text, bool bAppend) {
 
 } // namespace
 
-// NTSC-U/C: 0x0053a108, PAL: 0x00579a38
 bool FormatCurrentDateTime(HxStr &text) {
     sceCdCLOCK clock;
     if (sceCdReadClock(&clock) == 0) {

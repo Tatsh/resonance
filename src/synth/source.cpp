@@ -137,37 +137,30 @@ private:
 
 } // namespace
 
-// NTSC-U/C: 0x00545e28, PAL: 0x00586358
 Source *Source::AllocateSineSource(float flPeriod, float flPhase) {
     return new Sine(kTwoPi / flPeriod, flPhase * kTwoPi);
 }
 
-// NTSC-U/C: 0x00545e98, PAL: 0x005863c8
 Source *Source::AllocateSquareSource(float flPeriod) {
     return new Square(flPeriod);
 }
 
-// NTSC-U/C: 0x00545ee0, PAL: 0x00586410
 Source *Source::AllocateTriSource(float flPeriod, float flPhase) {
     return new Tri(flPeriod, flPhase * flPeriod, kTriangleSpan / flPeriod);
 }
 
-// NTSC-U/C: 0x00545f50, PAL: 0x00586480
 Source *Source::AllocateRampSource(float flPeriod, float flPhase) {
     return new Ramp(flPeriod, flPhase * flPeriod, 1.0f / flPeriod);
 }
 
-// NTSC-U/C: 0x00545fc0, PAL: 0x005864f0
 Source *Source::AllocateFadeOutSource(int bStopAtEnd, float flDuration) {
     return new Fade(flDuration, 0.0f, bStopAtEnd);
 }
 
-// NTSC-U/C: 0x00546020, PAL: 0x00586550
 Source *Source::AllocateFadeInSource(int bStopAtEnd, float flDuration) {
     return new Fade(flDuration, 1.0f, bStopAtEnd);
 }
 
-// NTSC-U/C: 0x00546088, PAL: 0x005865b8
 Source *Source::AllocateHoldAndFadeDownSource(int bStopAtEnd, float flHold, float flFade) {
     return new HoldAndFadeDown(flHold, flFade, bStopAtEnd);
 }

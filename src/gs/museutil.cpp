@@ -79,7 +79,6 @@ private:
 
 } // namespace
 
-// NTSC-U/C: 0x001ab6d8, PAL: 0x001b1440
 MultiMuse *CloneAndTranspose(const MultiMuse &muse, int nTrans) {
     Shifter shifter;
     return shifter.GetShiftedMuse(muse, nTrans);

@@ -189,12 +189,10 @@ NoteDestroyer *g_pNoteDestroyer;
 
 } // namespace
 
-// NTSC-U/C: 0x0012e460, PAL: 0x0012ebd8
 void CreateNoteDestroyer() {
     g_pNoteDestroyer = new NoteDestroyer(Application::shared());
 }
 
-// NTSC-U/C: 0x0012ea50, PAL: 0x0012f1c8
 void PlaySynthSound(int nNote, int nNote2, int nVelocity, int bAutoStop) {
     Ps2HardSynth *pSynth = Application::shared()->GetSynth();
     // Yes, the binary tests the first note against 1 rather than -1.
@@ -213,23 +211,19 @@ void PlaySynthSound(int nNote, int nNote2, int nVelocity, int bAutoStop) {
     }
 }
 
-// NTSC-U/C: 0x0012f3d8, PAL: 0x0012fb70
 void StartNoteDestroyer() {
     g_pNoteDestroyer->Start(kTickInfinity);
 }
 
-// NTSC-U/C: 0x0012f400, PAL: 0x0012fb98
 void StopNoteDestroyer() {
     g_pNoteDestroyer->Stop();
 }
 
-// NTSC-U/C: 0x0012f428, PAL: 0x0012fbc0
 void DestroyNoteDestroyer() {
     delete g_pNoteDestroyer;
     g_pNoteDestroyer = nullptr;
 }
 
-// NTSC-U/C: 0x0012f470, PAL: 0x0012fc08
 void PlaySoundByName(const char *pszName) {
     const HxStr name(pszName);
     int nNote = kNoNote;
@@ -240,12 +234,10 @@ void PlaySoundByName(const char *pszName) {
     PlaySynthSound(nNote, nNote2, nVelocity, bAutoStop);
 }
 
-// NTSC-U/C: 0x0012f598, PAL: 0x0012fd50
 void PlayActivateSound() {
     PlaySynthSound(kNoteActivate, kNoNote, kDefaultVelocity, 0);
 }
 
-// NTSC-U/C: 0x0012e570, PAL: 0x0012ece8
 void LookupSound(const HxStr &name, int *pNote, int *pNote2, int *pVelocity, int *pAutoStop) {
     *pNote = kNoNote;
     *pNote2 = kNoNote;
@@ -359,7 +351,6 @@ void LookupSound(const HxStr &name, int *pNote, int *pNote2, int *pVelocity, int
     }
 }
 
-// NTSC-U/C: 0x0012eba0, PAL: 0x0012f318
 void StopSoundByName(const char *pszName) {
     const HxStr name(pszName);
     int nNote = kNoNote;
@@ -377,11 +368,10 @@ void StopSoundByName(const char *pszName) {
     }
 }
 
-// NTSC-U/C: 0x0012f520, PAL: 0x0012fcd8
-// The jump table at `0x007d1bd0` maps kinds 0 through 4 to sounds 0x3f, 0x3d, 0x3e, 0x3c, and
-// 0x40, kinds 5 through 11 to no sound, and kind 12 to 0x41, which is what the cases below
-// encode. Kinds past 12 return without playing.
 void PlayPowerupSound(PowerupType kind) {
+    // The jump table at `0x007d1bd0` maps kinds 0 through 4 to sounds 0x3f, 0x3d, 0x3e, 0x3c, and
+    // 0x40, kinds 5 through 11 to no sound, and kind 12 to 0x41. Kinds past 12 return without
+    // playing.
     int nSound;
     switch (kind) {
     case kHudItemNeutralizer:

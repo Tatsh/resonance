@@ -420,11 +420,15 @@ public:
     std::list<Rnd::Object *> GetLoadedObjects();
 
 private:
-    // NTSC-U/C: 0x0024ff80, PAL: 0x00265448
-    // Build a part template over one loaded texture: a material named after it with
-    // `.mat` appended, copied from mMaterialTemplate with the texture on its first stage, the
-    // texture's bitmap size as its scale, the category the seventh character from the end of the
-    // name selects, and the colour and randomisation flags the next two characters set.
+    /**
+     * Build a part template over one loaded texture: a material named after it with `.mat`
+     * appended, copied from mMaterialTemplate with the texture on its first stage, the texture's
+     * bitmap size as its scale, the category the seventh character from the end of the name
+     * selects, and the colour and randomisation flags the next two characters set.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0024ff80
+     * @ghidraAddress PAL: 0x00265448
+     */
     FreqPartTemplate *RegisterPart(Rnd::Object *pObject);
 
     int mReserved;                                    // +0x00, starts at 0, no reader identified

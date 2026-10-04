@@ -185,21 +185,37 @@ private:
         Rnd::Mesh *mMesh;
     };
 
-    // NTSC-U/C: 0x003fdec0, PAL: 0x00436948
-    // Clone the template into the row view for one index.
+    /**
+     * Clone the template into the row view for one index.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003fdec0
+     * @ghidraAddress PAL: 0x00436948
+     */
     Rnd::View *makeRow(int nIndex);
 
-    // NTSC-U/C: 0x003fd858, PAL: 0x004362e0
-    // Record the Text and Mesh children of one row view as its cells, and every Text
-    // child in mTextCells as well.
+    /**
+     * Record the Text and Mesh children of one row view as its cells, and every Text child in
+     * mTextCells as well.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003fd858
+     * @ghidraAddress PAL: 0x004362e0
+     */
     void buildRowCells(Rnd::View *pRow);
 
-    // NTSC-U/C: 0x00401030, PAL: 0x00439b00
-    // Place the highlight mesh on the cursor row.
+    /**
+     * Place the highlight mesh on the cursor row.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00401030
+     * @ghidraAddress PAL: 0x00439b00
+     */
     void updateHighlight();
 
-    // NTSC-U/C: 0x00401270, PAL: 0x00439d40
-    // Show each arrow when items lie beyond that end of the page.
+    /**
+     * Show each arrow when items lie beyond that end of the page.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00401270
+     * @ghidraAddress PAL: 0x00439d40
+     */
     void updateArrows();
 
     ListDataProvider *mProvider;

@@ -74,23 +74,19 @@ constexpr int kSelectAlternateCycles = 2;
 
 } // namespace
 
-// NTSC-U/C: 0x003b55a8, PAL: 0x003e9c00
 MetSoloWinScreen::MetSoloWinScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(new MetButtonList()), mDifficultyUnlocked(0) {
 }
 
-// NTSC-U/C: 0x003b9ce8, PAL: 0x003ee6f8
 MetSoloWinScreen::~MetSoloWinScreen() {
     delete mButtonList;
 }
 
-// NTSC-U/C: 0x003b9b98, PAL: 0x003ee670
 MetSoloWinScreen *MetSoloWinScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetSoloWinScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x003b6188, PAL: 0x003eaa48
 void MetSoloWinScreen::OnExitFinished() {
     mRenderer->ResolveArenaView(kResolveArenaView);
     mRenderer->OnReturnFromGame();
@@ -121,7 +117,6 @@ void MetSoloWinScreen::OnExitFinished() {
     mButtonList->SetSelected(kNoSelection);
 }
 
-// NTSC-U/C: 0x003b5968, PAL: 0x003ea068
 void MetSoloWinScreen::EnterAndShow() {
     mButtonList->Clear();
 
@@ -152,7 +147,6 @@ void MetSoloWinScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x003b57a0, PAL: 0x003e9e60
 void MetSoloWinScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -179,19 +173,15 @@ void MetSoloWinScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x003b9b90, PAL: 0x003ee668
 void MetSoloWinScreen::PlayLeaveSound(int) {
 }
 
-// NTSC-U/C: 0x003b9b80, PAL: 0x003ee658
 void MetSoloWinScreen::PlayCycleLeftSound(int) {
 }
 
-// NTSC-U/C: 0x003b9b88, PAL: 0x003ee660
 void MetSoloWinScreen::PlayCycleRightSound(int) {
 }
 
-// NTSC-U/C: 0x003b5f88, PAL: 0x003ea7c8
 void MetSoloWinScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ExitScreenByName(HxStr(kSoloStatsScreen));
     ExitScreenByName(HxStr(kTitleScreen));
@@ -200,13 +190,11 @@ void MetSoloWinScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// NTSC-U/C: 0x003b9d80, PAL: 0x003ee790
 void MetSoloWinScreen::OnEnterFinished() {
     MetHelpScreen::SelectPreset(MetText(kMetStrHNoBackTitle, kPromptLayout));
     MetHelpScreen::SetText(mHelpKeys[mButtonList->mSelected], mRenderer->mAnimationFrame);
 }
 
-// NTSC-U/C: 0x003b9c20, PAL: 0x003e9b18
 void MetSoloWinScreen::SetDifficultyUnlocked(int nUnlocked) {
     MetScreen *pScreen = MetScreen::FindScreenByName(HxStr(kOwnScreenName));
     MetSoloWinScreen *pWinScreen =

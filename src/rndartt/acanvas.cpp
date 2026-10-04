@@ -100,7 +100,6 @@ inline int AdvanceStretchRow(ACanvas::AScaledRowInfo *pBlit) {
 // NTSC-U/C: 0x0086f6f0, PAL: 0x008b3dd0
 APalette *ACanvas::palDefault = nullptr;
 
-// NTSC-U/C: 0x00557af8, PAL: 0x00598c50
 void ACanvas::QuantizeToRamps(ACanvas &dest, const std::vector<const Color *> &colors) const {
     std::vector<NormalKey> keys;
     keys.reserve(kQuantizeReservedKeys);
@@ -145,7 +144,6 @@ void ACanvas::QuantizeToRamps(ACanvas &dest, const std::vector<const Color *> &c
     }
 }
 
-// NTSC-U/C: 0x005eb1a0, PAL: 0x0062d2e8
 ACanvas::ACanvas(const ABitmap &bitmap) : mBitmap(bitmap) {
     mClip.mLeft = 0;
     mClip.mTop = 0;
@@ -153,7 +151,6 @@ ACanvas::ACanvas(const ABitmap &bitmap) : mBitmap(bitmap) {
     mClip.mBottom = bitmap.mHeight;
 }
 
-// NTSC-U/C: 0x005e8bc8, PAL: 0x0062ad10
 ACanvas *ACanvas::NewCompatibleCanvas(const ABitmap &bitmap, bool bAllocatePixels) {
     ABitmap copy = bitmap;
     if (bAllocatePixels) {
@@ -186,7 +183,6 @@ ACanvas *ACanvas::NewCompatibleCanvas(const ABitmap &bitmap, bool bAllocatePixel
     }
 }
 
-// NTSC-U/C: 0x005e8e38, PAL: 0x0062af80
 ACanvas *ACanvas::SubCanvas(const ABitmap &source, int nX, int nY, int nWidth, int nHeight) {
     ABitmap rect(source, nX, nY, nWidth, nHeight);
     switch (rect.mFormat) {
@@ -204,7 +200,6 @@ ACanvas *ACanvas::SubCanvas(const ABitmap &source, int nX, int nY, int nWidth, i
     }
 }
 
-// NTSC-U/C: 0x005eb200, PAL: 0x0062d348
 ACanvas *ACanvas::NewCompatibleLinearCanvas(const ABitmap &bitmap) {
     ABitmap copy = bitmap;
     if (copy.mFormat == kABitmapFormatRle8) {
@@ -213,11 +208,9 @@ ACanvas *ACanvas::NewCompatibleLinearCanvas(const ABitmap &bitmap) {
     return NewCompatibleCanvas(copy, true);
 }
 
-// NTSC-U/C: 0x005ead68, PAL: 0x0062ceb0
 ACanvas::~ACanvas() {
 }
 
-// NTSC-U/C: 0x005eb3d0, PAL: 0x0062d518
 unsigned char ACanvas::ClipCode(int nX, int nY) const {
     unsigned char nCode = 0;
     if (nX < mClip.mLeft) {
@@ -235,7 +228,6 @@ unsigned char ACanvas::ClipCode(int nX, int nY) const {
     return nCode;
 }
 
-// NTSC-U/C: 0x005eb418, PAL: 0x0062d560
 int ACanvas::ClipRle8Bitmap(
     const ABitmap &source, int *pnX, int *pnY, ARle8Reader *pReader, Rle8Clip *pSpan) const {
     pSpan->mStopColumn = source.mWidth;
@@ -262,7 +254,6 @@ int ACanvas::ClipRle8Bitmap(
     return *pnY < pSpan->mStopRow;
 }
 
-// NTSC-U/C: 0x005e8fd8, PAL: 0x0062b120
 int ACanvas::ClipLine(int *pnX0, int *pnY0, int *pnX1, int *pnY1) const {
     unsigned char nCode0 = ClipCode(*pnX0 >> kACanvasFractionBits, *pnY0 >> kACanvasFractionBits);
     for (;;) {
@@ -302,7 +293,6 @@ int ACanvas::ClipLine(int *pnX0, int *pnY0, int *pnX1, int *pnY1) const {
     }
 }
 
-// NTSC-U/C: 0x005e91b8, PAL: 0x0062b300
 int ACanvas::ClipBitmap(ABitmap *pBitmap, int *pnX, int *pnY) const {
     if (*pnY < mClip.mTop) {
         pBitmap->mPixels = static_cast<unsigned char *>(pBitmap->mPixels) +
@@ -342,49 +332,42 @@ int ACanvas::ClipBitmap(ABitmap *pBitmap, int *pnX, int *pnY) const {
     return pBitmap->mWidth > 0 && pBitmap->mHeight > 0;
 }
 
-// NTSC-U/C: 0x005eb520, PAL: 0x0062d668
 void ACanvas::DrawPixel(int nX, int nY) {
     if (nX >= mClip.mLeft && nX < mClip.mRight && nY >= mClip.mTop && nY < mClip.mBottom) {
         DrawPixelU(nX, nY);
     }
 }
 
-// NTSC-U/C: 0x005eb590, PAL: 0x0062d6d8
 void ACanvas::DrawPixel8(int nX, int nY, int nIndex) {
     if (nX >= mClip.mLeft && nX < mClip.mRight && nY >= mClip.mTop && nY < mClip.mBottom) {
         DrawPixel8U(nX, nY, nIndex & kChannelMask);
     }
 }
 
-// NTSC-U/C: 0x005eb608, PAL: 0x0062d750
 void ACanvas::DrawPixel15(int nX, int nY, unsigned short nColor) {
     if (nX >= mClip.mLeft && nX < mClip.mRight && nY >= mClip.mTop && nY < mClip.mBottom) {
         DrawPixel15U(nX, nY, nColor);
     }
 }
 
-// NTSC-U/C: 0x005eb680, PAL: 0x0062d7c8
 void ACanvas::DrawPixel24(int nX, int nY, const unsigned char *pRGB) {
     if (nX >= mClip.mLeft && nX < mClip.mRight && nY >= mClip.mTop && nY < mClip.mBottom) {
         DrawPixel24U(nX, nY, pRGB);
     }
 }
 
-// NTSC-U/C: 0x005eb6f0, PAL: 0x0062d838
 void ACanvas::DrawPixel32(int nX, int nY, unsigned int nColor) {
     if (nX >= mClip.mLeft && nX < mClip.mRight && nY >= mClip.mTop && nY < mClip.mBottom) {
         DrawPixel32U(nX, nY, nColor);
     }
 }
 
-// NTSC-U/C: 0x005eb760, PAL: 0x0062d8a8
 void ACanvas::DrawPixelNative(int nX, int nY, unsigned int nColor) {
     if (nX >= mClip.mLeft && nX < mClip.mRight && nY >= mClip.mTop && nY < mClip.mBottom) {
         DrawPixelNativeU(nX, nY, nColor);
     }
 }
 
-// NTSC-U/C: 0x005eb7d0, PAL: 0x0062d918
 int ACanvas::GetPixel8(int nX, int nY) {
     if (nX >= mClip.mLeft && nX < mClip.mRight && nY >= mClip.mTop && nY < mClip.mBottom) {
         return GetPixel8U(nX, nY);
@@ -392,7 +375,6 @@ int ACanvas::GetPixel8(int nX, int nY) {
     return 0;
 }
 
-// NTSC-U/C: 0x005eb848, PAL: 0x0062d990
 unsigned short ACanvas::GetPixel15(int nX, int nY) {
     if (nX >= mClip.mLeft && nX < mClip.mRight && nY >= mClip.mTop && nY < mClip.mBottom) {
         return GetPixel15U(nX, nY);
@@ -400,7 +382,6 @@ unsigned short ACanvas::GetPixel15(int nX, int nY) {
     return 0;
 }
 
-// NTSC-U/C: 0x005eb8c0, PAL: 0x0062da08
 void ACanvas::GetPixel24(int nX, int nY, unsigned char *pRGB) {
     if (nX >= mClip.mLeft && nX < mClip.mRight && nY >= mClip.mTop && nY < mClip.mBottom) {
         GetPixel24U(nX, nY, pRGB);
@@ -409,7 +390,6 @@ void ACanvas::GetPixel24(int nX, int nY, unsigned char *pRGB) {
     memset(pRGB, 0, kRGBByteCount);
 }
 
-// NTSC-U/C: 0x005eb948, PAL: 0x0062da90
 unsigned int ACanvas::GetPixel32(int nX, int nY) {
     if (nX >= mClip.mLeft && nX < mClip.mRight && nY >= mClip.mTop && nY < mClip.mBottom) {
         return GetPixel32U(nX, nY);
@@ -417,7 +397,6 @@ unsigned int ACanvas::GetPixel32(int nX, int nY) {
     return 0;
 }
 
-// NTSC-U/C: 0x005eb9c0, PAL: 0x0062db08
 unsigned int ACanvas::GetPixelNative(int nX, int nY) {
     if (nX >= mClip.mLeft && nX < mClip.mRight && nY >= mClip.mTop && nY < mClip.mBottom) {
         return GetPixelNativeU(nX, nY);
@@ -425,14 +404,12 @@ unsigned int ACanvas::GetPixelNative(int nX, int nY) {
     return 0;
 }
 
-// NTSC-U/C: 0x005eba38, PAL: 0x0062db80
 void ACanvas::DrawHorzLineU(int nY, int nLeft, int nRight) {
     for (int x = nLeft; x < nRight; ++x) {
         DrawPixelU(x, nY);
     }
 }
 
-// NTSC-U/C: 0x005ebab8, PAL: 0x0062dc00
 void ACanvas::DrawHorzLine(int nY, int nLeft, int nRight) {
     if (nY < mClip.mTop || nY >= mClip.mBottom) {
         return;
@@ -448,14 +425,12 @@ void ACanvas::DrawHorzLine(int nY, int nLeft, int nRight) {
     }
 }
 
-// NTSC-U/C: 0x005ebb30, PAL: 0x0062dc78
 void ACanvas::DrawVertLineU(int nX, int nTop, int nBottom) {
     for (int y = nTop; y < nBottom; ++y) {
         DrawPixelU(nX, y);
     }
 }
 
-// NTSC-U/C: 0x005ebbb0, PAL: 0x0062dcf8
 void ACanvas::DrawVertLine(int nX, int nTop, int nBottom) {
     if (nX < mClip.mLeft || nX >= mClip.mRight) {
         return;
@@ -471,14 +446,12 @@ void ACanvas::DrawVertLine(int nX, int nTop, int nBottom) {
     }
 }
 
-// NTSC-U/C: 0x005ebc28, PAL: 0x0062dd70
 void ACanvas::DrawRectU(ARect rect) {
     for (int y = rect.mTop; y < rect.mBottom; ++y) {
         DrawHorzLineU(y, rect.mLeft, rect.mRight);
     }
 }
 
-// NTSC-U/C: 0x005ebc98, PAL: 0x0062dde0
 void ACanvas::DrawRect(ARect rect) {
     rect = rect.Intersection(mClip);
     if (rect.mLeft < rect.mRight && rect.mTop < rect.mBottom) {
@@ -486,7 +459,6 @@ void ACanvas::DrawRect(ARect rect) {
     }
 }
 
-// NTSC-U/C: 0x005e9378, PAL: 0x0062b4c0
 void ACanvas::DrawBoxU(ARect rect) {
     DrawHorzLineU(rect.mTop, rect.mLeft, rect.mRight);
     DrawHorzLineU(rect.mBottom - 1, rect.mLeft, rect.mRight);
@@ -494,7 +466,6 @@ void ACanvas::DrawBoxU(ARect rect) {
     DrawVertLineU(rect.mRight - 1, rect.mTop + 1, rect.mBottom - 1);
 }
 
-// NTSC-U/C: 0x005e9440, PAL: 0x0062b588
 void ACanvas::DrawBox(ARect rect) {
     DrawHorzLine(rect.mTop, rect.mLeft, rect.mRight);
     DrawHorzLine(rect.mBottom - 1, rect.mLeft, rect.mRight);
@@ -502,13 +473,11 @@ void ACanvas::DrawBox(ARect rect) {
     DrawVertLine(rect.mRight - 1, rect.mTop + 1, rect.mBottom - 1);
 }
 
-// NTSC-U/C: 0x005eaeb8, PAL: 0x0062d000
 int ACanvas::ClipRect(ARect *pRect) const {
     *pRect = pRect->Intersection(mClip);
     return pRect->mLeft < pRect->mRight && pRect->mTop < pRect->mBottom;
 }
 
-// NTSC-U/C: 0x005ebe10, PAL: 0x0062df58
 void ACanvas::DrawClutRect(ARect rect, const unsigned char *pRemap) {
     rect = rect.Intersection(mClip);
     if (rect.mLeft < rect.mRight && rect.mTop < rect.mBottom) {
@@ -516,7 +485,6 @@ void ACanvas::DrawClutRect(ARect rect, const unsigned char *pRemap) {
     }
 }
 
-// NTSC-U/C: 0x005e95e8, PAL: 0x0062b730
 void ACanvas::DrawFlatConvexPolygon(const APolygon &polygon) {
     const short nTop = static_cast<short>(FindTopmostPolyVertex(polygon));
     int nY = polygon.mPoints[polygon.mIndices[nTop]].mY >> kACanvasFractionBits;
@@ -560,7 +528,6 @@ void ACanvas::DrawFlatConvexPolygon(const APolygon &polygon) {
     }
 }
 
-// NTSC-U/C: 0x005e98c8, PAL: 0x0062ba10
 void ACanvas::DrawTmappedConvexPolygon(const APolygon &polygon) {
     const short nTop = static_cast<short>(FindTopmostPolyVertex(polygon));
     int nY = polygon.mPoints[polygon.mIndices[nTop]].mY >> kACanvasFractionBits;
@@ -624,17 +591,14 @@ void ACanvas::DrawTmappedConvexPolygon(const APolygon &polygon) {
     }
 }
 
-// NTSC-U/C: 0x005ec130, PAL: 0x0062e278
 void ACanvas::DrawBitmapU(const ABitmap &source, int nX, int nY) {
     (this->*pfDrawBitmapU[source.mFormat])(source, nX, nY);
 }
 
-// NTSC-U/C: 0x005ec1d8, PAL: 0x0062e320
 void ACanvas::DrawBitmap(const ABitmap &source, int nX, int nY) {
     (this->*kCopyForFormat[source.mFormat])(source, nX, nY);
 }
 
-// NTSC-U/C: 0x005ed990, PAL: 0x0062fad8
 void ACanvas::DrawClutBitmapLin4(const ABitmap &source,
                                  int nX,
                                  int nY,
@@ -645,7 +609,6 @@ void ACanvas::DrawClutBitmapLin4(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005edb38, PAL: 0x0062fc80
 void ACanvas::DrawClutBitmapLin8(const ABitmap &source,
                                  int nX,
                                  int nY,
@@ -656,7 +619,6 @@ void ACanvas::DrawClutBitmapLin8(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005ee128, PAL: 0x00630270
 void ACanvas::DrawBlendBitmapLin4(const ABitmap &source,
                                   int nX,
                                   int nY,
@@ -667,7 +629,6 @@ void ACanvas::DrawBlendBitmapLin4(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005ee2d0, PAL: 0x00630418
 void ACanvas::DrawBlendBitmapLin8(const ABitmap &source,
                                   int nX,
                                   int nY,
@@ -678,7 +639,6 @@ void ACanvas::DrawBlendBitmapLin8(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005ebd40, PAL: 0x0062de88
 void ACanvas::DrawClutRectU(ARect rect, const unsigned char *pRemap) {
     for (int y = rect.mTop; y < rect.mBottom; ++y) {
         for (int x = rect.mLeft; x < rect.mRight; ++x) {
@@ -687,7 +647,6 @@ void ACanvas::DrawClutRectU(ARect rect, const unsigned char *pRemap) {
     }
 }
 
-// NTSC-U/C: 0x005ebec8, PAL: 0x0062e010
 void ACanvas::DrawLineU(int nX0, int nY0, int nX1, int nY1) {
     int nStepX = 0;
     int nStepY = 0;
@@ -699,14 +658,12 @@ void ACanvas::DrawLineU(int nX0, int nY0, int nX1, int nY1) {
     }
 }
 
-// NTSC-U/C: 0x005ebf70, PAL: 0x0062e0b8
 void ACanvas::DrawLine(int nX0, int nY0, int nX1, int nY1) {
     if (ClipLine(&nX0, &nY0, &nX1, &nY1) != 0) {
         DrawLineU(nX0, nY0, nX1, nY1);
     }
 }
 
-// NTSC-U/C: 0x005e9508, PAL: 0x0062b650
 int ACanvas::SetupLine(int nX0, int nY0, int nX1, int nY1, int *pnStepX, int *pnStepY) {
     const int nDeltaX = nX1 - nX0;
     const int nDeltaY = nY1 - nY0;
@@ -728,7 +685,6 @@ int ACanvas::SetupLine(int nX0, int nY0, int nX1, int nY1, int *pnStepX, int *pn
     return 0; // Yes, the binary tests the length again although this return is unreachable.
 }
 
-// NTSC-U/C: 0x005ec050, PAL: 0x0062e198
 void ACanvas::DrawTmapRow8U(int nY,
                             int nLeft,
                             int nRight,
@@ -746,7 +702,6 @@ void ACanvas::DrawTmapRow8U(int nY,
     }
 }
 
-// NTSC-U/C: 0x005ec280, PAL: 0x0062e3c8
 void ACanvas::DrawBitmapLin4U(const ABitmap &source, int nX, int nY) {
     const unsigned char *pRow = SourceRow(source);
     for (int y = nY; y < nY + source.mHeight; ++y) {
@@ -771,7 +726,6 @@ void ACanvas::DrawBitmapLin4U(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ec3c0, PAL: 0x0062e508
 void ACanvas::DrawBitmapLin4(const ABitmap &source, int nX, int nY) {
     ABitmap clipped = source;
     if (ClipBitmap(&clipped, &nX, &nY) != 0) {
@@ -779,7 +733,6 @@ void ACanvas::DrawBitmapLin4(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ec450, PAL: 0x0062e598
 void ACanvas::DrawBitmapLin8U(const ABitmap &source, int nX, int nY) {
     const unsigned char *pPixel = SourceRow(source);
     for (int y = nY; y < nY + source.mHeight; ++y) {
@@ -795,7 +748,6 @@ void ACanvas::DrawBitmapLin8U(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ec570, PAL: 0x0062e6b8
 void ACanvas::DrawBitmapLin8(const ABitmap &source, int nX, int nY) {
     ABitmap clipped = source;
     if (ClipBitmap(&clipped, &nX, &nY) != 0) {
@@ -803,7 +755,6 @@ void ACanvas::DrawBitmapLin8(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ec600, PAL: 0x0062e748
 void ACanvas::DrawBitmapLin15U(const ABitmap &source, int nX, int nY) {
     const unsigned short *pPixel = static_cast<const unsigned short *>(source.mPixels);
     for (int y = nY; y < nY + source.mHeight; ++y) {
@@ -819,7 +770,6 @@ void ACanvas::DrawBitmapLin15U(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ec738, PAL: 0x0062e880
 void ACanvas::DrawBitmapLin15(const ABitmap &source, int nX, int nY) {
     ABitmap clipped = source;
     if (ClipBitmap(&clipped, &nX, &nY) != 0) {
@@ -827,7 +777,6 @@ void ACanvas::DrawBitmapLin15(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ec7c8, PAL: 0x0062e910
 void ACanvas::DrawBitmapLin24U(const ABitmap &source, int nX, int nY) {
     const unsigned char *pPixel = SourceRow(source);
     for (int y = nY; y < nY + source.mHeight; ++y) {
@@ -850,7 +799,6 @@ void ACanvas::DrawBitmapLin24U(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ec928, PAL: 0x0062ea70
 void ACanvas::DrawBitmapLin24(const ABitmap &source, int nX, int nY) {
     ABitmap clipped = source;
     if (ClipBitmap(&clipped, &nX, &nY) != 0) {
@@ -858,7 +806,6 @@ void ACanvas::DrawBitmapLin24(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ec9b8, PAL: 0x0062eb00
 void ACanvas::DrawBitmapLin32U(const ABitmap &source, int nX, int nY) {
     const unsigned char *pRow = SourceRow(source);
     for (int y = nY; y < nY + source.mHeight; ++y) {
@@ -874,7 +821,6 @@ void ACanvas::DrawBitmapLin32U(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ecad8, PAL: 0x0062ec20
 void ACanvas::DrawBitmapLin32(const ABitmap &source, int nX, int nY) {
     ABitmap clipped = source;
     if (ClipBitmap(&clipped, &nX, &nY) != 0) {
@@ -882,7 +828,6 @@ void ACanvas::DrawBitmapLin32(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ecb68, PAL: 0x0062ecb0
 void ACanvas::DrawBitmapRle8U(const ABitmap &source, int nX, int nY) {
     ABitmap row(ACanvas::tempBuff,
                 kABitmapFormatLinear8,
@@ -902,7 +847,6 @@ void ACanvas::DrawBitmapRle8U(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005e9cb8, PAL: 0x0062be00
 void ACanvas::DrawBitmapRle8(const ABitmap &source, int nX, int nY) {
     if (nY >= mClip.mTop && mClip.mBottom >= nY + source.mHeight && nX >= mClip.mLeft &&
         mClip.mRight >= nX + source.mWidth) {
@@ -935,7 +879,6 @@ void ACanvas::DrawBitmapRle8(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ecef0, PAL: 0x0062f038
 void ACanvas::GetBitmapLin4(const ABitmap &dest, int nX, int nY) {
     ABitmap clipped = dest;
     if (ClipBitmap(&clipped, &nX, &nY) != 0) {
@@ -943,7 +886,6 @@ void ACanvas::GetBitmapLin4(const ABitmap &dest, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ecdb8, PAL: 0x0062ef00
 void ACanvas::GetBitmapLin4U(const ABitmap &dest, int nX, int nY) {
     unsigned char *pRow = DestRow(dest);
     for (int y = nY; y < nY + dest.mHeight; ++y) {
@@ -964,7 +906,6 @@ void ACanvas::GetBitmapLin4U(const ABitmap &dest, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ed070, PAL: 0x0062f1b8
 void ACanvas::GetBitmapLin8(const ABitmap &dest, int nX, int nY) {
     ABitmap clipped = dest;
     if (ClipBitmap(&clipped, &nX, &nY) != 0) {
@@ -972,7 +913,6 @@ void ACanvas::GetBitmapLin8(const ABitmap &dest, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ecf80, PAL: 0x0062f0c8
 void ACanvas::GetBitmapLin8U(const ABitmap &dest, int nX, int nY) {
     unsigned char *pPixel = DestRow(dest);
     for (int y = nY; y < nY + dest.mHeight; ++y) {
@@ -984,7 +924,6 @@ void ACanvas::GetBitmapLin8U(const ABitmap &dest, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ed208, PAL: 0x0062f350
 void ACanvas::GetBitmapLin15(const ABitmap &dest, int nX, int nY) {
     ABitmap clipped = dest;
     if (ClipBitmap(&clipped, &nX, &nY) != 0) {
@@ -992,7 +931,6 @@ void ACanvas::GetBitmapLin15(const ABitmap &dest, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ed100, PAL: 0x0062f248
 void ACanvas::GetBitmapLin15U(const ABitmap &dest, int nX, int nY) {
     unsigned short *pPixel = static_cast<unsigned short *>(dest.mPixels);
     for (int y = nY; y < nY + dest.mHeight; ++y) {
@@ -1004,7 +942,6 @@ void ACanvas::GetBitmapLin15U(const ABitmap &dest, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ed398, PAL: 0x0062f4e0
 void ACanvas::GetBitmapLin24(const ABitmap &dest, int nX, int nY) {
     ABitmap clipped = dest;
     if (ClipBitmap(&clipped, &nX, &nY) != 0) {
@@ -1012,7 +949,6 @@ void ACanvas::GetBitmapLin24(const ABitmap &dest, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ed298, PAL: 0x0062f3e0
 void ACanvas::GetBitmapLin24U(const ABitmap &dest, int nX, int nY) {
     unsigned char *pPixel = DestRow(dest);
     for (int y = nY; y < nY + dest.mHeight; ++y) {
@@ -1024,7 +960,6 @@ void ACanvas::GetBitmapLin24U(const ABitmap &dest, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ed520, PAL: 0x0062f668
 void ACanvas::GetBitmapLin32(const ABitmap &dest, int nX, int nY) {
     ABitmap clipped = dest;
     if (ClipBitmap(&clipped, &nX, &nY) != 0) {
@@ -1032,7 +967,6 @@ void ACanvas::GetBitmapLin32(const ABitmap &dest, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ed428, PAL: 0x0062f570
 void ACanvas::GetBitmapLin32U(const ABitmap &dest, int nX, int nY) {
     unsigned int *pPixel = static_cast<unsigned int *>(dest.mPixels);
     for (int y = nY; y < nY + dest.mHeight; ++y) {
@@ -1044,13 +978,11 @@ void ACanvas::GetBitmapLin32U(const ABitmap &dest, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005e9ee8, PAL: 0x0062c030
 void ACanvas::DrawCharU(int nCharCode, const AFont *pFont, int nX, int nY) {
     const ABitmap *pGlyph = GlyphForCode(pFont, nCharCode);
     (this->*pfDrawBitmapU[pGlyph->mFormat])(*pGlyph, nX, nY - pFont->mBaseline);
 }
 
-// NTSC-U/C: 0x005e9fc8, PAL: 0x0062c110
 void ACanvas::DrawChar(int nCharCode, const AFont *pFont, int nX, int nY) {
     const ABitmap *pGlyph = GlyphForCode(pFont, nCharCode);
     // The compiled copy is 0x1c bytes, four more than an ABitmap. See the note in abitmap.h.
@@ -1061,7 +993,6 @@ void ACanvas::DrawChar(int nCharCode, const AFont *pFont, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ed5b0, PAL: 0x0062f6f8
 void ACanvas::DrawTextU(const char *pText, const AFont *pFont, int nX, int nY) {
     const int nStartX = nX;
     for (unsigned char ch = *pText++; ch != 0; ch = *pText++) {
@@ -1075,7 +1006,6 @@ void ACanvas::DrawTextU(const char *pText, const AFont *pFont, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ea120, PAL: 0x0062c268
 void ACanvas::DrawText(const char *pText, const AFont *pFont, int nX, int nY) {
     if (nY - pFont->mBaseline >= mClip.mBottom) {
         return;
@@ -1102,7 +1032,6 @@ void ACanvas::DrawText(const char *pText, const AFont *pFont, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x005ed858, PAL: 0x0062f9a0
 void ACanvas::DrawClutBitmapLin4U(const ABitmap &source,
                                   int nX,
                                   int nY,
@@ -1128,7 +1057,6 @@ void ACanvas::DrawClutBitmapLin4U(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005eda30, PAL: 0x0062fb78
 void ACanvas::DrawClutBitmapLin8U(const ABitmap &source,
                                   int nX,
                                   int nY,
@@ -1152,7 +1080,6 @@ void ACanvas::DrawClutBitmapLin8U(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005edd08, PAL: 0x0062fe50
 void ACanvas::DrawClutBitmapRowLin8U(const ARowInfo &span, const unsigned char *pRemap) {
     const unsigned char *pPixel = span.mSource;
     for (int x = span.mLeft; x < span.mRight; ++x) {
@@ -1163,7 +1090,6 @@ void ACanvas::DrawClutBitmapRowLin8U(const ARowInfo &span, const unsigned char *
     }
 }
 
-// NTSC-U/C: 0x005edfb8, PAL: 0x00630100
 void ACanvas::DrawBlendBitmapLin4U(const ABitmap &source,
                                    int nX,
                                    int nY,
@@ -1189,7 +1115,6 @@ void ACanvas::DrawBlendBitmapLin4U(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005ee1c8, PAL: 0x00630310
 void ACanvas::DrawBlendBitmapLin8U(const ABitmap &source,
                                    int nX,
                                    int nY,
@@ -1213,7 +1138,6 @@ void ACanvas::DrawBlendBitmapLin8U(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005ee4a0, PAL: 0x006305e8
 void ACanvas::DrawBlendBitmapRowLin8U(const ARowInfo &span, const unsigned char *const *ppBlend) {
     const unsigned char *pPixel = span.mSource;
     for (int x = span.mLeft; x < span.mRight; ++x) {
@@ -1228,7 +1152,6 @@ void ACanvas::DrawBlendBitmapRowLin8U(const ARowInfo &span, const unsigned char 
     }
 }
 
-// NTSC-U/C: 0x005ee968, PAL: 0x00630ab0
 void ACanvas::DrawScaledBitmapRowLin8U(const AScaledRowInfo &span) {
     int nPosition = span.mSourcePosition;
     for (int x = span.mLeft; x < span.mRight; ++x) {
@@ -1241,7 +1164,6 @@ void ACanvas::DrawScaledBitmapRowLin8U(const AScaledRowInfo &span) {
     }
 }
 
-// NTSC-U/C: 0x005eea18, PAL: 0x00630b60
 void ACanvas::DrawScaledBitmapRowLin15U(const AScaledRowInfo &span) {
     int nPosition = span.mSourcePosition;
     for (int x = span.mLeft; x < span.mRight; ++x) {
@@ -1255,7 +1177,6 @@ void ACanvas::DrawScaledBitmapRowLin15U(const AScaledRowInfo &span) {
     }
 }
 
-// NTSC-U/C: 0x005eeac8, PAL: 0x00630c10
 void ACanvas::DrawScaledBitmapRowLin24U(const AScaledRowInfo &span) {
     int nPosition = span.mSourcePosition;
     for (int x = span.mLeft; x < span.mRight; ++x) {
@@ -1277,7 +1198,6 @@ void ACanvas::DrawScaledBitmapRowLin24U(const AScaledRowInfo &span) {
     }
 }
 
-// NTSC-U/C: 0x005eebb8, PAL: 0x00630d00
 void ACanvas::DrawScaledBitmapRowLin32U(const AScaledRowInfo &span) {
     int nPosition = span.mSourcePosition;
     for (int x = span.mLeft; x < span.mRight; ++x) {
@@ -1290,7 +1210,6 @@ void ACanvas::DrawScaledBitmapRowLin32U(const AScaledRowInfo &span) {
     }
 }
 
-// NTSC-U/C: 0x005eedb8, PAL: 0x00630f00
 void ACanvas::DrawScaledClutBitmapRowLin8U(const AScaledRowInfo &span,
                                            const unsigned char *pRemap) {
     int nPosition = span.mSourcePosition;
@@ -1304,7 +1223,6 @@ void ACanvas::DrawScaledClutBitmapRowLin8U(const AScaledRowInfo &span,
     }
 }
 
-// NTSC-U/C: 0x005eefc0, PAL: 0x00631108
 void ACanvas::DrawScaledBlendBitmapRowLin8U(const AScaledRowInfo &span,
                                             const unsigned char *const *ppBlend) {
     int nPosition = span.mSourcePosition;
@@ -1319,7 +1237,6 @@ void ACanvas::DrawScaledBlendBitmapRowLin8U(const AScaledRowInfo &span,
     }
 }
 
-// NTSC-U/C: 0x005eddb8, PAL: 0x0062ff00
 void ACanvas::Unpack4(const unsigned char *pSource,
                       unsigned char *pDest,
                       int nCount,
@@ -1335,9 +1252,6 @@ void ACanvas::Unpack4(const unsigned char *pSource,
     }
 }
 
-// NTSC-U/C: 0x005ed6a8, PAL: 0x0062f7f0
-// A format the chain does not test draws nothing at all, rather than falling back to a
-// generic path.
 void ACanvas::DrawClutBitmapU(const ABitmap &source, int nX, int nY, const unsigned char *pRemap) {
     switch (source.mFormat) {
     case kABitmapFormatLinear4:
@@ -1354,8 +1268,6 @@ void ACanvas::DrawClutBitmapU(const ABitmap &source, int nX, int nY, const unsig
     }
 }
 
-// NTSC-U/C: 0x005ed718, PAL: 0x0062f860
-// The run-length format is handed over unclipped, because DrawClutBitmapRle8() clips for itself.
 void ACanvas::DrawClutBitmap(const ABitmap &source, int nX, int nY, const unsigned char *pRemap) {
     switch (source.mFormat) {
     case kABitmapFormatLinear4:
@@ -1372,7 +1284,6 @@ void ACanvas::DrawClutBitmap(const ABitmap &source, int nX, int nY, const unsign
     }
 }
 
-// NTSC-U/C: 0x005edbd8, PAL: 0x0062fd20
 void ACanvas::DrawClutBitmapRle8U(const ABitmap &source,
                                   int nX,
                                   int nY,
@@ -1402,9 +1313,6 @@ void ACanvas::DrawClutBitmapRle8U(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005ea280, PAL: 0x0062c3c8
-// The clipping matches DrawBitmapRle8(), without its test for a source wholly inside the
-// clip rectangle.
 void ACanvas::DrawClutBitmapRle8(const ABitmap &source,
                                  int nX,
                                  int nY,
@@ -1437,7 +1345,6 @@ void ACanvas::DrawClutBitmapRle8(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005ede08, PAL: 0x0062ff50
 void ACanvas::DrawBlendBitmapU(const ABitmap &source,
                                int nX,
                                int nY,
@@ -1457,7 +1364,6 @@ void ACanvas::DrawBlendBitmapU(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005ede78, PAL: 0x0062ffc0
 void ACanvas::DrawBlendBitmap(const ABitmap &source,
                               int nX,
                               int nY,
@@ -1478,13 +1384,12 @@ void ACanvas::DrawBlendBitmap(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005ee370, PAL: 0x006304b8
-// Instruction for instruction DrawClutBitmapRle8U() with the blend slot called in
-// place of the remap slot.
 void ACanvas::DrawBlendBitmapRle8U(const ABitmap &source,
                                    int nX,
                                    int nY,
                                    const unsigned char *const *ppBlend) {
+    // Instruction for instruction DrawClutBitmapRle8U() with the blend slot called in place of
+    // the remap slot.
     ARowInfo span;
     span.mLeft = static_cast<short>(nX);
     span.mRight = static_cast<short>(source.mWidth + nX);
@@ -1510,13 +1415,12 @@ void ACanvas::DrawBlendBitmapRle8U(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005ea460, PAL: 0x0062c5a8
-// Instruction for instruction DrawClutBitmapRle8() with the blend slot called in place of
-// the remap slot.
 void ACanvas::DrawBlendBitmapRle8(const ABitmap &source,
                                   int nX,
                                   int nY,
                                   const unsigned char *const *ppBlend) {
+    // Instruction for instruction DrawClutBitmapRle8() with the blend slot called in place of the
+    // remap slot.
     ARle8Reader reader;
     reader.mSource = SourceRow(source);
     reader.mWidth = source.mWidth;
@@ -1545,7 +1449,6 @@ void ACanvas::DrawBlendBitmapRle8(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005ecc68, PAL: 0x0062edb0
 void ACanvas::GetBitmapU(const ABitmap &dest, int nX, int nY) {
     // NTSC-U/C: 0x0077dcf8, PAL: 0x007c1ae8
     static const ABitmapCopyMember kReadNoClipForFormat[kABitmapFormatCount] = {
@@ -1558,7 +1461,6 @@ void ACanvas::GetBitmapU(const ABitmap &dest, int nX, int nY) {
     (this->*kReadNoClipForFormat[dest.mFormat])(dest, nX, nY);
 }
 
-// NTSC-U/C: 0x005ecd10, PAL: 0x0062ee58
 void ACanvas::GetBitmap(const ABitmap &dest, int nX, int nY) {
     // NTSC-U/C: 0x0077dd28, PAL: 0x007c1b18
     static const ABitmapCopyMember kReadForFormat[kABitmapFormatCount] = {&ACanvas::GetBitmapLin4,
@@ -1570,13 +1472,11 @@ void ACanvas::GetBitmap(const ABitmap &dest, int nX, int nY) {
     (this->*kReadForFormat[dest.mFormat])(dest, nX, nY);
 }
 
-// NTSC-U/C: 0x005eb190, PAL: 0x0062d2d8
 void ACanvas::ReadRectRle8([[maybe_unused]] const ABitmap &dest,
                            [[maybe_unused]] int nX,
                            [[maybe_unused]] int nY) {
 }
 
-// NTSC-U/C: 0x005ea780, PAL: 0x0062c8c8
 int ACanvas::ClipAndSetupScaledBitmap(const ABitmap &source,
                                       const ARect &rect,
                                       AScaledRowInfo *pBlit) const {
@@ -1624,7 +1524,6 @@ int ACanvas::ClipAndSetupScaledBitmap(const ABitmap &source,
     return pBlit->mTop < pBlit->mBottom && pBlit->mLeft < pBlit->mRight;
 }
 
-// NTSC-U/C: 0x005ee580, PAL: 0x006306c8
 void ACanvas::DrawScaledBitmap(const ABitmap &source, const ARect &rect) {
     // NTSC-U/C: 0x0077dd58, PAL: 0x007c1b48
     static const ABitmapStretchMember kStretchForFormat[kABitmapFormatCount] = {
@@ -1637,7 +1536,6 @@ void ACanvas::DrawScaledBitmap(const ABitmap &source, const ARect &rect) {
     (this->*kStretchForFormat[source.mFormat])(source, rect);
 }
 
-// NTSC-U/C: 0x005ea640, PAL: 0x0062c788
 void ACanvas::DrawScaledBitmapLin4(const ABitmap &source, const ARect &rect) {
     AScaledRowInfo blit;
     if (ClipAndSetupScaledBitmap(source, rect, &blit) == 0) {
@@ -1658,7 +1556,6 @@ void ACanvas::DrawScaledBitmapLin4(const ABitmap &source, const ARect &rect) {
     }
 }
 
-// NTSC-U/C: 0x005ee628, PAL: 0x00630770
 void ACanvas::DrawScaledBitmapLin8(const ABitmap &source, const ARect &rect) {
     AScaledRowInfo blit;
     if (ClipAndSetupScaledBitmap(source, rect, &blit) == 0) {
@@ -1673,7 +1570,6 @@ void ACanvas::DrawScaledBitmapLin8(const ABitmap &source, const ARect &rect) {
     }
 }
 
-// NTSC-U/C: 0x005ee6f8, PAL: 0x00630840
 void ACanvas::DrawScaledBitmapLin15(const ABitmap &source, const ARect &rect) {
     AScaledRowInfo blit;
     if (ClipAndSetupScaledBitmap(source, rect, &blit) == 0) {
@@ -1688,7 +1584,6 @@ void ACanvas::DrawScaledBitmapLin15(const ABitmap &source, const ARect &rect) {
     }
 }
 
-// NTSC-U/C: 0x005ee7c8, PAL: 0x00630910
 void ACanvas::DrawScaledBitmapLin24(const ABitmap &source, const ARect &rect) {
     AScaledRowInfo blit;
     if (ClipAndSetupScaledBitmap(source, rect, &blit) == 0) {
@@ -1703,7 +1598,6 @@ void ACanvas::DrawScaledBitmapLin24(const ABitmap &source, const ARect &rect) {
     }
 }
 
-// NTSC-U/C: 0x005ee898, PAL: 0x006309e0
 void ACanvas::DrawScaledBitmapLin32(const ABitmap &source, const ARect &rect) {
     AScaledRowInfo blit;
     if (ClipAndSetupScaledBitmap(source, rect, &blit) == 0) {
@@ -1718,7 +1612,6 @@ void ACanvas::DrawScaledBitmapLin32(const ABitmap &source, const ARect &rect) {
     }
 }
 
-// NTSC-U/C: 0x005ea960, PAL: 0x0062caa8
 void ACanvas::DrawScaledBitmapRle8(const ABitmap &source, const ARect &rect) {
     AScaledRowInfo blit;
     if (ClipAndSetupScaledBitmap(source, rect, &blit) == 0) {
@@ -1747,7 +1640,6 @@ void ACanvas::DrawScaledBitmapRle8(const ABitmap &source, const ARect &rect) {
     }
 }
 
-// NTSC-U/C: 0x005eec70, PAL: 0x00630db8
 void ACanvas::DrawScaledClutBitmap(const ABitmap &source,
                                    const ARect &rect,
                                    const unsigned char *pRemap) {
@@ -1766,13 +1658,11 @@ void ACanvas::DrawScaledClutBitmap(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005eecd0, PAL: 0x00630e18
 void ACanvas::DrawScaledClutBitmapLin4([[maybe_unused]] const ABitmap &source,
                                        [[maybe_unused]] const ARect &rect,
                                        [[maybe_unused]] const unsigned char *pRemap) {
 }
 
-// NTSC-U/C: 0x005eecd8, PAL: 0x00630e20
 void ACanvas::DrawScaledClutBitmapLin8(const ABitmap &source,
                                        const ARect &rect,
                                        const unsigned char *pRemap) {
@@ -1789,7 +1679,6 @@ void ACanvas::DrawScaledClutBitmapLin8(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005eaa98, PAL: 0x0062cbe0
 void ACanvas::DrawScaledClutBitmapRle8(const ABitmap &source,
                                        const ARect &rect,
                                        const unsigned char *pRemap) {
@@ -1820,7 +1709,6 @@ void ACanvas::DrawScaledClutBitmapRle8(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005eee78, PAL: 0x00630fc0
 void ACanvas::DrawScaledBlendBitmap(const ABitmap &source,
                                     const ARect &rect,
                                     const unsigned char *const *ppBlend) {
@@ -1840,13 +1728,11 @@ void ACanvas::DrawScaledBlendBitmap(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005eeed8, PAL: 0x00631020
 void ACanvas::DrawScaledBlendBitmapLin8([[maybe_unused]] const ABitmap &source,
                                         [[maybe_unused]] const ARect &rect,
                                         [[maybe_unused]] const unsigned char *const *ppBlend) {
 }
 
-// NTSC-U/C: 0x005eeee0, PAL: 0x00631028
 void ACanvas::DrawScaledBlendBitmapLin4(const ABitmap &source,
                                         const ARect &rect,
                                         const unsigned char *const *ppBlend) {
@@ -1863,7 +1749,6 @@ void ACanvas::DrawScaledBlendBitmapLin4(const ABitmap &source,
     }
 }
 
-// NTSC-U/C: 0x005eabe0, PAL: 0x0062cd28
 void ACanvas::DrawScaledBlendBitmapRle8(const ABitmap &source,
                                         const ARect &rect,
                                         const unsigned char *const *ppBlend) {

@@ -45,11 +45,16 @@ public:
     virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // A note-on sends a DurGemMsg for mPlayer from the note to 80 ticks after it, blended by
-    // AxeOldGemMaker::BlendForAxis() of mValue. On controller 46, a zero value with no strip open
-    // opens one under GetNewGemID(), and a non-zero value closes the open strip with a SusGemMsg
-    // whose mStop is 2.
-    // NTSC-U/C: 0x001a2f18, PAL: 0x001a8c80
+    /**
+     * A note-on sends a DurGemMsg for mPlayer from the note to 80 ticks after it, blended by
+     * AxeOldGemMaker::BlendForAxis() of mValue.
+     *
+     * On controller 46, a zero value with no strip open opens one under GetNewGemID(), and a
+     * non-zero value closes the open strip with a SusGemMsg whose mStop is 2.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001a2f18
+     * @ghidraAddress PAL: 0x001a8c80
+     */
     void PostGemMessages(StdMidiMsg *pMsg);
 
     int mTrack;                  // +0x18, copied from TrackData::mIndex

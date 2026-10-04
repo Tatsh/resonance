@@ -29,27 +29,22 @@ const Sch::CommandFactory kControllerCmdFactory(kControllerCmdId, NewControllerC
 // NTSC-U/C: 0x0067f238, PAL: 0x006c0468
 int ControllerCmd::sCmdID = kControllerCmdId;
 
-// NTSC-U/C: 0x0018be70, PAL: 0x00191918
 Sch::Command *NewControllerCmd() {
     return new ControllerCmd;
 }
 
-// NTSC-U/C: 0x00194598, PAL: 0x0019a218
 int ControllerCmd::CmdID() {
     return sCmdID;
 }
 
-// NTSC-U/C: 0x00194560, PAL: 0x0019a1e0
 void ControllerCmd::Execute() {
     Application::shared()->GetWorld()->ReplayControllerReading(&mReading);
 }
 
-// NTSC-U/C: 0x00194790, PAL: 0x0019a410
 void ControllerCmd::Print(std::ostream &stream) {
     stream << "{" << "ControllerCmd" << "}";
 }
 
-// NTSC-U/C: 0x001945a8, PAL: 0x0019a228
 void ControllerCmd::saveGuts(OBStream &stream) const {
     const char cOpenC = kTagC;
     const char cOpenM = kTagM;
@@ -67,7 +62,6 @@ void ControllerCmd::saveGuts(OBStream &stream) const {
         .Write(&cCloseM, sizeof(cCloseM));
 }
 
-// NTSC-U/C: 0x001946b8, PAL: 0x0019a338
 void ControllerCmd::restoreGuts(IBStream &stream) {
     char acTag[kTagByteCount];
     IBStream &body = stream.Read(&acTag[0], sizeof(acTag[0]))

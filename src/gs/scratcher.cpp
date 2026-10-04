@@ -96,7 +96,6 @@ constexpr char kEraseBarSound[] = "SND_ERASE";
 
 } // namespace
 
-// NTSC-U/C: 0x001cf988, PAL: 0x001d5840
 Scratcher::Scratcher(PhraseMgr *pPhraseMgr,
                      Quantizer *pQuantizer,
                      Sch::TickClock *pClock,
@@ -114,7 +113,6 @@ Scratcher::Scratcher(PhraseMgr *pPhraseMgr,
     mChannel = pTrackData->mChannel;
 }
 
-// NTSC-U/C: 0x001cfd20, PAL: 0x001d5bd8
 void Scratcher::PostNowBarMsg(AxisRegisterMsg *pMsg) {
     if (pMsg->mTrack != mTrack || mPlayer != pMsg->mPlayer) {
         return;
@@ -150,7 +148,6 @@ void Scratcher::PostNowBarMsg(AxisRegisterMsg *pMsg) {
     mReadings[mNewestReading] = flPosition;
 }
 
-// NTSC-U/C: 0x001d0038, PAL: 0x001d5ef0
 void Scratcher::EraseGemRange(EraseMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -190,7 +187,6 @@ void Scratcher::EraseGemRange(EraseMsg *pMsg) {
     SendSeekerMsg(pMsg->mPosition.mTick / mBarDivisor);
 }
 
-// NTSC-U/C: 0x001d0248, PAL: 0x001d6100
 void Scratcher::OnTrackSelect(TrackSelectMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -211,7 +207,6 @@ void Scratcher::OnTrackSelect(TrackSelectMsg *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x001d0358, PAL: 0x001d6210
 void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
     const int nBar = nTick / mBarDivisor;
     const int nLastBar = mLastScratchPosition.mTick / Sch::Tick(kBarTicks).mTick;
@@ -307,7 +302,6 @@ void Scratcher::OnPitchRiff(int nGem, int nStep, int nTick) {
     Send(&press);
 }
 
-// NTSC-U/C: 0x001d08e0, PAL: 0x001d6798
 void Scratcher::SendSeekerMsg(int) const {
     if (mPlayer->IsNull() != 0) {
         return;
@@ -316,11 +310,9 @@ void Scratcher::SendSeekerMsg(int) const {
     Send(&off);
 }
 
-// NTSC-U/C: 0x001d1bf0, PAL: 0x001d7aa8
 Scratcher::~Scratcher() {
 }
 
-// NTSC-U/C: 0x001d0980, PAL: 0x001d6838
 void Scratcher::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(PitchRiffMsg::sID)) {
@@ -355,7 +347,6 @@ void Scratcher::DispatchPriv(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x001d1cc8, PAL: 0x001d7b80
 void Scratcher::OnPitchRiffMsg(PitchRiffMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -367,19 +358,16 @@ void Scratcher::OnPitchRiffMsg(PitchRiffMsg *pMsg) {
     OnPitchRiff(pMsg->mButton, 0, pMsg->mPosition.mTick);
 }
 
-// NTSC-U/C: 0x001d1d18, PAL: 0x001d7bd0
 void Scratcher::OnInvalidateSeeker(InvalidateSeekerMsg *pMsg) {
     if (pMsg->mTrack == mTrack) {
         SendSeekerMsg(pMsg->mBar);
     }
 }
 
-// NTSC-U/C: 0x001d1d48, PAL: 0x001d7c00
 int Scratcher::QueryBar(int nBar) {
     return mTrackData->QueryBar(nBar);
 }
 
-// NTSC-U/C: 0x001d1d68, PAL: 0x001d7c20
 int Scratcher::Tick(int nElapsedTicks) {
     const int nBar = nElapsedTicks / mBarDivisor;
     SendSeekerMsg(nBar);

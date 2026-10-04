@@ -167,9 +167,15 @@ public:
     void RemoveView(View *pChild);
 
 private:
-    // Drop the references this view holds, of which there are none, so the body is empty. The
-    // destructor calls it immediately before ReleaseAllRefs(), where every sibling class drops its
-    // own references. The name follows that pattern and is inferred. 0x004e2730.
+    /**
+     * Drop the references this view holds, of which there are none, so the body is empty.
+     *
+     * The destructor calls it immediately before ReleaseAllRefs(), where every sibling class drops
+     * its own references. The name follows that pattern and is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004e2730
+     * @ghidraAddress PAL: 0x00520fe8
+     */
     void RemoveObjectRefs();
 
 public:

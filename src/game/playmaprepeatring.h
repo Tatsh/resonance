@@ -163,6 +163,8 @@ protected:
      *
      * @param nBar The bar.
      * @return The index of the last element of mSpanStarts at or before the bar.
+     * @ghidraAddress NTSC-U/C: 0x0012d588
+     * @ghidraAddress PAL: 0x0012dce8
      */
     int SpanIndex(int nBar);
 

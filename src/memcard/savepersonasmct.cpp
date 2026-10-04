@@ -6,7 +6,6 @@
 #include "memcard/memcarduser.h"
 #include "met/metpersonadata.h"
 
-// NTSC-U/C: 0x00178798, PAL: 0x0017be58
 SavePersonasMCT::SavePersonasMCT(MemcardUser *pUser,
                                  Memcard *pCard,
                                  int nPortSlot,
@@ -21,12 +20,10 @@ SavePersonasMCT::SavePersonasMCT(MemcardUser *pUser,
     }
 }
 
-// NTSC-U/C: 0x00184d98, PAL: 0x0018a2e8
 SavePersonasMCT::~SavePersonasMCT() {
 }
 
 #ifndef VIDEO_STANDARD_PAL
-// NTSC-U/C: 0x001864a0
 void SavePersonasMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus != kMemcardStatusUnknown && mStatus != kMemcardStatusNotFormatted) {
@@ -44,7 +41,6 @@ void SavePersonasMCT::OnCheckInfo(CheckInfoOp *pOp) {
 }
 #endif
 
-// NTSC-U/C: 0x00186538, PAL: 0x0018bf60
 void SavePersonasMCT::Finish() {
     mState = kMemcardTaskFinished;
 #ifdef VIDEO_STANDARD_PAL
@@ -54,7 +50,6 @@ void SavePersonasMCT::Finish() {
 #endif
 }
 
-// NTSC-U/C: 0x00178960, PAL: 0x0017c110
 void SavePersonasMCT::Execute() {
     mState = kMemcardTaskRunning;
     mDirName = g_saveDirBase + g_personasDirSuffix;

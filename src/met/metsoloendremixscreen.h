@@ -171,21 +171,32 @@ public:
     virtual void SetOwnerScreenShowing(int bShowing);
 
 private:
-    // NTSC-U/C: 0x00395a20, PAL: 0x003c79e0
-    // Resolves the arena view, runs the renderer's two empty hooks, pushes `MetHelpScreen`,
-    // `MetScreenTitleScreen`, and `MetRemixTypeScreen`, and activates `MetRemixTypeScreen` as the
-    // panel. Slots 2 and 36 are its two callers.
+    /**
+     * Resolves the arena view, runs the renderer's two empty hooks, pushes `MetHelpScreen`,
+     * `MetScreenTitleScreen`, and `MetRemixTypeScreen`, and activates `MetRemixTypeScreen` as the
+     * panel.
+     *
+     * Slots 2 and 36 are its two callers.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00395a20
+     * @ghidraAddress PAL: 0x003c79e0
+     */
     void ReturnToTitle();
 
-    // NTSC-U/C: 0x00395058, PAL: 0x003c6d68
-    // Loads both texture pairs for the session's level and fills the song, date, and username
-    // fields from configuration codes 0x320 through 0x327, falling back to the short title when the
-    // full one exceeds the title's wrap width. It then shows the persona's burn texture on the face
-    // material's second stage, sets the title-screen caption, pushes `MetHelpScreen`, opens the
-    // save screen for the first persona's appearance on the first card slot, and runs
-    // MetScreen::EnterAndShow(). EnterAndShow() is its one caller, and the title is inferred. The
-    // European release saves to a copy of the first card slot only when that slot is in port 1,
-    // and otherwise to the stand-in slot `1`.
+    /**
+     * Loads both texture pairs for the session's level and fills the song, date, and username
+     * fields from configuration codes 0x320 through 0x327, falling back to the short title when the
+     * full one exceeds the title's wrap width.
+     *
+     * It then shows the persona's burn texture on the face material's second stage, sets the
+     * title-screen caption, pushes `MetHelpScreen`, opens the save screen for the first persona's
+     * appearance on the first card slot, and runs MetScreen::EnterAndShow(). EnterAndShow() is its
+     * one caller, and the title is inferred. The European release saves to a copy of the first card
+     * slot only when that slot is in port 1, and otherwise to the stand-in slot `1`.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00395058
+     * @ghidraAddress PAL: 0x003c6d68
+     */
     void ShowResults();
 
     // ResolveContainerViews() fills +0x90 through +0xb4, and the constructor writes none of them.

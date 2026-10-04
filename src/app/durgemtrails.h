@@ -155,13 +155,21 @@ public:
     static HxStr NewStringName();
 
 private:
-    // NTSC-U/C: 0x00437af8, PAL: 0x00473890
-    // The row string of lane nLane in slice row nRow, the row taken modulo mRowCount.
+    /**
+     * The row string of lane nLane in slice row nRow, the row taken modulo mRowCount.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00437af8
+     * @ghidraAddress PAL: 0x00473890
+     */
     DurGemRowString *GetRowString(int nLane, int nRow);
 
-    // NTSC-U/C: 0x00433530, PAL: 0x0046f2a0
-    // Place the midpoint of pPoints[nFirst] and pPoints[nLast] and recurse into both
-    // halves while it lies off the chord.
+    /**
+     * Place the midpoint of pPoints[nFirst] and pPoints[nLast] and recurse into both halves while
+     * it lies off the chord.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00433530
+     * @ghidraAddress PAL: 0x0046f2a0
+     */
     static void SubdivideSegment(int nLane,
                                  Vector3 *pPoints,
                                  int nFirst,
@@ -171,9 +179,15 @@ private:
                                  float flEndFrame,
                                  float flEndBlend);
 
-    // NTSC-U/C: 0x004378e0, PAL: 0x00473678
-    // Report the midpoint frame, blend, and position of a segment, and whether the
-    // position lies off the chord of first and last. SubdivideSegment() inlines the body.
+    /**
+     * Report the midpoint frame, blend, and position of a segment, and whether the position lies
+     * off the chord of first and last.
+     *
+     * SubdivideSegment() inlines the body.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004378e0
+     * @ghidraAddress PAL: 0x00473678
+     */
     static bool NeedsSubdivision(int nLane,
                                  const Vector3 &first,
                                  const Vector3 &last,
@@ -185,9 +199,14 @@ private:
                                  float flEndFrame,
                                  float flEndBlend);
 
-    // NTSC-U/C: 0x00436e88, PAL: 0x00472c20
-    // The first curve of row nRow or later. AddSegment() and EndTrail() inline the
-    // body.
+    /**
+     * The first curve of row nRow or later.
+     *
+     * AddSegment() and EndTrail() inline the body.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00436e88
+     * @ghidraAddress PAL: 0x00472c20
+     */
     static std::list<DurGemCurve>::iterator FindFirstCurve(std::list<DurGemCurve> &curves,
                                                            int nRow);
 

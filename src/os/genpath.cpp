@@ -20,7 +20,6 @@ constexpr char kLowercaseOffset = 'a' - 'A';
 // NTSC-U/C: 0x00725840, PAL: 0x007694e0
 const char *dirpath = "gen/";
 
-// NTSC-U/C: 0x005585a8, PAL: 0x00599700
 char *ConvertNameToGenerated(char *pszPath, const char *pszExtension) {
     char *pszName = strrchr(pszPath, '/');
     char *pszBackslash = strrchr(pszPath, '\\');
@@ -46,7 +45,6 @@ char *ConvertNameToGenerated(char *pszPath, const char *pszExtension) {
     return strcat(pszPath, pszExtension);
 }
 
-// NTSC-U/C: 0x00558538, PAL: 0x00599690
 int LoadBitmapFileFromPath(const char *pszPath) {
     char szPath[kMaxPathLength];
     strcpy(szPath, pszPath);
@@ -59,7 +57,6 @@ int LoadBitmapFileFromPath(const char *pszPath) {
     return pFile != nullptr;
 }
 
-// NTSC-U/C: 0x005586b0, PAL: 0x00599808
 void AppendName(char *pszPath, const char *pszExtension) {
     char *pszDot = strrchr(pszPath, '.');
     if (pszDot == nullptr) {

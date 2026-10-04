@@ -16,13 +16,11 @@ constexpr char kSectionNameFormat[] = "[%s_seek%d.%d]";
 
 } // namespace
 
-// NTSC-U/C: 0x0046e7d8, PAL: 0x004ac3b8
 TunnelSeekStrip::TunnelSeekStrip()
     : mFirstSlice(0), mSliceCount(0), mRing(0), mColor{1.0f, 1.0f, 1.0f, 1.0f}, mMat(nullptr),
       mTunnel(nullptr), mOwner(nullptr), mStepNumerator(0) {
 }
 
-// NTSC-U/C: 0x0046ea98, PAL: 0x004ac698
 void TunnelSeekStrip::Clear() {
     mSections.clear();
     if (mMat != nullptr) {
@@ -31,7 +29,6 @@ void TunnelSeekStrip::Clear() {
     mTunnel = nullptr;
 }
 
-// NTSC-U/C: 0x0046eb48, PAL: 0x004ac748
 void TunnelSeekStrip::SetRange(int nFirstSlice, int nSliceCount, int nRing) {
     mFirstSlice = nFirstSlice;
     mSliceCount = nSliceCount;
@@ -49,12 +46,10 @@ void TunnelSeekStrip::SetRange(int nFirstSlice, int nSliceCount, int nRing) {
     }
 }
 
-// NTSC-U/C: 0x00477ff0, PAL: 0x004b5c68
 void TunnelSeekStrip::Refresh() {
     SetRange(mFirstSlice, mSliceCount, mRing);
 }
 
-// NTSC-U/C: 0x0046e830, PAL: 0x004ac410
 void TunnelSeekStrip::Build(Tunnel *pTunnel, TunnelSeeker *pOwner, int nIndex) {
     mTunnel = pTunnel;
     mOwner = pOwner;
@@ -75,7 +70,6 @@ void TunnelSeekStrip::Build(Tunnel *pTunnel, TunnelSeeker *pOwner, int nIndex) {
     Refresh();
 }
 
-// NTSC-U/C: 0x00477f18, PAL: 0x004b5b90
 void TunnelSeekStrip::SetMat(Mat *pMat) {
     if (mMat != nullptr) {
         mMat->RemoveRef(mTunnel);
@@ -89,7 +83,6 @@ void TunnelSeekStrip::SetMat(Mat *pMat) {
     }
 }
 
-// NTSC-U/C: 0x00477e68, PAL: 0x004b5ae0
 void TunnelSeekStrip::SetColor(const Color &color) {
     mColor = color;
     for (TunnelSeekSection &section : mSections) {
@@ -99,7 +92,6 @@ void TunnelSeekStrip::SetColor(const Color &color) {
     }
 }
 
-// NTSC-U/C: 0x0046ec40, PAL: 0x004ac840
 void TunnelSeekStrip::DrawSection(int nSlice, float flScreenSize) {
     TunnelSeekSection &section = mSections[static_cast<unsigned>(nSlice) % mSections.size()];
     if (section.mSlice != nSlice) {
@@ -113,7 +105,6 @@ void TunnelSeekStrip::DrawSection(int nSlice, float flScreenSize) {
     section.mMeshes.Draw(flScreenSize);
 }
 
-// NTSC-U/C: 0x00477db8, PAL: 0x004b5a30
 void TunnelSeekStrip::Replace(Object *pFrom, Object *pTo, Object *pReferrer) {
     if (mMat == pFrom && mMat != nullptr) {
         mMat->RemoveRef(pReferrer);

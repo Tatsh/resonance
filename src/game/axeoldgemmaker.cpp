@@ -39,12 +39,10 @@ inline int ClampTick(int nTick) {
 
 } // namespace
 
-// NTSC-U/C: 0x001a31c8, PAL: 0x001a8f30
 AxeOldGemMaker::AxeOldGemMaker(const TrackData *pTrackData)
     : mTrack(pTrackData->mIndex), mPhrase(nullptr), mSustainStart(0) {
 }
 
-// NTSC-U/C: 0x001a32f0, PAL: 0x001a9058
 void AxeOldGemMaker::PostDurGemMsg(NoteMsg *pMsg) {
     const Sch::Tick offset(mPosition.mTick % Sch::Tick(kBarTicks).mTick);
     const float flBlend = BlendForAxis(mPhrase->GetValue(offset.mTick));
@@ -65,7 +63,6 @@ void AxeOldGemMaker::PostDurGemMsg(NoteMsg *pMsg) {
     Send(&gem);
 }
 
-// NTSC-U/C: 0x001a34e8, PAL: 0x001a9250
 void AxeOldGemMaker::OnStdMidi(StdMidiMsg *pMsg) {
     if ((pMsg->mStatus & kStatusKindMask) != kStatusControlChange ||
         pMsg->mData1 != kSustainController) {
@@ -91,7 +88,6 @@ void AxeOldGemMaker::OnStdMidi(StdMidiMsg *pMsg) {
     mSustainStart = Sch::Tick(0);
 }
 
-// NTSC-U/C: 0x001a3600, PAL: 0x001a9368
 void AxeOldGemMaker::OnPhrase(PhraseMsg *pMsg) {
     mPhrase = pMsg->mPhrase;
     mPosition = Sch::Tick(ClampTick(pMsg->mBar * Sch::Tick(kBarTicks).mTick));
@@ -108,7 +104,6 @@ void AxeOldGemMaker::OnPhrase(PhraseMsg *pMsg) {
     mPhrase = nullptr;
 }
 
-// NTSC-U/C: 0x001a4578, PAL: 0x001aa2e0
 float AxeOldGemMaker::BlendForStep(int nStep) {
     const int nIndex = nStep - kLowestStep;
     if (nIndex < 0 || nIndex >= kStepCount) {
@@ -117,7 +112,6 @@ float AxeOldGemMaker::BlendForStep(int nStep) {
     return kStepBlends[nIndex];
 }
 
-// NTSC-U/C: 0x001a47a8, PAL: 0x001aa510
 void AxeOldGemMaker::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == PhraseMsg::sID) {

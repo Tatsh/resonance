@@ -68,7 +68,6 @@ static inline int MtapCall(int nClient) {
                          NULL);
 }
 
-// NTSC-U/C: 0x0053a5c0, PAL: 0x0057a008
 int sceMtapInit(void) {
     int nVersion;
     int i;
@@ -103,7 +102,6 @@ int sceMtapInit(void) {
     return 1;
 }
 
-// NTSC-U/C: 0x0053a840, PAL: 0x0057a288
 int sceMtapPortOpen(int nPort) {
     g_mtapRpc.port.nPort = nPort;
     if (MtapCall(kMtapClientPortOpen) < 0) {
@@ -113,7 +111,6 @@ int sceMtapPortOpen(int nPort) {
     return g_mtapRpc.port.nResult;
 }
 
-// NTSC-U/C: 0x0053a8b0, PAL: 0x0057a2f8
 int sceMtapPortClose(int nPort) {
     g_mtapRpc.port.nPort = nPort;
     if (MtapCall(kMtapClientPortClose) < 0) {
@@ -123,7 +120,6 @@ int sceMtapPortClose(int nPort) {
     return g_mtapRpc.port.nResult;
 }
 
-// NTSC-U/C: 0x0053a920, PAL: 0x0057a368
 int sceMtapGetConnection(int nPort) {
     g_mtapRpc.port.nPort = nPort;
     if (MtapCall(kMtapClientGetConnection) < 0) {
@@ -133,7 +129,6 @@ int sceMtapGetConnection(int nPort) {
     return g_mtapRpc.port.nResult;
 }
 
-// NTSC-U/C: 0x0053a990, PAL: 0x0057a3d8
 int sceMtapChangeThreadPriority(int nFirstPriority, int nSecondPriority) {
     g_mtapRpc.priority.nFirstPriority = nFirstPriority;
     g_mtapRpc.priority.nSecondPriority = nSecondPriority;
@@ -144,7 +139,6 @@ int sceMtapChangeThreadPriority(int nFirstPriority, int nSecondPriority) {
     return g_mtapRpc.priority.nResult;
 }
 
-// NTSC-U/C: 0x0053aa00, PAL: 0x0057a448
 int sceMtapGetModVersion(void) {
     if (MtapCall(kMtapClientGetModVersion) < 0) {
         DPRINT("sceMtapGetModVersion: rpc error\n");

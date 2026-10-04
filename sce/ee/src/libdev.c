@@ -44,13 +44,11 @@ static void *chaMemAlloc(unsigned int nSize);
 // null pointer, an uninitialised heap, and an empty heap are ignored.
 static void chaMemFree(void *pBlock);
 
-// NTSC-U/C: 0x0062bfd0, PAL: 0x0066cb60
 void sceDevVif0Reset(void) {
     *(volatile unsigned int *)0x10003810u = 1u;
     *(volatile unsigned int *)0x10003820u = 6u;
 }
 
-// NTSC-U/C: 0x0061dc90, PAL: 0x0065e820
 void sceDevVu0Reset(void) {
     unsigned int nStatus;
 
@@ -59,7 +57,6 @@ void sceDevVu0Reset(void) {
     __asm__ volatile ("ctc2 %0, $vi28" : : "r" (nStatus));
 }
 
-// NTSC-U/C: 0x00622710, PAL: 0x00663120
 void sceDevConsInit(void) {
     DevConsole *pConsoles = s_Cons;
     int nIndex;
@@ -69,7 +66,6 @@ void sceDevConsInit(void) {
     }
 }
 
-// NTSC-U/C: 0x00622748, PAL: 0x00663158
 int sceDevConsOpen(
     unsigned int nGsX, unsigned int nGsY, unsigned int nColumns, unsigned int nRows) {
     DevConsole *pConsoles = s_Cons;
@@ -98,7 +94,6 @@ int sceDevConsOpen(
     return 0;
 }
 
-// NTSC-U/C: 0x00622848, PAL: 0x00663258
 void sceDevConsClose(int nConsole) {
     DevConsole *pConsole = (DevConsole *)(uintptr_t)nConsole;
 
@@ -108,7 +103,6 @@ void sceDevConsClose(int nConsole) {
     pConsole->nColumns = 0;
 }
 
-// NTSC-U/C: 0x00622c98, PAL: 0x006636a8
 void sceDevConsClear(int nConsole) {
     DevConsole *pConsole = (DevConsole *)(uintptr_t)nConsole;
     int nRemaining = pConsole->nColumns * pConsole->nRows - 1;

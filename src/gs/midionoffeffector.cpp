@@ -14,22 +14,18 @@ constexpr unsigned char kControllerOff = 0;
 
 } // namespace
 
-// NTSC-U/C: 0x001a1bc0, PAL: 0x001a7928
 MidiOnOffEffector::MidiOnOffEffector(unsigned char nChannel, int nType, unsigned char nController)
     : mType(nType), mChannel(nChannel), mEnabled(0), mController(nController) {
 }
 
-// NTSC-U/C: 0x001a1c28, PAL: 0x001a7990
 MidiOnOffEffector::~MidiOnOffEffector() {
     SetEnabled(0);
 }
 
-// NTSC-U/C: 0x001a1cf0, PAL: 0x001a7a58
 int MidiOnOffEffector::Type() {
     return mType;
 }
 
-// NTSC-U/C: 0x001a0860, PAL: 0x001a65c8
 void MidiOnOffEffector::SetEnabled(int bEnabled) {
     if (bEnabled == mEnabled) {
         return;

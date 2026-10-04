@@ -140,18 +140,32 @@ protected:
      */
     virtual void DispatchPriv(Message *pMsg);
 
-    // The out-of-line copy of the AllNotesOffMsg branch DispatchPriv() expands inline. The message
-    // is not read.
-    // NTSC-U/C: 0x001ab0b8, PAL: 0x001b0e20
+    /**
+     * The out-of-line copy of the AllNotesOffMsg branch DispatchPriv() expands inline.
+     *
+     * The message is not read.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ab0b8
+     * @ghidraAddress PAL: 0x001b0e20
+     */
     void OnAllNotesOff();
 
-    // The out-of-line copy of the StdMidiMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x001ab058, PAL: 0x001b0dc0
+    /**
+     * The out-of-line copy of the StdMidiMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ab058
+     * @ghidraAddress PAL: 0x001b0dc0
+     */
     void OnStdMidi(StdMidiMsg *pMsg);
 
-    // The out-of-line copy of the SustainNoteMsg branch DispatchPriv() expands inline. Its body
-    // compiles to the same bytes as OnStdMidi().
-    // NTSC-U/C: 0x001ab088, PAL: 0x001b0df0
+    /**
+     * The out-of-line copy of the SustainNoteMsg branch DispatchPriv() expands inline.
+     *
+     * Its body compiles to the same bytes as OnStdMidi().
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ab088
+     * @ghidraAddress PAL: 0x001b0df0
+     */
     void OnSustainNote(SustainNoteMsg *pMsg);
 
     // The clock every player is scheduled against.

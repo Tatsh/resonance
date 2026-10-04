@@ -82,14 +82,12 @@ T *FindObject(const char *pszName) {
 
 } // namespace
 
-// NTSC-U/C: 0x002f0918, PAL: 0x003142e0
 MetMultiEndRemixScreen::MetMultiEndRemixScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mLogoTextures(HxStr(kSongLogoFirstTexture), HxStr(kSongLogoSecondTexture)),
       mLabelTextures(HxStr(kSongLabelFirstTexture), HxStr(kSongLabelSecondTexture)) {
 }
 
-// NTSC-U/C: 0x002f0da8, PAL: 0x00314838
 void MetMultiEndRemixScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
@@ -113,11 +111,9 @@ void MetMultiEndRemixScreen::ResolveContainerViews() {
     }
 }
 
-// NTSC-U/C: 0x002f1500, PAL: 0x003150a8
 MetMultiEndRemixScreen::~MetMultiEndRemixScreen() {
 }
 
-// NTSC-U/C: 0x002f16a0, PAL: 0x00315248
 void MetMultiEndRemixScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     (void)MetFrontEndState::shared()->GetFirstPersona(); // Yes, the binary discards this result.
@@ -152,12 +148,10 @@ void MetMultiEndRemixScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x002f5540, PAL: 0x00319300
 MetMultiEndRemixScreen *MetMultiEndRemixScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMultiEndRemixScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x002f55c8, PAL: 0x00319388
 void MetMultiEndRemixScreen::UpdateIdle(float) {
     // Both Advance() results are discarded, as in the binary.
     mLogoTextures.Advance();
@@ -166,6 +160,5 @@ void MetMultiEndRemixScreen::UpdateIdle(float) {
     mPhotoMat->mStages[kPairStage].SetTex(mLabelTextures.Current());
 }
 
-// NTSC-U/C: 0x002f5650, PAL: 0x00319410
 void MetMultiEndRemixScreen::OnExitFinished() {
 }

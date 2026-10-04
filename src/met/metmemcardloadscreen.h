@@ -260,23 +260,44 @@ public:
 #endif
 
 private:
-    // NTSC-U/C: 0x002ccab8, PAL: 0x002ee410
-    // Sets the panel heading, refreshes the card list, the arrows, and the selection, and enters.
-    // The title is inferred.
+    /**
+     * Sets the panel heading, refreshes the card list, the arrows, and the selection, and enters.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002ccab8
+     * @ghidraAddress PAL: 0x002ee410
+     */
     void ShowCards();
 
-    // NTSC-U/C: 0x002ccc48, PAL: 0x002ee5f8
-    // Shows the selected card's name and free space, or the no-card instructions. The title is
-    // inferred.
+    /**
+     * Shows the selected card's name and free space, or the no-card instructions.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002ccc48
+     * @ghidraAddress PAL: 0x002ee5f8
+     */
     void ShowSelection();
 
-    // NTSC-U/C: 0x002cde00, PAL: 0x002efb38
-    // Rebuilds mCards from GlobalSettings::mCardSlots and clamps mSelected. The title is inferred.
+    /**
+     * Rebuilds mCards from GlobalSettings::mCardSlots and clamps mSelected.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002cde00
+     * @ghidraAddress PAL: 0x002efb38
+     */
     void RefreshCards();
 
-    // NTSC-U/C: 0x002d1f88, PAL: 0x002f4160
-    // Shows both arrows while at least two cards are listed, and hides them otherwise. The title
-    // is inferred.
+    /**
+     * Shows both arrows while at least two cards are listed, and hides them otherwise.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002d1f88
+     * @ghidraAddress PAL: 0x002f4160
+     */
     void UpdateArrows();
 
     Rnd::Button *mLeftArrow;    // +0xa4

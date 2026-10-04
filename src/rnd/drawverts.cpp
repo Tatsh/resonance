@@ -5,10 +5,9 @@
 
 namespace Rnd {
 
-// NTSC-U/C: 0x005514a0, PAL: 0x00591ae0
-// The binary runs all six planes on VU0 in macro mode and reads the sticky sign bit of the status
-// register once at the end, so every plane is evaluated before the answer is known.
 int IsSphereInsideFrustum(const Sphere &sphere, const Frustum &frustum) {
+    // The binary runs all six planes on VU0 in macro mode and reads the sticky sign bit of the
+    // status register once at the end. Every plane is evaluated before the result is known.
     const Plane *const apPlanes[] = {&frustum.mFront,
                                      &frustum.mBack,
                                      &frustum.mLeft,

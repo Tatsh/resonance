@@ -107,7 +107,6 @@ static void videoDecReset(VideoDec *pVideoDec) {
     pVideoDec->state = 0;
 }
 
-// NTSC-U/C: 0x005692f8, PAL: 0x005a97c0
 void videoDecCreate(VideoDec *pVideoDec,
                     unsigned char *pWork,
                     int nWorkSize,
@@ -126,29 +125,24 @@ void videoDecCreate(VideoDec *pVideoDec,
     sceDmaCreateQueueSemaphore(inputBuf(pVideoDec), pData, pTag, nTagSize, pTimeStamps, nTimeStamps);
 }
 
-// NTSC-U/C: 0x005693f8, PAL: 0x005a98c0
 int videoDecDelete(VideoDec *pVideoDec) {
     sceDmaDeleteQueueSemaphore(inputBuf(pVideoDec));
     sceMpegDelete(pVideoDec);
     return 1;
 }
 
-// NTSC-U/C: 0x00569430, PAL: 0x005a98f8
 void videoDecAbort(VideoDec *pVideoDec) {
     pVideoDec->state = VD_STATE_ABORT;
 }
 
-// NTSC-U/C: 0x00569440, PAL: 0x005a9908
 int videoDecGetState(VideoDec *pVideoDec) {
     return pVideoDec->state;
 }
 
-// NTSC-U/C: 0x00569458, PAL: 0x005a9920
 int videoDecInputCount(VideoDec *pVideoDec) {
     return viBufCount(inputBuf(pVideoDec));
 }
 
-// NTSC-U/C: 0x00569478, PAL: 0x005a9940
 int videoDecInputSpaceCount(VideoDec *pVideoDec) {
     unsigned char *pPut;
     int putSize;
@@ -159,12 +153,10 @@ int videoDecInputSpaceCount(VideoDec *pVideoDec) {
     return putSize + wrappedSize;
 }
 
-// NTSC-U/C: 0x005694b0, PAL: 0x005a9978
 void videoDecSetDecodeMode(VideoDec *pVideoDec, int nIntra, int nPredicted, int nBidirectional) {
     sceMpegSetDecodeMode(pVideoDec, nIntra, nPredicted, nBidirectional);
 }
 
-// NTSC-U/C: 0x005694d0, PAL: 0x005a9998
 int videoDecFlush(VideoDec *pVideoDec) {
     unsigned char endCode[kFlushWriteSize];
     unsigned char *pPut;
@@ -199,7 +191,6 @@ int videoDecFlush(VideoDec *pVideoDec) {
     return 1;
 }
 
-// NTSC-U/C: 0x005695b0, PAL: 0x005a9a78
 int videoDecIsFlushed(VideoDec *pVideoDec) {
     if (viBufCount(inputBuf(pVideoDec)) != 0) {
         return 0;
@@ -207,14 +198,12 @@ int videoDecIsFlushed(VideoDec *pVideoDec) {
     return sceMpegIsRefBuffEmpty(pVideoDec) != 0;
 }
 
-// NTSC-U/C: 0x00569600, PAL: 0x005a9ac8
 int videoDecSetStream(
     VideoDec *pVideoDec, int nType, int nChannel, VideoDecCallback pfnCallback, void *pData) {
     sceMpegAddStrCallback(pVideoDec, nType, nChannel, pfnCallback, pData);
     return 1;
 }
 
-// NTSC-U/C: 0x00569620, PAL: 0x005a9ae8
 void videoDecBeginPut(VideoDec *pVideoDec,
                       unsigned char **ppPut,
                       int *pPutSize,
@@ -223,12 +212,10 @@ void videoDecBeginPut(VideoDec *pVideoDec,
     viBufBeginPut(inputBuf(pVideoDec), ppPut, pPutSize, ppWrappedPut, pWrappedSize);
 }
 
-// NTSC-U/C: 0x00569640, PAL: 0x005a9b08
 void videoDecEndPut(VideoDec *pVideoDec, int nSize) {
     viBufEndPut(inputBuf(pVideoDec), nSize);
 }
 
-// NTSC-U/C: 0x00569660, PAL: 0x005a9b28
 int videoDecPutTs(VideoDec *pVideoDec,
                   long long nFirstStamp,
                   long long nSecondStamp,
@@ -245,7 +232,6 @@ int videoDecPutTs(VideoDec *pVideoDec,
     return viBufPutTs(inputBuf(&videoDec), &stamp);
 }
 
-// NTSC-U/C: 0x005696a0, PAL: 0x005a9b68
 void videoDecMain(VideoDec *pVideoDec) {
     viBufReset(inputBuf(pVideoDec));
     voBufReset(&voBuf);

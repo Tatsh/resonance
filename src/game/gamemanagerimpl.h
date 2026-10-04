@@ -576,47 +576,91 @@ protected:
     virtual void OnDoPlayback(Message *pMsg);
 
 private:
-    // NTSC-U/C: 0x0010bec8, PAL: 0x0010c060
-    // Reads mState and returns 1 on both paths, so the branch on the state has no
-    // effect. The constructor, the destructor, SetParams(), and OnBeginGameLocal() all run it and
-    // all discard the result.
+    /**
+     * Reads mState and returns 1 on both paths, so the branch on the state has no effect.
+     *
+     * The constructor, the destructor, SetParams(), and OnBeginGameLocal() all run it and all
+     * discard the result.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0010bec8
+     * @ghidraAddress PAL: 0x0010c060
+     */
     int CheckState();
 
-    // NTSC-U/C: 0x0010b8f0, PAL: 0x0010ba78
-    // Runs CheckState() and discards its result. No caller is recovered. The title is inferred.
+    /**
+     * Runs CheckState() and discards its result.
+     *
+     * No caller is recovered. The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0010b8f0
+     * @ghidraAddress PAL: 0x0010ba78
+     */
     void RunStateCheck();
 
-    // NTSC-U/C: 0x0010c050, PAL: 0x0010c208
-    // Snapshots the watchdog, withdraws the world from the poller, deletes it, and clears
-    // mpWorld. EndGame() expands the same sequence, and no caller of this copy is recovered. The
-    // title is inferred.
+    /**
+     * Snapshots the watchdog, withdraws the world from the poller, deletes it, and clears mpWorld.
+     *
+     * EndGame() expands the same sequence, and no caller of this copy is recovered. The title is
+     * inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0010c050
+     * @ghidraAddress PAL: 0x0010c208
+     */
     void DestroyWorld();
 
-    // NTSC-U/C: 0x001068a0, PAL: 0x00106918
-    // Creates the game world with the application and this manager's tally, publishes
-    // two of the settings under script symbols 0x277 and 0x27b, and hands the world the container
-    // name from script symbol 0x38e. Load() and OnBeginGameLocal() are its two callers.
+    /**
+     * Creates the game world with the application and this manager's tally, publishes two of the
+     * settings under script symbols 0x277 and 0x27b, and hands the world the container name from
+     * script symbol 0x38e.
+     *
+     * Load() and OnBeginGameLocal() are its two callers.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001068a0
+     * @ghidraAddress PAL: 0x00106918
+     */
     void CreateWorld();
 
-    // NTSC-U/C: 0x0010c0c0, PAL: 0x0010c278
-    // Sets mWorldLoadFlag, spins on the world's load report at 0x00194ca0 until it
-    // finishes, completes the load, adds the players, prepares the level, and reconnects the
-    // poller. Load() inlines the same sequence rather than calling this.
+    /**
+     * Sets mWorldLoadFlag, spins on the world's load report at 0x00194ca0 until it finishes,
+     * completes the load, adds the players, prepares the level, and reconnects the poller.
+     *
+     * Load() inlines the same sequence rather than calling this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0010c0c0
+     * @ghidraAddress PAL: 0x0010c278
+     */
     void FinishWorldLoad();
 
-    // NTSC-U/C: 0x0010c1f0, PAL: 0x0010c3a8
-    // Forwards to AddPersonaPlayers(). FinishWorldLoad() and Load() call it.
+    /**
+     * Forwards to AddPersonaPlayers().
+     *
+     * FinishWorldLoad() and Load() call it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0010c1f0
+     * @ghidraAddress PAL: 0x0010c3a8
+     */
     void AddPlayers();
 
-    // NTSC-U/C: 0x00106ec0, PAL: 0x00106f50
-    // Adds a local player for each persona through GrooveWorld::AddLocalPlayer(), in
-    // persona order, each with one of the colour names at 0x007cd3b0. It also shuffles the
-    // persona indices, but AddLocalPlayer() does not read the shuffled index.
+    /**
+     * Adds a local player for each persona through GrooveWorld::AddLocalPlayer(), in persona order,
+     * each with one of the colour names at 0x007cd3b0.
+     *
+     * It also shuffles the persona indices, but AddLocalPlayer() does not read the shuffled index.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00106ec0
+     * @ghidraAddress PAL: 0x00106f50
+     */
     void AddPersonaPlayers();
 
-    // NTSC-U/C: 0x00106c08, PAL: 0x00106c98
-    // The out-of-line body of OnEndGame(). Deletes the game world, ends a recording
-    // and a playback, and then either queues a BeginGameLocalMsg or returns to the front end.
+    /**
+     * The out-of-line body of OnEndGame().
+     *
+     * Deletes the game world, ends a recording and a playback, and then either queues a
+     * BeginGameLocalMsg or returns to the front end.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00106c08
+     * @ghidraAddress PAL: 0x00106c98
+     */
     void EndGame(int bRestart);
 
     // A state word. The two diagnostics StartRecording() and Recreate() trip both describe it

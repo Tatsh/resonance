@@ -14,35 +14,29 @@ constexpr double kJumpShortfall = 1.0e-6;
 
 } // namespace
 
-// NTSC-U/C: 0x00411878, PAL: 0x0044b340
 LinearAnim::LinearAnim() : mLastTime(kNoTime), mTarget(0.0f), mCurrent(0.0f) {
     SetParams(mTarget, kDefaultTo, kDefaultDuration);
 }
 
-// NTSC-U/C: 0x004118d0, PAL: 0x0044b398
 void LinearAnim::SetParams(float flFrom, float flTo, float flDuration) {
     mScale = flTo - flFrom;
     mRate = 1.0f / flDuration;
     mOffset = flFrom - mScale * 0.0f; // Yes, the binary multiplies by zero here.
 }
 
-// NTSC-U/C: 0x00411900, PAL: 0x0044b3c8
 void LinearAnim::SetTarget(float flTarget) {
     mTarget = flTarget;
 }
 
-// NTSC-U/C: 0x00411908, PAL: 0x0044b3d0
 void LinearAnim::Jump(float flTarget) {
     mTarget = flTarget;
     mCurrent = static_cast<float>(flTarget - kJumpShortfall);
 }
 
-// NTSC-U/C: 0x00411958, PAL: 0x0044b420
 float LinearAnim::Val() const {
     return mCurrent * mScale + mOffset;
 }
 
-// NTSC-U/C: 0x00411970, PAL: 0x0044b438
 int LinearAnim::Execute(float flTime) {
     if (mCurrent == mTarget) {
         mLastTime = flTime;

@@ -33,7 +33,6 @@ inline void SetPlaneThrough(Plane &plane, const Vector3 &normal, const Vector3 &
 
 } // namespace
 
-// NTSC-U/C: 0x00550b78, PAL: 0x005911b8
 Frustum &Frustum::Set(float flNear, float flFar, float flFov, float flAspect) {
     SetPlaneThrough(mFront, Vector3{0.0f, 1.0f, 0.0f, 1.0f}, Vector3{0.0f, flNear, 0.0f, 1.0f});
     SetPlaneThrough(mBack, Vector3{0.0f, -1.0f, 0.0f, 1.0f}, Vector3{0.0f, flFar, 0.0f, 1.0f});
@@ -61,7 +60,6 @@ Frustum &Frustum::Set(float flNear, float flFar, float flFov, float flAspect) {
     return *this;
 }
 
-// NTSC-U/C: 0x0054f798, PAL: 0x0058fdd8
 Rnd::Dbg &operator<<(Rnd::Dbg &sink, const Frustum &frustum) {
     PrintPlane(sink, "\n\tfront:", frustum.mFront);
     PrintPlane(sink, "\n\tback:", frustum.mBack);
@@ -72,7 +70,6 @@ Rnd::Dbg &operator<<(Rnd::Dbg &sink, const Frustum &frustum) {
     return sink;
 }
 
-// NTSC-U/C: 0x005513a8, PAL: 0x005919e8
 int IsSphereOutsideFrustum(const Sphere &sphere, const Frustum &frustum) {
     const Plane *const apPlanes[] = {&frustum.mFront,
                                      &frustum.mBack,

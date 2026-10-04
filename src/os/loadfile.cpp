@@ -224,7 +224,6 @@ unsigned char *g_pGzipOutputStart = nullptr;
 // The current inflate output position, advanced by the deflate driver.
 unsigned char *currOutBuf = nullptr;
 
-// NTSC-U/C: 0x00555538, PAL: 0x00595bc0
 void *LoadWholeFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsigned *pnSize) {
     const char *pszExtension = pszPath + strlen(pszPath) - (sizeof(kGzExtension) - 1);
     if (strcasecmp(pszExtension, kGzExtension) == 0) {
@@ -255,7 +254,6 @@ void *LoadWholeFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, un
     return pBuffer;
 }
 
-// NTSC-U/C: 0x00555678, PAL: 0x00595d00
 void *LoadGzFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsigned *pnSize) {
     int nFile = FileOpen(pszPath, kFileOpenRead);
     if (nFile < 0) {
@@ -285,7 +283,6 @@ void *LoadGzFile(const char *pszPath, void *pBuffer, unsigned nBufferSize, unsig
     return pBuffer;
 }
 
-// NTSC-U/C: 0x00555790, PAL: 0x00595e18
 int FileSize(const char *pszPath) {
     const int nFile = FileOpen(pszPath, kFileOpenRead);
     if (nFile < 0) {
@@ -297,7 +294,6 @@ int FileSize(const char *pszPath) {
     return nLength;
 }
 
-// NTSC-U/C: 0x005638c8, PAL: 0x005a2038
 unsigned GetGzFileSize(int nFile) {
     FileSeek(nFile, kGzTrailerSizeOffset, kFileSeekEnd);
     unsigned nSize;
@@ -306,8 +302,6 @@ unsigned GetGzFileSize(int nFile) {
     return nSize;
 }
 
-// NTSC-U/C: 0x005636a0, PAL: 0x005a1e10
-// Inflate a memory gzip member, reporting a positive size on success.
 int GzipDecompressRamToRam(const void *pSource, int nSourceLength, void *pDest) {
     gzipInSrcPtr = pSource;
     gzipInSrcSize = nSourceLength;
@@ -340,7 +334,6 @@ int GzipDecompressRamToRam(const void *pSource, int nSourceLength, void *pDest) 
     return GzipInflatedSize();
 }
 
-// NTSC-U/C: 0x00555800, PAL: 0x00595e88
 int FileTrueSize(const char *pszPath) {
     const int nFile = FileOpen(pszPath, kFileOpenRead);
     if (nFile < 0) {
@@ -404,8 +397,6 @@ int gzip_read_error() {
     return 1;
 }
 
-// NTSC-U/C: 0x006121a0, PAL: 0x00652d30
-// Refills the staging buffer and reports its first byte.
 int GzipRefillInputBuffer(int nSilentEof) {
     int nBuffered;
     if (gzip_ifd == kMemoryInputDescriptor) {
@@ -471,7 +462,6 @@ unsigned long long GzipUpdateCrc(const unsigned char *pData, unsigned nLength) {
     return llCrc ^ kCrcInitial;
 }
 
-// NTSC-U/C: 0x006122f8, PAL: 0x00652e88
 void GzipFlushWindow() {
     if (gzipOutcnt == 0) {
         return;
@@ -596,8 +586,6 @@ int GzipReportInflateError() {
     return 0;
 }
 
-// NTSC-U/C: 0x005635b8, PAL: 0x005a1d28
-// Inflates a whole file through the descriptor globals.
 void GzipDecompressFdToRam(int nFile, void *pDest) {
     memcpy(gzipIfname, kUnknownInputName, sizeof(kUnknownInputName));
     if (bInit == 0) {

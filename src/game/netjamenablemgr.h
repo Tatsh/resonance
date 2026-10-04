@@ -66,12 +66,20 @@ private:
     // The owner identifier of a track nobody owns.
     enum { kNoOwner = -2 };
 
-    // NTSC-U/C: 0x00105a98, PAL: 0x00105a98
-    // Reports whether the local player may catch nTrack in nSection.
+    /**
+     * Reports whether the local player may catch nTrack in nSection.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00105a98
+     * @ghidraAddress PAL: 0x00105a98
+     */
     int IsSongSectionEnabled(int nTrack, int nSection) const;
 
-    // NTSC-U/C: 0x00105b08, PAL: 0x00105b08
-    // Reports the play-map section a bar lies in.
+    /**
+     * Reports the play-map section a bar lies in.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00105b08
+     * @ghidraAddress PAL: 0x00105b08
+     */
     int FindSection(int nBar);
 
     PlayMap *mPlayMap;

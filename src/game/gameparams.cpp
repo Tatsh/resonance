@@ -9,7 +9,6 @@ int g_nDoWinSequence;
 
 } // namespace
 
-// NTSC-U/C: 0x00187170, PAL: 0x0018c960
 GameParams::GameParams() {
     mFriends = 0;
     mPlayMode = 0;
@@ -20,11 +19,9 @@ GameParams::GameParams() {
     mJukeboxMode = 0;
 }
 
-// NTSC-U/C: 0x00187940, PAL: 0x0018d138
 GameParams::~GameParams() {
 }
 
-// NTSC-U/C: 0x001871b8, PAL: 0x0018c9b0
 void GameParams::Save(OBStream *pStream) const {
     unsigned nLevelNameLength = mLevelName.mLen;
     pStream->WriteLE(&nLevelNameLength, sizeof(nLevelNameLength));
@@ -60,7 +57,6 @@ void GameParams::Save(OBStream *pStream) const {
     pStream->WriteLE(&nJukeboxMode, sizeof(nJukeboxMode));
 }
 
-// NTSC-U/C: 0x00187390, PAL: 0x0018cb88
 void GameParams::Load(IBStream *pStream) {
     unsigned nLevelNameLength;
     pStream->ReadLE(&nLevelNameLength, sizeof(nLevelNameLength));
@@ -104,7 +100,6 @@ void GameParams::Load(IBStream *pStream) {
     mJukeboxMode = nJukeboxMode != 0;
 }
 
-// NTSC-U/C: 0x00187570, PAL: 0x0018cd68
 void GameParams::Print(std::ostream &stream) const {
     stream << "GameParams:" << " level=" << mLevelName << " arena=" << mArenaName
            << " friends=" << mFriends << " " << (mPlayMode == 1 ? " game" : " jam")
@@ -113,7 +108,6 @@ void GameParams::Print(std::ostream &stream) const {
            << "jukeboxmode=" << mJukeboxMode << std::endl;
 }
 
-// NTSC-U/C: 0x00187be8, PAL: 0x0018d470
 GameParams &GameParams::operator=(const GameParams &other) {
     mLevelName = other.mLevelName;
     mArenaName = other.mArenaName;
@@ -127,7 +121,6 @@ GameParams &GameParams::operator=(const GameParams &other) {
     return *this;
 }
 
-// NTSC-U/C: 0x00187b20, PAL: 0x0018d3a8
 bool GameParams::operator==(const GameParams &other) const {
     return mLevelName == other.mLevelName && mArenaName == other.mArenaName &&
            mFriends == other.mFriends && mPlayMode == other.mPlayMode &&
@@ -136,12 +129,10 @@ bool GameParams::operator==(const GameParams &other) const {
            mJukeboxMode == other.mJukeboxMode;
 }
 
-// NTSC-U/C: 0x00187b00, PAL: 0x0018d388
 int GetDoWinSequence() {
     return g_nDoWinSequence;
 }
 
-// NTSC-U/C: 0x00187b10, PAL: 0x0018d398
 void SetDoWinSequence(int nDoWinSequence) {
     g_nDoWinSequence = nDoWinSequence;
 }

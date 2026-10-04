@@ -5,12 +5,10 @@
 #include "os/async.h"
 #include "os/log.h"
 
-// NTSC-U/C: 0x0060e8b0, PAL: 0x0064f520
 ACircBuff::ACircBuff(char *pBuff, int nSize)
     : mBuff(pBuff), mBuffSize(nSize), mWrite(pBuff), mRead(pBuff), mWrap(pBuff + nSize) {
 }
 
-// NTSC-U/C: 0x0060e930, PAL: 0x0064f5a0
 int ACircBuff::Avail() {
     if (mWrite == mRead) {
         return 0;
@@ -22,7 +20,6 @@ int ACircBuff::Avail() {
     return (mWrap - mWrite) + (mRead - mBuff) - 1;
 }
 
-// NTSC-U/C: 0x0060e998, PAL: 0x0064f608
 int ACircBuff::IsRoom(int nBytes) {
     if (mWrite == mRead) {
         return 0;
@@ -38,14 +35,12 @@ int ACircBuff::IsRoom(int nBytes) {
     return 1;
 }
 
-// NTSC-U/C: 0x0060ea20, PAL: 0x0064f690
 void ACircBuff::WrapWriteIfOk() {
     if (mWrite >= mWrap && mBuff < mRead) {
         mWrite = mBuff;
     }
 }
 
-// NTSC-U/C: 0x0060ea50, PAL: 0x0064f6c0
 char *ACircBuff::AdvanceRead(int nBytes) {
     mRead += nBytes;
     if (mRead >= mWrap) {
@@ -54,7 +49,6 @@ char *ACircBuff::AdvanceRead(int nBytes) {
     return mRead;
 }
 
-// NTSC-U/C: 0x0060ea80, PAL: 0x0064f6f0
 int ACircBuff::FullyRead(const char *pStart, int nBytes) const {
     const char *pEnd = pStart + nBytes;
     if (mWrap < pEnd) {
@@ -69,7 +63,6 @@ int ACircBuff::FullyRead(const char *pStart, int nBytes) const {
     return 0;
 }
 
-// NTSC-U/C: 0x0060eaf0, PAL: 0x0064f760
 int ACircBuff::WillWriteWrap(int nBytes) const {
     if (mWrite + nBytes > mWrap) {
         return mWrap - mWrite;
@@ -77,7 +70,6 @@ int ACircBuff::WillWriteWrap(int nBytes) const {
     return nBytes;
 }
 
-// NTSC-U/C: 0x0060eb18, PAL: 0x0064f788
 char *ACircBuff::AdvanceWrite(int nBytes) {
     mWrite += nBytes;
     if (mWrite >= mWrap && mRead != mBuff) {
@@ -86,7 +78,6 @@ char *ACircBuff::AdvanceWrite(int nBytes) {
     return mWrite;
 }
 
-// NTSC-U/C: 0x0060eb48, PAL: 0x0064f7b8
 int ACircBuff::Write(const void *pSrc, int nBytes) {
     WrapWriteIfOk();
     if (mWrite < mRead) {
@@ -110,7 +101,6 @@ int ACircBuff::Write(const void *pSrc, int nBytes) {
     return nBytes;
 }
 
-// NTSC-U/C: 0x0060ec08, PAL: 0x0064f878
 int ACircBuff::Write(int nFile, int nBytes) {
     WrapWriteIfOk();
     if (mWrite < mRead) {
@@ -135,7 +125,6 @@ int ACircBuff::Write(int nFile, int nBytes) {
     return nBytes;
 }
 
-// NTSC-U/C: 0x0060ecd0, PAL: 0x0064f940
 void ACircBuff::Dump(const char *pszLabel) const {
     printf("%s: circbuff: pRead: %p, pWrite: %p, pWrap: %p, pBuff: %p, buffsz: %d\n",
            pszLabel,

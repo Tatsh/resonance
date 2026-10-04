@@ -351,19 +351,33 @@ private:
     // The panel SetHighlight() draws with its highlight material. The names are inferred.
     enum Highlight { kHighlightCanvas = 0, kHighlightInventory = 1, kHighlightNone = 2 };
 
-    // NTSC-U/C: 0x0026e9e0, PAL: 0x00286d28
-    // Show or hide `fm_spectrum.view`, mCrossOrigin, and `COLOR.txt`.
+    /**
+     * Show or hide `fm_spectrum.view`, mCrossOrigin, and `COLOR.txt`.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0026e9e0
+     * @ghidraAddress PAL: 0x00286d28
+     */
     void ShowPalette(int nShowing);
 
-    // NTSC-U/C: 0x0026e690, PAL: 0x00286978
-    // Show or hide the inventory decorations and the main view. The wires and the
-    // limit text are hidden first, and when shown, the edit page shows mLimitText and mWire16 and
-    // every other page shows mWire30.
+    /**
+     * Show or hide the inventory decorations and the main view.
+     *
+     * The wires and the limit text are hidden first, and when shown, the edit page shows mLimitText
+     * and mWire16 and every other page shows mWire30.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0026e690
+     * @ghidraAddress PAL: 0x00286978
+     */
     void ShowInventory(int nShowing);
 
-    // NTSC-U/C: 0x0026ebb8, PAL: 0x00286f40
-    // Choose the materials of `canvas_2.mesh` and `fm_inventory.mesh`. A value outside
-    // Highlight clears both materials.
+    /**
+     * Choose the materials of `canvas_2.mesh` and `fm_inventory.mesh`.
+     *
+     * A value outside Highlight clears both materials.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0026ebb8
+     * @ghidraAddress PAL: 0x00286f40
+     */
     void SetHighlight(int nHighlight);
 
     // Show one part page with its row count and heading. The five page routines expand it.
@@ -373,78 +387,156 @@ private:
     // mesh under the grid cursor. Slot 19 expands it for each palette move.
     void ApplyPaletteToCurrentMesh();
 
-    // NTSC-U/C: 0x0026e448, PAL: 0x002866f0
-    // Hide `fm_inventory_hisquare.mesh`.
+    /**
+     * Hide `fm_inventory_hisquare.mesh`.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0026e448
+     * @ghidraAddress PAL: 0x002866f0
+     */
     void HideGridCursor();
 
-    // NTSC-U/C: 0x0026e528, PAL: 0x002867f0
-    // Move `fm_inventory_hisquare.mesh` to the grid cursor and show it.
+    /**
+     * Move `fm_inventory_hisquare.mesh` to the grid cursor and show it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0026e528
+     * @ghidraAddress PAL: 0x002867f0
+     */
     void UpdateGridCursor();
 
-    // NTSC-U/C: 0x0026eff0, PAL: 0x002873f0
-    // Show one directions page, or the full page for the select page once the canvas
-    // has its maximum of parts and the edit page is not shown.
+    /**
+     * Show one directions page, or the full page for the select page once the canvas has its
+     * maximum of parts and the edit page is not shown.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0026eff0
+     * @ghidraAddress PAL: 0x002873f0
+     */
     void ShowDirections(int nPage);
 
-    // NTSC-U/C: 0x0026f100, PAL: 0x00287520
-    // Report whether the grid cursor is on a template, or on the edit page on a part.
+    /**
+     * Report whether the grid cursor is on a template, or on the edit page on a part.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0026f100
+     * @ghidraAddress PAL: 0x00287520
+     */
     bool IsCurrentCellFilled();
 
-    // NTSC-U/C: 0x0026f1b0, PAL: 0x002875d0
-    // The name list of the page shown, or null when the grid cursor is past its end.
+    /**
+     * The name list of the page shown, or null when the grid cursor is past its end.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0026f1b0
+     * @ghidraAddress PAL: 0x002875d0
+     */
     std::vector<HxStr> *GetCurrentPageNames();
 
-    // NTSC-U/C: 0x002726e8, PAL: 0x0028ab98
-    // Apply the palette colour and preview the template under the grid cursor.
+    /**
+     * Apply the palette colour and preview the template under the grid cursor.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002726e8
+     * @ghidraAddress PAL: 0x0028ab98
+     */
     void PreviewCurrentTemplate();
 
-    // NTSC-U/C: 0x00272868, PAL: 0x0028ad18
-    // The palette position at the centre of the palette cursor's cell.
+    /**
+     * The palette position at the centre of the palette cursor's cell.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00272868
+     * @ghidraAddress PAL: 0x0028ad18
+     */
     void GetPalettePosition(Vector2 &position);
 
-    // NTSC-U/C: 0x00272918, PAL: 0x0028adc8
-    // Move `fm_cross_origin.view` to one palette position.
+    /**
+     * Move `fm_cross_origin.view` to one palette position.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00272918
+     * @ghidraAddress PAL: 0x0028adc8
+     */
     void MoveCrossOrigin(const Vector2 &position);
 
-    // NTSC-U/C: 0x00272800, PAL: 0x0028acb0
-    // Move `fm_cross_origin.view` to one palette position. The routine is never called.
+    /**
+     * Move `fm_cross_origin.view` to one palette position.
+     *
+     * The routine is never called.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00272800
+     * @ghidraAddress PAL: 0x0028acb0
+     */
     void MoveCrossOrigin(float flX, float flY);
 
-    // NTSC-U/C: 0x00272828, PAL: 0x0028acd8
-    // Move `fm_cross_origin.view` to the palette cursor.
+    /**
+     * Move `fm_cross_origin.view` to the palette cursor.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00272828
+     * @ghidraAddress PAL: 0x0028acd8
+     */
     void UpdateCrossOrigin();
 
-    // NTSC-U/C: 0x002727d0, PAL: 0x0028ac80
-    // The colour at one palette position.
+    /**
+     * The colour at one palette position.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002727d0
+     * @ghidraAddress PAL: 0x0028ac80
+     */
     Color *PaletteColorAt(const Vector2 &position);
 
-    // NTSC-U/C: 0x002724c8, PAL: 0x0028a958
-    // Report the colour under the palette cursor and apply it on the canvas.
+    /**
+     * Report the colour under the palette cursor and apply it on the canvas.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002724c8
+     * @ghidraAddress PAL: 0x0028a958
+     */
     void ApplyPaletteColor(Color &color);
 
-    // NTSC-U/C: 0x00272988, PAL: 0x0028ae38
-    // Put the palette cursor on the cell a part's colour came from, or on the centre
-    // for a part with no palette position.
+    /**
+     * Put the palette cursor on the cell a part's colour came from, or on the centre for a part
+     * with no palette position.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00272988
+     * @ghidraAddress PAL: 0x0028ae38
+     */
     void SetPaletteFromPart(FreqPart *pPart);
 
-    // NTSC-U/C: 0x00272a68, PAL: 0x0028af18
-    // Select the part under the grid cursor on the canvas.
+    /**
+     * Select the part under the grid cursor on the canvas.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00272a68
+     * @ghidraAddress PAL: 0x0028af18
+     */
     FreqPart *SelectCurrentPart();
 
-    // NTSC-U/C: 0x00272790, PAL: 0x0028ac40
-    // Delete the part under the grid cursor from the canvas.
+    /**
+     * Delete the part under the grid cursor from the canvas.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00272790
+     * @ghidraAddress PAL: 0x0028ac40
+     */
     void DeleteCurrentPart();
 
-    // NTSC-U/C: 0x002727c0, PAL: 0x0028ac70
-    // Empty. Slot 19 runs it when the grid cursor cannot move above row 0.
+    /**
+     * Empty.
+     *
+     * Slot 19 runs it when the grid cursor cannot move above row 0.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002727c0
+     * @ghidraAddress PAL: 0x0028ac70
+     */
     void OnGridTopReached();
 
-    // NTSC-U/C: 0x002727c8, PAL: 0x0028ac78
-    // Empty. Slot 19 runs it when the grid cursor cannot move below the last row.
+    /**
+     * Empty.
+     *
+     * Slot 19 runs it when the grid cursor cannot move below the last row.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002727c8
+     * @ghidraAddress PAL: 0x0028ac78
+     */
     void OnGridBottomReached();
 
-    // NTSC-U/C: 0x00272d20, PAL: 0x0028b1d0
-    // The scale a part's template category is drawn at on the grid.
+    /**
+     * The scale a part's template category is drawn at on the grid.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00272d20
+     * @ghidraAddress PAL: 0x0028b1d0
+     */
     float PartScale(FreqPart *pPart);
 
     Rnd::View *mMainInventoryView;        // +0x8c

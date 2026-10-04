@@ -49,7 +49,6 @@ inline void ShowOtherPlayers(const std::vector<Rnd::Cam *> &outerCams,
 
 } // namespace
 
-// NTSC-U/C: 0x00440d30, PAL: 0x0047d9a8
 TnlCameraRig::TnlCameraRig(int nPlayerCount, int nSkipIntro)
     : mPlayerCount(nPlayerCount), mState(kStateSettled) {
     mIntroPos.w = 1.0f;
@@ -97,20 +96,17 @@ TnlCameraRig::TnlCameraRig(int nPlayerCount, int nSkipIntro)
     }
 }
 
-// NTSC-U/C: 0x004414a0, PAL: 0x0047e1b8
 void TnlCameraRig::ZoomIn() {
     mRamp.SetTarget(1.0f);
     mState = kStateZoomedIn;
     ShowOtherPlayers(mOuterCams, mLocalViews, 0);
 }
 
-// NTSC-U/C: 0x00457118, PAL: 0x00494648
 void TnlCameraRig::ZoomOut() {
     mRamp.SetTarget(0.0f);
     mState = kStateZoomingOut;
 }
 
-// NTSC-U/C: 0x00441558, PAL: 0x0047e270
 void TnlCameraRig::SetFrame(float flTime) {
     if (mRamp.Execute(flTime) == 0) {
         if (mState == kStateSettled) {

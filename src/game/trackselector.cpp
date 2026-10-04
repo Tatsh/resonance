@@ -56,7 +56,6 @@ void ProbePlayer(Player *pPlayer) {
 
 } // namespace
 
-// NTSC-U/C: 0x0013b250, PAL: 0x0013bb98
 TrackSelector::TrackSelector(const std::vector<Player *> &players)
     : mChannelCount(kTrackSelectorChannelCount), mSlotCount(players.size()) {
     for (int nChannel = 0; nChannel < kTrackSelectorChannelCount; ++nChannel) {
@@ -73,7 +72,6 @@ TrackSelector::TrackSelector(const std::vector<Player *> &players)
     }
 }
 
-// NTSC-U/C: 0x0013b480, PAL: 0x0013bdc8
 void TrackSelector::RemoveLightFromColumn(Player *pPlayer, int nChannel, int nPayload) {
     if (nChannel == kNoChannel) {
         return;
@@ -98,7 +96,6 @@ void TrackSelector::RemoveLightFromColumn(Player *pPlayer, int nChannel, int nPa
     }
 }
 
-// NTSC-U/C: 0x0013b5e8, PAL: 0x0013bf30
 void TrackSelector::InsertLightForDrawable(Player *pPlayer, int nChannel, int nPayload) {
     for (int nSlot = 0; nSlot < mSlotCount; ++nSlot) {
         if (mGrid[nChannel][nSlot] == &NullPlayer::sInstance) {
@@ -114,7 +111,6 @@ void TrackSelector::InsertLightForDrawable(Player *pPlayer, int nChannel, int nP
     }
 }
 
-// NTSC-U/C: 0x0013b6a8, PAL: 0x0013bff0
 int TrackSelector::RebuildChannelGrid(BumpPacket *pPacket) {
     const int nChannel = pPacket->mTrack;
     Player *pPlayer = pPacket->mPlayer;
@@ -141,8 +137,6 @@ int TrackSelector::RebuildChannelGrid(BumpPacket *pPacket) {
     return 1;
 }
 
-// The address below is the out-of-line copy.
-// NTSC-U/C: 0x0013f5a0, PAL: 0x0013ff68
 inline void TrackSelector::OnMsg(const RotLeftMsg &msg) {
     Player *pPlayer = msg.mPlayer;
     if (pPlayer->IsLocal()) {
@@ -150,8 +144,6 @@ inline void TrackSelector::OnMsg(const RotLeftMsg &msg) {
     }
 }
 
-// The address below is the out-of-line copy.
-// NTSC-U/C: 0x0013f608, PAL: 0x0013ffd0
 inline void TrackSelector::OnMsg(const RotRightMsg &msg) {
     Player *pPlayer = msg.mPlayer;
     if (pPlayer->IsLocal()) {
@@ -159,8 +151,6 @@ inline void TrackSelector::OnMsg(const RotRightMsg &msg) {
     }
 }
 
-// The address below is the out-of-line copy.
-// NTSC-U/C: 0x0013f670, PAL: 0x00140038
 inline void TrackSelector::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
     if (pPlayer->IsLocal()) {
@@ -168,14 +158,11 @@ inline void TrackSelector::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     }
 }
 
-// The address below is the out-of-line copy.
-// NTSC-U/C: 0x0013f6d8, PAL: 0x001400a0
 inline void TrackSelector::OnRemoteTrackSelect(RemoteTrackSelectMsg *pMsg) {
     Player *pPlayer = pMsg->mPlayer;
     MovePlayer(pPlayer, pPlayer->GetTrack(), pMsg->mTrack, pMsg->mPosition.mTick);
 }
 
-// NTSC-U/C: 0x0013b868, PAL: 0x0013c1b0
 void TrackSelector::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nRotLeftMsgType) {
@@ -191,7 +178,6 @@ void TrackSelector::DispatchPriv(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x0013ba08, PAL: 0x0013c350
 int TrackSelector::SelfTest() {
     std::vector<Player *> players;
     for (int nIndex = 0; nIndex < kTestPlayerCount; ++nIndex) {
@@ -247,22 +233,18 @@ int TrackSelector::SelfTest() {
     return 1;
 }
 
-// NTSC-U/C: 0x0013f8e8, PAL: 0x001402b0
 int TrackSelector::RunSelfTest() {
     return SelfTest();
 }
 
-// NTSC-U/C: 0x0013f020, PAL: 0x0013f9d8
 TrackSelector::~TrackSelector() {
 }
 
-// NTSC-U/C: 0x0013f748, PAL: 0x00140110
 void TrackSelector::MovePlayer(Player *pPlayer, int nFromChannel, int nToChannel, int nPayload) {
     RemoveLightFromColumn(pPlayer, nFromChannel, nPayload);
     InsertLightForDrawable(pPlayer, nToChannel, nPayload);
 }
 
-// NTSC-U/C: 0x0013f7a8, PAL: 0x00140170
 void TrackSelector::MovePlayerToBack(Player *pPlayer, int nChannel, int nPayload) {
     if (mGrid[nChannel][0] == pPlayer && mGrid[nChannel][1] == &NullPlayer::sInstance) {
         return;
@@ -271,7 +253,6 @@ void TrackSelector::MovePlayerToBack(Player *pPlayer, int nChannel, int nPayload
     InsertLightForDrawable(pPlayer, nChannel, nPayload);
 }
 
-// NTSC-U/C: 0x0013f840, PAL: 0x00140208
 int TrackSelector::AddLightToChannel(Player *pPlayer, int nPayload, int nDelta) {
     const int nChannel = pPlayer->GetTrack();
     const int nTarget = (nChannel + nDelta + mChannelCount) % mChannelCount;

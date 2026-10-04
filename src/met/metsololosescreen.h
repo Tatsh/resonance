@@ -136,11 +136,16 @@ public:
     virtual void OnExitFinished();
 
 private:
-    // NTSC-U/C: 0x0039a4e8, PAL: 0x003cc7e8
-    // Sets the `solo_lose` caption and the `no_back_title` help layout, pushes `MetHelpScreen` and
-    // `MetSoloStatsScreen`, makes this screen the active panel, selects the first button, shows its
-    // prompt, and runs MetScreen::EnterAndShow(). EnterAndShow() is its one caller, and the title
-    // is inferred.
+    /**
+     * Sets the `solo_lose` caption and the `no_back_title` help layout, pushes `MetHelpScreen` and
+     * `MetSoloStatsScreen`, makes this screen the active panel, selects the first button, shows its
+     * prompt, and runs MetScreen::EnterAndShow().
+     *
+     * EnterAndShow() is its one caller, and the title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0039a4e8
+     * @ghidraAddress PAL: 0x003cc7e8
+     */
     void ShowButtons();
 
     // The retry and levels buttons. +0x8c

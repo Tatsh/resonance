@@ -51,7 +51,6 @@ constexpr float kButtonFlashInterval = 30.0f;
 
 } // namespace
 
-// NTSC-U/C: 0x00231728, PAL: 0x00245060
 MetJukeboxEditPlaylistScreenDone::MetJukeboxEditPlaylistScreenDone(MetRenderer *pRenderer,
                                                                    int nPriority)
     : MetScreen(pRenderer,
@@ -64,7 +63,6 @@ MetJukeboxEditPlaylistScreenDone::MetJukeboxEditPlaylistScreenDone(MetRenderer *
     mButtons = new MetButtonList;
 }
 
-// NTSC-U/C: 0x00231908, PAL: 0x002452a0
 void MetJukeboxEditPlaylistScreenDone::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mButtons->Add(HxStr(kRandomButton), MetText(kMetStrJbdRandom, kRandomLabel));
@@ -73,7 +71,6 @@ void MetJukeboxEditPlaylistScreenDone::ResolveContainerViews() {
     mButtons->SetSelected(kButtonRandom);
 }
 
-// NTSC-U/C: 0x00231b50, PAL: 0x00245700
 void MetJukeboxEditPlaylistScreenDone::OnExitFinished() {
     if (mSaveChosen != 0) {
         ExitScreenByName(HxStr(kTitleScreen));
@@ -95,7 +92,6 @@ void MetJukeboxEditPlaylistScreenDone::OnExitFinished() {
     mSaveChosen = 0;
 }
 
-// NTSC-U/C: 0x002321f8, PAL: 0x00245ec0
 void MetJukeboxEditPlaylistScreenDone::OnRepeatingSoundFinished(
     [[maybe_unused]] Rnd::Button *pButton) {
     switch (mButtons->mSelected) {
@@ -137,7 +133,6 @@ void MetJukeboxEditPlaylistScreenDone::OnRepeatingSoundFinished(
     }
 }
 
-// NTSC-U/C: 0x00232598, PAL: 0x00246400
 void MetJukeboxEditPlaylistScreenDone::UpdateHelpText() {
     HxStr layout;
     HxStr text;
@@ -160,37 +155,29 @@ void MetJukeboxEditPlaylistScreenDone::UpdateHelpText() {
     MetHelpScreen::SetText(text, mRenderer->mAnimationFrame);
 }
 
-// NTSC-U/C: 0x00237160, PAL: 0x0024b2b8
 void MetJukeboxEditPlaylistScreenDone::PlaySlideSound(int) {
 }
 
-// NTSC-U/C: 0x00237168, PAL: 0x0024b2c0
 void MetJukeboxEditPlaylistScreenDone::PlayLeaveSound(int) {
 }
 
-// NTSC-U/C: 0x00237170, PAL: 0x0024b2c8
 void MetJukeboxEditPlaylistScreenDone::PlayHighSound(int) {
 }
 
-// NTSC-U/C: 0x00237178, PAL: 0x0024b2d0
 void MetJukeboxEditPlaylistScreenDone::PlayCycleLeftSound(int) {
 }
 
-// NTSC-U/C: 0x00237180, PAL: 0x0024b2d8
 void MetJukeboxEditPlaylistScreenDone::PlayCycleRightSound(int) {
 }
 
-// NTSC-U/C: 0x00237188, PAL: 0x0024b2e0
 MetJukeboxEditPlaylistScreenDone *MetJukeboxEditPlaylistScreenDone::New(MetRenderer *pRenderer,
                                                                         int nPriority) {
     return new MetJukeboxEditPlaylistScreenDone(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x00237210, PAL: 0x0024b368
 MetJukeboxEditPlaylistScreenDone::~MetJukeboxEditPlaylistScreenDone() {
 }
 
-// NTSC-U/C: 0x00237268, PAL: 0x00245590
 void MetJukeboxEditPlaylistScreenDone::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -218,7 +205,6 @@ void MetJukeboxEditPlaylistScreenDone::HandleCommand(const MetScreenCommand *pCo
     }
 }
 
-// NTSC-U/C: 0x00237330, PAL: 0x0024b3c0
 void MetJukeboxEditPlaylistScreenDone::EnterAndShow() {
     MetScreen::EnterAndShow();
     mButtons->SetSelected(kButtonRandom);
@@ -231,7 +217,6 @@ void MetJukeboxEditPlaylistScreenDone::EnterAndShow() {
 #endif
 }
 
-// NTSC-U/C: 0x002373a8, PAL: 0x0024b3f0
 void MetJukeboxEditPlaylistScreenDone::OnEnterFinished() {
     mButtons->SetSelected(kButtonRandom);
     mPlayChosen = 0;
@@ -239,7 +224,6 @@ void MetJukeboxEditPlaylistScreenDone::OnEnterFinished() {
     mSaveChosen = 0;
 }
 
-// NTSC-U/C: 0x002373e0, PAL: 0x0024b428
 void MetJukeboxEditPlaylistScreenDone::SetShowing(int nShowing) {
     MetScreen::SetShowing(nShowing);
     if (nShowing != 0) {

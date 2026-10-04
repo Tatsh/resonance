@@ -283,7 +283,6 @@ inline void LogStackUse() {
 
 } // namespace
 
-// NTSC-U/C: 0x004a8380, PAL: 0x004e6490
 void *operator new[](size_t nSize) {
     size_t nRequest = (nSize != 0) ? nSize : 1;
     void *pBlock = HeapAlloc(nRequest);
@@ -300,7 +299,6 @@ void *operator new[](size_t nSize) {
     return pBlock;
 }
 
-// NTSC-U/C: 0x004a8520, PAL: 0x004e6630
 void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine) {
     void *pBlock = HeapAlloc(nSize);
 
@@ -317,7 +315,6 @@ void *MemAllocTagged(size_t nSize, const char *pszTag, int nLine) {
     return pBlock;
 }
 
-// NTSC-U/C: 0x004a81e0, PAL: 0x004e62f0
 void *operator new(size_t nSize) {
     size_t nRequest = (nSize != 0) ? nSize : 1;
     void *pBlock = HeapAlloc(nRequest);
@@ -334,7 +331,6 @@ void *operator new(size_t nSize) {
     return pBlock;
 }
 
-// NTSC-U/C: 0x004a90a0, PAL: 0x004e71b0
 void *AllocateTaggedMemory(size_t nSize, const char *pszClass) {
     size_t nRequest = (nSize != 0) ? nSize : 1;
     void *pBlock = HeapAlloc(nRequest);
@@ -351,7 +347,6 @@ void *AllocateTaggedMemory(size_t nSize, const char *pszClass) {
     return pBlock;
 }
 
-// NTSC-U/C: 0x004a92c8, PAL: 0x004e73d8
 // The image, built as C++98, has no sized overload to pair with this one.
 void operator delete[](void *pBlock) noexcept {
     if (bEnabled != 0) {
@@ -360,7 +355,6 @@ void operator delete[](void *pBlock) noexcept {
     HeapFree(pBlock);
 }
 
-// NTSC-U/C: 0x004a9230, PAL: 0x004e7340
 // The image, built as C++98, has no sized overload to pair with this one.
 void operator delete(void *pBlock) noexcept {
     if (bEnabled != 0) {
@@ -369,7 +363,6 @@ void operator delete(void *pBlock) noexcept {
     HeapFree(pBlock);
 }
 
-// NTSC-U/C: 0x004a91e0, PAL: 0x004e72f0
 void OperatorDeleteOverride(void *pBlock, const char *pszClass) {
     if (bEnabled != 0) {
         fprintf(fpLog, "del(%s,%p)\n", pszClass, pBlock);
@@ -377,7 +370,6 @@ void OperatorDeleteOverride(void *pBlock, const char *pszClass) {
     HeapFree(pBlock);
 }
 
-// NTSC-U/C: 0x004a94e8, PAL: 0x004e75f8
 void MemFreeTagged(void *pBlock, const char *pszTag, int nLine) {
     int nZone = FindZoneForPointer(pBlock);
     if (nZone != kNoZone) {
@@ -390,7 +382,6 @@ void MemFreeTagged(void *pBlock, const char *pszTag, int nLine) {
     HeapFree(pBlock);
 }
 
-// NTSC-U/C: 0x004a93b8, PAL: 0x004e74c8
 void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine) {
     int nZone = FindZoneForPointer(pBlock);
     if (nZone != kNoZone) {
@@ -413,24 +404,20 @@ void *MemReallocTagged(void *pBlock, size_t nSize, const char *pszTag, int nLine
     return pNew;
 }
 
-// NTSC-U/C: 0x004a9090, PAL: 0x004e71a0
 char *MemGetCurrentTag() {
     return stlName;
 }
 
-// NTSC-U/C: 0x004a9048, PAL: 0x004e7158
 void MemSetStlTag(const char *pszKind, int nElemSize) {
     sprintf(stlName, "%s.%d", pszKind, nElemSize);
 }
 
-// NTSC-U/C: 0x004a8e18, PAL: 0x004e6f28
 void MemLogWriteMarker(const char *pszText) {
     if (bEnabled != 0) {
         fprintf(fpLog, "MARKER: %s\n", pszText);
     }
 }
 
-// NTSC-U/C: 0x004a86c0, PAL: 0x004e67d0
 int MemLogFindSource(const char *pszName) {
     const char *pName = StripPath(pszName);
 
@@ -460,7 +447,6 @@ int MemLogFindSource(const char *pszName) {
     return nRow;
 }
 
-// NTSC-U/C: 0x004a95c8, PAL: 0x004e76d8
 void MemLogSourceInit() {
     g_pMemLogBlocks =
         static_cast<MemLogBlock *>(HeapAlloc(kMemLogBlockCount * sizeof(MemLogBlock)));
@@ -470,7 +456,6 @@ void MemLogSourceInit() {
     }
 }
 
-// NTSC-U/C: 0x004a87d0, PAL: 0x004e68e0
 void MemLogSourceTrackRealloc(const char *pszSource, void *pNew, void *pOld, int nSize) {
     if (g_pMemLogBlocks == nullptr) {
         return;
@@ -493,7 +478,6 @@ void MemLogSourceTrackRealloc(const char *pszSource, void *pNew, void *pOld, int
     }
 }
 
-// NTSC-U/C: 0x004a8a68, PAL: 0x004e6b78
 void MemLogSourceReport(const char *pszTitle, FILE *pFile) {
     if (g_pMemLogBlocks == nullptr) {
         return;
@@ -541,14 +525,12 @@ void MemLogSourceReport(const char *pszTitle, FILE *pFile) {
     }
 }
 
-// NTSC-U/C: 0x004a8e50, PAL: 0x004e6f60
 void MemLogPrint(const char *pszText) {
     if (bEnabled != 0) {
         fprintf(fpLog, "%s", pszText);
     }
 }
 
-// NTSC-U/C: 0x004a8e88, PAL: 0x004e6f98
 void MemLogBeginCount() {
     memCountAlloced = 0;
     memset(memCountSource, 0, sizeof(memCountSource));
@@ -556,7 +538,6 @@ void MemLogBeginCount() {
     bMemCountEnabled = 1;
 }
 
-// NTSC-U/C: 0x004a8ef8, PAL: 0x004e7008
 int MemLogEndCount(char *pszReport, int nReportSize) {
     sprintf(pszReport, "Memory Allocated: %d\n", memCountAlloced);
     for (int i = 0; i < kMemTagCount; ++i) {
@@ -584,7 +565,6 @@ int MemLogEndCount(char *pszReport, int nReportSize) {
     return memCountAlloced;
 }
 
-// NTSC-U/C: 0x004a7c40, PAL: 0x004e5d50
 void MemOpenLog(const char *pszPath) {
     if (pszPath != nullptr) {
         strcpy(g_szMemLogPath, pszPath);
@@ -605,7 +585,6 @@ void MemOpenLog(const char *pszPath) {
     atexit(MemCloseLogAndReport);
 }
 
-// NTSC-U/C: 0x004a7d30, PAL: 0x004e5e40
 void MemCloseLogAndReport() {
     if (fpLog != nullptr) {
         fclose(fpLog);
@@ -619,7 +598,6 @@ void MemCloseLogAndReport() {
     DumpHeapMemoryLog(0);
 }
 
-// NTSC-U/C: 0x004a7ef8, PAL: 0x004e6008
 void MemLogCloseAndContinue() {
     printf("MemLogCloseAndContinue:, fpLog: %p\n", fpLog);
     if (fpLog != nullptr) {
@@ -652,7 +630,6 @@ void MemLogCloseAndContinue() {
 // load the toolchain allocator's state from 0x007819cc and tail-call it, and the allocator itself
 // is toolchain code that this tree does not reconstruct.
 
-// NTSC-U/C: 0x00246c18, PAL: 0x0025bd58
 void ReportHeapCapacity() {
     std::vector<void *> blocks;
     int nBlocks = 0;
@@ -682,7 +659,6 @@ inline bool CanWriteReport(const FILE *pFile) {
 #endif
 }
 
-// NTSC-U/C: 0x0054b348, PAL: 0x0058b878
 void DumpHeapMemoryLog(int nIndex) {
     char szPath[kHeapLogPathSize];
     sprintf(szPath, "memdump_%d.txt", nIndex);
@@ -746,17 +722,14 @@ void DumpHeapMemoryLog(int nIndex) {
     }
 }
 
-// NTSC-U/C: 0x004bfd48, PAL: 0x004fdde8
 extern "C" void *HeapAlloc(size_t nSize) {
     return malloc(nSize);
 }
 
-// NTSC-U/C: 0x004bfd70, PAL: 0x004fde10
 extern "C" void HeapFree(void *pBlock) {
     free(pBlock);
 }
 
-// NTSC-U/C: 0x00589278, PAL: 0x005cc4f0
 extern "C" void *HeapRealloc(void *pBlock, size_t nSize) {
     return realloc(pBlock, nSize);
 }

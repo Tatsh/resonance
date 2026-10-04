@@ -57,7 +57,6 @@ inline bool IsPowerAxisSlot(int nSlot) {
 
 } // namespace
 
-// NTSC-U/C: 0x00163a88, PAL: 0x00165b38
 ControllerConfig::ControllerConfig() {
     mButtons.resize(kSlotCount);
     for (int i = 0; i < kSlotCount; ++i) {
@@ -65,7 +64,6 @@ ControllerConfig::ControllerConfig() {
     }
 }
 
-// NTSC-U/C: 0x00163c28, PAL: 0x00165cd8
 void ControllerConfig::SetButton(int nRow, int nButtonIndex) {
     int nSlot = ActionSlot(nRow);
     int nCode = ButtonCode(nButtonIndex);
@@ -106,7 +104,6 @@ void ControllerConfig::SetButton(int nRow, int nButtonIndex) {
     }
 }
 
-// NTSC-U/C: 0x00163d50, PAL: 0x00165e00
 int ControllerConfig::ActionCode(int nSlot) {
     switch (nSlot) {
     case kSlotRotateRight:
@@ -143,7 +140,6 @@ int ControllerConfig::ActionCode(int nSlot) {
     }
 }
 
-// NTSC-U/C: 0x00163e10, PAL: 0x00165ec0
 void ControllerConfig::Load(IBStream &stream) {
     int nVersion;
     stream.ReadLE(&nVersion, sizeof(nVersion));
@@ -166,12 +162,10 @@ void ControllerConfig::Load(IBStream &stream) {
     }
 }
 
-// NTSC-U/C: 0x00164b00, PAL: 0x00166bb0
 int ControllerConfig::GetButtonIndex(int nRow) {
     return ButtonIndex(mButtons[ActionSlot(nRow)]);
 }
 
-// NTSC-U/C: 0x00164b40, PAL: 0x00166bf0
 int ControllerConfig::ButtonCode(int nButtonIndex) {
     if (static_cast<unsigned>(nButtonIndex) >= sizeof(kButtonCodes) / sizeof(kButtonCodes[0])) {
         return kNone;
@@ -179,7 +173,6 @@ int ControllerConfig::ButtonCode(int nButtonIndex) {
     return kButtonCodes[nButtonIndex];
 }
 
-// NTSC-U/C: 0x00164bc0, PAL: 0x00166c70
 int ControllerConfig::ButtonIndex(int nCode) {
     switch (nCode) {
     case kButtonCodes[0]:
@@ -209,7 +202,6 @@ int ControllerConfig::ButtonIndex(int nCode) {
     }
 }
 
-// NTSC-U/C: 0x00164c40, PAL: 0x00166cf0
 int ControllerConfig::ActionSlot(int nRow) {
     if (static_cast<unsigned>(nRow) >= sizeof(kRowSlots) / sizeof(kRowSlots[0])) {
         return kNone;
@@ -217,7 +209,6 @@ int ControllerConfig::ActionSlot(int nRow) {
     return kRowSlots[nRow];
 }
 
-// NTSC-U/C: 0x00164cb8, PAL: 0x00166d68
 int ControllerConfig::RiffIndex(int nSlot) {
     switch (nSlot) {
     case kSlotPitchRiffFirst:
@@ -234,7 +225,6 @@ int ControllerConfig::RiffIndex(int nSlot) {
     }
 }
 
-// NTSC-U/C: 0x00164d00, PAL: 0x00166db0
 void ControllerConfig::Save(OBStream &stream) {
     int nVersion = kRecordVersion;
     stream.WriteLE(&nVersion, sizeof(nVersion));
@@ -246,7 +236,6 @@ void ControllerConfig::Save(OBStream &stream) {
     }
 }
 
-// NTSC-U/C: 0x00164dd0, PAL: 0x00166e80
 ControllerConfig &ControllerConfig::operator=(const ControllerConfig &other) {
     mButtons = other.mButtons;
     return *this;

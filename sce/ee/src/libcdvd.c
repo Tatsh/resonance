@@ -247,7 +247,6 @@ static void sceCdDelayThread(unsigned short nTicks) {
     DeleteSema(nSemaId);
 }
 
-// NTSC-U/C: 0x004ff0c0, PAL: 0x0053de70
 sceCdCBFunc sceCdCallback(sceCdCBFunc func) {
     sceCdCBFunc pfnPrevious;
 
@@ -303,7 +302,6 @@ static void sceCdCallbackThread(void *pArgument) {
     }
 }
 
-// NTSC-U/C: 0x004ff278, PAL: 0x0053e028
 int sceCdInitEeCB(int priority, void *stack, int stacksize) {
     if (g_nCdCallbackThreadId != 0) {
         ChangeThreadPriority(g_nCdCallbackThreadId, priority);
@@ -387,7 +385,6 @@ static int sceCdPOffHandlerInstall(void) {
     return 1;
 }
 
-// NTSC-U/C: 0x004ff508, PAL: 0x0053e2b8
 sceCdPOffFunc sceCdPOffCallback(sceCdPOffFunc func, void *addr) {
     sceCdPOffFunc pfnPrevious;
 
@@ -402,7 +399,6 @@ sceCdPOffFunc sceCdPOffCallback(sceCdPOffFunc func, void *addr) {
     return pfnPrevious;
 }
 
-// NTSC-U/C: 0x004ff620, PAL: 0x0053e3d0
 int sceCdSearchFile(sceCdlFILE *fp, const char *name) {
     int nResult;
     int i;
@@ -510,7 +506,6 @@ static int sceCdNCmdDiskReady(void) {
     return nResult;
 }
 
-// NTSC-U/C: 0x004ffb28, PAL: 0x0053e8d8
 int sceCdSync(int mode) {
     if (mode == SCECdBlock) {
         if (g_nCdDebug > 0) {
@@ -527,7 +522,6 @@ int sceCdSync(int mode) {
     return 0;
 }
 
-// NTSC-U/C: 0x004ffbc8, PAL: 0x0053e978
 int sceCdSyncS(int mode) {
     if (mode == SCECdBlock) {
         if (g_nCdDebug > 0) {
@@ -565,7 +559,6 @@ static int scmd_prechk(int nCommand) {
     return 1;
 }
 
-// NTSC-U/C: 0x004ffda8, PAL: 0x0053eb58
 int sceCdInit(int init_mode) {
     int nResult;
     int nBind;
@@ -643,7 +636,6 @@ int sceCdInit(int init_mode) {
     return nResult;
 }
 
-// NTSC-U/C: 0x00500088, PAL: 0x0053ee38
 int sceCdDiskReady(int mode) {
     int nResult;
 
@@ -697,7 +689,6 @@ static int sceCdSCmdCall(unsigned int nFunction, void *pSend, int nSendSize, int
                          NULL);
 }
 
-// NTSC-U/C: 0x00500280, PAL: 0x0053f030
 int sceCdMmode(int media) {
     int nResult;
 
@@ -743,7 +734,6 @@ static int sceCdNCmdCallAsync(unsigned int nServerFunction,
     return 1;
 }
 
-// NTSC-U/C: 0x00519928, PAL: 0x00559cd8
 int sceCdStop(void) {
     if (sceCdNCmdDiskReady() == SCECdNotReady) {
         return 0;
@@ -755,7 +745,6 @@ int sceCdStop(void) {
         kNCmdFuncStop, SCECdFuncStop, NULL, 0, sceCdRpcEnd, (void *)&g_nCdCallbackFunction);
 }
 
-// NTSC-U/C: 0x00545bd0, PAL: 0x00586100
 int sceCdGetDiskType(void) {
     int nResult;
 
@@ -771,7 +760,6 @@ int sceCdGetDiskType(void) {
     return nResult;
 }
 
-// NTSC-U/C: 0x00558c20, PAL: 0x00599d78
 int sceCdTrayReq(int param, unsigned int *traycnt) {
     int nResult;
 
@@ -795,7 +783,6 @@ int sceCdTrayReq(int param, unsigned int *traycnt) {
     return nResult;
 }
 
-// NTSC-U/C: 0x0059bdf8, PAL: 0x005df290
 int sceCdRead(unsigned int lsn, unsigned int sectors, void *buf, sceCdRMode *mode) {
     CdReadPacket *pPacket = &g_cdNCmdSend.mRead;
     unsigned int nBytes;
@@ -844,7 +831,6 @@ int sceCdRead(unsigned int lsn, unsigned int sectors, void *buf, sceCdRMode *mod
     return nStarted;
 }
 
-// NTSC-U/C: 0x005ae998, PAL: 0x005f0f00
 int sceCdSeek(unsigned int lsn) {
     if (sceCdNCmdDiskReady() == SCECdNotReady) {
         return 0;
@@ -862,7 +848,6 @@ int sceCdSeek(unsigned int lsn) {
                               (void *)&g_nCdCallbackFunction);
 }
 
-// NTSC-U/C: 0x005e0270, PAL: 0x006222d8
 int sceCdGetError(void) {
     int nResult;
 
@@ -878,7 +863,6 @@ int sceCdGetError(void) {
     return nResult;
 }
 
-// NTSC-U/C: 0x005fc468, PAL: 0x0063d178
 int sceCdReadClock(sceCdCLOCK *rtc) {
     int nResult;
 
@@ -949,36 +933,30 @@ static int sceCdStream(
     return nResult;
 }
 
-// NTSC-U/C: 0x00611cc0, PAL: 0x00652850
 int sceCdStInit(unsigned int bufmax, unsigned int bankmax, unsigned int iop_bufaddr) {
     g_nCdStreamActive = 0;
     // The IOP ring buffer address travels in the packet's buffer word.
     return sceCdStream(bufmax, bankmax, (void *)iop_bufaddr, kStreamInit, &g_cdStreamDefaultMode);
 }
 
-// NTSC-U/C: 0x00611cf0, PAL: 0x00652880
 int sceCdStStart(unsigned int lsn, sceCdRMode *mode) {
     g_nCdStreamActive = 1;
     return sceCdStream(lsn, 0, NULL, kStreamStart, mode);
 }
 
-// NTSC-U/C: 0x00611d28, PAL: 0x006528b8
 int sceCdStSeekF(unsigned int lsn) {
     return sceCdStream(lsn, 0, NULL, kStreamSeekF, &g_cdStreamDefaultMode);
 }
 
-// NTSC-U/C: 0x00611d58, PAL: 0x006528e8
 int sceCdStSeek(unsigned int lsn) {
     return sceCdStream(lsn, 0, NULL, kStreamSeek, &g_cdStreamDefaultMode);
 }
 
-// NTSC-U/C: 0x00611d88, PAL: 0x00652918
 int sceCdStStop(void) {
     g_nCdStreamActive = 0;
     return sceCdStream(0, 0, NULL, kStreamStop, &g_cdStreamDefaultMode);
 }
 
-// NTSC-U/C: 0x00611dc0, PAL: 0x00652950
 int sceCdStRead(unsigned int size, unsigned int *buf, unsigned int mode, unsigned int *err) {
     unsigned char *pBytes = (unsigned char *)buf;
     unsigned int nRead = 0;
@@ -1025,7 +1003,6 @@ int sceCdStRead(unsigned int size, unsigned int *buf, unsigned int mode, unsigne
     return (int)nRead;
 }
 
-// NTSC-U/C: 0x00611f48, PAL: 0x00652ad8
 int sceCdStPause(void) {
     g_nCdStreamActive = 0;
     if (g_nCdDebug > 0) {
@@ -1034,7 +1011,6 @@ int sceCdStPause(void) {
     return sceCdStream(0, 0, NULL, kStreamPause, &g_cdStreamDefaultMode);
 }
 
-// NTSC-U/C: 0x00611f98, PAL: 0x00652b28
 int sceCdStResume(void) {
     g_nCdStreamActive = 1;
     if (g_nCdDebug > 0) {
@@ -1043,7 +1019,6 @@ int sceCdStResume(void) {
     return sceCdStream(0, 0, NULL, kStreamResume, &g_cdStreamDefaultMode);
 }
 
-// NTSC-U/C: 0x00611ff0, PAL: 0x00652b80
 int sceCdStStat(void) {
     if (g_nCdDebug > 0) {
         scePrintf("sceCdStStat call\n");

@@ -33,14 +33,12 @@ constexpr int kCommandResume = 10;
 
 } // namespace
 
-// NTSC-U/C: 0x00327d90, PAL: 0x0034fbe0
 MetPauseMultiRemixScreen::MetPauseMultiRemixScreen(MetRenderer *pRenderer, int nPriority)
     : MetPauseBaseScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
     mReturnPanel = kPanelName;
 }
 
-// NTSC-U/C: 0x00327f30, PAL: 0x0034fde0
 void MetPauseMultiRemixScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     for (int i = 1; i <= kOptionCount; ++i) {
@@ -50,7 +48,6 @@ void MetPauseMultiRemixScreen::ResolveContainerViews() {
     }
 }
 
-// NTSC-U/C: 0x00328080, PAL: 0x0034ff58
 void MetPauseMultiRemixScreen::EnterAndShow() {
     // Yes, the binary copies the settings and never reads the copy.
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
@@ -73,12 +70,10 @@ void MetPauseMultiRemixScreen::EnterAndShow() {
     MetPauseBaseScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x0032b3c8, PAL: 0x00353840
 MetPauseMultiRemixScreen *MetPauseMultiRemixScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetPauseMultiRemixScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x0032b4a8, PAL: 0x00353920
 void MetPauseMultiRemixScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (pCommand->mCommand == kMetScreenCommandBack || pCommand->mCommand == kCommandResume) {
         MetPauseBaseScreen::HandleCommand(pCommand);

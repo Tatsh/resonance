@@ -282,7 +282,6 @@ static Dbg &operator<<(Dbg &sink, const std::list<Generator::Instance> &instance
     return sink;
 }
 
-// NTSC-U/C: 0x00458748, PAL: 0x00495cd0
 Generator::Generator(const HxStr &name)
     : Object(name), mPath(nullptr), mPathStartFrame(0.0f), mPathEndFrame(0.0f), mMesh(nullptr),
       mView(nullptr), mMultiMesh(nullptr), mParticleSys(nullptr), mAnimateFromStart(1),
@@ -294,13 +293,11 @@ Generator::Generator(const HxStr &name)
     mPathVarMax[2] = 0.0f;
 }
 
-// NTSC-U/C: 0x0045de20, PAL: 0x0049b4c8
 Generator::~Generator() {
     ReleaseRefs();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x00459220, PAL: 0x004967a8
 void Generator::Replace(Object *pFrom, Object *pTo) {
     Transformable::Replace(pFrom, pTo);
     Drawable::Replace(pFrom, pTo);
@@ -313,7 +310,6 @@ void Generator::Replace(Object *pFrom, Object *pTo) {
     ReplaceObjectRef(this, &mParticleSys, pFrom, pTo);
 }
 
-// NTSC-U/C: 0x0045e3d8, PAL: 0x0049ba80
 void Generator::Copy(const Object *pSource, unsigned nFlags) {
     // Yes, the result is used without a null test, so a source that is not an emitter is read
     // through null.
@@ -343,22 +339,18 @@ void Generator::Copy(const Object *pSource, unsigned nFlags) {
     AcquireRefs();
 }
 
-// NTSC-U/C: 0x0045db78, PAL: 0x0049b220
 void *Generator::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kGeneratorTag);
 }
 
-// NTSC-U/C: 0x0045db98, PAL: 0x0049b240
 void Generator::operator delete(void *pBlock) {
     OperatorDeleteOverride(pBlock, kGeneratorTag);
 }
 
-// NTSC-U/C: 0x0045e2a8, PAL: 0x0049b950
 int Generator::NumInstances() {
     return mInstances.size();
 }
 
-// NTSC-U/C: 0x0045e528, PAL: 0x0049bbd0
 void Generator::ReleaseRefs() {
     ReleaseObjectRef(this, mMesh);
     ReleaseObjectRef(this, mPath);
@@ -369,7 +361,6 @@ void Generator::ReleaseRefs() {
     mInstances.clear();
 }
 
-// NTSC-U/C: 0x0045e5e0, PAL: 0x0049bc88
 void Generator::AcquireRefs() {
     AcquireObjectRef(this, mMesh);
     AcquireObjectRef(this, mPath);
@@ -380,7 +371,6 @@ void Generator::AcquireRefs() {
     Regenerate();
 }
 
-// NTSC-U/C: 0x0045e698, PAL: 0x0049bd40
 void Generator::SetMesh(Mesh *pMesh) {
     ReleaseObjectRef(this, mMesh);
     mMesh = pMesh;
@@ -393,7 +383,6 @@ void Generator::SetMesh(Mesh *pMesh) {
     mParticleSys = nullptr;
 }
 
-// NTSC-U/C: 0x0045e738, PAL: 0x0049bde0
 void Generator::SetView(View *pView) {
     ReleaseObjectRef(this, mMesh);
     mMesh = nullptr;
@@ -406,7 +395,6 @@ void Generator::SetView(View *pView) {
     mParticleSys = nullptr;
 }
 
-// NTSC-U/C: 0x0045e7d8, PAL: 0x0049be80
 void Generator::SetMultiMesh(MultiMesh *pMultiMesh) {
     ReleaseObjectRef(this, mMesh);
     mMesh = nullptr;
@@ -419,7 +407,6 @@ void Generator::SetMultiMesh(MultiMesh *pMultiMesh) {
     mParticleSys = nullptr;
 }
 
-// NTSC-U/C: 0x0045e878, PAL: 0x0049bf20
 void Generator::SetParticleSys(ParticleSys *pParticleSys) {
     ReleaseObjectRef(this, mMesh);
     mMesh = nullptr;
@@ -433,14 +420,12 @@ void Generator::SetParticleSys(ParticleSys *pParticleSys) {
     Regenerate();
 }
 
-// NTSC-U/C: 0x0045ea18, PAL: 0x0049c0c0
 void Generator::SetBirthCamera(Cam *pCam) {
     ReleaseObjectRef(this, mBirthCam);
     mBirthCam = pCam;
     AcquireObjectRef(this, mBirthCam);
 }
 
-// NTSC-U/C: 0x0045e920, PAL: 0x0049bfc8
 void Generator::SetPath(TransAnim *pPath, float flStartFrame, float flEndFrame) {
     ReleaseObjectRef(this, mPath);
     mPath = pPath;
@@ -452,7 +437,6 @@ void Generator::SetPath(TransAnim *pPath, float flStartFrame, float flEndFrame) 
                         flEndFrame;
 }
 
-// NTSC-U/C: 0x0045aa40, PAL: 0x004980b0
 void Generator::SetFrameSelf(float flFrame) {
     if (mNextSpawnFrame == kUnsetFrame) {
         mNextSpawnFrame = flFrame;
@@ -547,7 +531,6 @@ void Generator::SetFrameSelf(float flFrame) {
     }
 }
 
-// NTSC-U/C: 0x0045b040, PAL: 0x004986b0
 int Generator::DrawShowing() {
     // NTSC-U/C: 0x0081c448, PAL: 0x0085ef68
     // the four draw paths in DrawPath order.
@@ -609,7 +592,6 @@ int Generator::DrawShowing() {
     return 1;
 }
 
-// NTSC-U/C: 0x0045ea70, PAL: 0x0049c118
 void Generator::DrawInstanceView(const Transform &xfm, float flAge) {
     InstallLocalXfm(mView, xfm);
     if (mAnimateFromStart != 0) {
@@ -619,19 +601,16 @@ void Generator::DrawInstanceView(const Transform &xfm, float flAge) {
     mView->Draw();
 }
 
-// NTSC-U/C: 0x0045eb00, PAL: 0x0049c1a8
 void Generator::DrawInstanceMesh(const Transform &xfm, [[maybe_unused]] float flAge) {
     InstallLocalXfm(mMesh, xfm);
     mMesh->UpdateWorldXfm(nullptr, 0);
     mMesh->Draw();
 }
 
-// NTSC-U/C: 0x0045eb78, PAL: 0x0049c220
 void Generator::DrawInstanceMultiMesh(const Transform &xfm, [[maybe_unused]] float flAge) {
     *mMultiMeshCursor++ = xfm;
 }
 
-// NTSC-U/C: 0x0045ebb8, PAL: 0x0049c260
 void Generator::DrawInstanceParticle(const Transform &xfm, [[maybe_unused]] float flAge) {
     if (mParticleCursor != nullptr) {
         mParticleCursor->mPos = xfm.mTranslation;
@@ -639,17 +618,14 @@ void Generator::DrawInstanceParticle(const Transform &xfm, [[maybe_unused]] floa
     }
 }
 
-// NTSC-U/C: 0x0045e2e8, PAL: 0x0049b990
 const HxStr &Generator::ClassName() const {
     return g_generatorClassName;
 }
 
-// NTSC-U/C: 0x0045e2f8, PAL: 0x0049b9a0
 std::list<Generator::Instance> &Generator::Instances() {
     return mInstances;
 }
 
-// NTSC-U/C: 0x0045a998, PAL: 0x00498008
 void Generator::Regenerate() {
     if (mParticleSys == nullptr) {
         return;
@@ -665,7 +641,6 @@ void Generator::Regenerate() {
     }
 }
 
-// NTSC-U/C: 0x00459618, PAL: 0x00496ba0
 void Generator::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Transformable::DumpText(sink);
@@ -731,10 +706,6 @@ void Generator::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x00459bd8, PAL: 0x00497160
-//
-// The instance list is not written, so a reloaded emitter starts empty and Load() repopulates it
-// through Regenerate().
 void Generator::Save(Stream &stream) {
     const int nRevision = kGeneratorRevision;
     stream.WriteLE(&nRevision, sizeof(nRevision));
@@ -763,7 +734,6 @@ void Generator::Save(Stream &stream) {
     WriteObjectRef(stream, mParticleSys);
 }
 
-// NTSC-U/C: 0x0045a090, PAL: 0x00497618
 void Generator::Load(Stream &stream) {
     int nRevision = 0;
     stream.ReadLE(&nRevision, sizeof(nRevision));
@@ -891,10 +861,6 @@ void Generator::Load(Stream &stream) {
     Regenerate();
 }
 
-// NTSC-U/C: 0x0045dcf0, PAL: 0x0049b398
-//
-// Nothing in the image references this copy. The allocation is billed to the tag "Rnd::Generator"
-// and takes 0x160 bytes.
 Generator *NewGenerator(const HxStr &name) {
     try {
         return new Generator(name);
@@ -910,7 +876,6 @@ static Object *NewGeneratorObject(const HxStr &name) {
     return NewGenerator(name);
 }
 
-// NTSC-U/C: 0x0045dcc0, PAL: 0x0049b368
 void Generator::Init() {
     TheManager.RegisterClass(g_generatorClassName, NewGeneratorObject);
 }

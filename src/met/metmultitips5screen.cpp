@@ -44,7 +44,6 @@ inline void FillText(const TipText &entry) {
 
 } // namespace
 
-// NTSC-U/C: 0x00309fa0, PAL: 0x0032f610
 MetMultiTips5Screen::MetMultiTips5Screen(MetRenderer *pRenderer, int nPriority)
     : MetMultiTipsBaseScreen(pRenderer,
                              nPriority,
@@ -55,7 +54,6 @@ MetMultiTips5Screen::MetMultiTips5Screen(MetRenderer *pRenderer, int nPriority)
                              HxStr(kNextScreen)) {
 }
 
-// NTSC-U/C: 0x0030a170, PAL: 0x0032f858
 void MetMultiTips5Screen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     // The binary expands this loop into one call per text.
@@ -64,7 +62,6 @@ void MetMultiTips5Screen::ResolveContainerViews() {
     }
 }
 
-// NTSC-U/C: 0x0030a4d8, PAL: 0x0032fec8
 void MetMultiTips5Screen::OnExitFinished() {
     if (mExitChoice == kExitNext) {
         ReturnToPlayerCount();
@@ -73,11 +70,9 @@ void MetMultiTips5Screen::OnExitFinished() {
     }
 }
 
-// NTSC-U/C: 0x0030df48, PAL: 0x00333b60
 MetMultiTips5Screen::~MetMultiTips5Screen() {
 }
 
-// NTSC-U/C: 0x0030dfc8, PAL: 0x00333c08
 MetMultiTips5Screen *MetMultiTips5Screen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMultiTips5Screen(pRenderer, nPriority);
 }

@@ -121,7 +121,6 @@ void Heap::ReplaceFreeNode(HeapNode *pFrom, HeapNode *pTo) {
     }
 }
 
-// NTSC-U/C: 0x00552040, PAL: 0x00592680
 Heap *Heap::Create(void *pBlock, unsigned nSize, unsigned nFlags) {
     if (pBlock == nullptr) {
         // Yes, the binary discards this call's result and then builds the heap at address zero.
@@ -157,14 +156,12 @@ Heap *Heap::Create(void *pBlock, unsigned nSize, unsigned nFlags) {
     return pHeap;
 }
 
-// NTSC-U/C: 0x00552108, PAL: 0x00592748
 void HHeapDelete(Heap *pHeap) {
     if ((pHeap->mFlags & kHeapFlagOwnsBlock) != 0) {
         MemFreeTagged(pHeap, __FILE__, __LINE__);
     }
 }
 
-// NTSC-U/C: 0x00551780, PAL: 0x00591dc0
 void *
 Heap::Alloc(unsigned nSize, [[maybe_unused]] const char *pszFile, [[maybe_unused]] int nLine) {
     unsigned nStart = ReadCycleCount();
@@ -237,7 +234,6 @@ Heap::Alloc(unsigned nSize, [[maybe_unused]] const char *pszFile, [[maybe_unused
     return NodePayload(pChosen);
 }
 
-// NTSC-U/C: 0x00551d28, PAL: 0x00592368
 void Heap::Free(void *pBlock, [[maybe_unused]] const char *pszFile, [[maybe_unused]] int nLine) {
     unsigned nStart = ReadCycleCount();
     if (pBlock == nullptr) {
@@ -295,7 +291,6 @@ void Heap::Free(void *pBlock, [[maybe_unused]] const char *pszFile, [[maybe_unus
     AccumulateMicroseconds(&tFree, nStart);
 }
 
-// NTSC-U/C: 0x005519d0, PAL: 0x00592010
 void *Heap::Realloc(void *pBlock,
                     unsigned nSize,
                     [[maybe_unused]] const char *pszFile,
@@ -377,7 +372,6 @@ void *Heap::Realloc(void *pBlock,
     return pMoved;
 }
 
-// NTSC-U/C: 0x00552138, PAL: 0x00592778
 int Heap::Shrink(unsigned nSize) {
     if (nSize >= mLength) {
         return 0;
@@ -408,7 +402,6 @@ int Heap::Shrink(unsigned nSize) {
     return 1;
 }
 
-// NTSC-U/C: 0x00551ec8, PAL: 0x00592508
 void HHeapDump(Heap *pHeap, const char *pszPath) {
     FILE *pFile = fopen(pszPath, "w");
     if (pFile == nullptr) {
@@ -443,7 +436,6 @@ void HHeapDump(Heap *pHeap, const char *pszPath) {
     fclose(pFile);
 }
 
-// NTSC-U/C: 0x00552218, PAL: 0x00592858
 void HHeapLogBasicStats(Heap *pHeap) {
     char szLine[0xa0];
     sprintf(szLine,

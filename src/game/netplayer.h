@@ -76,8 +76,12 @@ public:
     virtual void DispatchPriv(Message *message);
 
 private:
-    // NTSC-U/C: 0x00122f78, PAL: 0x001235a8
-    // Passes a selection packet naming this player on to the sinks as a RemoteTrackSelectMsg.
+    /**
+     * Passes a selection packet naming this player on to the sinks as a RemoteTrackSelectMsg.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00122f78
+     * @ghidraAddress PAL: 0x001235a8
+     */
     void OnTrackSelectPacket(TrackSelectPacket *pPacket);
 
     // The track and place of a TrackSelectMsg addressed to this player, copied from the message's

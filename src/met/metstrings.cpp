@@ -25,7 +25,6 @@ enum MetStringsState {
 // PAL: 0x00710a38
 ScriptTemplateMap g_metStrings;
 
-// PAL: 0x003f9bb0
 void LoadMetStrings() {
     HxStr path = GetFreqRoot() + "metagame/strings/";
     switch (GetLanguage()) {
@@ -112,7 +111,6 @@ void LoadMetStrings() {
     }
 }
 
-// PAL: 0x003fb7b0
 HxStr GetMetString(int nId) {
     return g_metStrings.Find(nId);
 }

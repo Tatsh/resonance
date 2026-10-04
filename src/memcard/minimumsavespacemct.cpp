@@ -36,11 +36,9 @@ MinimumSaveSpaceMCT::MinimumSaveSpaceMCT(MemcardUser *pUser,
 #endif
 }
 
-// NTSC-U/C: 0x00184c18, PAL: 0x0018a140
 MinimumSaveSpaceMCT::~MinimumSaveSpaceMCT() {
 }
 
-// NTSC-U/C: 0x00178328, PAL: 0x0017b740
 void MinimumSaveSpaceMCT::Execute() {
     mState = kMemcardTaskRunning;
     mSpace = GlobalSettings::shared()->mRequiredSaveSpace - kMinimumSaveSpaceSettingsAllowance;
@@ -56,7 +54,6 @@ void MinimumSaveSpaceMCT::Execute() {
     RunStep();
 }
 
-// NTSC-U/C: 0x00178660, PAL: 0x0017bd20
 void MinimumSaveSpaceMCT::RunStep() {
     switch (mStep) {
     case kMinimumSaveSpaceStepCheckInfo:
@@ -107,19 +104,16 @@ void MinimumSaveSpaceMCT::RunStep() {
     }
 }
 
-// NTSC-U/C: 0x00186200, PAL: 0x0018bcc0
 void MinimumSaveSpaceMCT::OnCheckInfo([[maybe_unused]] CheckInfoOp *pOp) {
     RunStep();
 }
 
-// NTSC-U/C: 0x00186220, PAL: 0x0018bce0
 void MinimumSaveSpaceMCT::OnOpenRead(OpenReadOp *pOp) {
     mStatus = pOp->mStatus;
     mFile = pOp->mFile;
     RunStep();
 }
 
-// NTSC-U/C: 0x00186250, PAL: 0x0018bd10
 void MinimumSaveSpaceMCT::OnClose(CloseOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus == kMemcardStatusOk) {
@@ -131,7 +125,6 @@ void MinimumSaveSpaceMCT::OnClose(CloseOp *pOp) {
     Finish();
 }
 
-// NTSC-U/C: 0x001861c0, PAL: 0x0018bc78
 void MinimumSaveSpaceMCT::Finish() {
     mState = kMemcardTaskFinished;
 #ifdef VIDEO_STANDARD_PAL

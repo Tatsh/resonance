@@ -164,11 +164,17 @@ public:
     }
 
 private:
-    // NTSC-U/C: 0x00363148, PAL: 0x00390a48
-    // Brings up the solo stages screen for the new button, or lists the remixes on
-    // the card and the disc for the load button. Other selections do nothing. The European release
-    // also pushes the help screen for the new button, and lists the first slot of port 0, as
-    // recorded or by the name `1`, whether or not the front end uses the card.
+    /**
+     * Brings up the solo stages screen for the new button, or lists the remixes on the card and the
+     * disc for the load button.
+     *
+     * Other selections do nothing. The European release also pushes the help screen for the new
+     * button, and lists the first slot of port 0, as recorded or by the name `1`, whether or not
+     * the front end uses the card.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00363148
+     * @ghidraAddress PAL: 0x00390a48
+     */
     void OpenSelectedButton();
 
     MetButtonList *mButtons;          // +0x8c

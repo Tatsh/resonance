@@ -154,7 +154,6 @@ int ExportCmd::sCmdID;
 
 } // namespace
 
-// NTSC-U/C: 0x001ba0d0, PAL: 0x001bfea8
 PhraseMgr::PhraseMgr(
     Sch::TickClock *pClock, int nBarTicks, PlayMap *pMap, int nConfig, const TrackData *pTrackData)
     : mPhrasePlayer(nullptr), mNetSink(nullptr), mTrackData(pTrackData), mMap(pMap),
@@ -168,14 +167,12 @@ PhraseMgr::PhraseMgr(
     CreatePowerbarMgr();
 }
 
-// NTSC-U/C: 0x001ba2b8, PAL: 0x001c0090
 PhraseMgr::~PhraseMgr() {
     WithdrawCommands();
     delete mDatabase;
     delete mPowerbarMgr;
 }
 
-// NTSC-U/C: 0x001ba3d8, PAL: 0x001c01b0
 void PhraseMgr::CreatePowerbarMgr() {
     delete mPowerbarMgr;
     mPowerbarMgr = nullptr;
@@ -203,7 +200,6 @@ inline void PhraseMgr::RefreshWindowBarOfStep(int nStep) {
     }
 }
 
-// NTSC-U/C: 0x001ba540, PAL: 0x001c0318
 void PhraseMgr::OnCaughtPhrasePacket(Message *pMsg) {
     CaughtPhrasePacket *pPacket = static_cast<CaughtPhrasePacket *>(pMsg);
     if (static_cast<int>(pPacket->mTr) != mTrack) {
@@ -228,7 +224,6 @@ void PhraseMgr::OnCaughtPhrasePacket(Message *pMsg) {
     } while (nStep != nFirstStep);
 }
 
-// NTSC-U/C: 0x001ba6d0, PAL: 0x001c04a8
 void PhraseMgr::PostGemMsg(Message *pMsg) {
     GemPacket *pPacket = static_cast<GemPacket *>(pMsg);
     if (pPacket->mTr != mTrack) {
@@ -262,7 +257,6 @@ void PhraseMgr::PostGemMsg(Message *pMsg) {
     } while (nStep != nFirstStep);
 }
 
-// NTSC-U/C: 0x001ba928, PAL: 0x001c0700
 void PhraseMgr::OnRefreshNet(Message *pMsg) {
     RefreshNetMsg *pRefresh = static_cast<RefreshNetMsg *>(pMsg);
     if (pRefresh->mTrack != mTrack || mNetSink == nullptr) {
@@ -278,7 +272,6 @@ void PhraseMgr::OnRefreshNet(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x001baa98, PAL: 0x001c0870
 void PhraseMgr::AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner, int bPost) {
     Application::shared()->GetWorld()->MarkStatsFlag();
 
@@ -342,7 +335,6 @@ void PhraseMgr::AddGem(int nGem, int nTrans, int nBar, int nTick, Player *pOwner
     (void)mMap->MapToLinkedStep(nStep, mTrack); // Yes, the binary discards this step.
 }
 
-// NTSC-U/C: 0x001bafa8, PAL: 0x001c0d80
 void PhraseMgr::SetPhraseOwner(Player *pPlayer, int nBar) {
     const int nFirstStep = mMap->MapBar(nBar);
     int nStep = nFirstStep;
@@ -366,7 +358,6 @@ void PhraseMgr::SetPhraseOwner(Player *pPlayer, int nBar) {
     } while (mPlayMode == kPlayModeGame && nStep != nFirstStep);
 }
 
-// NTSC-U/C: 0x001bb1a0, PAL: 0x001c0f78
 void PhraseMgr::InstallPhrase(Phrase *pPhrase, int nBar, int bRefresh) {
     Application::shared()->GetWorld()->MarkStatsFlag();
 
@@ -385,7 +376,6 @@ void PhraseMgr::InstallPhrase(Phrase *pPhrase, int nBar, int bRefresh) {
     }
 }
 
-// NTSC-U/C: 0x001bb328, PAL: 0x001c1100
 void PhraseMgr::ClearPhrase(int nBar, int bAll) {
     Application::shared()->GetWorld()->MarkStatsFlag();
 
@@ -410,7 +400,6 @@ void PhraseMgr::ClearPhrase(int nBar, int bAll) {
     } while (mPlayMode == kPlayModeGame && bAll != 0 && nStep != nFirstStep);
 }
 
-// NTSC-U/C: 0x001bb558, PAL: 0x001c1330
 int PhraseMgr::PhrasesMatch(int nFirstBar, int nSecondBar) {
     if (nFirstBar == nSecondBar) {
         return 1;
@@ -429,7 +418,6 @@ int PhraseMgr::PhrasesMatch(int nFirstBar, int nSecondBar) {
     return pFirst->mGems == pSecond->mGems;
 }
 
-// NTSC-U/C: 0x001bb798, PAL: 0x001c1570
 void PhraseMgr::ReplayBar(int nBar, int nOffset) {
     const int nNow = mClock->SongTick();
     const Sch::Tick start(ClampPosition(nBar * Sch::Tick(kBarTicks).mTick));
@@ -437,7 +425,6 @@ void PhraseMgr::ReplayBar(int nBar, int nOffset) {
     mPhrasePlayer->PlayBarAt(nBar, nOffset, elapsed.mTick);
 }
 
-// NTSC-U/C: 0x001bb6b8, PAL: 0x001c1490
 void PhraseMgr::OnCommand(int nBar) {
     mPhrasePlayer->PlayBar(nBar);
 
@@ -450,7 +437,6 @@ void PhraseMgr::OnCommand(int nBar) {
     }
 }
 
-// NTSC-U/C: 0x001bb8a0, PAL: 0x001c1678
 void PhraseMgr::OnExportCommand(int nBar) {
     mRefreshing = 1;
     mWindowStart = nBar - 1;
@@ -468,7 +454,6 @@ void PhraseMgr::OnExportCommand(int nBar) {
     }
 }
 
-// NTSC-U/C: 0x001bb9f8, PAL: 0x001c17d0
 void PhraseMgr::PostBarStatusMsg(int nBar) {
     const int nStep = mMap->MapBar(nBar);
     (void)Sch::Tick(ClampPosition(mBarTicks * nBar)); // Yes, the binary discards this position.
@@ -490,7 +475,6 @@ void PhraseMgr::PostBarStatusMsg(int nBar) {
     Send(&msg);
 }
 
-// NTSC-U/C: 0x001bbb90, PAL: 0x001c1968
 void PhraseMgr::RefreshBar(int nBar, int bClear) {
     if (nBar < mWindowStart || nBar >= mWindowEnd) {
         return;
@@ -528,7 +512,6 @@ void PhraseMgr::RefreshBar(int nBar, int bClear) {
     }
 }
 
-// NTSC-U/C: 0x001bbcf0, PAL: 0x001c1ac8
 void PhraseMgr::PostDurGemMsg(int nBar) {
     Phrase *pPhrase = mDatabase->GetPhraseAt(nBar);
     if (pPhrase == nullptr) {
@@ -584,7 +567,6 @@ void PhraseMgr::PostDurGemMsg(int nBar) {
     }
 }
 
-// NTSC-U/C: 0x001bc0f0, PAL: 0x001c1ec8
 void PhraseMgr::PostGemMsgSecond(int nBar) {
     Phrase *pPhrase = mDatabase->GetPhraseAt(nBar);
     if (pPhrase == nullptr) {
@@ -603,7 +585,6 @@ void PhraseMgr::PostGemMsgSecond(int nBar) {
     }
 }
 
-// NTSC-U/C: 0x001bc290, PAL: 0x001c2068
 void PhraseMgr::PostGemMsgThird(int nBar, int bGhost) {
     if (mTrackData->QueryBar(nBar) == 0) {
         return;
@@ -629,7 +610,6 @@ void PhraseMgr::PostGemMsgThird(int nBar, int bGhost) {
     }
 }
 
-// NTSC-U/C: 0x001bc468, PAL: 0x001c2240
 void PhraseMgr::PostPhraseMsg(int nPhrase) {
     Phrase *pPhrase = mDatabase->GetPhraseAt(nPhrase);
     if (pPhrase == nullptr) {
@@ -643,7 +623,6 @@ void PhraseMgr::PostPhraseMsg(int nPhrase) {
     Send(&msg);
 }
 
-// NTSC-U/C: 0x001bc588, PAL: 0x001c2360
 void PhraseMgr::StartCommands() {
     Cmd *pCommand = new Cmd(this, kFirstBar);
     const Sch::Tick when(ClampPosition(mBarTicks * kFirstBar));
@@ -661,7 +640,6 @@ void PhraseMgr::StartCommands() {
     }
 }
 
-// NTSC-U/C: 0x001bc718, PAL: 0x001c24f0
 void PhraseMgr::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == g_nPhrasePacketType) {
@@ -679,19 +657,16 @@ void PhraseMgr::DispatchPriv(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x001bf6c0, PAL: 0x001c54e0
 int PhraseMgr::TickToBar(int nTick) {
     const int nBar = nTick / mBarTicks;
     (void)Sch::Tick(ClampPosition(mBarTicks * nBar)); // Yes, the binary discards this position.
     return nBar;
 }
 
-// NTSC-U/C: 0x001bf738, PAL: 0x001c5558
 int PhraseMgr::BarToTick(int nBar) {
     return Sch::Tick(ClampPosition(mBarTicks * nBar)).mTick;
 }
 
-// NTSC-U/C: 0x001c0010, PAL: 0x001c5e40
 void PhraseMgr::OnPhrasePacket(PhrasePacket *pPacket) {
     if (static_cast<int>(pPacket->mTr) != mTrack) {
         return;
@@ -712,7 +687,6 @@ void PhraseMgr::OnPhrasePacket(PhrasePacket *pPacket) {
     RefreshWindowBarOfStep(nStep);
 }
 
-// NTSC-U/C: 0x001c0110, PAL: 0x001c5f40
 void PhraseMgr::OnInvalidateTrack(InvalidateTrackMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -728,22 +702,18 @@ void PhraseMgr::OnInvalidateTrack(InvalidateTrackMsg *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x001c01c8, PAL: 0x001c5ff8
 Phrase *PhraseMgr::GetPhraseAt(int nBar) {
     return mDatabase->GetPhraseAt(nBar);
 }
 
-// NTSC-U/C: 0x001c01e8, PAL: 0x001c6018
 int PhraseMgr::GetPowerbar(int nBar) {
     return mPowerbarMgr->GetPowerbar(mMap->MapBar(nBar));
 }
 
-// NTSC-U/C: 0x001c0248, PAL: 0x001c6078
 long long *PhraseMgr::GetStepValue(int nBar) {
     return mDatabase->GetStepValue(nBar);
 }
 
-// NTSC-U/C: 0x001c0268, PAL: 0x001c6098
 Player *PhraseMgr::GetOwner(int nBar) const {
     Phrase *pPhrase = mDatabase->GetPhraseAt(nBar);
     if (pPhrase == nullptr) {
@@ -752,7 +722,6 @@ Player *PhraseMgr::GetOwner(int nBar) const {
     return pPhrase->mPlayer;
 }
 
-// NTSC-U/C: 0x001c0298, PAL: 0x001c60c8
 void PhraseMgr::SetPhraseByte(int nBar, char cValue) {
     const int nFirst = mMap->MapBar(nBar);
     int nIndex = nFirst;
@@ -762,12 +731,10 @@ void PhraseMgr::SetPhraseByte(int nBar, char cValue) {
     } while (nIndex != nFirst);
 }
 
-// NTSC-U/C: 0x001c0338, PAL: 0x001c6168
 unsigned char PhraseMgr::GetPhraseByte(int nBar) {
     return mDatabase->GetPhraseByte(mMap->MapBar(nBar));
 }
 
-// NTSC-U/C: 0x001c0380, PAL: 0x001c61b0
 void PhraseMgr::ResetOwners(Player *pPlayer) {
     mDatabase->SetOwners(pPlayer);
     for (int nBar = mWindowStart; nBar < mWindowEnd; ++nBar) {
@@ -775,7 +742,6 @@ void PhraseMgr::ResetOwners(Player *pPlayer) {
     }
 }
 
-// NTSC-U/C: 0x001c03e0, PAL: 0x001c6210
 void PhraseMgr::RefreshAllBars() {
     mRefreshing = 1;
     mWindowStart = 0;
@@ -786,7 +752,6 @@ void PhraseMgr::RefreshAllBars() {
     mRefreshing = 0;
 }
 
-// NTSC-U/C: 0x001c0450, PAL: 0x001c6280
 void PhraseMgr::WithdrawCommands() {
     mClock->Withdraw(mCommand);
     mClock->Withdraw(mExportCommand);

@@ -526,13 +526,23 @@ public:
     int mInstrument;
 
 private:
-    // Scores a bar from its gems. Each gem adds the weight of the first divisor its position is a
-    // multiple of, and the total is placed among the configured thresholds.
-    // NTSC-U/C: 0x001d2e08, PAL: 0x001d8cc0
+    /**
+     * Scores a bar from its gems.
+     *
+     * Each gem adds the weight of the first divisor its position is a multiple of, and the total is
+     * placed among the configured thresholds.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d2e08
+     * @ghidraAddress PAL: 0x001d8cc0
+     */
     static int ScoreGems(const std::vector<TickObj<int> > &gems);
 
-    // Fills the weights and thresholds ScoreGems() uses from the configuration, once.
-    // NTSC-U/C: 0x001d2ca8, PAL: 0x001d8b60
+    /**
+     * Fills the weights and thresholds ScoreGems() uses from the configuration, once.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d2ca8
+     * @ghidraAddress PAL: 0x001d8b60
+     */
     static void InitScoreTables();
 
     HxStr mName;                            // +0x14

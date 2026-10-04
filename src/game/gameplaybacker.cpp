@@ -8,7 +8,6 @@
 #include "os/hxstr.h"
 #include "stream/ibfilestream.h"
 
-// NTSC-U/C: 0x0010cf30, PAL: 0x0010d208
 GamePlaybacker::GamePlaybacker(const HxStr &file, GameManagerImpl *pManager, int)
     : mManager(pManager) {
     IBFileStream stream(MakeFreqPath(file));
@@ -24,7 +23,6 @@ GamePlaybacker::GamePlaybacker(const HxStr &file, GameManagerImpl *pManager, int
     Application::shared()->GetWatchdog()->StartPlayback(stream);
 }
 
-// NTSC-U/C: 0x0010f0d8, PAL: 0x0010f538
 GamePlaybacker::~GamePlaybacker() {
     Application::shared()->GetWatchdog()->StopRecOrPlayback();
 }

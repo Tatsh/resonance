@@ -465,28 +465,47 @@ private:
     // A point that is neither end of a run governs two vertices, and a cap point governs four.
     enum { kVertexSlotBody = 0, kVertexSlotStartCap = 1, kVertexSlotEndCap = 2 };
 
-    // NTSC-U/C: 0x004b9a68, PAL: 0x004f79e0
-    // Reports the mode of point nIndex and the first mesh vertex it governs.
+    /**
+     * Reports the mode of point nIndex and the first mesh vertex it governs.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004b9a68
+     * @ghidraAddress PAL: 0x004f79e0
+     */
     void ResolvePointVertexSlot(unsigned nIndex, VertexSlot &slot);
 
-    // NTSC-U/C: 0x004ba3d0, PAL: 0x004f8348
-    // Builds the owned mesh, applies the stored material and the depth state to it,
-    // caches the cosine of the fold angle, and sizes the geometry to the current point count. The
-    // constructor, Load(), and Copy() are the callers. The binary has a catch-all handler inside it
-    // that returns null.
+    /**
+     * Builds the owned mesh, applies the stored material and the depth state to it, caches the
+     * cosine of the fold angle, and sizes the geometry to the current point count.
+     *
+     * The constructor, Load(), and Copy() are the callers. The binary has a catch-all handler
+     * inside it that returns null.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004ba3d0
+     * @ghidraAddress PAL: 0x004f8348
+     */
     void CreateMesh();
 
-    // NTSC-U/C: 0x004bf810, PAL: 0x004fd898
-    // Releases the owned mesh and clears the pointer. The destructor is the only
-    // out-of-line caller, and Load() and Copy() inline the same body.
+    /**
+     * Releases the owned mesh and clears the pointer.
+     *
+     * The destructor is the only out-of-line caller, and Load() and Copy() inline the same body.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004bf810
+     * @ghidraAddress PAL: 0x004fd898
+     */
     void DeleteMesh();
 
-    // NTSC-U/C: 0x004b9008, PAL: 0x004f6f80
-    // Builds the screen direction and the perpendicular of every point in the closed
-    // range, widens each by mWidth, and folds the ribbon wherever the turn between two segments
-    // passes mFoldCos. A corner sharper than a near-straight turn is mitred at the crossing of the
-    // two edge lines. The vertices are camera-space positions displaced by the screen-space
-    // normals. DrawShowing() is the only caller.
+    /**
+     * Builds the screen direction and the perpendicular of every point in the closed range, widens
+     * each by mWidth, and folds the ribbon wherever the turn between two segments passes mFoldCos.
+     *
+     * A corner sharper than a near-straight turn is mitred at the crossing of the two edge lines.
+     * The vertices are camera-space positions displaced by the screen-space normals. DrawShowing()
+     * is the only caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004b9008
+     * @ghidraAddress PAL: 0x004f6f80
+     */
     void EmitRibbonVerts(Point *pFirst, Point *pLast);
 
     // Declared in recovered offset order. Every member is private, because the image supplies an

@@ -25,7 +25,6 @@ constexpr int kMaxCursorLead = 4;
 
 } // namespace
 
-// NTSC-U/C: 0x001ccb70, PAL: 0x001d2a28
 GamePowerupPlacer::GamePowerupPlacer(LocalPlayer *pOwner,
                                      Application *pApplication,
                                      PowerupCollectionI *pCollection)
@@ -33,13 +32,11 @@ GamePowerupPlacer::GamePowerupPlacer(LocalPlayer *pOwner,
       mOwner(pOwner), mApplication(pApplication), mCollection(pCollection), mCursorBar(kNoCursor) {
 }
 
-// NTSC-U/C: 0x001cd9b0, PAL: 0x001d3868
-// Both table stores and the TickTask and MsgSource teardown after them are compiler
-// expansions.
 GamePowerupPlacer::~GamePowerupPlacer() {
+    // Both table stores and the TickTask and MsgSource teardown after them are compiler
+    // expansions.
 }
 
-// NTSC-U/C: 0x001cccb0, PAL: 0x001d2b68
 void GamePowerupPlacer::MoveCursor(int nStep) {
     if (nStep == 0) {
         return;
@@ -76,7 +73,6 @@ void GamePowerupPlacer::MoveCursor(int nStep) {
     Send(&msg);
 }
 
-// NTSC-U/C: 0x001cce90, PAL: 0x001d2d48
 void GamePowerupPlacer::AnnounceCursor() {
     if (mCursorBar == -1) {
         return;
@@ -85,7 +81,6 @@ void GamePowerupPlacer::AnnounceCursor() {
     Send(&msg);
 }
 
-// NTSC-U/C: 0x001ccf30, PAL: 0x001d2de8
 void GamePowerupPlacer::DeployPowerup() {
     if (mCursorBar == kNoCursor) {
         return;
@@ -102,7 +97,6 @@ void GamePowerupPlacer::DeployPowerup() {
     Send(&remove);
 }
 
-// NTSC-U/C: 0x001cd028, PAL: 0x001d2ee0
 int GamePowerupPlacer::Tick(int nElapsedTicks) {
     const int nBeat = Sch::Tick(kTicksPerBeat).mTick;
     const Sch::Tick tick(std::min(std::max(nElapsedTicks + nBeat, kTickMinimum), kTickMaximum));
@@ -115,12 +109,10 @@ int GamePowerupPlacer::Tick(int nElapsedTicks) {
     return 1;
 }
 
-// NTSC-U/C: 0x001cde18, PAL: 0x001d3cd0
 void GamePowerupPlacer::Activate() {
     Start(kTickInfinity);
 }
 
-// NTSC-U/C: 0x001cde40, PAL: 0x001d3cf8
 void GamePowerupPlacer::Deactivate() {
     Stop();
 }

@@ -24,7 +24,6 @@ bool HasGameWorld() {
 
 } // namespace
 
-// NTSC-U/C: 0x0038ff58, PAL: 0x003c1828
 MetScreenMultiSoundBank::MetScreenMultiSoundBank(MetRenderer *pRenderer,
                                                  int nPriority,
                                                  const HxStr &name,
@@ -33,31 +32,25 @@ MetScreenMultiSoundBank::MetScreenMultiSoundBank(MetRenderer *pRenderer,
     : MetScreen(pRenderer, nPriority, name, directory, file) {
 }
 
-// NTSC-U/C: 0x0038fe60, PAL: 0x003c1730
 MetScreenMultiSoundBank::~MetScreenMultiSoundBank() {
 }
 
-// NTSC-U/C: 0x003907b0, PAL: 0x003c2080
 void MetScreenMultiSoundBank::PlaySlideSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(HasGameWorld() ? kInGameActionSound : kSlideSound);
 }
 
-// NTSC-U/C: 0x003907f0, PAL: 0x003c20c0
 void MetScreenMultiSoundBank::PlayLeaveSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(HasGameWorld() ? kInGameActionSound : kLeaveSound);
 }
 
-// NTSC-U/C: 0x00390830, PAL: 0x003c2100
 void MetScreenMultiSoundBank::PlayHighSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(HasGameWorld() ? kInGameNavigationSound : kHighSound);
 }
 
-// NTSC-U/C: 0x00390870, PAL: 0x003c2140
 void MetScreenMultiSoundBank::PlayCycleLeftSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(HasGameWorld() ? kInGameNavigationSound : kCycleLeftSound);
 }
 
-// NTSC-U/C: 0x003908b0, PAL: 0x003c2180
 void MetScreenMultiSoundBank::PlayCycleRightSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(HasGameWorld() ? kInGameNavigationSound : kCycleRightSound);
 }

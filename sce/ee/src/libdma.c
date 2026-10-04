@@ -163,8 +163,6 @@ static void memclr(unsigned char *pBytes, int nCount) {
     }
 }
 
-// NTSC-U/C: 0x005f36f0, PAL: 0x00596e10
-// Returns the channel block for the identifier. An out of range identifier yields a null pointer.
 sceDmaChan *sceDmaGetChan(int nChannel) {
     if ((unsigned int)nChannel < kChannelCount) {
         return (sceDmaChan *)dch[nChannel];
@@ -172,9 +170,6 @@ sceDmaChan *sceDmaGetChan(int nChannel) {
     return NULL;
 }
 
-// NTSC-U/C: 0x005f3718, PAL: 0x00596e38
-// Resets every channel and returns the previous enable flag. The routine clears channel words
-// and status bits and applies a cleared environment.
 int sceDmaReset(int nMode) {
     unsigned int oldCtrl;
     unsigned int stat;
@@ -209,9 +204,6 @@ int sceDmaReset(int nMode) {
     return (int)(oldCtrl & 1U);
 }
 
-// NTSC-U/C: 0x005f3808, PAL: 0x00596f28
-// Validates the environment and writes the controller words.
-// Out of range fields produce negative results.
 int sceDmaPutEnv(sceDmaEnv *pEnv) {
     DmaEnvRaw *raw;
     unsigned int ctrl;
@@ -253,16 +245,11 @@ int sceDmaPutEnv(sceDmaEnv *pEnv) {
     return 0;
 }
 
-// NTSC-U/C: 0x005f39e0, PAL: 0x00597100
-// Copies the saved environment into the caller buffer and returns the caller buffer.
 sceDmaEnv *sceDmaGetEnv(sceDmaEnv *pEnv) {
     *pEnv = sceDmaCurrentEnv;
     return pEnv;
 }
 
-// NTSC-U/C: 0x005f3a40, PAL: 0x00597160
-// Waits for the channel to idle and starts a source chain transfer. A busy channel spins
-// with a timeout and reports an expiry.
 void sceDmaSend(sceDmaChan *pChannel, void *pTag) {
     DmaChannelRegs *channel;
     unsigned int tag;
@@ -289,9 +276,6 @@ void sceDmaSend(sceDmaChan *pChannel, void *pTag) {
     channel->mChcr = (channel->mChcr & 0xFFFFFFF3U) | 0x105U;
 }
 
-// NTSC-U/C: 0x005f3b18, PAL: 0x00597238
-// Waits for the channel to idle and starts a normal transfer. A busy channel spins with
-// a timeout and reports an expiry.
 void sceDmaSendN(sceDmaChan *pChannel, void *pAddress, int nQuadwords) {
     DmaChannelRegs *channel;
     unsigned int address;
@@ -318,8 +302,6 @@ void sceDmaSendN(sceDmaChan *pChannel, void *pAddress, int nQuadwords) {
     channel->mChcr = (channel->mChcr & 0xFFFFFFF3U) | 0x101U;
 }
 
-// NTSC-U/C: 0x005f3f90, PAL: 0x005976b0
-// Polls the channel until the busy bit clears and reports zero. Probe mode returns the busy flag.
 int sceDmaSync(sceDmaChan *pChannel, int nMode, int nTimeout) {
     DmaChannelRegs *channel;
     int timeout;
@@ -348,10 +330,6 @@ int sceDmaSync(sceDmaChan *pChannel, int nMode, int nTimeout) {
     return 0;
 }
 
-// NTSC-U/C: 0x00613388, PAL: 0x00653f18
-// Prepares the queue record and creates the guarding semaphore.
-// The routine stores the data pointer, the tag pointer, the sizes,
-// and the stamp ring, then initialises the transfer path.
 void sceDmaCreateQueueSemaphore(
     ViBuf *buffer, void *pData, void *pTag, int nTagSize, void *pTimeStamps, int nTimeStamps) {
     DmaQueue *queue;
@@ -373,9 +351,6 @@ void sceDmaCreateQueueSemaphore(
     queue->mTotalPut = 0LL;
 }
 
-// NTSC-U/C: 0x00613400, PAL: 0x00653f90
-// Stops the transfer channels and deletes the guarding semaphore. The routine disables interrupts
-// across the channel updates.
 int sceDmaDeleteQueueSemaphore(ViBuf *buffer) {
     DmaQueue *queue;
     unsigned int enabler;
@@ -395,9 +370,6 @@ int sceDmaDeleteQueueSemaphore(ViBuf *buffer) {
     return 1;
 }
 
-// NTSC-U/C: 0x006126e8, PAL: 0x00653278
-// Initialises the queue counts and builds the tag ring. The routine clears the buffered counts,
-// clears the stamp ring, programs the tag entries, and arms the transfer channels.
 int viBufReset(ViBuf *buffer) {
     DmaQueue *queue;
     int count;
@@ -481,9 +453,6 @@ int viBufReset(ViBuf *buffer) {
     return 1;
 }
 
-// NTSC-U/C: 0x00612890, PAL: 0x00653420
-// Advances the queue after a stall and restarts the channel when work remains. The routine
-// reports an error for an inactive queue.
 int viBufAddDMA(ViBuf *buffer) {
     DmaQueue *queue;
     unsigned int enabler;
@@ -617,9 +586,6 @@ int viBufAddDMA(ViBuf *buffer) {
     return 1;
 }
 
-// NTSC-U/C: 0x00612b40, PAL: 0x006536d0
-// Stops the transfer channels and saves the hardware positions. The routine disables interrupts
-// across the channel updates.
 int viBufStopDMA(ViBuf *buffer) {
     DmaQueue *queue;
     unsigned int enabler;
@@ -658,10 +624,6 @@ int viBufStopDMA(ViBuf *buffer) {
     return 1;
 }
 
-// NTSC-U/C: 0x00612cc0, PAL: 0x00653850
-// Restarts both IPU channels from the positions viBufStopDMA() saved. The input channel is
-// rewound by the words the IPU FIFO had, the read position and buffered count are corrected for
-// whatever the rewind crossed, the saved IPU command is reissued, and IPU_CTRL is restored.
 int viBufRestartDMA(ViBuf *buffer) {
     DmaQueue *queue = (DmaQueue *)buffer;
     const unsigned int savedBp = (unsigned int)queue->mSavedIpuBp;
@@ -764,9 +726,6 @@ int viBufRestartDMA(ViBuf *buffer) {
     return 1;
 }
 
-// NTSC-U/C: 0x00613088, PAL: 0x00653c18
-// Discards the stamps the reader has passed. The routine advances the stamp ring past
-// the supplied offset.
 void viBufModifyPts(ViBuf *buffer, ViTimeStamp *timeStamp) {
     DmaQueue *queue;
     int capacity;
@@ -849,9 +808,6 @@ void viBufModifyPts(ViBuf *buffer, ViTimeStamp *timeStamp) {
     }
 }
 
-// NTSC-U/C: 0x006131e0, PAL: 0x00653d70
-// Retrieves the stamp for the completed span.
-// The routine scans the stamp ring for the matching entry.
 int viBufGetTs(ViBuf *buffer, long long *pStamps) {
     DmaQueue *queue;
     unsigned int madr;
@@ -933,9 +889,6 @@ int viBufGetTs(ViBuf *buffer, long long *pStamps) {
     return 1;
 }
 
-// NTSC-U/C: 0x00613798, PAL: 0x00654328
-// Rounds the buffered byte count up to the sector boundary. The routine waits on the semaphore
-// across the update.
 void viBufFlush(ViBuf *buffer) {
     DmaQueue *queue;
     int bytes;

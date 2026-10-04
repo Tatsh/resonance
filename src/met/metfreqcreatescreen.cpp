@@ -83,7 +83,6 @@ constexpr int kNoRandomize = 0;
 
 } // namespace
 
-// NTSC-U/C: 0x0029c130, PAL: 0x002b9950
 MetFreqCreateScreen::MetFreqCreateScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mSelectedIdentity(0) {
@@ -94,17 +93,14 @@ MetFreqCreateScreen::MetFreqCreateScreen(MetRenderer *pRenderer, int nPriority)
     mBurnTexture = FreqAppearance::FindPersonaBurnTexture(kBurnTextureIndex);
 }
 
-// NTSC-U/C: 0x002a0b08, PAL: 0x002be8a8
 MetFreqCreateScreen::~MetFreqCreateScreen() {
     delete mButtonList;
 }
 
-// NTSC-U/C: 0x002a0a80, PAL: 0x002be820
 MetFreqCreateScreen *MetFreqCreateScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetFreqCreateScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x0029ccb8, PAL: 0x002ba6c0
 void MetFreqCreateScreen::EnterAndShow() {
     mIdentities = MetFreqMakerAssetManager::shared()->GetIdentityList();
     mButtonList->SetSelected(kPrefabButtonIndex);
@@ -119,7 +115,6 @@ void MetFreqCreateScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x0029c7a0, PAL: 0x002ba0f0
 void MetFreqCreateScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -172,21 +167,18 @@ void MetFreqCreateScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x002a0b88, PAL: 0x002be928
 void MetFreqCreateScreen::PlayCycleLeftSound(int nSelector) {
     if (mButtonList->mSelected == kPrefabButtonIndex) {
         MetScreen::PlayCycleLeftSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x002a0bb8, PAL: 0x002be958
 void MetFreqCreateScreen::PlayCycleRightSound(int nSelector) {
     if (mButtonList->mSelected == kPrefabButtonIndex) {
         MetScreen::PlayCycleRightSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x0029ce58, PAL: 0x002ba8b8
 void MetFreqCreateScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     if (pButton == mLeftArrow || pButton == mRightArrow) {
         return;
@@ -197,7 +189,6 @@ void MetFreqCreateScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     BeginExit();
 }
 
-// NTSC-U/C: 0x0029cfa0, PAL: 0x002baa40
 void MetFreqCreateScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
 #ifdef VIDEO_STANDARD_PAL
@@ -241,7 +232,6 @@ void MetFreqCreateScreen::OnExitFinished() {
     mButtonList->SetSelected(kNoSelection);
 }
 
-// NTSC-U/C: 0x0029c330, PAL: 0x002b9bb8
 void MetFreqCreateScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mLeftArrow = dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(HxStr(kLeftArrowObject)));
@@ -257,7 +247,6 @@ void MetFreqCreateScreen::ResolveContainerViews() {
     mHelpKeys.push_back(MetText(kMetStrHCreateFromScratch, kCreatePrompt));
 }
 
-// NTSC-U/C: 0x0029cb30, PAL: 0x002ba518
 void MetFreqCreateScreen::StepSelection(const MetScreenCommand *pCommand) {
     if (pCommand->mCommand == kMetScreenCommandLeft) {
         int nIndex = mSelectedIdentity - 1;
@@ -275,7 +264,6 @@ void MetFreqCreateScreen::StepSelection(const MetScreenCommand *pCommand) {
     RefreshSelection();
 }
 
-// NTSC-U/C: 0x0029cbb8, PAL: 0x002ba5a0
 void MetFreqCreateScreen::RefreshSelection() {
     Rnd::Mat *pMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr(kPreviewMaterial)));
     (*mIdentities)[mSelectedIdentity]->AttachToBurnSlot(kPreviewBurnSlot);

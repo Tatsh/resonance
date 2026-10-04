@@ -55,7 +55,6 @@ const ShiftJisSymbol g_aShiftJisSymbols[kShiftJisSymbolCount + 1] = {
 const ShiftJisRange g_aShiftJisRanges[kShiftJisRangeCount] = {
     {0x824f, '0'}, {0x8260, 'A'}, {0x8281, 'a'}};
 
-// NTSC-U/C: 0x00556750, PAL: 0x005978a8
 char DecodeShiftJisCharacter(const char *pShiftJis) {
     const unsigned char nTrail = static_cast<unsigned char>(pShiftJis[1]);
     const unsigned char nLead = static_cast<unsigned char>(pShiftJis[0]);
@@ -79,7 +78,6 @@ char DecodeShiftJisCharacter(const char *pShiftJis) {
     return '\0';
 }
 
-// NTSC-U/C: 0x00556818, PAL: 0x00597970
 unsigned short EncodeShiftJisCharacter(unsigned char cAscii) {
     int nSymbol = kNoSymbol;
     int nRange = kRangeDigits;
@@ -109,7 +107,6 @@ unsigned short EncodeShiftJisCharacter(unsigned char cAscii) {
     return static_cast<unsigned short>(range.mShiftJisBase + cAscii - range.mAsciiBase);
 }
 
-// NTSC-U/C: 0x00556928, PAL: 0x00597a80
 void ShiftJisToAscii(const char *pszShiftJis, char *pszAscii) {
     const int nCount = strlen(pszShiftJis) / 2;
     int i = 0;
@@ -125,7 +122,6 @@ void ShiftJisToAscii(const char *pszShiftJis, char *pszAscii) {
     pszAscii[i] = '\0';
 }
 
-// NTSC-U/C: 0x00556a20, PAL: 0x00597b78
 void AsciiToShiftJis(const char *pszAscii, char *pszDest) {
     const int nLength = strlen(pszAscii);
     int i = 0;

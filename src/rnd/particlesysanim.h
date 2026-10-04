@@ -205,15 +205,34 @@ protected:
     void SetFramesOwner(ParticleSysAnim *pOwner);
 
 private:
-    // Empty the three channels unless this animation owns its frames. Load() and SetFramesOwner()
-    // inline it. 0x0052c758.
+    /**
+     * Empty the three channels unless this animation owns its frames.
+     *
+     * Load() and SetFramesOwner() inline it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0052c758
+     * @ghidraAddress PAL: 0x0056cdd0
+     */
     void ClearKeys();
 
-    // Register this animation as a referrer of mParticleSys and mFramesOwner. Load() inlines it.
-    // NTSC-U/C: 0x0052c868, PAL: 0x0056cee0
+    /**
+     * Register this animation as a referrer of mParticleSys and mFramesOwner.
+     *
+     * Load() inlines it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0052c868
+     * @ghidraAddress PAL: 0x0056cee0
+     */
     void AddRefObjects();
 
-    // Drop the references AddRefObjects() took. The destructor calls it. 0x0052c818.
+    /**
+     * Drop the references AddRefObjects() took.
+     *
+     * The destructor calls it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0052c818
+     * @ghidraAddress PAL: 0x0056ce90
+     */
     void ReleaseObjects();
 
     // No class derives from Rnd::ParticleSysAnim and no access from outside it is recovered, so

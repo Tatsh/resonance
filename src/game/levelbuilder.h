@@ -91,12 +91,20 @@ public:
     virtual TrackData *OwnTrack();
 
     /**
+     * Return one track.
+     *
+     * The index is not tested against the collection.
+     *
      * @ghidraAddress NTSC-U/C: 0x001ec6f0
      * @ghidraAddress PAL: 0x001f2978
      */
     virtual TrackData *TrackAt(int nIndex);
 
     /**
+     * Return one backing track.
+     *
+     * The index is not tested against the collection.
+     *
      * @ghidraAddress NTSC-U/C: 0x001ec708
      * @ghidraAddress PAL: 0x001f2990
      */

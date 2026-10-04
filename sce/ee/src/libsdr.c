@@ -79,7 +79,6 @@ static int _sce_sdr_spu2IntrArg;
 // NTSC-U/C: 0x00765d38, PAL: 0x007a8cd0
 static sceSifEndFunc g_pfnSdrEndFunction;
 
-// NTSC-U/C: 0x00576fe0, PAL: 0x005b74a8
 int sceSdRemoteInit(void) {
     sceSifClientData *pClient = &g_sdrClient;
     int nBind;
@@ -106,7 +105,6 @@ int sceSdRemoteInit(void) {
     }
 }
 
-// NTSC-U/C: 0x00577120, PAL: 0x005b75e8
 int sceSdRemote(int nControl, ...) {
     SdrPacket *pPacket = &g_sdrPacket;
     sceSifClientData *pClient = &g_sdrClient;

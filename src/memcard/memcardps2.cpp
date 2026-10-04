@@ -7,15 +7,12 @@
 // `sceMcSync()` mode that reports the state of the current command without waiting for it.
 constexpr int kMemcardSyncCheck = 1;
 
-// NTSC-U/C: 0x0055e268, PAL: 0x0059f538
 MemcardPS2::MemcardPS2() {
 }
 
-// NTSC-U/C: 0x0055e300, PAL: 0x0059f5d0
 MemcardPS2::~MemcardPS2() {
 }
 
-// NTSC-U/C: 0x0055cfc0, PAL: 0x0059e208
 void MemcardPS2::Update() {
     if (mOps.empty()) {
         return;

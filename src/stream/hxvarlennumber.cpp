@@ -11,7 +11,6 @@ constexpr int kBitsPerByte = 8;
 
 } // namespace
 
-// NTSC-U/C: 0x00405ad8, PAL: 0x0043f3c8
 HxStream &HxVarLenNumber::Write(HxStream &stream) const {
     int nRemaining = mValue;
     int nPacked = nRemaining & kVarLenValueMask;
@@ -28,7 +27,6 @@ HxStream &HxVarLenNumber::Write(HxStream &stream) const {
     return stream;
 }
 
-// NTSC-U/C: 0x00405b70, PAL: 0x0043f460
 HxStream &HxVarLenNumber::Read(HxStream &stream) {
     mValue = 0;
     unsigned char byte;

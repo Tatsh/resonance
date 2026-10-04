@@ -61,8 +61,12 @@ public:
     void Play();
 
 private:
-    // Hands every wrapper from mCursor to the end to Scheduler::QueueReplayed().
-    // NTSC-U/C: 0x00596330, PAL: 0x005d9738
+    /**
+     * Hands every wrapper from mCursor to the end to Scheduler::QueueReplayed().
+     *
+     * @ghidraAddress NTSC-U/C: 0x00596330
+     * @ghidraAddress PAL: 0x005d9738
+     */
     void QueueRemaining();
 
     std::vector<Sch::TimedCommand *> mCommands;         // +0x00

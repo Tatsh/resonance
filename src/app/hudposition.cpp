@@ -62,7 +62,6 @@ inline void ScaleBlock(Rnd::Mesh *pBlock, float flScale) {
 
 } // namespace
 
-// NTSC-U/C: 0x00419f88, PAL: 0x00454740
 HudPosition::HudPosition(PlayMap *pPlayMap)
     : mPlayMap(pPlayMap), mCurrentSection(kNoSection), mBar(kNoBar), mUnusedWord(0) {
     const char *pszLayout =
@@ -129,7 +128,6 @@ HudPosition::HudPosition(PlayMap *pPlayMap)
     mView->AddTrans(mRepeatView);
 }
 
-// NTSC-U/C: 0x0041ac18, PAL: 0x00455550
 HudPosition::~HudPosition() {
     for (std::vector<Section>::iterator it = mSections.begin(); it != mSections.end(); ++it) {
         delete it->mBlock;
@@ -139,7 +137,6 @@ HudPosition::~HudPosition() {
     mView->SetOrigin(&origin.x);
 }
 
-// NTSC-U/C: 0x0041ad88, PAL: 0x004556c0
 void HudPosition::Update() {
     int nCurrent = kNoSection;
     if (mBar >= 0) {

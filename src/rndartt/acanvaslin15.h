@@ -127,6 +127,8 @@ public:
     /**
      * Slot 47.
      *
+     * The key is compared against the low byte of the transparent colour.
+     *
      * @ghidraAddress NTSC-U/C: 0x00618b00
      * @ghidraAddress PAL: 0x00659690
      */
@@ -151,6 +153,8 @@ public:
     /**
      * Slot 75.
      *
+     * The key is compared against the low byte of the transparent colour.
+     *
      * @ghidraAddress NTSC-U/C: 0x00619280
      * @ghidraAddress PAL: 0x00659e10
      */
@@ -158,6 +162,9 @@ public:
 
     /**
      * Slot 79.
+     *
+     * The key is compared against the whole transparent colour word, where
+     * DrawScaledClutBitmapRowLin8U() compares its low byte.
      *
      * @ghidraAddress NTSC-U/C: 0x00619360
      * @ghidraAddress PAL: 0x00659ef0

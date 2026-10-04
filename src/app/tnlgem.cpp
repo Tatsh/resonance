@@ -52,7 +52,6 @@ inline void GetGemXfm(const TnlGem &gem, Transform &xfm) {
 
 } // namespace
 
-// NTSC-U/C: 0x00415790, PAL: 0x0044f2e0
 TnlGem::TnlGem(char nKind,
                char nTrack,
                char nColor,
@@ -65,7 +64,6 @@ TnlGem::TnlGem(char nKind,
       mExpireFrame(kNeverExpire), mMeshKind(nullptr), mEffectKind(nullptr) {
 }
 
-// NTSC-U/C: 0x00411e38, PAL: 0x0044b918
 float TnlGem::Place(TnlGemManager *pManager, float flFrame) {
     if (!(mKind & TnlGemManager::kEffectKindBase)) {
         if (!mMeshKind) {
@@ -103,7 +101,6 @@ float TnlGem::Place(TnlGemManager *pManager, float flFrame) {
     return mEffectKind->mCost;
 }
 
-// NTSC-U/C: 0x004157e8, PAL: 0x0044f338
 void TnlGem::Release() {
     if (mMeshKind) {
         mMeshKind->mMesh->GetTransforms().erase(mInstance);
@@ -114,7 +111,6 @@ void TnlGem::Release() {
     }
 }
 
-// NTSC-U/C: 0x00415868, PAL: 0x0044f3b8
 void TnlGem::Flash(AppTunnel *pTunnel) {
     if (mMeshKind) {
         pTunnel->StartGemFlash(mInstance->mTranslation);
@@ -123,7 +119,6 @@ void TnlGem::Flash(AppTunnel *pTunnel) {
     }
 }
 
-// NTSC-U/C: 0x00411d30, PAL: 0x0044b810
 std::ostream &operator<<(std::ostream &stream, const TnlGem &gem) {
     stream << '[' << gem.mKind << ' ' << gem.mTrack << ' ' << gem.mFrame << ' ' << gem.mBlend
            << " (" << gem.mAppearFrame << ' ' << gem.mExpireFrame << ")]";

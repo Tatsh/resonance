@@ -49,16 +49,13 @@ static const char *const kNoName = "";
 
 } // namespace
 
-// NTSC-U/C: 0x00140580, PAL: 0x00140f60
 CampaignStats::CampaignStats() {
     ResetCounters();
 }
 
-// NTSC-U/C: 0x00140768, PAL: 0x00141148
 CampaignStats::~CampaignStats() {
 }
 
-// NTSC-U/C: 0x00145110, PAL: 0x00145c28
 void CampaignStats::Save(OBStream &stream) {
     int nVersion = kRecordVersion;
     stream.WriteLE(&nVersion, sizeof(nVersion));
@@ -71,7 +68,6 @@ void CampaignStats::Save(OBStream &stream) {
     }
 }
 
-// NTSC-U/C: 0x00141ed8, PAL: 0x001429c8
 void CampaignStats::Load(IBStream &stream) {
     stream.ReadLE(&g_nStatsRecordVersion, sizeof(g_nStatsRecordVersion));
 
@@ -86,17 +82,14 @@ void CampaignStats::Load(IBStream &stream) {
     MergeLevelList();
 }
 
-// NTSC-U/C: 0x00144f08, PAL: 0x00145a20
 int CampaignStats::GetLevelBeaten(int nDifficulty, const HxStr &name) {
     return mLevels[FindLevelIndex(name)].mSkills[nDifficulty].mBeaten;
 }
 
-// NTSC-U/C: 0x00144ca8, PAL: 0x001457c0
 int CampaignStats::GetLevelHighScore(int nDifficulty, const HxStr &name) {
     return mLevels[FindLevelIndex(name)].mSkills[nDifficulty].mHighScore;
 }
 
-// NTSC-U/C: 0x00141798, PAL: 0x00142210
 void CampaignStats::RecordLevelBeaten(int nDifficulty, const HxStr &name) {
     int nIndex = FindLevelIndex(name);
     int nStage = GetAlbumLevelStage(name);
@@ -110,7 +103,6 @@ void CampaignStats::RecordLevelBeaten(int nDifficulty, const HxStr &name) {
     UpdateUnlockLevel();
 }
 
-// NTSC-U/C: 0x00144d68, PAL: 0x00145880
 void CampaignStats::RecordHighScore(int nDifficulty, const HxStr &name, int nScore) {
     SkillStats &skill = mLevels[FindLevelIndex(name)].mSkills[nDifficulty];
     if (skill.mHighScore < nScore) {
@@ -119,17 +111,14 @@ void CampaignStats::RecordHighScore(int nDifficulty, const HxStr &name, int nSco
     }
 }
 
-// NTSC-U/C: 0x00145028, PAL: 0x00145b40
 int CampaignStats::GetStageScoreBeaten(int nDifficulty, int nStage) {
     return mStageScoreBeaten[nDifficulty][nStage - kFirstStage];
 }
 
-// NTSC-U/C: 0x00145048, PAL: 0x00145b60
 int CampaignStats::GetStageScore(int nDifficulty, int nStage) {
     return mStageScores[nDifficulty][nStage - kFirstStage];
 }
 
-// NTSC-U/C: 0x00144e58, PAL: 0x00145970
 int CampaignStats::IsStageComplete(int nDifficulty, int nStage) {
     if ((nDifficulty == kDifficultyEasy && nStage > kEasyLastStage) ||
         (nDifficulty == kDifficultyNormal && nStage > kNormalLastStage) ||
@@ -143,7 +132,6 @@ int CampaignStats::IsStageComplete(int nDifficulty, int nStage) {
     return mStageCompleted[nDifficulty][nStage - kFirstStage] >= nRequired;
 }
 
-// NTSC-U/C: 0x00140d40, PAL: 0x00141740
 int CampaignStats::IsDifficultyComplete(int nDifficulty) {
     int nStageCount = nDifficulty + kEasyLastStage;
     int nComplete = 0;
@@ -164,7 +152,6 @@ int CampaignStats::IsDifficultyComplete(int nDifficulty) {
     return bComplete;
 }
 
-// NTSC-U/C: 0x00141690, PAL: 0x001420e8
 HxStr CampaignStats::GetBonusLevelName(int nDifficulty, int nStage) {
     int nCount = GetStageList(nStage)->size();
     int nBonus = GetAlbumLevelValue(nStage - kFirstStage, nDifficulty);
@@ -175,7 +162,6 @@ HxStr CampaignStats::GetBonusLevelName(int nDifficulty, int nStage) {
     return name;
 }
 
-// NTSC-U/C: 0x001410f0, PAL: 0x00141b10
 int CampaignStats::IsSuperSecretUnlocked() {
     int bUnlocked = 0;
     if (!IsSecretUnlocked()) {
@@ -189,7 +175,6 @@ int CampaignStats::IsSuperSecretUnlocked() {
     return bUnlocked;
 }
 
-// NTSC-U/C: 0x00141b90, PAL: 0x00142648
 void CampaignStats::RecountStageCompleted(int nDifficulty, int nStage) {
     std::vector<int> &levels = mStageLevels[nStage - kFirstStage];
     int nCount = levels.size();
@@ -205,7 +190,6 @@ void CampaignStats::RecountStageCompleted(int nDifficulty, int nStage) {
     mStageCompleted[nDifficulty][nStage - kFirstStage] = nBeaten;
 }
 
-// NTSC-U/C: 0x00141898, PAL: 0x00142310
 void CampaignStats::RecountStageScore(int nDifficulty, int nStage) {
     if (nStage > kLastRegularStage) {
         return;
@@ -230,7 +214,6 @@ void CampaignStats::RecountStageScore(int nDifficulty, int nStage) {
     }
 }
 
-// NTSC-U/C: 0x00141cb8, PAL: 0x00142780
 int CampaignStats::UpdateUnlockLevel() {
     int nLevel = mStageLevelCounts[kFirstStageIndex] > kManyLevelsThreshold ? kManyLevelsUnlock :
                                                                               kFewLevelsUnlock;
@@ -270,7 +253,6 @@ int CampaignStats::UpdateUnlockLevel() {
     return nLevel;
 }
 
-// NTSC-U/C: 0x00140a68, PAL: 0x00141448
 void CampaignStats::ResetCounters() {
     for (int i = 0; i < kStageCount; ++i) {
         mStageLevelCounts[i] = 0;
@@ -291,7 +273,6 @@ void CampaignStats::ResetCounters() {
     RecountAll();
 }
 
-// NTSC-U/C: 0x00145068, PAL: 0x00145b80
 void CampaignStats::RecountAll() {
     RebuildStageLevels();
     for (int nStage = kFirstStage; nStage <= kLastRegularStage; ++nStage) {
@@ -305,7 +286,6 @@ void CampaignStats::RecountAll() {
     UpdateUnlockLevel();
 }
 
-// NTSC-U/C: 0x00140b40, PAL: 0x00141520
 void CampaignStats::RebuildStageLevels() {
     for (int i = 0; i < kIndexedStageCount; ++i) {
         mStageLevels[i].erase(mStageLevels[i].begin(), mStageLevels[i].end());
@@ -322,7 +302,6 @@ void CampaignStats::RebuildStageLevels() {
     }
 }
 
-// NTSC-U/C: 0x00144c38, PAL: 0x00145750
 int CampaignStats::IsLevelListed(const HxStr &name) {
     std::vector<HxStr>::iterator end = GetLevelNames().end();
     for (std::vector<HxStr>::iterator it = GetLevelNames().begin(); it != end; ++it) {
@@ -333,7 +312,6 @@ int CampaignStats::IsLevelListed(const HxStr &name) {
     return 0;
 }
 
-// NTSC-U/C: 0x00140908, PAL: 0x001412e8
 void CampaignStats::RebuildLevelList() {
     mLevels.clear();
     LevelStats level;
@@ -348,7 +326,6 @@ void CampaignStats::RebuildLevelList() {
     }
 }
 
-// NTSC-U/C: 0x00142070, PAL: 0x00142b60
 void CampaignStats::MergeLevelList() {
     std::vector<HxStr>::iterator end = GetLevelNames().end();
     for (std::vector<HxStr>::iterator it = GetLevelNames().begin(); it != end; ++it) {
@@ -369,7 +346,6 @@ void CampaignStats::MergeLevelList() {
     RecountAll();
 }
 
-// NTSC-U/C: 0x00140ef8, PAL: 0x00141918
 int CampaignStats::IsStageCompleteAtAnyDifficulty(int nStage) {
     if (nStage < kThirdStage) {
         return IsStageComplete(kDifficultyEasy, nStage) ||
@@ -386,7 +362,6 @@ int CampaignStats::IsStageCompleteAtAnyDifficulty(int nStage) {
     return 0;
 }
 
-// NTSC-U/C: 0x00141578, PAL: 0x00141fd0
 int CampaignStats::IsLastLevelRemaining(const GameParams &params) {
     const int nDifficulty = params.mDifficulty;
     if (mLevels[FindLevelIndex(params.mLevelName)].mSkills[nDifficulty].mBeaten != 0) {
@@ -401,7 +376,6 @@ int CampaignStats::IsLastLevelRemaining(const GameParams &params) {
     return nCompleted == nLevels - 1;
 }
 
-// NTSC-U/C: 0x00142288, PAL: 0x00142d78
 void CampaignStats::Assign(const CampaignStats &other) {
     mLevels.clear();
     mLevels.resize(other.mLevels.size(), LevelStats());
@@ -411,7 +385,6 @@ void CampaignStats::Assign(const CampaignStats &other) {
     RecountAll();
 }
 
-// NTSC-U/C: 0x001451e0, PAL: 0x00145cf8
 void CampaignStats::PrintLevels(std::ostream &stream) {
     for (unsigned i = 0; i < mLevels.size(); ++i) {
         std::ostream &line = stream << "levels[" << static_cast<int>(i) << "]";

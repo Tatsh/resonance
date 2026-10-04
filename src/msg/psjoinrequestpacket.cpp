@@ -2,38 +2,30 @@
 
 #include <iostream>
 
-// NTSC-U/C: 0x003eef50, PAL: 0x004274a0
 PSJoinRequestPacket::PSJoinRequestPacket() {
 }
 
-// NTSC-U/C: 0x003e4a98, PAL: 0x0041ccc8
 Message *PSJoinRequestPacket::New() {
     return new PSJoinRequestPacket;
 }
 
-// NTSC-U/C: 0x003f1f38, PAL: 0x0042a480
 void PSJoinRequestPacket::PrintExtra(std::ostream &stream) const {
     mAppearance.Print(stream);
 }
 
-// NTSC-U/C: 0x003eeeb8, PAL: 0x00427408
-// Clone allocates and hands off to the copy constructor at 0x003f2dc0, which is
-// the compiler expanding the implicit one.
 Message *PSJoinRequestPacket::Clone() {
+    // The copy constructor at 0x003f2dc0 is the compiler expanding the implicit one.
     return new PSJoinRequestPacket(*this);
 }
 
-// NTSC-U/C: 0x003eef30, PAL: 0x00427480
 int PSJoinRequestPacket::Type() {
     return g_nPSJoinRequestPacketType;
 }
 
-// NTSC-U/C: 0x003eef40, PAL: 0x00427490
 const char *PSJoinRequestPacket::GetName() const {
     return "PSJoinRequestPacket";
 }
 
-// NTSC-U/C: 0x003e5538, PAL: 0x0041d7e0
 void PSJoinRequestPacket::saveGuts(OBStream &stream) const {
     int destination = mDestination;
     stream.WriteLE(&destination, sizeof(destination));
@@ -54,7 +46,6 @@ void PSJoinRequestPacket::saveGuts(OBStream &stream) const {
     stream.WriteLE(&clientIdAgain, sizeof(clientIdAgain));
 }
 
-// NTSC-U/C: 0x003e5638, PAL: 0x0041d8e0
 void PSJoinRequestPacket::restoreGuts(IBStream &stream) {
     stream.ReadLE(&mDestination, sizeof(mDestination));
     stream.ReadLE(&mDestinationSystem, sizeof(mDestinationSystem));

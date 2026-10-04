@@ -200,14 +200,24 @@ public:
     static void StartSave(const std::vector<HxStr> &screens);
 
 private:
-    // NTSC-U/C: 0x00282048, PAL: 0x0029bda0
-    // Replace mReturnScreens with the screens to return to.
+    /**
+     * Replace mReturnScreens with the screens to return to.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00282048
+     * @ghidraAddress PAL: 0x0029bda0
+     */
     void SetReturnScreens(const std::vector<HxStr> &screens);
 
-    // NTSC-U/C: 0x002820a8, PAL: 0x00295540
-    // Become the memory card manager's user and request the state of the card
-    // GlobalSettings records. The North American OnMsgScreenDismissed() expands it. The European
-    // release enquires about port 1 whatever card GlobalSettings records.
+    /**
+     * Become the memory card manager's user and request the state of the card GlobalSettings
+     * records.
+     *
+     * The North American OnMsgScreenDismissed() expands it. The European release enquires about
+     * port 1 whatever card GlobalSettings records.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002820a8
+     * @ghidraAddress PAL: 0x00295540
+     */
     void RequestConnectState();
 
     // Raise `mem_format_check` with NO and YES for the card the state describes. OnConnectState()

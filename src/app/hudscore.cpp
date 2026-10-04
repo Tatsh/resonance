@@ -28,7 +28,6 @@ constexpr float kScoreChangeLongAgo = -100000.0f;
 
 } // namespace
 
-// NTSC-U/C: 0x00419618, PAL: 0x00453b10
 HudScore::HudScore(Player *pPlayer, int nIndex) : mText(nullptr) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
@@ -52,7 +51,6 @@ HudScore::HudScore(Player *pPlayer, int nIndex) : mText(nullptr) {
     mChangeTime = kScoreChangeLongAgo;
 }
 
-// NTSC-U/C: 0x0042a220, PAL: 0x00454120
 void HudScore::Update(float flTime) {
     if (mChangeTime == kScoreDrawn) {
         return;

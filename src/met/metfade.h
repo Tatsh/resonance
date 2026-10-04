@@ -122,9 +122,29 @@ public:
 #endif
 
 private:
-    // NTSC-U/C: 0x0016a2d0, PAL: 0x0016c4f0
+    /**
+     * Darken the rectangle for one frame of the fade out.
+     *
+     * At the end frame it removes the fade view, hides the rectangle, and notifies the user through
+     * OnFadeOutDone(). The European release also clears g_nFadeRunning. The North American release
+     * shows the rectangle again after hiding it.
+     *
+     * @param frame The current frame.
+     * @ghidraAddress NTSC-U/C: 0x0016a2d0
+     * @ghidraAddress PAL: 0x0016c4f0
+     */
     void UpdateOut(float frame);
-    // NTSC-U/C: 0x0016a468, PAL: 0x0016c708
+    /**
+     * Lighten the rectangle for one frame of the fade in.
+     *
+     * At the end frame it removes the fade view and hides the rectangle unless the view is
+     * retained, and notifies the user through OnFadeInDone(). The European release also clears
+     * g_nFadeRunning. The North American release shows the rectangle again after hiding it.
+     *
+     * @param frame The current frame.
+     * @ghidraAddress NTSC-U/C: 0x0016a468
+     * @ghidraAddress PAL: 0x0016c708
+     */
     void UpdateIn(float frame);
 
     float outStart_; // 1.0e9 while no fade out runs.

@@ -69,7 +69,6 @@ inline long long FrameClockNs(Sch::Scheduler *pWatchdog) {
 // NTSC-U/C: 0x00694740, PAL: 0x006d5a48
 MainLoop *g_pMainLoop;
 
-// NTSC-U/C: 0x001ec998, PAL: 0x001f2c20
 MainLoop::MainLoop(int nInCharge, Sch::Scheduler *pWatchdog, GameManagerImpl *pGameManager) {
     // The call passes 1. The value selects virtual-base setup the compiler emits. The body
     // does not use the flag.
@@ -92,14 +91,12 @@ MainLoop::MainLoop(int nInCharge, Sch::Scheduler *pWatchdog, GameManagerImpl *pG
     UpdateCallbackTime();
 }
 
-// NTSC-U/C: 0x001ef158, PAL: 0x001f54f8
 MainLoop::~MainLoop() {
     g_pMainLoop = nullptr;
     SetLongOperationPollProc(nullptr);
     // Yes, the binary retains the redraw callback.
 }
 
-// NTSC-U/C: 0x001ef290, PAL: 0x001f5630
 void MainLoop::Run() {
     mRunning = 1;
     do {
@@ -107,25 +104,21 @@ void MainLoop::Run() {
     } while (mRunning != 0);
 }
 
-// NTSC-U/C: 0x001ef2e0, PAL: 0x001f5680
 void MainLoop::UpdateCallbackTime() {
     mNextDeadlineNs = mNextWatchdogPollNs < mNextBankPollNs ? mNextWatchdogPollNs : mNextBankPollNs;
 }
 
-// NTSC-U/C: 0x001ef3d0, PAL: 0x001f5770
 void MainLoop::FirePollTimer(long long nNowNs) {
     mNextBankPollNs = nNowNs + kTimerPeriodNs;
     mGameManager->PollPlayback();
 }
 
-// NTSC-U/C: 0x001ef398, PAL: 0x001f5738
 void MainLoop::SchCallback(long long nNowNs) {
     mNextWatchdogPollNs = nNowNs + kTimerPeriodNs;
     mWatchdog->Service();
     PollSynthEvents();
 }
 
-// NTSC-U/C: 0x001ef308, PAL: 0x001f56a8
 void MainLoop::Callback(long long nNowNs) {
     if (nNowNs >= mNextBankPollNs) {
         FirePollTimer(nNowNs);
@@ -136,29 +129,24 @@ void MainLoop::Callback(long long nNowNs) {
     UpdateCallbackTime();
 }
 
-// NTSC-U/C: 0x001ef230, PAL: 0x001f55d0
 void MainLoop::Resume() {
     mFlushFrame = kFlushFrameNever;
     mWatchdog->Flush();
 }
 
-// NTSC-U/C: 0x001ef260, PAL: 0x001f5600
 void MainLoop::Step(int nFrames) {
     mFlushFrame = mFrameCount + nFrames;
     mWatchdog->Flush();
 }
 
-// NTSC-U/C: 0x001ef118, PAL: 0x001f54b8
 float MainLoop::Progress() {
     return 0.0f;
 }
 
-// NTSC-U/C: 0x001ef128, PAL: 0x001f54c8
 HxStr MainLoop::Name() const {
     return HxStr("");
 }
 
-// NTSC-U/C: 0x001ecc90, PAL: 0x001f2f98
 int MainLoop::Poll() {
     s_qwElapsedMs = GetElapsedMilliseconds();
 
@@ -193,11 +181,9 @@ int MainLoop::Poll() {
     return 1;
 }
 
-// NTSC-U/C: 0x001ef410, PAL: 0x001f57b0
 void MainLoop::PostDraw() {
 }
 
-// NTSC-U/C: 0x001ec7d0, PAL: 0x001f2a58
 void MainLoop::PumpTimers() {
     ++s_nPollTicks;
     if (s_pPumpedLoop == nullptr) {
@@ -210,7 +196,6 @@ void MainLoop::PumpTimers() {
     }
 }
 
-// NTSC-U/C: 0x001ec8c0, PAL: 0x001f2b48
 void MainLoop::KeepAliveDraw() {
     long long nNowMs = GetElapsedMilliseconds();
     if (nNowMs - s_qwLastKeepAliveMs < kKeepAliveIntervalMs) {

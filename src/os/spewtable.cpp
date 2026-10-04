@@ -21,16 +21,13 @@ inline void LowerCase(HxStr &text) {
 
 } // namespace
 
-// NTSC-U/C: 0x004b32b8, PAL: 0x004f14f8
 SpewTable::SpewTable() {
 }
 
-// NTSC-U/C: 0x004b32e8, PAL: 0x004f1528
 SpewTable::~SpewTable() {
     CloseChannels();
 }
 
-// NTSC-U/C: 0x004b3528, PAL: 0x004f1790
 void SpewTable::Register(std::ostream **ppStream, const char *pszFile) {
     HxStr name(pszFile);
     int nPos = name.ReverseFind('.');
@@ -45,7 +42,6 @@ void SpewTable::Register(std::ostream **ppStream, const char *pszFile) {
     mConnections.push_back(Connection(name, ppStream, nullptr));
 }
 
-// NTSC-U/C: 0x004b36b8, PAL: 0x004f1960
 void SpewTable::Connect(const HxStr &file, const HxStr &channel) {
     Channel *pChannel = nullptr;
     HxStr channelName(channel);
@@ -73,7 +69,6 @@ void SpewTable::Connect(const HxStr &file, const HxStr &channel) {
     }
 }
 
-// NTSC-U/C: 0x004b3898, PAL: 0x004f1b80
 SpewTable::Channel *SpewTable::NewChannel(const HxStr &name) {
     std::ostream *pStream = nullptr;
     if (name == kChannelOff) {
@@ -88,7 +83,6 @@ SpewTable::Channel *SpewTable::NewChannel(const HxStr &name) {
     return new Channel(name, pStream);
 }
 
-// NTSC-U/C: 0x004b3448, PAL: 0x004f16a0
 void SpewTable::CloseChannels() {
     for (Channel *pChannel : mChannels) {
         if (pChannel == nullptr) {
@@ -104,7 +98,6 @@ void SpewTable::CloseChannels() {
     mChannels.erase(mChannels.begin(), mChannels.end());
 }
 
-// NTSC-U/C: 0x004b4550, PAL: 0x004f2860
 void SpewTable::PrintConnections(std::ostream &stream) {
     for (const auto &connection : mConnections) {
         stream << connection.mFile;

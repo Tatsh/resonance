@@ -493,12 +493,25 @@ private:
     // caller. A text run with no font measures nothing.
     float MeasureRun(const char *pText, int nCount);
 
-    // Drop the reference on the font and release the glyph mesh. The destructor is its only
-    // out-of-line caller, and Copy() and BuildGlyphMesh() inline the same body. 0x004cf958.
+    /**
+     * Drop the reference on the font and release the glyph mesh.
+     *
+     * The destructor is its only out-of-line caller, and Copy() and BuildGlyphMesh() inline the
+     * same body.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004cf958
+     * @ghidraAddress PAL: 0x0050dcd0
+     */
     void ReleaseObjects();
 
-    // Take a reference on the font and rebuild. Copy() and Load() inline the same body.
-    // NTSC-U/C: 0x004cf9b8, PAL: 0x0050dd30
+    /**
+     * Take a reference on the font and rebuild.
+     *
+     * Copy() and Load() inline the same body.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004cf9b8
+     * @ghidraAddress PAL: 0x0050dd30
+     */
     void AddRefObjects();
 
     // Declared in recovered offset order. Every member but mWrapWidth and mPreWrapText is private:

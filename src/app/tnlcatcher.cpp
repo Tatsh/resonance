@@ -32,7 +32,6 @@ T *FindObject(const HxStr &name) {
 
 } // namespace
 
-// NTSC-U/C: 0x00439958, PAL: 0x004757f8
 TnlCatcher::TnlCatcher(const HxStr &colorName)
     : mView(nullptr), mTarget(0), mMultiplied(0), mUnusedWord(0), mUpdateCount(kIdleCount),
       mHitCount(kIdleCount) {
@@ -52,7 +51,6 @@ TnlCatcher::TnlCatcher(const HxStr &colorName)
     ResetTargets();
 }
 
-// NTSC-U/C: 0x00455268, PAL: 0x00492798
 void TnlCatcher::SetMultiplied(int nMultiplied) {
     mMultiplied = nMultiplied;
     if (nMultiplied) {
@@ -63,14 +61,12 @@ void TnlCatcher::SetMultiplied(int nMultiplied) {
     mMat->SyncMat(0);
 }
 
-// NTSC-U/C: 0x004553c0, PAL: 0x004928f0
 void TnlCatcher::ResetTargets() {
     for (int i = 0; i < kTargetCount; ++i) {
         mTargets[i]->SetMat(mUpMat);
     }
 }
 
-// NTSC-U/C: 0x00455330, PAL: 0x00492860
 void TnlCatcher::Hit(int nTarget) {
     if (!mView->GetShowing()) {
         return;
@@ -81,18 +77,15 @@ void TnlCatcher::Hit(int nTarget) {
     mHitCount = 0;
 }
 
-// NTSC-U/C: 0x00455238, PAL: 0x00492768
 void TnlCatcher::SetAlpha(float flAlpha) {
     mMat->SetAlpha(flAlpha);
 }
 
-// NTSC-U/C: 0x004552d8, PAL: 0x00492808
 void TnlCatcher::AttachTo(Rnd::View *pParent) {
     pParent->AddTrans(mView);
     pParent->AddDraw(mView, nullptr);
 }
 
-// NTSC-U/C: 0x00455418, PAL: 0x00492948
 void TnlCatcher::Update(float flFrame) {
     if (mMultiplied) {
         mMultMovie->SetFrame(flFrame);

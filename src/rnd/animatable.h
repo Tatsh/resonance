@@ -992,16 +992,30 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
-    // NTSC-U/C: 0x00494cb0, PAL: 0x004d2b78
-    // Drops this object's reference on every mAnims entry, deletes every filter, and
-    // then empties mFilters. The destructor, Copy(), and Load() all invoke it. That shared use is
-    // what makes it a member rather than the destructor body alone.
+    /**
+     * Drops this object's reference on every mAnims entry, deletes every filter, and then empties
+     * mFilters.
+     *
+     * The destructor, Copy(), and Load() all invoke it. That shared use is what makes it a member
+     * rather than the destructor body alone.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00494cb0
+     * @ghidraAddress PAL: 0x004d2b78
+     */
     void ReleaseObjects();
-    // NTSC-U/C: 0x0049a7c0, PAL: 0x004d8728
-    // Only SetFrame() invokes this.
+    /**
+     * Only SetFrame() invokes this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0049a7c0
+     * @ghidraAddress PAL: 0x004d8728
+     */
     float FilterFrame(float flValue);
-    // NTSC-U/C: 0x0049a750, PAL: 0x004d86b8
-    // Only Copy() and Load() invoke this, and both inline it.
+    /**
+     * Only Copy() and Load() invoke this, and both inline it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0049a750
+     * @ghidraAddress PAL: 0x004d86b8
+     */
     void AcquireAnimsRefs();
 
     // Declared in recovered offset order. The animatables this one drives, each of which

@@ -131,7 +131,6 @@ constexpr bool kEnterTitlePlainInFrench = false;
 
 } // namespace
 
-// NTSC-U/C: 0x00349dc0, PAL: 0x00375678
 MetRemixLoadScreen::MetRemixLoadScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mList(nullptr), mThisDiscFont(nullptr), mOtherFont(nullptr), mButtons(nullptr) {
@@ -139,7 +138,6 @@ MetRemixLoadScreen::MetRemixLoadScreen(MetRenderer *pRenderer, int nPriority)
     mButtons = new MetButtonList;
 }
 
-// NTSC-U/C: 0x00349fc8, PAL: 0x003758e0
 void MetRemixLoadScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mButtons->Clear();
@@ -155,7 +153,6 @@ void MetRemixLoadScreen::ResolveContainerViews() {
     mOtherFont = dynamic_cast<Rnd::Font *>(Rnd::TheManager.Find(HxStr(kOtherFont)));
 }
 
-// NTSC-U/C: 0x0034a2a8, PAL: 0x00375c68
 void MetRemixLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -210,7 +207,6 @@ void MetRemixLoadScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x0034a748, PAL: 0x003761d0
 void MetRemixLoadScreen::ShowRowOnDataScreen(unsigned nIndex) {
     // Yes, the binary takes the registered screen without a cast check.
     MetRemixDataScreen *pDataScreen =
@@ -222,7 +218,6 @@ void MetRemixLoadScreen::ShowRowOnDataScreen(unsigned nIndex) {
     }
 }
 
-// NTSC-U/C: 0x0034a838, PAL: 0x003762e0
 void MetRemixLoadScreen::OnButtonRingMoved() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     if (mButtons->mSelected == kSavedButtonIndex) {
@@ -238,7 +233,6 @@ void MetRemixLoadScreen::OnButtonRingMoved() {
     ShowRowOnDataScreen(kFirstRow);
 }
 
-// NTSC-U/C: 0x0034b568, PAL: 0x00377138
 void MetRemixLoadScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     mHelpKeys.clear();
@@ -282,7 +276,6 @@ void MetRemixLoadScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x0034cbd0, PAL: 0x00378920
 void MetRemixLoadScreen::OnExitFinished() {
     mButtons->GetButton(kSavedButtonIndex)->SetShowing(0);
     mButtons->GetButton(kFactoryButtonIndex)->SetShowing(0);
@@ -333,7 +326,6 @@ void MetRemixLoadScreen::OnExitFinished() {
     }
 }
 
-// NTSC-U/C: 0x0034d8b0, PAL: 0x00379888
 int MetRemixLoadScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     // The catalogue pointer is not tested for null here, unlike in the two sound overrides.
     if (static_cast<unsigned>(nItem) < mRemixes->size()) {
@@ -347,38 +339,32 @@ int MetRemixLoadScreen::ProvideText(int nItem, int, Rnd::Text *pText, int) {
     return 1;
 }
 
-// NTSC-U/C: 0x00352588, PAL: 0x0037e6f8
 int MetRemixLoadScreen::ProvideMesh(int, int, Rnd::Mesh *, int) {
     return 1;
 }
 
-// NTSC-U/C: 0x00352590, PAL: 0x0037e700
 MetRemixLoadScreen *MetRemixLoadScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetRemixLoadScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x00352618, PAL: 0x0037e788
 MetRemixLoadScreen::~MetRemixLoadScreen() {
     delete mList;
     mList = nullptr;
     delete mButtons;
 }
 
-// NTSC-U/C: 0x003526d0, PAL: 0x0037e840
 void MetRemixLoadScreen::PlaySlideSound(int nSelector) {
     if (mRemixes != nullptr && mRemixes->size() != 0) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x00352720, PAL: 0x0037e890
 void MetRemixLoadScreen::PlayHighSound(int nSelector) {
     if (mRemixes != nullptr && mRemixes->size() != 0) {
         MetScreen::PlayHighSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x00352770, PAL: 0x0037e8e0
 void MetRemixLoadScreen::OnEnterFinished() {
     ShowRowOnDataScreen(kFirstRow);
     MetHelpScreen::SelectPreset(MetText(kMetStrHRemixLoadOpt, kHelpLayout));

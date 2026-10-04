@@ -288,14 +288,12 @@ void LoadChainMaterials(Stream &stream, std::vector<LodMesh> &chains, int nCount
 
 } // namespace
 
-// NTSC-U/C: 0x00476a10, PAL: 0x004b4688
 void Tunnel::FindCollisions(const Segment &ray, std::list<Collision> &collisions) {
     for (LodMesh &chain : mCellChains) {
         chain.FindCollisions(ray, collisions);
     }
 }
 
-// NTSC-U/C: 0x00467f48, PAL: 0x004a5978
 void Tunnel::Update() {
     // Yes, the binary takes these references without releasing earlier ones. ReleaseRefs() is the
     // counterpart the callers run first.
@@ -313,7 +311,6 @@ void Tunnel::Update() {
     }
 }
 
-// NTSC-U/C: 0x00468020, PAL: 0x004a5a50
 void Tunnel::ReleaseRefs() {
     if (mPath != nullptr) {
         mPath->RemoveRef(this);
@@ -329,7 +326,6 @@ void Tunnel::ReleaseRefs() {
     ClearMaterialSectionLists();
 }
 
-// NTSC-U/C: 0x004680e0, PAL: 0x004a5b10
 void Tunnel::Replace(Object *pFrom, Object *pTo) {
     Drawable::Replace(pFrom, pTo);
     Animatable::Replace(pFrom, pTo);
@@ -355,7 +351,6 @@ void Tunnel::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// NTSC-U/C: 0x004682a8, PAL: 0x004a5cd8
 void Tunnel::Save(Stream &stream) {
     const int nRevision = kTunnelRevision;
     stream.WriteLE(&nRevision, sizeof(nRevision));
@@ -379,7 +374,6 @@ void Tunnel::Save(Stream &stream) {
     SaveSectionMaterials(stream);
 }
 
-// NTSC-U/C: 0x00468538, PAL: 0x004a5f68
 void Tunnel::Load(Stream &stream) {
     stream.ReadLE(&g_nTunnelLoadVersion, sizeof(g_nTunnelLoadVersion));
     if (g_nTunnelLoadVersion >= kTunnelRejectedRevision) {
@@ -418,7 +412,6 @@ void Tunnel::Load(Stream &stream) {
     LoadSectionMaterials(stream);
 }
 
-// NTSC-U/C: 0x00468a78, PAL: 0x004a64d8
 void Tunnel::SaveSectionMaterials(Stream &stream) {
     const int nCellCount = mCellChains.size();
     stream.WriteLE(&nCellCount, sizeof(nCellCount));
@@ -432,7 +425,6 @@ void Tunnel::SaveSectionMaterials(Stream &stream) {
     }
 }
 
-// NTSC-U/C: 0x00468da0, PAL: 0x004a6800
 void Tunnel::LoadSectionMaterials(Stream &stream) {
     int nCellCount = mCellChains.size();
     int nSliceCount = mSliceChains.size();
@@ -446,7 +438,6 @@ void Tunnel::LoadSectionMaterials(Stream &stream) {
     LoadChainMaterials(stream, mSliceChains, nSliceCount);
 }
 
-// NTSC-U/C: 0x00476788, PAL: 0x004b4400
 void Tunnel::Copy(const Object *pSource, unsigned nFlags) {
     // Yes, the binary dereferences the cast result without testing it.
     const Tunnel *pTunnel = dynamic_cast<const Tunnel *>(pSource);
@@ -471,7 +462,6 @@ void Tunnel::Copy(const Object *pSource, unsigned nFlags) {
     Update();
 }
 
-// NTSC-U/C: 0x004770d0, PAL: 0x004b4d48
 void Tunnel::SetPath(TransAnim *pPath) {
     if (mPath != nullptr) {
         mPath->RemoveRef(this);
@@ -486,7 +476,6 @@ void Tunnel::SetPath(TransAnim *pPath) {
     std::fill(mPlacedSlices.begin(), mPlacedSlices.end(), kNoSlice);
 }
 
-// NTSC-U/C: 0x004775b0, PAL: 0x004b5228
 void Tunnel::GetPathXfm(Transform *pOut, float flFrame) {
     if (mPath != nullptr) {
         mPath->EvalFrame(flFrame, &pOut->mBasisX.x, 1);
@@ -507,17 +496,14 @@ void Tunnel::GetPathXfm(Transform *pOut, float flFrame) {
     pOut->mTranslation.w = 1.0f;
 }
 
-// NTSC-U/C: 0x004772c8, PAL: 0x004b4f40
 void Tunnel::SetLaneChangeFrames(float flFrames) {
     mLaneChangeFrames = flFrames;
 }
 
-// NTSC-U/C: 0x00477298, PAL: 0x004b4f10
 TunnelSeeker *Tunnel::GetSeeker(unsigned nIndex) {
     return nIndex < mSeekers.size() ? &mSeekers[nIndex] : nullptr;
 }
 
-// NTSC-U/C: 0x0046cfd8, PAL: 0x004aab18
 void Tunnel::ResizeSeekers(unsigned nCount) {
     for (TunnelSeeker &seeker : mSeekers) {
         seeker.ReleaseRefs();
@@ -528,7 +514,6 @@ void Tunnel::ResizeSeekers(unsigned nCount) {
     }
 }
 
-// NTSC-U/C: 0x00477160, PAL: 0x004b4dd8
 void Tunnel::Configure(float flRingRadius,
                        int nRingCount,
                        int nSliceCount,
@@ -554,12 +539,10 @@ void Tunnel::Configure(float flRingRadius,
     }
 }
 
-// NTSC-U/C: 0x00476540, PAL: 0x004b41b8
 int Tunnel::FrameToSlice(float flFrame) {
     return static_cast<int>(floorf(flFrame * mSlicesPerFrame));
 }
 
-// NTSC-U/C: 0x00466620, PAL: 0x004a4050
 Tunnel::Tunnel(const HxStr &name)
     : Object(name), mRingRadius(1.0f), mRingCount(3), mSliceCount(0), mLodCount(2),
       mFloorPull(0.1f), mLaneEdgeGap(0.1f), mFloorEdgeWeight(0.25f), mCellEdgeBlendPerStep(0.01f),
@@ -572,23 +555,19 @@ Tunnel::Tunnel(const HxStr &name)
     Update();
 }
 
-// NTSC-U/C: 0x004676b0, PAL: 0x004a50e0
 Tunnel::~Tunnel() {
     ReleaseRefs();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x00476218, PAL: 0x004b3e90
 void *Tunnel::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kTunnelTag);
 }
 
-// NTSC-U/C: 0x00476238, PAL: 0x004b3eb0
 void Tunnel::operator delete(void *pBlock) {
     OperatorDeleteOverride(pBlock, kTunnelTag);
 }
 
-// NTSC-U/C: 0x0046da40, PAL: 0x004ab580
 void Tunnel::GetRingXfm(int nRing, Transform *pOut, float flFrame, float flBlend) {
     if (mPath == nullptr) {
         pOut->mBasisX.x = 1.0f;
@@ -618,7 +597,6 @@ void Tunnel::GetRingXfm(int nRing, Transform *pOut, float flFrame, float flBlend
     XfmConcat(&pOut->mBasisX.x, &anim.mBasisX.x, &pOut->mBasisX.x);
 }
 
-// NTSC-U/C: 0x00468850, PAL: 0x004a62b0
 int Tunnel::DrawShowing() {
     const int nEnd = mWindowStartSlice + mSliceCount - mCulledFarSlices;
     if (mDrawLattice != 0) {
@@ -649,7 +627,6 @@ int Tunnel::DrawShowing() {
     return 1;
 }
 
-// NTSC-U/C: 0x00469180, PAL: 0x004a6c40
 void Tunnel::SetFrameSelf(float flFrame) {
     float flEarliestOffset = 0.0f;
     for (const TunnelSeeker &seeker : mSeekers) {
@@ -714,7 +691,6 @@ void Tunnel::SetFrameSelf(float flFrame) {
     }
 }
 
-// NTSC-U/C: 0x004699c0, PAL: 0x004a74b8
 void Tunnel::BuildMesh() {
     std::vector<Mat *> cellMats(mCellChains.size(), nullptr);
     std::vector<Color> cellColors(mCellChains.size());
@@ -830,7 +806,6 @@ void Tunnel::BuildMesh() {
     }
 }
 
-// NTSC-U/C: 0x0046adc0, PAL: 0x004a88b8
 void Tunnel::BuildSliceMeshes() {
     mSliceChains.resize(mSliceCount, LodMesh());
     if (mSliceChains.empty()) {
@@ -895,7 +870,6 @@ void Tunnel::BuildSliceMeshes() {
     }
 }
 
-// NTSC-U/C: 0x0046b830, PAL: 0x004a9340
 void Tunnel::BuildLaneMeshes() {
     mSliceChains.resize(mRingCount * mSliceCount, LodMesh());
     if (mSliceChains.empty()) {
@@ -944,7 +918,6 @@ void Tunnel::BuildLaneMeshes() {
     }
 }
 
-// NTSC-U/C: 0x0046c0e8, PAL: 0x004a9c10
 void Tunnel::BuildCellMeshes() {
     mCellChains.resize(mRingCount * mSliceCount, LodMesh());
     if (mCellChains.empty()) {
@@ -976,7 +949,6 @@ void Tunnel::BuildCellMeshes() {
     }
 }
 
-// NTSC-U/C: 0x0046c638, PAL: 0x004aa178
 void Tunnel::SetRingSectionFrames() {
     Transform xfm;
     SetPaddingWords(xfm);
@@ -1070,7 +1042,6 @@ void Tunnel::SetRingSectionFrames() {
     }
 }
 
-// NTSC-U/C: 0x0046d788, PAL: 0x004ab2c8
 void Tunnel::SetLaneDividerColor(int nRing, int nSlice, const Color &color) {
     const int nColumns = mSliceSteps + 1;
     const int nPanelVerts = kPanelRows * nColumns;
@@ -1086,7 +1057,6 @@ void Tunnel::SetLaneDividerColor(int nRing, int nSlice, const Color &color) {
     pMesh->SyncChanged(Mesh::kSyncColors);
 }
 
-// NTSC-U/C: 0x0046d8e8, PAL: 0x004ab428
 void Tunnel::SetLaneFloorColor(const Color &color) {
     const int nColumns = mSliceSteps + 1;
     const int nPanelVerts = kPanelRows * nColumns;
@@ -1109,12 +1079,10 @@ void Tunnel::SetLaneFloorColor(const Color &color) {
 // NTSC-U/C: 0x006eab10, PAL: 0x0072e510
 HxStr g_tunnelClassName("Tunnel");
 
-// NTSC-U/C: 0x004763b8, PAL: 0x004b4030
 const HxStr &Tunnel::ClassName() const {
     return g_tunnelClassName;
 }
 
-// NTSC-U/C: 0x004768b8, PAL: 0x004b4530
 void Tunnel::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
@@ -1129,7 +1097,6 @@ void Tunnel::DumpText(Dbg &sink) {
     sink.Print("TODO\n");
 }
 
-// NTSC-U/C: 0x0046d180, PAL: 0x004aacc0
 void Tunnel::ApplyMeshLodScreenSizes(const std::vector<float> &screenSizes) {
     mLodScreenSizes = screenSizes;
     for (LodMesh &chain : mCellChains) {
@@ -1140,13 +1107,11 @@ void Tunnel::ApplyMeshLodScreenSizes(const std::vector<float> &screenSizes) {
     }
 }
 
-// NTSC-U/C: 0x0046acf0, PAL: 0x004a87e8
 void Tunnel::ClearMaterialSectionLists() {
     mSliceChains.clear();
     mCellChains.clear();
 }
 
-// NTSC-U/C: 0x0046db80, PAL: 0x004ab6c0
 void Tunnel::ProjectSectionToCameraSpace(
     int nRing, Transform *pOut, float flAnimFrame, float flRingBlend, float flTangentScale) {
     if (mPath == nullptr) {
@@ -1195,20 +1160,17 @@ void Tunnel::ProjectSectionToCameraSpace(
     XfmConcat(&pOut->mBasisX.x, &anim.mBasisX.x, &pOut->mBasisX.x);
 }
 
-// NTSC-U/C: 0x004773e8, PAL: 0x004b5060
 Mesh *Tunnel::GetRingSection(int nSlice) {
     return mSliceChains[WrapIndex(nSlice, mSliceCount)].front();
 }
 
-// NTSC-U/C: 0x00477388, PAL: 0x004b5000
 Mesh *Tunnel::GetRingSection(int nRing, int nSlice) {
     return mCellChains[WrapIndex(nSlice, mSliceCount) * mRingCount + WrapIndex(nRing, mRingCount)]
         .front();
 }
 
-// NTSC-U/C: 0x00477538, PAL: 0x004b51b0
-// A VU0 multiply and accumulate in the image, vmulax then vmaddx over xyz.
 void Tunnel::LerpRingSectionTangent(int nRing, Vector3 *pOut, float flWeight) {
+    // A VU0 multiply and accumulate in the image, vmulax then vmaddx over xyz.
     const Vector3 &next = mRingXfms[WrapIndex(nRing + 1, mRingCount)].mTranslation;
     const Vector3 &current = mRingXfms[nRing].mTranslation;
     const float flComplement = 1.0f - flWeight;
@@ -1218,7 +1180,6 @@ void Tunnel::LerpRingSectionTangent(int nRing, Vector3 *pOut, float flWeight) {
     pOut->w = next.w;
 }
 
-// NTSC-U/C: 0x00476f48, PAL: 0x004b4bc0
 void Tunnel::ScrollRings() {
     for (int nSlice = mWindowStartSlice; nSlice < mWindowStartSlice + mSliceCount; ++nSlice) {
         if (mPlacedSlices[WrapIndex(nSlice, mSliceCount)] != nSlice) {
@@ -1228,7 +1189,6 @@ void Tunnel::ScrollRings() {
     }
 }
 
-// NTSC-U/C: 0x00476fe0, PAL: 0x004b4c58
 void Tunnel::AdvanceRing(int nSlice) {
     const int nIndex = WrapIndex(nSlice, mSliceCount);
     if (nSlice != mPlacingSlice) {
@@ -1247,7 +1207,6 @@ void Tunnel::AdvanceRing(int nSlice) {
     }
 }
 
-// NTSC-U/C: 0x0046d400, PAL: 0x004aaf40
 void Tunnel::AddEvent(Drawable *pObject, float flFrame, int nId, int nUser) {
     std::list<TunnelEvent>::iterator it = mEvents.begin();
     while (it != mEvents.end() && !(flFrame <= it->mFrame)) {
@@ -1259,7 +1218,6 @@ void Tunnel::AddEvent(Drawable *pObject, float flFrame, int nId, int nUser) {
     }
 }
 
-// NTSC-U/C: 0x0046d540, PAL: 0x004ab080
 int Tunnel::MoveEvent(int nId, float flFrame) {
     for (std::list<TunnelEvent>::iterator it = mEvents.begin(); it != mEvents.end(); ++it) {
         if (it->mId == nId) {
@@ -1273,7 +1231,6 @@ int Tunnel::MoveEvent(int nId, float flFrame) {
     return 0;
 }
 
-// NTSC-U/C: 0x0046d5d8, PAL: 0x004ab118
 int Tunnel::RemoveEvent(int nId) {
     for (std::list<TunnelEvent>::iterator it = mEvents.begin(); it != mEvents.end(); ++it) {
         if (it->mId == nId) {
@@ -1287,7 +1244,6 @@ int Tunnel::RemoveEvent(int nId) {
     return 0;
 }
 
-// NTSC-U/C: 0x0046d680, PAL: 0x004ab1c0
 int Tunnel::RemoveEventsInRange(float flFrom, float flTo) {
     int nRemoved = 0;
     std::list<TunnelEvent>::iterator it = mEvents.begin();
@@ -1305,7 +1261,6 @@ int Tunnel::RemoveEventsInRange(float flFrom, float flTo) {
     return nRemoved;
 }
 
-// NTSC-U/C: 0x00477310, PAL: 0x004b4f88
 void Tunnel::ForEachEvent(void (*pfnVisit)(Drawable *pObject, float flFrame, int nId, void *pUser),
                           void *pUser) {
     for (const TunnelEvent &event : mEvents) {
@@ -1313,7 +1268,6 @@ void Tunnel::ForEachEvent(void (*pfnVisit)(Drawable *pObject, float flFrame, int
     }
 }
 
-// NTSC-U/C: 0x00476288, PAL: 0x004b3f00
 Tunnel *NewTunnel(const HxStr &name) {
     try {
         return new Tunnel(name);
@@ -1322,7 +1276,6 @@ Tunnel *NewTunnel(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x00476468, PAL: 0x004b40e0
 Object *CreateRegisteredTunnel(const HxStr &name) {
     try {
         return new Tunnel(name);

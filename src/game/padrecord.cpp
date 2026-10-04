@@ -186,7 +186,6 @@ inline void AdvancePhase(PadRecord *pPad, int nState) {
 
 } // namespace
 
-// NTSC-U/C: 0x005bcf58, PAL: 0x00585f40
 void BreugPadInit(PadRecord *pPad, int nPort, int nSlot, int nDeadZone) {
     // NTSC-U/C: 0x00777fbc, PAL: 0x0076560c
     static int firstPadStarted;
@@ -223,7 +222,6 @@ void BreugPadInit(PadRecord *pPad, int nPort, int nSlot, int nDeadZone) {
     pPad->mPreviousButtons = 0;
 }
 
-// NTSC-U/C: 0x005bc998, PAL: 0x00585960
 int BreugPadRead(PadRecord *pPad,
                  unsigned int *pButtons,
                  unsigned char *pAxis0,
@@ -345,7 +343,6 @@ int BreugPadRead(PadRecord *pPad,
     return pPad->mReadyLevel;
 }
 
-// NTSC-U/C: 0x005bd0b0, PAL: 0x00586098
 void BreugPadSetMotors(PadRecord *pPad, int nSmallMotor, int nBigMotor) {
     if (pPad->mReadyLevel < kVibrationReady) {
         return;
@@ -356,7 +353,6 @@ void BreugPadSetMotors(PadRecord *pPad, int nSmallMotor, int nBigMotor) {
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// PAL: 0x00585f20
 void PadRecord::EndLibrary() {
     scePadEnd();
 }

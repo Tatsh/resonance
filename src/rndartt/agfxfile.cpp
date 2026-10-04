@@ -27,7 +27,6 @@ const char *const kWriteMode = "wb";
 
 } // namespace
 
-// NTSC-U/C: 0x005f9bc8, PAL: 0x0063a8d8
 AGfxFile *AGfxFile::Open(const char *pszPath, int *pnError, bool bRead) {
     *pnError = kAGfxFileOk;
     FILE *pFile = fopen(pszPath, bRead ? kReadMode : kWriteMode);
@@ -55,7 +54,6 @@ AGfxFile *AGfxFile::Open(const char *pszPath, int *pnError, bool bRead) {
     return pGfxFile;
 }
 
-// NTSC-U/C: 0x005f9d18, PAL: 0x0063aa28
 int AGfxFile::Write(const char *pszPath, const ABitmap &bitmap) {
     int nError = kAGfxFileOk;
     AGfxFile *pGfxFile = Open(pszPath, &nError, false);
@@ -68,7 +66,6 @@ int AGfxFile::Write(const char *pszPath, const ABitmap &bitmap) {
     return nError;
 }
 
-// NTSC-U/C: 0x0062f560, PAL: 0x006700f0
 int GrabExt(const char *pszPath) {
     const char *pExtension = strrchr(pszPath, kExtensionSeparator);
     if (pExtension == nullptr) {

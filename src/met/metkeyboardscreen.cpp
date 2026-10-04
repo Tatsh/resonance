@@ -496,7 +496,6 @@ inline Rnd::View *FindView(const char *pszName) {
 
 } // namespace
 
-// NTSC-U/C: 0x00282660, PAL: 0x0029c3e0
 MetKeyboardScreen::MetKeyboardScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mMacros(nullptr), mpKeypanelRegular(nullptr), mpKeypanelShift(nullptr),
@@ -511,11 +510,9 @@ MetKeyboardScreen::MetKeyboardScreen(MetRenderer *pRenderer, int nPriority)
     mPlaysCommandSounds = kInitialPlaysCommandSounds;
 }
 
-// NTSC-U/C: 0x00282e30, PAL: 0x0029dbe0
 MetKeyboardScreen::~MetKeyboardScreen() {
 }
 
-// NTSC-U/C: 0x00282948, PAL: 0x0029d620
 void MetKeyboardScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mpCursor = FindText(kCursorObject);
@@ -540,7 +537,6 @@ void MetKeyboardScreen::ResolveContainerViews() {
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// PAL: 0x0029c770
 void MetKeyboardScreen::LocalizeKeyLabels() {
     // The binary expands this loop into one block per label.
     for (const auto &entry : kKeyLabels) {
@@ -568,7 +564,6 @@ void MetKeyboardScreen::LocalizeKeyLabels() {
 }
 #endif
 
-// NTSC-U/C: 0x00282ef0, PAL: 0x0029dce8
 void MetKeyboardScreen::DispatchKeyName(const HxStr &name) {
     if (name.mLen == 0) {
         return;
@@ -620,7 +615,6 @@ void MetKeyboardScreen::DispatchKeyName(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x00283268, PAL: 0x0029e060
 void MetKeyboardScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (mSelector != kSelectorAny && mSelector != pCommand->mPadIndex) {
         return;
@@ -695,7 +689,6 @@ void MetKeyboardScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x00283868, PAL: 0x0029e6f8
 void MetKeyboardScreen::EnterAndShow() {
     mpTitleBar->SetText(mPrompt);
     mpTextEntryWindow->SetText(mText);
@@ -710,7 +703,6 @@ void MetKeyboardScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x00283968, PAL: 0x0029e7f8
 void MetKeyboardScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *pButton) {
     if (mPendingKey.mLen == 0) {
         return;
@@ -722,7 +714,6 @@ void MetKeyboardScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *p
     ActivateNamedPanel(HxStr(kKeyboardScreen));
 }
 
-// NTSC-U/C: 0x00283aa0, PAL: 0x0029e970
 void MetKeyboardScreen::OnExitFinished() {
     mBlinkTime = kBlinkOff;
     UnhighlightKey(HxStr(*CurrentKey()));
@@ -750,7 +741,6 @@ void MetKeyboardScreen::OnExitFinished() {
     mShiftState = kShiftStateRegular;
 }
 
-// NTSC-U/C: 0x00283c10, PAL: 0x0029eb08
 void MetKeyboardScreen::ResetKeyStates() {
     mMacrosDisabled = 1;
     HxStr path;
@@ -761,7 +751,6 @@ void MetKeyboardScreen::ResetKeyStates() {
     }
 }
 
-// NTSC-U/C: 0x00285378, PAL: 0x002a0748
 inline Rnd::Button *MetKeyboardScreen::FindKeyButton(const HxStr &key) {
     HxStr path;
     if (key.mLen <= kSingleCharacterLength) {
@@ -778,19 +767,16 @@ inline Rnd::Button *MetKeyboardScreen::FindKeyButton(const HxStr &key) {
     return dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(path));
 }
 
-// NTSC-U/C: 0x0028c870, PAL: 0x002a8570
 inline HxStr *MetKeyboardScreen::CurrentKey() {
     return &mRows[mRow][mColumn];
 }
 
-// NTSC-U/C: 0x0028caf8, PAL: 0x002a87f8
 inline void MetKeyboardScreen::HideMacro() {
     mpMacroDisplay->SetText(HxStr(kNoName));
     memcpy(mpMacroDisplay->mLocalXfm[kTranslationRow], &mMacroOffset, sizeof(mMacroOffset));
     mpMacroDisplay->mDirty = 1;
 }
 
-// NTSC-U/C: 0x0028c898, PAL: 0x002a8598
 inline void MetKeyboardScreen::UnhighlightKey(const HxStr &key) {
     if (key.mLen == 0) {
         return;
@@ -807,7 +793,6 @@ inline void MetKeyboardScreen::UnhighlightKey(const HxStr &key) {
     HideMacro();
 }
 
-// NTSC-U/C: 0x0028cc50, PAL: 0x002a8978
 bool MetKeyboardScreen::IsMacroKey(const HxStr &key) {
     for (int i = 0; i < kDefaultMacroCount; ++i) {
         if (g_macroKeys[i] == key) {
@@ -817,12 +802,10 @@ bool MetKeyboardScreen::IsMacroKey(const HxStr &key) {
     return false;
 }
 
-// NTSC-U/C: 0x0028ccb8, PAL: 0x002a89e0
 void MetKeyboardScreen::SetPendingCommand(const HxStr &key) {
     mPendingKey = key;
 }
 
-// NTSC-U/C: 0x0028cd00, PAL: 0x002a8a38
 inline void MetKeyboardScreen::SetTickerText(const HxStr &text) {
     static HxStr sTicker(kNoName);
     if (!(sTicker == text)) {
@@ -831,7 +814,6 @@ inline void MetKeyboardScreen::SetTickerText(const HxStr &text) {
     }
 }
 
-// NTSC-U/C: 0x0028c3e8, PAL: 0x002a80d0
 inline void MetKeyboardScreen::UpdateCursor() {
     mpTextEntryWindow->SetShowing(1);
     Vector3 position = mpTextEntryWindow->CharPosition(mCaret);
@@ -842,23 +824,19 @@ inline void MetKeyboardScreen::UpdateCursor() {
     mpCursor->mDirty = 1;
 }
 
-// NTSC-U/C: 0x0028ca58, PAL: 0x002a8758
 inline int MetKeyboardScreen::TextEndX() {
     mpTextEntryWindow->SetShowing(1);
     return static_cast<int>(mpTextEntryWindow->CharPosition(mText.mLen).x);
 }
 
-// NTSC-U/C: 0x0028c9c8, PAL: 0x002a86c8
 inline void MetKeyboardScreen::RemoveChar(int nIndex) {
     mText.Erase(nIndex, 1);
 }
 
-// NTSC-U/C: 0x0028c9e8, PAL: 0x002a86e8
 inline void MetKeyboardScreen::AppendText(const HxStr &text) {
     mText += text;
 }
 
-// NTSC-U/C: 0x0028ca08, PAL: 0x002a8708
 inline void MetKeyboardScreen::InsertText(const HxStr &text, unsigned nPos) {
     if (nPos < mText.mLen) {
         mText.Insert(nPos, text);
@@ -874,7 +852,6 @@ inline void MetKeyboardScreen::PressKey(const HxStr &key) {
     ActivateNamedPanel(HxStr(kNoName));
 }
 
-// NTSC-U/C: 0x00283f38, PAL: 0x0029eee8
 void MetKeyboardScreen::HighlightCurrentKey() {
     HxStr key(*CurrentKey());
     if (IsMacroKey(key) && mMacrosDisabled != 0) {
@@ -884,7 +861,6 @@ void MetKeyboardScreen::HighlightCurrentKey() {
     ShowMacro(key);
 }
 
-// NTSC-U/C: 0x00284788, PAL: 0x0029f948
 void MetKeyboardScreen::MoveRight() {
     HxStr previous(*CurrentKey());
     HxStr current(previous);
@@ -898,7 +874,6 @@ void MetKeyboardScreen::MoveRight() {
     HighlightCurrentKey();
 }
 
-// NTSC-U/C: 0x002848e0, PAL: 0x0029fae0
 void MetKeyboardScreen::MoveLeft() {
     HxStr previous(*CurrentKey());
     HxStr current(previous);
@@ -912,7 +887,6 @@ void MetKeyboardScreen::MoveLeft() {
     HighlightCurrentKey();
 }
 
-// NTSC-U/C: 0x00284a30, PAL: 0x0029fc70
 void MetKeyboardScreen::MoveDown() {
     HxStr previous(*CurrentKey());
     HxStr current(previous);
@@ -926,7 +900,6 @@ void MetKeyboardScreen::MoveDown() {
     HighlightCurrentKey();
 }
 
-// NTSC-U/C: 0x00284bb0, PAL: 0x0029fe28
 void MetKeyboardScreen::MoveUp() {
     HxStr previous(*CurrentKey());
     HxStr current(previous);
@@ -940,7 +913,6 @@ void MetKeyboardScreen::MoveUp() {
     HighlightCurrentKey();
 }
 
-// NTSC-U/C: 0x00284d30, PAL: 0x0029ffd8
 std::vector<HxStr> *MetKeyboardScreen::GetDefaultMacros() {
     if (g_defaultMacros.size() != kDefaultMacroCount) {
         g_defaultMacros.resize(kDefaultMacroCount);
@@ -951,7 +923,6 @@ std::vector<HxStr> *MetKeyboardScreen::GetDefaultMacros() {
     return &g_defaultMacros;
 }
 
-// NTSC-U/C: 0x00284ec0, PAL: 0x002a01c0
 void MetKeyboardScreen::ShowMacro(const HxStr &key) {
     if (mMacrosDisabled != 0) {
         return;
@@ -985,7 +956,6 @@ void MetKeyboardScreen::ShowMacro(const HxStr &key) {
     }
 }
 
-// NTSC-U/C: 0x002850b8, PAL: 0x002a0428
 void MetKeyboardScreen::InsertMacro(int nIndex) {
     if (mMacrosDisabled != 0) {
         return;
@@ -1010,7 +980,6 @@ void MetKeyboardScreen::InsertMacro(int nIndex) {
     HideMacro();
 }
 
-// NTSC-U/C: 0x00285b08, PAL: 0x002a10c8
 void MetKeyboardScreen::OnShift() {
     UnhighlightKey(*CurrentKey());
     mLastAction = kActionShift;
@@ -1046,7 +1015,6 @@ void MetKeyboardScreen::OnShift() {
     HighlightCurrentKey();
 }
 
-// NTSC-U/C: 0x00285e28, PAL: 0x002a13e8
 void MetKeyboardScreen::OnBackspace() {
     if (mCaret > 0) {
         RemoveChar(mCaret - 1);
@@ -1060,7 +1028,6 @@ void MetKeyboardScreen::OnBackspace() {
     UpdateCursor();
 }
 
-// NTSC-U/C: 0x00285fa0, PAL: 0x002a1560
 void MetKeyboardScreen::OnCaretLeft() {
     mLastAction = mCaret > 0 ? kActionAccepted : kActionRejected;
     SetTickerText(mTicker);
@@ -1070,7 +1037,6 @@ void MetKeyboardScreen::OnCaretLeft() {
     UpdateCursor();
 }
 
-// NTSC-U/C: 0x00286120, PAL: 0x002a16e0
 void MetKeyboardScreen::OnCaretRight() {
     mLastAction = static_cast<unsigned>(mCaret) < mText.mLen ? kActionAccepted : kActionRejected;
     SetTickerText(mTicker);
@@ -1080,7 +1046,6 @@ void MetKeyboardScreen::OnCaretRight() {
     UpdateCursor();
 }
 
-// NTSC-U/C: 0x002862b0, PAL: 0x002a1870
 void MetKeyboardScreen::OnCaps() {
     Rnd::Button *pCaps = FindKeyButton(g_keyCaps);
     mLastAction = kActionShift;
@@ -1116,7 +1081,6 @@ void MetKeyboardScreen::OnCaps() {
     HighlightCurrentKey();
 }
 
-// NTSC-U/C: 0x002865a0, PAL: 0x002a1b60
 void MetKeyboardScreen::OnTab() {
     HxStr spaces;
     for (int i = 0; i < kTabWidth; ++i) {
@@ -1139,7 +1103,6 @@ void MetKeyboardScreen::OnTab() {
     UpdateCursor();
 }
 
-// NTSC-U/C: 0x00286850, PAL: 0x002a1ef8
 void MetKeyboardScreen::OnSpace() {
     const int nEnd = TextEndX();
     if (static_cast<float>(nEnd) + mpTextEntryWindow->GetFontWidth(" ", 1) <
@@ -1157,7 +1120,6 @@ void MetKeyboardScreen::OnSpace() {
     UpdateCursor();
 }
 
-// NTSC-U/C: 0x00286ab0, PAL: 0x002a21c0
 void MetKeyboardScreen::OnDelete() {
     if (static_cast<unsigned>(mCaret) < mText.mLen) {
         RemoveChar(mCaret);
@@ -1170,7 +1132,6 @@ void MetKeyboardScreen::OnDelete() {
     UpdateCursor();
 }
 
-// NTSC-U/C: 0x00286c10, PAL: 0x002a2320
 void MetKeyboardScreen::OnCharacter(const HxStr &key) {
     char ch = key[0];
     const int nEnd = TextEndX();
@@ -1189,7 +1150,6 @@ void MetKeyboardScreen::OnCharacter(const HxStr &key) {
     UpdateCursor();
 }
 
-// NTSC-U/C: 0x0028c2c0, PAL: 0x002a7f88
 void MetKeyboardScreen::SetKeyboardReturnScreen(const HxStr &returnScreen) {
     // The binary narrows the lookup without a runtime check.
     MetKeyboardScreen *pKeyboard =
@@ -1197,46 +1157,39 @@ void MetKeyboardScreen::SetKeyboardReturnScreen(const HxStr &returnScreen) {
     pKeyboard->SetReturnScreen(returnScreen);
 }
 
-// NTSC-U/C: 0x0028c358, PAL: 0x002a8040
 MetScreen *MetKeyboardScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetKeyboardScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x0028c550, PAL: 0x002a8238
 void MetKeyboardScreen::BeginExit() {
     SetTickerText(MetText(kMetStrHKeyboardClearTicker, kClearTickerTemplate));
     MetScreen::BeginExit();
 }
 
-// NTSC-U/C: 0x0028c518, PAL: 0x002a8200
 void MetKeyboardScreen::PlaySlideSound(int nSelector) {
     if (mSelector == nSelector || mSelector == kSelectorAny) {
         PlaySoundByName(kKeySound1);
     }
 }
 
-// NTSC-U/C: 0x0028c4e0, PAL: 0x002a81c8
 void MetKeyboardScreen::PlayHighSound(int nSelector) {
     if (mSelector == nSelector || mSelector == kSelectorAny) {
         PlaySoundByName(kKeySound2);
     }
 }
 
-// NTSC-U/C: 0x0028c470, PAL: 0x002a8158
 void MetKeyboardScreen::PlayCycleLeftSound(int nSelector) {
     if (mSelector == nSelector || mSelector == kSelectorAny) {
         PlaySoundByName(kKeySound2);
     }
 }
 
-// NTSC-U/C: 0x0028c4a8, PAL: 0x002a8190
 void MetKeyboardScreen::PlayCycleRightSound(int nSelector) {
     if (mSelector == nSelector || mSelector == kSelectorAny) {
         PlaySoundByName(kKeySound2);
     }
 }
 
-// NTSC-U/C: 0x0028c5e0, PAL: 0x002a82e0
 void MetKeyboardScreen::StartRepeatingSound(float flStartTime,
                                             float flInterval,
                                             Rnd::Button *pButton,
@@ -1274,7 +1227,6 @@ void MetKeyboardScreen::StartRepeatingSound(float flStartTime,
     MetScreen::StartRepeatingSound(flStartTime, flInterval, pButton, nCycles);
 }
 
-// NTSC-U/C: 0x0028c708, PAL: 0x002a8408
 void MetKeyboardScreen::UpdateIdle(float flTime) {
     if (mBlinkTime == kBlinkOff || !(mBlinkTime + kBlinkInterval < flTime)) {
         return;
@@ -1287,22 +1239,18 @@ void MetKeyboardScreen::UpdateIdle(float flTime) {
     mBlinkTime = flTime + kBlinkInterval;
 }
 
-// NTSC-U/C: 0x0028c7c0, PAL: 0x002a84c0
 void MetKeyboardScreen::ResetCaret() {
     mpCursor->SetShowing(0);
     mBlinkTime = kBlinkStart;
 }
 
-// NTSC-U/C: 0x0028c808, PAL: 0x002a8508
 void MetKeyboardScreen::OnEnterFinished() {
     SetTickerText(mTicker);
 }
 
-// NTSC-U/C: 0x0028c828, PAL: 0x002a8528
 void MetKeyboardScreen::OnDeparted() {
 }
 
-// NTSC-U/C: 0x0028cbb8, PAL: 0x002a88d8
 HxStr MetKeyboardScreen::DefaultMacro(int nIndex) {
 #ifdef VIDEO_STANDARD_PAL
     HxStr text = GetMetString(kMetStrKbMacroF1 + nIndex);
@@ -1312,7 +1260,6 @@ HxStr MetKeyboardScreen::DefaultMacro(int nIndex) {
     return text;
 }
 
-// NTSC-U/C: 0x0028cda8, PAL: 0x002a8ae0
 void MetKeyboardScreen::OnEnter() {
     mLastAction = kActionAccepted;
     mExitChoice = kExitCommit;
@@ -1321,14 +1268,12 @@ void MetKeyboardScreen::OnEnter() {
     UpdateCursor();
 }
 
-// NTSC-U/C: 0x0028ce70, PAL: 0x002a8ba8
 void MetKeyboardScreen::OnMacro(int nIndex) {
     InsertMacro(nIndex);
     mpTextEntryWindow->SetText(mText);
     UpdateCursor();
 }
 
-// NTSC-U/C: 0x00282468, PAL: 0x0029c188
 void MetKeyboardScreen::Open(const MetKeyboardRequest &request) {
     // The binary narrows the lookup without a runtime check.
     MetKeyboardScreen *pKeyboard =
@@ -1347,32 +1292,26 @@ void MetKeyboardScreen::Open(const MetKeyboardRequest &request) {
     pReturn->ActivateNamedPanel(HxStr(kKeyboardScreen));
 }
 
-// NTSC-U/C: 0x0028c830, PAL: 0x002a8530
 void MetKeyboardScreen::SetText(const HxStr &text) {
     mText = text;
 }
 
-// NTSC-U/C: 0x0028c850, PAL: 0x002a8550
 void MetKeyboardScreen::SetPrompt(const HxStr &prompt) {
     mPrompt = prompt;
 }
 
-// NTSC-U/C: 0x0028cad0, PAL: 0x002a87d0
 void MetKeyboardScreen::SetUser(MetKBUser *pUser) {
     mUser = pUser;
 }
 
-// NTSC-U/C: 0x0028c3e0, PAL: 0x002a80c8
 void MetKeyboardScreen::SetSelector(int nSelector) {
     mSelector = nSelector;
 }
 
-// NTSC-U/C: 0x0028cad8, PAL: 0x002a87d8
 void MetKeyboardScreen::SetTicker(const HxStr &ticker) {
     mTicker = ticker;
 }
 
-// NTSC-U/C: 0x0028cab0, PAL: 0x002a87b0
 void MetKeyboardScreen::SetReturnScreen(const HxStr &returnScreen) {
     mReturnScreen = returnScreen;
 }

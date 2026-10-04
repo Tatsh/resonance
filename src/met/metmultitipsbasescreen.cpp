@@ -23,7 +23,6 @@ constexpr int kCommandQuit = 8;
 
 } // namespace
 
-// NTSC-U/C: 0x00306cd8, PAL: 0x0032b700
 MetMultiTipsBaseScreen::MetMultiTipsBaseScreen(MetRenderer *pRenderer,
                                                int nPriority,
                                                const HxStr &name,
@@ -36,7 +35,6 @@ MetMultiTipsBaseScreen::MetMultiTipsBaseScreen(MetRenderer *pRenderer,
     mHelpKeys.push_back(MetText(kMetStrHMultiTipHelp, kHelpPrompt));
 }
 
-// NTSC-U/C: 0x00306ee0, PAL: 0x0032b958
 void MetMultiTipsBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandSelect:
@@ -63,7 +61,6 @@ void MetMultiTipsBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x003070f0, PAL: 0x0032bbc8
 void MetMultiTipsBaseScreen::EnterAndShow() {
     HxStr title = MetConfigText(kMetStrTMultiTips, kTitleConfigCode, kTitleKey) +
                   Rnd::MakeString(kPageFormat, mPage);
@@ -72,7 +69,6 @@ void MetMultiTipsBaseScreen::EnterAndShow() {
     MetHelpScreen::SelectPreset(MetText(kMetStrHMultiTipsTab, kHelpLayout));
 }
 
-// NTSC-U/C: 0x003072a0, PAL: 0x0032bde0
 void MetMultiTipsBaseScreen::OnExitFinished() {
     if (mExitChoice == kExitPrevious) {
         PushNamedScreen(mPreviousScreen);
@@ -85,28 +81,22 @@ void MetMultiTipsBaseScreen::OnExitFinished() {
     }
 }
 
-// NTSC-U/C: 0x0030d710, PAL: 0x00333240
 MetMultiTipsBaseScreen::~MetMultiTipsBaseScreen() {
 }
 
-// NTSC-U/C: 0x0030d790, PAL: 0x003332e8
 void MetMultiTipsBaseScreen::PlayCycleLeftSound(int) {
 }
 
-// NTSC-U/C: 0x0030d798, PAL: 0x003332f0
 void MetMultiTipsBaseScreen::PlayCycleRightSound(int) {
 }
 
-// NTSC-U/C: 0x0030d7a0, PAL: 0x003332f8
 void MetMultiTipsBaseScreen::PlayHighSound(int) {
 }
 
-// NTSC-U/C: 0x0030d7a8, PAL: 0x00333300
 void MetMultiTipsBaseScreen::OnEnterFinished() {
     MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
 }
 
-// NTSC-U/C: 0x0030d7d0, PAL: 0x00333328
 void MetMultiTipsBaseScreen::BeginExit() {
     ExitScreenByName(HxStr(kTitleScreen));
     MetScreen::BeginExit();

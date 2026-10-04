@@ -80,17 +80,14 @@ inline const char *TextOrEmpty(const HxStr &text) {
 
 } // namespace
 
-// NTSC-U/C: 0x002a8a58, PAL: 0x002c6ec8
 MetLoadPreFabScreen::MetLoadPreFabScreen(MetRenderer *pRenderer, int nPriority)
     : MetLoadFreqBaseScreen(pRenderer, nPriority) {
 }
 
-// NTSC-U/C: 0x002ad450, PAL: 0x002cbd60
-// Everything in the body is the teardown of mIdentities and the base.
 MetLoadPreFabScreen::~MetLoadPreFabScreen() {
+    // Everything in the body is the teardown of mIdentities and the base.
 }
 
-// NTSC-U/C: 0x002a8aa0, PAL: 0x002c6f18
 void MetLoadPreFabScreen::EnterAndShow() {
     MetHelpScreen::SelectPreset(MetText(kMetStrHStandardTitle, kPromptLayout));
 
@@ -100,7 +97,6 @@ void MetLoadPreFabScreen::EnterAndShow() {
     MetLoadFreqBaseScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x002a8b80, PAL: 0x002c7030
 void MetLoadPreFabScreen::BuildButtonList() {
     mButtonList->Clear();
     mButtonList->Add(HxStr(kNameButtonObject), HxStr(kNoLabel));
@@ -119,7 +115,6 @@ void MetLoadPreFabScreen::BuildButtonList() {
     mButtonList->SetSelected(kNameButtonIndex);
 }
 
-// NTSC-U/C: 0x002a8fe0, PAL: 0x002c7580
 void MetLoadPreFabScreen::UpdateNameLabel() {
     HxStr username((*mIdentityList)[mSelectedIdentity]->mAppearance.mUserName);
     mButtonList->GetButton(kNameButtonIndex)->mText->SetText(username);
@@ -135,7 +130,6 @@ void MetLoadPreFabScreen::UpdateNameLabel() {
     mButtonList->GetButton(kEditButtonIndex)->mText->SetText(editText);
 }
 
-// NTSC-U/C: 0x002a91b8, PAL: 0x002c7770
 void MetLoadPreFabScreen::AcquireIdentityList() {
     mIdentities.erase(mIdentities.begin(), mIdentities.end());
     for (unsigned int i = 0; i < MetPersonaData::savedList()->size(); ++i) {
@@ -148,7 +142,6 @@ void MetLoadPreFabScreen::AcquireIdentityList() {
     mIdentityList = &mIdentities;
 }
 
-// NTSC-U/C: 0x002a9330, PAL: 0x002c78e8
 void MetLoadPreFabScreen::PrepareFreqMakerForSelection() {
     MetFreqMakerCanvasScreen *pCanvas =
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
@@ -165,7 +158,6 @@ void MetLoadPreFabScreen::PrepareFreqMakerForSelection() {
     MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadPreFabScreen);
 }
 
-// NTSC-U/C: 0x002a94f0, PAL: 0x002c7b08
 void MetLoadPreFabScreen::OnNameButton() {
     if (Application::shared()->GetGameManager()->GetGameMode() == kNetworkGameMode) {
         Fatal(kNetModeError);
@@ -180,7 +172,6 @@ void MetLoadPreFabScreen::OnNameButton() {
     ActivateNamedPanel(HxStr(kModeScreen));
 }
 
-// NTSC-U/C: 0x002a9710, PAL: 0x002c7d88
 void MetLoadPreFabScreen::OnCreateButton() {
     if (MetPersonaData::savedList()->size() >= kMaxSavedPersonas) {
         ExitScreenByName(HxStr(kHelpScreen));
@@ -203,7 +194,6 @@ void MetLoadPreFabScreen::OnCreateButton() {
     }
 }
 
-// NTSC-U/C: 0x002a9b38, PAL: 0x002c8270
 void MetLoadPreFabScreen::OnMsgScreenDismissed(const HxStr &name, int) {
     if (!(name == kFreqLimitMessage)) {
         return;
@@ -217,7 +207,6 @@ void MetLoadPreFabScreen::OnMsgScreenDismissed(const HxStr &name, int) {
     ActivateNamedPanel(HxStr(kLoadPreFabScreen));
 }
 
-// NTSC-U/C: 0x002ad3c8, PAL: 0x002cbcd8
 MetScreen *MetLoadPreFabScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadPreFabScreen(pRenderer, nPriority);
 }

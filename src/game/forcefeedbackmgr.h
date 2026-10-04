@@ -277,9 +277,13 @@ public:
     void PlayCrippleEffect(Player *pPlayer);
 
 private:
-    // Reads the metronome settings (configuration 0x4b1) and the five effects (0x4b4, 0x4b5,
-    // 0x4b2, 0x4b3, and 0x4b6), and empties mSlots.
-    // NTSC-U/C: 0x0016de58, PAL: 0x00170768
+    /**
+     * Reads the metronome settings (configuration 0x4b1) and the five effects (0x4b4, 0x4b5, 0x4b2,
+     * 0x4b3, and 0x4b6), and empties mSlots.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0016de58
+     * @ghidraAddress PAL: 0x00170768
+     */
     void LoadConfig();
 
     unsigned char mFlags;         // +0x00, any set bit suspends vibration

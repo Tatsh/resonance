@@ -81,13 +81,11 @@ inline void FillText(const char *pszText, MetStringId nId, const char *pszKey) {
 
 } // namespace
 
-// NTSC-U/C: 0x002ff228, PAL: 0x003237b0
 MetMultiStatsScreen::MetMultiStatsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
 }
 
-// NTSC-U/C: 0x002ff3f8, PAL: 0x003239e8
 void MetMultiStatsScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     FillText(kSongHeading, kMetStrEgsSongLabel, kSongHeadingKey);
@@ -122,11 +120,9 @@ void MetMultiStatsScreen::ResolveContainerViews() {
     }
 }
 
-// NTSC-U/C: 0x002fff90, PAL: 0x00324740
 MetMultiStatsScreen::~MetMultiStatsScreen() {
 }
 
-// NTSC-U/C: 0x00300268, PAL: 0x00324a18
 void MetMultiStatsScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     GameStats *pStats = Application::shared()->GetGameManager()->GetStats();
@@ -201,11 +197,9 @@ void MetMultiStatsScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x00306910, PAL: 0x0032b320
 MetMultiStatsScreen *MetMultiStatsScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMultiStatsScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x00306998, PAL: 0x0032b3a8
 void MetMultiStatsScreen::OnExitFinished() {
 }

@@ -77,7 +77,6 @@ inline void AddButton(MetButtonList *pList,
 
 } // namespace
 
-// NTSC-U/C: 0x002d23b8, PAL: 0x002f4680
 MetMemCardTypeScreen::MetMemCardTypeScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr) {
@@ -85,22 +84,18 @@ MetMemCardTypeScreen::MetMemCardTypeScreen(MetRenderer *pRenderer, int nPriority
     mHelpKeys.push_back(MetText(kMetStrHMcrfFreq, kFreqKey));
 }
 
-// NTSC-U/C: 0x002d84d0, PAL: 0x002fac40
 MetMemCardTypeScreen::~MetMemCardTypeScreen() {
     delete mButtonList;
 }
 
-// NTSC-U/C: 0x002d8448, PAL: 0x002fabb8
 MetMemCardTypeScreen *MetMemCardTypeScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMemCardTypeScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x002d8560, PAL: 0x002face0
 void MetMemCardTypeScreen::SetCardSlot(MemcardConnectState slot) {
     mCardSlot = slot;
 }
 
-// NTSC-U/C: 0x002d2b50, PAL: 0x002f4fa8
 void MetMemCardTypeScreen::EnterAndShow() {
     if (mButtonList->mSelected == kNoSelection) {
         mButtonList->SetSelected(kRemixButtonIndex);
@@ -113,7 +108,6 @@ void MetMemCardTypeScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x002d2898, PAL: 0x002f4c70
 void MetMemCardTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -147,7 +141,6 @@ void MetMemCardTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x002d2cf0, PAL: 0x002f5188
 void MetMemCardTypeScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
@@ -156,7 +149,6 @@ void MetMemCardTypeScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// NTSC-U/C: 0x002d2e90, PAL: 0x002f5388
 void MetMemCardTypeScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kMemCardLoadScreen));
@@ -181,7 +173,6 @@ void MetMemCardTypeScreen::OnExitFinished() {
     }
 }
 
-// NTSC-U/C: 0x002d26b0, PAL: 0x002f4a18
 void MetMemCardTypeScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mButtonList = new MetButtonList;

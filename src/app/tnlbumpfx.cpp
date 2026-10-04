@@ -28,7 +28,6 @@ constexpr float kTwoPi = 6.283185f;
 
 } // namespace
 
-// NTSC-U/C: 0x0043dc20, PAL: 0x0047a450
 TnlBumpFX::TnlBumpFX(int nIndex) : mState(kStateIdle) {
     mGenerator = dynamic_cast<Rnd::Generator *>(
         Rnd::TheManager.Find(HxStr(Rnd::MakeString("bumpfx%d.mgen", nIndex))));
@@ -43,12 +42,10 @@ TnlBumpFX::TnlBumpFX(int nIndex) : mState(kStateIdle) {
     mGenerator->SetShowing(0);
 }
 
-// NTSC-U/C: 0x00456690, PAL: 0x00493bc0
 TnlBumpFX::~TnlBumpFX() {
     mGenerator->SetRateGen(mSavedRateGen, mSavedRateGen);
 }
 
-// NTSC-U/C: 0x0043dea8, PAL: 0x0047a738
 void TnlBumpFX::Start(int nStep, const HxStr &colorName, int nForward, float flPathOffset) {
     mState = kStateSpawning;
     mForward = nForward;
@@ -85,7 +82,6 @@ void TnlBumpFX::Start(int nStep, const HxStr &colorName, int nForward, float flP
     mGenerator->SetShowing(1);
 }
 
-// NTSC-U/C: 0x004566c8, PAL: 0x00493bf8
 void TnlBumpFX::SetFrame(float flFrame) {
     if (mState == kStateIdle) {
         mStartFrame = flFrame;

@@ -150,7 +150,6 @@ alignas(64) char g_abAsyncCallbackStack[kAsyncCallbackStackSize] = {};
 
 } // namespace
 
-// NTSC-U/C: 0x0045f000, PAL: 0x0049c6c0
 void InitAsync() {
     g_nAsyncHostMedia = (UsingCdMedia() == 0);
     pendingJobList.clear();
@@ -187,7 +186,6 @@ void InitAsync() {
     g_bAsyncInitialised = 1;
 }
 
-// NTSC-U/C: 0x0045fc90, PAL: 0x0049d350
 void AsyncQueueRequest(AsyncRequest request) {
     if (g_nAsyncHostMedia != 0) {
         const int nRead = read(request.mFile, request.mReadBuffer, request.mReadLength);
@@ -270,12 +268,10 @@ void AsyncQueueRequest(AsyncRequest request) {
     pendingJobList.push_back(request);
 }
 
-// NTSC-U/C: 0x00460b20, PAL: 0x0049e1e0
 int IsMediaReady() {
     return 1;
 }
 
-// NTSC-U/C: 0x00460b28, PAL: 0x0049e1e8
 void AsyncMediaEventCallback(int nFunction) {
     g_nAsyncOpError = sceCdGetError();
 
@@ -287,14 +283,12 @@ void AsyncMediaEventCallback(int nFunction) {
     }
 }
 
-// NTSC-U/C: 0x00460b98, PAL: 0x0049e258
 void ShutdownAsync() {
     if (g_bAsyncInitialised != 0) {
         MemFreeTagged(pHeadJobInfo, __FILE__, __LINE__);
     }
 }
 
-// NTSC-U/C: 0x00460bd0, PAL: 0x0049e290
 int AsyncSubmitRequest(int nFile,
                        void *pBuffer,
                        int nLength,
@@ -332,7 +326,6 @@ int AsyncSubmitRequest(int nFile,
     return request.mId;
 }
 
-// NTSC-U/C: 0x00460d90, PAL: 0x0049e450
 AsyncJobInfo *AsyncGetFreeJobChain() {
     AsyncJobInfo *pJob = pHeadJobInfo;
     AsyncJobInfo *pNext = pJob->mNext;
@@ -345,7 +338,6 @@ AsyncJobInfo *AsyncGetFreeJobChain() {
     return pJob;
 }
 
-// NTSC-U/C: 0x00460dd8, PAL: 0x0049e498
 void AsyncReturnJobChain(AsyncJobInfo *pChain) {
     if (pChain == nullptr) {
         return;
@@ -392,7 +384,6 @@ void AsyncIssueOp() {
 
 } // namespace
 
-// NTSC-U/C: 0x00460590, PAL: 0x0049dc50
 void AsyncCheck(int nBlocking) {
     if ((g_asyncCurrentOp.mStatus != kAsyncOpSeeking) &&
         (g_asyncCurrentOp.mStatus != kAsyncOpReading)) {
@@ -627,7 +618,6 @@ int AsyncQueueCachedSector(int nFile, int nSector, int nBaseSector) {
 
 } // namespace
 
-// NTSC-U/C: 0x0045f8d8, PAL: 0x0049cf98
 void AsyncPumpCompletedRequests() {
     if (g_nAsyncHostMedia == 0) {
         int nFile;
@@ -662,7 +652,6 @@ void AsyncPumpCompletedRequests() {
     }
 }
 
-// NTSC-U/C: 0x00460d58, PAL: 0x0049e418
 int AsyncGetIdFromFd(int nFile) {
     if ((nFile & kFileHandleArkStream) == 0) {
         return nFile;
@@ -671,7 +660,6 @@ int AsyncGetIdFromFd(int nFile) {
     return GetArkfileIdFromFileFd(nFile & ~kFileHandleArkStream);
 }
 
-// NTSC-U/C: 0x00460f78, PAL: 0x0049e638
 int MatchesCurrentAsyncOp(int nFile, int nSector) {
     if (g_asyncCurrentOp.mId != nFile) {
         return 0;
@@ -680,7 +668,6 @@ int MatchesCurrentAsyncOp(int nFile, int nSector) {
     return (g_asyncCurrentOp.mSector == nSector) ? 1 : 0;
 }
 
-// NTSC-U/C: 0x0045ffa8, PAL: 0x0049d668
 void AsyncJobComplete(AsyncRequest *pRequest, int nStatus) {
     if (nStatus > 0) {
         printf("AsyncJobComplete: job %d has error: %d\n", pRequest->mId, nStatus);
@@ -698,7 +685,6 @@ void AsyncJobComplete(AsyncRequest *pRequest, int nStatus) {
     completedJobList.push_back(*pRequest);
 }
 
-// NTSC-U/C: 0x0045f658, PAL: 0x0049cd18
 int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength) {
     for (auto it = completedJobList.begin(); it != completedJobList.end(); ++it) {
         if (it->mId != nHandle) {
@@ -722,7 +708,6 @@ int AsyncPollComplete(int nHandle, void **ppBuffer, int *pnLength) {
     return -1;
 }
 
-// NTSC-U/C: 0x0045f738, PAL: 0x0049cdf8
 void AsyncCancelRequest(int nHandle) {
     for (auto it = pendingJobList.begin(); it != pendingJobList.end(); ++it) {
         if (it->mId != nHandle) {
@@ -760,7 +745,6 @@ void AsyncCancelRequest(int nHandle) {
     }
 }
 
-// NTSC-U/C: 0x0045faf0, PAL: 0x0049d1b0
 void AsyncDump() {
     printf("\nASYNC DUMP\n\n");
     printf("current op:  id: %d, sector: %d, buffer: %p, status: %d, retry: %d (%d)\n",
@@ -788,7 +772,6 @@ void AsyncDump() {
     printf("num Free Job Chains: %d\n", nFreeJobs);
 }
 
-// NTSC-U/C: 0x0045f148, PAL: 0x0049c808
 int AsyncLoadFileByPath(const char *pszPath,
                         void *pBuffer,
                         unsigned nLength,
@@ -909,7 +892,6 @@ int AsyncLoadFileByPath(const char *pszPath,
     return request.mId;
 }
 
-// NTSC-U/C: 0x0045fa38, PAL: 0x0049d0f8
 void AsyncStatus(int &nPending, int &nCompleted, int &nFreeJobs) {
     nPending = static_cast<int>(pendingJobList.size());
     nCompleted = static_cast<int>(completedJobList.size());

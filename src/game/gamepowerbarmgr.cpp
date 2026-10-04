@@ -69,7 +69,6 @@ const PowerbarWeightRow g_aPowerbarWeightRows[] = {
 
 } // namespace
 
-// NTSC-U/C: 0x001c4fb0, PAL: 0x001cadf8
 GamePowerbarMgr::GamePowerbarMgr(PlayMap *pMap,
                                  PhraseDatabase *pDatabase,
                                  const TrackData *pTrackData,
@@ -114,7 +113,6 @@ GamePowerbarMgr::GamePowerbarMgr(PlayMap *pMap,
     }
 }
 
-// NTSC-U/C: 0x001c6258, PAL: 0x001cc0a0
 int GamePowerbarMgr::GetPowerbar(int nBar) {
     return mBars[nBar].mPowerbar;
 }

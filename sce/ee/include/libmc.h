@@ -127,6 +127,8 @@ typedef struct {
  *
  * @return The server's result, the RPC error less 100, -120 when mcserv is too old, or -121 when
  * mcman is too old.
+ * @ghidraAddress NTSC-U/C: 0x005659e8
+ * @ghidraAddress PAL: 0x005a4158
  */
 int sceMcInitLibrary(void);
 
@@ -139,6 +141,8 @@ int sceMcInitLibrary(void);
  * @param nMode sceMcFileAttrReadable, sceMcFileAttrWriteable, and sceMcFileCreateFile bits.
  * @return Zero once the command was sent, -100 when the library is not bound, -200 while another
  * command runs, -210 for an empty name, or the RPC error. sceMcSync() reports the descriptor.
+ * @ghidraAddress NTSC-U/C: 0x00565d48
+ * @ghidraAddress PAL: 0x005a44b8
  */
 int sceMcOpen(int nPort, int nSlot, const char *pszName, int nMode);
 
@@ -149,6 +153,8 @@ int sceMcOpen(int nPort, int nSlot, const char *pszName, int nMode);
  * @param nSlot Slot.
  * @param pszName Path of the directory.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x00565e80
+ * @ghidraAddress PAL: 0x005a45f0
  */
 int sceMcMkdir(int nPort, int nSlot, const char *pszName);
 
@@ -157,6 +163,8 @@ int sceMcMkdir(int nPort, int nSlot, const char *pszName);
  *
  * @param nFd Descriptor.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x00565eb8
+ * @ghidraAddress PAL: 0x005a4628
  */
 int sceMcClose(int nFd);
 
@@ -167,6 +175,8 @@ int sceMcClose(int nFd);
  * @param nOffset Offset in bytes.
  * @param nMode Origin of the offset.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x00565f70
+ * @ghidraAddress PAL: 0x005a46e0
  */
 int sceMcSeek(int nFd, int nOffset, int nMode);
 
@@ -177,6 +187,8 @@ int sceMcSeek(int nFd, int nOffset, int nMode);
  * @param pBuffer Destination.
  * @param nSize Size in bytes.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x005660d8
+ * @ghidraAddress PAL: 0x005a4848
  */
 int sceMcRead(int nFd, void *pBuffer, int nSize);
 
@@ -187,6 +199,8 @@ int sceMcRead(int nFd, void *pBuffer, int nSize);
  * @param pBuffer Source.
  * @param nSize Size in bytes.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x005661f8
+ * @ghidraAddress PAL: 0x005a4968
  */
 int sceMcWrite(int nFd, const void *pBuffer, int nSize);
 
@@ -195,6 +209,8 @@ int sceMcWrite(int nFd, const void *pBuffer, int nSize);
  *
  * @param nFd Descriptor.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x00566bc8
+ * @ghidraAddress PAL: 0x005a5338
  */
 int sceMcFlush(int nFd);
 
@@ -206,6 +222,8 @@ int sceMcFlush(int nFd);
  * @param pszNewDir Path of the new current directory.
  * @param pszCurrentDir Receives the directory the server reports, 1024 bytes, or null.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x00566888
+ * @ghidraAddress PAL: 0x005a4ff8
  */
 int sceMcChdir(int nPort, int nSlot, const char *pszNewDir, char *pszCurrentDir);
 
@@ -216,6 +234,8 @@ int sceMcChdir(int nPort, int nSlot, const char *pszNewDir, char *pszCurrentDir)
  * @param pnCommand Receives the sceMcFuncNo value of the command, or null.
  * @param pnResult Receives the command's result once it has finished, or null.
  * @return sceMcExecIdle, sceMcExecRun, or sceMcExecFinish.
+ * @ghidraAddress NTSC-U/C: 0x005663e8
+ * @ghidraAddress PAL: 0x005a4b58
  */
 int sceMcSync(int nMode, int *pnCommand, int *pnResult);
 
@@ -228,6 +248,8 @@ int sceMcSync(int nMode, int *pnCommand, int *pnResult);
  * @param pnFree Receives the free space in kilobytes, or null.
  * @param pnFormat Receives one when the card is formatted, or null.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x00566520
+ * @ghidraAddress PAL: 0x005a4c90
  */
 int sceMcGetInfo(int nPort, int nSlot, int *pnType, int *pnFree, int *pnFormat);
 
@@ -241,6 +263,8 @@ int sceMcGetInfo(int nPort, int nSlot, int *pnType, int *pnFree, int *pnFormat);
  * @param nMaxEntries Capacity of pTable.
  * @param pTable Receives the entries.
  * @return As sceMcOpen(). sceMcSync() reports the number of entries.
+ * @ghidraAddress NTSC-U/C: 0x005666a8
+ * @ghidraAddress PAL: 0x005a4e18
  */
 int sceMcGetDir(int nPort,
                 int nSlot,
@@ -258,6 +282,8 @@ int sceMcGetDir(int nPort,
  * @param pInfo Values to write.
  * @param nValid sceMcFileInfo bits of the fields to write.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x00566c80
+ * @ghidraAddress PAL: 0x005a53f0
  */
 int sceMcSetFileInfo(
     int nPort, int nSlot, const char *pszName, const sceMcTblGetDir *pInfo, unsigned int nValid);
@@ -268,6 +294,8 @@ int sceMcSetFileInfo(
  * @param nPort Port.
  * @param nSlot Slot.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x005669d8
+ * @ghidraAddress PAL: 0x005a5148
  */
 int sceMcFormat(int nPort, int nSlot);
 
@@ -278,6 +306,8 @@ int sceMcFormat(int nPort, int nSlot);
  * @param nSlot Slot.
  * @param pszName Path of the entry.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x00566aa0
+ * @ghidraAddress PAL: 0x005a5210
  */
 int sceMcDelete(int nPort, int nSlot, const char *pszName);
 
@@ -289,6 +319,8 @@ int sceMcDelete(int nPort, int nSlot, const char *pszName);
  * @param pszName Path of the entry.
  * @param pszNewName New name, without a directory. At most 31 characters are used.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x00566e58
+ * @ghidraAddress PAL: 0x005a55c8
  */
 int sceMcRename(int nPort, int nSlot, const char *pszName, const char *pszNewName);
 
@@ -298,6 +330,8 @@ int sceMcRename(int nPort, int nSlot, const char *pszName, const char *pszNewNam
  * @param nPort Port.
  * @param nSlot Slot.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x00566fc0
+ * @ghidraAddress PAL: 0x005a5730
  */
 int sceMcUnformat(int nPort, int nSlot);
 
@@ -308,6 +342,8 @@ int sceMcUnformat(int nPort, int nSlot);
  * @param nSlot Slot.
  * @param pszPath Path of the directory.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x00567088
+ * @ghidraAddress PAL: 0x005a57f8
  */
 int sceMcGetEntSpace(int nPort, int nSlot, const char *pszPath);
 
@@ -316,6 +352,8 @@ int sceMcGetEntSpace(int nPort, int nSlot, const char *pszPath);
  *
  * @param nLevel New priority.
  * @return As sceMcOpen().
+ * @ghidraAddress NTSC-U/C: 0x00565bd0
+ * @ghidraAddress PAL: 0x005a4340
  */
 int sceMcChangeThreadPriority(int nLevel);
 
@@ -326,6 +364,8 @@ int sceMcChangeThreadPriority(int nLevel);
  *
  * @param nPort Port.
  * @return The slot count, or an error as sceMcOpen() reports it.
+ * @ghidraAddress NTSC-U/C: 0x00565c88
+ * @ghidraAddress PAL: 0x005a43f8
  */
 int sceMcGetSlotMax(int nPort);
 
@@ -337,6 +377,8 @@ int sceMcGetSlotMax(int nPort);
  * @param ppResult Receives the reply buffer.
  * @param ppnCommand Receives the word that records the command in flight.
  * @return The client bound to the server.
+ * @ghidraAddress NTSC-U/C: 0x00565ba0
+ * @ghidraAddress PAL: 0x005a4310
  */
 sceSifClientData *sceMcGetRpcState(sceMcRpcResult **ppResult, int **ppnCommand);
 

@@ -184,34 +184,28 @@ inline int Clamp(int nLow, int nValue, int nHigh) {
 // NTSC-U/C: 0x006c1110, PAL: 0x00704108
 MetRemixManager *MetRemixManager::sInstance;
 
-// NTSC-U/C: 0x00352b80, PAL: 0x0037ed28
 MetRemixManager::MetRemixManager(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mListingsDone(0), mListingsExpected(0), mPlayListReady(1), mIndexRequest(0), mRemixRequest(0),
       mIndexSlot(-1), mCurrentPlaylistTrack(0), mShuffle(0), mAfterLoadAction(0) {
 }
 
-// NTSC-U/C: 0x00355070, PAL: 0x00381570
 MetRemixManager::~MetRemixManager() {
 }
 
-// NTSC-U/C: 0x00361020, PAL: 0x0038e4e0
 MetRemixManager *MetRemixManager::New(MetRenderer *pRenderer, int nPriority) {
     return new MetRemixManager(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x00361000, PAL: 0x0038e4c0
 MetRemixManager *MetRemixManager::shared() {
     return ResolveSharedInstance();
 }
 
-// NTSC-U/C: 0x003610a8, PAL: 0x0038e568
 MetRemixManager *MetRemixManager::ResolveSharedInstance() {
     CacheSharedInstance();
     return sInstance;
 }
 
-// NTSC-U/C: 0x00361210, PAL: 0x0038e6d0
 void MetRemixManager::CacheSharedInstance() {
     if (sInstance == nullptr) {
         sInstance =
@@ -219,17 +213,14 @@ void MetRemixManager::CacheSharedInstance() {
     }
 }
 
-// NTSC-U/C: 0x00361558, PAL: 0x0038ea38
 MetRemixRecord *MetRemixManager::GetRecord() {
     return &mRecord;
 }
 
-// NTSC-U/C: 0x00361560, PAL: 0x0038ea40
 void MetRemixManager::SetRecord(const MetRemixRecord &record) {
     mRecord = record;
 }
 
-// NTSC-U/C: 0x00359230, PAL: 0x00386388
 MetRemixRecord *MetRemixManager::FindRecord(const HxStr &name) {
     for (auto it = mRemixes.begin(); it != mRemixes.end(); ++it) {
         std::vector<MetRemixRecord> &records = it->second;
@@ -250,7 +241,6 @@ MetRemixRecord *MetRemixManager::FindRecord(const HxStr &name) {
     return nullptr;
 }
 
-// NTSC-U/C: 0x00357f80, PAL: 0x00384f10
 void MetRemixManager::LoadIndex() {
     const HxStr path = GetFreqRoot() + g_remixIndexPath;
     const int nZone = ZoneGetCurrent();
@@ -259,7 +249,6 @@ void MetRemixManager::LoadIndex() {
     ZoneSetCurrent(nZone);
 }
 
-// NTSC-U/C: 0x003580f0, PAL: 0x003850d8
 void MetRemixManager::LoadRemixFile(const HxStr &fileName) {
     const HxStr directory = GetFreqRoot() + g_remixDirectory;
     const HxStr path = directory + fileName;
@@ -269,12 +258,10 @@ void MetRemixManager::LoadRemixFile(const HxStr &fileName) {
     ZoneSetCurrent(nZone);
 }
 
-// NTSC-U/C: 0x003613d8, PAL: 0x0038e8b8
 void MetRemixManager::SetCurrentTrack(int nTrack) {
     mCurrentPlaylistTrack = Clamp(0, nTrack, mPlayList.entries.size());
 }
 
-// NTSC-U/C: 0x0035a7e0, PAL: 0x00387a40
 void MetRemixManager::RandomTrack() {
     const int nTracks = mPlayList.entries.size();
     int nUnplayed = 0;
@@ -309,7 +296,6 @@ void MetRemixManager::RandomTrack() {
         "MetRemixManager::%s() - mCurrentPlaylistTrack = %i.\n", __func__, mCurrentPlaylistTrack);
 }
 
-// NTSC-U/C: 0x00361300, PAL: 0x0038e7e0
 void MetRemixManager::PreviousTrack() {
     if (mShuffle != 0) {
         RandomTrack();
@@ -318,7 +304,6 @@ void MetRemixManager::PreviousTrack() {
     mCurrentPlaylistTrack = std::max(0, mCurrentPlaylistTrack - 1);
 }
 
-// NTSC-U/C: 0x00361358, PAL: 0x0038e838
 inline void MetRemixManager::NextTrack() {
     if (mShuffle != 0) {
         RandomTrack();
@@ -332,7 +317,6 @@ inline void MetRemixManager::NextTrack() {
     mCurrentPlaylistTrack = std::min(nLast, mCurrentPlaylistTrack + 1);
 }
 
-// NTSC-U/C: 0x00353350, PAL: 0x0037f5a8
 void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
                                   std::vector<MemcardConnectState> slots,
                                   int bLoadPlayList) {
@@ -409,7 +393,6 @@ void MetRemixManager::ListRemixes(const std::vector<HxStr> &returnScreens,
     }
 }
 
-// NTSC-U/C: 0x003548e8, PAL: 0x00380cd8
 void MetRemixManager::BeginRemixLoad(const std::vector<HxStr> &returnScreens,
                                      const std::vector<HxStr> &restoreScreens,
                                      const MetRemixRecord &record,
@@ -445,7 +428,6 @@ void MetRemixManager::BeginRemixLoad(const std::vector<HxStr> &returnScreens,
     LoadRemix(record, nFactory);
 }
 
-// NTSC-U/C: 0x00355ff0, PAL: 0x00382920
 void MetRemixManager::OnRemixLoaded(int nPortSlot, int nStatus) {
     printf(" in MetRemixManager::%s(). Return code = %i.\n", __func__, nStatus);
     if (nStatus == 0) {
@@ -483,7 +465,6 @@ inline void MetRemixManager::RetrySavePlayList() {
     SavePlayList(screens);
 }
 
-// NTSC-U/C: 0x003555c0, PAL: 0x00381b20
 void MetRemixManager::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kLoadRemixDataDialogue) {
         PushReturnScreens();
@@ -557,7 +538,6 @@ void MetRemixManager::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     }
 }
 
-// NTSC-U/C: 0x003569d0, PAL: 0x00383638
 void MetRemixManager::OnCardFormatted([[maybe_unused]] int nPortSlot, int nStatus) {
     if (nStatus == 0) {
         std::vector<HxStr> buttons;
@@ -599,7 +579,6 @@ void MetRemixManager::OnCardFormatted([[maybe_unused]] int nPortSlot, int nStatu
     }
 }
 
-// NTSC-U/C: 0x003573e8, PAL: 0x003841e0
 #ifdef VIDEO_STANDARD_PAL
 void MetRemixManager::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot,
                                              int nStatus,
@@ -677,7 +656,6 @@ void MetRemixManager::OnJukeboxPlayListSaved([[maybe_unused]] int nPortSlot, int
     }
 }
 
-// NTSC-U/C: 0x00356508, PAL: 0x00382fc8
 void MetRemixManager::SavePlayList(const std::vector<HxStr> &returnScreens) {
     ReplaceScreens(mReturnScreens, returnScreens);
     const std::vector<HxStr> buttons;
@@ -697,7 +675,6 @@ void MetRemixManager::SavePlayList(const std::vector<HxStr> &returnScreens) {
         0, &mPlayList, QueryConfigValue(kPlayListIndexCode));
 }
 
-// NTSC-U/C: 0x003593d0, PAL: 0x00386528
 void MetRemixManager::StartPlayList(const std::vector<HxStr> &returnScreens, int nShuffle) {
     mRestoreScreens.clear();
     mRestoreScreens.push_back(HxStr(kTopButtonsScreen));
@@ -736,7 +713,6 @@ void MetRemixManager::StartLoadedRemix() {
     ActivateNamedPanel(HxStr(kLoadGameScreen));
 }
 
-// NTSC-U/C: 0x0035a6b0, PAL: 0x003878a0
 void MetRemixManager::LeaveJukeboxMode() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     params.mJukeboxMode = 0;
@@ -766,21 +742,17 @@ void MetRemixManager::PushReturnScreens() {
     }
 }
 
-// NTSC-U/C: 0x003612a0, PAL: 0x0038e780
 void MetRemixManager::PrunePlayList() {
     mPlayList.RemoveStaleEntries();
 }
 
-// NTSC-U/C: 0x00361518, PAL: 0x0038e9f8
 void MetRemixManager::EnterAndShow() {
     mView->SetShowing(0);
 }
 
-// NTSC-U/C: 0x00361550, PAL: 0x0038ea30
 void MetRemixManager::OnExitFinished() {
 }
 
-// NTSC-U/C: 0x003553e8, PAL: 0x00381918
 void MetRemixManager::OnRemixesListed(int nPortSlot, int nStatus) {
     mListStatus[nPortSlot] = nStatus;
     ++mListingsDone;
@@ -794,7 +766,6 @@ void MetRemixManager::OnRemixesListed(int nPortSlot, int nStatus) {
     }
 }
 
-// NTSC-U/C: 0x003563e0, PAL: 0x00382e70
 void MetRemixManager::OnJukeboxPlayListLoaded([[maybe_unused]] int nPortSlot, int nStatus) {
     mPlayListReady = 1;
     // Yes, the binary repeats the same exit on both sides of the status test.
@@ -807,7 +778,6 @@ void MetRemixManager::OnJukeboxPlayListLoaded([[maybe_unused]] int nPortSlot, in
     }
 }
 
-// NTSC-U/C: 0x00358310, PAL: 0x00385380
 void MetRemixManager::Done(int nHandle,
                            [[maybe_unused]] int nFile,
                            void *pBuffer,
@@ -855,7 +825,6 @@ void MetRemixManager::Done(int nHandle,
     }
 }
 
-// NTSC-U/C: 0x003612c0, PAL: 0x0038e7a0
 MetRemixRecord *MetRemixManager::LookupRemix(const HxStr &name) {
     return FindRecord(name);
 }
@@ -877,7 +846,6 @@ void MetRemixManager::LoadCurrentTrack() {
     LoadRemix(*FindRecord(pEntry->name), pEntry->factory);
 }
 
-// NTSC-U/C: 0x003612e0, PAL: 0x0038e7c0
 void MetRemixManager::PlayCurrentTrack() {
     LoadCurrentTrack();
 }

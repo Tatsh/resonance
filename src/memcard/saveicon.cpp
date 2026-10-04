@@ -21,7 +21,6 @@ unsigned char g_abSaveIcon[kSaveIconBufferSize];
 // NTSC-U/C: 0x0067bfd8, PAL: 0x006bcf40
 int g_nSaveIconLength;
 
-// NTSC-U/C: 0x00177570, PAL: 0x0017a000
 void LoadSaveIcon() {
     FILE *pFile;
     // The binary releases the path before it tests the open.

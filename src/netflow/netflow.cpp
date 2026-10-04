@@ -52,8 +52,6 @@ NetflowQueueEntry queue[NETFLOW_MAX_VERTICES];
 // The U vertices on the current search path.
 unsigned char visited[NETFLOW_MAX_VERTICES];
 
-// NTSC-U/C: 0x005e6508, PAL: 0x006286f0
-// Clear every adjacency list and mate, and clear the U count.
 void Init_U(struct netflow_graph *graph) {
     for (int i = 0; i < NETFLOW_MAX_VERTICES; ++i) {
         graph->u[i].edges = nullptr;
@@ -62,8 +60,6 @@ void Init_U(struct netflow_graph *graph) {
     graph->u_count = 0;
 }
 
-// NTSC-U/C: 0x005e64e8, PAL: 0x006286d0
-// Clear every mate, and clear the V count.
 void Init_V(struct netflow_v_side *side) {
     for (int i = 0; i < NETFLOW_MAX_VERTICES; ++i) {
         side->mate[i] = 0;
@@ -71,8 +67,6 @@ void Init_V(struct netflow_v_side *side) {
     side->v_count = 0;
 }
 
-// NTSC-U/C: 0x005e6538, PAL: 0x00628720
-// Prepend a record for the edge, and allocate a reverse record recording u.
 void AddEdge(int u, int v, struct netflow_graph *graph, struct netflow_v_side *side) {
     (void)side;
     struct netflow_edge *pForward = static_cast<struct netflow_edge *>(Alloc(8));
@@ -83,8 +77,6 @@ void AddEdge(int u, int v, struct netflow_graph *graph, struct netflow_v_side *s
     pReverse->v = u;
 }
 
-// NTSC-U/C: 0x00569bf0, PAL: 0x005aa0b8
-// Seed a greedy matching, initialise the pool, and grow along augmenting paths.
 void Match(struct netflow_graph *graph, struct netflow_v_side *side) {
     NetflowReportInitialMatching(graph, side);
     NetflowInitMatchingPool(graph, side);

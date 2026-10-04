@@ -18,7 +18,6 @@ inline bool IsBlank(const char *pszText) {
 
 } // namespace
 
-// NTSC-U/C: 0x004b7ad0, PAL: 0x004f5f00
 HxStr::HxStr(const char *pszText) {
     if (pszText == nullptr) {
         mLen = 0;
@@ -35,7 +34,6 @@ HxStr::HxStr(const char *pszText) {
     strcpy(mStr, pszText);
 }
 
-// NTSC-U/C: 0x004b7b50, PAL: 0x004f5f88
 HxStr::HxStr(const HxStr &other) {
     if (other.mStr == nullptr) {
         mLen = 0;
@@ -52,7 +50,6 @@ HxStr::HxStr(const HxStr &other) {
     strcpy(mStr, other.mStr);
 }
 
-// NTSC-U/C: 0x004b7bd0, PAL: 0x004f6010
 HxStr::HxStr(unsigned nCount, char ch) : mLen(nCount) {
     mStr = new char[nCount + 1];
     HX_ASSERT(mStr != 0)
@@ -62,7 +59,6 @@ HxStr::HxStr(unsigned nCount, char ch) : mLen(nCount) {
     mStr[nCount] = '\0';
 }
 
-// NTSC-U/C: 0x004b7c68, PAL: 0x004f60a8
 HxStr &HxStr::operator+=(const HxStr &other) {
     mLen += other.mLen;
     char *pNew = new char[mLen + 1];
@@ -84,7 +80,6 @@ HxStr &HxStr::operator+=(const HxStr &other) {
     return *this;
 }
 
-// NTSC-U/C: 0x004b7d28, PAL: 0x004f6170
 HxStr &HxStr::operator+=(char ch) {
     char *pNew = new char[mLen + 2];
     ++mLen;
@@ -103,7 +98,6 @@ HxStr &HxStr::operator+=(char ch) {
     return *this;
 }
 
-// NTSC-U/C: 0x004b7dd8, PAL: 0x004f6228
 HxStr &HxStr::operator=(const char *pszText) {
     if (pszText == mStr) {
         return *this;
@@ -131,7 +125,6 @@ HxStr &HxStr::operator=(const char *pszText) {
     return *this;
 }
 
-// NTSC-U/C: 0x004b7e78, PAL: 0x004f62e0
 HxStr &HxStr::operator=(const HxStr &other) {
     if (&other == this) {
         return *this;
@@ -163,7 +156,6 @@ HxStr &HxStr::operator=(const HxStr &other) {
     return *this;
 }
 
-// NTSC-U/C: 0x004b7f18, PAL: 0x004f63a0
 char HxStr::operator[](unsigned i) const {
 #ifndef VIDEO_STANDARD_PAL
     HX_ASSERT(mStr != 0)
@@ -172,7 +164,6 @@ char HxStr::operator[](unsigned i) const {
     return mStr[i];
 }
 
-// NTSC-U/C: 0x004b8230, PAL: 0x004f64e8
 void HxStr::Alloc(unsigned nLen) {
 #ifdef VIDEO_STANDARD_PAL
     if (mStr != g_szEmptyString && mStr != nullptr) {
@@ -189,7 +180,6 @@ void HxStr::Alloc(unsigned nLen) {
     HX_ASSERT(mStr != 0) // Yes, the binary checks the allocation only after writing through it.
 }
 
-// NTSC-U/C: 0x004b82b8, PAL: 0x004f6580
 int HxStr::Find(char ch) const {
 #ifndef VIDEO_STANDARD_PAL
     HX_ASSERT(mStr != 0)
@@ -204,7 +194,6 @@ int HxStr::Find(char ch) const {
     return pFound - mStr;
 }
 
-// NTSC-U/C: 0x004b8350, PAL: 0x004f65c8
 int HxStr::Find(char ch, unsigned nStart) const {
 #ifndef VIDEO_STANDARD_PAL
     HX_ASSERT(mStr != 0)
@@ -222,7 +211,6 @@ int HxStr::Find(char ch, unsigned nStart) const {
     return pFound - mStr;
 }
 
-// NTSC-U/C: 0x004b83f0, PAL: 0x004f6620
 int HxStr::Find(const char *pszText) const {
 #ifndef VIDEO_STANDARD_PAL
     HX_ASSERT(mStr != 0)
@@ -236,7 +224,6 @@ int HxStr::Find(const char *pszText) const {
     return -1;
 }
 
-// NTSC-U/C: 0x004b84b0, PAL: 0x004f66c0
 int HxStr::ReverseFind(char ch) const {
 #ifndef VIDEO_STANDARD_PAL
     HX_ASSERT(mStr != 0)
@@ -251,7 +238,6 @@ int HxStr::ReverseFind(char ch) const {
     return pFound - mStr;
 }
 
-// NTSC-U/C: 0x004b8550, PAL: 0x004f6720
 int HxStr::ReverseFindOneOf(const char *pszChars) const {
     if (pszChars == nullptr) {
         return -1;
@@ -266,7 +252,6 @@ int HxStr::ReverseFindOneOf(const char *pszChars) const {
     return nBest;
 }
 
-// NTSC-U/C: 0x004b8678, PAL: 0x004f67d0
 int HxStr::Compare(unsigned pos, unsigned len, const char *str) const {
 #ifdef VIDEO_STANDARD_PAL
     if (str == nullptr) {
@@ -280,7 +265,6 @@ int HxStr::Compare(unsigned pos, unsigned len, const char *str) const {
     return strncmp(mStr + pos, str, len);
 }
 
-// NTSC-U/C: 0x004b8738, PAL: 0x004f6858
 HxStr HxStr::Mid(unsigned pos) const {
 #ifndef VIDEO_STANDARD_PAL
     HX_ASSERT(mStr != 0)
@@ -289,7 +273,6 @@ HxStr HxStr::Mid(unsigned pos) const {
     return HxStr(mStr + pos);
 }
 
-// NTSC-U/C: 0x004b78b8, PAL: 0x004f5bc8
 HxStr HxStr::Mid(unsigned pos, unsigned len) const {
 #ifndef VIDEO_STANDARD_PAL
     HX_ASSERT(mStr != 0)
@@ -306,7 +289,6 @@ HxStr HxStr::Mid(unsigned pos, unsigned len) const {
     return part;
 }
 
-// NTSC-U/C: 0x004b8818, PAL: 0x004f6918
 HxStr &HxStr::Replace(unsigned pos, unsigned len, char ch) {
     HX_ASSERT(len == 1)
 #ifdef VIDEO_STANDARD_PAL
@@ -319,7 +301,6 @@ HxStr &HxStr::Replace(unsigned pos, unsigned len, char ch) {
     return *this;
 }
 
-// NTSC-U/C: 0x004b88d0, PAL: 0x004f69d8
 HxStr &HxStr::Replace(unsigned pos, unsigned len, const HxStr &other) {
 #ifndef VIDEO_STANDARD_PAL
     HX_ASSERT(mStr != 0)
@@ -342,7 +323,6 @@ HxStr &HxStr::Replace(unsigned pos, unsigned len, const HxStr &other) {
     return *this;
 }
 
-// NTSC-U/C: 0x004b89f0, PAL: 0x004f6ad8
 HxStr &HxStr::Clear() {
 #ifdef VIDEO_STANDARD_PAL
     if (mStr != g_szEmptyString) {
@@ -355,7 +335,6 @@ HxStr &HxStr::Clear() {
     return *this;
 }
 
-// NTSC-U/C: 0x004b8a10, PAL: 0x004f6b00
 HxStr &HxStr::Truncate(unsigned pos) {
 #ifdef VIDEO_STANDARD_PAL
     HX_ASSERT(pos <= mLen)
@@ -372,7 +351,6 @@ HxStr &HxStr::Truncate(unsigned pos) {
     return *this;
 }
 
-// NTSC-U/C: 0x004b8a98, PAL: 0x004f6b70
 HxStr &HxStr::Erase(unsigned pos, unsigned len) {
 #ifndef VIDEO_STANDARD_PAL
     HX_ASSERT(mStr != 0)
@@ -390,7 +368,6 @@ HxStr &HxStr::Erase(unsigned pos, unsigned len) {
     return *this;
 }
 
-// NTSC-U/C: 0x004b8bd8, PAL: 0x004f6c70
 HxStr &HxStr::Insert(unsigned pos, unsigned nCount, char ch) {
 #ifdef VIDEO_STANDARD_PAL
     if (mStr == g_szEmptyString) {
@@ -418,7 +395,6 @@ HxStr &HxStr::Insert(unsigned pos, unsigned nCount, char ch) {
     return *this;
 }
 
-// NTSC-U/C: 0x004b8cd8, PAL: 0x004f5dd0
 HxStr &HxStr::Insert(unsigned pos, const HxStr &other) {
 #ifdef VIDEO_STANDARD_PAL
     if (mStr == g_szEmptyString) {
@@ -439,7 +415,6 @@ HxStr &HxStr::Insert(unsigned pos, const HxStr &other) {
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// NTSC-U/C: 0x004b7f98, PAL: 0x004f6400
 bool HxStr::operator!=(const char *pszRight) const {
     if (pszRight == nullptr) {
         return true;
@@ -447,12 +422,10 @@ bool HxStr::operator!=(const char *pszRight) const {
     return strcmp(pszRight, mStr) != 0;
 }
 
-// NTSC-U/C: 0x004b8018, PAL: 0x004f6438
 bool HxStr::operator!=(const HxStr &right) const {
     return strcmp(right.mStr, mStr) != 0;
 }
 
-// NTSC-U/C: 0x004b80a0, PAL: 0x004f6460
 bool HxStr::operator==(const char *pszRight) const {
     if (pszRight == nullptr) {
         return false;
@@ -460,17 +433,14 @@ bool HxStr::operator==(const char *pszRight) const {
     return strcmp(pszRight, mStr) == 0;
 }
 
-// NTSC-U/C: 0x004b8120, PAL: 0x004f6498
 bool HxStr::operator==(const HxStr &right) const {
     return strcmp(right.mStr, mStr) == 0;
 }
 
-// NTSC-U/C: 0x004b81a8, PAL: 0x004f64c0
 bool HxStr::operator<(const HxStr &right) const {
     return strcmp(mStr, right.mStr) < 0;
 }
 #else
-// NTSC-U/C: 0x004b7f98, PAL: 0x004f6400
 bool HxStr::operator!=(const char *pszRight) const {
     if (IsBlank(mStr) && IsBlank(pszRight)) {
         return false;
@@ -481,7 +451,6 @@ bool HxStr::operator!=(const char *pszRight) const {
     return strcmp(pszRight, mStr) != 0;
 }
 
-// NTSC-U/C: 0x004b8018, PAL: 0x004f6438
 bool HxStr::operator!=(const HxStr &right) const {
     if (IsBlank(mStr) && IsBlank(right.mStr)) {
         return false;
@@ -492,7 +461,6 @@ bool HxStr::operator!=(const HxStr &right) const {
     return strcmp(right.mStr, mStr) != 0;
 }
 
-// NTSC-U/C: 0x004b80a0, PAL: 0x004f6460
 bool HxStr::operator==(const char *pszRight) const {
     if (IsBlank(mStr) && IsBlank(pszRight)) {
         return true;
@@ -503,7 +471,6 @@ bool HxStr::operator==(const char *pszRight) const {
     return strcmp(pszRight, mStr) == 0;
 }
 
-// NTSC-U/C: 0x004b8120, PAL: 0x004f6498
 bool HxStr::operator==(const HxStr &right) const {
     if (IsBlank(mStr) && IsBlank(right.mStr)) {
         return true;
@@ -514,7 +481,6 @@ bool HxStr::operator==(const HxStr &right) const {
     return strcmp(right.mStr, mStr) == 0;
 }
 
-// NTSC-U/C: 0x004b81a8, PAL: 0x004f64c0
 bool HxStr::operator<(const HxStr &right) const {
     if (IsBlank(mStr)) {
         return !IsBlank(right.mStr);
@@ -526,12 +492,10 @@ bool HxStr::operator<(const HxStr &right) const {
 }
 #endif
 
-// NTSC-U/C: 0x004b8e00, PAL: 0x004f6d78
 std::ostream &HxStr::Print(std::ostream &stream) const {
     return stream << mStr;
 }
 
-// NTSC-U/C: 0x004b8e28, PAL: 0x004f6da0
 std::ostream &operator<<(std::ostream &stream, const HxStr &text) {
     stream << text.mStr;
     return stream;

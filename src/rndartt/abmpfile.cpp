@@ -90,7 +90,6 @@ inline unsigned char SwapNibbles(unsigned char nByte) {
 
 } // namespace
 
-// NTSC-U/C: 0x0061c688, PAL: 0x0065d218
 int ABmpFile::StartRead() {
     // NTSC-U/C: 0x008e68e0, PAL: 0x0092b8e0
     static BmpFileHeader buffHdr;
@@ -136,7 +135,6 @@ int ABmpFile::StartRead() {
     return kAGfxFileOk;
 }
 
-// NTSC-U/C: 0x0061c860, PAL: 0x0065d3f0
 int ABmpFile::ReadFrame(ABitmap &image, int *pbEnd) {
     if (mImageRead != 0) {
         *pbEnd = 1;
@@ -201,7 +199,6 @@ int ABmpFile::ReadFrame(ABitmap &image, int *pbEnd) {
     return kAGfxFileOk;
 }
 
-// NTSC-U/C: 0x0061ca78, PAL: 0x0065d608
 int ABmpFile::Write(const ABitmap &bitmap) {
     // NTSC-U/C: 0x008e6918, PAL: 0x0092b918
     static BmpFileHeader buffHdr;
@@ -277,7 +274,6 @@ int ABmpFile::Write(const ABitmap &bitmap) {
     return kAGfxFileOk;
 }
 
-// NTSC-U/C: 0x0061cde0, PAL: 0x0065d970
 APalette *ABmpFile::ReadPalette() {
     unsigned int aEntries[kPaletteEntryCount];
     memset(aEntries, 0, sizeof(aEntries));
@@ -291,7 +287,6 @@ APalette *ABmpFile::ReadPalette() {
     return new APalette(aEntries, mColorCount);
 }
 
-// NTSC-U/C: 0x0061d5c0, PAL: 0x0065e150
 int ABmpFile::ReadBitsFromFile(ABitmap *pImage) {
     fseek(mFile, mPixelOffset, SEEK_SET);
     if (mCompression == kCompressionNone) {
@@ -300,7 +295,6 @@ int ABmpFile::ReadBitsFromFile(ABitmap *pImage) {
     return ReadBitmapCompressed(pImage);
 }
 
-// NTSC-U/C: 0x0061cef8, PAL: 0x0065da88
 int ABmpFile::ReadBitmapNotCompressed(ABitmap *pImage) {
     unsigned char *pRow = static_cast<unsigned char *>(pImage->mPixels);
     int nStride = pImage->mBytesPerRow;
@@ -338,7 +332,6 @@ int ABmpFile::ReadBitmapNotCompressed(ABitmap *pImage) {
     return kAGfxFileOk;
 }
 
-// NTSC-U/C: 0x0061d0e8, PAL: 0x0065dc78
 int ABmpFile::ReadBitmapCompressed(ABitmap *pImage) {
     unsigned char *pRow = static_cast<unsigned char *>(pImage->mPixels);
     int nStride = pImage->mBytesPerRow;
@@ -436,7 +429,6 @@ int ABmpFile::ReadBitmapCompressed(ABitmap *pImage) {
     return kAGfxFileOk;
 }
 
-// NTSC-U/C: 0x0061d620, PAL: 0x0065e1b0
 void Convert24To32InPlace(unsigned char *pPixels, int nCount) {
     const unsigned char *pSource = pPixels + (nCount - 1) * kRGBByteCount;
     unsigned char *pDest = pPixels + (nCount - 1) * kRGBAByteCount;

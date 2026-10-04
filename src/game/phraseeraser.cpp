@@ -2,14 +2,12 @@
 
 #include "gs/phrasemgr.h"
 
-// NTSC-U/C: 0x001b99c8, PAL: 0x001bf7a0
 PhraseEraser::PhraseEraser(
     int nTrack, int nSecondArgument, PhraseMgr *pPhraseMgr, int nFourthArgument, int nFifthArgument)
     : mActive(0), mFifthArgument(nFifthArgument), mTrack(nTrack), mPhraseMgr(pPhraseMgr),
       mSecondArgument(nSecondArgument), mFourthArgument(nFourthArgument) {
 }
 
-// NTSC-U/C: 0x001b9a60, PAL: 0x001bf838
 void PhraseEraser::OnEraseMsg(EraseMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -22,11 +20,9 @@ void PhraseEraser::OnEraseMsg(EraseMsg *pMsg) {
     EraseBar(nBar);
 }
 
-// NTSC-U/C: 0x001b9ac8, PAL: 0x001bf8a0
 void PhraseEraser::EraseBar(int) {
 }
 
-// NTSC-U/C: 0x001b9ad0, PAL: 0x001bf8a8
 void PhraseEraser::DispatchPriv(Message *pMsg) {
     if (pMsg->Type() != EraseMsg::sID) {
         return;

@@ -15,7 +15,6 @@ constexpr int kTagNone = 0x6e6f6e65;     // 'none'
 
 } // namespace
 
-// NTSC-U/C: 0x00100f40, PAL: 0x00100f40
 void MetControllerReading::Print(std::ostream &stream) const {
     switch (mTag) {
     case kTagKeyboard:
@@ -34,7 +33,6 @@ void MetControllerReading::Print(std::ostream &stream) const {
     stream << '.' << mPadIndex << '.' << mButton << ':' << mValue;
 }
 
-// NTSC-U/C: 0x00101060, PAL: 0x00101060
 OBStream &operator<<(OBStream &stream, const MetControllerReading &reading) {
     int tag = reading.mTag;
     int padIndex = reading.mPadIndex;
@@ -47,7 +45,6 @@ OBStream &operator<<(OBStream &stream, const MetControllerReading &reading) {
     return stream;
 }
 
-// NTSC-U/C: 0x00101120, PAL: 0x00101120
 IBStream &operator>>(IBStream &stream, MetControllerReading &reading) {
     int tag;
     stream.ReadLE(&tag, sizeof(tag))

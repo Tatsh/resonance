@@ -44,21 +44,17 @@ std::vector<RndActiveLoadEntry> gInProgressRndFiles;
 
 } // namespace
 
-// NTSC-U/C: 0x003f7c00, PAL: 0x00430428
 RndAsyncLoader::RndAsyncLoader(const HxStr &directory, const HxStr &file, int nZone)
     : mDirectory(directory), mFile(file), mPending(1), mFileRead(0), mFinished(0), mZone(nZone) {
 }
 
-// NTSC-U/C: 0x003f7e50, PAL: 0x00430688
 RndAsyncLoader::RndAsyncLoader() : mPending(1), mFileRead(0), mFinished(0), mZone(kNoZone) {
 }
 
-// NTSC-U/C: 0x003f8178, PAL: 0x004309b8
 RndAsyncLoader::~RndAsyncLoader() {
     Unload();
 }
 
-// NTSC-U/C: 0x003f8030, PAL: 0x00430870
 void RndAsyncLoader::Cancel() {
     if (mFileRead != 0) {
         return;
@@ -80,7 +76,6 @@ void RndAsyncLoader::Cancel() {
     }
 }
 
-// NTSC-U/C: 0x003f8240, PAL: 0x00430aa0
 void RndAsyncLoader::Unload() {
     Cancel();
     if (mPending != 0) {
@@ -98,7 +93,6 @@ void RndAsyncLoader::Unload() {
     mFileRead = 0;
 }
 
-// NTSC-U/C: 0x003f8308, PAL: 0x00430b68
 void RndAsyncLoader::Enqueue() {
     for (const auto &entry : gInProgressRndFiles) {
         if (entry.mRequest == this) {
@@ -122,7 +116,6 @@ void RndAsyncLoader::Enqueue() {
     gPendingRndFiles.push_back(this);
 }
 
-// NTSC-U/C: 0x003f8460, PAL: 0x00430cc0
 void RndAsyncLoader::HarvestLoadedObjects() {
     mLoadedObjects = Rnd::TheManager.mLoaded;
 
@@ -146,7 +139,6 @@ void RndAsyncLoader::HarvestLoadedObjects() {
     }
 }
 
-// NTSC-U/C: 0x003f8930, PAL: 0x00431190
 void RndAsyncLoader::PollAsyncLoads() {
     const int nPreviousZone = ZoneGetCurrent();
     ZoneSetCurrent(g_nRndLoaderZone);
@@ -215,7 +207,6 @@ void RndAsyncLoader::PollAsyncLoads() {
     ZoneSetCurrent(nPreviousZone);
 }
 
-// NTSC-U/C: 0x003f8fc0, PAL: 0x00431908
 int RndAsyncLoader::Poll(float *pfProgress) {
     if (mPending != 0) {
         *pfProgress = 0;
@@ -246,7 +237,6 @@ int RndAsyncLoader::Poll(float *pfProgress) {
     return 0;
 }
 
-// NTSC-U/C: 0x003fc708, PAL: 0x00435108
 void RndAsyncLoader::Restart(const HxStr &directory, const HxStr &file) {
     Cancel();
     mDirectory = directory;

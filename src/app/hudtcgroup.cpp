@@ -6,7 +6,6 @@
 #include "rnd/text.h"
 #include "rnd/view.h"
 
-// NTSC-U/C: 0x00417a60, PAL: 0x004518a8
 HudTcGroup::HudTcGroup() {
     mView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr("tc_hi_group.view")));
 #ifdef VIDEO_STANDARD_PAL
@@ -16,7 +15,6 @@ HudTcGroup::HudTcGroup() {
     SetShowing(0);
 }
 
-// NTSC-U/C: 0x00429e08, PAL: 0x00465448
 void HudTcGroup::SetShowing(int nShowing) {
     mView->SetShowing(nShowing);
 }

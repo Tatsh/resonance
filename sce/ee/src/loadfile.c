@@ -149,7 +149,6 @@ static int loadFileVersionMismatch(void) {
     return memcmp(g_abLoadFileLibraryVersion, g_pszLoadFileAltVersion, kVersionSize) != 0;
 }
 
-// NTSC-U/C: 0x005fb3c8, PAL: 0x0063c0d8
 int sceSifLoadFileReset(void) {
     _bind_check = -1;
     memset(_lfversion, 0, kVersionSize);
@@ -185,7 +184,6 @@ static int loadModuleBuffer(const void *pImage, int nArgs, const char *pArgs, in
     return g_loadFileArgs.nResult;
 }
 
-// NTSC-U/C: 0x005fb608, PAL: 0x0063c318
 int sceSifStopModule(int modid, int args, const char *argp, int *result) {
     if (_lf_bind() < 0) {
         return kLoadFileErrorBind;
@@ -214,7 +212,6 @@ int sceSifStopModule(int modid, int args, const char *argp, int *result) {
     return g_loadFileArgs.nResult;
 }
 
-// NTSC-U/C: 0x005fb810, PAL: 0x0063c520
 int sceSifUnloadModule(int modid) {
     if (_lf_bind() < 0) {
         return kLoadFileErrorBind;
@@ -237,7 +234,6 @@ int sceSifUnloadModule(int modid) {
     return g_loadFileArgs.nResult;
 }
 
-// NTSC-U/C: 0x005fb8a0, PAL: 0x0063c5b0
 int sceSifSearchModuleByName(const char *modulename) {
     if (_lf_bind() < 0) {
         return kLoadFileErrorBind;
@@ -261,7 +257,6 @@ int sceSifSearchModuleByName(const char *modulename) {
     return g_loadFileArgs.nResult;
 }
 
-// NTSC-U/C: 0x005fb940, PAL: 0x0063c650
 int sceSifSearchModuleByAddress(const void *addr) {
     if (_lf_bind() < 0) {
         return kLoadFileErrorBind;
@@ -284,14 +279,12 @@ int sceSifSearchModuleByAddress(const void *addr) {
     return g_loadFileArgs.nResult;
 }
 
-// NTSC-U/C: 0x005fb9d0, PAL: 0x0063c6e0
 int sceSifLoadModuleBuffer(const void *addr, int args, const char *argp) {
     int nResult;
 
     return loadModuleBuffer(addr, args, argp, &nResult);
 }
 
-// NTSC-U/C: 0x005fb9f0, PAL: 0x0063c700
 int sceSifLoadStartModuleBuffer(const void *addr, int args, const char *argp, int *result) {
     return loadModuleBuffer(addr, args, argp, result);
 }
@@ -328,14 +321,12 @@ loadModule(const char *pPath, int nArgs, const char *pArgs, int *pResult, int nF
     return g_loadFileArgs.nResult;
 }
 
-// NTSC-U/C: 0x005fbc38, PAL: 0x0063c948
 int sceSifLoadModule(const char *filename, int args, const char *argp) {
     int nResult;
 
     return loadModule(filename, args, argp, &nResult, kLoadFileFunctionModule);
 }
 
-// NTSC-U/C: 0x005fbc58, PAL: 0x0063c968
 int sceSifLoadStartModule(const char *filename, int args, const char *argp, int *result) {
     return loadModule(filename, args, argp, result, kLoadFileFunctionModule);
 }
@@ -371,18 +362,14 @@ static int loadElf(const char *pPath, const char *pSection, sceExecData *pData, 
     return 0;
 }
 
-// NTSC-U/C: 0x005fbd80, PAL: 0x0063ca90
 int sceSifLoadElfPart(const char *name, const char *secname, sceExecData *data) {
     return loadElf(name, secname, data, kLoadFileFunctionElf);
 }
 
-// NTSC-U/C: 0x005fbda0, PAL: 0x0063cab0
 int sceSifLoadElf(const char *name, sceExecData *data) {
     return loadElf(name, "all", data, kLoadFileFunctionElf);
 }
 
-// NTSC-U/C: 0x005fbdc8, PAL: 0x0063cad8
-// Unlike the other calls, the value calls do not check the server version.
 int sceSifGetIopAddr(unsigned int addr, void *value, int type) {
     if (_lf_bind() < 0) {
         return kLoadFileErrorBind;
@@ -419,7 +406,6 @@ int sceSifGetIopAddr(unsigned int addr, void *value, int type) {
     return 0;
 }
 
-// NTSC-U/C: 0x005fbeb8, PAL: 0x0063cbc8
 int sceSifSetIopAddr(unsigned int addr, const void *value, int type) {
     if (_lf_bind() < 0) {
         return kLoadFileErrorBind;

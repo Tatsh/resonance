@@ -229,34 +229,54 @@ private:
                           const std::vector<unsigned short> &vertIndices,
                           const std::vector<unsigned short> &primIndices);
 
-    // Submit every face run of mFacesOwner through VU1. 0x006019e0.
-    //
-    // Advances the triangle counter by the face count, opens a VIF DMA chain, and builds the
-    // render-state word from pXfm and mSphere. Then, once per run: the parameter quadword goes to
-    // VU address 0x12 as {mVertIndices count, mIndexCount / 3, render state, nClip}, the selected
-    // vertices follow it contiguously, the packed index data follows those, and the run enters the
-    // microprogram. With a stage texture bound each vertex contributes all four of its quadwords
-    // under the default write cycle and the program entry is address 0; without one each vertex
-    // contributes three under STCYCL CL=4 WL=3, which retains the destination stride of four, and
-    // the entry is 0x4ce. The textured path also closes and reopens the UNPACK every 252
-    // destination quadwords, because the VIFcode NUM field is eight bits.
+    /**
+     * Submit every face run of mFacesOwner through VU1.
+     *
+     * Advances the triangle counter by the face count, opens a VIF DMA chain, and builds the
+     * render-state word from pXfm and mSphere. Then, once per run: the parameter quadword goes to
+     * VU address 0x12 as {mVertIndices count, mIndexCount / 3, render state, nClip}, the selected
+     * vertices follow it contiguously, the packed index data follows those, and the run enters the
+     * microprogram. With a stage texture bound each vertex contributes all four of its quadwords
+     * under the default write cycle and the program entry is address 0; without one each vertex
+     * contributes three under STCYCL CL=4 WL=3, which retains the destination stride of four, and
+     * the entry is 0x4ce. The textured path also closes and reopens the UNPACK every 252
+     * destination quadwords, because the VIFcode NUM field is eight bits.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006019e0
+     * @ghidraAddress PAL: 0x006425d0
+     */
     void DrawFacesVU1(const float *pXfm, int nClip);
 
-    // Submit every edge run of mFacesOwner through VU1. 0x00601de0.
-    //
-    // Advances the line counter by the edge count and builds the render-state word from pXfm and
-    // the material specular colour, or from white when the mesh has no material. Each run then
-    // sends its parameter quadword to VU address 8, the vertex positions to address 9 as one
-    // quadword each under STCYCL CL=2 WL=1, and the packed index data after those. Only the first
-    // quadword of each vertex travels, which is why an edge needs no normal, no colour, and no
-    // texture coordinate. As with faces, the first run of the list enters through MSCAL, at
-    // 0x1c2, and every run after it through MSCNT.
+    /**
+     * Submit every edge run of mFacesOwner through VU1.
+     *
+     * Advances the line counter by the edge count and builds the render-state word from pXfm and
+     * the material specular colour, or from white when the mesh has no material. Each run then
+     * sends its parameter quadword to VU address 8, the vertex positions to address 9 as one
+     * quadword each under STCYCL CL=2 WL=1, and the packed index data after those. Only the first
+     * quadword of each vertex travels, which is why an edge needs no normal, no colour, and no
+     * texture coordinate. As with faces, the first run of the list enters through MSCAL, at 0x1c2,
+     * and every run after it through MSCNT.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00601de0
+     * @ghidraAddress PAL: 0x006429d0
+     */
     void DrawEdgesVU1(const float *pXfm);
 
-    // Submit the faces of mFacesOwner from the already transformed vertex buffer. 0x00601410.
+    /**
+     * Submit the faces of mFacesOwner from the already transformed vertex buffer.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00601410
+     * @ghidraAddress PAL: 0x00642000
+     */
     void DrawFacesSoftware(int nClip);
 
-    // Submit the edges of mFacesOwner from the already transformed vertex buffer. 0x006017c0.
+    /**
+     * Submit the edges of mFacesOwner from the already transformed vertex buffer.
+     *
+     * @ghidraAddress NTSC-U/C: 0x006017c0
+     * @ghidraAddress PAL: 0x006423b0
+     */
     void DrawEdgesSoftware(int nClip);
 };
 

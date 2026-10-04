@@ -51,7 +51,6 @@ std::vector<HxStr> &LevelNameStorage() {
 
 } // namespace
 
-// NTSC-U/C: 0x003cc498, PAL: 0x00403d48
 HxStr DifficultyName(int nDifficulty) {
     HxStr name("");
     switch (nDifficulty) {
@@ -77,7 +76,6 @@ HxStr DifficultyName(int nDifficulty) {
     return name;
 }
 
-// NTSC-U/C: 0x003cc7a0, PAL: 0x004040a8
 void RebuildStageLists() {
     QueryConfigStrings(&LevelNameStorage(), kLevelListConfigCode);
 
@@ -103,7 +101,6 @@ void RebuildStageLists() {
     }
 }
 
-// NTSC-U/C: 0x003ccab0, PAL: 0x004043e8
 void RebuildArenaLists() {
     std::vector<HxStr> soloNames;
     std::vector<HxStr> localNames;
@@ -131,17 +128,14 @@ void RebuildArenaLists() {
     std::sort(g_localArenaList.begin(), g_localArenaList.end());
 }
 
-// NTSC-U/C: 0x003d06b8, PAL: 0x00408478
 std::vector<HxStr> &GetLevelNames() {
     return LevelNameStorage();
 }
 
-// NTSC-U/C: 0x003d06d8, PAL: 0x00408498
 std::vector<StageListEntry> *GetStageList(int nStage) {
     return &g_stageLists[nStage - 1];
 }
 
-// NTSC-U/C: 0x003d06f8, PAL: 0x004084b8
 std::vector<ArenaListEntry> *GetArenaList() {
     if (Application::shared()->GetGameMode() == kGameModeLocal) {
         return &g_localArenaList;
@@ -149,7 +143,6 @@ std::vector<ArenaListEntry> *GetArenaList() {
     return &g_soloArenaList;
 }
 
-// NTSC-U/C: 0x003d0a40, PAL: 0x00408818
 MemcardConnectState NextCardSlot(const MemcardConnectState &slot) {
     MemcardConnectState next;
     if (slot.mPortSlot == kCardPort1) {
@@ -170,7 +163,6 @@ MemcardConnectState NextCardSlot(const MemcardConnectState &slot) {
     return next;
 }
 
-// NTSC-U/C: 0x003d0b98, PAL: 0x00408990
 HxStr FirstCardSlotName() {
     HxStr name;
 #ifdef VIDEO_STANDARD_PAL

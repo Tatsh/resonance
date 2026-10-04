@@ -152,12 +152,20 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // NTSC-U/C: 0x0029cb30, PAL: 0x002ba518
-    // Step the carousel one identity, wrapping at both ends, and refresh the preview.
+    /**
+     * Step the carousel one identity, wrapping at both ends, and refresh the preview.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0029cb30
+     * @ghidraAddress PAL: 0x002ba518
+     */
     void StepSelection(const MetScreenCommand *pCommand);
 
-    // NTSC-U/C: 0x0029cbb8, PAL: 0x002ba5a0
-    // Burn the selected identity into `cf_char.mat`.
+    /**
+     * Burn the selected identity into `cf_char.mat`.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0029cbb8
+     * @ghidraAddress PAL: 0x002ba5a0
+     */
     void RefreshSelection();
 
     std::vector<MetPersonaData *> *mIdentities; // +0x8c, the pre-fab list slot 5 takes

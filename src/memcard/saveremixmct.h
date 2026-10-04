@@ -194,29 +194,48 @@ public:
 #endif
 
 private:
-    // NTSC-U/C: 0x00179c28, PAL: 0x0017dd60
-    // Appends a summary of one directory to infos, with the directory number parsed out of name
-    // and no highest file number yet.
+    /**
+     * Appends a summary of one directory to infos, with the directory number parsed out of name and
+     * no highest file number yet.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00179c28
+     * @ghidraAddress PAL: 0x0017dd60
+     */
     static void AppendDirInfo(std::vector<RemixDirInfo> &infos, const HxStr &name, int nEntryCount);
 
-    // NTSC-U/C: 0x00179d60, PAL: 0x0017ded0
-    // Returns the first directory with room, or a fresh name one past the highest directory number.
+    /**
+     * Returns the first directory with room, or a fresh name one past the highest directory number.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00179d60
+     * @ghidraAddress PAL: 0x0017ded0
+     */
     static HxStr ChooseTargetDir(const std::vector<RemixDirInfo> &infos);
 
-    // NTSC-U/C: 0x0017a928, PAL: 0x0017ed88
-    // Moves the first entry of mDirNames into mCurrentDir, erases it, rewinds mStream, and reads
-    // `<dir>/index` through a fresh inner LoadFileMCT.
+    /**
+     * Moves the first entry of mDirNames into mCurrentDir, erases it, rewinds mStream, and reads
+     * `<dir>/index` through a fresh inner LoadFileMCT.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0017a928
+     * @ghidraAddress PAL: 0x0017ed88
+     */
     void ReadNextIndex();
 
-    // NTSC-U/C: 0x0017ab50, PAL: 0x0017f000
-    // Writes mRemixName into the payload in the shared log stream, rewinds mStream, and reads the
-    // target directory's index through a fresh inner LoadFileMCT.
+    /**
+     * Writes mRemixName into the payload in the shared log stream, rewinds mStream, and reads the
+     * target directory's index through a fresh inner LoadFileMCT.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0017ab50
+     * @ghidraAddress PAL: 0x0017f000
+     */
     void ReadTargetIndex();
 
 #ifndef VIDEO_STANDARD_PAL
-    // NTSC-U/C: 0x0017ba98
-    // Saves the payload in the shared log stream as `<target>/<mPayloadFileName>`, without icon
-    // files, through a fresh inner SaveFileMCT.
+    /**
+     * Saves the payload in the shared log stream as `<target>/<mPayloadFileName>`, without icon
+     * files, through a fresh inner SaveFileMCT.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0017ba98
+     */
     void WritePayload();
 #endif
 

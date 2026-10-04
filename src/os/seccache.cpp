@@ -23,7 +23,6 @@ int g_nSectorCacheZone = kNoZone;
 
 SectorCache gSectorCache;
 
-// NTSC-U/C: 0x00554fb8, PAL: 0x00595640
 void SectorCacheInit(int nRows) {
     int nSaved = ZoneGetCurrent();
     int nZone = FindZoneByName(kSectorCacheZoneName);
@@ -52,7 +51,6 @@ void SectorCacheInit(int nRows) {
     ZoneSetCurrent(nSaved);
 }
 
-// NTSC-U/C: 0x005550c8, PAL: 0x00595750
 void SectorCacheTerm() {
     SectorCacheRow *pRow = gSectorCache.mRows;
     for (int i = 0; i < gSectorCache.mRowCount; ++i) {
@@ -72,7 +70,6 @@ void SectorCacheTerm() {
     gSectorCache.mRowCount = 0;
 }
 
-// NTSC-U/C: 0x00555298, PAL: 0x00595920
 void SectorCacheRemove(int nFile) {
     for (int i = 0; i < gSectorCache.mRowCount; ++i) {
         SectorCacheRow *pRow = &gSectorCache.mRows[i];
@@ -84,7 +81,6 @@ void SectorCacheRemove(int nFile) {
     }
 }
 
-// NTSC-U/C: 0x00555190, PAL: 0x00595818
 SectorCacheRow *SectorCacheFind(int nFile, int nSector) {
     for (int i = 0; i < gSectorCache.mRowCount; ++i) {
         SectorCacheRow *pRow = &gSectorCache.mRows[i];
@@ -100,7 +96,6 @@ SectorCacheRow *SectorCacheFind(int nFile, int nSector) {
     return nullptr;
 }
 
-// NTSC-U/C: 0x005552f0, PAL: 0x00595978
 void SectorCacheLock(int nFile, int nSector) {
     // The inlined search advances the clock over the row it finds, and the sentinel below then
     // replaces the value it wrote. One clock tick is therefore spent for nothing.
@@ -112,12 +107,10 @@ void SectorCacheLock(int nFile, int nSector) {
     pRow->mStamp = kSectorCacheLocked;
 }
 
-// NTSC-U/C: 0x00555398, PAL: 0x00595a20
 void SetSectorRowLocked(SectorCacheRow *pRow) {
     pRow->mStamp = kSectorCacheLocked;
 }
 
-// NTSC-U/C: 0x005553a8, PAL: 0x00595a30
 void UnlockCachedSector(int nFile, int nSector) {
     SectorCacheRow *pRow = SectorCacheFind(nFile, nSector);
     if (pRow == nullptr) {
@@ -128,7 +121,6 @@ void UnlockCachedSector(int nFile, int nSector) {
     ++gCurrTimestamp;
 }
 
-// NTSC-U/C: 0x005554a0, PAL: 0x00595b28
 void SectorCacheDump() {
     printf("SECTOR CACHE:\n");
     for (int i = 0; i < gSectorCache.mRowCount; ++i) {
@@ -142,7 +134,6 @@ void SectorCacheDump() {
     }
 }
 
-// NTSC-U/C: 0x00554e50, PAL: 0x005954d8
 SectorCacheRow *SectorCacheGetLRU(int nFile, int nSector) {
     unsigned nOldest = kSectorCacheStampCeiling;
     SectorCacheRow *pChosen = nullptr;

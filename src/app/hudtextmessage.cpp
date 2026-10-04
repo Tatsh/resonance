@@ -20,7 +20,6 @@ constexpr float kFadeLength = 250.0f;
 
 } // namespace
 
-// NTSC-U/C: 0x00416dd8, PAL: 0x00450ac0
 HudTextMessage::HudTextMessage(const HxStr &name)
     : mText(nullptr), mStart(kMessageIdle), mActive(0) {
     mBlur = dynamic_cast<Rnd::Blur *>(Rnd::TheManager.Find(name + ".blur"));
@@ -35,7 +34,6 @@ HudTextMessage::HudTextMessage(const HxStr &name)
     }
 }
 
-// NTSC-U/C: 0x00429b58, PAL: 0x00465198
 void HudTextMessage::Show(const HxStr &text, float flScale, float flHold) {
     if (mActive != 0) {
         return;
@@ -52,13 +50,11 @@ void HudTextMessage::Show(const HxStr &text, float flScale, float flHold) {
     mAnim->SetFrame(0.0f);
 }
 
-// NTSC-U/C: 0x00429af8, PAL: 0x00465138
 void HudTextMessage::Hide() {
     mText->SetShowing(0);
     mActive = 0;
 }
 
-// NTSC-U/C: 0x00429c20, PAL: 0x00465260
 void HudTextMessage::SetFrame(float flTime) {
     if (mStart == kMessageIdle) {
         return;

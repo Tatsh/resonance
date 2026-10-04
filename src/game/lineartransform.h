@@ -34,9 +34,13 @@ public:
     int Apply(int nValue);
 
 private:
-    // Computes mSlope and mOffset in single precision from the four ends, and orders the two
-    // output ends into mLower and mUpper.
-    // NTSC-U/C: 0x00536f50, PAL: 0x00576810
+    /**
+     * Computes mSlope and mOffset in single precision from the four ends, and orders the two output
+     * ends into mLower and mUpper.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00536f50
+     * @ghidraAddress PAL: 0x00576810
+     */
     void Recalc();
 
     int mInMin;    // +0x00

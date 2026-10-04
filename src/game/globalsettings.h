@@ -159,9 +159,14 @@ public:
     GameOptions mGameOptions;
 
 private:
-    // NTSC-U/C: 0x00188b90, PAL: 0x0018e550
-    // Read and discard the macro list of a record older than version 3. The body does not read
-    // this object.
+    /**
+     * Read and discard the macro list of a record older than version 3.
+     *
+     * The body does not read this object.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00188b90
+     * @ghidraAddress PAL: 0x0018e550
+     */
     void SkipLegacyMacros(IBStream &stream);
 
     // MetKeyboardScreen's default macros, which the constructor copies into mMacros. +0x3c

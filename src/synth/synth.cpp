@@ -129,7 +129,6 @@ private:
 
 } // namespace
 
-// NTSC-U/C: 0x00139fd0, PAL: 0x0013a918
 void Synth::Setup() {
     for (unsigned char nChannel = 0; nChannel < kChannelCount; ++nChannel) {
         PlayMidi(kStatusPitchBend | nChannel, 0, kPitchBendCentre);
@@ -140,7 +139,6 @@ void Synth::Setup() {
     }
 }
 
-// NTSC-U/C: 0x0013a480, PAL: 0x0013adc8
 void Synth::FadeOut(int nDurationMs) {
     SynthFade *pFade = new SynthFade(this, nDurationMs);
     pFade->Start(kFadeEpochNow);
@@ -149,79 +147,62 @@ void Synth::FadeOut(int nDurationMs) {
     }
 }
 
-// NTSC-U/C: 0x0013a398, PAL: 0x0013ace0
 Synth::~Synth() {
 }
 
-// NTSC-U/C: 0x0013a1d0, PAL: 0x0013ab18
 void Synth::LoadBankSet4() {
 }
 
-// NTSC-U/C: 0x0013a1d8, PAL: 0x0013ab20
 void Synth::LoadBankSet5() {
 }
 
-// NTSC-U/C: 0x0013a1e0, PAL: 0x0013ab28
 void Synth::LoadBankSet6() {
 }
 
-// NTSC-U/C: 0x0013a1e8, PAL: 0x0013ab30
 void Synth::UnusedHook() {
 }
 
-// NTSC-U/C: 0x0013a1f0, PAL: 0x0013ab38
 void Synth::UnloadBanks() {
 }
 
-// NTSC-U/C: 0x0013a1f8, PAL: 0x0013ab40
 void Synth::OnPlayStarted() {
 }
 
-// NTSC-U/C: 0x0013a200, PAL: 0x0013ab48
 void Synth::SelectBank([[maybe_unused]] unsigned char nChannel,
                        [[maybe_unused]] unsigned char nBank) {
 }
 
-// NTSC-U/C: 0x0013a208, PAL: 0x0013ab50
 void Synth::SetStereo([[maybe_unused]] int bStereo) {
 }
 
-// NTSC-U/C: 0x0013a210, PAL: 0x0013ab58
 void Synth::SetRemixMode([[maybe_unused]] int bRemix) {
 }
 
-// NTSC-U/C: 0x0013a218, PAL: 0x0013ab60
 void Synth::SetPaused([[maybe_unused]] int bPaused) {
 }
 
-// NTSC-U/C: 0x0013a220, PAL: 0x0013ab68
 void Synth::AllNotesOff() {
     for (unsigned char nChannel = 0; nChannel < kChannelCount; ++nChannel) {
         PlayMidi(kStatusControlChange | nChannel, kControllerAllNotesOff, 0);
     }
 }
 
-// NTSC-U/C: 0x0013a288, PAL: 0x0013abd0
 void Synth::AllNotesOffExceptSfxChannel() {
     for (unsigned char nChannel = 0; nChannel < kSfxChannel; ++nChannel) {
         PlayMidi(kStatusControlChange | nChannel, kControllerAllNotesOff, 0);
     }
 }
 
-// NTSC-U/C: 0x0013a2f0, PAL: 0x0013ac38
 void Synth::SetChannelVolume(unsigned char nVolume) {
     for (unsigned char nChannel = 0; nChannel < kChannelCount; ++nChannel) {
         PlayMidi(kStatusControlChange | nChannel, kControllerChannelVolume, nVolume);
     }
 }
 
-// The address below is the out-of-line copy.
-// NTSC-U/C: 0x0013a360, PAL: 0x0013aca8
 inline void Synth::OnStdMidi(StdMidiMsg *pMsg) {
     PlayMidi(pMsg->mStatus, pMsg->mData1, pMsg->mData2);
 }
 
-// NTSC-U/C: 0x0013a570, PAL: 0x0013aeb8
 void Synth::DispatchPriv(Message *pMsg) {
     if (pMsg->Type() != static_cast<int>(StdMidiMsg::sID)) {
         return;

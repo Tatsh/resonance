@@ -50,7 +50,6 @@ inline void FillText(const TipText &entry) {
 
 } // namespace
 
-// NTSC-U/C: 0x00309018, PAL: 0x0032e398
 MetMultiTips4Screen::MetMultiTips4Screen(MetRenderer *pRenderer, int nPriority)
     : MetMultiTipsBaseScreen(pRenderer,
                              nPriority,
@@ -61,7 +60,6 @@ MetMultiTips4Screen::MetMultiTips4Screen(MetRenderer *pRenderer, int nPriority)
                              HxStr(kNextScreen)) {
 }
 
-// NTSC-U/C: 0x003091e8, PAL: 0x0032e5e0
 void MetMultiTips4Screen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     // The binary expands this loop into one call per text.
@@ -70,11 +68,9 @@ void MetMultiTips4Screen::ResolveContainerViews() {
     }
 }
 
-// NTSC-U/C: 0x0030ddb8, PAL: 0x003339a8
 MetMultiTips4Screen::~MetMultiTips4Screen() {
 }
 
-// NTSC-U/C: 0x0030de38, PAL: 0x00333a50
 MetMultiTips4Screen *MetMultiTips4Screen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMultiTips4Screen(pRenderer, nPriority);
 }

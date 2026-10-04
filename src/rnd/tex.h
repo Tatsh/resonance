@@ -434,13 +434,26 @@ public:
     int mFlags;
 
 private:
-    // Queue the base file and, when mFlags has bit 0x4, every numbered mip file ("_m1", "_m2",
-    // and on) that exists, stopping at the first one missing. Reports false only when a queued
-    // read fails, which QueueMipRead() never reports.
+    /**
+     * Queue the base file and, when mFlags has bit 0x4, every numbered mip file ("_m1", "_m2", and
+     * on) that exists, stopping at the first one missing.
+     *
+     * Reports false only when a queued read fails, which QueueMipRead() never reports.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004e4208
+     * @ghidraAddress PAL: 0x00522ae0
+     */
     bool LoadMipFiles();
 
-    // Queue an asynchronous read of the compressed cache copy of one bitmap file, and record a new
-    // pending mip level for it with a null bitmap. Always reports 1.
+    /**
+     * Queue an asynchronous read of the compressed cache copy of one bitmap file, and record a new
+     * pending mip level for it with a null bitmap.
+     *
+     * Always reports 1.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004e4300
+     * @ghidraAddress PAL: 0x00522bd8
+     */
     int QueueMipRead(const char *pszPath);
 
 protected:

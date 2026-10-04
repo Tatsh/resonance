@@ -19,22 +19,18 @@ constexpr int kButtonStateDisabled = 3;
 
 } // namespace
 
-// NTSC-U/C: 0x001fecc8, PAL: 0x00206198
 void *MetButtonList::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kAllocationTag);
 }
 
-// NTSC-U/C: 0x001fece8, PAL: 0x002061b8
 void MetButtonList::operator delete(void *pBlock) {
     OperatorDeleteOverride(pBlock, kAllocationTag);
 }
 
-// NTSC-U/C: 0x001fca30, PAL: 0x00203ed8
 MetButtonList::~MetButtonList() {
     Clear();
 }
 
-// NTSC-U/C: 0x001fcc40, PAL: 0x002040e8
 void MetButtonList::SelectPrevious() {
     const int nStart = mSelected;
     int bDone = 0;
@@ -59,7 +55,6 @@ void MetButtonList::SelectPrevious() {
     ChangeButtonSelected(nStart, mSelected);
 }
 
-// NTSC-U/C: 0x001fcd10, PAL: 0x002041b8
 void MetButtonList::SelectNext() {
     const int nStart = mSelected;
     int bDone = 0;
@@ -84,7 +79,6 @@ void MetButtonList::SelectNext() {
     ChangeButtonSelected(nStart, mSelected);
 }
 
-// NTSC-U/C: 0x001feed8, PAL: 0x002063a8
 void MetButtonList::ChangeButtonSelected(int nPreviousIndex, int nIndex) {
     if (nPreviousIndex == nIndex) {
         return;
@@ -95,12 +89,10 @@ void MetButtonList::ChangeButtonSelected(int nPreviousIndex, int nIndex) {
     mButtons[nIndex]->SetState(kButtonStateSelected);
 }
 
-// NTSC-U/C: 0x001fedb0, PAL: 0x00206280
 void MetButtonList::Clear() {
     mButtons.erase(mButtons.begin(), mButtons.end());
 }
 
-// NTSC-U/C: 0x001fcb28, PAL: 0x00203fd0
 void MetButtonList::Add(const HxStr &objectName, const HxStr &labelText) {
     Rnd::Button *pButton = dynamic_cast<Rnd::Button *>(Rnd::TheManager.Find(objectName));
     if (pButton == nullptr) {
@@ -109,7 +101,6 @@ void MetButtonList::Add(const HxStr &objectName, const HxStr &labelText) {
     Append(pButton, labelText);
 }
 
-// NTSC-U/C: 0x001fee08, PAL: 0x002062d8
 void MetButtonList::SetSelected(int nIndex) {
     if (mButtons.size() == 0 || nIndex == mSelected) {
         return;
@@ -127,7 +118,6 @@ void MetButtonList::SetSelected(int nIndex) {
     mSelectedButton = mButtons.begin()[nIndex];
 }
 
-// NTSC-U/C: 0x001fef40, PAL: 0x00206410
 Rnd::Button *MetButtonList::GetButton(int nIndex) const {
     if (nIndex == kNoSelection) {
         return nullptr;

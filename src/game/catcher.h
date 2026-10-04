@@ -204,91 +204,175 @@ public:
     void SimulateRemoteGem(int nTick);
 
 protected:
-    // Sends a PhraseMuffedMsg for a bar once, recording the bar in mLastMuffedBar. The message
-    // reports the phrase as tried when the bar is free and a gem of it was caught or missed.
-    // NTSC-U/C: 0x001ad3b0, PAL: 0x001b3118
+    /**
+     * Sends a PhraseMuffedMsg for a bar once, recording the bar in mLastMuffedBar.
+     *
+     * The message reports the phrase as tried when the bar is free and a gem of it was caught or
+     * missed.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ad3b0
+     * @ghidraAddress PAL: 0x001b3118
+     */
     void PostPhraseMuffedMsg(int nBar, Sch::Tick position);
 
-    // Scores a PitchRiffMsg for this track. A riff from another player queries that player's
-    // slot 5 and plays SND_INACTIVE. A riff snapped into a bar that is not free plays SND_INACTIVE
-    // and sends a missed CatchMsg. Otherwise a riff on the gem at the snapped position, other
-    // than the last one caught, goes to CatchGem(), and every other riff to MissGem().
-    // NTSC-U/C: 0x001ac370, PAL: 0x001b20d8
+    /**
+     * Scores a PitchRiffMsg for this track.
+     *
+     * A riff from another player queries that player's slot 5 and plays SND_INACTIVE. A riff
+     * snapped into a bar that is not free plays SND_INACTIVE and sends a missed CatchMsg. Otherwise
+     * a riff on the gem at the snapped position, other than the last one caught, goes to
+     * CatchGem(), and every other riff to MissGem().
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ac370
+     * @ghidraAddress PAL: 0x001b20d8
+     */
     void PostCatchMsg(PitchRiffMsg *pMsg);
 
-    // Does nothing once a gem of the phrase was missed or muffed. Otherwise it delivers a
-    // CaughtBarMsg to the player, extends the phrase run in mPhraseRunBars towards nNextBar
-    // (bounded by the next step and mSeekerBarCount), and scores the run through CapturePhrase()
-    // when it ends the seeker range.
-    // NTSC-U/C: 0x001ac7e8, PAL: 0x001b2550
+    /**
+     * Does nothing once a gem of the phrase was missed or muffed.
+     *
+     * Otherwise it delivers a CaughtBarMsg to the player, extends the phrase run in mPhraseRunBars
+     * towards nNextBar (bounded by the next step and mSeekerBarCount), and scores the run through
+     * CapturePhrase() when it ends the seeker range.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ac7e8
+     * @ghidraAddress PAL: 0x001b2550
+     */
     void PostCaughtBarMsg(int nBar, int nNextBar);
 
-    // Returns the gem on either side of nTick nearer to it when that gem lies within
-    // mCatchWindow, and nTick otherwise. PostCatchMsg() is the caller.
-    // NTSC-U/C: 0x001abcf8, PAL: 0x001b1a60
+    /**
+     * Returns the gem on either side of nTick nearer to it when that gem lies within mCatchWindow,
+     * and nTick otherwise.
+     *
+     * PostCatchMsg() is the caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001abcf8
+     * @ghidraAddress PAL: 0x001b1a60
+     */
     int SnapToNearestGem(int nTick);
 
-    // Takes the track for the player a TrackSelectMsg names.
-    // NTSC-U/C: 0x001ac550, PAL: 0x001b22b8
+    /**
+     * Takes the track for the player a TrackSelectMsg names.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ac550
+     * @ghidraAddress PAL: 0x001b22b8
+     */
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
-    // Plays a free bar for the player an AutoCatchMsg identifies through CapturePhrase(), marks the
-    // message handled through CmdMsg::mResult, and replays the bar from the current offset
-    // through PhraseMgr::ReplayBar() when the song is inside it.
-    // NTSC-U/C: 0x001ac688, PAL: 0x001b23f0
+    /**
+     * Plays a free bar for the player an AutoCatchMsg identifies through CapturePhrase(), marks the
+     * message handled through CmdMsg::mResult, and replays the bar from the current offset through
+     * PhraseMgr::ReplayBar() when the song is inside it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ac688
+     * @ghidraAddress PAL: 0x001b23f0
+     */
     void OnAutoCatch(AutoCatchMsg *pMsg);
 
-    // Closes the counts for a bar. A muffed phrase is reported for the previous bar when gems
-    // were missed or muffed and some were caught.
-    // NTSC-U/C: 0x001ac958, PAL: 0x001b26c0
+    /**
+     * Closes the counts for a bar.
+     *
+     * A muffed phrase is reported for the previous bar when gems were missed or muffed and some
+     * were caught.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ac958
+     * @ghidraAddress PAL: 0x001b26c0
+     */
     void EndBar(int nBar);
 
-    // Returns the first gem position after nTick. When none lies within TrackData::mGemSearchBars
-    // bars of the track, returns nTick plus that many bars less one.
-    // NTSC-U/C: 0x001aca48, PAL: 0x001b27b0
+    /**
+     * Returns the first gem position after nTick.
+     *
+     * When none lies within TrackData::mGemSearchBars bars of the track, returns nTick plus that
+     * many bars less one.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001aca48
+     * @ghidraAddress PAL: 0x001b27b0
+     */
     int FindNextGemTick(int nTick);
 
-    // Build a PostGemCmd for the gem after nTick and queue it one tick after PostGemDelay() under
-    // the handle mPostGemCommand.
-    // NTSC-U/C: 0x001acba0, PAL: 0x001b2908
+    /**
+     * Build a PostGemCmd for the gem after nTick and queue it one tick after PostGemDelay() under
+     * the handle mPostGemCommand.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001acba0
+     * @ghidraAddress PAL: 0x001b2908
+     */
     void SchedulePostGemCommand(int nTick);
 
-    // Build a GemCmd for the gem after nTick and queue it at that gem under the handle
-    // mGemCommand.
-    // NTSC-U/C: 0x001acca0, PAL: 0x001b2a08
+    /**
+     * Build a GemCmd for the gem after nTick and queue it at that gem under the handle mGemCommand.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001acca0
+     * @ghidraAddress PAL: 0x001b2a08
+     */
     void ScheduleGemCommand(int nTick);
 
-    // Returns the earlier of the midpoint between nTick and the next gem, and nTick plus
-    // mCatchWindow.
-    // NTSC-U/C: 0x001acd30, PAL: 0x001b2a98
+    /**
+     * Returns the earlier of the midpoint between nTick and the next gem, and nTick plus
+     * mCatchWindow.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001acd30
+     * @ghidraAddress PAL: 0x001b2a98
+     */
     int PostGemDelay(int nTick);
 
-    // Finds the next free bar within 32 bars of nBar (or of the bar after mLastMuffedBar) and
-    // points the seeker at the phrase starting there, or turns the seeker off. It does nothing
-    // while mPlayer is the stand-in or reports -1 from Player::GetInputSlot(). 0x001ad0e8
+    /**
+     * Finds the next free bar within 32 bars of nBar (or of the bar after mLastMuffedBar) and
+     * points the seeker at the phrase starting there, or turns the seeker off.
+     *
+     * It does nothing while mPlayer is the stand-in or reports -1 from Player::GetInputSlot().
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ad0e8
+     * @ghidraAddress PAL: 0x001b2e50
+     */
     void UpdateSeeker(int nBar);
 
-    // Sends a SeekerMsg that turns the seeker off and clears mSeekerEnabled.
-    // NTSC-U/C: 0x001ad4e0, PAL: 0x001b3248
+    /**
+     * Sends a SeekerMsg that turns the seeker off and clears mSeekerEnabled.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ad4e0
+     * @ghidraAddress PAL: 0x001b3248
+     */
     void PostSeekerMsg();
 
-    // Sends a SeekerMsg for nBarCount bars from nFirstBar at position 0, and records the
-    // range in mSeekerFirstBar, mSeekerEndBar, and mSeekerEnabled.
-    // NTSC-U/C: 0x001ad560, PAL: 0x001b32c8
+    /**
+     * Sends a SeekerMsg for nBarCount bars from nFirstBar at position 0, and records the range in
+     * mSeekerFirstBar, mSeekerEndBar, and mSeekerEnabled.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ad560
+     * @ghidraAddress PAL: 0x001b32c8
+     */
     void PostSeekerRangeMsg(int nFirstBar, int nBarCount);
 
-    // Returns whether a bar is non-negative, playable according to TrackData::QueryBar(), and
-    // owned by no player. UpdateSeeker(), OnAutoCatch(), PostCatchMsg(), and
-    // PostPhraseMuffedMsg() expand the same test inline.
-    // NTSC-U/C: 0x001b1488, PAL: 0x001b7248
+    /**
+     * Returns whether a bar is non-negative, playable according to TrackData::QueryBar(), and owned
+     * by no player.
+     *
+     * UpdateSeeker(), OnAutoCatch(), PostCatchMsg(), and PostPhraseMuffedMsg() expand the same test
+     * inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001b1488
+     * @ghidraAddress PAL: 0x001b7248
+     */
     int IsBarFree(int nBar);
 
-    // The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x001b1578, PAL: 0x001b7338
+    /**
+     * The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001b1578
+     * @ghidraAddress PAL: 0x001b7338
+     */
     void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
 
-    // Gives every bar from nFirstBar up to nEndBar to one player. The image has no caller.
-    // NTSC-U/C: 0x001b1918, PAL: 0x001b76d8
+    /**
+     * Gives every bar from nFirstBar up to nEndBar to one player.
+     *
+     * The image has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001b1918
+     * @ghidraAddress PAL: 0x001b76d8
+     */
     void SetPhraseOwners(int nFirstBar, int nEndBar, Player *pPlayer);
 
     Quantizer *mQuantizer;         // +0x18

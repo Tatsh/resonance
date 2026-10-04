@@ -241,15 +241,26 @@ public:
     void SetCardSlot(MemcardConnectState slot);
 
 private:
-    // NTSC-U/C: 0x002bfa88, PAL: 0x002dfa50
-    // Builds the list on first use, fills it from mPersonas, heads the panel with the card, and
-    // enters. The title is inferred.
+    /**
+     * Builds the list on first use, fills it from mPersonas, heads the panel with the card, and
+     * enters.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002bfa88
+     * @ghidraAddress PAL: 0x002dfa50
+     */
     void ShowList();
 
-    // NTSC-U/C: 0x002bff98, PAL: 0x002e0030
-    // Shows the selected persona's username, face, and birthday, or hides the details when the
-    // list is empty. The European release first labels the information text with `Born:`. The
-    // title is inferred.
+    /**
+     * Shows the selected persona's username, face, and birthday, or hides the details when the list
+     * is empty.
+     *
+     * The European release first labels the information text with `Born:`. The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002bff98
+     * @ghidraAddress PAL: 0x002e0030
+     */
     void ShowSelection();
 
     Rnd::Text *mNameText;     // +0x98

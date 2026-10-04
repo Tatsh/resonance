@@ -6,7 +6,6 @@
 #include "os/formatstring.h"
 #include "os/hxstr.h"
 
-// NTSC-U/C: 0x0041bec8, PAL: 0x004569f0
 HudTrack::HudTrack(Player *pPlayer, int nIndex)
     : mEnergy(nIndex), mPowerup(nIndex),
       mTextMessage(HxStr(
@@ -18,7 +17,6 @@ HudTrack::HudTrack(Player *pPlayer, int nIndex)
       mTrack(0), mDeployedPowerup(0), mPlayer(pPlayer) {
 }
 
-// NTSC-U/C: 0x0042ab08, PAL: 0x00465e58
 void HudTrack::SetFrame(float flFrame, float flTime) {
     mEnergy.SetFrame(flFrame);
     mTextMessage.SetFrame(flTime);

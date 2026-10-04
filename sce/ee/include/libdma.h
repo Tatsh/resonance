@@ -43,6 +43,8 @@ sceDmaChan *sceDmaGetChan(int nChannel);
  * Wait for the channel to stop, then start a normal-mode transfer of nQuadwords quadwords from
  * pAddress.
  *
+ * A wait past the spin limit prints a timeout message and clears the channel's start bit.
+ *
  * @param pChannel The channel.
  * @param pAddress The source.
  * @param nQuadwords Size of the transfer in quadwords.
@@ -69,6 +71,9 @@ int sceDmaSync(sceDmaChan *pChannel, int nMode, int nTimeout);
 /**
  * Reset every channel.
  *
+ * Clears the address and control words of every enabled channel and the status bits, then
+ * applies cleared controller settings.
+ *
  * @param nMode 1 to enable the controller afterwards.
  * @return The previous enable state.
  * @ghidraAddress NTSC-U/C: 0x005f3718
@@ -90,7 +95,7 @@ sceDmaEnv *sceDmaGetEnv(sceDmaEnv *pEnv);
  * Validate the controller settings in pEnv and write them back.
  *
  * @param pEnv The settings.
- * @return 0, or -1 when a field is out of range.
+ * @return 0, or -1 through -4 for the first field out of range.
  * @ghidraAddress NTSC-U/C: 0x005f3808
  * @ghidraAddress PAL: 0x00596f28
  */
@@ -98,6 +103,9 @@ int sceDmaPutEnv(sceDmaEnv *pEnv);
 
 /**
  * Start a source-chain transfer from the DMA tag at pTag.
+ *
+ * Waits for the channel to stop first. A wait past the spin limit prints a timeout message and
+ * clears the channel's start bit.
  *
  * @param pChannel The channel.
  * @param pTag The first DMA tag of the chain.

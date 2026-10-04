@@ -110,7 +110,6 @@ inline void CentreTexts(std::vector<Rnd::Text *> &texts,
 
 } // namespace
 
-// NTSC-U/C: 0x003125b0, PAL: 0x00338418
 MetHelpScreen::MetHelpScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mShowStart(0.0f), mHideStart(0.0f) {
@@ -119,11 +118,9 @@ MetHelpScreen::MetHelpScreen(MetRenderer *pRenderer, int nPriority)
     mShowsLoadedDrawables = 0;
 }
 
-// NTSC-U/C: 0x00312770, PAL: 0x00338640
 MetHelpScreen::~MetHelpScreen() {
 }
 
-// NTSC-U/C: 0x003128d0, PAL: 0x003387d0
 void MetHelpScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
@@ -153,13 +150,11 @@ void MetHelpScreen::ResolveContainerViews() {
     }
 }
 
-// NTSC-U/C: 0x00312df0, PAL: 0x00338da0
 void MetHelpScreen::UpdateIdle(float flTime) {
     UpdateShow(flTime);
     UpdateHide(flTime);
 }
 
-// NTSC-U/C: 0x00312f70, PAL: 0x00338f20
 void MetHelpScreen::PostText(const HxStr &text, float flTime) {
     if (mShownText == kNoText && text == kNoText) {
         return;
@@ -181,7 +176,6 @@ void MetHelpScreen::PostText(const HxStr &text, float flTime) {
     }
 }
 
-// NTSC-U/C: 0x003130e8, PAL: 0x00339098
 void MetHelpScreen::ClearInfoTexts() {
     for (std::vector<Rnd::Text *>::size_type i = 0; i < mInfoTexts.size(); ++i) {
         mInfoTexts[i]->SetText(HxStr(kNoText));
@@ -190,7 +184,6 @@ void MetHelpScreen::ClearInfoTexts() {
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// PAL: 0x003391d8
 HxStr MetHelpScreen::FontForCode(const HxStr &code) {
     HxStr fontName(kPlainFont);
     if (code == kPlainFontCode) {
@@ -204,7 +197,6 @@ HxStr MetHelpScreen::FontForCode(const HxStr &code) {
 }
 #endif
 
-// NTSC-U/C: 0x00313208, PAL: 0x00339300
 void MetHelpScreen::FillTexts(const HxStr &key,
                               std::vector<Rnd::Text *> &texts,
                               const Vector3 &origin,
@@ -276,29 +268,24 @@ void MetHelpScreen::FillTexts(const HxStr &key,
     }
 }
 
-// NTSC-U/C: 0x00317210, PAL: 0x0033d4c8
 MetHelpScreen *MetHelpScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetHelpScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x00317298, PAL: 0x00338328
 void MetHelpScreen::SelectPreset(const HxStr &name) {
     FindHelpScreen()->ApplyPreset(name);
 }
 
-// NTSC-U/C: 0x00317368, PAL: 0x0033d550
 void MetHelpScreen::SetText(const HxStr &text, float flTime) {
     FindHelpScreen()->PostText(text, flTime);
 }
 
-// NTSC-U/C: 0x00317448, PAL: 0x0033d650
 void MetHelpScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (pCommand->mCommand == kMetScreenCommandBack) {
         BeginExit();
     }
 }
 
-// NTSC-U/C: 0x00317480, PAL: 0x0033d688
 void MetHelpScreen::OnExitFinished() {
     ClearInfoTexts();
     mShownText = kNoText;
@@ -306,7 +293,6 @@ void MetHelpScreen::OnExitFinished() {
     mHideStart = 0.0f;
 }
 
-// NTSC-U/C: 0x00317508, PAL: 0x0033d710
 void MetHelpScreen::StartShow(float flTime) {
     if (mShowStart == 0.0f) {
         mShowStart = flTime;
@@ -315,7 +301,6 @@ void MetHelpScreen::StartShow(float flTime) {
     }
 }
 
-// NTSC-U/C: 0x00317568, PAL: 0x0033d770
 void MetHelpScreen::UpdateShow(float flTime) {
     if (mShowStart == 0.0f) {
         return;
@@ -331,7 +316,6 @@ void MetHelpScreen::UpdateShow(float flTime) {
     }
 }
 
-// NTSC-U/C: 0x00317600, PAL: 0x0033d808
 void MetHelpScreen::StartHide(float flTime) {
     if (mHideStart == 0.0f) {
         mHideStart = flTime;
@@ -339,7 +323,6 @@ void MetHelpScreen::StartHide(float flTime) {
     }
 }
 
-// NTSC-U/C: 0x00317640, PAL: 0x0033d848
 void MetHelpScreen::UpdateHide(float flTime) {
     if (mHideStart == 0.0f) {
         return;
@@ -359,7 +342,6 @@ void MetHelpScreen::UpdateHide(float flTime) {
     }
 }
 
-// NTSC-U/C: 0x00317758, PAL: 0x0033d960
 void MetHelpScreen::ApplyPreset(const HxStr &name) {
     mPreset = name;
     if (mViewsUnresolved == 0) {

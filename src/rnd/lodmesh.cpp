@@ -14,7 +14,6 @@ constexpr char kLevelFormat[] = "%s.%d";
 
 } // namespace
 
-// NTSC-U/C: 0x00476b28, PAL: 0x004b47a0
 void LodMesh::DeleteMeshes() {
     for (Mesh *pMesh : *this) {
         if (pMesh != nullptr) {
@@ -24,7 +23,6 @@ void LodMesh::DeleteMeshes() {
     erase(begin(), end());
 }
 
-// NTSC-U/C: 0x004694a0, PAL: 0x004a6f60
 void LodMesh::Build(const HxStr &name, int nCount, bool bInternal) {
     DeleteMeshes();
     resize(nCount);
@@ -49,14 +47,12 @@ void LodMesh::Build(const HxStr &name, int nCount, bool bInternal) {
     SetTransOwner(front());
 }
 
-// NTSC-U/C: 0x00476e48, PAL: 0x004b4ac0
 void LodMesh::SetTransOwner(Mesh *pOwner) {
     for (Mesh *pMesh : *this) {
         pMesh->SetTransOwner(pOwner);
     }
 }
 
-// NTSC-U/C: 0x00469820, PAL: 0x004a7318
 void LodMesh::CopyScreenSizes(const LodMesh &source) {
     for (unsigned i = 0; i < size(); ++i) {
         Mesh *pMesh = (*this)[i];
@@ -64,7 +60,6 @@ void LodMesh::CopyScreenSizes(const LodMesh &source) {
     }
 }
 
-// NTSC-U/C: 0x00476c50, PAL: 0x004b48c8
 void LodMesh::SetScreenSizes(const std::vector<float> &screenSizes) {
     for (unsigned i = 0; i < size(); ++i) {
         if (i < screenSizes.size()) {
@@ -75,7 +70,6 @@ void LodMesh::SetScreenSizes(const std::vector<float> &screenSizes) {
     }
 }
 
-// NTSC-U/C: 0x00476d28, PAL: 0x004b49a0
 void LodMesh::ShareFaces(const LodMesh &templates) {
     for (unsigned i = 0; i < size(); ++i) {
         (*this)[i]->SetFacesOwner(templates[i]->mFacesOwner);
@@ -83,21 +77,18 @@ void LodMesh::ShareFaces(const LodMesh &templates) {
     }
 }
 
-// NTSC-U/C: 0x00476de8, PAL: 0x004b4a60
 void LodMesh::Sync() {
     for (Mesh *pMesh : *this) {
         pMesh->Sync();
     }
 }
 
-// NTSC-U/C: 0x00476ec0, PAL: 0x004b4b38
 void LodMesh::FindCollisions(const Segment &ray, std::list<Collideable::Collision> &collisions) {
     for (Mesh *pMesh : *this) {
         pMesh->FindCollisions(ray, collisions);
     }
 }
 
-// NTSC-U/C: 0x004698e8, PAL: 0x004a73e0
 void LodMesh::SetVertexCount(unsigned nCount) {
     MeshVert blank;
     blank.mPoint.x = 0.0f;
@@ -119,7 +110,6 @@ void LodMesh::SetVertexCount(unsigned nCount) {
     front()->mVertsOwner->mVerts.resize(nCount, blank);
 }
 
-// NTSC-U/C: 0x00476bc8, PAL: 0x004b4840
 void LodMesh::Draw(float flScreenSize) {
     if (empty() || !front()->GetShowing()) {
         return;

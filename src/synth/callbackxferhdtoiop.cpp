@@ -8,7 +8,6 @@
 // NTSC-U/C: 0x006e9bc8, PAL: 0x0072d588
 CallbackXferHdToIop g_hdXfer;
 
-// NTSC-U/C: 0x00464d10, PAL: 0x004a26d0
 void CallbackXferHdToIop::Done([[maybe_unused]] int nHandle,
                                [[maybe_unused]] int nFile,
                                void *pBuffer,

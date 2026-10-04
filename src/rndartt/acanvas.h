@@ -1372,7 +1372,8 @@ protected:
      * Clip against the clip rectangle and then copy through a remap table.
      *
      * The clip runs against a stack copy of the source description, because ClipBitmap()
-     * rewrites what it is given. A zero result returns without drawing.
+     * rewrites what it is given. A zero result returns without drawing. The run length encoded
+     * format is handed over unclipped, because DrawClutBitmapRle8() clips for itself.
      *
      * @param source The source bitmap.
      * @param nX The destination column.
@@ -1408,6 +1409,8 @@ protected:
      *
      * The clipped counterpart of DrawClutBitmapRle8U(), reached only from DrawClutBitmap(). Rows
      * above the clip rectangle are consumed through ARle8Reader::SkipRow() rather than decoded.
+     * The clipping matches DrawBitmapRle8(), without its test for a source wholly inside the clip
+     * rectangle.
      *
      * @param source The source bitmap.
      * @param nX The destination column.

@@ -72,6 +72,8 @@ typedef struct {
  *
  * @param nMode Passed to scePadInit2().
  * @return The scePadInit2() result, or zero on a version mismatch.
+ * @ghidraAddress NTSC-U/C: 0x0059c108
+ * @ghidraAddress PAL: 0x005a63f0
  */
 int scePadInit(int nMode);
 
@@ -80,6 +82,8 @@ int scePadInit(int nMode);
  *
  * @param nMode Not used.
  * @return padman's result, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0059c248
+ * @ghidraAddress PAL: 0x005a6530
  */
 int scePadInit2(int nMode);
 
@@ -87,6 +91,8 @@ int scePadInit2(int nMode);
  * Stop padman.
  *
  * @return padman's result, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0059c2e8
+ * @ghidraAddress PAL: 0x005a65d0
  */
 int scePadEnd(void);
 
@@ -98,6 +104,8 @@ int scePadEnd(void);
  * @param pFrames Two frames aligned to 64 bytes. They must remain valid until the port closes.
  * @return padman's result, or zero when the area is misaligned, the port is open, or the call
  * failed.
+ * @ghidraAddress NTSC-U/C: 0x0059c368
+ * @ghidraAddress PAL: 0x005a6650
  */
 int scePadPortOpen(int nPort, int nSlot, scePadDmaFrame *pFrames);
 
@@ -107,6 +115,8 @@ int scePadPortOpen(int nPort, int nSlot, scePadDmaFrame *pFrames);
  * @param nPort Port.
  * @param nSlot Slot.
  * @return padman's result, or zero when the port is closed or the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0059c550
+ * @ghidraAddress PAL: 0x005a6838
  */
 int scePadPortClose(int nPort, int nSlot);
 
@@ -116,6 +126,8 @@ int scePadPortClose(int nPort, int nSlot);
  * @param nPort Port.
  * @param nSlot Slot.
  * @return The frame.
+ * @ghidraAddress NTSC-U/C: 0x0059c608
+ * @ghidraAddress PAL: 0x005a68f0
  */
 scePadDmaFrame *scePadGetDmaStr(int nPort, int nSlot);
 
@@ -125,6 +137,8 @@ scePadDmaFrame *scePadGetDmaStr(int nPort, int nSlot);
  * @param nPort Port.
  * @param nSlot Slot.
  * @return The count, or zero when the port is closed.
+ * @ghidraAddress NTSC-U/C: 0x0059c668
+ * @ghidraAddress PAL: 0x005a6950
  */
 unsigned int scePadGetFrameCount(int nPort, int nSlot);
 
@@ -137,6 +151,8 @@ unsigned int scePadGetFrameCount(int nPort, int nSlot);
  * @param nSlot Slot.
  * @param pData Receives the report, 32 bytes at most.
  * @return The report size, or zero when the port is closed.
+ * @ghidraAddress NTSC-U/C: 0x0059c6b8
+ * @ghidraAddress PAL: 0x005a69a0
  */
 int scePadRead(int nPort, int nSlot, unsigned char *pData);
 
@@ -147,6 +163,8 @@ int scePadRead(int nPort, int nSlot, unsigned char *pData);
  * @param nSlot Slot.
  * @return A scePadState value. scePadStateExecCmd replaces scePadStateStable while a request
  * runs.
+ * @ghidraAddress NTSC-U/C: 0x0059c738
+ * @ghidraAddress PAL: 0x005a6a20
  */
 int scePadGetState(int nPort, int nSlot);
 
@@ -155,6 +173,8 @@ int scePadGetState(int nPort, int nSlot);
  *
  * @param nState scePadState value.
  * @param pszName Receives the name, or an empty string for an unknown state.
+ * @ghidraAddress NTSC-U/C: 0x0059c7b0
+ * @ghidraAddress PAL: 0x005a6a98
  */
 void scePadStateIntToStr(int nState, char *pszName);
 
@@ -165,6 +185,8 @@ void scePadStateIntToStr(int nState, char *pszName);
  * @param nSlot Slot.
  * @param nState scePadReqState value.
  * @return 1, or zero when the port is closed.
+ * @ghidraAddress NTSC-U/C: 0x0059c7e8
+ * @ghidraAddress PAL: 0x005a6ad0
  */
 int scePadSetReqState(int nPort, int nSlot, int nState);
 
@@ -174,6 +196,8 @@ int scePadSetReqState(int nPort, int nSlot, int nState);
  * @param nPort Port.
  * @param nSlot Slot.
  * @return A scePadReqState value, or zero when the port is closed.
+ * @ghidraAddress NTSC-U/C: 0x0059c850
+ * @ghidraAddress PAL: 0x005a6b38
  */
 int scePadGetReqState(int nPort, int nSlot);
 
@@ -183,6 +207,8 @@ int scePadGetReqState(int nPort, int nSlot);
  * @param nState scePadReqState value.
  * @param pszName Receives the name, or an empty string for a value above 3. The value 3 has no
  *                name, and the copy reads a null pointer.
+ * @ghidraAddress NTSC-U/C: 0x0059c8a0
+ * @ghidraAddress PAL: 0x005a6b88
  */
 void scePadReqIntToStr(int nState, char *pszName);
 
@@ -194,6 +220,8 @@ void scePadReqIntToStr(int nState, char *pszName);
  * @param nActuator Actuator index, or -1 for the actuator count.
  * @param nTerm InfoAct term.
  * @return The value, or zero when the tables are not valid.
+ * @ghidraAddress NTSC-U/C: 0x0059c8d8
+ * @ghidraAddress PAL: 0x005a6bc0
  */
 int scePadInfoAct(int nPort, int nSlot, int nActuator, int nTerm);
 
@@ -205,6 +233,8 @@ int scePadInfoAct(int nPort, int nSlot, int nActuator, int nTerm);
  * @param nList Combination index, or -1 for the combination count.
  * @param nOffset -1 for the member count, or the index of a member.
  * @return The value, or zero when the tables are not valid.
+ * @ghidraAddress NTSC-U/C: 0x0059c9f8
+ * @ghidraAddress PAL: 0x005a6ce0
  */
 int scePadInfoComb(int nPort, int nSlot, int nList, int nOffset);
 
@@ -216,6 +246,8 @@ int scePadInfoComb(int nPort, int nSlot, int nList, int nOffset);
  * @param nTerm InfoMode term.
  * @param nOffset Table index for InfoModeIdTable, or -1 for the table size.
  * @return The value, or zero when the tables are not valid or a request runs.
+ * @ghidraAddress NTSC-U/C: 0x0059cb18
+ * @ghidraAddress PAL: 0x005a6e00
  */
 int scePadInfoMode(int nPort, int nSlot, int nTerm, int nOffset);
 
@@ -227,6 +259,8 @@ int scePadInfoMode(int nPort, int nSlot, int nTerm, int nOffset);
  * @param nOffset Index of the mode in the identifier table.
  * @param nLock 3 to lock the mode against the controller's button.
  * @return padman's result, 1 once the request started, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0059cc50
+ * @ghidraAddress PAL: 0x005a6f38
  */
 int scePadSetMainMode(int nPort, int nSlot, int nOffset, int nLock);
 
@@ -237,6 +271,8 @@ int scePadSetMainMode(int nPort, int nSlot, int nOffset, int nLock);
  * @param nSlot Slot.
  * @param pData Six actuator bytes.
  * @return 1, or zero when the tables are not valid.
+ * @ghidraAddress NTSC-U/C: 0x0059cd08
+ * @ghidraAddress PAL: 0x005a6ff0
  */
 int scePadSetActDirect(int nPort, int nSlot, const unsigned char *pData);
 
@@ -247,6 +283,8 @@ int scePadSetActDirect(int nPort, int nSlot, const unsigned char *pData);
  * @param nSlot Slot.
  * @param pData Six actuator indices, 0xff for none.
  * @return padman's result, 1 once the request started, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0059cdc0
+ * @ghidraAddress PAL: 0x005a70a8
  */
 int scePadSetActAlign(int nPort, int nSlot, const unsigned char *pData);
 
@@ -256,6 +294,8 @@ int scePadSetActAlign(int nPort, int nSlot, const unsigned char *pData);
  * @param nPort Port.
  * @param nSlot Slot.
  * @return The button mask, or zero when the port is closed or the controller has none.
+ * @ghidraAddress NTSC-U/C: 0x0059ce98
+ * @ghidraAddress PAL: 0x005a7180
  */
 int scePadGetButtonMask(int nPort, int nSlot);
 
@@ -266,6 +306,8 @@ int scePadGetButtonMask(int nPort, int nSlot);
  * @param nSlot Slot.
  * @param nMask Buttons to report as pressures.
  * @return padman's result, 1 once the request started, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0059cf50
+ * @ghidraAddress PAL: 0x005a7238
  */
 int scePadSetButtonInfo(int nPort, int nSlot, int nMask);
 
@@ -275,6 +317,8 @@ int scePadSetButtonInfo(int nPort, int nSlot, int nMask);
  * @param nPort Port.
  * @param nSlot Slot.
  * @return 1 when every button is pressure-sensitive, or zero.
+ * @ghidraAddress NTSC-U/C: 0x0059d000
+ * @ghidraAddress PAL: 0x005a72e8
  */
 int scePadInfoPressMode(int nPort, int nSlot);
 
@@ -284,6 +328,8 @@ int scePadInfoPressMode(int nPort, int nSlot);
  * @param nPort Port.
  * @param nSlot Slot.
  * @return padman's result, 1 once the request started, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0059d060
+ * @ghidraAddress PAL: 0x005a7348
  */
 int scePadEnterPressMode(int nPort, int nSlot);
 
@@ -293,6 +339,8 @@ int scePadEnterPressMode(int nPort, int nSlot);
  * @param nPort Port.
  * @param nSlot Slot.
  * @return padman's result, 1 once the request started, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0059d0b8
+ * @ghidraAddress PAL: 0x005a73a0
  */
 int scePadExitPressMode(int nPort, int nSlot);
 
@@ -303,6 +351,8 @@ int scePadExitPressMode(int nPort, int nSlot);
  * @param nSlot Slot.
  * @param pParam Twelve parameter bytes.
  * @return padman's result, 1 once the request started, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0059d110
+ * @ghidraAddress PAL: 0x005a73f8
  */
 int scePadSetVrefParam(int nPort, int nSlot, const unsigned char *pParam);
 
@@ -310,6 +360,8 @@ int scePadSetVrefParam(int nPort, int nSlot, const unsigned char *pParam);
  * Report the number of ports.
  *
  * @return The port count, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0059d1e0
+ * @ghidraAddress PAL: 0x005a74c8
  */
 int scePadGetPortMax(void);
 
@@ -318,6 +370,8 @@ int scePadGetPortMax(void);
  *
  * @param nPort Port.
  * @return The slot count, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0059d248
+ * @ghidraAddress PAL: 0x005a7530
  */
 int scePadGetSlotMax(int nPort);
 
@@ -326,6 +380,8 @@ int scePadGetSlotMax(int nPort);
  *
  * @return The major version in bits 8 to 15 and the minor in bits 0 to 7, or zero when the call
  * failed.
+ * @ghidraAddress NTSC-U/C: 0x0059d2b0
+ * @ghidraAddress PAL: 0x005a7598
  */
 int scePadGetModVersion(void);
 
@@ -336,6 +392,8 @@ int scePadGetModVersion(void);
  *
  * @param nLevel Level.
  * @return padman's result, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0059d318
+ * @ghidraAddress PAL: 0x005a7600
  */
 int scePadSetWarningLevel(int nLevel);
 

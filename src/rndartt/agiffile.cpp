@@ -150,7 +150,6 @@ NextDataByte(FILE *pFile, unsigned char *pBlock, unsigned char **ppByte, unsigne
 
 } // namespace
 
-// NTSC-U/C: 0x0062a9c0, PAL: 0x0066b550
 int AGifFile::StartRead() {
     GifScreenDescriptor screen;
     fread(&screen, 1, kScreenDescriptorSize, mFile);
@@ -172,7 +171,6 @@ int AGifFile::StartRead() {
     return kAGfxFileOk;
 }
 
-// NTSC-U/C: 0x0062aaf8, PAL: 0x0066b688
 int AGifFile::ReadFrame(ABitmap &bitmap, int *pbEnd) {
     *pbEnd = 0;
     for (;;) {
@@ -243,12 +241,10 @@ int AGifFile::ReadFrame(ABitmap &bitmap, int *pbEnd) {
     }
 }
 
-// NTSC-U/C: 0x0062b6f0, PAL: 0x0066c280
 int AGifFile::Write([[maybe_unused]] const ABitmap &bitmap) {
     return kAGfxFileUnsupported;
 }
 
-// NTSC-U/C: 0x0062ae10, PAL: 0x0066b9a0
 void AGifFile::ReadExtension() {
     unsigned char nLabel;
     fread(&nLabel, 1, 1, mFile);
@@ -304,7 +300,6 @@ void AGifFile::ReadExtension() {
     }
 }
 
-// NTSC-U/C: 0x0062b008, PAL: 0x0066bb98
 int AGifFile::DecodeLzwImage(FILE *pFile, int nCodeSize, unsigned char *pDest) {
     unsigned char abBlock[kSubBlockSize];
     unsigned char *pByte = abBlock;

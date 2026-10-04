@@ -129,43 +129,77 @@ public:
     };
 
 private:
-    // A note-on starts the phrase for its tick, holds the note, and takes the message's channel
-    // as mChannel. A note-off records the first held note of its number as a NoteMsg lasting
-    // until the note-off, and drops it. Any other channel message starts the phrase and is
-    // recorded as it is.
-    // NTSC-U/C: 0x0019b958, PAL: 0x001a16c0
+    /**
+     * A note-on starts the phrase for its tick, holds the note, and takes the message's channel as
+     * mChannel.
+     *
+     * A note-off records the first held note of its number as a NoteMsg lasting until the note-off,
+     * and drops it. Any other channel message starts the phrase and is recorded as it is.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019b958
+     * @ghidraAddress PAL: 0x001a16c0
+     */
     void OnStdMidi(StdMidiMsg *pMsg);
 
-    // Records one message into mPhrase at its offset in mPhraseBar, with mValue as the value.
-    // NTSC-U/C: 0x0019bbd8, PAL: 0x001a1940
+    /**
+     * Records one message into mPhrase at its offset in mPhraseBar, with mValue as the value.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019bbd8
+     * @ghidraAddress PAL: 0x001a1940
+     */
     void RecordMuseMsg(MuseMsg *pMsg);
 
-    // Unless mPhrase is already recording the bar of nTick, finishes the phrase in progress and
-    // starts a new one for the player there, announcing it with a ClearGemsMsg, a BarStatusMsg,
-    // a BeginPhraseCatchMsg, and a PhraseCapturedMsg.
-    // NTSC-U/C: 0x0019bce0, PAL: 0x001a1a48
+    /**
+     * Unless mPhrase is already recording the bar of nTick, finishes the phrase in progress and
+     * starts a new one for the player there, announcing it with a ClearGemsMsg, a BarStatusMsg, a
+     * BeginPhraseCatchMsg, and a PhraseCapturedMsg.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019bce0
+     * @ghidraAddress PAL: 0x001a1a48
+     */
     void StartPhrase(int nTick);
 
-    // Gives every held note a NoteMsg ending one tick after the bar, installs mPhrase in the
-    // phrase manager at mPhraseBar, and releases it.
-    // NTSC-U/C: 0x0019c118, PAL: 0x001a1e80
+    /**
+     * Gives every held note a NoteMsg ending one tick after the bar, installs mPhrase in the phrase
+     * manager at mPhraseBar, and releases it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019c118
+     * @ghidraAddress PAL: 0x001a1e80
+     */
     void FinishPhrase();
 
-    // Sends a SeekerMsg that turns mPlayer's seeker off, unless mPlayer is the stand-in. The bar
-    // is not read.
-    // NTSC-U/C: 0x0019c368, PAL: 0x001a20d0
+    /**
+     * Sends a SeekerMsg that turns mPlayer's seeker off, unless mPlayer is the stand-in.
+     *
+     * The bar is not read.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019c368
+     * @ghidraAddress PAL: 0x001a20d0
+     */
     void SendSeekerMsg(int nBar) const;
 
-    // The out-of-line copy of the TrackSelectMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x0019d860, PAL: 0x001a35c8
+    /**
+     * The out-of-line copy of the TrackSelectMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019d860
+     * @ghidraAddress PAL: 0x001a35c8
+     */
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
-    // The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x0019d8f0, PAL: 0x001a3658
+    /**
+     * The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019d8f0
+     * @ghidraAddress PAL: 0x001a3658
+     */
     void OnMsg(const InvalidateSeekerMsg &msg);
 
-    // The out-of-line copy of the SustainNoteMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x0019d920, PAL: 0x001a3688
+    /**
+     * The out-of-line copy of the SustainNoteMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019d920
+     * @ghidraAddress PAL: 0x001a3688
+     */
     void OnSustainNote(SustainNoteMsg *pMsg);
 
     PhraseMgr *mPhraseMgr;            // +0x18

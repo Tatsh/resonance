@@ -154,33 +154,64 @@ protected:
     virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // The out-of-line copy of the EraseMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x001d9e40, PAL: 0x001dfdb0
+    /**
+     * The out-of-line copy of the EraseMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d9e40
+     * @ghidraAddress PAL: 0x001dfdb0
+     */
     void OnEraseMsg(EraseMsg *pMsg);
 
-    // The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x001d9e98, PAL: 0x001dfe08
+    /**
+     * The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d9e98
+     * @ghidraAddress PAL: 0x001dfe08
+     */
     void OnInvalidateSeekerMsg(InvalidateSeekerMsg *pMsg);
 
-    // Returns TrackData::QueryBar() for the bar on mTrackData. UpdateSustain() calls it.
-    // NTSC-U/C: 0x001d9ec8, PAL: 0x001dfe38
+    /**
+     * Returns TrackData::QueryBar() for the bar on mTrackData.
+     *
+     * UpdateSustain() calls it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d9ec8
+     * @ghidraAddress PAL: 0x001dfe38
+     */
     int QueryBar(int nBar);
 
-    // When the held levels no longer match mSustaining, sends the sustain controller (0 while
-    // held, 127 once released) at nTick, recorded into the phrase at its offset in the bar. A
-    // bar QueryBar() rejects plays SND_INACTIVE instead. The title is inferred.
-    // NTSC-U/C: 0x001d8508, PAL: 0x001de3e8
+    /**
+     * When the held levels no longer match mSustaining, sends the sustain controller (0 while held,
+     * 127 once released) at nTick, recorded into the phrase at its offset in the bar.
+     *
+     * A bar QueryBar() rejects plays SND_INACTIVE instead. The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d8508
+     * @ghidraAddress PAL: 0x001de3e8
+     */
     void UpdateSustain(int nTick);
 
-    // Unless the bar of nTick is mPhraseBar, finishes the phrase, sends a BarStatusMsg, starts a
-    // new Phrase for mPlayer there, and silently erases the bar. The title is inferred.
-    // NTSC-U/C: 0x001d89d0, PAL: 0x001de920
+    /**
+     * Unless the bar of nTick is mPhraseBar, finishes the phrase, sends a BarStatusMsg, starts a
+     * new Phrase for mPlayer there, and silently erases the bar.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d89d0
+     * @ghidraAddress PAL: 0x001de920
+     */
     void StartPhrase(int nTick);
 
-    // For nBar equal to mPhraseBar with a phrase in progress, closes a held sustain one tick
-    // before the bar ends, installs the phrase in the phrase manager, and releases it. A held
-    // sustain then reopens at the start of the next bar in a new phrase. The title is inferred.
-    // NTSC-U/C: 0x001d8b00, PAL: 0x001dea50
+    /**
+     * For nBar equal to mPhraseBar with a phrase in progress, closes a held sustain one tick before
+     * the bar ends, installs the phrase in the phrase manager, and releases it.
+     *
+     * A held sustain then reopens at the start of the next bar in a new phrase. The title is
+     * inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d8b00
+     * @ghidraAddress PAL: 0x001dea50
+     */
     void FinishPhrase(int nBar);
 
     static constexpr int kLevelBits = 64;

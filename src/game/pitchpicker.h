@@ -63,41 +63,72 @@ public:
     };
 
 private:
-    // Records the lowest and highest note of the riff the message carries in mRiffLow and
-    // mRiffHigh, through a stack RiffRangeFinder that visits every message of the sequence.
-    // NTSC-U/C: 0x001c2c60, PAL: 0x001c8aa8
+    /**
+     * Records the lowest and highest note of the riff the message carries in mRiffLow and
+     * mRiffHigh, through a stack RiffRangeFinder that visits every message of the sequence.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001c2c60
+     * @ghidraAddress PAL: 0x001c8aa8
+     */
     void OnMsg(const MultiMuseMsg &msg);
 
-    // Records the message's tick in mSustainTick and sends a SustainNoteMsg at that tick for the
-    // pitch GetSustainPitch() reports for its note.
-    // NTSC-U/C: 0x001c2d40, PAL: 0x001c8b88
+    /**
+     * Records the message's tick in mSustainTick and sends a SustainNoteMsg at that tick for the
+     * pitch GetSustainPitch() reports for its note.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001c2d40
+     * @ghidraAddress PAL: 0x001c8b88
+     */
     void PostSustainNoteMsg(SustainNoteMsg *pMsg);
 
-    // Picks the pitch of a note-on (reusing the sustained pitch at mSustainTick), records the
-    // pairing in mHeldNotes, and sends the note-on at that pitch.
-    // NTSC-U/C: 0x001c2dd0, PAL: 0x001c8c18
+    /**
+     * Picks the pitch of a note-on (reusing the sustained pitch at mSustainTick), records the
+     * pairing in mHeldNotes, and sends the note-on at that pitch.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001c2dd0
+     * @ghidraAddress PAL: 0x001c8c18
+     */
     void PostNoteOn(int nTick, unsigned char nStatus, unsigned char nNote, unsigned char nVelocity);
 
-    // Clears mSustainNotes unless nTick is mSustainTick, then sends a note-off with zero velocity
-    // for the first held pairing of nNote and removes that pairing. A note without a pairing
-    // sends nothing.
-    // NTSC-U/C: 0x001c2f08, PAL: 0x001c8d50
+    /**
+     * Clears mSustainNotes unless nTick is mSustainTick, then sends a note-off with zero velocity
+     * for the first held pairing of nNote and removes that pairing.
+     *
+     * A note without a pairing sends nothing.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001c2f08
+     * @ghidraAddress PAL: 0x001c8d50
+     */
     void PostNoteOff(int nTick, unsigned char nStatus, unsigned char nNote);
 
-    // Returns the pitch mSustainNotes pairs with nNote, or picks one and records the pairing.
-    // NTSC-U/C: 0x001c3060, PAL: 0x001c8ea8
+    /**
+     * Returns the pitch mSustainNotes pairs with nNote, or picks one and records the pairing.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001c3060
+     * @ghidraAddress PAL: 0x001c8ea8
+     */
     unsigned char GetSustainPitch(int nTick, unsigned char nNote);
 
-    // Routes a note-off to PostNoteOff() and a note-on to PostNoteOn(), and sends every other
-    // channel message on unchanged. The out-of-line copy of the branch DispatchPriv() expands
-    // inline.
-    // NTSC-U/C: 0x001c43b0, PAL: 0x001ca1f8
+    /**
+     * Routes a note-off to PostNoteOff() and a note-on to PostNoteOn(), and sends every other
+     * channel message on unchanged.
+     *
+     * The out-of-line copy of the branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001c43b0
+     * @ghidraAddress PAL: 0x001ca1f8
+     */
     void OnStdMidi(StdMidiMsg *pMsg);
 
-    // Returns nNote unchanged when no harmony is in force at nTick. Otherwise the axis position
-    // maps linearly from 0..1023 onto the offsets that move the riff's range onto the harmony's,
-    // and the offset note snaps to the nearer harmony note.
-    // NTSC-U/C: 0x001c4488, PAL: 0x001ca2d0
+    /**
+     * Returns nNote unchanged when no harmony is in force at nTick.
+     *
+     * Otherwise the axis position maps linearly from 0..1023 onto the offsets that move the riff's
+     * range onto the harmony's, and the offset note snaps to the nearer harmony note.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001c4488
+     * @ghidraAddress PAL: 0x001ca2d0
+     */
     unsigned char PickPitch(int nTick, unsigned char nNote);
 
     const TrackData *mTrackData;            // +0x18

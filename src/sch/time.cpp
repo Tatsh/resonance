@@ -17,7 +17,6 @@ constexpr unsigned long long kTimeLowWordMask = 0xffffffffULL;
 
 } // namespace
 
-// NTSC-U/C: 0x006100a8, PAL: 0x00650d18
 OBStream &Time::Save(OBStream &stream) {
     // The binary loads each half with its own word load rather than shifting the doubleword.
     const int nLow = static_cast<int>(mValue);
@@ -25,7 +24,6 @@ OBStream &Time::Save(OBStream &stream) {
     return stream.WriteLE(&nLow, sizeof(nLow)).WriteLE(&nHigh, sizeof(nHigh));
 }
 
-// NTSC-U/C: 0x00610118, PAL: 0x00650d88
 IBStream &Time::Load(IBStream &stream) {
     // The binary reads each half straight into its own word of the member.
     int nLow;
@@ -36,7 +34,6 @@ IBStream &Time::Load(IBStream &stream) {
     return result;
 }
 
-// NTSC-U/C: 0x00610050, PAL: 0x00650cc0
 void Time::Print(std::ostream &stream) {
     stream << (static_cast<double>(mValue) / kNanosecondsPerSecond) << "s";
 }

@@ -24,7 +24,6 @@ constexpr int kLeadVertex = 0;
 
 } // namespace
 
-// NTSC-U/C: 0x00417170, PAL: 0x00450f10
 HudHighlight::HudHighlight() : mStarting(0), mDone(1), mEndTime(kNoEndTime) {
     mMesh = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr("HUD1 hilite_box.mesh")));
     mMat = dynamic_cast<Rnd::Mat *>(Rnd::TheManager.Find(HxStr("HUD hilite_box.mat")));
@@ -49,7 +48,6 @@ HudHighlight::HudHighlight() : mStarting(0), mDone(1), mEndTime(kNoEndTime) {
     mCornerVerts[kBottomLeft][3] = 3;
 }
 
-// NTSC-U/C: 0x00417388, PAL: 0x00451170
 void HudHighlight::MoveTo(
     float flLeft, float flTop, float flRight, float flBottom, float flDuration) {
     std::vector<Rnd::MeshVert> &verts = mMesh->mVertsOwner->mVerts;
@@ -92,7 +90,6 @@ void HudHighlight::MoveTo(
     mDone = 0;
 }
 
-// NTSC-U/C: 0x00417570, PAL: 0x00451358
 void HudHighlight::JumpTo(float flLeft, float flTop, float flRight, float flBottom) {
     std::vector<Rnd::MeshVert> &verts = mMesh->mVertsOwner->mVerts;
     const Rnd::MeshVert &topLeft = verts[mCornerVerts[kTopLeft][kLeadVertex]];
@@ -119,7 +116,6 @@ void HudHighlight::JumpTo(float flLeft, float flTop, float flRight, float flBott
     }
 }
 
-// NTSC-U/C: 0x00417690, PAL: 0x00451478
 void HudHighlight::SetFrame(float flTime) {
     if (mStarting != 0) {
         mLastTime = flTime;
@@ -159,7 +155,6 @@ void HudHighlight::SetFrame(float flTime) {
     mLastTime = flTime;
 }
 
-// NTSC-U/C: 0x00429d30, PAL: 0x00465370
 void HudHighlight::SetShowing(int nShowing) {
     mMesh->SetShowing(nShowing);
 }

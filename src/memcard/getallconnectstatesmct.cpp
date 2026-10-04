@@ -22,11 +22,9 @@ GetAllConnectStatesMCT::GetAllConnectStatesMCT(MemcardUser *pUser,
     : MemcardTask(pUser, pCard, nCookie), mExpected(0), mStates(pStates), mCompleted(0) {
 }
 
-// NTSC-U/C: 0x00184b08, PAL: 0x0018a020
 GetAllConnectStatesMCT::~GetAllConnectStatesMCT() {
 }
 
-// NTSC-U/C: 0x00178138, PAL: 0x0017b508
 void GetAllConnectStatesMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus != kMemcardStatusUnknown) {
@@ -50,13 +48,11 @@ void GetAllConnectStatesMCT::OnCheckInfo(CheckInfoOp *pOp) {
     }
 }
 
-// NTSC-U/C: 0x001860a0, PAL: 0x0018bb58
 void GetAllConnectStatesMCT::Finish() {
     mState = kMemcardTaskFinished;
     mUser->OnAllConnectStates();
 }
 
-// NTSC-U/C: 0x001860d8, PAL: 0x0018bb90
 void GetAllConnectStatesMCT::Execute() {
     mState = kMemcardTaskRunning;
 

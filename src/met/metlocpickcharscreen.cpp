@@ -144,7 +144,6 @@ inline void ShowPlayerName(Rnd::Button *pButton, MetPersonaData *pPersona, int n
 
 } // namespace
 
-// NTSC-U/C: 0x002b1270, PAL: 0x002d0050
 MetLocPickCharScreen::MetLocPickCharScreen(MetRenderer *pRenderer, int nPriority)
     : MetMemDetectScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
@@ -153,16 +152,13 @@ MetLocPickCharScreen::MetLocPickCharScreen(MetRenderer *pRenderer, int nPriority
     mHelpKeys.push_back(MetText(kMetStrHLocPc, kHelpKey));
 }
 
-// NTSC-U/C: 0x002b19b0, PAL: 0x002d0808
 MetLocPickCharScreen::~MetLocPickCharScreen() {
 }
 
-// NTSC-U/C: 0x002b9e60, PAL: 0x002d96c8
 MetLocPickCharScreen *MetLocPickCharScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLocPickCharScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x002b1e00, PAL: 0x002d0c58
 void MetLocPickCharScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     HxStr name;
@@ -193,7 +189,6 @@ void MetLocPickCharScreen::ResolveContainerViews() {
     mCustomIconMat = FindObject<Rnd::Mat>(HxStr(kCustomIconMat));
 }
 
-// NTSC-U/C: 0x002b2370, PAL: 0x002d1230
 void MetLocPickCharScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (pCommand->mPadIndex > mPlayerCount) {
         return;
@@ -251,7 +246,6 @@ void MetLocPickCharScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x002b27f8, PAL: 0x002d1738
 void MetLocPickCharScreen::CyclePersona(const MetScreenCommand *pCommand) {
     int nChoice = mChoices[pCommand->mPadIndex - 1];
     if (pCommand->mCommand == kMetScreenCommandLeft) {
@@ -268,7 +262,6 @@ void MetLocPickCharScreen::CyclePersona(const MetScreenCommand *pCommand) {
     ShowPlayerName(mNameButtons[pCommand->mPadIndex - 1], pPersona, pCommand->mPadIndex - 1);
 }
 
-// NTSC-U/C: 0x002b29e8, PAL: 0x002d1948
 void MetLocPickCharScreen::EnterAndShow() {
     if (!(MetFrontEndState::shared()->mReturnScreen == kLocNumPlayScreen)) {
         ShowPickers();
@@ -288,7 +281,6 @@ void MetLocPickCharScreen::EnterAndShow() {
     ShowPickers();
 }
 
-// NTSC-U/C: 0x002b2e08, PAL: 0x002d1d68
 void MetLocPickCharScreen::SelectPersona(MetPersonaData *pPersona, int nPlayer) {
     unsigned int i;
     for (i = 0; i < mPersonas.size(); ++i) {
@@ -303,7 +295,6 @@ void MetLocPickCharScreen::SelectPersona(MetPersonaData *pPersona, int nPlayer) 
     }
 }
 
-// NTSC-U/C: 0x002b2ef8, PAL: 0x002d1e58
 void MetLocPickCharScreen::ShowPickers() {
     HxStr title;
     // Yes, the binary never reads the title.
@@ -385,7 +376,6 @@ void MetLocPickCharScreen::ShowPickers() {
     ActivateNamedPanel(HxStr(kOwnScreenName));
 }
 
-// NTSC-U/C: 0x002b3e18, PAL: 0x002d2f90
 void MetLocPickCharScreen::OnExitFinished() {
     PushNamedScreen(HxStr(kLeftGizmoScreen));
     if (mExitChoice == kExitBack) {
@@ -397,7 +387,6 @@ void MetLocPickCharScreen::OnExitFinished() {
     }
 }
 
-// NTSC-U/C: 0x002b4068, PAL: 0x002d3268
 void MetLocPickCharScreen::StartDetect() {
     const HxStr format(MetConfigText(kMetStrMemDetectMulti, kDialogueConfigCode, kDetectMultiKey));
     const HxStr text(
@@ -412,7 +401,6 @@ void MetLocPickCharScreen::StartDetect() {
     MetMemDetectScreen::StartDetect();
 }
 
-// NTSC-U/C: 0x002b4378, PAL: 0x002d35f0
 void MetLocPickCharScreen::OnNoCard() {
     std::vector<HxStr> buttons;
     buttons.push_back(MetText(kMetStrMsgRETRY, kRetryButton));
@@ -425,7 +413,6 @@ void MetLocPickCharScreen::OnNoCard() {
                              this);
 }
 
-// NTSC-U/C: 0x002b4738, PAL: 0x002d3a40
 void MetLocPickCharScreen::OnDetectFinished() {
     if (!MetFrontEndState::shared()->mUsingMemcard) {
         AppendPersonas(mPersonas, *MetPersonaData::savedList());
@@ -469,7 +456,6 @@ void MetLocPickCharScreen::OnDetectFinished() {
     MemcardManager::shared()->CreateLoadPersonasTask(nPortSlot, MetPersonaData::loadList());
 }
 
-// NTSC-U/C: 0x002b4ff0, PAL: 0x002d4398
 void MetLocPickCharScreen::OnPersonasLoaded(int, int nStatus) {
     if (mCardIndex == 0) {
         mPersonas.clear();
@@ -504,28 +490,24 @@ void MetLocPickCharScreen::OnPersonasLoaded(int, int nStatus) {
     }
 }
 
-// NTSC-U/C: 0x002b9fe8, PAL: 0x002d9850
 void MetLocPickCharScreen::PlaySlideSound(int nSelector) {
     if (!mSelectViews[nSelector - 1]->GetShowing() && nSelector <= mPlayerCount) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x002b9f48, PAL: 0x002d97b0
 void MetLocPickCharScreen::PlayCycleLeftSound(int nSelector) {
     if (!mSelectViews[nSelector - 1]->GetShowing() && nSelector <= mPlayerCount) {
         MetScreen::PlayCycleLeftSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x002b9f98, PAL: 0x002d9800
 void MetLocPickCharScreen::PlayCycleRightSound(int nSelector) {
     if (!mSelectViews[nSelector - 1]->GetShowing() && nSelector <= mPlayerCount) {
         MetScreen::PlayCycleRightSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x002ba038, PAL: 0x002d2e60
 void MetLocPickCharScreen::UpdateIdle(float flTime) {
     if (mExitCountdown != 0) {
         mExitCountdown -= 1.0f;
@@ -538,13 +520,11 @@ void MetLocPickCharScreen::UpdateIdle(float flTime) {
     MetMemDetectScreen::UpdateIdle(flTime);
 }
 
-// NTSC-U/C: 0x002ba148, PAL: 0x002d98a0
 void MetLocPickCharScreen::StartLoadPersonas() {
     mPersonaLoadRequested = 1;
     StartSaveSpaceCheck();
 }
 
-// NTSC-U/C: 0x002ba178, PAL: 0x002d98d0
 void MetLocPickCharScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (mShowOnDismiss || mLoadingCards) {
         mShowOnDismiss = 0;

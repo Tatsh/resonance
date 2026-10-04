@@ -439,28 +439,23 @@ void BlendColorsIntoVerts(const std::vector<Color> &from,
 // NTSC-U/C: 0x006eed70, PAL: 0x00732790
 HxStr g_meshAnimClassName("MeshAnim");
 
-// NTSC-U/C: 0x00493a00, PAL: 0x004d18b0
 Object *CreateRegisteredMeshAnim(const HxStr &name) {
     // The binary rounds the 0x48-byte object up to the allocator's own granularity.
     return new MeshAnim(name);
 }
 
-// NTSC-U/C: 0x00493170, PAL: 0x004d1020
 MeshAnim *NewMeshAnim(const HxStr &name) {
     return new MeshAnim(name);
 }
 
-// NTSC-U/C: 0x00493520, PAL: 0x004d13d0
 MeshAnim::MeshAnim(const HxStr &name) : Object(name), mMesh(nullptr), mKeysOwner(this) {
 }
 
-// NTSC-U/C: 0x00493240, PAL: 0x004d10f0
 MeshAnim::~MeshAnim() {
     ReleaseObjects();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x004873b0, PAL: 0x004c51d0
 float MeshAnim::FilteredFrameEnd() {
     const float flPoints = ChannelEndFrame(mKeysOwner->mVertPointsKeys);
     const float flTexs = ChannelEndFrame(mKeysOwner->mVertTexsKeys);
@@ -468,7 +463,6 @@ float MeshAnim::FilteredFrameEnd() {
     return std::max(flPoints, std::max(flTexs, flColors));
 }
 
-// NTSC-U/C: 0x00486c98, PAL: 0x004c4a68
 void MeshAnim::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
@@ -494,7 +488,6 @@ void MeshAnim::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x00486e50, PAL: 0x004c4c20
 void MeshAnim::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.WriteLE(&nVersion, sizeof(nVersion));
@@ -508,7 +501,6 @@ void MeshAnim::Save(Stream &stream) {
     WriteObjectRef(stream, mKeysOwner);
 }
 
-// NTSC-U/C: 0x00486ac0, PAL: 0x004c4890
 void MeshAnim::Replace(Object *pFrom, Object *pTo) {
     Animatable::Replace(pFrom, pTo);
 
@@ -541,12 +533,10 @@ void MeshAnim::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// NTSC-U/C: 0x00493510, PAL: 0x004d13c0
 const HxStr &MeshAnim::ClassName() const {
     return g_meshAnimClassName;
 }
 
-// NTSC-U/C: 0x00487258, PAL: 0x004c5078
 void MeshAnim::Copy(const Object *pSource, unsigned nFlags) {
     const MeshAnim *pSourceAnim = dynamic_cast<const MeshAnim *>(pSource);
 
@@ -567,7 +557,6 @@ void MeshAnim::Copy(const Object *pSource, unsigned nFlags) {
     AddRefObjects();
 }
 
-// NTSC-U/C: 0x00486fa8, PAL: 0x004c4d78
 void MeshAnim::Load(Stream &stream) {
     int nVersion = 0;
     stream.ReadLE(&nVersion, sizeof(nVersion));
@@ -596,7 +585,6 @@ void MeshAnim::Load(Stream &stream) {
     AddRefObjects();
 }
 
-// NTSC-U/C: 0x004867d8, PAL: 0x004c45a8
 void MeshAnim::CopyVertKeys(int nFromVert, int nToVert) {
     for (auto &key : mKeysOwner->mVertPointsKeys) {
         key.mValues[nToVert] = key.mValues[nFromVert];
@@ -609,7 +597,6 @@ void MeshAnim::CopyVertKeys(int nFromVert, int nToVert) {
     }
 }
 
-// NTSC-U/C: 0x00486900, PAL: 0x004c46d0
 void MeshAnim::AppendVertKeys(int nVert) {
     for (auto &key : mKeysOwner->mVertPointsKeys) {
         key.mValues.push_back(key.mValues[nVert]);
@@ -622,7 +609,6 @@ void MeshAnim::AppendVertKeys(int nVert) {
     }
 }
 
-// NTSC-U/C: 0x00487518, PAL: 0x004c5338
 void MeshAnim::SetFrameSelf(float flFrame) {
     if (mMesh == nullptr) {
         return;
@@ -656,7 +642,6 @@ void MeshAnim::SetFrameSelf(float flFrame) {
     }
 }
 
-// NTSC-U/C: 0x00494120, PAL: 0x004d1fd0
 void MeshAnim::SetMesh(Mesh *pMesh) {
     if (mMesh != nullptr) {
         mMesh->RemoveRef(this);
@@ -667,7 +652,6 @@ void MeshAnim::SetMesh(Mesh *pMesh) {
     }
 }
 
-// NTSC-U/C: 0x00494288, PAL: 0x004d2138
 void MeshAnim::AddRefObjects() {
     if (mMesh != nullptr) {
         mMesh->AddRef(this);
@@ -677,7 +661,6 @@ void MeshAnim::AddRefObjects() {
     }
 }
 
-// NTSC-U/C: 0x00494238, PAL: 0x004d20e8
 void MeshAnim::ReleaseObjects() {
     if (mMesh != nullptr) {
         mMesh->RemoveRef(this);
@@ -687,7 +670,6 @@ void MeshAnim::ReleaseObjects() {
     }
 }
 
-// NTSC-U/C: 0x00494178, PAL: 0x004d2028
 void MeshAnim::ClearKeys() {
     if (mKeysOwner == this) {
         return;
@@ -697,7 +679,6 @@ void MeshAnim::ClearKeys() {
     mVertColorsKeys.clear();
 }
 
-// NTSC-U/C: 0x004941c0, PAL: 0x004d2070
 void MeshAnim::SetKeysOwner(MeshAnim *pOwner) {
     if (mKeysOwner != nullptr) {
         mKeysOwner->RemoveRef(this);

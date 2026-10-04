@@ -83,7 +83,6 @@ inline Rnd::Button *FindArrow(const char *pszFormat, int nNumber) {
 
 } // namespace
 
-// NTSC-U/C: 0x0020c3e0, PAL: 0x00215828
 MetConfigGameOptionsScreen::MetConfigGameOptionsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreenMultiSoundBank(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
@@ -93,7 +92,6 @@ MetConfigGameOptionsScreen::MetConfigGameOptionsScreen(MetRenderer *pRenderer, i
     mHelpKeys.push_back(MetText(kMetStrHPangameForceFeedback, kForceFeedbackRowKey));
 }
 
-// NTSC-U/C: 0x0020c800, PAL: 0x00215ce0
 void MetConfigGameOptionsScreen::ResolveContainerViews() {
     MetScreenMultiSoundBank::ResolveContainerViews();
 
@@ -116,12 +114,10 @@ void MetConfigGameOptionsScreen::ResolveContainerViews() {
     }
 }
 
-// NTSC-U/C: 0x0020ce20, PAL: 0x00216400
 MetConfigGameOptionsScreen::~MetConfigGameOptionsScreen() {
     delete mRows;
 }
 
-// NTSC-U/C: 0x0020cf70, PAL: 0x00216550
 void MetConfigGameOptionsScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -174,7 +170,6 @@ void MetConfigGameOptionsScreen::HandleCommand(const MetScreenCommand *pCommand)
     }
 }
 
-// NTSC-U/C: 0x0020d310, PAL: 0x00216980
 void MetConfigGameOptionsScreen::EnterAndShow() {
     mRows->SetSelected(kFirstRow);
     MetScreenTitleScreen::SetTitle(
@@ -195,7 +190,6 @@ void MetConfigGameOptionsScreen::EnterAndShow() {
     MetScreenMultiSoundBank::EnterAndShow();
 }
 
-// NTSC-U/C: 0x0020d448, PAL: 0x00216b98
 void MetConfigGameOptionsScreen::UpdateOptionLabels() {
     mRows->GetButton(kRowAudio)->mText->SetText(mOptions.mStereo != 0 ?
                                                     MetText(kMetStrGsStereo, kStereoText) :
@@ -205,7 +199,6 @@ void MetConfigGameOptionsScreen::UpdateOptionLabels() {
                                                         MetText(kMetStrGsFfOff, kOffText));
 }
 
-// NTSC-U/C: 0x0020d5a8, PAL: 0x00216d38
 void MetConfigGameOptionsScreen::OnExitFinished() {
     if (MetFrontEndState::shared()->mReturnScreen == kPauseGameScreen ||
         MetFrontEndState::shared()->mReturnScreen == kPauseRemixScreen) {
@@ -240,12 +233,10 @@ void MetConfigGameOptionsScreen::OnExitFinished() {
     MetGlobalSettingsSaverScreen::StartSave(screens);
 }
 
-// NTSC-U/C: 0x002114f0, PAL: 0x0021aeb0
 MetConfigGameOptionsScreen *MetConfigGameOptionsScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetConfigGameOptionsScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x00211578, PAL: 0x0021af38
 void MetConfigGameOptionsScreen::ToggleOption(int nRow) {
     if (nRow == kRowAudio) {
         mOptions.mStereo ^= 1;
@@ -255,7 +246,6 @@ void MetConfigGameOptionsScreen::ToggleOption(int nRow) {
     UpdateOptionLabels();
 }
 
-// NTSC-U/C: 0x002115c8, PAL: 0x0021af88
 void MetConfigGameOptionsScreen::ApplyOptions() {
     GlobalSettings::shared()->mGameOptions = mOptions;
     Application::shared()->GetSynth()->SetStereo(mOptions.mStereo);

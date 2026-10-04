@@ -133,19 +133,16 @@ inline int ClassifyPowerOfTwo(int n) {
 
 } // namespace
 
-// NTSC-U/C: 0x004e3dc8, PAL: 0x00522698
 Tex::Tex(const HxStr &name)
     : Object(name), mWidth(0), mHeight(0), mBitsPerPixel(0), mFlags(0), mPendingMipMask(0),
       mMipSelect(-0x80), mBitmapPath(nullptr), mZone(-1) {
 }
 
-// NTSC-U/C: 0x004e7628, PAL: 0x005260c8
 Tex::~Tex() {
     FreeLoadedBitmaps();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x004e4738, PAL: 0x00523010
 void Tex::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     if (sink.mDumpLevel <= 0) {
@@ -176,7 +173,6 @@ void Tex::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x004e4910, PAL: 0x005231e8
 void Tex::Save(Stream &stream) {
     const int nRevision = kTexRevision;
     stream.WriteLE(&nRevision, sizeof(nRevision));
@@ -188,16 +184,13 @@ void Tex::Save(Stream &stream) {
     stream.WriteLE(&mMipSelect, sizeof(mMipSelect));
 }
 
-// NTSC-U/C: 0x004e7610, PAL: 0x005260b0
 void Tex::Replace([[maybe_unused]] Object *pFrom, [[maybe_unused]] Object *pTo) {
 }
 
-// NTSC-U/C: 0x004e7618, PAL: 0x005260b8
 const HxStr &Tex::ClassName() const {
     return Tex::sClassName;
 }
 
-// NTSC-U/C: 0x004e79f0, PAL: 0x005264a0
 void Tex::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
     const Tex *pTex = dynamic_cast<const Tex *>(pSource);
     FreeLoadedBitmaps();
@@ -210,7 +203,6 @@ void Tex::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
     AllocateBitmapFromStream();
 }
 
-// NTSC-U/C: 0x004e4a20, PAL: 0x005232f8
 void Tex::Load(Stream &stream) {
     int nRevision = 0;
     stream.ReadLE(&nRevision, sizeof(nRevision));
@@ -244,26 +236,21 @@ void Tex::Load(Stream &stream) {
     AllocateBitmapFromStream();
 }
 
-// NTSC-U/C: 0x004e75a0, PAL: 0x00526040
 ACanvas *Tex::LockMipBitmap([[maybe_unused]] int nMip,
                             [[maybe_unused]] int nReserved,
                             [[maybe_unused]] int nFlags) {
     return nullptr;
 }
 
-// NTSC-U/C: 0x004e75f8, PAL: 0x00526098
 void Tex::UnlockMipBitmap() {
 }
 
-// NTSC-U/C: 0x004e7600, PAL: 0x005260a0
 void Tex::SetPalette([[maybe_unused]] APalette *pPalette, [[maybe_unused]] int nReserved) {
 }
 
-// NTSC-U/C: 0x004e7608, PAL: 0x005260a8
 void Tex::SetGsPageInUse([[maybe_unused]] bool bInUse) {
 }
 
-// NTSC-U/C: 0x004e7908, PAL: 0x005263b8
 void Tex::SetBitmapConfig(
     int nWidth, int nHeight, int nBitsPerPixel, const HxStr &path, int nMipSelect, int nFlags) {
     mWidth = nWidth;
@@ -280,7 +267,6 @@ void Tex::SetBitmapConfig(
     mMipHandles.clear();
 }
 
-// NTSC-U/C: 0x004e4598, PAL: 0x00522e70
 void Tex::RestoreSurfaces() {
     if (!mLoadedBitmaps.empty() && mLoadedBitmaps[0] != nullptr) {
         const ABitmap *pBitmap = mLoadedBitmaps[0];
@@ -294,7 +280,6 @@ void Tex::RestoreSurfaces() {
 // NTSC-U/C: 0x007033b0, PAL: 0x00746e60
 HxStr Tex::sClassName("Tex");
 
-// NTSC-U/C: 0x004e77f0, PAL: 0x005262a0
 Tex *NewTex(const HxStr &name) {
     return new Tex(name);
 }
@@ -302,7 +287,6 @@ Tex *NewTex(const HxStr &name) {
 // NTSC-U/C: 0x007033a8, PAL: 0x00746e58
 Tex *(*Tex::sNew)(const HxStr &name) = NewTex;
 
-// NTSC-U/C: 0x004e7770, PAL: 0x00526220
 Object *CreateRegisteredTex(const HxStr &name) {
     try {
         return Tex::sNew(name);
@@ -311,12 +295,10 @@ Object *CreateRegisteredTex(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x004e7878, PAL: 0x00526328
 bool Tex::IsLoadComplete() {
     return mPendingMipMask == 0;
 }
 
-// NTSC-U/C: 0x004e3e48, PAL: 0x00522720
 int Tex::GetBitmapInfo(int &nWidth, int &nHeight, int &nBitsPerPixel, int &nBytes) {
     ACanvas *pCanvas = LockMipBitmap(0, 0, 0);
     if (pCanvas == nullptr) {
@@ -345,7 +327,6 @@ int Tex::GetBitmapInfo(int &nWidth, int &nHeight, int &nBitsPerPixel, int &nByte
     return 1;
 }
 
-// NTSC-U/C: 0x004e3fe8, PAL: 0x005228c0
 void Tex::AllocateBitmapFromStream() {
     mMipHandles.clear();
     mZone = ZoneGetCurrent();
@@ -396,7 +377,6 @@ void Tex::AllocateBitmapFromStream() {
     RestoreSurfaces();
 }
 
-// NTSC-U/C: 0x004e4208, PAL: 0x00522ae0
 bool Tex::LoadMipFiles() {
     mPendingMipMask = 0;
     char szBase[kMaxPathLength];
@@ -422,7 +402,6 @@ bool Tex::LoadMipFiles() {
     }
 }
 
-// NTSC-U/C: 0x004e4300, PAL: 0x00522bd8
 int Tex::QueueMipRead(const char *pszPath) {
     char szCache[kMaxPathLength];
     strcpy(szCache, pszPath);
@@ -437,7 +416,6 @@ int Tex::QueueMipRead(const char *pszPath) {
     return 1; // Yes, the binary reports success whatever the read queue returned.
 }
 
-// NTSC-U/C: 0x004e4410, PAL: 0x00522ce8
 bool Tex::PollAsyncMips() {
     if (mPendingMipMask == 0) {
         return true;
@@ -473,7 +451,6 @@ bool Tex::PollAsyncMips() {
     return true;
 }
 
-// NTSC-U/C: 0x004e5928, PAL: 0x00524378
 void Tex::OnMipLoaded(int nMip) {
     if (mLoadedBitmaps.empty()) {
         return;
@@ -527,23 +504,19 @@ void Tex::OnMipLoaded(int nMip) {
     }
 }
 
-// NTSC-U/C: 0x004e73c8, PAL: 0x00525e68
 void Tex::ReloadBitmaps() {
     FreeLoadedBitmaps();
     AllocateBitmapFromStream();
 }
 
-// NTSC-U/C: 0x004e7388, PAL: 0x00525e28
 void *Tex::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kTexTag);
 }
 
-// NTSC-U/C: 0x004e73a8, PAL: 0x00525e48
 void Tex::operator delete(void *pBlock) {
     OperatorDeleteOverride(pBlock, kTexTag);
 }
 
-// NTSC-U/C: 0x004e7448, PAL: 0x00525ee8
 Tex *NewTexThroughHook(const HxStr &name) {
     try {
         return Tex::sNew(name);
@@ -552,12 +525,10 @@ Tex *NewTexThroughHook(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x004e7568, PAL: 0x00526008
 const HxStr &Tex::GetRelativeBitmapPath() const {
     return mBitmapPath.RelativeToRoot();
 }
 
-// NTSC-U/C: 0x004e7cd8, PAL: 0x005267c8
 bool FilePath::IsAbsolute(const HxStr &path) {
     if (path.mLen == 0) {
         return true; // Yes, the binary counts an empty path as absolute.
@@ -565,7 +536,6 @@ bool FilePath::IsAbsolute(const HxStr &path) {
     return path[0] == kPathSeparator || path[0] == kBackslash || path[1] == kDriveSeparator;
 }
 
-// NTSC-U/C: 0x004e4648, PAL: 0x00522f20
 void Tex::CancelPendingMips() {
     if (mPendingMipMask == 0) {
         return;
@@ -579,7 +549,6 @@ void Tex::CancelPendingMips() {
     mMipHandles.clear(); // Yes, the binary leaves the pending mask set.
 }
 
-// NTSC-U/C: 0x004e7aa8, PAL: 0x00526558
 void Tex::FreeLoadedBitmaps() {
     CancelPendingMips();
     for (const auto pBitmap : mLoadedBitmaps) {
@@ -594,7 +563,6 @@ void Tex::FreeLoadedBitmaps() {
 // NTSC-U/C: 0x007033b8, PAL: 0x00746e68
 FilePath FilePath::sRoot("");
 
-// NTSC-U/C: 0x004e4bd8, PAL: 0x005234b0
 void FilePath::SetFromRoot(const HxStr &name) {
     if (name.mLen == 0) {
         Clear();
@@ -606,13 +574,11 @@ void FilePath::SetFromRoot(const HxStr &name) {
     Normalize();
 }
 
-// NTSC-U/C: 0x004e7b70, PAL: 0x00526620
 void FilePath::Set(const HxStr &path) {
     HxStr::operator=(path);
     Normalize();
 }
 
-// NTSC-U/C: 0x004e4d88, PAL: 0x005236d8
 void FilePath::Normalize() {
     HxStr text(TextOf(*this));
     for (char *pch = text.mStr; pch != text.mStr + text.mLen; ++pch) {
@@ -647,7 +613,6 @@ void FilePath::Normalize() {
     }
 }
 
-// NTSC-U/C: 0x004e5168, PAL: 0x00523af0
 const HxStr &FilePath::RelativeToRoot() const {
     if (mLen == 0) {
         return *this;
@@ -693,25 +658,21 @@ const HxStr &FilePath::RelativeToRoot() const {
     return sRelative;
 }
 
-// NTSC-U/C: 0x004e7bc0, PAL: 0x00526680
 void FilePath::Print(Dbg &sink) const {
     sink.Format("\"%s\"", TextOf(*this));
 }
 
-// NTSC-U/C: 0x004e7bf8, PAL: 0x005266b8
 void FilePath::Save(Stream &stream) const {
     const HxStr &relative = RelativeToRoot();
     stream.Write(TextOf(relative), relative.mLen + 1);
 }
 
-// NTSC-U/C: 0x004e7c50, PAL: 0x00526710
 void FilePath::Load(Stream &stream) {
     HxStr name;
     stream.ReadString(name);
     SetFromRoot(name);
 }
 
-// NTSC-U/C: 0x004e78d8, PAL: 0x00526388
 void FilePath::SetRoot(const HxStr &root) {
     sRoot.HxStr::operator=(root);
     sRoot.Normalize();

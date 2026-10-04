@@ -16,17 +16,14 @@ constexpr int kEndRecordingCmdId = 6;
 
 } // namespace
 
-// NTSC-U/C: 0x00594968, PAL: 0x005d7d00
 Sch::Playbacker::Playbacker(Scheduler *pWatchdog) : mWatchdog(pWatchdog) {
 }
 
-// NTSC-U/C: 0x00594988, PAL: 0x005d7d20
 Sch::Playbacker::~Playbacker() {
     std::for_each(mCommands.begin(), mCommands.end(), Attachment::ReleaseIfSet);
     mCommands.erase(mCommands.begin(), mCommands.end());
 }
 
-// NTSC-U/C: 0x00594a78, PAL: 0x005d7e10
 void Sch::Playbacker::Load(IBStream &stream) {
     mCommands.erase(mCommands.begin(), mCommands.end());
     for (;;) {
@@ -42,7 +39,6 @@ void Sch::Playbacker::Load(IBStream &stream) {
     mCursor = mCommands.begin();
 }
 
-// NTSC-U/C: 0x005962e8, PAL: 0x005d96f0
 void Sch::Playbacker::Play() {
     mWatchdog->mClock.Pause();
     mWatchdog->ResetTimes();
@@ -50,7 +46,6 @@ void Sch::Playbacker::Play() {
     mWatchdog->mClock.Resume();
 }
 
-// NTSC-U/C: 0x00596330, PAL: 0x005d9738
 void Sch::Playbacker::QueueRemaining() {
     while (mCursor != mCommands.end()) {
         mWatchdog->QueueReplayed(*mCursor);

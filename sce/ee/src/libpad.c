@@ -190,7 +190,6 @@ static void _send_to_iop(int nPort, int nSlot) {
     pState->nDmaId = nDmaId;
 }
 
-// NTSC-U/C: 0x0059c108, PAL: 0x005a63f0
 int scePadInit(int nMode) {
     int nVersion;
     int i;
@@ -224,7 +223,6 @@ int scePadInit(int nMode) {
     return scePadInit2(nMode);
 }
 
-// NTSC-U/C: 0x0059c248, PAL: 0x005a6530
 int scePadInit2(int nMode) {
     int nPort;
     int nSlot;
@@ -245,7 +243,6 @@ int scePadInit2(int nMode) {
     return g_padRpc.status.nResult;
 }
 
-// NTSC-U/C: 0x0059c2e8, PAL: 0x005a65d0
 int scePadEnd(void) {
     g_padRpc.nCommand = kPadCommandEnd;
     if (PadCall() < 0) {
@@ -257,7 +254,6 @@ int scePadEnd(void) {
     return g_padRpc.status.nResult;
 }
 
-// NTSC-U/C: 0x0059c368, PAL: 0x005a6650
 int scePadPortOpen(int nPort, int nSlot, scePadDmaFrame *pFrames) {
     PadPortState *pState;
     int i;
@@ -301,7 +297,6 @@ int scePadPortOpen(int nPort, int nSlot, scePadDmaFrame *pFrames) {
     return g_padRpc.open.nResult;
 }
 
-// NTSC-U/C: 0x0059c550, PAL: 0x005a6838
 int scePadPortClose(int nPort, int nSlot) {
     PadPortState *pState = &g_aaPadPorts[nPort][nSlot];
 
@@ -319,7 +314,6 @@ int scePadPortClose(int nPort, int nSlot) {
     return g_padRpc.status.nResult;
 }
 
-// NTSC-U/C: 0x0059c608, PAL: 0x005a68f0
 scePadDmaFrame *scePadGetDmaStr(int nPort, int nSlot) {
     scePadDmaFrame *pFrames = g_aaPadPorts[nPort][nSlot].pFrames;
 
@@ -327,7 +321,6 @@ scePadDmaFrame *scePadGetDmaStr(int nPort, int nSlot) {
     return &pFrames[pFrames[0].nFrame < pFrames[1].nFrame];
 }
 
-// NTSC-U/C: 0x0059c668, PAL: 0x005a6950
 unsigned int scePadGetFrameCount(int nPort, int nSlot) {
     if (g_aaPadPorts[nPort][nSlot].nOpen == 0) {
         return 0;
@@ -335,7 +328,6 @@ unsigned int scePadGetFrameCount(int nPort, int nSlot) {
     return scePadGetDmaStr(nPort, nSlot)->nFrame;
 }
 
-// NTSC-U/C: 0x0059c6b8, PAL: 0x005a69a0
 int scePadRead(int nPort, int nSlot, unsigned char *pData) {
     const scePadDmaFrame *pFrame;
 
@@ -347,7 +339,6 @@ int scePadRead(int nPort, int nSlot, unsigned char *pData) {
     return pFrame->nLength;
 }
 
-// NTSC-U/C: 0x0059c738, PAL: 0x005a6a20
 int scePadGetState(int nPort, int nSlot) {
     const scePadDmaFrame *pFrame;
 
@@ -361,7 +352,6 @@ int scePadGetState(int nPort, int nSlot) {
     return pFrame->nState;
 }
 
-// NTSC-U/C: 0x0059c7b0, PAL: 0x005a6a98
 void scePadStateIntToStr(int nState, char *pszName) {
     if ((unsigned int)nState < sizeof(g_apszPadStateNames) / sizeof(g_apszPadStateNames[0])) {
         strcpy(pszName, g_apszPadStateNames[nState]);
@@ -370,7 +360,6 @@ void scePadStateIntToStr(int nState, char *pszName) {
     pszName[0] = '\0';
 }
 
-// NTSC-U/C: 0x0059c7e8, PAL: 0x005a6ad0
 int scePadSetReqState(int nPort, int nSlot, int nState) {
     if (g_aaPadPorts[nPort][nSlot].nOpen == 0) {
         return 0;
@@ -379,7 +368,6 @@ int scePadSetReqState(int nPort, int nSlot, int nState) {
     return 1;
 }
 
-// NTSC-U/C: 0x0059c850, PAL: 0x005a6b38
 int scePadGetReqState(int nPort, int nSlot) {
     if (g_aaPadPorts[nPort][nSlot].nOpen == 0) {
         return 0;
@@ -387,7 +375,6 @@ int scePadGetReqState(int nPort, int nSlot) {
     return scePadGetDmaStr(nPort, nSlot)->nReqState;
 }
 
-// NTSC-U/C: 0x0059c8a0, PAL: 0x005a6b88
 void scePadReqIntToStr(int nState, char *pszName) {
     if ((unsigned int)nState < sizeof(g_apszPadReqStateNames) / sizeof(g_apszPadReqStateNames[0])) {
         strcpy(pszName, g_apszPadReqStateNames[nState]);
@@ -410,7 +397,6 @@ static inline const scePadDmaFrame *PadActuatorFrame(int nPort, int nSlot) {
     return pFrame;
 }
 
-// NTSC-U/C: 0x0059c8d8, PAL: 0x005a6bc0
 int scePadInfoAct(int nPort, int nSlot, int nActuator, int nTerm) {
     const scePadDmaFrame *pFrame = PadActuatorFrame(nPort, nSlot);
 
@@ -431,7 +417,6 @@ int scePadInfoAct(int nPort, int nSlot, int nActuator, int nTerm) {
     }
 }
 
-// NTSC-U/C: 0x0059c9f8, PAL: 0x005a6ce0
 int scePadInfoComb(int nPort, int nSlot, int nList, int nOffset) {
     const scePadDmaFrame *pFrame = PadActuatorFrame(nPort, nSlot);
 
@@ -451,7 +436,6 @@ int scePadInfoComb(int nPort, int nSlot, int nList, int nOffset) {
     return pFrame->aabCombInfo[nList][nOffset - kPadInfoIndexCount];
 }
 
-// NTSC-U/C: 0x0059cb18, PAL: 0x005a6e00
 int scePadInfoMode(int nPort, int nSlot, int nTerm, int nOffset) {
     const scePadDmaFrame *pFrame;
 
@@ -494,7 +478,6 @@ int scePadInfoMode(int nPort, int nSlot, int nTerm, int nOffset) {
     }
 }
 
-// NTSC-U/C: 0x0059cc50, PAL: 0x005a6f38
 int scePadSetMainMode(int nPort, int nSlot, int nOffset, int nLock) {
     g_padRpc.mainMode.nOffset = nOffset;
     g_padRpc.mainMode.nLock = nLock;
@@ -507,7 +490,6 @@ int scePadSetMainMode(int nPort, int nSlot, int nOffset, int nLock) {
     return PadAccepted(nPort, nSlot, &g_padRpc.mainMode.nResult);
 }
 
-// NTSC-U/C: 0x0059cd08, PAL: 0x005a6ff0
 int scePadSetActDirect(int nPort, int nSlot, const unsigned char *pData) {
     PadDirectPacket *pPacket;
     int i;
@@ -526,7 +508,6 @@ int scePadSetActDirect(int nPort, int nSlot, const unsigned char *pData) {
     return 1;
 }
 
-// NTSC-U/C: 0x0059cdc0, PAL: 0x005a70a8
 int scePadSetActAlign(int nPort, int nSlot, const unsigned char *pData) {
     int i;
 
@@ -542,7 +523,6 @@ int scePadSetActAlign(int nPort, int nSlot, const unsigned char *pData) {
     return PadAccepted(nPort, nSlot, &g_padRpc.actAlign.nResult);
 }
 
-// NTSC-U/C: 0x0059ce98, PAL: 0x005a7180
 int scePadGetButtonMask(int nPort, int nSlot) {
     const scePadDmaFrame *pFrame = PadActuatorFrame(nPort, nSlot);
     unsigned int nMask = 0;
@@ -557,7 +537,6 @@ int scePadGetButtonMask(int nPort, int nSlot) {
     return (int)nMask;
 }
 
-// NTSC-U/C: 0x0059cf50, PAL: 0x005a7238
 int scePadSetButtonInfo(int nPort, int nSlot, int nMask) {
     g_padRpc.buttonInfo.nMask = nMask;
     g_padRpc.nCommand = kPadCommandSetButtonInfo;
@@ -569,7 +548,6 @@ int scePadSetButtonInfo(int nPort, int nSlot, int nMask) {
     return PadAccepted(nPort, nSlot, &g_padRpc.buttonInfo.nResult);
 }
 
-// NTSC-U/C: 0x0059d000, PAL: 0x005a72e8
 int scePadInfoPressMode(int nPort, int nSlot) {
     if (g_aaPadPorts[nPort][nSlot].nOpen == 0) {
         return 0;
@@ -577,7 +555,6 @@ int scePadInfoPressMode(int nPort, int nSlot) {
     return scePadGetButtonMask(nPort, nSlot) == kPadPressureMaskAll;
 }
 
-// NTSC-U/C: 0x0059d060, PAL: 0x005a7348
 int scePadEnterPressMode(int nPort, int nSlot) {
     if (g_aaPadPorts[nPort][nSlot].nOpen == 0) {
         return 0;
@@ -585,7 +562,6 @@ int scePadEnterPressMode(int nPort, int nSlot) {
     return scePadSetButtonInfo(nPort, nSlot, kPadPressureButtonsAll);
 }
 
-// NTSC-U/C: 0x0059d0b8, PAL: 0x005a73a0
 int scePadExitPressMode(int nPort, int nSlot) {
     if (g_aaPadPorts[nPort][nSlot].nOpen == 0) {
         return 0;
@@ -593,7 +569,6 @@ int scePadExitPressMode(int nPort, int nSlot) {
     return scePadSetButtonInfo(nPort, nSlot, kPadPressureButtonsNone);
 }
 
-// NTSC-U/C: 0x0059d110, PAL: 0x005a73f8
 int scePadSetVrefParam(int nPort, int nSlot, const unsigned char *pParam) {
     g_padRpc.nPort = nPort;
     g_padRpc.nCommand = kPadCommandSetVrefParam;
@@ -605,7 +580,6 @@ int scePadSetVrefParam(int nPort, int nSlot, const unsigned char *pParam) {
     return PadAccepted(nPort, nSlot, &g_padRpc.vref.nResult);
 }
 
-// NTSC-U/C: 0x0059d1e0, PAL: 0x005a74c8
 int scePadGetPortMax(void) {
     g_padRpc.nCommand = kPadCommandGetPortMax;
     if (PadCall() < 0) {
@@ -614,7 +588,6 @@ int scePadGetPortMax(void) {
     return g_padRpc.status.nResult;
 }
 
-// NTSC-U/C: 0x0059d248, PAL: 0x005a7530
 int scePadGetSlotMax(int nPort) {
     g_padRpc.nPort = nPort;
     g_padRpc.nCommand = kPadCommandGetSlotMax;
@@ -624,7 +597,6 @@ int scePadGetSlotMax(int nPort) {
     return g_padRpc.status.nResult;
 }
 
-// NTSC-U/C: 0x0059d2b0, PAL: 0x005a7598
 int scePadGetModVersion(void) {
     g_padRpc.nCommand = kPadCommandGetModVersion;
     if (PadCall() < 0) {
@@ -633,7 +605,6 @@ int scePadGetModVersion(void) {
     return g_padRpc.status.nResult;
 }
 
-// NTSC-U/C: 0x0059d318, PAL: 0x005a7600
 int scePadSetWarningLevel(int nLevel) {
     g_padRpc.nPort = nLevel;
     g_padRpc.nCommand = kPadCommandSetWarningLevel;

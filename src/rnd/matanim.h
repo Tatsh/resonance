@@ -421,15 +421,31 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
-    // Empty every channel of this animation, and its stage vector, unless it owns its own keys.
-    // The test on mKeysOwner is the first thing the body does. 0x004d2fe0.
+    /**
+     * Empty every channel of this animation, and its stage vector, unless it owns its own keys.
+     *
+     * The test on mKeysOwner is the first thing the body does.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004d2fe0
+     * @ghidraAddress PAL: 0x00511480
+     */
     void ClearKeys();
 
-    // Take a reference on the material, on the keys owner, and on every texture of every stage
-    // channel, and record this animation in each stage. 0x004d3818.
+    /**
+     * Take a reference on the material, on the keys owner, and on every texture of every stage
+     * channel, and record this animation in each stage.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004d3818
+     * @ghidraAddress PAL: 0x00511cb8
+     */
     void AddObjectRefs();
 
-    // Drop the references AddObjectRefs() took. 0x004d3750.
+    /**
+     * Drop the references AddObjectRefs() took.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004d3750
+     * @ghidraAddress PAL: 0x00511bf0
+     */
     void RemoveObjectRefs();
 
     // No class derives from Rnd::MatAnim and no access from outside it is recovered, so every

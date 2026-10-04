@@ -115,7 +115,6 @@ inline void ApplyLightColor(GifQuadword *pQuad, const Color &light, int bFromVer
 
 } // namespace
 
-// NTSC-U/C: 0x005af0c8, PAL: 0x005f1670
 int TransformLightRecords(DirectionalLightRecord *&pDirectionalBegin,
                           DirectionalLightRecord *&pDirectionalEnd,
                           PointLightRecord *&pPointBegin,
@@ -143,7 +142,6 @@ int TransformLightRecords(DirectionalLightRecord *&pDirectionalBegin,
     return nActive;
 }
 
-// NTSC-U/C: 0x005af2c0, PAL: 0x005f1868
 int SelectLightForVertex(GifQuadword *pLight,
                          GifQuadword *pAmbient,
                          GifQuadword *pDiffuse,
@@ -201,17 +199,14 @@ float g_flFogScale;
 // NTSC-U/C: 0x00776114, PAL: 0x007b9fec
 float g_flFogOffset = 255.0f;
 
-// NTSC-U/C: 0x005b2200, PAL: 0x005f47d0
 PsEnviron::~PsEnviron() {
 }
 
-// NTSC-U/C: 0x005b27b0, PAL: 0x005f4d80
 Environ *PsEnviron::NewEnviron(const HxStr &name) {
     // The binary bills the allocation to the tag "Rnd::Environ" and the object is 0x80 bytes.
     return new PsEnviron(name);
 }
 
-// NTSC-U/C: 0x005aea68, PAL: 0x005f0fd0
 void PsEnviron::Init() {
     g_pfnNewEnviron = NewEnviron;
     g_pDefaultEnviron = new PsEnviron(HxStr("[default environ]"));
@@ -232,14 +227,12 @@ void PsEnviron::Init() {
     PsCam::sDefault->AddTrans(g_pDefaultLight);
 }
 
-// NTSC-U/C: 0x005b2888, PAL: 0x005f4e58
 void PsEnviron::Terminate() {
     delete g_pDefaultEnviron;
     delete g_pDefaultLight;
     RegisterEnvironClass();
 }
 
-// NTSC-U/C: 0x005aecb8, PAL: 0x005f1260
 int PsEnviron::DrawShowing() {
     g_nFogEnabled = mFogMode != kFogModeNone;
     if (g_nFogEnabled != 0) {

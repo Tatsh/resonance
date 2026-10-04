@@ -35,7 +35,6 @@ const SelfTestRegistration sSelfTestRegistration;
 
 } // namespace
 
-// NTSC-U/C: 0x00127a80, PAL: 0x001281a0
 PlayMapLinear::PlayMapLinear(int bLoadStepRings)
     : mTrimmedCount(0), mPatternEnd(0), mStepRings(kSetCount) {
     mWindow.reserve(kInitialCapacity);
@@ -45,14 +44,12 @@ PlayMapLinear::PlayMapLinear(int bLoadStepRings)
     }
 }
 
-// NTSC-U/C: 0x00128c38, PAL: 0x00129368
 void PlayMapLinear::AppendSection(int nSection) {
     mWindowStarts.push_back(GetLength());
     const Entry entry{nSection, 1};
     mWindow.push_back(entry);
 }
 
-// NTSC-U/C: 0x00129150, PAL: 0x00129880
 void PlayMapLinear::GrowPastLimit(int nLimit) {
     while (!(nLimit < GetLength())) {
         // The extent is re-read on every iteration rather than cached, and GetLength() is called
@@ -74,7 +71,6 @@ void PlayMapLinear::GrowPastLimit(int nLimit) {
     }
 }
 
-// NTSC-U/C: 0x0012ade8, PAL: 0x0012b520
 inline int PlayMapLinear::WindowIndex(int nBar) {
     GrowPastLimit(nBar);
     const std::vector<int>::iterator it =
@@ -90,7 +86,6 @@ inline void PlayMapLinear::RestartFrom(std::vector<int>::size_type nFirst) {
     }
 }
 
-// NTSC-U/C: 0x00128d08, PAL: 0x00129438
 std::vector<int> &PlayMapLinear::FindBarsPlaying(int nStart, int nMin, int nEnd) {
     GrowPastLimit(nEnd);
     mFoundBars.clear();
@@ -126,7 +121,6 @@ std::vector<int> &PlayMapLinear::FindBarsPlaying(int nStart, int nMin, int nEnd)
     return mFoundBars;
 }
 
-// NTSC-U/C: 0x00128ed8, PAL: 0x00129608
 int PlayMapLinear::EndLoop(int nBar) {
     GrowPastLimit(nBar);
     const int nIndex = WindowIndex(nBar);
@@ -139,7 +133,6 @@ int PlayMapLinear::EndLoop(int nBar) {
     return 1;
 }
 
-// NTSC-U/C: 0x00129038, PAL: 0x00129768
 int PlayMapLinear::StartLoop(int nBar) {
     GrowPastLimit(nBar);
     const int nIndex = WindowIndex(nBar);
@@ -148,7 +141,6 @@ int PlayMapLinear::StartLoop(int nBar) {
     return 1;
 }
 
-// NTSC-U/C: 0x001293b0, PAL: 0x00129ae0
 int PlayMapLinear::SelfTest() {
     PlayMapLinear map(kSkipStepRings);
     for (const int nStep : kTestSteps) {
@@ -168,37 +160,30 @@ int PlayMapLinear::SelfTest() {
     return 1;
 }
 
-// NTSC-U/C: 0x0012b110, PAL: 0x0012b848
 int PlayMapLinear::RunSelfTest() {
     return SelfTest();
 }
 
-// NTSC-U/C: 0x0012a4d8, PAL: 0x0012ac08
 PlayMapLinear::~PlayMapLinear() {
 }
 
-// NTSC-U/C: 0x0012aa18, PAL: 0x0012b150
 void PlayMapLinear::RecordPattern() {
     mPattern = mWindow;
     mPatternEnd = GetLength();
 }
 
-// NTSC-U/C: 0x0012aa60, PAL: 0x0012b198
 int PlayMapLinear::GetEndBar() {
     return mPatternEnd;
 }
 
-// NTSC-U/C: 0x0012aa68, PAL: 0x0012b1a0
 int PlayMapLinear::GetNumSections() const {
     return static_cast<int>(mPattern.size());
 }
 
-// NTSC-U/C: 0x0012aa80, PAL: 0x0012b1b8
 int PlayMapLinear::GetPatternSection(int nIndex) {
     return mPattern[nIndex].mSection;
 }
 
-// NTSC-U/C: 0x0012ad58, PAL: 0x0012b490
 int PlayMapLinear::MapBar(int nBar) {
     GrowPastLimit(nBar);
     const int nIndex = WindowIndex(nBar);
@@ -206,7 +191,6 @@ int PlayMapLinear::MapBar(int nBar) {
     return mSteps[nSection] + ((nBar - mWindowStarts[nIndex]) % mSectionLengths[nSection]);
 }
 
-// NTSC-U/C: 0x0012ae38, PAL: 0x0012b570
 int PlayMapLinear::GetLength() const {
     if (mWindowStarts.empty()) {
         return 0;
@@ -215,7 +199,6 @@ int PlayMapLinear::GetLength() const {
     return mWindowStarts.back() + (mSectionLengths[last.mSection] * last.mRepeats);
 }
 
-// NTSC-U/C: 0x0012ae88, PAL: 0x0012b5c0
 int PlayMapLinear::MapToLinkedStep(int nPosition, int nSet) {
     const int nStep = FindStepIndex(nPosition);
     const std::vector<StepPair> &pairs = mStepRings[nSet];
@@ -227,25 +210,21 @@ int PlayMapLinear::MapToLinkedStep(int nPosition, int nSet) {
     return nPosition;
 }
 
-// NTSC-U/C: 0x0012af30, PAL: 0x0012b668
 int PlayMapLinear::GetPatternIndex(int nBar) {
     GrowPastLimit(nBar);
     return static_cast<int>(WindowIndex(nBar) % mPattern.size());
 }
 
-// NTSC-U/C: 0x0012afb8, PAL: 0x0012b6f0
 int PlayMapLinear::GetAbsoluteSectionIndex(int nBar) {
     GrowPastLimit(nBar);
     return WindowIndex(nBar) + mTrimmedCount;
 }
 
-// NTSC-U/C: 0x0012b028, PAL: 0x0012b760
 int PlayMapLinear::IsLooping(int nBar) {
     GrowPastLimit(nBar);
     return mWindow[WindowIndex(nBar)].mRepeats == kRepeatForever;
 }
 
-// NTSC-U/C: 0x0012b0a8, PAL: 0x0012b7e0
 int PlayMapLinear::ToggleLoop(int nBar) {
     if (EndLoop(nBar) != 0) {
         return 1;

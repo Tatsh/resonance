@@ -92,9 +92,13 @@ public:
     void OnCommand(int nTick);
 
 private:
-    // Sends the note-on (status 0x90 ORed with mChannel, mNote, mVelocity) at a song position to
-    // mSink.
-    // NTSC-U/C: 0x001b3fb8, PAL: 0x001b9d90
+    /**
+     * Sends the note-on (status 0x90 ORed with mChannel, mNote, mVelocity) at a song position to
+     * mSink.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001b3fb8
+     * @ghidraAddress PAL: 0x001b9d90
+     */
     void NoteOn(int nTick);
 
     unsigned char mNote;     // +0x08

@@ -370,7 +370,6 @@ GfxDevice Rnd::ThePs;
 // NTSC-U/C: 0x006f2f20, PAL: 0x00736970
 volatile int gVCount;
 
-// NTSC-U/C: 0x0049ac50, PAL: 0x004d8bd0
 GfxDevice::GfxDevice()
     : mpSavedWrite(nullptr), mpReservedRegion(nullptr),
       mSavedPacket(kSavedPacketQuadwords, GifQuadword()), mpOpenTag(nullptr), mnSwapVblank(0),
@@ -383,7 +382,6 @@ GfxDevice::GfxDevice()
     mAdTag.mHi = kGifRegAd;
 }
 
-// NTSC-U/C: 0x0049afe0, PAL: 0x004d8ff8
 void GfxDevice::Terminate() {
     Rnd::RegisterMeshClass();
     Rnd::PsCam::Terminate();
@@ -395,44 +393,37 @@ void GfxDevice::Terminate() {
     Rnd::TheVRAM.~VRAM(); // Yes, the binary calls the destructor on the global directly.
 }
 
-// NTSC-U/C: 0x0049fea0, PAL: 0x004ddf28
 int DrawVSyncCB([[maybe_unused]] int nCause) {
     gVCount = gVCount + 1;
     ExitHandler();
     return 0;
 }
 
-// NTSC-U/C: 0x0049fef0, PAL: 0x004ddf78
 void GfxDevice::ResetVramAndSavePacket() {
     Rnd::TheVRAM.Clear(1);
     SavePacket();
 }
 
-// NTSC-U/C: 0x0049ff28, PAL: 0x004ddfb0
 void GfxDevice::SavePacket() {
     sceDmaSync(sceDmaGetChan(SCE_DMA_GIF), 0, 0);
     sceDmaSync(sceDmaGetChan(SCE_DMA_VIF1), 0, 0);
     std::memcpy(&mSavedPacket[0], mpBuffer, (mpWrite - mpBuffer) * sizeof(GifQuadword));
 }
 
-// NTSC-U/C: 0x0049ff98, PAL: 0x004de020
 void GfxDevice::RestorePacket() {
     std::memcpy(mpBuffer, &mSavedPacket[0], (mpWrite - mpBuffer) * sizeof(GifQuadword));
 }
 
-// NTSC-U/C: 0x004a00e8, PAL: 0x004de170
 inline void GfxDevice::SendPacket() {
     sceDmaChan *pChannel = sceDmaGetChan(mnUseVu1 != 0 ? SCE_DMA_VIF1 : SCE_DMA_GIF);
     sceDmaSendN(pChannel, ToDmaAddress(mpBuffer), static_cast<int>(mpWrite - mpBuffer));
 }
 
-// NTSC-U/C: 0x004a0388, PAL: 0x004de410
 void GfxDevice::FlipFrameBuffer() {
     PutDrawBufferSmall(mpDisplayBuffers, mnDrawBuffer, 1);
     SwapBuffers();
 }
 
-// NTSC-U/C: 0x0049ae20, PAL: 0x004d8da0
 void GfxDevice::Init(int nWidth, int nHeight, int nBitDepth) {
     int nTimer = kFirstDeviceTimer;
     for (const char *pszName : kapszDeviceTimerNames) {
@@ -484,7 +475,6 @@ void GfxDevice::Init(int nWidth, int nHeight, int nBitDepth) {
     Rnd::TheVRAM.Init();
 }
 
-// NTSC-U/C: 0x0049b138, PAL: 0x004d9150
 void GfxDevice::InitDisplayMode() {
     std::memset(mGsRegs, kRegShadowFillByte, sizeof(mGsRegs));
     mGsRegs[kGsRegFogCol] = kFogColInitial;
@@ -548,7 +538,6 @@ void GfxDevice::InitDisplayMode() {
     LeaveVu1Path();
 }
 
-// NTSC-U/C: 0x0049b930, PAL: 0x004d9950
 void GfxDevice::BeginFrame() {
     SwapBuffers();
     std::memset(&g_renderStats, 0, sizeof(g_renderStats));
@@ -562,7 +551,6 @@ void GfxDevice::BeginFrame() {
     }
 }
 
-// NTSC-U/C: 0x004a0238, PAL: 0x004de2c0
 inline void GfxDevice::SwapBuffers() {
     sceGsSyncPath(0, 0);
     while (gVCount < mnSwapVblank) {
@@ -588,7 +576,6 @@ inline void GfxDevice::SwapBuffers() {
     mGsRegs[kGsRegPrim] = kAllBits;
 }
 
-// NTSC-U/C: 0x0049bac8, PAL: 0x004d9ae8
 void GfxDevice::PresentFrame(int nSwapBuffers) {
     if (mFeedbackEnabled != 0) {
         SetupGsDrawContext();
@@ -601,7 +588,6 @@ void GfxDevice::PresentFrame(int nSwapBuffers) {
     }
 }
 
-// NTSC-U/C: 0x0049b478, PAL: 0x004d9498
 int GfxDevice::FlushGifPacket(int bRetainOpenTag, int bOnlyWhenFull) {
     if (bOnlyWhenFull != 0 && mpWrite < mpBuffer + kGifBufferQuadwords) {
         return 0;
@@ -634,7 +620,6 @@ int GfxDevice::FlushGifPacket(int bRetainOpenTag, int bOnlyWhenFull) {
     return 1;
 }
 
-// NTSC-U/C: 0x0049b5a8, PAL: 0x004d95c8
 void GfxDevice::WriteGifTag(const GifQuadword *pTag) {
     ++g_renderStats.mnGifTags;
     CloseGifTag(0); // Inlined in the binary.
@@ -654,7 +639,6 @@ void GfxDevice::WriteGifTag(const GifQuadword *pTag) {
     mpWrite = pWrite + 1;
 }
 
-// NTSC-U/C: 0x0049ffd0, PAL: 0x004de058
 void GfxDevice::SetGsReg(int nReg, unsigned long long qwValue, unsigned long long qwMask) {
     if ((mGsRegs[nReg] & qwMask) == (qwValue & qwMask)) {
         return;
@@ -681,7 +665,6 @@ void GfxDevice::SetGsReg(int nReg, unsigned long long qwValue, unsigned long lon
     }
 }
 
-// NTSC-U/C: 0x004a0348, PAL: 0x004de3d0
 void GfxDevice::EnterVu1Path() {
     if (mnUseVu1 != 0) {
         return;
@@ -690,7 +673,6 @@ void GfxDevice::EnterVu1Path() {
     mnUseVu1 = 1;
 }
 
-// NTSC-U/C: 0x0049b838, PAL: 0x004d9858
 void GfxDevice::LeaveVu1Path() {
     if (mnUseVu1 == 0) {
         return;
@@ -701,7 +683,6 @@ void GfxDevice::LeaveVu1Path() {
     mnUseVu1 = 0;
 }
 
-// NTSC-U/C: 0x0049fd98, PAL: 0x004dde20
 void GfxDevice::ReserveGifSpace(int nQuadwords) {
     if (mnUseVu1 == 0) {
         return;
@@ -716,7 +697,6 @@ void GfxDevice::ReserveGifSpace(int nQuadwords) {
     mpWrite = pRegion;
 }
 
-// NTSC-U/C: 0x0049fe08, PAL: 0x004dde90
 void GfxDevice::SwapGifWrite() {
     if (mnUseVu1 == 0) {
         return;
@@ -729,7 +709,6 @@ void GfxDevice::SwapGifWrite() {
     mpSavedWrite = pWrite;
 }
 
-// NTSC-U/C: 0x0049fe38, PAL: 0x004ddec0
 void GfxDevice::FlushReservedGif() {
     if (mnUseVu1 == 0) {
         return;
@@ -750,7 +729,6 @@ void GfxDevice::FlushReservedGif() {
     mpReservedRegion = nullptr;
 }
 
-// NTSC-U/C: 0x004a0158, PAL: 0x004de1e0
 void GfxDevice::CloseGifTag(int bEndOfPacket) {
     GifQuadword *pTag = mpOpenTag;
     if (pTag == nullptr) {
@@ -784,7 +762,6 @@ void GfxDevice::CloseGifTag(int bEndOfPacket) {
     mpOpenVifDirect = nullptr;
 }
 
-// NTSC-U/C: 0x0049b6b8, PAL: 0x004d96d8
 void GfxDevice::RestoreFrameBufferTarget() {
     const sceGsDrawEnv1 &draw =
         mnDrawBuffer != 0 ? mpDisplayBuffers->mHalves[1].mDraw : mpDisplayBuffers->mHalves[0].mDraw;
@@ -792,7 +769,6 @@ void GfxDevice::RestoreFrameBufferTarget() {
     SetGsReg(kGsRegXyOffset1, draw.xyoffset1, kGsXyOffsetMask);
 }
 
-// NTSC-U/C: 0x0049b368, PAL: 0x004d9388
 void GfxDevice::SetClearColor(const Color &color) {
     mClearColor = color;
     mpDisplayBuffers->mHalves[0].mClear.rgbaqWord = PackRgbaq(color);
@@ -800,7 +776,6 @@ void GfxDevice::SetClearColor(const Color &color) {
     FlushCache(kFlushCacheWriteBackData);
 }
 
-// NTSC-U/C: 0x0049ccb8, PAL: 0x004dacd8
 void GfxDevice::SetupGsDrawContext() {
     SetGsReg(kGsRegTest1, kTestZTestAlways, kTestZTestMask);
     SetGsReg(kGsRegZbuf1, kZbufZmsk, kZbufZmsk);
@@ -862,7 +837,6 @@ void GfxDevice::SetupGsDrawContext() {
     FlushGifPacket(0, 1);
 }
 
-// NTSC-U/C: 0x0049bc20, PAL: 0x004d9c40
 void GfxDevice::DrawDebugText(const char *pszText, const Rect &rect, const Color &color) {
     GifQuadword primAndColor;
     primAndColor.mLo = kGsPrimLineStrip;
@@ -901,7 +875,6 @@ void GfxDevice::DrawDebugText(const char *pszText, const Rect &rect, const Color
     }
 }
 
-// NTSC-U/C: 0x0049c630, PAL: 0x004da650
 void GfxDevice::DrawTimingBar(const Rect &rect, const Color &color) {
     GifQuadword *pHeader = Rnd::ThePs.mpWrite;
     Rnd::ThePs.mpWrite = pHeader + 1;
@@ -919,7 +892,6 @@ void GfxDevice::DrawTimingBar(const Rect &rect, const Color &color) {
     Rnd::ThePs.FlushGifPacket(1, 1);
 }
 
-// NTSC-U/C: 0x0049bec8, PAL: 0x004d9ee8
 void GfxDevice::DrawRenderStatsOverlay() {
     SetGsReg(kGsRegTest1, kTestZTestAlways, kTestZTestMask);
     GifQuadword tag;
@@ -974,7 +946,6 @@ void GfxDevice::DrawRenderStatsOverlay() {
     DrawDebugText(Rnd::MakeString("vramk %d", nBlocks >> 2), rect, white);
 }
 
-// NTSC-U/C: 0x0049c388, PAL: 0x004da3a8
 void GfxDevice::DrawFpsReadout() {
     mflFrameMsSum += TimerMilliseconds(g_lastFrameProfileTimers[kProfileTimerFrame]);
     mflSyncMsSum += TimerMilliseconds(g_lastFrameProfileTimers[kProfileTimerSync]);
@@ -1005,7 +976,6 @@ void GfxDevice::DrawFpsReadout() {
     DrawDebugText(Rnd::MakeString("fps %d sync %d", mnFps, mnSyncMsAverage), rect, white);
 }
 
-// NTSC-U/C: 0x0049c778, PAL: 0x004da798
 void GfxDevice::DrawSubsystemTimingGraph(int nFullScaleMs) {
     SetGsReg(kGsRegTest1, kTestZTestAlways, kTestZTestMask);
     GifQuadword barTag;
@@ -1063,7 +1033,6 @@ void GfxDevice::DrawSubsystemTimingGraph(int nFullScaleMs) {
     }
 }
 
-// NTSC-U/C: 0x0049fec0, PAL: 0x004ddf48
 int GfxDevice::GetReservedVramWords() const {
     return (mpDisplayBuffers->mZbp << kGsPageWordShift) +
            ((mnDisplayWidth * mnDisplayHeight * mnDepthBytes) >> kBytesPerWordShift);

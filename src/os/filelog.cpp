@@ -114,7 +114,6 @@ int bFileLogging = 0;
 // NTSC-U/C: 0x006ee378, PAL: 0x00731d98
 char logfilename[kFileLogPathSize] = {};
 
-// NTSC-U/C: 0x0047c9c0, PAL: 0x004ba650
 int FileOpen(const char *pszPath, int nFlags, ...) {
     const int nSceFlags = TranslateOpenFlags(nFlags);
 
@@ -189,7 +188,6 @@ int FileOpen(const char *pszPath, int nFlags, ...) {
     return nFile;
 }
 
-// NTSC-U/C: 0x0047ddf0, PAL: 0x004bbac8
 void InitFileIOLog(char *pszPath) {
     strcpy(logfilename, pszPath);
     // The image passes the default protection 0664 alongside the mode.
@@ -197,7 +195,6 @@ void InitFileIOLog(char *pszPath) {
     bFileLogging = 1;
 }
 
-// NTSC-U/C: 0x0047de48, PAL: 0x004bbb20
 void CloseFileIOLog() {
     if (bFileLogging != 0) {
         gFileIOLog.close();
@@ -205,14 +202,12 @@ void CloseFileIOLog() {
     }
 }
 
-// NTSC-U/C: 0x0047de88, PAL: 0x004bbb60
 void PrintToFileIOLog(const char *pszText) {
     if (bFileLogging != 0) {
         gFileIOLog << pszText << std::endl;
     }
 }
 
-// NTSC-U/C: 0x0047dec0, PAL: 0x004bbb98
 void FilenameToISO9660(const char *pszComponent, char *pszPath) {
     if (*pszComponent != '\0') {
         strcat(pszPath, kDiscPathSeparator);
@@ -230,7 +225,6 @@ void FilenameToISO9660(const char *pszComponent, char *pszPath) {
     strcat(pszPath, kDiscVersionSuffix);
 }
 
-// NTSC-U/C: 0x0047dfb0, PAL: 0x004bbc88
 extern "C" int close(int nFile) {
     char szTrace[kFileTraceSize];
     sprintf(szTrace, "close($%x) at t:%f", nFile, kUntimedSeconds);
@@ -245,7 +239,6 @@ extern "C" int close(int nFile) {
     return sceClose(nFile & ~kFileHandleSceFile);
 }
 
-// NTSC-U/C: 0x0047e060, PAL: 0x004bbd38
 extern "C" ssize_t read(int nFile, void *pBuffer, size_t nLength) {
     int nRead;
     if ((nFile & kFileHandleArkStream) != 0) {
@@ -269,7 +262,6 @@ extern "C" ssize_t read(int nFile, void *pBuffer, size_t nLength) {
     return nRead;
 }
 
-// NTSC-U/C: 0x0047e178, PAL: 0x004bbe50
 extern "C" ssize_t write(int nFile, const void *pBuffer, size_t nLength) {
     if ((nFile & kFileHandleArkStream) != 0) {
         return -1;
@@ -280,7 +272,6 @@ extern "C" ssize_t write(int nFile, const void *pBuffer, size_t nLength) {
     return sceWrite(nFile & ~kFileHandleSceFile, pBuffer, nLength);
 }
 
-// NTSC-U/C: 0x0047e1c8, PAL: 0x004bbea0
 int FileSeek(int nFile, int nOffset, int nOrigin) {
     int nPosition;
     if ((nFile & kFileHandleArkStream) != 0) {
@@ -305,7 +296,6 @@ int FileSeek(int nFile, int nOffset, int nOrigin) {
     return nPosition;
 }
 
-// NTSC-U/C: 0x0047e2f0, PAL: 0x004bbfc8
 extern "C" int isatty(int nFile) {
     if ((nFile & kFileHandleArkStream) != 0 || (nFile & kFileHandleSceFile) != 0) {
         return 0;

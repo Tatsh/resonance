@@ -77,6 +77,9 @@ public:
     /**
      * Slot 5.
      *
+     * The same store as SetColorNative(), in a separate slot. For this format an 8888 colour and
+     * the native word are the same value.
+     *
      * @ghidraAddress NTSC-U/C: 0x00630380
      * @ghidraAddress PAL: 0x00670f10
      */
@@ -116,6 +119,8 @@ public:
 
     /**
      * Slot 10.
+     *
+     * The same load as GetColorNative(), in a separate slot.
      *
      * @ghidraAddress NTSC-U/C: 0x006303e8
      * @ghidraAddress PAL: 0x00670f78
@@ -160,6 +165,9 @@ public:
     /**
      * Slot 23.
      *
+     * For this format the native word is an 8888 colour, so the store forwards to DrawPixel32U()
+     * through the table rather than converting.
+     *
      * @ghidraAddress NTSC-U/C: 0x006303f8
      * @ghidraAddress PAL: 0x00670f88
      */
@@ -189,6 +197,8 @@ public:
 
     /**
      * Slot 33.
+     *
+     * The read counterpart of DrawPixelNativeU(), forwarding to GetPixel32U().
      *
      * @ghidraAddress NTSC-U/C: 0x00630420
      * @ghidraAddress PAL: 0x00670fb0

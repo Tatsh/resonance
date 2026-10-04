@@ -350,24 +350,45 @@ protected:
     void SetNumParticles(int nCount);
 
 private:
-    // Integrate every live particle over a span of frames and release the ones whose death frame
-    // has passed. 0x00524b70.
+    /**
+     * Integrate every live particle over a span of frames and release the ones whose death frame
+     * has passed.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00524b70
+     * @ghidraAddress PAL: 0x00565148
+     */
     void UpdateParticles(float flDeltaFrames);
 
-    // Allocate and initialise the particles the emission rate calls for over a span of frames.
-    // NTSC-U/C: 0x005244b0, PAL: 0x00564a88
+    /**
+     * Allocate and initialise the particles the emission rate calls for over a span of frames.
+     *
+     * @ghidraAddress NTSC-U/C: 0x005244b0
+     * @ghidraAddress PAL: 0x00564a88
+     */
     void SpawnParticles(float flDeltaFrames);
 
-    // Drop the reference on the material and on the particle owner, and remove this system from
-    // the owner's sharer list. Copy() calls it, and the destructor and Replace() open-code it.
-    // NTSC-U/C: 0x0052c318, PAL: 0x0056c990
+    /**
+     * Drop the reference on the material and on the particle owner, and remove this system from the
+     * owner's sharer list.
+     *
+     * Copy() calls it, and the destructor and Replace() open-code it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0052c318
+     * @ghidraAddress PAL: 0x0056c990
+     */
     void RemoveObjectRefs();
 
-    // Take the references RemoveObjectRefs() drops. A system that is its own owner also threads
-    // the whole pool onto its free list and empties the live list of every sharer, and any other
-    // system joins the sharer list of its owner. Either way this system's live list starts empty
-    // and mEmitAccumulator is cleared. The constructor, Copy(), Replace(), and Load() call it.
-    // NTSC-U/C: 0x005241a8, PAL: 0x00564780
+    /**
+     * Take the references RemoveObjectRefs() drops.
+     *
+     * A system that is its own owner also threads the whole pool onto its free list and empties the
+     * live list of every sharer, and any other system joins the sharer list of its owner. Either
+     * way this system's live list starts empty and mEmitAccumulator is cleared. The constructor,
+     * Copy(), Replace(), and Load() call it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x005241a8
+     * @ghidraAddress PAL: 0x00564780
+     */
     void AddObjectRefs();
 
     // Data members follow the recovered offset order.

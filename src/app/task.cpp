@@ -5,7 +5,6 @@
 // NTSC-U/C: 0x006fba4c, PAL: 0x0073f4c4
 Task::Node *g_pRunningTasks;
 
-// NTSC-U/C: 0x004b6270, PAL: 0x004f4580
 Task::Task() {
     mNode = new Node;
     mNode->mTask = this;
@@ -14,7 +13,6 @@ Task::Task() {
     mNode->mPrev = mNode;
 }
 
-// NTSC-U/C: 0x004b6708, PAL: 0x004f4a18
 Task::Task(const Task &other) {
     (void)other; // Yes, the binary reads nothing from the source task.
     mNode = new Node;
@@ -24,7 +22,6 @@ Task::Task(const Task &other) {
     mNode->mPrev = mNode;
 }
 
-// NTSC-U/C: 0x004b6808, PAL: 0x004f4b18
 Task::~Task() {
     if (mNode->mState == kTaskStateRunning) {
         Warn("hx: destroying active task");
@@ -34,7 +31,6 @@ Task::~Task() {
     delete mNode;
 }
 
-// NTSC-U/C: 0x004b6928, PAL: 0x004f4c38
 Task &Task::operator=(const Task &other) {
     if (this != &other) {
         Reset();
@@ -42,7 +38,6 @@ Task &Task::operator=(const Task &other) {
     return *this;
 }
 
-// Link the node in ahead of the ring head, which makes it the last position of the pass.
 void Task::Link() {
     Node *pHead = g_pRunningTasks;
     if (pHead == nullptr) {
@@ -56,8 +51,6 @@ void Task::Link() {
     pTail->mNext = mNode;
 }
 
-// Take the node out of the ring and make it self-referential again, moving the head along when the
-// head is the node being removed.
 void Task::Unlink(Node *pNode) {
     Node *pNext = pNode->mNext;
     if (pNext == pNode) {
@@ -75,7 +68,6 @@ void Task::Unlink(Node *pNode) {
     }
 }
 
-// NTSC-U/C: 0x004b6370, PAL: 0x004f4680
 int Task::Start(int bBlocking) {
     int nState = mNode->mState;
     if (nState == kTaskStateRunning && bBlocking == 0) {
@@ -101,7 +93,6 @@ int Task::Start(int bBlocking) {
     return 1;
 }
 
-// NTSC-U/C: 0x004b6968, PAL: 0x004f4c78
 int Task::Suspend() {
     int nState = mNode->mState;
     if (nState == kTaskStateSuspended) {
@@ -119,7 +110,6 @@ int Task::Suspend() {
     return 1;
 }
 
-// NTSC-U/C: 0x004b6a28, PAL: 0x004f4d38
 int Task::Reset() {
     int nState = mNode->mState;
     if (nState == kTaskStateIdle) {
@@ -136,7 +126,6 @@ int Task::Reset() {
     return 1;
 }
 
-// NTSC-U/C: 0x004b6ae8, PAL: 0x004f4df8
 int Task::Finish() {
     int nState = mNode->mState;
     if (nState == kTaskStateFinished) {
@@ -153,32 +142,26 @@ int Task::Finish() {
     return 1;
 }
 
-// NTSC-U/C: 0x004b6958, PAL: 0x004f4c68
 int Task::State() const {
     return mNode->mState;
 }
 
-// NTSC-U/C: 0x004b65e8, PAL: 0x004f48f8
 int Task::InProgress() const {
     return static_cast<unsigned>(State() - kTaskStateRunning) < 2;
 }
 
-// NTSC-U/C: 0x004b6610, PAL: 0x004f4920
 float Task::GetProgress() {
     return Progress();
 }
 
-// NTSC-U/C: 0x004b6638, PAL: 0x004f4948
 HxStr Task::GetStatus() const {
     return Name();
 }
 
-// NTSC-U/C: 0x004b6670, PAL: 0x004f4980
 int Task::GetQuiet() {
     return Quiet();
 }
 
-// NTSC-U/C: 0x004b6490, PAL: 0x004f47a0
 int Task::PollTasks() {
     Node *pNode = g_pRunningTasks;
     if (pNode == nullptr) {
@@ -199,12 +182,10 @@ int Task::PollTasks() {
     return g_pRunningTasks != nullptr;
 }
 
-// NTSC-U/C: 0x004b6bb0, PAL: 0x004f4ec0
 int Task::Quiet() {
     return 0;
 }
 
-// NTSC-U/C: 0x004b6bb8, PAL: 0x004f4ec8
 int Task::CheckStateChange(int nFrom, int nTo) {
     (void)nFrom;
     (void)nTo;

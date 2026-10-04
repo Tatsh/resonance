@@ -257,9 +257,14 @@ protected:
 #endif
 
 private:
-    // NTSC-U/C: 0x002be670, PAL: 0x002de378
-    // Plays the activate sound and sets MetFrontEndState::mUnlockAll. Slot 3 expands it, and the
-    // address is its uncalled out-of-line copy. The title is inferred.
+    /**
+     * Plays the activate sound and sets MetFrontEndState::mUnlockAll.
+     *
+     * Slot 3 expands it, and the address is its uncalled out-of-line copy. The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002be670
+     * @ghidraAddress PAL: 0x002de378
+     */
     static void RecordUnlock();
 
     // Toggles the start text every 120 frames and sets the wave view's frame. Slots 26 and 27 both

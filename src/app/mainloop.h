@@ -165,19 +165,33 @@ public:
     static void KeepAliveDraw();
 
 private:
-    // Rearm the timer and poll the game manager. The routine it dispatches ticks the input
-    // poller, accumulates a profile timer, and advances the game world when the world and the
-    // playback object are both present; nothing in it concerns a sound bank, and no literal
-    // attests the word, so the earlier spelling of both this member and its callee is dropped.
-    // NTSC-U/C: 0x001ef3d0, PAL: 0x001f5770
+    /**
+     * Rearm the timer and poll the game manager.
+     *
+     * The routine it dispatches ticks the input poller, accumulates a profile timer, and advances
+     * the game world when the world and the playback object are both present; nothing in it
+     * concerns a sound bank, and no literal attests the word, so the earlier spelling of both this
+     * member and its callee is dropped.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ef3d0
+     * @ghidraAddress PAL: 0x001f5770
+     */
     void FirePollTimer(long long nNowNs);
 
-    // Rearm the watchdog timer and service the watchdog.
-    // NTSC-U/C: 0x001ef398, PAL: 0x001f5738
+    /**
+     * Rearm the watchdog timer and service the watchdog.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ef398
+     * @ghidraAddress PAL: 0x001f5738
+     */
     void SchCallback(long long nNowNs);
 
-    // Runs after the frame is drawn, with an empty body.
-    // NTSC-U/C: 0x001ef410, PAL: 0x001f57b0
+    /**
+     * Runs after the frame is drawn, with an empty body.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001ef410
+     * @ghidraAddress PAL: 0x001f57b0
+     */
     void PostDraw();
 
     int mRunning;                  // +0x0c

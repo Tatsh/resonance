@@ -52,12 +52,20 @@ protected:
     virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // Add the requested note to the sustained set unless it is already sounding.
-    // NTSC-U/C: 0x001d20a0, PAL: 0x001d7f58
+    /**
+     * Add the requested note to the sustained set unless it is already sounding.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d20a0
+     * @ghidraAddress PAL: 0x001d7f58
+     */
     void HandleSustainNote(SustainNoteMsg *pMsg);
 
-    // Filter a raw MIDI message against the two sets.
-    // NTSC-U/C: 0x001d2160, PAL: 0x001d8018
+    /**
+     * Filter a raw MIDI message against the two sets.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d2160
+     * @ghidraAddress PAL: 0x001d8018
+     */
     void HandleStdMidi(StdMidiMsg *pMsg);
 
     std::vector<unsigned char> mSounding;  // +0x04, notes a note-on has let through

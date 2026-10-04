@@ -119,6 +119,9 @@ int viBufCount(ViBuf *buffer);
 /**
  * Create the queue semaphore for the input record.
  *
+ * Stores the data pointer, the uncached tag pointer, the sizes, and the stamp ring, creates the
+ * semaphore, resets the buffer, and clears the lifetime total.
+ *
  * @param buffer The input record.
  * @param pData Staged data pointer. Inferred.
  * @param pTag Staged tag pointer. Inferred.
@@ -133,6 +136,8 @@ void sceDmaCreateQueueSemaphore(
 
 /**
  * Delete the queue semaphore of the input record.
+ *
+ * Stops the input DMA channel first.
  *
  * @param buffer The input record.
  * @return 1.
@@ -173,6 +178,10 @@ int viBufStopDMA(ViBuf *buffer);
 
 /**
  * Restart the input DMA from the saved position.
+ *
+ * Restarts both IPU channels from the positions viBufStopDMA() saved. The input channel is rewound
+ * by the words the IPU FIFO had, the read position and buffered count are corrected for the
+ * sectors the rewind crossed, the saved IPU command is reissued, and IPU_CTRL is restored.
  *
  * @param buffer The input record.
  * @return 1.

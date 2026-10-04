@@ -63,7 +63,6 @@ constexpr char kCaughtPowerSound[] = "SND_CAUGHT_POWERUP";
 
 } // namespace
 
-// NTSC-U/C: 0x0011e000, PAL: 0x0011e5a0
 LocalPlayer::LocalPlayer(int nId,
                          int nInputSlot,
                          const HxStr &colorName,
@@ -106,48 +105,39 @@ LocalPlayer::LocalPlayer(int nId,
     }
 }
 
-// NTSC-U/C: 0x0011e348, PAL: 0x0011e8f8
 LocalPlayer::~LocalPlayer() {
     delete mPlacer;
     delete mCollection;
 }
 
-// NTSC-U/C: 0x00121ea0, PAL: 0x001224a8
 int LocalPlayer::GetInputSlot() const {
     return mInputSlot;
 }
 
-// NTSC-U/C: 0x00121e90, PAL: 0x00122498
 int LocalPlayer::GetTrack() {
     return mTrack;
 }
 
-// NTSC-U/C: 0x00121e98, PAL: 0x001224a0
 int LocalPlayer::GetPlace() {
     return mPlace;
 }
 
-// NTSC-U/C: 0x00122890, PAL: 0x00122ea8
 int LocalPlayer::UnusedQuery() {
     return 0;
 }
 
-// NTSC-U/C: 0x00121ea8, PAL: 0x001224b0
 void LocalPlayer::UnusedHook() {
 }
 
-// NTSC-U/C: 0x00122898, PAL: 0x00122eb0
 void LocalPlayer::SetFreestyleSpan(int nStartBar, int nEndBar) {
     mFreestyleStartBar = nStartBar;
     mFreestyleEndBar = nEndBar;
 }
 
-// NTSC-U/C: 0x00121eb0, PAL: 0x001224b8
 int LocalPlayer::IsLooping() {
     return mLooping;
 }
 
-// NTSC-U/C: 0x0011e4e0, PAL: 0x0011eaa0
 void LocalPlayer::AnnounceState() {
     Player::AnnounceState();
     const int nTick = Application::shared()->GetSongClock()->SongTick();
@@ -183,12 +173,10 @@ void LocalPlayer::AnnounceState() {
     }
 }
 
-// NTSC-U/C: 0x001228c8, PAL: 0x00122ee0
 void LocalPlayer::DeactivatePlacer() {
     mPlacer->Deactivate();
 }
 
-// NTSC-U/C: 0x0011e810, PAL: 0x0011edd0
 void LocalPlayer::SetLooping(int bLooping, const Sch::Tick &position) {
     if (mPlayMode != kPlayModeJam) {
         return;
@@ -201,7 +189,6 @@ void LocalPlayer::SetLooping(int bLooping, const Sch::Tick &position) {
     Send(&loop);
 }
 
-// NTSC-U/C: 0x0011e908, PAL: 0x0011eec8
 void LocalPlayer::SetGhost(int bGhost) {
     if (mPlayMode != kPlayModeJam) {
         return;
@@ -215,17 +202,14 @@ void LocalPlayer::SetGhost(int bGhost) {
     Send(&message);
 }
 
-// NTSC-U/C: 0x00121ec0, PAL: 0x001224c8
 int LocalPlayer::CountCaughtGem() {
     return mCaughtGems += 1;
 }
 
-// NTSC-U/C: 0x00121ed0, PAL: 0x001224d8
 int LocalPlayer::CountMissedGem() {
     return mMissedGems += 1;
 }
 
-// NTSC-U/C: 0x00122cc8, PAL: 0x001232e0
 float LocalPlayer::GetCaptureRatio() {
     if (mCaptures == 0) {
         return 0.0f;
@@ -233,17 +217,14 @@ float LocalPlayer::GetCaptureRatio() {
     return static_cast<float>(mCaptures) / static_cast<float>(mCaptures + mMisses);
 }
 
-// NTSC-U/C: 0x00121ee0, PAL: 0x001224e8
 int LocalPlayer::GetBestStreak() {
     return mBestStreak;
 }
 
-// NTSC-U/C: 0x00121ee8, PAL: 0x001224f0
 int LocalPlayer::GetGameMode() {
     return mGameMode;
 }
 
-// NTSC-U/C: 0x001228a8, PAL: 0x00122ec0
 int LocalPlayer::IsFreestyleBar(int nBar) {
     if (nBar < mFreestyleStartBar) {
         return 0;
@@ -251,7 +232,6 @@ int LocalPlayer::IsFreestyleBar(int nBar) {
     return nBar < mFreestyleEndBar;
 }
 
-// NTSC-U/C: 0x00122ca0, PAL: 0x001232b8
 int LocalPlayer::GetMultiplier(int nBar) {
     if (mRunEndBar < nBar) {
         return mBonus + 1;
@@ -259,7 +239,6 @@ int LocalPlayer::GetMultiplier(int nBar) {
     return mMultiplier + (mBonus + 1);
 }
 
-// NTSC-U/C: 0x00122c00, PAL: 0x00123218
 int LocalPlayer::MarkBarScored(int nBar) {
     if (mLastScoredBar < nBar) {
         mLastScoredBar = nBar;
@@ -268,16 +247,12 @@ int LocalPlayer::MarkBarScored(int nBar) {
     return 0;
 }
 
-// The address below is the out-of-line copy.
-// NTSC-U/C: 0x00122a20, PAL: 0x00123038
 inline void LocalPlayer::OnAxisYPow(AxisYPowMsg *pMsg) {
     if (pMsg->mPlayer == this && mCollection != nullptr) {
         mCollection->SelectRelative(pMsg->mValue);
     }
 }
 
-// The address below is the out-of-line copy.
-// NTSC-U/C: 0x00122ae0, PAL: 0x001230f8
 inline void LocalPlayer::OnLoopTool(LoopToolMsg *pMsg) {
     if (pMsg->mPlayer == this) {
         const Sch::Tick position = pMsg->mPosition;
@@ -285,8 +260,6 @@ inline void LocalPlayer::OnLoopTool(LoopToolMsg *pMsg) {
     }
 }
 
-// The address below is the out-of-line copy.
-// NTSC-U/C: 0x00122b38, PAL: 0x00123150
 inline void LocalPlayer::OnPhraseCaptured(PhraseCapturedMsg *pMsg) {
     if (pMsg->mPlayer != this) {
         return;
@@ -311,8 +284,6 @@ inline void LocalPlayer::OnPhraseCaptured(PhraseCapturedMsg *pMsg) {
     OnMsg(*pMsg);
 }
 
-// The address below is the out-of-line copy.
-// NTSC-U/C: 0x00122c20, PAL: 0x00123238
 inline void LocalPlayer::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     if (pMsg->mPlayer != this || pMsg->mTried == 0) {
         return;
@@ -325,16 +296,12 @@ inline void LocalPlayer::OnPhraseMuffed(PhraseMuffedMsg *pMsg) {
     }
 }
 
-// The address below is the out-of-line copy.
-// NTSC-U/C: 0x001229d8, PAL: 0x00122ff0
 inline void LocalPlayer::OnButtonPow(ButtonPowMsg *pMsg) {
     if (pMsg->mPlayer == this && mPlacer != nullptr) {
         mPlacer->DeployPowerup();
     }
 }
 
-// The address below is the out-of-line copy.
-// NTSC-U/C: 0x00122a68, PAL: 0x00123080
 inline void LocalPlayer::OnCaughtPowerbar(CaughtPowerbarMsg *pMsg) {
     if (pMsg->mPlayer != this) {
         return;
@@ -348,7 +315,6 @@ inline void LocalPlayer::OnCaughtPowerbar(CaughtPowerbarMsg *pMsg) {
     Send(pMsg);
 }
 
-// NTSC-U/C: 0x0011ed98, PAL: 0x0011f358
 void LocalPlayer::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (static_cast<unsigned int>(nType) == g_dwTrackSelectMsgType) {
@@ -381,21 +347,18 @@ void LocalPlayer::DispatchPriv(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x001228f8, PAL: 0x00122f10
 void LocalPlayer::AddSink(MsgSink *pSink) {
     MsgSource::AddSink(pSink);
     mPlacer->AddSink(pSink);
     mCollection->AddSink(pSink);
 }
 
-// NTSC-U/C: 0x00122968, PAL: 0x00122f80
 void LocalPlayer::RemoveSink(MsgSink *pSink) {
     MsgSource::RemoveSink(pSink);
     mPlacer->RemoveSink(pSink);
     mCollection->RemoveSink(pSink);
 }
 
-// NTSC-U/C: 0x0011ec00, PAL: 0x0011f1c0
 void LocalPlayer::OnBarTick(int nTick) {
     const int nBar = nTick / Sch::Tick(kTicksPerBar).mTick;
     bool bChanged = false;
@@ -421,7 +384,6 @@ void LocalPlayer::OnBarTick(int nTick) {
     }
 }
 
-// NTSC-U/C: 0x0011e700, PAL: 0x0011ecc0
 void LocalPlayer::ToggleLoop(const Sch::Tick &position) {
     if (mPlayMode != kPlayModeJam) {
         return;
@@ -434,7 +396,6 @@ void LocalPlayer::ToggleLoop(const Sch::Tick &position) {
     Send(&loop);
 }
 
-// NTSC-U/C: 0x0011e980, PAL: 0x0011ef40
 void LocalPlayer::OnTrackSelect(TrackSelectMsg *pMsg) {
     if (pMsg->mPlayer != this) {
         return;
@@ -455,7 +416,6 @@ void LocalPlayer::OnTrackSelect(TrackSelectMsg *pMsg) {
     Send(&packet);
 }
 
-// NTSC-U/C: 0x0011eaa8, PAL: 0x0011f068
 void LocalPlayer::OnToggleGhost(ToggleGhostMsg *pMsg) {
     if (pMsg->mPlayer != this) {
         return;
@@ -468,7 +428,6 @@ void LocalPlayer::OnToggleGhost(ToggleGhostMsg *pMsg) {
     Send(&ghost);
 }
 
-// NTSC-U/C: 0x0011eb20, PAL: 0x0011f0e0
 void LocalPlayer::OnMultiplier(MultiplierMsg *pMsg) {
     mBonus = kBonusMultiplier;
     mBonusEndBar = pMsg->mBar + kBonusBars;

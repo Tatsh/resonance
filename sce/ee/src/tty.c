@@ -236,7 +236,6 @@ static int sceTtyRead(char *pBuffer, int nLength) {
     return nRead;
 }
 
-// NTSC-U/C: 0x00596480, PAL: 0x005d9888
 int writx(int nFile, const void *pBuffer, int nLength) {
     if (nFile != kConsoleOutput && nFile != kConsoleError) {
         return -1;
@@ -262,7 +261,6 @@ int writx(int nFile, const void *pBuffer, int nLength) {
     return TtyWrite((const char *)pBuffer, nLength);
 }
 
-// NTSC-U/C: 0x00596500, PAL: 0x005d9908
 int reax(int nFile, void *pBuffer, int nLength) {
     if (nFile != kConsoleInput) {
         return -1;
@@ -276,13 +274,11 @@ int reax(int nFile, void *pBuffer, int nLength) {
     return sceTtyRead((char *)pBuffer, nLength);
 }
 
-// NTSC-U/C: 0x005965a0, PAL: 0x005d99a8
 int LibcConsoleClose(int nFile) {
     (void)nFile;
     return -1;
 }
 
-// NTSC-U/C: 0x005965b0, PAL: 0x005d99b8
 int LibcConsoleLseek(int nFile, int nOffset, int nOrigin) {
     (void)nFile;
     (void)nOffset;
@@ -290,13 +286,11 @@ int LibcConsoleLseek(int nFile, int nOffset, int nOrigin) {
     return -1;
 }
 
-// NTSC-U/C: 0x00596668, PAL: 0x005d9a70
 int LibcConsoleIsatty(int nFile) {
     (void)nFile;
     return 1;
 }
 
-// NTSC-U/C: 0x005963d0, PAL: 0x005d97d8
 void LibcConsoleReset(void) {
     ttyinit = 0;
 }

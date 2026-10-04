@@ -992,10 +992,16 @@ protected:
     virtual void DispatchPriv(Message *pMsg);
 
 protected:
-    // NTSC-U/C: 0x0038bd60, PAL: 0x003bd538
-    // Resolves the two animation views from the screen name and records the enter
-    // animation's end frame. Slot 38 and MetTopLogoScreen's slot 38 call it, which is why it is
-    // protected. The title is inferred from the two members it writes.
+    /**
+     * Resolves the two animation views from the screen name and records the enter animation's end
+     * frame.
+     *
+     * Slot 38 and MetTopLogoScreen's slot 38 call it, which is why it is protected. The title is
+     * inferred from the two members it writes.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0038bd60
+     * @ghidraAddress PAL: 0x003bd538
+     */
     void ResolveAnimationViews();
 
 protected:

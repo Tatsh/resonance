@@ -194,7 +194,6 @@ inline int CategoryOfLetter(char cLetter) {
 
 } // namespace
 
-// NTSC-U/C: 0x00250b18, PAL: 0x00266050
 MetFreqMakerAssetManager::MetFreqMakerAssetManager()
     : mReserved(0), mPrefabLoader(nullptr), mTeamFreqLoader(nullptr), mAssetLoader(nullptr),
       mLoaded(0), mMaterialTemplate(nullptr), mMeshTemplate(nullptr), mPaletteTex(nullptr),
@@ -207,13 +206,11 @@ MetFreqMakerAssetManager::MetFreqMakerAssetManager()
     mTeamFreqLoader = new MetFreqLoader(teamFreqPath, &mTeamFreqIdentities);
 }
 
-// NTSC-U/C: 0x00250808, PAL: 0x00265d40
 MetFreqMakerAssetManager::~MetFreqMakerAssetManager() {
     delete mPrefabLoader;
     delete mTeamFreqLoader;
 }
 
-// NTSC-U/C: 0x0024f798, PAL: 0x00264bd8
 bool MetFreqMakerAssetManager::PollLoad() {
     if (mLoaded == 1) {
         return true;
@@ -255,7 +252,6 @@ bool MetFreqMakerAssetManager::PollLoad() {
     return true;
 }
 
-// NTSC-U/C: 0x0024fce8, PAL: 0x00265170
 void MetFreqMakerAssetManager::StartAssetLoad() {
     if (mAssetLoader != nullptr) {
         return;
@@ -265,13 +261,11 @@ void MetFreqMakerAssetManager::StartAssetLoad() {
     mAssetLoader->Enqueue();
 }
 
-// NTSC-U/C: 0x00250540, PAL: 0x00265a78
 std::list<Rnd::Object *> MetFreqMakerAssetManager::GetLoadedObjects() {
     PollLoad(); // Yes, the binary discards the result.
     return mAssetLoader->mObjects;
 }
 
-// NTSC-U/C: 0x0024fe58, PAL: 0x00265320
 void MetFreqMakerAssetManager::ReleaseParts() {
     for (std::map<HxStr, FreqPartTemplate *>::iterator it = mPartsByName.begin();
          it != mPartsByName.end();
@@ -283,7 +277,6 @@ void MetFreqMakerAssetManager::ReleaseParts() {
     mLoaded = 0;
 }
 
-// NTSC-U/C: 0x0024ff80, PAL: 0x00265448
 FreqPartTemplate *MetFreqMakerAssetManager::RegisterPart(Rnd::Object *pObject) {
     HxStr name;
     HxStr materialName;
@@ -315,29 +308,24 @@ FreqPartTemplate *MetFreqMakerAssetManager::RegisterPart(Rnd::Object *pObject) {
     return pTemplate;
 }
 
-// NTSC-U/C: 0x00255158, PAL: 0x0026a820
 void MetFreqMakerAssetManager::CreateInstance() {
     g_pFreqMakerAssetManager = new MetFreqMakerAssetManager();
 }
 
-// NTSC-U/C: 0x002551b8, PAL: 0x0026a880
 void MetFreqMakerAssetManager::DestroyInstance() {
     delete g_pFreqMakerAssetManager; // Yes, the binary does not clear the pointer.
 }
 
-// NTSC-U/C: 0x002551f0, PAL: 0x0026a8b8
 MetFreqMakerAssetManager *MetFreqMakerAssetManager::Instance() {
     return g_pFreqMakerAssetManager;
 }
 
-// NTSC-U/C: 0x00255200, PAL: 0x0026a8c8
 void MetFreqMakerAssetManager::WaitForLoad() {
     while (!PollLoad()) {
         RndAsyncLoader::PollAsyncLoads();
     }
 }
 
-// NTSC-U/C: 0x00255090, PAL: 0x0026a758
 std::vector<MetPersonaData *> *MetFreqMakerAssetManager::GetIdentityList() {
     WaitForLoad();
     while (!AreIdentitiesLoaded()) {
@@ -346,7 +334,6 @@ std::vector<MetPersonaData *> *MetFreqMakerAssetManager::GetIdentityList() {
                                                               &mPrefabIdentities;
 }
 
-// NTSC-U/C: 0x00255100, PAL: 0x0026a7c8
 std::vector<MetPersonaData *> *MetFreqMakerAssetManager::GetAllIdentities() {
     WaitForLoad();
     while (!AreIdentitiesLoaded()) {
@@ -354,48 +341,40 @@ std::vector<MetPersonaData *> *MetFreqMakerAssetManager::GetAllIdentities() {
     return &mTeamFreqIdentities;
 }
 
-// NTSC-U/C: 0x00254fd0, PAL: 0x0026a698
 void MetFreqMakerAssetManager::StartIdentityLoads() {
     mPrefabLoader->Start();
     mTeamFreqLoader->Start();
 }
 
-// NTSC-U/C: 0x00255000, PAL: 0x0026a6c8
 bool MetFreqMakerAssetManager::AreIdentitiesLoaded() {
     int nPrefabLoaded = mPrefabLoader->IsLoaded();
     int nTeamFreqLoaded = mTeamFreqLoader->IsLoaded();
     return nTeamFreqLoaded != 0 && nPrefabLoaded != 0;
 }
 
-// NTSC-U/C: 0x00255048, PAL: 0x0026a710
 bool MetFreqMakerAssetManager::AreLoadersReady() {
     bool bPrefabReady = mPrefabLoader->PollAssets();
     bool bTeamFreqReady = mTeamFreqLoader->PollAssets();
     return bTeamFreqReady && bPrefabReady;
 }
 
-// NTSC-U/C: 0x00254930, PAL: 0x00269ff8
 void MetFreqMakerAssetManager::Create() {
     CreateInstance();
 }
 
-// NTSC-U/C: 0x00254950, PAL: 0x0026a018
 MetFreqMakerAssetManager *MetFreqMakerAssetManager::shared() {
     return Instance();
 }
 
-// NTSC-U/C: 0x00254970, PAL: 0x0026a038
 void MetFreqMakerAssetManager::Destroy() {
     DestroyInstance();
 }
 
-// NTSC-U/C: 0x00254990, PAL: 0x0026a058
 std::map<HxStr, FreqPartTemplate *> *MetFreqMakerAssetManager::GetPartsByName() {
     PollLoad(); // Yes, the binary discards the result.
     return &mPartsByName;
 }
 
-// NTSC-U/C: 0x00250638, PAL: 0x00265b70
 Color *MetFreqMakerAssetManager::SampleTexture(Rnd::Tex *pTex, float flU, float flV) {
     g_sampledColor = kOpaqueBlack;
     ACanvas *pCanvas = pTex->LockMipBitmap(kTopMip, 0, kNoReadBack);
@@ -415,7 +394,6 @@ Color *MetFreqMakerAssetManager::SampleTexture(Rnd::Tex *pTex, float flU, float 
     return &g_sampledColor;
 }
 
-// NTSC-U/C: 0x00254cf8, PAL: 0x0026a3c0
 bool MetFreqMakerAssetManager::PaintTexel(Rnd::Tex *pTex,
                                           const Color &color,
                                           float flU,
@@ -436,7 +414,6 @@ bool MetFreqMakerAssetManager::PaintTexel(Rnd::Tex *pTex,
     return true;
 }
 
-// NTSC-U/C: 0x00254c20, PAL: 0x0026a2e8
 bool MetFreqMakerAssetManager::ScaleMesh(
     Rnd::Mesh *pMesh, int nOrthonormalize, float flScaleX, float flScaleY, float flScaleZ) {
     float basis[kBasisRowCount][Rnd::kXfmRowFloatCount];
@@ -452,18 +429,15 @@ bool MetFreqMakerAssetManager::ScaleMesh(
     return true;
 }
 
-// NTSC-U/C: 0x00254a18, PAL: 0x0026a0e0
 FreqPartTemplate *MetFreqMakerAssetManager::GetPart(int nId) {
     PollLoad(); // Yes, the binary discards the result.
     return mParts[nId];
 }
 
-// NTSC-U/C: 0x00254e50, PAL: 0x0026a518
 HxStr MetFreqMakerAssetManager::NextMeshName() {
     return HxStr(Rnd::MakeString(kMeshNameFormat, mMeshCount++));
 }
 
-// NTSC-U/C: 0x00254a58, PAL: 0x0026a120
 Rnd::Mesh *MetFreqMakerAssetManager::CloneMesh(const HxStr &name) {
     PollLoad(); // Yes, the binary discards the result.
     Rnd::Mesh *pMesh = Rnd::NewMeshThroughHook(name);
@@ -472,7 +446,6 @@ Rnd::Mesh *MetFreqMakerAssetManager::CloneMesh(const HxStr &name) {
     return pMesh;
 }
 
-// NTSC-U/C: 0x00254b30, PAL: 0x0026a1f8
 void MetFreqMakerAssetManager::ApplyPartScale(Rnd::Mesh *pMesh,
                                               FreqPartTemplate *pTemplate,
                                               float *pScaleX,
@@ -491,7 +464,6 @@ void MetFreqMakerAssetManager::ApplyPartScale(Rnd::Mesh *pMesh,
     pMesh->mDirty = 1;
 }
 
-// NTSC-U/C: 0x00254f30, PAL: 0x0026a5f8
 Color *MetFreqMakerAssetManager::ColorAt(const Vector2 &position) {
     if (mPaletteTex == nullptr) {
         mPaletteTex = dynamic_cast<Rnd::Tex *>(Rnd::TheManager.Find(g_spectrumTextureName));
@@ -499,14 +471,12 @@ Color *MetFreqMakerAssetManager::ColorAt(const Vector2 &position) {
     return SampleTexture(mPaletteTex, position.x, position.y);
 }
 
-// NTSC-U/C: 0x002549b8, PAL: 0x0026a080
 FreqPartTemplate *MetFreqMakerAssetManager::FindPart(const HxStr &name) {
     PollLoad(); // Yes, the binary discards the result.
     std::map<HxStr, FreqPartTemplate *>::iterator it = mPartsByName.find(name);
     return it != mPartsByName.end() ? it->second : nullptr;
 }
 
-// NTSC-U/C: 0x00254ea0, PAL: 0x0026a568
 std::list<FreqPartTemplate *> *MetFreqMakerAssetManager::TemplatesInCategory(int nCategory) {
     // The binary dispatches through a jump table with one entry for each category.
     if (nCategory < kFirstCategory || nCategory > kCategoryCount) {

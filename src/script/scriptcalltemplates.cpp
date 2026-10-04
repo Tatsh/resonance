@@ -141,7 +141,6 @@ constexpr int kScriptTemplateGetAlbumName = 1301;
 
 } // namespace
 
-// NTSC-U/C: 0x004016c8, PAL: 0x0043a1b0
 void RegisterScriptCallTemplates() {
     RegisterScriptTemplate(
         kScriptTemplateExitInstanceException,

@@ -70,7 +70,6 @@ int Cmd::sCmdID;
 
 } // namespace
 
-// NTSC-U/C: 0x001b4328, PAL: 0x001ba100
 NotePlayer::NotePlayer(unsigned char nNote,
                        unsigned char nVelocity,
                        int nDuration,
@@ -86,12 +85,10 @@ NotePlayer::NotePlayer(unsigned char nNote,
     }
 }
 
-// NTSC-U/C: 0x001b4460, PAL: 0x001ba238
 NotePlayer::~NotePlayer() {
     Stop();
 }
 
-// NTSC-U/C: 0x001b3d58, PAL: 0x001b9b30
 void NotePlayer::Start(MsgSink *pSink) {
     mSink = pSink;
     const int nNow = mClock->SongTick();
@@ -106,7 +103,6 @@ void NotePlayer::Start(MsgSink *pSink) {
     }
 }
 
-// NTSC-U/C: 0x001b3ee0, PAL: 0x001b9cb8
 void NotePlayer::Stop() {
     if (mSink != nullptr) {
         StdMidiMsg msg(mClock->SongTick(), kNoteOffStatus | mChannel, mNote, kReleaseVelocity);
@@ -116,13 +112,11 @@ void NotePlayer::Stop() {
     mSink = nullptr;
 }
 
-// NTSC-U/C: 0x001b3fb8, PAL: 0x001b9d90
 void NotePlayer::NoteOn(int nTick) {
     StdMidiMsg msg(nTick, kNoteOnStatus | mChannel, mNote, mVelocity);
     mSink->Dispatch(&msg);
 }
 
-// NTSC-U/C: 0x001b4040, PAL: 0x001b9e18
 void NotePlayer::OnCommand(int nTick) {
     StdMidiMsg msg(nTick, kNoteOffStatus | mChannel, mNote, kReleaseVelocity);
     mSink->Dispatch(&msg);
@@ -130,7 +124,6 @@ void NotePlayer::OnCommand(int nTick) {
     mParent->PlayerFinished(this);
 }
 
-// NTSC-U/C: 0x001b41c0, PAL: 0x001b9f98
 int NotePlayer::DisplacesSiblings() {
     return 0;
 }

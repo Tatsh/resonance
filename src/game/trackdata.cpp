@@ -97,16 +97,13 @@ void DeleteHarmony(Harmony *pHarmony) {
 
 } // namespace
 
-// NTSC-U/C: 0x001d2ef0, PAL: 0x001d8da8
 TrackData::Bar::Bar() : mQuant(kDefaultQuant), mPoints(0) {
 }
 
-// NTSC-U/C: 0x001d2f50, PAL: 0x001d8e08
 TrackData::Bar::~Bar() {
     std::for_each(mMidi.begin(), mMidi.end(), DeleteMidi);
 }
 
-// NTSC-U/C: 0x001d31d8, PAL: 0x001d9090
 void TrackData::Bar::Print(std::ostream &stream) {
     stream << "quant = " << mQuant << ". ";
     stream << "points = " << mPoints << ". ";
@@ -158,7 +155,6 @@ void TrackData::Bar::Print(std::ostream &stream) {
     stream << ")" << std::endl;
 }
 
-// NTSC-U/C: 0x001d35a8, PAL: 0x001d9460
 TrackData::TrackData(int nIndex, PlayMap *pMap)
     : mIndex(nIndex), mKind(kTrackModeRiff), mMap(pMap), mBars(pMap->mSteps.back()) {
     mBarLength = Sch::Tick(kBarLength).mTick;
@@ -167,13 +163,11 @@ TrackData::TrackData(int nIndex, PlayMap *pMap)
     mCurrentRiffTick = Sch::Tick(kNoRiffTick).mTick;
 }
 
-// NTSC-U/C: 0x001d3900, PAL: 0x001d97d0
 TrackData::~TrackData() {
     std::for_each(mRiffSetsOwned.begin(), mRiffSetsOwned.end(), DeleteRiffSet);
     std::for_each(mHarmoniesOwned.begin(), mHarmoniesOwned.end(), DeleteHarmony);
 }
 
-// NTSC-U/C: 0x001d3b18, PAL: 0x001d99f8
 void TrackData::AddRiff(int nTick, Riff *pRiff) {
     const Sch::Tick length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
     if (!(nTick < length.mTick)) {
@@ -197,7 +191,6 @@ void TrackData::AddRiff(int nTick, Riff *pRiff) {
     mCurrentRiffSet->mRiffs[pRiff->mId] = pRiff;
 }
 
-// NTSC-U/C: 0x001d3d10, PAL: 0x001d9bf0
 void TrackData::AddHarmony(int nTick, const Harmony &harmony) {
     const Sch::Tick length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
     if (!(nTick < length.mTick)) {
@@ -217,7 +210,6 @@ void TrackData::AddHarmony(int nTick, const Harmony &harmony) {
     }
 }
 
-// NTSC-U/C: 0x001d3ee0, PAL: 0x001d9dc0
 void TrackData::AddGem(int nTick, int nGem, Riff *pRiff) {
     const Sch::Tick length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
     if (!(nTick < length.mTick)) {
@@ -237,7 +229,6 @@ void TrackData::AddGem(int nTick, int nGem, Riff *pRiff) {
     }
 }
 
-// NTSC-U/C: 0x001d4088, PAL: 0x001d9f68
 void TrackData::AddMidiMsg(int nTick,
                            unsigned char nStatus,
                            unsigned char nData1,
@@ -254,7 +245,6 @@ void TrackData::AddMidiMsg(int nTick,
     InsertAtTick(pBar->mMidi, pMsg, offset.mTick);
 }
 
-// NTSC-U/C: 0x001d41c0, PAL: 0x001da0a0
 void TrackData::AddNoteMsg(
     int nTick, unsigned char nNote, unsigned char nVelocity, int nLength, unsigned char nChannel) {
     const Sch::Tick length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
@@ -271,7 +261,6 @@ void TrackData::AddNoteMsg(
     InsertAtTick(pBar->mMidi, pMsg, offset.mTick);
 }
 
-// NTSC-U/C: 0x001d4308, PAL: 0x001da1e8
 void TrackData::ScoreBars() {
     if (mIndex == kSkippedTrack) {
         return;
@@ -291,7 +280,6 @@ void TrackData::ScoreBars() {
     }
 }
 
-// NTSC-U/C: 0x001d4428, PAL: 0x001da308
 int TrackData::FindGemAtOrBefore(int nTick, int *pTick, int *pGem) const {
     const Bar *pBar;
     Sch::Tick offset;
@@ -319,7 +307,6 @@ int TrackData::FindGemAtOrBefore(int nTick, int *pTick, int *pGem) const {
     return 1;
 }
 
-// NTSC-U/C: 0x001d46f0, PAL: 0x001da5d0
 int TrackData::FindGemAtOrAfter(int nTick, int *pTick, int *pGem) const {
     const Bar *pBar;
     Sch::Tick offset;
@@ -342,7 +329,6 @@ int TrackData::FindGemAtOrAfter(int nTick, int *pTick, int *pGem) const {
     return 0;
 }
 
-// NTSC-U/C: 0x001d4978, PAL: 0x001da858
 void TrackData::Print(std::ostream &stream) {
     const char *pszMode;
     switch (mKind) {
@@ -370,7 +356,6 @@ void TrackData::Print(std::ostream &stream) {
     }
 }
 
-// NTSC-U/C: 0x001d4b40, PAL: 0x001daa20
 void TrackData::Locate(int nTick, Bar *&pBar, Sch::Tick &offset) {
     const int nBar = nTick / mBarLength;
     const Sch::Tick start = MakePosition(mBarLength * nBar);
@@ -378,7 +363,6 @@ void TrackData::Locate(int nTick, Bar *&pBar, Sch::Tick &offset) {
     pBar = &mBars[nBar];
 }
 
-// NTSC-U/C: 0x001d4c58, PAL: 0x001dab38
 void TrackData::LocateMapped(int nTick, const Bar *&pBar, Sch::Tick &offset) const {
     const int nBar = nTick / mBarLength;
     const int nMappedBar = mMap->MapBar(nBar);
@@ -387,7 +371,6 @@ void TrackData::LocateMapped(int nTick, const Bar *&pBar, Sch::Tick &offset) con
     pBar = &mBars[nMappedBar];
 }
 
-// NTSC-U/C: 0x001d4d90, PAL: 0x001dac70
 void TrackData::AddPhrases(PhraseDatabase *pDatabase) {
     const int nStepCount = mMap->mSteps.back();
     const int nCatchPoints = QueryConfigValue(kCatchPointsQuery);
@@ -408,7 +391,6 @@ void TrackData::AddPhrases(PhraseDatabase *pDatabase) {
     }
 }
 
-// NTSC-U/C: 0x001d7688, PAL: 0x001dd568
 void TrackData::SetQuant(int nTick, int nQuant) {
     const Sch::Tick length = MakePosition(mBarLength * static_cast<int>(mBars.size()));
     if (!(nTick < length.mTick)) {
@@ -420,16 +402,13 @@ void TrackData::SetQuant(int nTick, int nQuant) {
     pBar->mQuant = nQuant;
 }
 
-// NTSC-U/C: 0x001d7758, PAL: 0x001dd638
 void TrackData::SetActive([[maybe_unused]] int nTick, [[maybe_unused]] int bActive) {
 }
 
-// NTSC-U/C: 0x001d7760, PAL: 0x001dd640
 void TrackData::SetOwner(Player *pPlayer, int nBar) const {
     mGamer->SetBarOwner(mIndex, nBar, pPlayer);
 }
 
-// NTSC-U/C: 0x001d7788, PAL: 0x001dd668
 Harmony *TrackData::GetHarmony(int nTick) const {
     const Bar *pBar;
     Sch::Tick offset;
@@ -442,7 +421,6 @@ Harmony *TrackData::GetHarmony(int nTick) const {
     return it->mValue;
 }
 
-// NTSC-U/C: 0x001d77e0, PAL: 0x001dd6c0
 Riff *TrackData::GetRiff(int nTick, int nLevel) const {
     const Bar *pBar;
     Sch::Tick offset;
@@ -455,7 +433,6 @@ Riff *TrackData::GetRiff(int nTick, int nLevel) const {
     return it->mValue->mRiffs[nLevel];
 }
 
-// NTSC-U/C: 0x001d7858, PAL: 0x001dd738
 Riff *TrackData::GetRiffInMappedBar(int nBar, int nOffset, int nLevel) const {
     const Bar *pBar;
     GetBar(nBar, pBar);
@@ -467,7 +444,6 @@ Riff *TrackData::GetRiffInMappedBar(int nBar, int nOffset, int nLevel) const {
     return it->mValue->mRiffs[nLevel];
 }
 
-// NTSC-U/C: 0x001d78d0, PAL: 0x001dd7b0
 Riff *TrackData::GetRiffInBar(int nBar, int nOffset, int nLevel) const {
     const Bar &bar = mBars[nBar];
     const auto it = FindAtOrBefore(bar.mRiffSets, nOffset);
@@ -477,7 +453,6 @@ Riff *TrackData::GetRiffInBar(int nBar, int nOffset, int nLevel) const {
     return it->mValue->mRiffs[nLevel];
 }
 
-// NTSC-U/C: 0x001d7948, PAL: 0x001dd828
 int TrackData::GetGemAt(int nTick) const {
     const Bar *pBar;
     Sch::Tick offset;
@@ -490,99 +465,82 @@ int TrackData::GetGemAt(int nTick) const {
     return kNoGem;
 }
 
-// NTSC-U/C: 0x001d79a8, PAL: 0x001dd888
 int TrackData::GetQuant(int nBar) const {
     const Bar *pBar;
     GetBar(nBar, pBar);
     return pBar->mQuant;
 }
 
-// NTSC-U/C: 0x001d79d0, PAL: 0x001dd8b0
 int TrackData::IsStepStart(int nBar) const {
     return mMap->IsStepStart(nBar);
 }
 
-// NTSC-U/C: 0x001d79f0, PAL: 0x001dd8d0
 int TrackData::StepStartBar(int nBar) const {
     return mMap->StepStartBar(nBar);
 }
 
-// NTSC-U/C: 0x001d7a10, PAL: 0x001dd8f0
 int TrackData::NextStepBar(int nBar) const {
     return mMap->NextStepBar(nBar);
 }
 
-// NTSC-U/C: 0x001d7a30, PAL: 0x001dd910
 int TrackData::FollowingStepBar(int nBar) const {
     return mMap->FollowingStepBar(nBar);
 }
 
-// NTSC-U/C: 0x001d7a50, PAL: 0x001dd930
 int TrackData::QueryBar(int nBar) const {
     return mGamer->QueryBar(mIndex, nBar);
 }
 
-// NTSC-U/C: 0x001d7a78, PAL: 0x001dd958
 int TrackData::GetPoints(int nBar) const {
     const Bar *pBar;
     GetBar(nBar, pBar);
     return pBar->mPoints;
 }
 
-// NTSC-U/C: 0x001d7aa0, PAL: 0x001dd980
 int TrackData::GetJuice(int nBar) const {
     const Bar *pBar;
     GetBar(nBar, pBar);
     return pBar->mCatchPoints;
 }
 
-// NTSC-U/C: 0x001d7ac8, PAL: 0x001dd9a8
 const std::vector<TickObj<MuseMsg *> > *TrackData::GetMidiInBar(int nBar) const {
     return &mBars[nBar].mMidi;
 }
 
-// NTSC-U/C: 0x001d7ae0, PAL: 0x001dd9c0
 const std::vector<TickObj<int> > *TrackData::GetGemsInBar(int nBar) const {
     return &mBars[nBar].mGems;
 }
 
-// NTSC-U/C: 0x001d7af8, PAL: 0x001dd9d8
 const std::vector<TickObj<MuseMsg *> > *TrackData::GetMidi(int nBar) const {
     const Bar *pBar;
     GetBar(nBar, pBar);
     return &pBar->mMidi;
 }
 
-// NTSC-U/C: 0x001d7b20, PAL: 0x001dda00
 const std::vector<TickObj<int> > *TrackData::GetGems(int nBar) const {
     const Bar *pBar;
     GetBar(nBar, pBar);
     return &pBar->mGems;
 }
 
-// NTSC-U/C: 0x001d7b48, PAL: 0x001dda28
 void TrackData::Locate(int nTick, Bar *&pBar) {
     Sch::Tick offset;
     Locate(nTick, pBar, offset);
 }
 
-// NTSC-U/C: 0x001d7b70, PAL: 0x001dda50
 void TrackData::LocateMapped(int nTick, const Bar *&pBar) const {
     Sch::Tick offset;
     LocateMapped(nTick, pBar, offset);
 }
 
-// NTSC-U/C: 0x001d7b98, PAL: 0x001dda78
 void TrackData::GetBar(int nBar, const Bar *&pBar) const {
     pBar = &mBars[mMap->MapBar(nBar)];
 }
 
-// NTSC-U/C: 0x001d7bf0, PAL: 0x001ddad0
 int TrackData::FindStepIndex(int nBar) const {
     return mMap->FindStepIndex(mMap->MapBar(nBar));
 }
 
-// NTSC-U/C: 0x001d2e08, PAL: 0x001d8cc0
 int TrackData::ScoreGems(const std::vector<TickObj<int> > &gems) {
     int nScore = 0;
     if (g_bScoreTablesLoaded == 0) {
@@ -603,7 +561,6 @@ int TrackData::ScoreGems(const std::vector<TickObj<int> > &gems) {
         g_scoreThresholds.begin());
 }
 
-// NTSC-U/C: 0x001d2ca8, PAL: 0x001d8b60
 void TrackData::InitScoreTables() {
     std::vector<int> weights;
     QueryConfigVector(&weights, kScoreWeightsQuery);

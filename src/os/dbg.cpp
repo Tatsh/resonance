@@ -41,7 +41,6 @@ inline Rnd::Dbg::~Dbg() {
 
 Rnd::Dbg Rnd::TheDbg;
 
-// NTSC-U/C: 0x004de0a0, PAL: 0x0051c658
 void Rnd::Dbg::CloseLog() {
     if (mLogStream != nullptr) {
         mLogStream->Flush();
@@ -50,7 +49,6 @@ void Rnd::Dbg::CloseLog() {
     mLogStream = nullptr;
 }
 
-// NTSC-U/C: 0x004ddfb8, PAL: 0x0051c570
 void Rnd::Dbg::OpenLog(const HxStr &path) {
     CloseLog();
     mLogStream = new Rnd::FileStream(path, kOpenForWriting);
@@ -62,12 +60,10 @@ void Rnd::Dbg::OpenLog(const HxStr &path) {
     }
 }
 
-// NTSC-U/C: 0x004ddf90, PAL: 0x0051c548
 void Rnd::Dbg::SetNotify(FailReportProc pfnReport) {
     mReportProc = (pfnReport != nullptr) ? pfnReport : DefaultFailReport;
 }
 
-// NTSC-U/C: 0x004dde28, PAL: 0x0051c3e0
 void Rnd::Dbg::Notify(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -77,7 +73,6 @@ void Rnd::Dbg::Notify(const char *pszFormat, ...) {
     mReportProc(g_szFailMessage);
 }
 
-// NTSC-U/C: 0x004dde98, PAL: 0x0051c450
 Rnd::Dbg *Rnd::Dbg::Format(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -87,7 +82,6 @@ Rnd::Dbg *Rnd::Dbg::Format(const char *pszFormat, ...) {
     return this;
 }
 
-// NTSC-U/C: 0x004ddfb0, PAL: 0x0051c568
 Rnd::Dbg *Rnd::Dbg::Print([[maybe_unused]] const char *pszText) {
     return this;
 }

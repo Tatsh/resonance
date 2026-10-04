@@ -167,8 +167,8 @@ static Stream &operator>>(Stream &stream, std::list<Transformable *> &transList)
     return stream;
 }
 
-// Inlined at 0x00482c20 in Rnd::Mesh::Replace.
 void Transformable::AdoptXfmFrom(const Transformable &owner) {
+    // Inlined at 0x00482c20 in Rnd::Mesh::Replace.
     memcpy(mLocalXfm, owner.mWorldXfm, sizeof(mLocalXfm));
     mDirty = 1;
     UpdateWorldXfm(nullptr, 0);
@@ -202,7 +202,6 @@ static inline void SetIdentityXfm(float (&aflXfm)[kXfmRowCount][kXfmRowFloatCoun
               aflXfm[kXfmTranslationRow]);
 }
 
-// NTSC-U/C: 0x004fb3f8, PAL: 0x0053a0d8
 Transformable::Transformable() : mDirty(1), mBillboard(kBillboardNone) {
     for (auto &aflRow : mLocalXfm) {
         aflRow[kXfmPaddingFloat] = 1.0f;
@@ -215,7 +214,6 @@ Transformable::Transformable() : mDirty(1), mBillboard(kBillboardNone) {
     std::copy(std::begin(kIdentityTranslation), std::end(kIdentityTranslation), mOrigin);
 }
 
-// NTSC-U/C: 0x004fb2a8, PAL: 0x00539f88
 Transformable::~Transformable() {
     ReleaseTransRefs();
 }
@@ -243,7 +241,6 @@ static inline void CameraToDrawTranslation(const Cam &cam, float *pOut) {
     Rnd::Subtract(g_drawXfm[kXfmTranslationRow], cam.mWorldXfm[kXfmTranslationRow], pOut);
 }
 
-// NTSC-U/C: 0x004f0cc0, PAL: 0x0052f8b0
 float *Transformable::GetDrawXfm() {
     if (mBillboard == kBillboardNone || Cam::sCurrent == nullptr) {
         memcpy(g_drawXfm, mWorldXfm, sizeof(g_drawXfm));
@@ -355,7 +352,6 @@ static inline void TransformRow(const float (&aflXfm)[kXfmRowCount][kXfmRowFloat
     std::copy(std::begin(afOut), std::end(afOut), pOut);
 }
 
-// NTSC-U/C: 0x004f0770, PAL: 0x0052f360
 Transformable *Transformable::Parent() {
     for (std::list<Object *>::iterator it = mRefs.begin(); it != mRefs.end(); ++it) {
         Transformable *pCandidate = dynamic_cast<Transformable *>(*it);
@@ -370,7 +366,6 @@ Transformable *Transformable::Parent() {
     return nullptr;
 }
 
-// NTSC-U/C: 0x004f0b18, PAL: 0x0052f708
 int Transformable::UpdateWorldXfm(Transformable *pParent, int nForce) {
     if (nForce != 0 || mDirty != 0 || (pParent != nullptr && pParent->mDirty != 0)) {
         if (pParent == nullptr) {
@@ -402,7 +397,6 @@ int Transformable::UpdateWorldXfm(Transformable *pParent, int nForce) {
     return nRecomposed;
 }
 
-// NTSC-U/C: 0x004f0838, PAL: 0x0052f428
 void Transformable::AddTrans(Transformable *pTrans) {
     if (std::find(mTransList.begin(), mTransList.end(), pTrans) != mTransList.end()) {
         Rnd::TheDbg.Notify(kAlreadyInFormat, NameText(pTrans), NameText(this));
@@ -416,7 +410,6 @@ void Transformable::AddTrans(Transformable *pTrans) {
     pTrans->mDirty = 1; // Yes, the binary dereferences pTrans here with no null test.
 }
 
-// NTSC-U/C: 0x004f09c0, PAL: 0x0052f5b0
 void Transformable::RemoveTrans(Transformable *pTrans) {
     if (std::find(mTransList.begin(), mTransList.end(), pTrans) == mTransList.end()) {
         return;
@@ -427,19 +420,16 @@ void Transformable::RemoveTrans(Transformable *pTrans) {
     mTransList.remove(pTrans);
 }
 
-// NTSC-U/C: 0x004fce08, PAL: 0x0053baf0
 void Transformable::SetBillboard(int nBillboard) {
     mBillboard = nBillboard;
     mDirty = 1;
 }
 
-// NTSC-U/C: 0x004fce18, PAL: 0x0053bb00
 void Transformable::SetOrigin(const float *pOrigin) {
     std::copy(pOrigin, pOrigin + kXfmRowFloatCount, mOrigin);
     mDirty = 1;
 }
 
-// NTSC-U/C: 0x004f0a80, PAL: 0x0052f670
 void Transformable::RemoveAllTranses() {
     for (std::list<Transformable *>::iterator it = mTransList.begin(); it != mTransList.end();) {
         if (*it != nullptr) {
@@ -449,7 +439,6 @@ void Transformable::RemoveAllTranses() {
     }
 }
 
-// NTSC-U/C: 0x004fcf18, PAL: 0x0053bc00
 void Transformable::ReleaseTransRefs() {
     for (std::list<Transformable *>::iterator it = mTransList.begin(); it != mTransList.end();
          ++it) {
@@ -459,7 +448,6 @@ void Transformable::ReleaseTransRefs() {
     }
 }
 
-// NTSC-U/C: 0x004fcf88, PAL: 0x0053bc70
 void Transformable::AcquireTransRefs() {
     mDirty = 1;
     for (std::list<Transformable *>::iterator it = mTransList.begin(); it != mTransList.end();
@@ -470,7 +458,6 @@ void Transformable::AcquireTransRefs() {
     }
 }
 
-// NTSC-U/C: 0x004f12e0, PAL: 0x0052fed0
 void Transformable::DumpText(Dbg &sink) {
     if (sink.mDumpLevel <= 0) {
         return;
@@ -502,7 +489,6 @@ void Transformable::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x004f1a58, PAL: 0x00530648
 void Transformable::Save(Stream &stream) {
     int nRevision = kTransformableRevision;
     stream.WriteLE(&nRevision, sizeof(nRevision));
@@ -531,7 +517,6 @@ void Transformable::Save(Stream &stream) {
     }
 }
 
-// NTSC-U/C: 0x004f1f18, PAL: 0x00530b08
 void Transformable::Load(Stream &stream) {
     int nRevision = 0;
     stream.ReadLE(&nRevision, sizeof(nRevision));
@@ -587,7 +572,6 @@ void Transformable::Load(Stream &stream) {
     AcquireTransRefs();
 }
 
-// NTSC-U/C: 0x004f2510, PAL: 0x00531100
 void Transformable::Replace(Object *pFrom, Object *pTo) {
     for (std::list<Transformable *>::iterator it = mTransList.begin(); it != mTransList.end();) {
         if (*it == pTo) {
@@ -614,7 +598,6 @@ void Transformable::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// NTSC-U/C: 0x004fce30, PAL: 0x0053bb18
 void Transformable::Copy(const Object *pSource, unsigned nFlags) {
     const Transformable *pSourceTrans = dynamic_cast<const Transformable *>(pSource);
 

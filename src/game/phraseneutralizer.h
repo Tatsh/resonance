@@ -43,11 +43,16 @@ public:
     virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // Clears the owned phrases of the four bars after the message's bar on this track. Each owner
-    // loses the phrase's value from its score through the Player routine at 0x0012f808. When a
-    // phrase was cleared, the message is marked handled, a DeployedPowerupMsg covering the four
-    // bars is sent, and a PlayersTrackNeutralizedMsg follows for each player that lost points.
-    // NTSC-U/C: 0x001c0980, PAL: 0x001c67c8
+    /**
+     * Clears the owned phrases of the four bars after the message's bar on this track.
+     *
+     * Each owner loses the phrase's value from its score through the Player routine at 0x0012f808.
+     * When a phrase was cleared, the message is marked handled, a DeployedPowerupMsg covering the
+     * four bars is sent, and a PlayersTrackNeutralizedMsg follows for each player that lost points.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001c0980
+     * @ghidraAddress PAL: 0x001c67c8
+     */
     void PostTrackNeutralizedMsg(NeutralizeMsg *pMsg);
 
     int mReservedWords[5];       // +0x18, neither read nor written by any routine

@@ -198,26 +198,55 @@ private:
         kRiffCount = 3,
     };
 
-    // NTSC-U/C: 0x00119518, PAL: 0x00119a78
-    // Turns one reading into the message its binding's action identifies, for the
-    // player whose GetInputSlot() matches the binding's slot. An axis binding first quantises the
-    // value to a step of -1, 0, or 1 and drops the reading unless the step changed.
+    /**
+     * Turns one reading into the message its binding's action identifies, for the player whose
+     * GetInputSlot() matches the binding's slot.
+     *
+     * An axis binding first quantises the value to a step of -1, 0, or 1 and drops the reading
+     * unless the step changed.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00119518
+     * @ghidraAddress PAL: 0x00119a78
+     */
     void OnControllerReading(RawControllerMsg *pMsg);
 
-    // NTSC-U/C: 0x0011da68, PAL: 0x0011dff0
+    /**
+     * Send a StopRiffMsg for one riff of a player's track at a song position.
+     *
+     * @param position The song position of the stop.
+     * @param pPlayer The player the riff belongs to.
+     * @param nTrack The track of the riff.
+     * @param nRiff The riff to stop.
+     * @ghidraAddress NTSC-U/C: 0x0011da68
+     * @ghidraAddress PAL: 0x0011dff0
+     */
     void SendStopRiff(Sch::Tick position, Player *pPlayer, int nTrack, int nRiff);
 
-    // NTSC-U/C: 0x0011d9b0, PAL: 0x0011df38
-    // Sends a PitchRiffMsg after a Player::GetInputSlot() call whose result it discards.
+    /**
+     * Sends a PitchRiffMsg after a Player::GetInputSlot() call whose result it discards.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0011d9b0
+     * @ghidraAddress PAL: 0x0011df38
+     */
     void SendPitchRiff(Sch::Tick position, Player *pPlayer, int nTrack, int nRiff);
 
-    // NTSC-U/C: 0x00119f58, PAL: 0x0011a4b8
-    // The binding equal to binding in slot, action, and argument, appended with a
-    // fresh axis state for an axis action when none exists.
+    /**
+     * The binding equal to binding in slot, action, and argument, appended with a fresh axis state
+     * for an axis action when none exists.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00119f58
+     * @ghidraAddress PAL: 0x0011a4b8
+     */
     std::list<Binding>::iterator FindOrAddBinding(const Binding &binding);
 
-    // NTSC-U/C: 0x0011d1a0, PAL: 0x0011d728
-    // Empties mBindingMap. The title is inferred.
+    /**
+     * Empties mBindingMap.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0011d1a0
+     * @ghidraAddress PAL: 0x0011d728
+     */
     void ClearBindingMap();
 
     Globals *mGlobals;

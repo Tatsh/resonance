@@ -35,7 +35,6 @@ void DeleteEffector(Effector *pEffector) {
 
 } // namespace
 
-// NTSC-U/C: 0x001a5020, PAL: 0x001aad88
 JamEffectsMgr::JamEffectsMgr(
     int nTrack, unsigned char nChannel, PlayMap *pPlayMap, PhraseMgr *pPhraseMgr, MsgSink *pSink)
     : mPlayMap(pPlayMap), mPhraseMgr(pPhraseMgr), mTrack(nTrack), mChannel(nChannel) {
@@ -48,12 +47,10 @@ JamEffectsMgr::JamEffectsMgr(
     }
 }
 
-// NTSC-U/C: 0x001a5378, PAL: 0x001ab0e0
 JamEffectsMgr::~JamEffectsMgr() {
     std::for_each(mEffectors.begin(), mEffectors.end(), DeleteEffector);
 }
 
-// NTSC-U/C: 0x001a56d8, PAL: 0x001ab440
 void JamEffectsMgr::Enable(long long nMask) {
     std::bitset<kStepMaskBits> mask(nMask);
     for (std::vector<Effector *>::iterator it = mEffectors.begin(); it != mEffectors.end(); ++it) {
@@ -62,7 +59,6 @@ void JamEffectsMgr::Enable(long long nMask) {
     }
 }
 
-// NTSC-U/C: 0x001a54d8, PAL: 0x001ab240
 void JamEffectsMgr::PostRemixFxMsg(JamEffectMsg *pMsg) {
     if (pMsg->mTrack != mTrack) {
         return;
@@ -89,7 +85,6 @@ void JamEffectsMgr::PostRemixFxMsg(JamEffectMsg *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x001a62d8, PAL: 0x001ac040
 Effector *JamEffectsMgr::GetEffector(int nType) const {
     for (std::vector<Effector *>::const_iterator it = mEffectors.begin(); it != mEffectors.end();
          ++it) {
@@ -100,14 +95,12 @@ Effector *JamEffectsMgr::GetEffector(int nType) const {
     return nullptr;
 }
 
-// NTSC-U/C: 0x001a6350, PAL: 0x001ac0b8
 void JamEffectsMgr::EnableAll(int bEnabled) {
     for (std::vector<Effector *>::iterator it = mEffectors.begin(); it != mEffectors.end(); ++it) {
         (*it)->SetEnabled(bEnabled);
     }
 }
 
-// NTSC-U/C: 0x001a63d0, PAL: 0x001ac138
 void JamEffectsMgr::DispatchPriv(Message *pMsg) {
     if (pMsg->Type() == JamEffectMsg::sID) {
         PostRemixFxMsg(static_cast<JamEffectMsg *>(pMsg));

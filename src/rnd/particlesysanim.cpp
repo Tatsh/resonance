@@ -89,12 +89,10 @@ void BlendColorRange(const std::list<ColorKey> &keys, float flFrame, Color &low,
 // NTSC-U/C: 0x0071af00, PAL: 0x0075ee28
 HxStr g_particleSysAnimClassName("ParticleSysAnim");
 
-// NTSC-U/C: 0x0052bc90, PAL: 0x0056c308
 const HxStr &ParticleSysAnim::ClassName() const {
     return g_particleSysAnimClassName;
 }
 
-// NTSC-U/C: 0x00526980, PAL: 0x00566f58
 void ParticleSysAnim::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
@@ -121,7 +119,6 @@ void ParticleSysAnim::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x00527128, PAL: 0x00567750
 float ParticleSysAnim::FilteredFrameEnd() {
     const float flStartColor = ChannelEndFrame(mFramesOwner->mStartColorKeys);
     const float flEndColor = ChannelEndFrame(mFramesOwner->mEndColorKeys);
@@ -129,7 +126,6 @@ float ParticleSysAnim::FilteredFrameEnd() {
     return std::max(flStartColor, std::max(flEndColor, flEmitRate));
 }
 
-// NTSC-U/C: 0x00527290, PAL: 0x005678b8
 void ParticleSysAnim::SetFrameSelf(float flFrame) {
     if (mParticleSys == nullptr) {
         return;
@@ -162,7 +158,6 @@ void ParticleSysAnim::SetFrameSelf(float flFrame) {
     mParticleSys->mEmitRateHigh = flRate * mEmitRateRatio;
 }
 
-// NTSC-U/C: 0x00526b68, PAL: 0x00567140
 void ParticleSysAnim::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.WriteLE(&nVersion, sizeof(nVersion));
@@ -177,7 +172,6 @@ void ParticleSysAnim::Save(Stream &stream) {
     stream.WriteLE(&mEmitRateRatio, sizeof(mEmitRateRatio));
 }
 
-// NTSC-U/C: 0x00526fc8, PAL: 0x005675f0
 void ParticleSysAnim::Copy(const Object *pSource, unsigned nFlags) {
     const ParticleSysAnim *pSourceAnim = dynamic_cast<const ParticleSysAnim *>(pSource);
 
@@ -214,18 +208,15 @@ void ParticleSysAnim::Copy(const Object *pSource, unsigned nFlags) {
     }
 }
 
-// NTSC-U/C: 0x0052bca0, PAL: 0x0056c318
 ParticleSysAnim::ParticleSysAnim(const HxStr &name)
     : Object(name), mParticleSys(nullptr), mFramesOwner(this), mEmitRateRatio(0.0f) {
 }
 
-// NTSC-U/C: 0x0052b9c0, PAL: 0x0056c038
 ParticleSysAnim::~ParticleSysAnim() {
     ReleaseObjects();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x005267a8, PAL: 0x00566d80
 void ParticleSysAnim::Replace(Object *pFrom, Object *pTo) {
     Animatable::Replace(pFrom, pTo);
 
@@ -265,7 +256,6 @@ void ParticleSysAnim::Replace(Object *pFrom, Object *pTo) {
     mFramesOwner = this;
 }
 
-// NTSC-U/C: 0x00526ce8, PAL: 0x005672c0
 void ParticleSysAnim::Load(Stream &stream) {
     int nRevision = 0;
     stream.ReadLE(&nRevision, sizeof(nRevision));
@@ -289,7 +279,6 @@ void ParticleSysAnim::Load(Stream &stream) {
     AddRefObjects();
 }
 
-// NTSC-U/C: 0x0052c700, PAL: 0x0056cd78
 void ParticleSysAnim::SetParticleSys(ParticleSys *pParticleSys) {
     if (mParticleSys != nullptr) {
         mParticleSys->RemoveRef(this);
@@ -300,7 +289,6 @@ void ParticleSysAnim::SetParticleSys(ParticleSys *pParticleSys) {
     }
 }
 
-// NTSC-U/C: 0x0052c758, PAL: 0x0056cdd0
 void ParticleSysAnim::ClearKeys() {
     if (mFramesOwner == this) {
         return;
@@ -310,7 +298,6 @@ void ParticleSysAnim::ClearKeys() {
     mEmitRateKeys.clear();
 }
 
-// NTSC-U/C: 0x0052c7a0, PAL: 0x0056ce18
 void ParticleSysAnim::SetFramesOwner(ParticleSysAnim *pOwner) {
     if (mFramesOwner != nullptr) {
         mFramesOwner->RemoveRef(this);
@@ -322,7 +309,6 @@ void ParticleSysAnim::SetFramesOwner(ParticleSysAnim *pOwner) {
     ClearKeys();
 }
 
-// NTSC-U/C: 0x0052c818, PAL: 0x0056ce90
 void ParticleSysAnim::ReleaseObjects() {
     if (mParticleSys != nullptr) {
         mParticleSys->RemoveRef(this);
@@ -332,7 +318,6 @@ void ParticleSysAnim::ReleaseObjects() {
     }
 }
 
-// NTSC-U/C: 0x0052c868, PAL: 0x0056cee0
 void ParticleSysAnim::AddRefObjects() {
     if (mParticleSys != nullptr) {
         mParticleSys->AddRef(this);
@@ -342,7 +327,6 @@ void ParticleSysAnim::AddRefObjects() {
     }
 }
 
-// NTSC-U/C: 0x0052c180, PAL: 0x0056c7f8
 Object *CreateRegisteredParticleSysAnim(const HxStr &name) {
     return NewParticleSysAnim(name);
 }

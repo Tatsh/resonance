@@ -5,36 +5,29 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// NTSC-U/C: 0x003e4e48, PAL: 0x0041d0e0
 Message *SCAllClientsStatusPacket::New() {
     return new SCAllClientsStatusPacket;
 }
 
-// NTSC-U/C: 0x003efaa8, PAL: 0x004280b0
-// Clone allocates and hands off to the copy constructor at 0x003f3298, which is
-// the compiler expanding the implicit one.
 Message *SCAllClientsStatusPacket::Clone() {
+    // The copy constructor at 0x003f3298 is the compiler expanding the implicit one.
     return new SCAllClientsStatusPacket(*this);
 }
 
-// NTSC-U/C: 0x003efb20, PAL: 0x00428128
 int SCAllClientsStatusPacket::Type() {
     return g_nSCAllClientsStatusPacketType;
 }
 
-// NTSC-U/C: 0x003efb30, PAL: 0x00428138
 const char *SCAllClientsStatusPacket::GetName() const {
     return "SCAllClientsStatusPacket";
 }
 
-// NTSC-U/C: 0x003f2160, PAL: 0x0042a6a8
 void SCAllClientsStatusPacket::PrintExtra(std::ostream &stream) const {
     for (const auto &entry : mClients) {
         stream << "(id:" << entry.mId << " stat:" << entry.mStatus << ") ";
     }
 }
 
-// NTSC-U/C: 0x003e6288, PAL: 0x0041e568
 void SCAllClientsStatusPacket::saveGuts(OBStream &stream) const {
     Packet::saveGuts(stream);
 
@@ -47,7 +40,6 @@ void SCAllClientsStatusPacket::saveGuts(OBStream &stream) const {
     }
 }
 
-// NTSC-U/C: 0x003e63f0, PAL: 0x0041e6d0
 void SCAllClientsStatusPacket::restoreGuts(IBStream &stream) {
     Packet::restoreGuts(stream);
 
@@ -59,7 +51,6 @@ void SCAllClientsStatusPacket::restoreGuts(IBStream &stream) {
     }
 }
 
-// NTSC-U/C: 0x003f2218, PAL: 0x0042a760
 void SCAllClientsStatusPacket::AddClientStatus(int nId, int nStatus) {
     ClientInfoEntry entry;
     entry.mId = nId;

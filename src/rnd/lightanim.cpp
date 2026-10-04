@@ -69,11 +69,9 @@ void BlendChannelColor(const std::list<ColorKey> &keys, float flFrame, Color &re
 // NTSC-U/C: 0x00720bd8, PAL: 0x00764668
 HxStr g_lightAnimClassName("LightAnim");
 
-// NTSC-U/C: 0x00544df0, PAL: 0x00584b68
 LightAnim::LightAnim(const HxStr &name) : Object(name), mLight(nullptr), mKeysOwner(this) {
 }
 
-// NTSC-U/C: 0x00544b10, PAL: 0x00584888
 LightAnim::~LightAnim() {
     // The binary drops these two references through an out-of-line copy of the pair Copy() and
     // Load() expand, at 0x00545630.
@@ -86,22 +84,18 @@ LightAnim::~LightAnim() {
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x00544de0, PAL: 0x00584b58
 const HxStr &LightAnim::ClassName() const {
     return g_lightAnimClassName;
 }
 
-// NTSC-U/C: 0x00544dd0, PAL: 0x00584b48
 Light *LightAnim::GetLight() {
     return mLight;
 }
 
-// NTSC-U/C: 0x00544dd8, PAL: 0x00584b50
 LightAnim *LightAnim::GetKeysOwner() {
     return mKeysOwner;
 }
 
-// NTSC-U/C: 0x00541078, PAL: 0x00580d50
 void LightAnim::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
@@ -126,7 +120,6 @@ void LightAnim::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x00540ea0, PAL: 0x00580b78
 void LightAnim::Replace(Object *pFrom, Object *pTo) {
     Animatable::Replace(pFrom, pTo);
 
@@ -157,7 +150,6 @@ void LightAnim::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// NTSC-U/C: 0x00541790, PAL: 0x005814b8
 float LightAnim::FilteredFrameEnd() {
     const float flAmbient = ChannelEndFrame(mKeysOwner->mAmbientKeys);
     const float flDiffuse = ChannelEndFrame(mKeysOwner->mDiffuseKeys);
@@ -165,7 +157,6 @@ float LightAnim::FilteredFrameEnd() {
     return std::max(flAmbient, std::max(flDiffuse, flSpecular));
 }
 
-// NTSC-U/C: 0x005418f8, PAL: 0x00581620
 void LightAnim::SetFrameSelf(float flFrame) {
     if (mLight == nullptr) {
         return;
@@ -182,7 +173,6 @@ void LightAnim::SetFrameSelf(float flFrame) {
     mLight->SetColors(ambient, diffuse, specular);
 }
 
-// NTSC-U/C: 0x00541230, PAL: 0x00580f08
 void LightAnim::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.WriteLE(&nVersion, sizeof(nVersion));
@@ -196,7 +186,6 @@ void LightAnim::Save(Stream &stream) {
     WriteObjectRef(stream, mKeysOwner);
 }
 
-// NTSC-U/C: 0x00541638, PAL: 0x00581360
 void LightAnim::Copy(const Object *pSource, unsigned nFlags) {
     const LightAnim *pSourceAnim = dynamic_cast<const LightAnim *>(pSource);
 
@@ -232,7 +221,6 @@ void LightAnim::Copy(const Object *pSource, unsigned nFlags) {
     }
 }
 
-// NTSC-U/C: 0x00541388, PAL: 0x00581060
 void LightAnim::Load(Stream &stream) {
     int nRevision = 0;
     stream.ReadLE(&nRevision, sizeof(nRevision));
@@ -278,7 +266,6 @@ void LightAnim::Load(Stream &stream) {
     }
 }
 
-// NTSC-U/C: 0x005449f8, PAL: 0x00584770
 LightAnim *NewLightAnim(const HxStr &name) {
     // The allocation is untagged here, as it is for Rnd::ParticleSysAnim, and it is exactly 0x48
     // bytes rather than a rounded size.
@@ -289,17 +276,14 @@ LightAnim *NewLightAnim(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x005452d0, PAL: 0x00585048
 Object *CreateRegisteredLightAnim(const HxStr &name) {
     return NewLightAnim(name);
 }
 
-// NTSC-U/C: 0x005449c8, PAL: 0x00584740
 void RegisterLightAnimClass() {
     TheManager.RegisterClass(g_lightAnimClassName, CreateRegisteredLightAnim);
 }
 
-// NTSC-U/C: 0x00545570, PAL: 0x005852e8
 void LightAnim::ClearKeys() {
     if (mKeysOwner == this) {
         return;
@@ -309,7 +293,6 @@ void LightAnim::ClearKeys() {
     mSpecularKeys.clear();
 }
 
-// NTSC-U/C: 0x005455b8, PAL: 0x00585330
 void LightAnim::SetKeysOwner(LightAnim *pOwner) {
     if (mKeysOwner != nullptr) {
         mKeysOwner->RemoveRef(this);

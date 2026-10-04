@@ -12,7 +12,6 @@ static const char kNoWriteMessage[] =
 // The misspelling is the original's.
 static const char kEndOfBufferMessage[] = "End Of buffset %s reached";
 
-// NTSC-U/C: 0x00405cf8, PAL: 0x0043f5e8
 HxMemStream::HxMemStream(const char *pszName, char *pData, int nSize) : mName(pszName) {
     mEnd = &pData[nSize];
     mCur = pData;
@@ -20,11 +19,9 @@ HxMemStream::HxMemStream(const char *pszName, char *pData, int nSize) : mName(ps
     mStart = pData;
 }
 
-// NTSC-U/C: 0x00405d98, PAL: 0x0043f688
 HxMemStream::~HxMemStream() {
 }
 
-// NTSC-U/C: 0x00405e00, PAL: 0x0043f700
 void HxMemStream::SetMarker(int nOffset, int nWhence) {
     char *pTarget = nullptr;
     switch (nWhence) {
@@ -50,23 +47,19 @@ void HxMemStream::SetMarker(int nOffset, int nWhence) {
     }
 }
 
-// NTSC-U/C: 0x00405e80, PAL: 0x0043f780
 int HxMemStream::GetMarker() {
     return mCur - mStart;
 }
 
-// NTSC-U/C: 0x00405e90, PAL: 0x0043f790
 int HxMemStream::Size() {
     return mEnd - mStart;
 }
 
-// NTSC-U/C: 0x00405ea0, PAL: 0x0043f7a0
 HxStream &HxMemStream::Write([[maybe_unused]] const void *pSrc, [[maybe_unused]] int nSize) {
     Fatal(kNoWriteMessage);
     return *this;
 }
 
-// NTSC-U/C: 0x00405ed0, PAL: 0x0043f7d0
 HxStream &HxMemStream::ReadData(void *pDest, int nSize) {
     if (nSize > 0) {
         int nCount = mEnd - mCur;

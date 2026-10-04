@@ -119,14 +119,25 @@ public:
     void PrintConnections(std::ostream &stream);
 
 private:
-    // NTSC-U/C: 0x004b3898, PAL: 0x004f1b80
-    // Builds a channel. `off` and `debug` discard their output, `console` writes to
-    // cout, and any other name opens a file for writing. The receiver is unread.
+    /**
+     * Builds a channel.
+     *
+     * `off` and `debug` discard their output, `console` writes to cout, and any other name opens a
+     * file for writing. The receiver is unread.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004b3898
+     * @ghidraAddress PAL: 0x004f1b80
+     */
     Channel *NewChannel(const HxStr &name);
 
-    // NTSC-U/C: 0x004b3448, PAL: 0x004f16a0
-    // Flushes and deletes every channel's stream, deletes the channels, and empties
-    // mChannels. The destructor is the one caller.
+    /**
+     * Flushes and deletes every channel's stream, deletes the channels, and empties mChannels.
+     *
+     * The destructor is the one caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004b3448
+     * @ghidraAddress PAL: 0x004f16a0
+     */
     void CloseChannels();
 
     std::vector<Channel *> mChannels;     // +0x00

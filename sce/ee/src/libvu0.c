@@ -4,7 +4,6 @@ enum {
     kMatRowStride = 4,
 };
 
-// NTSC-U/C: 0x005e7a58, PAL: 0x00629c40
 void sceVu0MulAffineMatrix(float *pDst, const float *pA, const float *pB) {
     // The image pins the rows of pA in vector registers and streams the rows of pB, so either
     // factor may alias the destination. The copy below preserves that behaviour.
@@ -46,7 +45,6 @@ void sceVu0MulAffineMatrix(float *pDst, const float *pA, const float *pB) {
     pDst[15] = flOutW + aflBasis[15];
 }
 
-// NTSC-U/C: 0x005e7ab0, PAL: 0x00629c98
 void sceVu0MulAffineMatrixXyz(float *pDst, const float *pA, const float *pB) {
     // The image pins the rows of pA in vector registers and streams the rows of pB, so either
     // factor may alias the destination. The copy below preserves that behaviour.
@@ -78,7 +76,6 @@ void sceVu0MulAffineMatrixXyz(float *pDst, const float *pA, const float *pB) {
     pDst[14] = ((aflBasis[2] * flX) + (aflBasis[6] * flY) + (aflBasis[10] * flZ)) + aflBasis[14];
 }
 
-// NTSC-U/C: 0x005e7b08, PAL: 0x00629cf0
 void InversMatrix(float *pDst, const float *pSrc) {
     // The image shuffles the source rows through registers before storing anything, so every
     // value below is read before the destination is written and the pointers may alias.

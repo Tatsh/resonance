@@ -35,12 +35,10 @@ constexpr int kCommandErrorDuration = 50;
 // NTSC-U/C: 0x006f8a80, PAL: 0x0073c4d0
 long long g_llWatchdogSecondNs;
 
-// NTSC-U/C: 0x004a9858, PAL: 0x004e7968
 Sch::Scheduler::Scheduler()
     : mStreamMode(0), mRecorder(nullptr), mPlayback(nullptr), mNowNs(0), mBlocked(0) {
 }
 
-// NTSC-U/C: 0x004a9980, PAL: 0x004e7a90
 Sch::Scheduler::~Scheduler() {
     mBlocked = 1;
     std::for_each(mQueue.begin(), mQueue.end(), Attachment::ReleaseIfSet);
@@ -53,7 +51,6 @@ Sch::Scheduler::~Scheduler() {
     mPlayback = nullptr;
 }
 
-// NTSC-U/C: 0x004ac8c0, PAL: 0x004eaa60
 void Sch::Scheduler::BeginRecording(OBStream &stream) {
     mRecorder = new Sch::Recorder(&stream);
     mStreamMode = kStreamModeRecording;
@@ -61,7 +58,6 @@ void Sch::Scheduler::BeginRecording(OBStream &stream) {
     mNowNs = 0;
 }
 
-// NTSC-U/C: 0x004ac9e8, PAL: 0x004eab88
 void Sch::Scheduler::StopRecOrPlayback() {
     delete mRecorder;
     mRecorder = nullptr;
@@ -84,7 +80,6 @@ inline void Sch::Scheduler::Enqueue(Sch::TimedCommand *pCommand, CmdID &id) {
     mQueue.insert(pCommand);
 }
 
-// NTSC-U/C: 0x004ac608, PAL: 0x004ea7a8
 void Sch::Scheduler::QueueAbsolute(Sch::TimedCommand *pCommand,
                                    long long nTick,
                                    CmdID &id,
@@ -98,7 +93,6 @@ void Sch::Scheduler::QueueAbsolute(Sch::TimedCommand *pCommand,
     Enqueue(pCommand, id);
 }
 
-// NTSC-U/C: 0x004ac698, PAL: 0x004ea838
 void Sch::Scheduler::QueueDelta(
     Sch::TimedCommand *pCommand, long long nDelta, CmdID &id, int bRecordable, int nOrder) {
     if (mStreamMode == kStreamModePlayback && bRecordable != 0) {
@@ -118,7 +112,6 @@ void Sch::Scheduler::QueueDelta(
     }
 }
 
-// NTSC-U/C: 0x004ac808, PAL: 0x004ea9a8
 void Sch::Scheduler::PostUnreferenced(Sch::Command *pCommand) {
     if (mStreamMode != kStreamModeRecording) {
         return;
@@ -133,14 +126,12 @@ void Sch::Scheduler::PostUnreferenced(Sch::Command *pCommand) {
     // Yes, the binary destroys the wrapper without queueing or recording it.
 }
 
-// NTSC-U/C: 0x004a9a78, PAL: 0x004e7b88
 void Sch::Scheduler::Snapshot() {
     const std::multiset<Sch::TimedCommand *, QueueOrder> queue(mQueue);
     mQueue.clear();
     std::for_each(queue.begin(), queue.end(), Attachment::ReleaseIfSet);
 }
 
-// NTSC-U/C: 0x004ac7b0, PAL: 0x004ea950
 void Sch::Scheduler::QueueReplayed(Sch::TimedCommand *pCommand) {
     pCommand->mCommand->mQueued = 1;
     if (mBlocked != 0) {
@@ -152,7 +143,6 @@ void Sch::Scheduler::QueueReplayed(Sch::TimedCommand *pCommand) {
     mQueue.insert(pCommand);
 }
 
-// NTSC-U/C: 0x004aa260, PAL: 0x004e8370
 void Sch::Scheduler::WithdrawByCmdID(const CmdID &id) {
     if (id.mValue <= 0) {
         return;
@@ -169,7 +159,6 @@ void Sch::Scheduler::WithdrawByCmdID(const CmdID &id) {
     }
 }
 
-// NTSC-U/C: 0x004a9d00, PAL: 0x004e7e10
 void Sch::Scheduler::Withdraw(Sch::TimedCommand *pCommand) {
     const auto it = mQueue.find(pCommand);
     if (it == mQueue.end()) {
@@ -181,7 +170,6 @@ void Sch::Scheduler::Withdraw(Sch::TimedCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x004aa848, PAL: 0x004e8958
 void Sch::Scheduler::Service() {
     long long nNow = mClock.Now();
     if (g_llWatchdogSecondNs + kWatchdogSecondNs < nNow) {
@@ -216,19 +204,16 @@ void Sch::Scheduler::Service() {
     }
 }
 
-// NTSC-U/C: 0x004aca30, PAL: 0x004eabd0
 void Sch::Scheduler::ResetTimes() {
     mClock.Mark(0);
     mNowNs = 0;
 }
 
-// NTSC-U/C: 0x004aca60, PAL: 0x004eac00
 void Sch::Scheduler::Flush() {
     mClock.Mark(mNowNs);
     g_llWatchdogSecondNs = mClock.Now();
 }
 
-// NTSC-U/C: 0x004ac950, PAL: 0x004eaaf0
 void Sch::Scheduler::StartPlayback(IBStream &stream) {
     mPlayback = new Sch::Playbacker(this);
     mPlayback->Load(stream);

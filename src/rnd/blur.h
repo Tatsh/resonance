@@ -309,14 +309,24 @@ protected:
     virtual int DrawShowing();
 
 private:
-    // NTSC-U/C: 0x004c36b0, PAL: 0x005017d8
-    // Registers this object as a referrer of both subjects and discards the recorded
-    // transforms. The constructor, Copy(), and Load() are the callers.
+    /**
+     * Registers this object as a referrer of both subjects and discards the recorded transforms.
+     *
+     * The constructor, Copy(), and Load() are the callers.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004c36b0
+     * @ghidraAddress PAL: 0x005017d8
+     */
     void AcquireObjectRefs();
 
-    // NTSC-U/C: 0x004c3708, PAL: 0x00501830
-    // Drops this object's registration on both subjects. Copy() and Load() are the
-    // callers.
+    /**
+     * Drops this object's registration on both subjects.
+     *
+     * Copy() and Load() are the callers.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004c3708
+     * @ghidraAddress PAL: 0x00501830
+     */
     void ReleaseObjectRefs();
 
     // NTSC-U/C: 0x004c34c0, PAL: 0x005015e8

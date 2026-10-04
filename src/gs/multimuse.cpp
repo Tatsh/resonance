@@ -16,7 +16,6 @@ constexpr long long kNoIndent = -1;
 
 } // namespace
 
-// NTSC-U/C: 0x001a8448, PAL: 0x001ae1b0
 MultiMuse::~MultiMuse() {
     for (std::vector<TickObj<MuseMsg *> >::iterator it = mEntries.begin(); it != mEntries.end();
          ++it) {
@@ -24,7 +23,6 @@ MultiMuse::~MultiMuse() {
     }
 }
 
-// NTSC-U/C: 0x001a8580, PAL: 0x001ae2e8
 void MultiMuse::Print(std::ostream &stream) {
     long long nIndent = kNoIndent;
     std::vector<TickObj<MuseMsg *> >::iterator it = mEntries.begin();
@@ -61,17 +59,14 @@ void MultiMuse::Print(std::ostream &stream) {
     stream << "]";
 }
 
-// NTSC-U/C: 0x001a9490, PAL: 0x001af1f8
 void *MultiMuse::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, "MultiMuse");
 }
 
-// NTSC-U/C: 0x001a94b0, PAL: 0x001af218
 void MultiMuse::operator delete(void *pBlock) {
     OperatorDeleteOverride(pBlock, "MultiMuse");
 }
 
-// NTSC-U/C: 0x001a9738, PAL: 0x001af4a0
 void MultiMuse::SaveFields(OBStream &stream) {
     const int nCount = mEntries.end() - mEntries.begin();
     stream.WriteLE(&nCount, sizeof(nCount));
@@ -84,7 +79,6 @@ void MultiMuse::SaveFields(OBStream &stream) {
     }
 }
 
-// NTSC-U/C: 0x001a97e8, PAL: 0x001af550
 std::ostream &PrintMuseMsgTickObj(std::ostream &stream, Sch::Tick position, MuseMsg *pMsg) {
     std::ostream &open = stream << "[";
     position.Print(open);
@@ -93,7 +87,6 @@ std::ostream &PrintMuseMsgTickObj(std::ostream &stream, Sch::Tick position, Muse
     return separated << "]";
 }
 
-// NTSC-U/C: 0x001a8808, PAL: 0x001ae570
 void MultiMuse::Append(const MultiMuse &other) {
     mEntries.reserve(other.mEntries.size());
     for (std::vector<TickObj<MuseMsg *> >::const_iterator it = other.mEntries.begin();
@@ -106,7 +99,6 @@ void MultiMuse::Append(const MultiMuse &other) {
     }
 }
 
-// NTSC-U/C: 0x001a8a88, PAL: 0x001ae7f0
 void MultiMuse::LoadFields(IBStream &stream) {
     mEntries.clear();
     int nCount;
@@ -124,7 +116,6 @@ void MultiMuse::LoadFields(IBStream &stream) {
     }
 }
 
-// NTSC-U/C: 0x001a9650, PAL: 0x001af3b8
 void MultiMuse::Add(MuseMsg *pMsg, int nTick, int bCheckLast) {
     TickObj<MuseMsg *> entry;
     entry.mPosition.mTick = nTick;
@@ -136,7 +127,6 @@ void MultiMuse::Add(MuseMsg *pMsg, int nTick, int bCheckLast) {
     }
 }
 
-// NTSC-U/C: 0x001a96c8, PAL: 0x001af430
 MuseMsg *MultiMuse::Find(int nTick) {
     std::vector<TickObj<MuseMsg *> >::iterator it =
         std::lower_bound(mEntries.begin(), mEntries.end(), nTick, TickObjAfter<MuseMsg *>);

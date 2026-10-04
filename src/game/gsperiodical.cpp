@@ -60,14 +60,12 @@ int PeriodicalCmd::sCmdID;
 
 } // namespace
 
-// NTSC-U/C: 0x001b4738, PAL: 0x001ba510
 GsPeriodical::GsPeriodical(Sch::TickClock *pClock, PhraseMaker *pPhraseMaker, int nPeriod)
     : mOrigin(kTickInfinity), mPeriod(nPeriod), mClock(pClock), mPhraseMaker(pPhraseMaker) {
     mCommand.mValue = kUnallocatedCommand;
     mOrigin = pPhraseMaker->GetPeriodOrigin();
 }
 
-// NTSC-U/C: 0x001b4548, PAL: 0x001ba320
 void GsPeriodical::PostAt(int nTick) {
     PeriodicalCmd *pCommand = new PeriodicalCmd(this, nTick);
     mClock->PostAtSongTick(pCommand, nTick, mCommand);
@@ -76,7 +74,6 @@ void GsPeriodical::PostAt(int nTick) {
     }
 }
 
-// NTSC-U/C: 0x001b45d0, PAL: 0x001ba3a8
 void GsPeriodical::Run(int nTick) {
     const Sch::Tick offset(ClampPosition(nTick - mOrigin));
     mPhraseMaker->OnPeriod(offset.mTick / mPeriod);
@@ -85,13 +82,11 @@ void GsPeriodical::Run(int nTick) {
     PostAt(next.mTick);
 }
 
-// NTSC-U/C: 0x001b4870, PAL: 0x001ba648
 void GsPeriodical::Post() {
     const Sch::Tick first(ClampPosition(mOrigin + mPeriod));
     PostAt(first.mTick);
 }
 
-// NTSC-U/C: 0x001b48f8, PAL: 0x001ba6d0
 void GsPeriodical::Withdraw() {
     const Sch::CmdID command = mCommand;
     mClock->Withdraw(command);

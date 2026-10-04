@@ -289,7 +289,8 @@ public:
      * Write the revision, both bases, both target names, the three channels, and the flags.
      *
      * The two targets are written as the names of the objects they address, so a reader has to
-     * resolve them through Rnd::TheManager.
+     * resolve them through Rnd::TheManager. The three channels are written interleaved with the
+     * flags rather than in one block, and a reader has to expect that order.
      *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x004f2d50
@@ -459,16 +460,34 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
-    // Empty the three channels unless this object owns its frames. The out-of-line copy has no
-    // caller, and SetFramesOwner() and Load() inline the same body. 0x004fd058.
+    /**
+     * Empty the three channels unless this object owns its frames.
+     *
+     * The out-of-line copy has no caller, and SetFramesOwner() and Load() inline the same body.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004fd058
+     * @ghidraAddress PAL: 0x0053bd40
+     */
     void ClearKeys();
 
-    // Take a reference on the target and on the frames owner. Load() and Copy() inline the same
-    // body. 0x004fd168.
+    /**
+     * Take a reference on the target and on the frames owner.
+     *
+     * Load() and Copy() inline the same body.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004fd168
+     * @ghidraAddress PAL: 0x0053be50
+     */
     void AddRefObjects();
 
-    // Drop the references AddRefObjects() took. The destructor is the one out-of-line caller.
-    // NTSC-U/C: 0x004fd118, PAL: 0x0053be00
+    /**
+     * Drop the references AddRefObjects() took.
+     *
+     * The destructor is the one out-of-line caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004fd118
+     * @ghidraAddress PAL: 0x0053be00
+     */
     void ReleaseObjects();
 
     // Declared in recovered offset order. The transformable this animation drives.

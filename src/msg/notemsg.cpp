@@ -5,29 +5,24 @@
 #include "stream/ibstream.h"
 #include "stream/obstream.h"
 
-// NTSC-U/C: 0x003d6d80, PAL: 0x0040ec70
 Message *NoteMsg::New() {
     return new NoteMsg;
 }
 
-// NTSC-U/C: 0x003dc208, PAL: 0x00414640
-// The field copies are the compiler expanding the implicit copy
-// constructor, so the allocation tag is the only part written here.
 Message *NoteMsg::Clone() {
+    // The field copies are the compiler expanding the implicit copy constructor.
+    // The allocation tag is the only part written here.
     return new NoteMsg(*this);
 }
 
-// NTSC-U/C: 0x003dc280, PAL: 0x004146b8
 int NoteMsg::Type() {
     return sID;
 }
 
-// NTSC-U/C: 0x003dc290, PAL: 0x004146c8
 const char *NoteMsg::GetName() const {
     return "NoteMsg";
 }
 
-// NTSC-U/C: 0x003e3760, PAL: 0x0041bb00
 void NoteMsg::PrintExtra(std::ostream &stream) const {
     Sch::Tick position;
     position.mTick = mTick;
@@ -39,7 +34,6 @@ void NoteMsg::PrintExtra(std::ostream &stream) const {
     rest << " n" << static_cast<int>(mChannel);
 }
 
-// NTSC-U/C: 0x003d80c0, PAL: 0x00410228
 void NoteMsg::saveGuts(OBStream &stream) const {
     unsigned char channel = mChannel;
     unsigned char note = mNote;
@@ -51,7 +45,6 @@ void NoteMsg::saveGuts(OBStream &stream) const {
         .WriteLE(&length, sizeof(length));
 }
 
-// NTSC-U/C: 0x003e3808, PAL: 0x0041bba8
 void NoteMsg::restoreGuts(IBStream &stream) {
     unsigned short length;
     stream.Read(&mChannel, sizeof(mChannel))

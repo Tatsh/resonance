@@ -234,19 +234,36 @@ public:
     virtual void OnPersonasLoaded(int nPortSlot, int nStatus);
 
 private:
-    // NTSC-U/C: 0x002b27f8, PAL: 0x002d1738
-    // Steps one player's choice through mPersonas and shows the new character. The title is
-    // inferred.
+    /**
+     * Steps one player's choice through mPersonas and shows the new character.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002b27f8
+     * @ghidraAddress PAL: 0x002d1738
+     */
     void CyclePersona(const MetScreenCommand *pCommand);
 
-    // NTSC-U/C: 0x002b2e08, PAL: 0x002d1d68
-    // Points a player's choice at the entry of mPersonas with the persona's username, or at a
-    // random entry when there is none. The title is inferred.
+    /**
+     * Points a player's choice at the entry of mPersonas with the persona's username, or at a
+     * random entry when there is none.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002b2e08
+     * @ghidraAddress PAL: 0x002d1d68
+     */
     void SelectPersona(MetPersonaData *pPersona, int nPlayer);
 
-    // NTSC-U/C: 0x002b2ef8, PAL: 0x002d1e58
-    // Loads the layout for the player count, fills mPersonas and the choices, dresses each
-    // player's picker, and enters. The title is inferred.
+    /**
+     * Loads the layout for the player count, fills mPersonas and the choices, dresses each player's
+     * picker, and enters.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002b2ef8
+     * @ghidraAddress PAL: 0x002d1e58
+     */
     void ShowPickers();
 
     // Players who have locked a character in.

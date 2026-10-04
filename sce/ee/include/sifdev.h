@@ -355,6 +355,8 @@ int sceSifLoadElf(const char *name, sceExecData *data);
 /**
  * Read a value from IOP memory through the module loader.
  *
+ * Unlike the other module loader calls, the value calls do not check the server version.
+ *
  * @param addr IOP address.
  * @param value Receives the value.
  * @param type Width, one of #SIF_IOP_VALUE_BYTE, #SIF_IOP_VALUE_HALF, and #SIF_IOP_VALUE_WORD.
@@ -378,6 +380,8 @@ int sceSifSetIopAddr(unsigned int addr, const void *value, int type);
 
 /**
  * Send the IOP a reset command that reboots it with an argument string.
+ *
+ * The argument is copied without its terminator and without a length check.
  *
  * @param arg Argument string of up to 80 characters, such as `rom0:UDNL <image>`.
  * @param mode Reset mode the IOP receives.
@@ -422,6 +426,8 @@ int sceSifRebootIop(const char *imgname);
  * Unbind the file service client after an IOP reboot. The next call binds the new server.
  *
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x0056acc8
+ * @ghidraAddress PAL: 0x005ab190
  */
 int sceFsReset(void);
 
@@ -431,6 +437,8 @@ int sceFsReset(void);
  * @param filename Path, with its device prefix.
  * @param flag Open flags such as #SCE_RDONLY.
  * @return A descriptor, or a negative error code.
+ * @ghidraAddress NTSC-U/C: 0x0056ad00
+ * @ghidraAddress PAL: 0x005ab1c8
  */
 int sceOpen(const char *filename, int flag, ...);
 
@@ -439,6 +447,8 @@ int sceOpen(const char *filename, int flag, ...);
  *
  * @param fd Descriptor.
  * @return Zero, or a negative error code.
+ * @ghidraAddress NTSC-U/C: 0x0056af88
+ * @ghidraAddress PAL: 0x005ab450
  */
 int sceClose(int fd);
 
@@ -449,6 +459,8 @@ int sceClose(int fd);
  * @param buf Destination.
  * @param nbyte Byte count.
  * @return The bytes read, or a negative error code.
+ * @ghidraAddress NTSC-U/C: 0x0056b340
+ * @ghidraAddress PAL: 0x005ab808
  */
 int sceRead(int fd, void *buf, int nbyte);
 
@@ -459,6 +471,8 @@ int sceRead(int fd, void *buf, int nbyte);
  * @param buf Source.
  * @param nbyte Byte count.
  * @return The bytes written, or a negative error code.
+ * @ghidraAddress NTSC-U/C: 0x0056b5b0
+ * @ghidraAddress PAL: 0x005aba78
  */
 int sceWrite(int fd, const void *buf, int nbyte);
 
@@ -469,6 +483,8 @@ int sceWrite(int fd, const void *buf, int nbyte);
  * @param offset Offset from @p where.
  * @param where Origin such as #SCE_SEEK_SET.
  * @return The new position, or a negative error code.
+ * @ghidraAddress NTSC-U/C: 0x0056b108
+ * @ghidraAddress PAL: 0x005ab5d0
  */
 int sceLseek(int fd, int offset, int where);
 
@@ -479,6 +495,8 @@ int sceLseek(int fd, int offset, int where);
  * @param req Request code.
  * @param arg Request argument.
  * @return A request-defined value, or a negative error code.
+ * @ghidraAddress NTSC-U/C: 0x0056b870
+ * @ghidraAddress PAL: 0x005abd38
  */
 int sceIoctl(int fd, int req, void *arg);
 

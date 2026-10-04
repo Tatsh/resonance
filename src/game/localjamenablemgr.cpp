@@ -17,28 +17,23 @@ constexpr int kTicksPerBar = 1920;
 
 } // namespace
 
-// NTSC-U/C: 0x00105838, PAL: 0x00105838
 LocalJamEnableMgr::LocalJamEnableMgr() {
     for (int i = 0; i < kTrackCount; ++i) {
         mTracks[i] = Application::shared()->GetLevel()->TrackAt(i);
     }
 }
 
-// NTSC-U/C: 0x001025f0, PAL: 0x001025f0
 LocalJamEnableMgr *LocalJamEnableMgr::CreateSolo() {
     return new LocalJamEnableMgr;
 }
 
-// NTSC-U/C: 0x001026c0, PAL: 0x001026c0
 LocalJamEnableMgr *LocalJamEnableMgr::CreateLocal() {
     return new LocalJamEnableMgr;
 }
 
-// NTSC-U/C: 0x00105830, PAL: 0x00105830
 void LocalJamEnableMgr::SetBarOwner(int, int, Player *) {
 }
 
-// NTSC-U/C: 0x00102488, PAL: 0x00102488
 int LocalJamEnableMgr::QueryBar(int nTrack, int nBar) {
     TrackData *pTrack = mTracks[nTrack];
     if (pTrack->mKind != kTrackModeVocal) {

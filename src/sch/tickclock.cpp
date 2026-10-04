@@ -29,7 +29,6 @@ inline long long SongTickToTime(const TempoMap *pTempoMap, long long nTick) {
 
 } // namespace
 
-// NTSC-U/C: 0x004a79f8, PAL: 0x004e5b08
 TickClock::TickClock(Scheduler *pWatchdog, TempoMap *pTempoMap) : TimeClock(pWatchdog) {
     // The store of pTempoMap sits in the branch delay slot of the null test and therefore runs
     // whether the test passes or not. The private-map branch then overwrites it.
@@ -41,20 +40,17 @@ TickClock::TickClock(Scheduler *pWatchdog, TempoMap *pTempoMap) : TimeClock(pWat
     }
 }
 
-// NTSC-U/C: 0x004a7aa8, PAL: 0x004e5bb8
 TickClock::~TickClock() {
     if (mTempoMap != nullptr) {
         mTempoMap->Release();
     }
 }
 
-// NTSC-U/C: 0x004a7af8, PAL: 0x004e5c08
 int TickClock::SongTick() {
     const long long nTime = Now() + mTempoMap->mCeilingBias;
     return Sch::Tick(static_cast<int>(nTime / mTempoMap->mNanosecondsPerTick)).mTick;
 }
 
-// NTSC-U/C: 0x004a7b60, PAL: 0x004e5c70
 void TickClock::SetSongTick(Sch::Tick tick) {
     const long long nTime = SongTickToTime(mTempoMap, tick.mTick);
     if (nTime != Now()) {
@@ -62,7 +58,6 @@ void TickClock::SetSongTick(Sch::Tick tick) {
     }
 }
 
-// NTSC-U/C: 0x004a7be0, PAL: 0x004e5cf0
 void TickClock::SetTempoMap(TempoMap *pTempoMap) {
     TempoMap *pPrevious = mTempoMap;
     mTempoMap = pTempoMap;
@@ -74,7 +69,6 @@ void TickClock::SetTempoMap(TempoMap *pTempoMap) {
     }
 }
 
-// NTSC-U/C: 0x004a5fd0, PAL: 0x004e4070
 void TickClock::PostAt(Command *pCommand, Time tick) {
     CmdID id;
     id.mValue = kUnallocatedCommand;
@@ -84,7 +78,6 @@ void TickClock::PostAt(Command *pCommand, Time tick) {
     Attachment::ReleaseIfSet(pTimed);
 }
 
-// NTSC-U/C: 0x004a6248, PAL: 0x004e42e8
 void TickClock::PostAtSongTick(Command *pCommand,
                                long long nTick,
                                CmdID &id,
@@ -95,7 +88,6 @@ void TickClock::PostAtSongTick(Command *pCommand,
     Attachment::ReleaseIfSet(pTimed);
 }
 
-// NTSC-U/C: 0x004a6330, PAL: 0x004e43d0
 void TickClock::PostAtSongTick(Command *pCommand, long long nTick) {
     CmdID id;
     id.mValue = kUnallocatedCommand;

@@ -5,31 +5,26 @@
 #include "game/player.h"
 #include "os/hxstr.h"
 
-// NTSC-U/C: 0x003d6928, PAL: 0x0040e818
 Message *PitchRiffMsg::New() {
     return new PitchRiffMsg;
 }
 
-// NTSC-U/C: 0x003da620, PAL: 0x00412a58
-// The field copies are the compiler expanding the implicit copy
-// constructor, so the allocation tag is the only part written here.
 Message *PitchRiffMsg::Clone() {
+    // The field copies are the compiler expanding the implicit copy constructor.
+    // The allocation tag is the only part written here.
     return new PitchRiffMsg(*this);
 }
 
-// NTSC-U/C: 0x003da680, PAL: 0x00412ab8
 int PitchRiffMsg::Type() {
     return sID;
 }
 
-// NTSC-U/C: 0x003da690, PAL: 0x00412ac8
 const char *PitchRiffMsg::GetName() const {
     return "PitchRiffMsg";
 }
 
-// NTSC-U/C: 0x003e2fd0, PAL: 0x0041b470
-// The colour name is copied into a temporary before it is written.
 void PitchRiffMsg::PrintExtra(std::ostream &stream) const {
     mPosition.Print(stream);
+    // The colour name is copied into a temporary before it is written.
     stream << " " << HxStr(mPlayer->mColorName) << " b#" << mButton;
 }

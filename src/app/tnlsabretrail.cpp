@@ -46,7 +46,6 @@ constexpr float kTwoPi = 6.283185f;
 
 } // namespace
 
-// NTSC-U/C: 0x00438518, PAL: 0x00474308
 TnlSabreTrail::TnlSabreTrail(int nIndex, HxStr colorName)
     : mString(nullptr), mIndex(nIndex), mStartFrame(0.0f), mAmplitude(0.0f), mStrength(0.0f),
       mPulseFrame(0.0f), mPhase(0.0f), mGlowFloor(0.0f), mGlowSize(0.0f), mGlow(nullptr) {
@@ -58,17 +57,14 @@ TnlSabreTrail::TnlSabreTrail(int nIndex, HxStr colorName)
     Clear();
 }
 
-// NTSC-U/C: 0x00454c50, PAL: 0x00492180
 TnlSabreTrail::~TnlSabreTrail() {
     Clear();
 }
 
-// NTSC-U/C: 0x00454d30, PAL: 0x00492260
 void TnlSabreTrail::SetShowing(int nShowing) {
     mString->SetShowing(nShowing);
 }
 
-// NTSC-U/C: 0x00454dc8, PAL: 0x004922f8
 void TnlSabreTrail::Clear() {
     mGlow->FreeAllParticles();
     mPoints.clear();
@@ -80,7 +76,6 @@ void TnlSabreTrail::Clear() {
     mTrack = 0;
 }
 
-// NTSC-U/C: 0x00454d60, PAL: 0x00492290
 void TnlSabreTrail::Rebuild() {
     const int nBarCount = mBarCount;
     if (nBarCount == 0) {
@@ -92,7 +87,6 @@ void TnlSabreTrail::Rebuild() {
     Build(nTrack, nFirstBar, nBarCount);
 }
 
-// NTSC-U/C: 0x004387b0, PAL: 0x004745e0
 void TnlSabreTrail::Build(int nTrack, int nFirstBar, int nBarCount) {
     if (nTrack == mTrack && nFirstBar == mFirstBar && nBarCount == mBarCount && !mPoints.empty()) {
         return;
@@ -115,7 +109,6 @@ void TnlSabreTrail::Build(int nTrack, int nFirstBar, int nBarCount) {
     mStartFrame = kUnsetFrame;
 }
 
-// NTSC-U/C: 0x004389a8, PAL: 0x004747d8
 void TnlSabreTrail::AddPoint(float flFrame, float flLane, int nGem) {
     Transform xfm;
     PadTransformRows(xfm);
@@ -137,7 +130,6 @@ void TnlSabreTrail::AddPoint(float flFrame, float flLane, int nGem) {
     mPoints.push_back(point);
 }
 
-// NTSC-U/C: 0x00454e48, PAL: 0x00492378
 void TnlSabreTrail::AddSegmentPoint(float flFrame, float flLane) {
     if (mPoints.empty()) {
         AddPoint(flFrame, flLane, 1);
@@ -153,7 +145,6 @@ void TnlSabreTrail::AddSegmentPoint(float flFrame, float flLane) {
     AddPoint(flFrame, flLane, 1);
 }
 
-// NTSC-U/C: 0x00438ad0, PAL: 0x00474900
 void TnlSabreTrail::Pulse(float flFrame, int nStrength, [[maybe_unused]] int nTotal) {
     if (mPoints.size() < 2) {
         return;
@@ -176,7 +167,6 @@ void TnlSabreTrail::Pulse(float flFrame, int nStrength, [[maybe_unused]] int nTo
     mGlowSize = mGlowFloor + kGlowStep;
 }
 
-// NTSC-U/C: 0x00438c20, PAL: 0x00474a50
 void TnlSabreTrail::Update(float flFrame) {
     if (mPoints.size() < 2) {
         return;
@@ -207,7 +197,6 @@ void TnlSabreTrail::Update(float flFrame) {
     mGlowSize = (flShrunk < mGlowFloor) ? mGlowFloor : flShrunk;
 }
 
-// NTSC-U/C: 0x00438e00, PAL: 0x00474c30
 void TnlSabreTrail::Wobble(float) {
     if (mAmplitude == 0.0f) {
         return;

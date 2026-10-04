@@ -28,7 +28,6 @@ Rnd::View *FindFadeView() {
 
 } // namespace
 
-// NTSC-U/C: 0x0016a1c8, PAL: 0x0016c3c8
 MetFade::MetFade(MetRenderer *pRenderer) : renderer_(pRenderer) {
     state_ = kStateIdle;
     inStart_ = kIdleFrame;
@@ -38,7 +37,6 @@ MetFade::MetFade(MetRenderer *pRenderer) : renderer_(pRenderer) {
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// NTSC-U/C: 0x0016a608, PAL: 0x0016ce48
 void MetFade::FadeOut(float duration, float start, FadeUser *pUser, int nRetainView) {
     g_nFadeRunning = 1;
     retainView_ = nRetainView;
@@ -54,7 +52,6 @@ void MetFade::FadeOut(float duration, float start, FadeUser *pUser, int nRetainV
     renderer_->AddScreenView(FindFadeView());
 }
 
-// NTSC-U/C: 0x0016d750, PAL: 0x0016cc30
 void MetFade::FadeIn(float duration, float start, FadeUser *pUser, int nRetainView) {
     g_nFadeRunning = 1;
     float end = start + duration;
@@ -69,7 +66,6 @@ void MetFade::FadeIn(float duration, float start, FadeUser *pUser, int nRetainVi
     renderer_->AddScreenView(FindFadeView());
 }
 #else
-// NTSC-U/C: 0x0016a608
 void MetFade::FadeOut(float duration, float start, FadeUser *pUser, int nRetainView) {
     retainView_ = nRetainView;
     user_ = pUser;
@@ -83,7 +79,6 @@ void MetFade::FadeOut(float duration, float start, FadeUser *pUser, int nRetainV
     renderer_->AddScreenView(dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kViewName))));
 }
 
-// NTSC-U/C: 0x0016d750
 void MetFade::FadeIn(float duration, float start, FadeUser *pUser, int nRetainView) {
     float end = start + duration;
     inStart_ = start;
@@ -97,7 +92,6 @@ void MetFade::FadeIn(float duration, float start, FadeUser *pUser, int nRetainVi
 }
 #endif
 
-// NTSC-U/C: 0x0016d710, PAL: 0x001700e8
 void MetFade::Update(float frame) {
     if (state_ == kStateIdle) {
         return;
@@ -110,7 +104,6 @@ void MetFade::Update(float frame) {
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// NTSC-U/C: 0x0016a2d0, PAL: 0x0016c4f0
 void MetFade::UpdateOut(float frame) {
     if (!(outEnd_ <= frame)) {
         Color color{0.0f, 0.0f, 0.0f, 1.0f - (rate_ * frame + offset_)};
@@ -131,7 +124,6 @@ void MetFade::UpdateOut(float frame) {
     }
 }
 
-// NTSC-U/C: 0x0016a468, PAL: 0x0016c708
 void MetFade::UpdateIn(float frame) {
     if (!(inEnd_ <= frame)) {
         Color color{0.0f, 0.0f, 0.0f, rate_ * frame + offset_};
@@ -154,13 +146,11 @@ void MetFade::UpdateIn(float frame) {
     }
 }
 
-// PAL: 0x0016c910
 void MetFade::Detach() {
     renderer_->RemoveScreenView(FindFadeView());
     rect_->SetShowing(0);
 }
 
-// PAL: 0x0016ca20
 void MetFade::ShowOpaque() {
     renderer_->RemoveScreenView(FindFadeView());
     renderer_->AddScreenView(FindFadeView());
@@ -169,7 +159,6 @@ void MetFade::ShowOpaque() {
     rect_->SetShowing(1);
 }
 
-// PAL: 0x00170128
 float MetFade::GetCoverage() const {
     if (rect_->GetShowing() == 0) {
         return 0.0f;
@@ -177,7 +166,6 @@ float MetFade::GetCoverage() const {
     return 1.0f - rect_->mVertsOwner->mVerts[0].mColor.a;
 }
 #else
-// NTSC-U/C: 0x0016a2d0
 void MetFade::UpdateOut(float frame) {
     if (outEnd_ <= frame) {
         state_ = kStateIdle;
@@ -196,7 +184,6 @@ void MetFade::UpdateOut(float frame) {
     rect_->SetShowing(1); // Yes, the binary shows again a rectangle that a finished fade hid.
 }
 
-// NTSC-U/C: 0x0016a468
 void MetFade::UpdateIn(float frame) {
     if (inEnd_ <= frame) {
         frame = inEnd_;

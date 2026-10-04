@@ -179,6 +179,9 @@ public:
     /**
      * Write revision 4 of the loop to stream.
      *
+     * The base blocks are written in a different order from the one DumpText() uses. mDrawOrder is
+     * not written, because AddInstancesToHitList() rebuilds it from the section count.
+     *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x005b60c0
      * @ghidraAddress PAL: 0x005f8728
@@ -415,18 +418,30 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
-    // Move a section's view from its current loop to nLoop, shifting its translation by whole
-    // trips of mLoopDist, and record nLoop in the section. The view is written and marked dirty
-    // only when mTeleport is set. Does nothing without a view or when the loop is unchanged.
-    // UpdateSection() calls it, and the setters above expand it inline with nLoop zero.
-    // NTSC-U/C: 0x005bbda8, PAL: 0x005fe470
+    /**
+     * Move a section's view from its current loop to nLoop, shifting its translation by whole trips
+     * of mLoopDist, and record nLoop in the section.
+     *
+     * The view is written and marked dirty only when mTeleport is set. Does nothing without a view
+     * or when the loop is unchanged. UpdateSection() calls it, and the setters above expand it
+     * inline with nLoop zero.
+     *
+     * @ghidraAddress NTSC-U/C: 0x005bbda8
+     * @ghidraAddress PAL: 0x005fe470
+     */
     void SetSectionLoop(Section &section, int nLoop);
 
-    // Place a section for the current filtered frame. The loop count is the number of whole
-    // mLoopFrames the frame lies past the section's mFrame, plus one. The view is animated to the
-    // frame within its own loop and shown while that frame falls in [mFrame - mDelta, mFrame), and
-    // is otherwise hidden and restarted if it was showing. SetFrameSelf() and the section setters
-    // call it. 0x005b64e0.
+    /**
+     * Place a section for the current filtered frame.
+     *
+     * The loop count is the number of whole mLoopFrames the frame lies past the section's mFrame,
+     * plus one. The view is animated to the frame within its own loop and shown while that frame
+     * falls in [mFrame - mDelta, mFrame), and is otherwise hidden and restarted if it was showing.
+     * SetFrameSelf() and the section setters call it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x005b64e0
+     * @ghidraAddress PAL: 0x005f8b48
+     */
     void UpdateSection(Section &section);
 
     // No class derives from Rnd::Arena and nothing outside it accesses a member directly. Every

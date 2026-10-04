@@ -279,44 +279,80 @@ public:
     void ToggleLoop(const Sch::Tick &position);
 
 private:
-    // NTSC-U/C: 0x0011e980, PAL: 0x0011ef40
-    // Records a selection of this player's track and place, and tells the other game
-    // systems unless the player stayed on the same track and dropped back.
+    /**
+     * Records a selection of this player's track and place, and tells the other game systems unless
+     * the player stayed on the same track and dropped back.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0011e980
+     * @ghidraAddress PAL: 0x0011ef40
+     */
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
-    // NTSC-U/C: 0x0011eaa8, PAL: 0x0011f068
-    // Toggles the ghost display of this player and announces it.
+    /**
+     * Toggles the ghost display of this player and announces it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0011eaa8
+     * @ghidraAddress PAL: 0x0011f068
+     */
     void OnToggleGhost(ToggleGhostMsg *pMsg);
 
-    // NTSC-U/C: 0x0011eb20, PAL: 0x0011f0e0
-    // Starts a multiplier bonus of 2 for eight bars from the message's bar.
+    /**
+     * Starts a multiplier bonus of 2 for eight bars from the message's bar.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0011eb20
+     * @ghidraAddress PAL: 0x0011f0e0
+     */
     void OnMultiplier(MultiplierMsg *pMsg);
 
     // The six handlers below are inline, and DispatchPriv() expands each. The addresses are
     // their uncalled out-of-line copies.
 
-    // NTSC-U/C: 0x00122a20, PAL: 0x00123038
-    // Moves the collection's selection when the message addresses this player.
+    /**
+     * Moves the collection's selection when the message addresses this player.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00122a20
+     * @ghidraAddress PAL: 0x00123038
+     */
     void OnAxisYPow(AxisYPowMsg *pMsg);
 
-    // NTSC-U/C: 0x00122ae0, PAL: 0x001230f8
-    // Toggles looping at the message's position when it addresses this player.
+    /**
+     * Toggles looping at the message's position when it addresses this player.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00122ae0
+     * @ghidraAddress PAL: 0x001230f8
+     */
     void OnLoopTool(LoopToolMsg *pMsg);
 
-    // NTSC-U/C: 0x00122b38, PAL: 0x00123150
-    // Updates the streak, multiplier, and capture counts, then awards the capture.
+    /**
+     * Updates the streak, multiplier, and capture counts, then awards the capture.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00122b38
+     * @ghidraAddress PAL: 0x00123150
+     */
     void OnPhraseCaptured(PhraseCapturedMsg *pMsg);
 
-    // NTSC-U/C: 0x00122c20, PAL: 0x00123238
-    // Counts a tried muff once per bar.
+    /**
+     * Counts a tried muff once per bar.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00122c20
+     * @ghidraAddress PAL: 0x00123238
+     */
     void OnPhraseMuffed(PhraseMuffedMsg *pMsg);
 
-    // NTSC-U/C: 0x001229d8, PAL: 0x00122ff0
-    // Forwards a button press to the placer.
+    /**
+     * Forwards a button press to the placer.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001229d8
+     * @ghidraAddress PAL: 0x00122ff0
+     */
     void OnButtonPow(ButtonPowMsg *pMsg);
 
-    // NTSC-U/C: 0x00122a68, PAL: 0x00123080
-    // Adds the caught powerup to the collection, plays its sounds, and passes the message on.
+    /**
+     * Adds the caught powerup to the collection, plays its sounds, and passes the message on.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00122a68
+     * @ghidraAddress PAL: 0x00123080
+     */
     void OnCaughtPowerbar(CaughtPowerbarMsg *pMsg);
 
     Sch::TickClock *mClock; // +0x48

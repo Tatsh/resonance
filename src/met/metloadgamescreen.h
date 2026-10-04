@@ -197,16 +197,30 @@ public:
     }
 
 private:
-    // NTSC-U/C: 0x0028df18, PAL: 0x002a9d08
-    // Load the level of the net game. The game settings are copied first.
+    /**
+     * Load the level of the net game.
+     *
+     * The game settings are copied first.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028df18
+     * @ghidraAddress PAL: 0x002a9d08
+     */
     void LoadNetLevel();
 
-    // NTSC-U/C: 0x00291ad0, PAL: 0x002ada08
-    // Record game phase 1 and load the level.
+    /**
+     * Record game phase 1 and load the level.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00291ad0
+     * @ghidraAddress PAL: 0x002ada08
+     */
     void LoadGameLevel();
 
-    // NTSC-U/C: 0x00291b28, PAL: 0x002ada60
-    // Record the tutorial phase and load the level.
+    /**
+     * Record the tutorial phase and load the level.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00291b28
+     * @ghidraAddress PAL: 0x002ada60
+     */
     void LoadTutorialLevel();
 
     // NTSC-U/C: 0x0028d590, PAL: 0x002a9270

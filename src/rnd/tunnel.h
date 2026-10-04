@@ -520,47 +520,100 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
-    // Drop every reference Update() takes (the path, each event drawable, and each seeker's
-    // objects) and delete the generated meshes. The destructor, Load(), and Copy() call it.
-    // NTSC-U/C: 0x00468020, PAL: 0x004a5a50
+    /**
+     * Drop every reference Update() takes (the path, each event drawable, and each seeker's
+     * objects) and delete the generated meshes.
+     *
+     * The destructor, Load(), and Copy() call it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00468020
+     * @ghidraAddress PAL: 0x004a5a50
+     */
     void ReleaseRefs();
 
-    // Write the material and the first vertex colour of every chain of both grids. 0x00468a78.
+    /**
+     * Write the material and the first vertex colour of every chain of both grids.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00468a78
+     * @ghidraAddress PAL: 0x004a64d8
+     */
     void SaveSectionMaterials(Stream &stream);
 
-    // Read what SaveSectionMaterials() writes and apply each entry to the chain of the same index,
-    // skipping entries past the end of the grid. Before revision 36 the cell count comes from the
-    // current grid rather than the stream, and before revision 37 the slice count does. 0x00468da0.
+    /**
+     * Read what SaveSectionMaterials() writes and apply each entry to the chain of the same index,
+     * skipping entries past the end of the grid.
+     *
+     * Before revision 36 the cell count comes from the current grid rather than the stream, and
+     * before revision 37 the slice count does.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00468da0
+     * @ghidraAddress PAL: 0x004a6800
+     */
     void LoadSectionMaterials(Stream &stream);
 
-    // Rebuild every generated mesh. The material and first vertex colour of each chain are kept
-    // across the rebuild. The ring transforms and lane profiles are regenerated from mRingRadius
-    // and the four lane parameters, and mSliceSteps becomes 2 to the power of one less than
-    // mLodCount. 0x004699c0
+    /**
+     * Rebuild every generated mesh.
+     *
+     * The material and first vertex colour of each chain are kept across the rebuild. The ring
+     * transforms and lane profiles are regenerated from mRingRadius and the four lane parameters,
+     * and mSliceSteps becomes 2 to the power of one less than mLodCount.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004699c0
+     * @ghidraAddress PAL: 0x004a74b8
+     */
     void BuildMesh();
 
-    // Build one chain per slice, "[<name>_lat<slice>]", whose finest level holds a block of
-    // 6 * (mSliceSteps + 1) + 8 vertices per ring. The triangles are built on
-    // the chain of slice 0 and shared by the others. 0x0046adc0.
+    /**
+     * Build one chain per slice, "[<name>_lat<slice>]", whose finest level holds a block of
+     * 6 * (mSliceSteps + 1) + 8 vertices per ring.
+     *
+     * The triangles are built on the chain of slice 0 and shared by the others.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0046adc0
+     * @ghidraAddress PAL: 0x004a88b8
+     */
     void BuildSliceMeshes();
 
-    // Build one chain per lane of each slice, "[<name>_lat<lane>]", holding one flat grid of four
-    // rows and two end caps, with the triangles built on the first chain and shared. The image has
-    // no caller, and BuildMesh() calls BuildSliceMeshes() instead. 0x0046b830.
+    /**
+     * Build one chain per lane of each slice, "[<name>_lat<lane>]", holding one flat grid of four
+     * rows and two end caps, with the triangles built on the first chain and shared.
+     *
+     * The image has no caller, and BuildMesh() calls BuildSliceMeshes() instead.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0046b830
+     * @ghidraAddress PAL: 0x004a9340
+     */
     void BuildLaneMeshes();
 
-    // Build one chain per cell, "[<name>_pan<cell>]", with two rows of mSliceSteps + 1 vertices.
-    // The triangles are built on the chain of cell 0 and shared by the others. 0x0046c0e8.
+    /**
+     * Build one chain per cell, "[<name>_pan<cell>]", with two rows of mSliceSteps + 1 vertices.
+     *
+     * The triangles are built on the chain of cell 0 and shared by the others.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0046c0e8
+     * @ghidraAddress PAL: 0x004a9c10
+     */
     void BuildCellMeshes();
 
-    // Empty the per-material section lists. 0x0046acf0.
+    /**
+     * Empty the per-material section lists.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0046acf0
+     * @ghidraAddress PAL: 0x004a87e8
+     */
     void ClearMaterialSectionLists();
 
-    // Place column mPlacingColumn of the slice mPlacingSlice. The path is evaluated at
-    // mPlacingFrame, every lane profile is passed through it into the slice mesh, and the edges of
-    // the neighbouring cells follow. The first and last columns also close the ends of each lane
-    // block. Column zero, the last one written, resynchronises the slice mesh and every cell mesh
-    // of the slice. 0x0046c638
+    /**
+     * Place column mPlacingColumn of the slice mPlacingSlice.
+     *
+     * The path is evaluated at mPlacingFrame, every lane profile is passed through it into the
+     * slice mesh, and the edges of the neighbouring cells follow. The first and last columns also
+     * close the ends of each lane block. Column zero, the last one written, resynchronises the
+     * slice mesh and every cell mesh of the slice.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0046c638
+     * @ghidraAddress PAL: 0x004aa178
+     */
     void SetRingSectionFrames();
 
     // A signed remainder moved into [0, nCount), the form every ring and slice lookup uses.

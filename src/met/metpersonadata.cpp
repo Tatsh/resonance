@@ -38,7 +38,6 @@ constexpr int kExpertLastStage = 5;
 
 } // namespace
 
-// NTSC-U/C: 0x0032b760, PAL: 0x00353bf0
 MetPersonaData::MetPersonaData() {
     mStats.RebuildLevelList();
     mBirthday = kInitialBirthday;
@@ -46,7 +45,6 @@ MetPersonaData::MetPersonaData() {
     mSavedName = kNoText;
 }
 
-// NTSC-U/C: 0x0032b880, PAL: 0x00353d40
 void MetPersonaData::Save(OBStream *pStream) {
     const int nVersion = kRecordVersion;
     OBStream &stream = pStream->WriteLE(&nVersion, sizeof(nVersion));
@@ -57,7 +55,6 @@ void MetPersonaData::Save(OBStream *pStream) {
     stream.Write(mBirthday.mStr != nullptr ? mBirthday.mStr : g_szEmptyString, nLength);
 }
 
-// NTSC-U/C: 0x0032b968, PAL: 0x00353e28
 void MetPersonaData::Load(IBStream *pStream) {
     int nVersion;
     pStream->ReadLE(&nVersion, sizeof(nVersion));
@@ -107,26 +104,21 @@ void MetPersonaData::Load(IBStream *pStream) {
     UpdateSkillStatus();
 }
 
-// NTSC-U/C: 0x0032e1e8, PAL: 0x003566f0
 void *MetPersonaData::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kAllocationTag);
 }
 
-// NTSC-U/C: 0x0032e208, PAL: 0x00356710
 void MetPersonaData::operator delete(void *pBlock) {
     OperatorDeleteOverride(pBlock, kAllocationTag);
 }
 
-// NTSC-U/C: 0x0032e230, PAL: 0x00356738
 void MetPersonaData::SetName(const HxStr &name) {
     mAppearance.mUserName = name;
 }
 
-// NTSC-U/C: 0x0032e278, PAL: 0x00356780
 MetPersonaData::~MetPersonaData() {
 }
 
-// NTSC-U/C: 0x0032e308, PAL: 0x00356838
 void MetPersonaData::UpdateSkillStatus() {
     int nStatus;
     if (mStats.IsStageComplete(kDifficultyExpert, kExpertLastStage)) {
@@ -140,17 +132,14 @@ void MetPersonaData::UpdateSkillStatus() {
     mAppearance.SetSkillStatus(nStatus);
 }
 
-// NTSC-U/C: 0x0032e488, PAL: 0x003569b8
 void MetPersonaData::AttachToBurnSlot(int nSlot) {
     mAppearance.AttachToBurnSlot(nSlot);
 }
 
-// NTSC-U/C: 0x0032e258, PAL: 0x00356760
 int MetPersonaData::GetSkillStatus() {
     return mAppearance.GetSkillStatus();
 }
 
-// NTSC-U/C: 0x0032e380, PAL: 0x003568b0
 void MetPersonaData::Print(std::ostream &stream) {
     stream << kStatsLabel;
     mStats.PrintLevels(stream);
@@ -159,7 +148,6 @@ void MetPersonaData::Print(std::ostream &stream) {
     stream << kBirthdayLabel << mBirthday << kPrefabLabel << mIsPrefab;
 }
 
-// NTSC-U/C: 0x0032e420, PAL: 0x00356950
 MetPersonaData &MetPersonaData::operator=(const MetPersonaData &other) {
     if (&other != this) {
         mAppearance = other.mAppearance;

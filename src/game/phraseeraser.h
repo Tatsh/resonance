@@ -52,13 +52,25 @@ public:
     virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // The out-of-line copy of the EraseMsg branch DispatchPriv() expands inline. Marks the eraser
-    // active, records the erased bar twice and the player, and passes the bar to EraseBar().
-    // NTSC-U/C: 0x001b9a60, PAL: 0x001bf838
+    /**
+     * The out-of-line copy of the EraseMsg branch DispatchPriv() expands inline.
+     *
+     * Marks the eraser active, records the erased bar twice and the player, and passes the bar to
+     * EraseBar().
+     *
+     * @ghidraAddress NTSC-U/C: 0x001b9a60
+     * @ghidraAddress PAL: 0x001bf838
+     */
     void OnEraseMsg(EraseMsg *pMsg);
 
-    // An empty body. The title is inferred from its one argument, the erased bar.
-    // NTSC-U/C: 0x001b9ac8, PAL: 0x001bf8a0
+    /**
+     * An empty body.
+     *
+     * The title is inferred from its one argument, the erased bar.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001b9ac8
+     * @ghidraAddress PAL: 0x001bf8a0
+     */
     void EraseBar(int nBar);
 
     int mActive;           // +0x18

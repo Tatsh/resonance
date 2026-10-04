@@ -68,17 +68,14 @@ inline void ReadString(IBStream &stream, HxStr &text) {
 
 } // namespace
 
-// NTSC-U/C: 0x0018b988, PAL: 0x00191418
 void *GlobalSettings::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, "GlobalSettings");
 }
 
-// NTSC-U/C: 0x0018b9a8, PAL: 0x00191438
 void GlobalSettings::operator delete(void *pBlock) {
     OperatorDeleteOverride(pBlock, "GlobalSettings");
 }
 
-// NTSC-U/C: 0x00187d00, PAL: 0x0018d588
 GlobalSettings::GlobalSettings()
     : mDefaultMacros(MetKeyboardScreen::GetDefaultMacros()), mTutorialComplete(0),
       mTeamFreqUnlocked(0) {
@@ -104,11 +101,9 @@ GlobalSettings::GlobalSettings()
     mPersonaMinimumFreeClusters = kDefaultPersonaMinimumFreeClusters;
 }
 
-// NTSC-U/C: 0x00188370, PAL: 0x0018dc90
 GlobalSettings::~GlobalSettings() {
 }
 
-// NTSC-U/C: 0x001885d0, PAL: 0x0018df28
 void GlobalSettings::Save(OBStream &stream) {
     int nVersion = kRecordVersion;
     OBStream &out = WriteString(
@@ -126,7 +121,6 @@ void GlobalSettings::Save(OBStream &stream) {
     stream << mTutorialComplete;
 }
 
-// NTSC-U/C: 0x001887d0, PAL: 0x0018e128
 void GlobalSettings::Load(IBStream &stream) {
     int nVersion;
     stream.ReadLE(&nVersion, sizeof(nVersion));
@@ -163,7 +157,6 @@ void GlobalSettings::Load(IBStream &stream) {
     }
 }
 
-// NTSC-U/C: 0x00188b90, PAL: 0x0018e550
 void GlobalSettings::SkipLegacyMacros(IBStream &stream) {
     int nCount;
     stream.ReadLE(&nCount, sizeof(nCount));
@@ -175,7 +168,6 @@ void GlobalSettings::SkipLegacyMacros(IBStream &stream) {
     }
 }
 
-// NTSC-U/C: 0x00188cc0, PAL: 0x0018e6a0
 void GlobalSettings::SetMacros(std::vector<HxStr> macros) {
     int nCount = macros.size();
     for (int i = 0; i < nCount; ++i) {
@@ -183,23 +175,19 @@ void GlobalSettings::SetMacros(std::vector<HxStr> macros) {
     }
 }
 
-// NTSC-U/C: 0x0018b9c8, PAL: 0x00191458
 GlobalSettings *GlobalSettings::shared() {
     return g_pGlobalSettings;
 }
 
-// NTSC-U/C: 0x0018b9d8, PAL: 0x00191468
 void GlobalSettings::Create() {
     g_pGlobalSettings = new GlobalSettings();
 }
 
-// NTSC-U/C: 0x0018ba48, PAL: 0x001914d8
 void GlobalSettings::Destroy() {
     delete g_pGlobalSettings;
     g_pGlobalSettings = nullptr;
 }
 
-// NTSC-U/C: 0x0018ba90, PAL: 0x00191520
 void GlobalSettings::Print(std::ostream &stream) {
     stream << kNetAddressLabel << mNetAddress << kNetPortLabel << mNetPort;
     stream << kControllerLabels[0] << kControllerLabels[1] << kControllerLabels[2]
@@ -207,7 +195,6 @@ void GlobalSettings::Print(std::ostream &stream) {
     stream << kTutorialLabel << mTutorialComplete;
 }
 
-// NTSC-U/C: 0x0018bb50, PAL: 0x001915e0
 void GlobalSettings::operator=(const GlobalSettings &other) {
     mNetAddress = other.mNetAddress;
     mNetPort = other.mNetPort;

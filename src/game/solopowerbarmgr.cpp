@@ -10,7 +10,6 @@ constexpr int kMaxGap = 16;
 
 } // namespace
 
-// NTSC-U/C: 0x001c6270, PAL: 0x001cc0b8
 SoloPowerbarMgr::SoloPowerbarMgr(PlayMap *pMap,
                                  PhraseDatabase *pDatabase,
                                  const TrackData *pTrackData,

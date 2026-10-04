@@ -12,12 +12,10 @@ constexpr int kDefaultHighNote = 120;
 
 } // namespace
 
-// NTSC-U/C: 0x001a4db0, PAL: 0x001aab18
 void Harmony::AddPitch(unsigned char nNote) {
     mNotes.insert(std::upper_bound(mNotes.begin(), mNotes.end(), nNote), nNote);
 }
 
-// NTSC-U/C: 0x001a4e28, PAL: 0x001aab90
 unsigned char Harmony::SnapToHarmony(unsigned char nNote) const {
     if (mNotes.empty()) {
         return nNote;
@@ -40,7 +38,6 @@ unsigned char Harmony::SnapToHarmony(unsigned char nNote) const {
     return *low;
 }
 
-// NTSC-U/C: 0x001a4eb0, PAL: 0x001aac18
 void Harmony::GetRange(int *pLow, int *pHigh) {
     if (mNotes.empty()) {
         *pLow = kDefaultLowNote;
@@ -51,7 +48,6 @@ void Harmony::GetRange(int *pLow, int *pHigh) {
     *pHigh = mNotes.back();
 }
 
-// NTSC-U/C: 0x001a4ee8, PAL: 0x001aac50
 void Harmony::Print(std::ostream &stream) {
     stream << "(";
     for (std::vector<unsigned char>::iterator it = mNotes.begin(); it != mNotes.end(); ++it) {

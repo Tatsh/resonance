@@ -59,8 +59,15 @@ protected:
     virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // Run the message's script text without testing its identity first. The receiver is unused,
-    // and DispatchPriv() inlines a copy of this body rather than calling it. 0x00118ad0
+    /**
+     * Run the message's script text without testing its identity first.
+     *
+     * The receiver is unused, and DispatchPriv() inlines a copy of this body rather than calling
+     * it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00118ad0
+     * @ghidraAddress PAL: 0x00118fe8
+     */
     void RunMessageScript(Message *pMsg);
 
     Globals *mGlobals; // +0x04

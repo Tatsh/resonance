@@ -33,24 +33,20 @@ constexpr double kLaneToOffset = -0.5;
 
 } // namespace
 
-// NTSC-U/C: 0x00455508, PAL: 0x00492a38
 void TnlPointer::MeshPair::Init(const HxStr &iconName, const HxStr &baseName) {
     mIcon = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(iconName));
     mBase = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(baseName));
 }
 
-// NTSC-U/C: 0x004555e0, PAL: 0x00492b10
 void TnlPointer::MeshPair::SetShowing(int nShowing) {
     mIcon->SetShowing(nShowing);
     mBase->SetShowing(nShowing);
 }
 
-// NTSC-U/C: 0x00455640, PAL: 0x00492b70
 void TnlPointer::MeshPair::SetAlpha(float flAlpha) {
     mIcon->mMat->SetAlpha(flAlpha);
 }
 
-// NTSC-U/C: 0x0043a810, PAL: 0x00476b10
 TnlPointer::TnlPointer(const HxStr &colorName)
     : mLastTime(0.0f), mSpinFrame(0.0f), mSpinning(0), mOffsetX(kCentreOffset),
       mCentreOffset(kCentreOffset), mSpinStart(kUnsetTime) {
@@ -65,7 +61,6 @@ TnlPointer::TnlPointer(const HxStr &colorName)
     Reset();
 }
 
-// NTSC-U/C: 0x0043b248, PAL: 0x00477768
 void TnlPointer::SetKind(int nKind) {
     for (unsigned i = 0; i < mPairs.size(); ++i) {
         mPairs[i].SetShowing(0);
@@ -86,14 +81,12 @@ void TnlPointer::SetKind(int nKind) {
     Reset();
 }
 
-// NTSC-U/C: 0x004557d0, PAL: 0x00492d00
 void TnlPointer::Reset() {
     mDip.SetTarget(0.0f);
     mSpinning = 0;
     mSpinStart = kUnsetTime;
 }
 
-// NTSC-U/C: 0x00455768, PAL: 0x00492c98
 void TnlPointer::Spin(int nRestart) {
     if (!mView->GetShowing()) {
         return;
@@ -105,25 +98,21 @@ void TnlPointer::Spin(int nRestart) {
     mSpinning = 1;
 }
 
-// NTSC-U/C: 0x00455810, PAL: 0x00492d40
 void TnlPointer::SetLane(float flLane) {
     mOffsetX = static_cast<float>((flLane - kLaneCentre) * kLaneToOffset);
 }
 
-// NTSC-U/C: 0x004556c8, PAL: 0x00492bf8
 void TnlPointer::SetAlpha(float flAlpha) {
     for (unsigned i = 0; i < mPairs.size(); ++i) {
         mPairs[i].SetAlpha(flAlpha);
     }
 }
 
-// NTSC-U/C: 0x00455670, PAL: 0x00492ba0
 void TnlPointer::AttachTo(Rnd::View *pParent) {
     pParent->AddTrans(mView);
     pParent->AddDraw(mView, nullptr);
 }
 
-// NTSC-U/C: 0x00455860, PAL: 0x00492d90
 void TnlPointer::Update(float flTime) {
     mDip.Execute(flTime);
     if (mSpinStart == kRestartPending) {

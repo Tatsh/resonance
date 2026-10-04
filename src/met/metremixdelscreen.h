@@ -408,10 +408,15 @@ private:
     // `del_fail_nocard`, and it has no address of its own.
     inline void StartDelete();
 
-    // NTSC-U/C: 0x003440b8, PAL: 0x00365690
-    // Shows one catalogue row on the data screen. Slot 33 and the shared tail of codes 1 and 2 in
-    // slot 19 are its callers. An index past the end hides the record instead, and mCatalogue is
-    // not tested for null.
+    /**
+     * Shows one catalogue row on the data screen.
+     *
+     * Slot 33 and the shared tail of codes 1 and 2 in slot 19 are its callers. An index past the
+     * end hides the record instead, and mCatalogue is not tested for null.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003440b8
+     * @ghidraAddress PAL: 0x00365690
+     */
     void ShowRowOnDataScreen(int nIndex);
 
     // The row catalogue the ListDataProvider override at `0x0033cc78` indexes. Slot 5 points it at

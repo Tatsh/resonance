@@ -111,7 +111,9 @@ public:
     /**
      * Write the packet to a stream.
      *
-     * Slot 6, overriding Packet::saveGuts().
+     * Slot 6, overriding Packet::saveGuts(). mClientId is written a second time after the payload,
+     * repeating the transfer the Packet prefix already performed, and restoreGuts() reads the same
+     * word twice to match.
      *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x003e8258

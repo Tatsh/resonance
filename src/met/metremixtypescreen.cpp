@@ -157,7 +157,6 @@ inline const char *TextOrEmpty(const HxStr &text) {
 
 } // namespace
 
-// NTSC-U/C: 0x00361d18, PAL: 0x0038f220
 MetRemixTypeScreen::MetRemixTypeScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtons(nullptr) {
@@ -167,17 +166,14 @@ MetRemixTypeScreen::MetRemixTypeScreen(MetRenderer *pRenderer, int nPriority)
     mButtons = new MetButtonList;
 }
 
-// NTSC-U/C: 0x003696c0, PAL: 0x00397740
 MetRemixTypeScreen::~MetRemixTypeScreen() {
     delete mButtons;
 }
 
-// NTSC-U/C: 0x00369638, PAL: 0x003976b8
 MetRemixTypeScreen *MetRemixTypeScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetRemixTypeScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x00362600, PAL: 0x0038fcb0
 void MetRemixTypeScreen::EnterAndShow() {
     SetShowing(0);
     if (MetFrontEndState::shared()->mPendingTransition != 0) {
@@ -255,7 +251,6 @@ void MetRemixTypeScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x00364478, PAL: 0x003922e8
 void MetRemixTypeScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (!(name == kNoSpaceDialogue)) {
         return;
@@ -270,7 +265,6 @@ void MetRemixTypeScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     }
 }
 
-// NTSC-U/C: 0x00362348, PAL: 0x0038f978
 void MetRemixTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -304,7 +298,6 @@ void MetRemixTypeScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x00362fa0, PAL: 0x00390848
 void MetRemixTypeScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *pButton) {
     mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
@@ -319,7 +312,6 @@ void MetRemixTypeScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *
     BeginExit();
 }
 
-// NTSC-U/C: 0x00363920, PAL: 0x00391470
 void MetRemixTypeScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kModeScreen));
@@ -395,7 +387,6 @@ void MetRemixTypeScreen::OnExitFinished() {
     }
 }
 
-// NTSC-U/C: 0x00362098, PAL: 0x0038f648
 void MetRemixTypeScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mTwoButtonView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kTwoButtonView)));
@@ -405,7 +396,6 @@ void MetRemixTypeScreen::ResolveContainerViews() {
         dynamic_cast<Rnd::TransAnim *>(Rnd::TheManager.Find(HxStr(kThreeButtonAnim)));
 }
 
-// NTSC-U/C: 0x00363148, PAL: 0x00390a48
 void MetRemixTypeScreen::OpenSelectedButton() {
     switch (mButtons->mSelected) {
     case kNewButtonIndex:

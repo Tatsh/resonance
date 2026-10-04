@@ -154,7 +154,6 @@ inline void InitMemoryCardLibrary() {
 
 } // namespace
 
-// NTSC-U/C: 0x004dfe28, PAL: 0x0051e5c0
 void InitIop() {
     ConfigureRetailBoot();
     RebootIopWithImage();
@@ -163,14 +162,12 @@ void InitIop() {
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// PAL: 0x0051e678
 void ShutdownIop() {
     CloseMultitapPorts();
     CloseDebugConsole();
 }
 #endif
 
-// NTSC-U/C: 0x004de170, PAL: 0x0051c728
 void LoadIopModule(const IopModule *pModule, unsigned nSources) {
     if ((nSources & kIopModuleSourceDisc) != 0) {
         HxStr name(pModule->mName);
@@ -191,7 +188,6 @@ void LoadIopModule(const IopModule *pModule, unsigned nSources) {
     }
 }
 
-// NTSC-U/C: 0x004de600, PAL: 0x0051ccd0
 void LoadIopModules() {
     const HostMode mode = GetHostMode();
     VSync();
@@ -226,7 +222,6 @@ void LoadIopModules() {
     InitMemoryCardLibrary();
 }
 
-// NTSC-U/C: 0x005e1210, PAL: 0x00623150
 void RegisterHardEffectCommands() {
     RegisterScriptTemplate(kTemplateUseHardEffect, HxStr(kUseHardEffectExpression));
     RegisterScriptTemplate(kTemplateHardEffectId, HxStr(kHardEffectIdExpression));

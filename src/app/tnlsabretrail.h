@@ -126,15 +126,31 @@ public:
     void Update(float flFrame);
 
 private:
-    // Place one point on the track and append it, allocating a glow particle for a gem point.
+    /**
+     * Place one point on the track and append it, allocating a glow particle for a gem point.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004389a8
+     * @ghidraAddress PAL: 0x004747d8
+     */
     void AddPoint(float flFrame, float flLane, int nGem);
 
-    // Append a gem point, first filling the gap from the last point with a filler point every 60
-    // frames on the straight line between the two.
+    /**
+     * Append a gem point, first filling the gap from the last point with a filler point every 60
+     * frames on the straight line between the two.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00454e48
+     * @ghidraAddress PAL: 0x00492378
+     */
     void AddSegmentPoint(float flFrame, float flLane);
 
-    // Decay the amplitude and move every revealed filler point past mPulseFrame. The argument is
-    // passed and never read.
+    /**
+     * Decay the amplitude and move every revealed filler point past mPulseFrame.
+     *
+     * The argument is passed and never read.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00438e00
+     * @ghidraAddress PAL: 0x00474c30
+     */
     void Wobble(float flFrame);
 
     std::vector<Point> mPoints;

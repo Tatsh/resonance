@@ -78,8 +78,14 @@ private:
     // AppTunnel::StartSnake() reads mStartFrame to find an idle ribbon.
     friend class AppTunnel;
 
-    // Place point nIndex at the lane position of frame nFrame. A frame another point already
-    // shows is copied from that point.
+    /**
+     * Place point nIndex at the lane position of frame nFrame.
+     *
+     * A frame another point already shows is copied from that point.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0043f218
+     * @ghidraAddress PAL: 0x0047bba0
+     */
     void SetPointFrame(int nFrame, int nIndex);
 
     float mStartFrame; // 1e9 while idle.

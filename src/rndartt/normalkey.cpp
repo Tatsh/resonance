@@ -14,7 +14,6 @@ constexpr float kUnusedKeyScale = 16.0f;
 // NTSC-U/C: 0x00725848, PAL: 0x007694e8
 NormalKey g_normalKeyUnused(kUnusedKeyScale, 0.0f, 0.0f);
 
-// NTSC-U/C: 0x00558740, PAL: 0x00599898
 NormalKey::NormalKey(float flRed, float flGreen, float flBlue) {
     if (flGreen < flRed) {
         if (flBlue < flRed) {
@@ -43,7 +42,6 @@ NormalKey::NormalKey(float flRed, float flGreen, float flBlue) {
     mBlue = 1.0f;
 }
 
-// NTSC-U/C: 0x00557858, PAL: 0x005989b0
 void NormalKey::InsertUniqueNormalKey(std::vector<NormalKey> &keys, const Color &color) {
     const NormalKey key(color.r, color.g, color.b);
     for (auto &existing : keys) {

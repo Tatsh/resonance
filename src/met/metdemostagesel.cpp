@@ -148,7 +148,6 @@ inline void ShowTvTexture(Rnd::Mesh *pMesh, Rnd::Tex *pTex) {
 
 } // namespace
 
-// PAL: 0x00221fc0
 MetDEMOStageSel::MetDEMOStageSel(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mLogoPair(nullptr), mLabelPair(nullptr), mLoadPending(0), mStageList(nullptr),
@@ -156,19 +155,16 @@ MetDEMOStageSel::MetDEMOStageSel(MetRenderer *pRenderer, int nPriority)
       mLabelText(nullptr) {
 }
 
-// PAL: 0x0022a328
 MetDEMOStageSel::~MetDEMOStageSel() {
     delete mLogoPair;
     delete mLabelPair;
     delete mStageList;
 }
 
-// PAL: 0x0022a2a0
 MetDEMOStageSel *MetDEMOStageSel::New(MetRenderer *pRenderer, int nPriority) {
     return new MetDEMOStageSel(pRenderer, nPriority);
 }
 
-// PAL: 0x002238c8
 void MetDEMOStageSel::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mLogoPair = new TexturePairRecord(HxStr(kFirstLogoTex), HxStr(kSecondLogoTex));
@@ -181,7 +177,6 @@ void MetDEMOStageSel::ResolveContainerViews() {
     mLabelText = FindObject<Rnd::Text>(kLabelText);
 }
 
-// PAL: 0x002221b8
 void MetDEMOStageSel::EnterAndShow() {
     MetScreen::EnterAndShow();
     mLabelPair->invalidate();
@@ -224,7 +219,6 @@ void MetDEMOStageSel::EnterAndShow() {
     ShowSelectedSong();
 }
 
-// PAL: 0x00223f40
 void MetDEMOStageSel::BeginExit() {
     MetScreen::BeginExit();
     ExitScreenByName(HxStr(kTitleScreen));
@@ -233,7 +227,6 @@ void MetDEMOStageSel::BeginExit() {
     }
 }
 
-// PAL: 0x002240b0
 void MetDEMOStageSel::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kTitleScreen));
@@ -246,7 +239,6 @@ void MetDEMOStageSel::OnExitFinished() {
     }
 }
 
-// PAL: 0x00224428
 void MetDEMOStageSel::UpdateIdle(float) {
     if (mLoadPending == 0) {
         return;
@@ -274,7 +266,6 @@ void MetDEMOStageSel::UpdateIdle(float) {
     }
 }
 
-// PAL: 0x00224558
 void MetDEMOStageSel::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -350,16 +341,13 @@ void MetDEMOStageSel::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// PAL: 0x0022a400
 void MetDEMOStageSel::OnRepeatingSoundFinished(Rnd::Button *) {
 }
 
-// PAL: 0x0022a3c8
 void MetDEMOStageSel::OnEnterFinished() {
     MetHelpScreen::SetText(mHelpKeys[mStageList->mSelected], mRenderer->mAnimationFrame);
 }
 
-// PAL: 0x00224ec0
 void MetDEMOStageSel::ShowSelectedSong() {
     HxStr level;
     const int nButton = mStageList->mSelected;

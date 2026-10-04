@@ -133,7 +133,6 @@ public:
 
 } // namespace
 
-// NTSC-U/C: 0x001ded98, PAL: 0x001e4e18
 InputPoller::InputPoller()
     : mNextJoypadId(0), mBytePairs(KeyboardMgr::shared()), mUnusedWord(0), mUnusedFlag(1),
       mPressedThisPoll(0), mActive(1), mMultitap0(0), mMultitap1(0), mPaused(0),
@@ -141,12 +140,10 @@ InputPoller::InputPoller()
     Init();
 }
 
-// NTSC-U/C: 0x001df080, PAL: 0x001e5100
 InputPoller::~InputPoller() {
     Shutdown();
 }
 
-// NTSC-U/C: 0x001e19b8, PAL: 0x001e7a80
 void InputPoller::Init() {
     g_adwControlMasks[kControlTriangle] = kPadButtonTriangle;
     g_adwControlMasks[kControlCircle] = kPadButtonCircle;
@@ -167,7 +164,6 @@ void InputPoller::Init() {
     Setup();
 }
 
-// NTSC-U/C: 0x001df248, PAL: 0x001e52c8
 void InputPoller::Setup() {
     for (int nSlot = 0; nSlot < kSlotsPerPort; ++nSlot) {
         JoypadPS2 *pJoypad = new JoypadPS2((kPort0 << kSlotBits) | nSlot);
@@ -223,7 +219,6 @@ void InputPoller::Setup() {
     }
 }
 
-// NTSC-U/C: 0x001df9d8, PAL: 0x001e5a58
 void InputPoller::Shutdown() {
     if (mJoypads.size() == 0) {
         return;
@@ -236,14 +231,12 @@ void InputPoller::Shutdown() {
     mEntries.clear();
 }
 
-// NTSC-U/C: 0x001e1a88, PAL: 0x001e7b70
 inline void InputPoller::ResetJoypads() {
     for (auto it = mJoypads.begin(); it != mJoypads.end(); ++it) {
         (*it)->Reset();
     }
 }
 
-// NTSC-U/C: 0x001e1ad8, PAL: 0x001e7bc0
 void InputPoller::NumberConnectedJoypads() {
     int nPlayer = kFirstPlayer;
     const int nJoypadCount = mJoypads.size();
@@ -256,7 +249,6 @@ void InputPoller::NumberConnectedJoypads() {
     }
 }
 
-// NTSC-U/C: 0x001e1b78, PAL: 0x001e7c60
 void InputPoller::SetVibration(int nPort, int nSmallMotor, int nBigMotor) {
     unsigned i = 0;
     while (i < mJoypadPlayers.size() && mJoypadPlayers[i] != nPort) {
@@ -269,7 +261,6 @@ void InputPoller::SetVibration(int nPort, int nSmallMotor, int nBigMotor) {
     mJoypads[i]->SetVibration(nSmallMotor, nBigMotor);
 }
 
-// NTSC-U/C: 0x001df798, PAL: 0x001e5818
 void InputPoller::FindJoypadConnections() {
     if (!mActive) {
         return;
@@ -306,7 +297,6 @@ void InputPoller::FindJoypadConnections() {
     }
 }
 
-// NTSC-U/C: 0x001dfab0, PAL: 0x001e5b30
 void InputPoller::ReadControllers() {
     mPressedThisPoll = 0;
     if (mController == nullptr) {
@@ -407,41 +397,34 @@ void InputPoller::ReadControllers() {
     }
 }
 
-// NTSC-U/C: 0x001e1c28, PAL: 0x001e7d10
 void InputPoller::Poll() {
     ReadControllers();
     FinishPoll();
 }
 
-// NTSC-U/C: 0x001e1c58, PAL: 0x001e7d40
 void InputPoller::FinishPoll() {
 }
 
-// NTSC-U/C: 0x001e1998, PAL: 0x001e7a60
 void InputPoller::SetController(RawController *pController) {
     mController = pController;
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// PAL: 0x001e7b48
 void InputPoller::EndPadLibrary() {
     PadRecord::EndLibrary();
 }
 #endif
 
-// NTSC-U/C: 0x001e1a80, PAL: 0x001e7b68
 void InputPoller::SetActive(int bActive) {
     mActive = bActive;
 }
 
-// NTSC-U/C: 0x001e19a0, PAL: 0x001e7a68
 void InputPoller::DetachController(RawController *pController) {
     if (mController == pController) {
         mController = nullptr;
     }
 }
 
-// NTSC-U/C: 0x001e1c18, PAL: 0x001e7d00
 void InputPoller::SetPaused(int bPaused) {
     mPaused = bPaused;
 }

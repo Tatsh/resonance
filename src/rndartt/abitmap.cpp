@@ -44,7 +44,6 @@ const unsigned char ABitmap::bmPixelSize[kABitmapFormatCount] = {0, 1, 2, 3, 4, 
 // NTSC-U/C: 0x00725cc8, PAL: 0x00769968
 const unsigned char g_abBitmapBitsPerPixel[kABitmapFormatCount] = {4, 8, 16, 24, 32, 8};
 
-// NTSC-U/C: 0x00558dd8, PAL: 0x00599f30
 ABitmap::ABitmap(const ABitmap &source, int nX, int nY, int nWidth, int nHeight) {
     mFormat = source.mFormat;
     unsigned char *pRow = static_cast<unsigned char *>(source.mPixels) + nY * source.mBytesPerRow;
@@ -69,7 +68,6 @@ ABitmap::ABitmap(const ABitmap &source, int nX, int nY, int nWidth, int nHeight)
     // Yes, the binary never writes mTransparentColor.
 }
 
-// NTSC-U/C: 0x005593a0, PAL: 0x0059a4f8
 ABitmap::ABitmap(void *pPixels,
                  int nFormat,
                  bool bHasTransparentColor,
@@ -98,7 +96,6 @@ ABitmap::ABitmap(void *pPixels,
     mPalette = nullptr;
 }
 
-// NTSC-U/C: 0x00559310, PAL: 0x0059a468
 int ABitmap::Bpp2Format(int nBitsPerPixel) {
     switch (nBitsPerPixel) {
     case kBitsPerPixel4:
@@ -116,7 +113,6 @@ int ABitmap::Bpp2Format(int nBitsPerPixel) {
     }
 }
 
-// NTSC-U/C: 0x00559368, PAL: 0x0059a4c0
 int ABitmap::ComputeByteCount(int nFormat, int nWidth, int nHeight) {
     int nBytesPerRow;
     if (nFormat == kABitmapFormatLinear4) {
@@ -127,7 +123,6 @@ int ABitmap::ComputeByteCount(int nFormat, int nWidth, int nHeight) {
     return nBytesPerRow * nHeight;
 }
 
-// NTSC-U/C: 0x00559568, PAL: 0x0059a6c0
 void ABitmap::Reverse15(unsigned short *pPixels, int nCount) {
     for (int nRemaining = nCount; nRemaining > 0; --nRemaining) {
         const unsigned int nColor = *pPixels;
@@ -137,7 +132,6 @@ void ABitmap::Reverse15(unsigned short *pPixels, int nCount) {
     }
 }
 
-// NTSC-U/C: 0x005595c8, PAL: 0x0059a720
 void ABitmap::Reverse24(unsigned char *pPixels, int nCount) {
     for (int nRemaining = nCount; nRemaining > 0; --nRemaining) {
         const unsigned char nFirst = pPixels[0];
@@ -147,7 +141,6 @@ void ABitmap::Reverse24(unsigned char *pPixels, int nCount) {
     }
 }
 
-// NTSC-U/C: 0x00559600, PAL: 0x0059a758
 void ABitmap::Reverse32(unsigned char *pPixels, int nCount) {
     for (int nRemaining = nCount; nRemaining > 0; --nRemaining) {
         const unsigned char nFirst = pPixels[0];
@@ -160,7 +153,6 @@ void ABitmap::Reverse32(unsigned char *pPixels, int nCount) {
 // NTSC-U/C: 0x00725cd0, PAL: 0x00769970
 int g_nSkipColorSwap = 1;
 
-// NTSC-U/C: 0x00558f28, PAL: 0x0059a080
 int ABitmap::Clone(ABitmap &source) {
     mFormat = source.mFormat;
     mHasTransparentColor = source.mHasTransparentColor;
@@ -196,7 +188,6 @@ int ABitmap::Clone(ABitmap &source) {
     return 0;
 }
 
-// NTSC-U/C: 0x00559140, PAL: 0x0059a298
 void ABitmap::SwapRedBlue() {
     unsigned char *pRow = static_cast<unsigned char *>(mPixels);
     switch (mFormat) {
@@ -230,7 +221,6 @@ void ABitmap::SwapRedBlue() {
     }
 }
 
-// NTSC-U/C: 0x004e5b78, PAL: 0x005245c8
 void ABitmap::ApplyColorKey(int nFlags) {
     if (nFlags != 0) {
         if (mPalette != nullptr &&
@@ -274,7 +264,6 @@ void ABitmap::ApplyColorKey(int nFlags) {
     }
 }
 
-// NTSC-U/C: 0x004e7d48, PAL: 0x00526838
 void ABitmap::SetPaletteAlphaFromLowByte(int bWhiten) {
     if (mPalette == nullptr) {
         return;
@@ -286,7 +275,6 @@ void ABitmap::SetPaletteAlphaFromLowByte(int bWhiten) {
     }
 }
 
-// NTSC-U/C: 0x005eb290, PAL: 0x0062d3d8
 void ABitmap::SetPaletteEntries(const unsigned int *pEntries, int nFirst, int nCount) {
     if (mPalette == nullptr) {
         mPalette = new APalette;

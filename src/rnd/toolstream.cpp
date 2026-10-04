@@ -16,12 +16,10 @@ constexpr size_t kToolStreamBufferSize = 0x4000;
 
 } // namespace
 
-// NTSC-U/C: 0x00510238, PAL: 0x0054f820
 ToolStream::ToolStream()
     : mCursor(0), mBuffer(new char[kToolStreamBufferSize]), mFill(0), mArrived(0), mConsumed(0) {
 }
 
-// NTSC-U/C: 0x00510480, PAL: 0x0054fa68
 void ToolStream::Connect() {
     // Yes, the binary prints the four addresses through %u; they are 32 bits on the target.
 #pragma GCC diagnostic push
@@ -30,14 +28,12 @@ void ToolStream::Connect() {
 #pragma GCC diagnostic pop
 }
 
-// NTSC-U/C: 0x00510288, PAL: 0x0054f870
 ToolStream::~ToolStream() {
     if (mBuffer != nullptr) {
         delete[] mBuffer;
     }
 }
 
-// NTSC-U/C: 0x00510308, PAL: 0x0054f8f0
 Stream &ToolStream::Read(void *pDest, int nSize) {
     char *pCursor = static_cast<char *>(pDest);
     while (Eof()) {
@@ -59,7 +55,6 @@ Stream &ToolStream::Read(void *pDest, int nSize) {
     return *this;
 }
 
-// NTSC-U/C: 0x00510400, PAL: 0x0054f9e8
 Stream &ToolStream::Write([[maybe_unused]] const void *pSrc, [[maybe_unused]] int nSize) {
     Rnd::TheDbg.Notify("Can't write to a PS ToolStream\n");
     if (Rnd::TheDbg.mAbortProc != nullptr) {
@@ -70,29 +65,24 @@ Stream &ToolStream::Write([[maybe_unused]] const void *pSrc, [[maybe_unused]] in
     return *this;
 }
 
-// NTSC-U/C: 0x0050fde0, PAL: 0x0054f3c8
 Stream &ToolStream::Seek([[maybe_unused]] int nOffset, [[maybe_unused]] int nWhence) {
     return *this;
 }
 
-// NTSC-U/C: 0x0050fde8, PAL: 0x0054f3d0
 int ToolStream::Tell() {
     return 0;
 }
 
-// NTSC-U/C: 0x00510468, PAL: 0x0054fa50
 Stream &ToolStream::Flush() {
     mCursor = 0;
     mConsumed = mArrived;
     return *this;
 }
 
-// NTSC-U/C: 0x005102f0, PAL: 0x0054f8d8
 int ToolStream::Eof() {
     return mArrived == mConsumed;
 }
 
-// NTSC-U/C: 0x005102e8, PAL: 0x0054f8d0
 int ToolStream::Fail() {
     return 0;
 }

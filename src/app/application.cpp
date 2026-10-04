@@ -12,11 +12,9 @@ Application s_app;
 
 } // namespace
 
-// NTSC-U/C: 0x00198cb0, PAL: 0x0019e9e0
 Application::~Application() {
 }
 
-// NTSC-U/C: 0x00198d20, PAL: 0x0019ea50
 int Application::Run() {
     RegisterScriptCallTemplates();
     GetPythonScriptHost(); // Yes, the binary discards this call's result.
@@ -29,7 +27,6 @@ int Application::Run() {
     return 1;
 }
 
-// NTSC-U/C: 0x00198da0, PAL: 0x0019ead0
 int Application::ExitInstance() {
 #ifdef VIDEO_STANDARD_PAL
     Shutdown();
@@ -38,7 +35,6 @@ int Application::ExitInstance() {
     return 0;
 }
 
-// NTSC-U/C: 0x00198da8, PAL: 0x0019eaf8
 Application *Application::shared() {
     return &s_app;
 }

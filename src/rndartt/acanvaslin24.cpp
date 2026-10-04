@@ -51,18 +51,14 @@ inline unsigned int KeyFromChannels(const unsigned char *pRGB) {
 
 } // namespace
 
-// NTSC-U/C: 0x00618470, PAL: 0x00659000
 ACanvasLin24::ACanvasLin24(const ABitmap &bitmap) : ACanvas24(bitmap) {
     mColorNative = 0;
 }
 
-// NTSC-U/C: 0x006184a8, PAL: 0x00659038
-// Empty in the binary, and the slot exists only because ACanvas24 declares it pure.
 void ACanvasLin24::SetAlphaValues(unsigned int nColorKey) {
     (void)nColorKey;
 }
 
-// NTSC-U/C: 0x006184b0, PAL: 0x00659040
 void ACanvasLin24::DrawPixelU(int nX, int nY) {
     unsigned char *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
     pPixel[0] = mColorChannels[0];
@@ -70,7 +66,6 @@ void ACanvasLin24::DrawPixelU(int nX, int nY) {
     pPixel[2] = mColorChannels[2];
 }
 
-// NTSC-U/C: 0x006184e8, PAL: 0x00659078
 void ACanvasLin24::DrawPixel24U(int nX, int nY, const unsigned char *pRGB) {
     unsigned char *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
     pPixel[0] = pRGB[0];
@@ -78,7 +73,6 @@ void ACanvasLin24::DrawPixel24U(int nX, int nY, const unsigned char *pRGB) {
     pPixel[2] = pRGB[2];
 }
 
-// NTSC-U/C: 0x00618528, PAL: 0x006590b8
 void ACanvasLin24::GetPixel24U(int nX, int nY, unsigned char *pRGB) {
     const unsigned char *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
     pRGB[0] = pPixel[0];
@@ -86,10 +80,9 @@ void ACanvasLin24::GetPixel24U(int nX, int nY, unsigned char *pRGB) {
     pRGB[2] = pPixel[2];
 }
 
-// NTSC-U/C: 0x00618568, PAL: 0x006590f8
-// The three colour bytes are re-read from the object on every iteration rather than
-// hoisted, and the destination advances one byte at a time rather than three at once.
 void ACanvasLin24::DrawHorzLineU(int nY, int nLeft, int nRight) {
+    // The three colour bytes are re-read from the object on every iteration rather than hoisted,
+    // and the destination advances one byte at a time rather than three at once.
     unsigned char *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nLeft, nY);
     for (int nCount = nRight - nLeft; nCount != 0; --nCount) {
         *pPixel = mColorChannels[0];
@@ -101,9 +94,8 @@ void ACanvasLin24::DrawHorzLineU(int nY, int nLeft, int nRight) {
     }
 }
 
-// NTSC-U/C: 0x006185d0, PAL: 0x00659160
-// The row pitch is re-read from the bitmap on every iteration.
 void ACanvasLin24::DrawVertLineU(int nX, int nTop, int nBottom) {
+    // The row pitch is re-read from the bitmap on every iteration.
     unsigned char *pPixel = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nTop);
     for (int nCount = nBottom - nTop; nCount != 0; --nCount) {
         pPixel[0] = mColorChannels[0];
@@ -113,7 +105,6 @@ void ACanvasLin24::DrawVertLineU(int nX, int nTop, int nBottom) {
     }
 }
 
-// NTSC-U/C: 0x00618630, PAL: 0x006591c0
 void ACanvasLin24::DrawRectU(ARect rect) {
     const short nColumns = static_cast<short>(rect.mRight - rect.mLeft);
     const int nRowAdvance = mBitmap.mBytesPerRow - (nColumns * kBytesPerPixel);
@@ -131,7 +122,6 @@ void ACanvasLin24::DrawRectU(ARect rect) {
     }
 }
 
-// NTSC-U/C: 0x00618a28, PAL: 0x006595b8
 void ACanvasLin24::DrawTmapRow8U(int nY,
                                  int nLeft,
                                  int nRight,
@@ -154,10 +144,8 @@ void ACanvasLin24::DrawTmapRow8U(int nY,
     }
 }
 
-// NTSC-U/C: 0x006186f8, PAL: 0x00659288
-// The key is compared against the low byte of the transparent colour, and the flag is
-// re-read for every pixel.
 void ACanvasLin24::DrawBitmapLin8U(const ABitmap &source, int nX, int nY) {
+    // The transparency flag is re-read for every pixel.
     const APalette *pPalette = ResolvePalette(source, mBitmap);
     if (pPalette == nullptr) {
         return;
@@ -178,10 +166,8 @@ void ACanvasLin24::DrawBitmapLin8U(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x00618270, PAL: 0x00658e00
-// Unlike the eight and 1555 layouts there is no whole-rectangle copy tier. A keyed row
-// compares the pixel's three bytes, widened with a zero, against the whole transparent colour.
 void ACanvasLin24::DrawBitmapLin24U(const ABitmap &source, int nX, int nY) {
+    // Unlike the eight and 1555 layouts there is no whole-rectangle copy tier.
     const unsigned char *pSourceByte = static_cast<const unsigned char *>(source.mPixels);
     unsigned char *pDest = PixelAt(mBitmap.mPixels, mBitmap.mBytesPerRow, nX, nY);
     for (int nRows = source.mHeight; nRows > 0; --nRows) {
@@ -206,8 +192,6 @@ void ACanvasLin24::DrawBitmapLin24U(const ABitmap &source, int nX, int nY) {
     }
 }
 
-// NTSC-U/C: 0x00618800, PAL: 0x00659390
-// The key is compared against the low byte of the transparent colour.
 void ACanvasLin24::DrawClutBitmapRowLin8U(const ARowInfo &span, const unsigned char *pRemap) {
     if (span.mPalette == nullptr) {
         return;
@@ -224,7 +208,6 @@ void ACanvasLin24::DrawClutBitmapRowLin8U(const ARowInfo &span, const unsigned c
     }
 }
 
-// NTSC-U/C: 0x006188b0, PAL: 0x00659440
 void ACanvasLin24::DrawScaledBitmapRowLin8U(const AScaledRowInfo &span) {
     if (span.mPalette == nullptr) {
         return;
@@ -242,7 +225,6 @@ void ACanvasLin24::DrawScaledBitmapRowLin8U(const AScaledRowInfo &span) {
     }
 }
 
-// NTSC-U/C: 0x00618968, PAL: 0x006594f8
 void ACanvasLin24::DrawScaledClutBitmapRowLin8U(const AScaledRowInfo &span,
                                                 const unsigned char *pRemap) {
     if (span.mPalette == nullptr) {

@@ -21,14 +21,12 @@ constexpr int kTickPrintNegativeInfinity = -715827881;
 
 namespace Sch {
 
-// NTSC-U/C: 0x00100ab8, PAL: 0x00100ab8
 int Tick::IsInRange(int nTick) {
     // The sum wraps as an unsigned value, which folds both bounds into one comparison.
     return static_cast<unsigned int>(nTick) + static_cast<unsigned int>(-kTickMinimum) <=
            static_cast<unsigned int>(kTickMaximum) + static_cast<unsigned int>(-kTickMinimum);
 }
 
-// NTSC-U/C: 0x004ace18, PAL: 0x004eafb8
 void Tick::Print(std::ostream &stream) const {
     if (mTick > kTickPrintMaximum) {
         stream << "[inf]tk";
@@ -44,13 +42,11 @@ void Tick::Print(std::ostream &stream) const {
            << ':' << nInMeasure % kTicksPerBeat << "tk";
 }
 
-// NTSC-U/C: 0x004acf28, PAL: 0x004eb0c8
 OBStream &Tick::saveGuts(OBStream &stream) const {
     const int nTick = mTick;
     return stream.WriteLE(&nTick, sizeof(nTick));
 }
 
-// NTSC-U/C: 0x004acf68, PAL: 0x004eb108
 IBStream &Tick::restoreGuts(IBStream &stream) {
     return stream.ReadLE(&mTick, sizeof(mTick));
 }

@@ -55,7 +55,6 @@ inline void ShowConfirmation(const char *pszDialogue,
 
 } // namespace
 
-// NTSC-U/C: 0x00317d40, PAL: 0x0033dc48
 MetPauseBaseScreen::MetPauseBaseScreen(MetRenderer *pRenderer,
                                        int nPriority,
                                        const HxStr &name,
@@ -65,11 +64,9 @@ MetPauseBaseScreen::MetPauseBaseScreen(MetRenderer *pRenderer,
       mReturnPanel(kNoText) {
 }
 
-// NTSC-U/C: 0x00317e90, PAL: 0x0033ddb0
 MetPauseBaseScreen::~MetPauseBaseScreen() {
 }
 
-// NTSC-U/C: 0x00318010, PAL: 0x0033df58
 void MetPauseBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kCommandResume:
@@ -101,7 +98,6 @@ void MetPauseBaseScreen::HandleCommand(const MetScreenCommand *pCommand) {
     BeginExit();
 }
 
-// NTSC-U/C: 0x00318278, PAL: 0x0033e200
 void MetPauseBaseScreen::EnterAndShow() {
     // Yes, the binary copies the settings and never reads the copy.
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
@@ -111,7 +107,6 @@ void MetPauseBaseScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x00318418, PAL: 0x0033e3f0
 void MetPauseBaseScreen::OnExitFinished() {
     if (mExitAction == kExitQuit) {
         ShowConfirmation(kQuitDialogue,
@@ -128,7 +123,6 @@ void MetPauseBaseScreen::OnExitFinished() {
     }
 }
 
-// NTSC-U/C: 0x00318b80, PAL: 0x0033ec70
 void MetPauseBaseScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kQuitDialogue) {
         if (nChoice == kChoiceNo) {
@@ -152,32 +146,25 @@ void MetPauseBaseScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     }
 }
 
-// NTSC-U/C: 0x0031bff0, PAL: 0x003421c0
 void MetPauseBaseScreen::PlaySlideSound(int) {
 }
 
-// NTSC-U/C: 0x0031bff8, PAL: 0x003421c8
 void MetPauseBaseScreen::PlayLeaveSound(int) {
 }
 
-// NTSC-U/C: 0x0031c000, PAL: 0x003421d0
 void MetPauseBaseScreen::PlayHighSound(int) {
 }
 
-// NTSC-U/C: 0x0031c008, PAL: 0x003421d8
 void MetPauseBaseScreen::PlayCycleLeftSound(int) {
 }
 
-// NTSC-U/C: 0x0031c010, PAL: 0x003421e0
 void MetPauseBaseScreen::PlayCycleRightSound(int) {
 }
 
-// NTSC-U/C: 0x0031c018, PAL: 0x003421e8
 void MetPauseBaseScreen::PlayPauseSound(int nSelector) {
     MetScreenMultiSoundBank::PlaySlideSound(nSelector);
 }
 
-// NTSC-U/C: 0x0031c038, PAL: 0x00342208
 MetPauseBaseScreen *MetPauseBaseScreen::New(MetRenderer *pRenderer,
                                             int nPriority,
                                             const HxStr &name,

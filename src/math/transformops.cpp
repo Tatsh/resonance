@@ -18,7 +18,6 @@ constexpr float kGimbalLockLimit = 0.9999998808f;
 
 } // namespace
 
-// NTSC-U/C: 0x004f0430, PAL: 0x0052f020
 void Rnd::MakeRotMatrix(const float *pAngles, float *pMat3Rows) {
     const float flSinZ = sinf(pAngles[2]);
     const float flCosZ = cosf(pAngles[2]);
@@ -40,7 +39,6 @@ void Rnd::MakeRotMatrix(const float *pAngles, float *pMat3Rows) {
     pMat3Rows[10] = flCosY * flCosX;
 }
 
-// NTSC-U/C: 0x004f0538, PAL: 0x0052f128
 void Mat33BuildOrthonormal(const float *pAxisY, const float *pReference, float *pMat3Rows) {
     pMat3Rows[4] = pAxisY[0];
     pMat3Rows[5] = pAxisY[1];
@@ -67,7 +65,6 @@ void Mat33BuildOrthonormal(const float *pAxisY, const float *pReference, float *
     pMat3Rows[11] = pMat3Rows[3];
 }
 
-// NTSC-U/C: 0x002556c8, PAL: 0x0026adc0
 void Mat33OrthonormalizeAroundY(const float *pSrc, float *pDst) {
     Vec3Normalize(&pSrc[4], &pDst[4]);
 
@@ -85,7 +82,6 @@ void Mat33OrthonormalizeAroundY(const float *pSrc, float *pDst) {
     pDst[11] = pDst[3];
 }
 
-// NTSC-U/C: 0x004ee750, PAL: 0x0052d2f8
 void Mat34DecomposeEulerScale(const float *pMat3Rows, float *pAngles, float *pScale) {
     const float flLenZ = sqrtf((pMat3Rows[8] * pMat3Rows[8]) + (pMat3Rows[9] * pMat3Rows[9]) +
                                (pMat3Rows[10] * pMat3Rows[10]));
@@ -125,7 +121,6 @@ void Mat34DecomposeEulerScale(const float *pMat3Rows, float *pAngles, float *pSc
     pAngles[1] = atan2f(-aRot[0].z, aRot[2].z);
 }
 
-// NTSC-U/C: 0x00453ec8, PAL: 0x004913e8
 void MultiplyMat3VU0(const float *pMatA, const float *pMatB, float *pOut) {
     if (pMatB == pOut) {
         // Each product row lands in a scratch quadword before the three are copied back over the
@@ -159,7 +154,6 @@ void MultiplyMat3VU0(const float *pMatA, const float *pMatB, float *pOut) {
     }
 }
 
-// NTSC-U/C: 0x0045da58, PAL: 0x0049b100
 void Rnd::Scale(const float *pScale, const float *pMat3Rows, float *pOut) {
     pOut[0] = pMat3Rows[0] * pScale[0];
     pOut[1] = pMat3Rows[1] * pScale[0];
@@ -174,7 +168,6 @@ void Rnd::Scale(const float *pScale, const float *pMat3Rows, float *pOut) {
     pOut[10] = pMat3Rows[10] * pScale[2];
 }
 
-// NTSC-U/C: 0x00453ea0, PAL: 0x004913c0
 void TransformVec3ByMat3VU0(const float *pVec, const float *pMat3Rows, float *pOut) {
     const float flX = pVec[0];
     const float flY = pVec[1];
@@ -187,7 +180,6 @@ void TransformVec3ByMat3VU0(const float *pVec, const float *pMat3Rows, float *pO
     pOut[3] = flW;
 }
 
-// NTSC-U/C: 0x0045dae8, PAL: 0x0049b190
 void XfmConcat(const float *pA, const float *pB, float *pOut) {
     sceVu0MulAffineMatrixXyz(pOut, pB, pA);
 }

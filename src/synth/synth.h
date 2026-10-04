@@ -244,8 +244,14 @@ public:
     void FadeOut(int nDurationMs);
 
 protected:
-    // NTSC-U/C: 0x0013a360, PAL: 0x0013aca8
-    // Inline, and DispatchPriv() expands it. Sends the message's three bytes through PlayMidi().
+    /**
+     * Sends the message's three bytes through PlayMidi().
+     *
+     * DispatchPriv() expands it inline. The address is the out-of-line copy.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0013a360
+     * @ghidraAddress PAL: 0x0013aca8
+     */
     void OnStdMidi(StdMidiMsg *pMsg);
 
     /**

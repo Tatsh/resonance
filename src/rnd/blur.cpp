@@ -82,7 +82,6 @@ static Object *NewBlurObject(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x004c3398, PAL: 0x005014c0
 Blur *Blur::NewFromHook(const HxStr &name) {
     try {
         return g_pfnNewBlur(name);
@@ -91,20 +90,17 @@ Blur *Blur::NewFromHook(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x004c0e70, PAL: 0x004fef60
 Blur::Blur(const HxStr &name)
     : Object(name), mpMesh(nullptr), mpText(nullptr), mLength(0), mRate(1), mFalloff(1.0f),
       mCountdown(mRate) {
     AcquireObjectRefs();
 }
 
-// NTSC-U/C: 0x004c0be8, PAL: 0x004fecd8
 Blur::~Blur() {
     ReleaseObjectRefs();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x004c36b0, PAL: 0x005017d8
 void Blur::AcquireObjectRefs() {
     if (mpMesh != nullptr) {
         mpMesh->AddRef(this);
@@ -115,7 +111,6 @@ void Blur::AcquireObjectRefs() {
     mXfms.clear();
 }
 
-// NTSC-U/C: 0x004c3708, PAL: 0x00501830
 void Blur::ReleaseObjectRefs() {
     if (mpMesh != nullptr) {
         mpMesh->RemoveRef(this);
@@ -125,7 +120,6 @@ void Blur::ReleaseObjectRefs() {
     }
 }
 
-// NTSC-U/C: 0x004c3758, PAL: 0x00501880
 void Blur::SetMesh(Mesh *pMesh) {
     if (mpMesh != nullptr) {
         mpMesh->RemoveRef(this);
@@ -137,7 +131,6 @@ void Blur::SetMesh(Mesh *pMesh) {
     mXfms.clear();
 }
 
-// NTSC-U/C: 0x004c37b8, PAL: 0x005018e0
 void Blur::SetText(Text *pText) {
     if (mpText != nullptr) {
         mpText->RemoveRef(this);
@@ -149,54 +142,44 @@ void Blur::SetText(Text *pText) {
     mXfms.clear();
 }
 
-// NTSC-U/C: 0x004c3818, PAL: 0x00501940
 void Blur::SetLength(int nLength) {
     mLength = std::max(nLength, 0);
     mXfms.clear();
 }
 
-// NTSC-U/C: 0x004c3858, PAL: 0x00501980
 void Blur::SetRate(int nRate) {
     mRate = std::max(nRate, 1);
     mXfms.clear();
 }
 
-// NTSC-U/C: 0x004c34b0, PAL: 0x005015d8
 void Blur::SetFalloff(float flFalloff) {
     mFalloff = flFalloff;
 }
 
-// NTSC-U/C: 0x004c3490, PAL: 0x005015b8
 Mesh *Blur::GetMesh() const {
     return mpMesh;
 }
 
-// NTSC-U/C: 0x004c3498, PAL: 0x005015c0
 Text *Blur::GetText() const {
     return mpText;
 }
 
-// NTSC-U/C: 0x004c34a0, PAL: 0x005015c8
 int Blur::GetLength() const {
     return mLength;
 }
 
-// NTSC-U/C: 0x004c34a8, PAL: 0x005015d0
 int Blur::GetRate() const {
     return mRate;
 }
 
-// NTSC-U/C: 0x004c34b8, PAL: 0x005015e0
 float Blur::GetFalloff() const {
     return mFalloff;
 }
 
-// NTSC-U/C: 0x004c3480, PAL: 0x005015a8
 const HxStr &Blur::ClassName() const {
     return g_blurClassName;
 }
 
-// NTSC-U/C: 0x004bfee0, PAL: 0x004fdf80
 void Blur::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
@@ -218,7 +201,6 @@ void Blur::DumpText(Dbg &sink) {
     pLine->Print("\n");
 }
 
-// NTSC-U/C: 0x004c00b0, PAL: 0x004fe150
 void Blur::Save(Stream &stream) {
     const int nRevision = kBlurRevision;
     stream.WriteLE(&nRevision, sizeof(nRevision));
@@ -232,7 +214,6 @@ void Blur::Save(Stream &stream) {
     WriteObjectName(tail, mpText);
 }
 
-// NTSC-U/C: 0x004c0258, PAL: 0x004fe2f8
 void Blur::Load(Stream &stream) {
     stream.ReadLE(&g_nRndBlurLoadRevision, sizeof(g_nRndBlurLoadRevision));
     if (g_nRndBlurLoadRevision >= kBlurRejectedRevision) {
@@ -261,7 +242,6 @@ void Blur::Load(Stream &stream) {
     AcquireObjectRefs();
 }
 
-// NTSC-U/C: 0x004c35e8, PAL: 0x00501710
 void Blur::Copy(const Object *pSource, unsigned nFlags) {
     const Blur *pSourceBlur = dynamic_cast<const Blur *>(pSource);
 
@@ -290,7 +270,6 @@ static inline bool SameXfm(const float aflLeft[kXfmRowCount][kXfmRowFloatCount],
     return true;
 }
 
-// NTSC-U/C: 0x004c0638, PAL: 0x004fe728
 int Blur::DrawShowing() {
     Drawable *pSubject = mpText != nullptr ? static_cast<Drawable *>(mpText) : mpMesh;
     if (pSubject == nullptr) {
@@ -379,7 +358,6 @@ int Blur::DrawShowing() {
     return 1;
 }
 
-// NTSC-U/C: 0x004c04c0, PAL: 0x004fe5b0
 void Blur::Replace(Object *pFrom, Object *pTo) {
     Drawable::Replace(pFrom, pTo);
 
@@ -408,17 +386,14 @@ void Blur::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// NTSC-U/C: 0x004c3570, PAL: 0x00501698
 Blur *Blur::NewBlur(const HxStr &name) {
     return new Blur(name);
 }
 
-// NTSC-U/C: 0x004c3418, PAL: 0x00501540
 Blur *Blur::Find(const HxStr &name) {
     return dynamic_cast<Blur *>(TheManager.Find(name));
 }
 
-// NTSC-U/C: 0x004c3358, PAL: 0x00501480
 void Blur::Init() {
     g_pfnNewBlur = NewBlur;
     TheManager.RegisterClass(g_blurClassName, NewBlurObject);

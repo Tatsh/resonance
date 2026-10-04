@@ -53,6 +53,8 @@ public:
     /**
      * Advance past a number of rows without writing.
      *
+     * mWidth is read once before the first row. A width written between rows is not seen.
+     *
      * @param nRows The number of rows to consume.
      * @ghidraAddress NTSC-U/C: 0x0060dc10
      * @ghidraAddress PAL: 0x0064e880

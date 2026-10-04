@@ -82,21 +82,17 @@ static const char *const kNameRejectedDialogue = "namenogood";
 
 } // namespace
 
-// NTSC-U/C: 0x002a8418, PAL: 0x002c68e8
 MetLoadNewFreqScreen::MetLoadNewFreqScreen(MetRenderer *pRenderer, int nPriority)
     : MetLoadFreqBaseScreen(pRenderer, nPriority) {
 }
 
-// NTSC-U/C: 0x002a8458, PAL: 0x002c6938
 MetLoadNewFreqScreen::~MetLoadNewFreqScreen() {
 }
 
-// NTSC-U/C: 0x002a8390, PAL: 0x002c6860
 MetScreen *MetLoadNewFreqScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLoadNewFreqScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x002a4108, PAL: 0x002c21e8
 void MetLoadNewFreqScreen::OnNameButton() {
     MetKeyboardRequest request(HxStr(kLoadNewFreqScreen),
                                MetText(kMetStrTMetKbFreq, kKeyboardPrompt),
@@ -109,7 +105,6 @@ void MetLoadNewFreqScreen::OnNameButton() {
     MetKeyboardScreen::Open(request);
 }
 
-// NTSC-U/C: 0x002a4910, PAL: 0x002c2bc8
 void MetLoadNewFreqScreen::OnMsgScreenDismissed(const HxStr &name, [[maybe_unused]] int nChoice) {
     if (!(name == kNameRejectedDialogue)) {
 #ifdef VIDEO_STANDARD_PAL
@@ -122,7 +117,6 @@ void MetLoadNewFreqScreen::OnMsgScreenDismissed(const HxStr &name, [[maybe_unuse
     ActivateNamedPanel(HxStr(kLoadNewFreqScreen));
 }
 
-// NTSC-U/C: 0x002a3890, PAL: 0x002c1698
 void MetLoadNewFreqScreen::EnterAndShow() {
     HxStr title = MetConfigText(kMetStrTCreateChar, kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
@@ -133,7 +127,6 @@ void MetLoadNewFreqScreen::EnterAndShow() {
     MetLoadFreqBaseScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x002a84c0, PAL: 0x002c17b8
 void MetLoadNewFreqScreen::BeginExit() {
     if (mExitChoice != 0 && mButtonList->mSelected == kNameButtonIndex) {
         ExitScreenByName(HxStr(kHelpScreen));
@@ -142,7 +135,6 @@ void MetLoadNewFreqScreen::BeginExit() {
     MetScreen::BeginExit();
 }
 
-// NTSC-U/C: 0x002a3978, PAL: 0x002c18a8
 void MetLoadNewFreqScreen::OnKeyboardDismissed() {
     if (mNameEntered != 0) {
         return;
@@ -153,7 +145,6 @@ void MetLoadNewFreqScreen::OnKeyboardDismissed() {
     ActivateNamedPanel(HxStr(kLoadNewFreqScreen));
 }
 
-// NTSC-U/C: 0x002a4340, PAL: 0x002c2548
 void MetLoadNewFreqScreen::OnKeyboardTextEntered(const HxStr &text) {
     mNameEntered = 1;
     HxStr name(text);
@@ -198,7 +189,6 @@ void MetLoadNewFreqScreen::OnKeyboardTextEntered(const HxStr &text) {
     }
 }
 
-// NTSC-U/C: 0x002a85c0, PAL: 0x002c69d8
 void MetLoadNewFreqScreen::UpdateNameLabel() {
     Rnd::Text *pLabel = mButtonList->GetButton(kNameButtonIndex)->mText;
 
@@ -206,7 +196,6 @@ void MetLoadNewFreqScreen::UpdateNameLabel() {
     pLabel->SetText(label);
 }
 
-// NTSC-U/C: 0x002a3f80, PAL: 0x002c2000
 void MetLoadNewFreqScreen::PrepareFreqMakerForSelection() {
     MetFreqMakerCanvasScreen *pCanvas =
         static_cast<MetFreqMakerCanvasScreen *>(FindScreenByName(HxStr(kFreqMakerCanvasScreen)));
@@ -218,7 +207,6 @@ void MetLoadNewFreqScreen::PrepareFreqMakerForSelection() {
     MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadNewFreqScreen);
 }
 
-// NTSC-U/C: 0x002a8670, PAL: 0x002c6aa0
 void MetLoadNewFreqScreen::OnCreateButton() {
     MetFrontEndState::shared()->mReturnScreen = HxStr(kLoadNewFreqScreen);
 #ifdef VIDEO_STANDARD_PAL
@@ -228,12 +216,10 @@ void MetLoadNewFreqScreen::OnCreateButton() {
 #endif
 }
 
-// NTSC-U/C: 0x002a8590, PAL: 0x002c69a8
 void MetLoadNewFreqScreen::AcquireIdentityList() {
     mIdentityList = MetFreqMakerAssetManager::shared()->GetIdentityList();
 }
 
-// NTSC-U/C: 0x002a3b08, PAL: 0x002c1a98
 void MetLoadNewFreqScreen::BuildButtonList() {
     mButtonList->Clear();
 

@@ -13,11 +13,9 @@ constexpr int kSecondRecordVersion = 2;
 
 int g_nStatsRecordVersion;
 
-// NTSC-U/C: 0x001452f8, PAL: 0x00145e10
 SkillStats::~SkillStats() {
 }
 
-// NTSC-U/C: 0x00145338, PAL: 0x00145e50
 void SkillStats::Save(OBStream &stream) {
     char nVersion = kRecordVersion;
     stream.Write(&nVersion, sizeof(nVersion));
@@ -29,7 +27,6 @@ void SkillStats::Save(OBStream &stream) {
     stream.WriteLE(&nHighScore, sizeof(nHighScore));
 }
 
-// NTSC-U/C: 0x00142f88, PAL: 0x00143a88
 void SkillStats::Load(IBStream &stream) {
     if (g_nStatsRecordVersion == kFirstRecordVersion) {
         int nUnused;
@@ -50,7 +47,6 @@ void SkillStats::Load(IBStream &stream) {
     }
 }
 
-// NTSC-U/C: 0x00145328, PAL: 0x00145e40
 void SkillStats::Clear() {
     mHighScore = 0;
     mBeaten = 0;

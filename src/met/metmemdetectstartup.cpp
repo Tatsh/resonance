@@ -46,7 +46,6 @@ constexpr int kReleaseView = 0;
 
 } // namespace
 
-// NTSC-U/C: 0x002df058, PAL: 0x00301db8
 MetMemDetectStartup::MetMemDetectStartup(MetRenderer *pRenderer, int nPriority)
     : MetMemDetectScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
@@ -54,17 +53,14 @@ MetMemDetectStartup::MetMemDetectStartup(MetRenderer *pRenderer, int nPriority)
     mFade = new MetFade(pRenderer);
 }
 
-// NTSC-U/C: 0x002e2eb8, PAL: 0x00305e40
 MetMemDetectStartup::~MetMemDetectStartup() {
     delete mFade;
 }
 
-// NTSC-U/C: 0x002e2e30, PAL: 0x00305db8
 MetMemDetectStartup *MetMemDetectStartup::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMemDetectStartup(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x002df250, PAL: 0x00302018
 void MetMemDetectStartup::UpdateIdle(float flTime) {
     mFade->Update(flTime);
     if (mEnterTime != 0 && mEnterTime + kFadeFrames < flTime) {
@@ -88,7 +84,6 @@ void MetMemDetectStartup::UpdateIdle(float flTime) {
     MetMemDetectScreen::UpdateIdle(flTime);
 }
 
-// NTSC-U/C: 0x002df6e0, PAL: 0x00302530
 void MetMemDetectStartup::StartDetect() {
     std::vector<HxStr> buttons;
     MetMsgScreen::Show(HxStr(kDetectMessage),
@@ -100,7 +95,6 @@ void MetMemDetectStartup::StartDetect() {
     MetMemDetectScreen::StartDetect();
 }
 
-// NTSC-U/C: 0x002e2f40, PAL: 0x00305ec8
 void MetMemDetectStartup::EnterAndShow() {
     mRenderer->AddScreenView(mView);
     Application::shared()->GetGameManager()->SetDrawEnabled(1);
@@ -108,28 +102,23 @@ void MetMemDetectStartup::EnterAndShow() {
     mEnterTime = mRenderer->mAnimationFrame;
 }
 
-// NTSC-U/C: 0x002e2fb8, PAL: 0x00305f40
 void MetMemDetectStartup::BeginExit() {
     PushNamedScreen(HxStr(kSonyScreen));
 }
 
-// NTSC-U/C: 0x002e3058, PAL: 0x00306000
 void MetMemDetectStartup::OnNoCard() {
     mNoCardTime = mRenderer->mAnimationFrame;
 }
 
-// NTSC-U/C: 0x002e3068, PAL: 0x00306010
 void MetMemDetectStartup::OnDetectFinished() {
     mFade->FadeIn(kFadeFrames, mRenderer->mAnimationFrame, this, kReleaseView);
 }
 
-// NTSC-U/C: 0x002e30a0, PAL: 0x00306048
 void MetMemDetectStartup::OnFadeInDone() {
     SetShowing(0);
     BeginExit();
 }
 
-// NTSC-U/C: 0x002e30f0, PAL: 0x00306098
 void MetMemDetectStartup::OnFadeOutDone() {
     StartDetect();
 }

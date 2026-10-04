@@ -11,29 +11,22 @@ constexpr int kDeployUnused = 0;
 
 } // namespace
 
-// NTSC-U/C: 0x001cb760, PAL: 0x001d1618
 SinglePowerupCollection::SinglePowerupCollection(LocalPlayer *pOwner)
     : mType(-1), mPowerup(nullptr), mOwner(pOwner) {
 }
 
-// NTSC-U/C: 0x001cb7b0, PAL: 0x001d1668
-// The base destructor after the release is a compiler expansion.
 SinglePowerupCollection::~SinglePowerupCollection() {
-    delete mPowerup;
+    delete mPowerup; // The base destructor after the release is a compiler expansion.
 }
 
-// NTSC-U/C: 0x001cb890, PAL: 0x001d1748
-// The kind is stored before the powerup is built, and the message reports an index of
-// 0 because the store holds one.
 void SinglePowerupCollection::Add(PowerupType type) {
     delete mPowerup;
-    mType = type;
+    mType = type; // The kind is stored before the powerup is built.
     mPowerup = Powerup::CreateForType(type);
     ChoosePowerupMsg msg(0, mOwner, mType);
     Send(&msg);
 }
 
-// NTSC-U/C: 0x001cb948, PAL: 0x001d1800
 void SinglePowerupCollection::Deploy(int nTrack, int nBar) {
     if (mType == -1) {
         return;
@@ -48,20 +41,16 @@ void SinglePowerupCollection::Deploy(int nTrack, int nBar) {
     mType = -1;
 }
 
-// NTSC-U/C: 0x001cc9f0, PAL: 0x001d28a8
 void SinglePowerupCollection::SelectRelative(int) {
 }
 
-// NTSC-U/C: 0x001cc9f8, PAL: 0x001d28b0
 void SinglePowerupCollection::Select(int) {
 }
 
-// NTSC-U/C: 0x001cca00, PAL: 0x001d28b8
 int SinglePowerupCollection::HasSelection() const {
     return mType != -1;
 }
 
-// NTSC-U/C: 0x001cba20, PAL: 0x001d18d8
 void SinglePowerupCollection::SendState() const {
     if (HasSelection() == 0) {
         return;

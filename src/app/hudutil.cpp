@@ -13,7 +13,6 @@ constexpr float kPurpleRed = 0.65f;
 // NTSC-U/C: 0x006dfde8, PAL: 0x00723618
 int g_nHudNameCounter;
 
-// NTSC-U/C: 0x00415ed8, PAL: 0x0044fa40
 HxStr HudPowerupName(int nKind) {
     switch (nKind) {
     case kHudItemNeutralizer:
@@ -47,7 +46,6 @@ HxStr HudPowerupName(int nKind) {
     }
 }
 
-// NTSC-U/C: 0x00416068, PAL: 0x0044fba0
 Color HudColorFromName(HxStr name) {
     if (name == "green") {
         return Color{0.0f, 1.0f, 0.0f, 1.0f};
@@ -67,7 +65,6 @@ Color HudColorFromName(HxStr name) {
     return Color{0.0f, 1.0f, 1.0f, 1.0f};
 }
 
-// NTSC-U/C: 0x004298e8, PAL: 0x00464f28
 HxStr NextHudName() {
     return HxStr(Rnd::MakeString("<hud%04d>", ++g_nHudNameCounter));
 }

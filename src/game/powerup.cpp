@@ -10,11 +10,9 @@
 #include "game/multiplierpowerup.h"
 #include "game/neutralizepowerup.h"
 
-// NTSC-U/C: 0x001ca4c8, PAL: 0x001d0380
 Powerup::~Powerup() {
 }
 
-// NTSC-U/C: 0x001c65f0, PAL: 0x001cc438
 Powerup *Powerup::CreateForType(int nType) {
     switch (nType) {
     case kHudItemNeutralizer:

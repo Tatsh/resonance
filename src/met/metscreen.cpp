@@ -207,7 +207,6 @@ static const char *const kEndGameGizmoScreenKey = "MetEndGameGizmoScreen";
 
 } // namespace
 
-// NTSC-U/C: 0x0038a450, PAL: 0x003bb9a8
 MetScreen::MetScreen(MetRenderer *pRenderer,
                      int nPriority,
                      const HxStr &name,
@@ -228,26 +227,22 @@ MetScreen::MetScreen(MetRenderer *pRenderer,
     }
 }
 
-// NTSC-U/C: 0x0038a848, PAL: 0x003bbe10
 MetScreen::~MetScreen() {
     mRenderer->RemoveScreen(this);
     OnDestroying();
     mRenderer->RemoveSink(this);
 }
 
-// NTSC-U/C: 0x00381e10, PAL: 0x003b2490
 std::map<HxStr, MetContainerLoad *> &MetScreen::ContainerLoaderMap() {
     static std::map<HxStr, MetContainerLoad *> theMap;
     return theMap;
 }
 
-// NTSC-U/C: 0x003821e0, PAL: 0x003b2860
 std::map<HxStr, MetScreenEntry> &MetScreen::ScreenRegistry() {
     static std::map<HxStr, MetScreenEntry> theMap;
     return theMap;
 }
 
-// NTSC-U/C: 0x0038ff90, PAL: 0x003c1860
 MetScreen *MetScreen::FindScreenByName(const HxStr &name) {
     MetScreen *pScreen = nullptr;
     std::map<HxStr, MetScreenEntry>::iterator it = ScreenRegistry().find(name);
@@ -257,7 +252,6 @@ MetScreen *MetScreen::FindScreenByName(const HxStr &name) {
     return pScreen;
 }
 
-// NTSC-U/C: 0x00390000, PAL: 0x003c18d0
 MetScreen *MetScreen::FindEndScreen([[maybe_unused]] MetRenderer *pRenderer, const HxStr &name) {
     MetScreen *pScreen = nullptr;
     std::map<HxStr, MetScreenEntry>::iterator it = ScreenRegistry().find(name);
@@ -271,7 +265,6 @@ MetScreen *MetScreen::FindEndScreen([[maybe_unused]] MetRenderer *pRenderer, con
     return pScreen;
 }
 
-// NTSC-U/C: 0x0038aa00, PAL: 0x003bc008
 void MetScreen::BeginContainerLoad(const HxStr &directory, [[maybe_unused]] const HxStr &file) {
     HxStr dir = directory + kPathSeparator;
     // A screen whose container another screen already loads does not touch the existing load.
@@ -293,7 +286,6 @@ void MetScreen::BeginContainerLoad(const HxStr &directory, [[maybe_unused]] cons
     }
 }
 
-// NTSC-U/C: 0x0038b338, PAL: 0x003bca70
 int MetScreen::PollContainerLoad() {
     MetContainerLoad *pLoad = ContainerLoaderMap()[mContainerFile];
     if (pLoad->mLoader == nullptr) {
@@ -309,7 +301,6 @@ int MetScreen::PollContainerLoad() {
     return 1;
 }
 
-// NTSC-U/C: 0x0038bd60, PAL: 0x003bd538
 void MetScreen::ResolveAnimationViews() {
     {
         HxStr name(
@@ -328,7 +319,6 @@ void MetScreen::ResolveAnimationViews() {
     mAnimEndFrame = mEnterAnim != nullptr ? mEnterAnim->FilteredFrameEnd() : 0.0f;
 }
 
-// NTSC-U/C: 0x0038b1b0, PAL: 0x003bc8a8
 void MetScreen::ResolveContainerViews() {
     ResolveAnimationViews();
     HxStr name = mContainerName + kViewSuffix;
@@ -344,7 +334,6 @@ void MetScreen::ResolveContainerViews() {
     mViewsUnresolved = 0;
 }
 
-// NTSC-U/C: 0x0038b490, PAL: 0x003bcbe8
 void MetScreen::SetShowing(int nShowing) {
     // Yes, the binary dereferences the view without a null check.
     static_cast<Rnd::Drawable *>(mView)->SetShowing(nShowing);
@@ -357,7 +346,6 @@ void MetScreen::SetShowing(int nShowing) {
     }
 }
 
-// NTSC-U/C: 0x00390200, PAL: 0x003c1ad0
 void MetScreen::PushNamedScreen(const HxStr &name) {
     MetScreen *pScreen = FindScreenByName(name);
     mRenderer->AddScreen(pScreen);
@@ -369,13 +357,11 @@ void MetScreen::PushNamedScreen(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x003900a8, PAL: 0x003c1978
 void MetScreen::EnterAndShow() {
     SetShowing(1);
     StartEnterAnimation(mRenderer->mAnimationFrame);
 }
 
-// NTSC-U/C: 0x0038b828, PAL: 0x003bcfa0
 void MetScreen::ActivateNamedPanel(const HxStr &name) {
     if (name == "") {
         mRenderer->mPanelActive = 0;
@@ -391,7 +377,6 @@ void MetScreen::ActivateNamedPanel(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x003902d0, PAL: 0x003c1ba0
 void MetScreen::ExitScreenByName(const HxStr &name) {
     char szLine[kExitLogBufferSize];
     sprintf(szLine, "Exiting screen: %s\n", name.mStr != nullptr ? name.mStr : g_szEmptyString);
@@ -400,12 +385,10 @@ void MetScreen::ExitScreenByName(const HxStr &name) {
     FindScreenByName(name)->BeginExit();
 }
 
-// NTSC-U/C: 0x00390100, PAL: 0x003c19d0
 void MetScreen::BeginExit() {
     StartExitAnimation(mRenderer->mAnimationFrame);
 }
 
-// NTSC-U/C: 0x003905c0, PAL: 0x003c1e90
 void MetScreen::StartEnterAnimation(float flTime) {
     mEnterStartTime = flTime;
     mExitStartTime = 0.0f;
@@ -414,7 +397,6 @@ void MetScreen::StartEnterAnimation(float flTime) {
     }
 }
 
-// NTSC-U/C: 0x003905f0, PAL: 0x003c1ec0
 void MetScreen::UpdateEnterAnimation(float flTime) {
     if (mEnterDone != 0) {
         mEnterDone = 0;
@@ -433,48 +415,37 @@ void MetScreen::UpdateEnterAnimation(float flTime) {
     }
 }
 
-// NTSC-U/C: 0x0038fdf8, PAL: 0x003c16c8
 void MetScreen::OnPanelActivated() {
 }
 
-// NTSC-U/C: 0x00390130, PAL: 0x003c1a00
 void MetScreen::OnUnusedHook() {
 }
 
-// NTSC-U/C: 0x00390138, PAL: 0x003c1a08
 void MetScreen::OnKeyboardDismissed() {
 }
 
-// NTSC-U/C: 0x0038fe00, PAL: 0x003c16d0
 void MetScreen::OnDrawPass() {
 }
 
-// NTSC-U/C: 0x003900a0, PAL: 0x003c1970
 void MetScreen::OnDestroying() {
 }
 
-// NTSC-U/C: 0x0038fe20, PAL: 0x003c16f0
 void MetScreen::OnMsgScreenDismissed([[maybe_unused]] const HxStr &name,
                                      [[maybe_unused]] int nChoice) {
 }
 
-// NTSC-U/C: 0x0038fe28, PAL: 0x003c16f8
 void MetScreen::OnMsgScreenShown([[maybe_unused]] const HxStr &name) {
 }
 
-// NTSC-U/C: 0x0038fe30, PAL: 0x003c1700
 void MetScreen::HandleCommand([[maybe_unused]] const MetScreenCommand *pCommand) {
 }
 
-// NTSC-U/C: 0x0038fe38, PAL: 0x003c1708
 void MetScreen::UpdateIdle([[maybe_unused]] float flTime) {
 }
 
-// NTSC-U/C: 0x0038fe40, PAL: 0x003c1710
 void MetScreen::UpdateIdleAnimation([[maybe_unused]] float flTime) {
 }
 
-// NTSC-U/C: 0x00390498, PAL: 0x003c1d68
 void MetScreen::StartRepeatingSound(float flStartTime,
                                     float flInterval,
                                     Rnd::Button *pButton,
@@ -490,7 +461,6 @@ void MetScreen::StartRepeatingSound(float flStartTime,
     pButton->SetState(kAlternateState);
 }
 
-// NTSC-U/C: 0x003904e0, PAL: 0x003c1db0
 void MetScreen::UpdateRepeatingSound(float flTime) {
     if (mRepeatNextTime == 0.0f) {
         return;
@@ -511,53 +481,42 @@ void MetScreen::UpdateRepeatingSound(float flTime) {
     mRepeatStep = 0;
 }
 
-// NTSC-U/C: 0x0038fe48, PAL: 0x003c1718
 void MetScreen::OnRepeatingSoundFinished([[maybe_unused]] Rnd::Button *pButton) {
 }
 
-// NTSC-U/C: 0x0038fe50, PAL: 0x003c1720
 void MetScreen::OnEnterFinished() {
 }
 
-// NTSC-U/C: 0x0038fe58, PAL: 0x003c1728
 void MetScreen::OnExitFinished() {
 }
 
-// NTSC-U/C: 0x003907a8, PAL: 0x003c2078
 void MetScreen::DispatchPriv([[maybe_unused]] Message *pMsg) {
 }
 
-// NTSC-U/C: 0x00390140, PAL: 0x003c1a10
 void MetScreen::PlaySlideSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kSlideSound);
 }
 
-// NTSC-U/C: 0x00390160, PAL: 0x003c1a30
 void MetScreen::PlayLeaveSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kLeaveSound);
 }
 
-// NTSC-U/C: 0x003901c0, PAL: 0x003c1a90
 void MetScreen::PlayHighSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kHighSound);
 }
 
-// NTSC-U/C: 0x00390180, PAL: 0x003c1a50
 void MetScreen::PlayCycleLeftSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kCycleLeftSound);
 }
 
-// NTSC-U/C: 0x003901a0, PAL: 0x003c1a70
 void MetScreen::PlayCycleRightSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kCycleRightSound);
 }
 
-// NTSC-U/C: 0x003901e0, PAL: 0x003c1ab0
 void MetScreen::PlayErrorSound([[maybe_unused]] int nSelector) {
     PlaySoundByName(kErrorSound);
 }
 
-// NTSC-U/C: 0x0038b730, PAL: 0x003bcea8
 void MetScreen::DeliverCommand(const MetScreenCommand *pCommand) {
     if (mAcceptsCommands == 0) {
         return;
@@ -587,19 +546,16 @@ void MetScreen::DeliverCommand(const MetScreenCommand *pCommand) {
     HandleCommand(pCommand);
 }
 
-// NTSC-U/C: 0x00390788, PAL: 0x003c2058
 void MetScreen::Draw() {
     mView->Drawable::Draw();
 }
 
-// NTSC-U/C: 0x003906a0, PAL: 0x003c1f70
 void MetScreen::StartExitAnimation(float flTime) {
     mExitStartTime = flTime;
     mAcceptsCommands = 0;
     mEnterStartTime = 0.0f;
 }
 
-// NTSC-U/C: 0x00390380, PAL: 0x003c1c50
 void MetScreen::UpdateAnimationFrame(float flTime) {
     if (mEnterPending != 0) {
         return;
@@ -625,7 +581,6 @@ void MetScreen::UpdateAnimationFrame(float flTime) {
     }
 }
 
-// NTSC-U/C: 0x0038b918, PAL: 0x003bd090
 void MetScreen::UpdateFrame(float flTime) {
     if (mEnterPending != 0) {
         if (ContainerLoaderMap()[mContainerFile]->mFinished != 0) {
@@ -660,7 +615,6 @@ void MetScreen::UpdateFrame(float flTime) {
     UpdateExitAnimation(flTime);
 }
 
-// NTSC-U/C: 0x003906b0, PAL: 0x003c1f80
 void MetScreen::UpdateExitAnimation(float flTime) {
     if (mExitDone != 0) {
         mExitStartTime = 0.0f;
@@ -686,7 +640,6 @@ void MetScreen::UpdateExitAnimation(float flTime) {
     }
 }
 
-// NTSC-U/C: 0x003822c8, PAL: 0x003b2948
 void MetScreen::DestroyCategory2Screens() {
     std::map<HxStr, MetScreenEntry>::iterator screen = ScreenRegistry().begin();
     while (screen != ScreenRegistry().end()) {
@@ -700,7 +653,6 @@ void MetScreen::DestroyCategory2Screens() {
     }
 }
 
-// NTSC-U/C: 0x00382978, PAL: 0x003b3010
 void MetScreen::DestroyCategory1Screens() {
     std::map<HxStr, MetScreenEntry>::iterator screen = ScreenRegistry().begin();
     while (screen != ScreenRegistry().end()) {
@@ -714,7 +666,6 @@ void MetScreen::DestroyCategory1Screens() {
     }
 }
 
-// NTSC-U/C: 0x00383020, PAL: 0x003b36d8
 void MetScreen::DestroyNonDefaultScreens() {
     std::map<HxStr, MetScreenEntry>::iterator screen = ScreenRegistry().begin();
     while (screen != ScreenRegistry().end()) {
@@ -729,7 +680,6 @@ void MetScreen::DestroyNonDefaultScreens() {
     ZoneResetZone(FindZoneByName(kLocAndNetZone));
 }
 
-// NTSC-U/C: 0x00383700, PAL: 0x003b3dc8
 void MetScreen::DestroyAllScreens() {
     std::map<HxStr, MetScreenEntry>::iterator screen = ScreenRegistry().begin();
     while (screen != ScreenRegistry().end()) {
@@ -748,7 +698,6 @@ void MetScreen::DestroyAllScreens() {
     }
 }
 
-// NTSC-U/C: 0x00381ef8, PAL: 0x003b2578
 void MetScreen::PollContainerLoads() {
     for (std::map<HxStr, MetContainerLoad *>::iterator it = ContainerLoaderMap().begin();
          it != ContainerLoaderMap().end();
@@ -770,7 +719,6 @@ void MetScreen::PollContainerLoads() {
     }
 }
 
-// NTSC-U/C: 0x00384300, PAL: 0x003b49f0
 void MetScreen::CreateStartupScreens(MetRenderer *pRenderer) {
     int nZone = FindZoneByName(kGlobalZone);
     ScreenRegistry()[HxStr(kSonyScreenKey)] = MetScreenEntry(MetSonyScreen::New(pRenderer, nZone));
@@ -780,7 +728,6 @@ void MetScreen::CreateStartupScreens(MetRenderer *pRenderer) {
     ScreenRegistry()[HxStr(kLogoScreenKey)] = MetScreenEntry(MetLogoScreen::New(pRenderer, nZone));
 }
 
-// NTSC-U/C: 0x003848e0, PAL: 0x003b50b0
 void MetScreen::CreateMainMenuScreens(MetRenderer *pRenderer) {
     int nZone = FindZoneByName(kGlobalZone);
     ScreenRegistry()[HxStr(kMainScreenKey)] = MetScreenEntry(MetMainScreen::New(pRenderer, nZone));
@@ -795,7 +742,6 @@ void MetScreen::CreateMainMenuScreens(MetRenderer *pRenderer) {
         MetScreenEntry(MetScreenTitleScreen::New(pRenderer, nZone));
 }
 
-// NTSC-U/C: 0x00385180, PAL: 0x003b5a98
 void MetScreen::CreateFrontEndScreens(MetRenderer *pRenderer) {
     if (ScreenRegistry()[HxStr(kLoadGameScreenKey)].mScreen != nullptr) {
         return;

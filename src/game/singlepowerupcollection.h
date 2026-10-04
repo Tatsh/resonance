@@ -49,7 +49,8 @@ public:
      * Replace the stored powerup with one of the requested kind.
      *
      * The powerup already stored is deleted first, whatever its kind, so a store of one never
-     * queues. A ChoosePowerupMsg follows with the new kind.
+     * queues. A ChoosePowerupMsg follows with the new kind and an index of 0, the one slot of the
+     * store.
      *
      * @param type The kind.
      * @ghidraAddress NTSC-U/C: 0x001cb890

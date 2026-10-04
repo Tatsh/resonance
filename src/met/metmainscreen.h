@@ -149,17 +149,26 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // NTSC-U/C: 0x002c7030, PAL: 0x002e7b08
-    // Promote a pending transition, bringing up the top logo, the small left gizmo, and
-    // the help screen and activating this screen, then select the title preset and show the
-    // screen. The European release looks the preset up in the current language. The title is
-    // inferred.
+    /**
+     * Promote a pending transition, bringing up the top logo, the small left gizmo, and the help
+     * screen and activating this screen, then select the title preset and show the screen.
+     *
+     * The European release looks the preset up in the current language. The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002c7030
+     * @ghidraAddress PAL: 0x002e7b08
+     */
     void EnterMenu();
 
-    // NTSC-U/C: 0x002c7520, PAL: 0x002e8180
-    // Open the screen the chosen button leads to. Solo goes to MetLoadPreFabScreen
-    // while no save is possible, and otherwise to MetLoadFreqScreen or, with no saved identity,
-    // MetLoadNewFreqScreen. The title is inferred.
+    /**
+     * Open the screen the chosen button leads to.
+     *
+     * Solo goes to MetLoadPreFabScreen while no save is possible, and otherwise to
+     * MetLoadFreqScreen or, with no saved identity, MetLoadNewFreqScreen. The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002c7520
+     * @ghidraAddress PAL: 0x002e8180
+     */
     void OpenSelectedButton();
 
     MetButtonList *mButtonList; // +0x8c

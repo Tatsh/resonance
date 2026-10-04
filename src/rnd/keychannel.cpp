@@ -69,7 +69,6 @@ Dbg &DumpVector3Key(Dbg &sink, const Vector3Key &key) {
 
 } // namespace
 
-// NTSC-U/C: 0x004d8de8, PAL: 0x00517300
 Dbg &DumpColorKeys(Dbg &sink, const std::list<ColorKey> &keys) {
     sink.Print("(size:");
     sink.Format("%u", keys.size());
@@ -86,7 +85,6 @@ Dbg &DumpColorKeys(Dbg &sink, const std::list<ColorKey> &keys) {
     return sink;
 }
 
-// NTSC-U/C: 0x004d8f08, PAL: 0x00517420
 Dbg &DumpFloatKeys(Dbg &sink, const std::list<FloatKey> &keys) {
     sink.Print("(size:");
     sink.Format("%u", keys.size());
@@ -107,7 +105,6 @@ Dbg &DumpFloatKeys(Dbg &sink, const std::list<FloatKey> &keys) {
     return sink;
 }
 
-// NTSC-U/C: 0x004dd9b0, PAL: 0x0051bf68
 Stream &ReadColorKeys(Stream &stream, std::list<ColorKey> &keys) {
     int nCount = 0;
     stream.ReadLE(&nCount, sizeof(nCount));
@@ -118,7 +115,6 @@ Stream &ReadColorKeys(Stream &stream, std::list<ColorKey> &keys) {
     return stream;
 }
 
-// NTSC-U/C: 0x004d9180, PAL: 0x00517698
 Stream &WriteColorKeys(Stream &stream, const std::list<ColorKey> &keys) {
     const int nCount = keys.size();
     stream.WriteLE(&nCount, sizeof(nCount));
@@ -128,7 +124,6 @@ Stream &WriteColorKeys(Stream &stream, const std::list<ColorKey> &keys) {
     return stream;
 }
 
-// NTSC-U/C: 0x004d9238, PAL: 0x00517750
 Stream &WriteFloatKeys(Stream &stream, const std::list<FloatKey> &keys) {
     const int nCount = keys.size();
     stream.WriteLE(&nCount, sizeof(nCount));
@@ -139,7 +134,6 @@ Stream &WriteFloatKeys(Stream &stream, const std::list<FloatKey> &keys) {
     return stream;
 }
 
-// NTSC-U/C: 0x004d98d8, PAL: 0x00517df0
 Stream &ReadFloatKeys(Stream &stream, std::list<FloatKey> &keys) {
     int nCount = 0;
     stream.ReadLE(&nCount, sizeof(nCount));
@@ -151,7 +145,6 @@ Stream &ReadFloatKeys(Stream &stream, std::list<FloatKey> &keys) {
     return stream;
 }
 
-// NTSC-U/C: 0x004da9b0, PAL: 0x00518ec8
 Dbg &DumpVector3Keys(Dbg &sink, const std::list<Vector3Key> &keys) {
     sink.Print("(size:");
     sink.Format("%u", keys.size());
@@ -168,7 +161,6 @@ Dbg &DumpVector3Keys(Dbg &sink, const std::list<Vector3Key> &keys) {
     return sink;
 }
 
-// NTSC-U/C: 0x004db3d0, PAL: 0x00519918
 Stream &ReadVector3Keys(Stream &stream, std::list<Vector3Key> &keys) {
     int nCount = 0;
     stream.ReadLE(&nCount, sizeof(nCount));
@@ -182,7 +174,6 @@ Stream &ReadVector3Keys(Stream &stream, std::list<Vector3Key> &keys) {
     return stream;
 }
 
-// NTSC-U/C: 0x004dac80, PAL: 0x00519198
 Stream &operator<<(Stream &stream, const std::list<Vector3Key> &keys) {
     const int nCount = keys.size();
     stream.WriteLE(&nCount, sizeof(nCount));

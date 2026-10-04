@@ -91,24 +91,20 @@ inline void AddButton(MetButtonList *pList,
 
 } // namespace
 
-// NTSC-U/C: 0x002c60d0, PAL: 0x002e6898
 MetMainScreen::MetMainScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr) {
     mButtonList = new MetButtonList;
 }
 
-// NTSC-U/C: 0x002cb570, PAL: 0x002ec458
 MetMainScreen::~MetMainScreen() {
     delete mButtonList;
 }
 
-// NTSC-U/C: 0x002cb4e8, PAL: 0x002ec3d0
 MetMainScreen *MetMainScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMainScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x002c6dc0, PAL: 0x002e7850
 void MetMainScreen::EnterAndShow() {
     mRenderer->mMaxPadIndex = kMenuHighestPad;
     SetShowing(0);
@@ -128,7 +124,6 @@ void MetMainScreen::EnterAndShow() {
     mActivatePending = 0;
 }
 
-// NTSC-U/C: 0x002c7030, PAL: 0x002e7b08
 void MetMainScreen::EnterMenu() {
     if (MetFrontEndState::shared()->mPendingTransition != 0) {
         int nTransition = MetFrontEndState::shared()->mPendingTransition;
@@ -144,7 +139,6 @@ void MetMainScreen::EnterMenu() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x002c6820, PAL: 0x002e7180
 void MetMainScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -181,15 +175,12 @@ void MetMainScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x002cb4d8, PAL: 0x002ec3c0
 void MetMainScreen::PlayCycleLeftSound(int) {
 }
 
-// NTSC-U/C: 0x002cb4e0, PAL: 0x002ec3c8
 void MetMainScreen::PlayCycleRightSound(int) {
 }
 
-// NTSC-U/C: 0x002c6c20, PAL: 0x002e7650
 void MetMainScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kTitleScreen));
@@ -198,7 +189,6 @@ void MetMainScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// NTSC-U/C: 0x002c72a0, PAL: 0x002e7e10
 void MetMainScreen::OnEnterFinished() {
     if (MetFrontEndState::shared()->mReturnScreen == kLogoScreen ||
         mButtonList->mSelected == kNoButton) {
@@ -216,7 +206,6 @@ void MetMainScreen::OnEnterFinished() {
 #endif
 }
 
-// NTSC-U/C: 0x002c73e0, PAL: 0x002e8000
 void MetMainScreen::OnExitFinished() {
     if (mExitChoice != kExitBack) {
         OpenSelectedButton();
@@ -227,7 +216,6 @@ void MetMainScreen::OnExitFinished() {
     ActivateNamedPanel(HxStr(kLogoScreen));
 }
 
-// NTSC-U/C: 0x002c7520, PAL: 0x002e8180
 void MetMainScreen::OpenSelectedButton() {
     switch (mButtonList->mSelected) {
     case kTutorialButtonIndex:
@@ -271,7 +259,6 @@ void MetMainScreen::OpenSelectedButton() {
     }
 }
 
-// NTSC-U/C: 0x002c62a0, PAL: 0x002e6ad0
 void MetMainScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     AddButton(mButtonList, kTutorialButton, kMetStrTut, kTutorialLabel);

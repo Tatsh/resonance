@@ -89,7 +89,12 @@ public:
     void supportBufferType();
 
 private:
-    // The deallocator a type has until dealloc() replaces it.
+    /**
+     * The deallocator a type has until dealloc() replaces it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x005abf60
+     * @ghidraAddress PAL: 0x005ee488
+     */
     static void standard_dealloc(PyObject *pyob);
 
     PyTypeObject *mTable;

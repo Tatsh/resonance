@@ -13,6 +13,8 @@ extern "C" {
  * Exits the program when a bind request cannot be sent.
  *
  * @return 1, or zero on a version mismatch.
+ * @ghidraAddress NTSC-U/C: 0x0053a5c0
+ * @ghidraAddress PAL: 0x0057a008
  */
 int sceMtapInit(void);
 
@@ -21,6 +23,8 @@ int sceMtapInit(void);
  *
  * @param nPort Port.
  * @return mtapman's result, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0053a840
+ * @ghidraAddress PAL: 0x0057a288
  */
 int sceMtapPortOpen(int nPort);
 
@@ -29,6 +33,8 @@ int sceMtapPortOpen(int nPort);
  *
  * @param nPort Port.
  * @return mtapman's result, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0053a8b0
+ * @ghidraAddress PAL: 0x0057a2f8
  */
 int sceMtapPortClose(int nPort);
 
@@ -37,6 +43,8 @@ int sceMtapPortClose(int nPort);
  *
  * @param nPort Port.
  * @return 1 when a multitap is connected, or zero when none is or the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0053a920
+ * @ghidraAddress PAL: 0x0057a368
  */
 int sceMtapGetConnection(int nPort);
 
@@ -46,6 +54,8 @@ int sceMtapGetConnection(int nPort);
  * @param nFirstPriority Priority of the first thread.
  * @param nSecondPriority Priority of the second thread.
  * @return mtapman's result, or zero when the call failed.
+ * @ghidraAddress NTSC-U/C: 0x0053a990
+ * @ghidraAddress PAL: 0x0057a3d8
  */
 int sceMtapChangeThreadPriority(int nFirstPriority, int nSecondPriority);
 
@@ -54,6 +64,8 @@ int sceMtapChangeThreadPriority(int nFirstPriority, int nSecondPriority);
  *
  * @return The major version in bits 8 to 15 and the minor in bits 0 to 7, or zero when the call
  * failed.
+ * @ghidraAddress NTSC-U/C: 0x0053aa00
+ * @ghidraAddress PAL: 0x0057a448
  */
 int sceMtapGetModVersion(void);
 

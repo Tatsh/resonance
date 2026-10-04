@@ -46,7 +46,6 @@ constexpr int kCommandResume = 10;
 
 } // namespace
 
-// NTSC-U/C: 0x0031fd98, PAL: 0x00346768
 MetPauseSoloGameScreen::MetPauseSoloGameScreen(MetRenderer *pRenderer, int nPriority)
     : MetPauseBaseScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
@@ -54,7 +53,6 @@ MetPauseSoloGameScreen::MetPauseSoloGameScreen(MetRenderer *pRenderer, int nPrio
     mReturnPanel = kPanelName;
 }
 
-// NTSC-U/C: 0x0031ff38, PAL: 0x00346970
 void MetPauseSoloGameScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     for (int i = 1; i <= kOptionCount; ++i) {
@@ -64,7 +62,6 @@ void MetPauseSoloGameScreen::ResolveContainerViews() {
     }
 }
 
-// NTSC-U/C: 0x00320088, PAL: 0x00346ae8
 void MetPauseSoloGameScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandSelect:
@@ -90,7 +87,6 @@ void MetPauseSoloGameScreen::HandleCommand(const MetScreenCommand *pCommand) {
     BeginExit();
 }
 
-// NTSC-U/C: 0x00320230, PAL: 0x00346cc0
 void MetPauseSoloGameScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kPausedText)));
@@ -122,7 +118,6 @@ void MetPauseSoloGameScreen::EnterAndShow() {
     mLeavingForConfig = 0;
 }
 
-// NTSC-U/C: 0x003205a8, PAL: 0x00347628
 void MetPauseSoloGameScreen::OnExitFinished() {
     if (mLeavingForConfig == 0) {
         MetPauseBaseScreen::OnExitFinished();
@@ -144,7 +139,6 @@ void MetPauseSoloGameScreen::OnExitFinished() {
     ActivateNamedPanel(HxStr(pszConfigScreen));
 }
 
-// NTSC-U/C: 0x00323a60, PAL: 0x0034afd0
 MetPauseSoloGameScreen *MetPauseSoloGameScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetPauseSoloGameScreen(pRenderer, nPriority);
 }

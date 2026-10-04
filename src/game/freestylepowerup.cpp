@@ -15,7 +15,6 @@ constexpr int kNoBar = 0;
 
 } // namespace
 
-// NTSC-U/C: 0x001c9a28, PAL: 0x001cf8c8
 int FreestylePowerup::Deploy(int, int nBar, Player *pPlayer, int) {
     if (pPlayer->GetPlace() != 0) {
         return 0;
@@ -45,7 +44,6 @@ int FreestylePowerup::Deploy(int, int nBar, Player *pPlayer, int) {
     return msg.mResult;
 }
 
-// NTSC-U/C: 0x001c9a20, PAL: 0x001cf8c0
 int FreestylePowerup::Type() {
     return kHudItemFreestyler;
 }

@@ -31,7 +31,6 @@ constexpr int kRowAxis = 2;
 
 } // namespace
 
-// NTSC-U/C: 0x003fcb00, PAL: 0x00435518
 ScrollingList::ScrollingList(ListDataProvider *pProvider,
                              int nRowPitch,
                              int nRowCount,
@@ -78,7 +77,6 @@ ScrollingList::ScrollingList(ListDataProvider *pProvider,
     ZoneSetCurrent(nZone);
 }
 
-// NTSC-U/C: 0x003fd380, PAL: 0x00435d98
 ScrollingList::~ScrollingList() {
     HxStr templateName(mTemplate->mName);
     mCursorRow = 0;
@@ -104,7 +102,6 @@ ScrollingList::~ScrollingList() {
     }
 }
 
-// NTSC-U/C: 0x003fdec0, PAL: 0x00436948
 Rnd::View *ScrollingList::makeRow(int nIndex) {
     HxStr prefix(Rnd::MakeString(kRowNameFormat, nIndex));
     Rnd::Object *pObject =
@@ -112,7 +109,6 @@ Rnd::View *ScrollingList::makeRow(int nIndex) {
     return pObject != nullptr ? dynamic_cast<Rnd::View *>(pObject) : nullptr;
 }
 
-// NTSC-U/C: 0x003fd858, PAL: 0x004362e0
 void ScrollingList::buildRowCells(Rnd::View *pRow) {
     std::vector<Cell> cells;
     std::list<Rnd::Drawable *> &draws = pRow->GetDraws();
@@ -128,7 +124,6 @@ void ScrollingList::buildRowCells(Rnd::View *pRow) {
     mRowCells.push_back(cells);
 }
 
-// NTSC-U/C: 0x003fdd18, PAL: 0x004367a0
 void ScrollingList::refresh() {
     int nItem = mSelected - mCursorRow > -1 ? mSelected - mCursorRow : 0;
     int nRow = 0;
@@ -154,7 +149,6 @@ void ScrollingList::refresh() {
     updateArrows();
 }
 
-// NTSC-U/C: 0x00400ec8, PAL: 0x00439998
 void ScrollingList::scrollUp() {
     if (mItemCount == 0) {
         if (mHighlight != nullptr) {
@@ -175,7 +169,6 @@ void ScrollingList::scrollUp() {
     refresh();
 }
 
-// NTSC-U/C: 0x00400f78, PAL: 0x00439a48
 void ScrollingList::scrollDown() {
     // Unlike scrollUp(), the highlight is neither tested for null nor masked with mShowing.
     if (mItemCount == 0) {
@@ -193,7 +186,6 @@ void ScrollingList::scrollDown() {
     refresh();
 }
 
-// NTSC-U/C: 0x00401030, PAL: 0x00439b00
 void ScrollingList::updateHighlight() {
     if (mHighlight == nullptr) {
         return;
@@ -205,7 +197,6 @@ void ScrollingList::updateHighlight() {
     mHighlight->mDirty = 1;
 }
 
-// NTSC-U/C: 0x00401088, PAL: 0x00439b58
 void ScrollingList::setItemCount(int nItemCount) {
     mItemCount = nItemCount;
     if (nItemCount <= 0) {
@@ -223,12 +214,10 @@ void ScrollingList::setItemCount(int nItemCount) {
     updateHighlight();
 }
 
-// NTSC-U/C: 0x00401160, PAL: 0x00439c30
 int ScrollingList::getSelected() {
     return mSelected;
 }
 
-// NTSC-U/C: 0x00401168, PAL: 0x00439c38
 void ScrollingList::setSelected(int nSelected) {
     if (mItemCount == 0) {
         mSelected = 0;
@@ -245,7 +234,6 @@ void ScrollingList::setSelected(int nSelected) {
     updateHighlight();
 }
 
-// NTSC-U/C: 0x00401270, PAL: 0x00439d40
 void ScrollingList::updateArrows() {
     if (mUpArrow != nullptr) {
         mUpArrow->SetShowing(0 < mSelected - mCursorRow);
@@ -255,7 +243,6 @@ void ScrollingList::updateArrows() {
     }
 }
 
-// NTSC-U/C: 0x00401300, PAL: 0x00439dd0
 void ScrollingList::setShowing(int nShowing) {
     mShowing = nShowing;
     if (mHighlight == nullptr) {
@@ -264,7 +251,6 @@ void ScrollingList::setShowing(int nShowing) {
     mHighlight->SetShowing(mItemCount == 0 ? 0 : nShowing & 1);
 }
 
-// NTSC-U/C: 0x00401360, PAL: 0x00439e30
 void ScrollingList::setEntriesShowing(int nShowing) {
     for (std::vector<Rnd::Drawable *>::iterator it = mTextCells.begin(); it != mTextCells.end();
          ++it) {

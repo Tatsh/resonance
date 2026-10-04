@@ -33,7 +33,6 @@ inline void WriteText(OBStream &stream, const HxStr &text) {
 
 } // namespace
 
-// NTSC-U/C: 0x0010c910, PAL: 0x0010cae0
 void GameRecorder::BeginRecording(int nGameMode, const GameParams &params) {
     const HxStr path = MakeFreqPath(HxStr("rec.bin"));
     mStream = new OBFileStream(path);
@@ -79,16 +78,13 @@ void GameRecorder::BeginRecording(int nGameMode, const GameParams &params) {
     Application::shared()->GetWatchdog()->BeginRecording(*mStream);
 }
 
-// NTSC-U/C: 0x0010f010, PAL: 0x0010f470
 GameRecorder::GameRecorder(GameManagerImpl *pManager) : mManager(pManager), mStream(nullptr) {
 }
 
-// NTSC-U/C: 0x0010f020, PAL: 0x0010f480
 GameRecorder::~GameRecorder() {
     delete mStream;
 }
 
-// NTSC-U/C: 0x0010cea0, PAL: 0x0010d178
 void GameRecorder::ScheduleEnd() {
     EndRecordingCmd *pCommand = new EndRecordingCmd(this);
     Sch::CmdID id;
@@ -100,7 +96,6 @@ void GameRecorder::ScheduleEnd() {
     }
 }
 
-// NTSC-U/C: 0x0010f080, PAL: 0x0010f4e0
 void GameRecorder::FinishUp() {
     Application::shared()->GetWatchdog()->StopRecOrPlayback();
     delete mStream;

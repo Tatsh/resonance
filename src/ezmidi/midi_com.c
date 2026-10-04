@@ -73,7 +73,6 @@ static void *midiFunc(unsigned int command, void *data, int size) {
     return &ret;
 }
 
-// NTSC-U/C: 0x00d0, PAL: 0x00d0
 int sce_midi_loop(void) {
     sceSifQueueData qd;
     sceSifServeData sd;

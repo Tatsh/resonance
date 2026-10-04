@@ -15,12 +15,10 @@ constexpr int kDeployed = 1;
 
 } // namespace
 
-// NTSC-U/C: 0x001ca210, PAL: 0x001d00b0
 int MultiplierPowerup::Type() {
     return kHudItemMultiplier;
 }
 
-// NTSC-U/C: 0x001ca218, PAL: 0x001d00b8
 int MultiplierPowerup::Deploy(int, int nBar, Player *pPlayer, int) {
     MultiplierMsg msg(pPlayer, nBar, kRequestedFactor);
     pPlayer->Dispatch(&msg);

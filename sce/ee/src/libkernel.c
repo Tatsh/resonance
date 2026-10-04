@@ -145,7 +145,6 @@ static inline int iGetThreadId(void) {
     return result;
 }
 
-// NTSC-U/C: 0x005e4510, PAL: 0x006266d0
 int DIntr(void) {
     if (!InterruptsEnabled()) {
         return 0;
@@ -157,7 +156,6 @@ int DIntr(void) {
     return 1;
 }
 
-// NTSC-U/C: 0x005e4558, PAL: 0x00626718
 int EIntr(void) {
     int bWasEnabled = InterruptsEnabled();
 
@@ -165,7 +163,6 @@ int EIntr(void) {
     return bWasEnabled;
 }
 
-// NTSC-U/C: 0x00588f18, PAL: 0x005cc190
 int DisableIntc(int cause) {
     int bEnabled = InterruptsEnabled();
     int result;
@@ -181,7 +178,6 @@ int DisableIntc(int cause) {
     return result;
 }
 
-// NTSC-U/C: 0x00588f80, PAL: 0x005cc1f8
 int EnableIntc(int cause) {
     int bEnabled = InterruptsEnabled();
     int result;
@@ -197,7 +193,6 @@ int EnableIntc(int cause) {
     return result;
 }
 
-// NTSC-U/C: 0x00588fe8, PAL: 0x005cc260
 int DisableDmac(int channel) {
     int bEnabled = InterruptsEnabled();
     int result;
@@ -213,7 +208,6 @@ int DisableDmac(int channel) {
     return result;
 }
 
-// NTSC-U/C: 0x00589050, PAL: 0x005cc2c8
 int EnableDmac(int channel) {
     int bEnabled = InterruptsEnabled();
     int result;
@@ -229,7 +223,6 @@ int EnableDmac(int channel) {
     return result;
 }
 
-// NTSC-U/C: 0x00589158, PAL: 0x005cc3d0
 int KernelCopyHandler(unsigned int *dest, const unsigned int *src, unsigned int size) {
     unsigned int nWords = size >> 2;
     unsigned int i;
@@ -240,7 +233,6 @@ int KernelCopyHandler(unsigned int *dest, const unsigned int *src, unsigned int 
     return 0;
 }
 
-// NTSC-U/C: 0x005891a0, PAL: 0x005cc418
 void InstallSyscallPatch(void) {
     int i;
 
@@ -272,7 +264,6 @@ static void InitLibcSemas(void) {
     g_libcSemaphores[1] = CreateSema(&second);
 }
 
-// NTSC-U/C: 0x004b8fe0, PAL: 0x004f6f58
 void _InitSys(void) {
     InitLibcSemas();
     InstallSyscallPatch();
@@ -308,7 +299,6 @@ static void topThread(void *arg) {
     }
 }
 
-// NTSC-U/C: 0x005f2088, PAL: 0x006341d0
 int InitThread(void) {
     struct ThreadParam thread;
     struct SemaParam sema;
@@ -339,8 +329,6 @@ int InitThread(void) {
     return topId;
 }
 
-// NTSC-U/C: 0x005f2160, PAL: 0x006342a8
-// A request to wake the interrupted thread is queued for the helper thread instead of the kernel.
 int iWakeupThread(int thid) {
     int nSelf = iGetThreadId();
     int nIndex;
@@ -390,7 +378,6 @@ static void _sceSDC(uintptr_t start, uintptr_t end) {
     }
 }
 
-// NTSC-U/C: 0x006207d8, PAL: 0x00661368
 void SyncDCache(void *start, void *end) {
     int bEnabled = InterruptsEnabled();
 
@@ -404,7 +391,6 @@ void SyncDCache(void *start, void *end) {
     }
 }
 
-// NTSC-U/C: 0x0061d7f8, PAL: 0x0065e388
 int sceDeci2Open(unsigned short protocol,
                  void *opt,
                  void (*handler)(int event, int param, void *opt)) {
@@ -417,7 +403,6 @@ int sceDeci2Open(unsigned short protocol,
     return Deci2Call(kDeci2Open, args);
 }
 
-// NTSC-U/C: 0x0061d868, PAL: 0x0065e3f8
 int sceDeci2ReqSend(int s, char dest) {
     unsigned int args[kDeci2ArgCount];
 
@@ -426,7 +411,6 @@ int sceDeci2ReqSend(int s, char dest) {
     return Deci2Call(kDeci2ReqSend, args);
 }
 
-// NTSC-U/C: 0x0061d898, PAL: 0x0065e428
 int sceDeci2Poll(int s) {
     unsigned int args[kDeci2ArgCount];
 
@@ -434,7 +418,6 @@ int sceDeci2Poll(int s) {
     return Deci2Call(kDeci2Poll, args);
 }
 
-// NTSC-U/C: 0x0061d8c0, PAL: 0x0065e450
 int sceDeci2ExRecv(int s, void *buf, unsigned short len) {
     unsigned int args[kDeci2ArgCount];
 
@@ -444,7 +427,6 @@ int sceDeci2ExRecv(int s, void *buf, unsigned short len) {
     return Deci2Call(kDeci2ExRecv, args);
 }
 
-// NTSC-U/C: 0x0061d8f8, PAL: 0x0065e488
 int sceDeci2ExSend(int s, void *buf, unsigned short len) {
     unsigned int args[kDeci2ArgCount];
 
@@ -454,7 +436,6 @@ int sceDeci2ExSend(int s, void *buf, unsigned short len) {
     return Deci2Call(kDeci2ExSend, args);
 }
 
-// NTSC-U/C: 0x0061d9b0, PAL: 0x0065e540
 int kputs(char *s) {
     unsigned int args[kDeci2ArgCount];
 
@@ -468,7 +449,6 @@ static char linebuf[kConsoleLineSize];
 // NTSC-U/C: 0x00780dc0, PAL: 0x007c4ad8
 static int count;
 
-// NTSC-U/C: 0x005fa8c0, PAL: 0x0063b5d0
 int kputchar(int c) {
     while ((*SIO_ISR & kSioIsrTxFull) != 0) {
     }
@@ -727,7 +707,6 @@ static void _printf(const char *pszFormat, va_list args) {
     }
 }
 
-// NTSC-U/C: 0x005fb1a0, PAL: 0x0063beb0
 void kprintf(const char *format, ...) {
     va_list args;
 
@@ -736,7 +715,6 @@ void kprintf(const char *format, ...) {
     va_end(args);
 }
 
-// NTSC-U/C: 0x005fb1d8, PAL: 0x0063bee8
 void scePrintf(const char *format, ...) {
     PutCharFunction pfnSaved = _putchar;
     va_list args;

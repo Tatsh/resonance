@@ -488,9 +488,14 @@ public:
     int StopMF();
 
 private:
-    // NTSC-U/C: 0x00133210, PAL: 0x00133a60
-    // Inline, and DispatchPriv() expands it. Adds the packet's delta without notifying when the
-    // packet names this player.
+    /**
+     * Adds the packet's delta without notifying when the packet names this player.
+     *
+     * DispatchPriv() expands it inline. The address is its uncalled out-of-line copy.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00133210
+     * @ghidraAddress PAL: 0x00133a60
+     */
     void OnUpdateScore(UpdateScorePacket *pPacket);
 
     // The persona's appearance. GrooveWorld::AddLocalPlayer() passes MetPersonaData::mAppearance.

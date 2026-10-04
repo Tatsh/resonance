@@ -19,7 +19,6 @@ constexpr int kNoPowerbar = -1;
 
 } // namespace
 
-// NTSC-U/C: 0x001b1a60, PAL: 0x001b7820
 MultiCatcher::MultiCatcher(PhraseMgr *pPhraseMgr,
                            Quantizer *pQuantizer,
                            const TrackData *pTrackData,
@@ -28,11 +27,9 @@ MultiCatcher::MultiCatcher(PhraseMgr *pPhraseMgr,
     : Catcher(pPhraseMgr, pQuantizer, pTrackData, pClock, kMultiCatcherFlag, tick) {
 }
 
-// NTSC-U/C: 0x001b0d98, PAL: 0x001b6b48
 MultiCatcher::~MultiCatcher() {
 }
 
-// NTSC-U/C: 0x001ad8e8, PAL: 0x001b3650
 void MultiCatcher::CapturePhrase(int nBar, int nRun, int nAutoCatch) {
     const int nMultiplier = nAutoCatch != 0 ? kAutoCatchMultiplier : mPlayer->GetMultiplier(nBar);
     const int nRunBars = nRun - 1;
@@ -65,6 +62,5 @@ void MultiCatcher::CapturePhrase(int nBar, int nRun, int nAutoCatch) {
     }
 }
 
-// NTSC-U/C: 0x001b0e00, PAL: 0x001b6bb0
 void MultiCatcher::ReportCaughtPowerbar(int) {
 }

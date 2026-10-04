@@ -145,20 +145,46 @@ public:
     void SetFrame(float flFrame);
 
 private:
-    // PointAmountMsg: refresh the leaders. DispatchPriv() inlines this, and the out-of-line copy
-    // has no caller.
+    /**
+     * On a PointAmountMsg, refresh the leaders.
+     *
+     * DispatchPriv() inlines this, and the out-of-line copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0040caf8
+     * @ghidraAddress PAL: 0x00446520
+     */
     void OnPointAmount(PointAmountMsg *pMsg);
 
-    // JuiceAmountMsg: pick the level from a solo player's juice, comparing in double precision.
-    // DispatchPriv() inlines this, and the out-of-line copy has no caller.
+    /**
+     * On a JuiceAmountMsg, pick the level from a solo player's juice, comparing in double
+     * precision.
+     *
+     * DispatchPriv() inlines this, and the out-of-line copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0040ca00
+     * @ghidraAddress PAL: 0x00446428
+     */
     void OnJuiceAmount(JuiceAmountMsg *pMsg);
 
-    // WinMsg: raise the level by one for a solo winner. DispatchPriv() inlines this, and the
-    // out-of-line copy has no caller.
+    /**
+     * On a WinMsg, raise the level by one for a solo winner.
+     *
+     * DispatchPriv() inlines this, and the out-of-line copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0040cb28
+     * @ghidraAddress PAL: 0x00446550
+     */
     void OnWin(WinMsg *pMsg);
 
-    // Set mJuiceLock to 1 (DispatchPriv() then ignores a JuiceAmountMsg), and pass the
-    // neutral level. Nothing calls it or inlines it, and the title is inferred.
+    /**
+     * Set mJuiceLock to 1 (DispatchPriv() then ignores a JuiceAmountMsg), and pass the neutral
+     * level.
+     *
+     * Nothing calls it or inlines it, and the title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0040c988
+     * @ghidraAddress PAL: 0x004463b0
+     */
     void LockLevel();
 
     std::vector<PlayerMaterial *> mPlayerMaterials;

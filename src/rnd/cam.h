@@ -528,14 +528,24 @@ protected:
     virtual int DrawShowing();
 
 private:
-    // NTSC-U/C: 0x004b27a8, PAL: 0x004f09d0
-    // Registers this camera as a referrer of the render target and then runs
-    // UpdateTargetAspect(). The constructor, SetTargetTex(), Copy(), and Load() are the callers.
+    /**
+     * Registers this camera as a referrer of the render target and then runs UpdateTargetAspect().
+     *
+     * The constructor, SetTargetTex(), Copy(), and Load() are the callers.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004b27a8
+     * @ghidraAddress PAL: 0x004f09d0
+     */
     void AcquireTargetTex();
 
-    // NTSC-U/C: 0x004b2778, PAL: 0x004f09a0
-    // Drops this camera's registration on the render target. The destructor, Copy(),
-    // and Load() are the callers.
+    /**
+     * Drops this camera's registration on the render target.
+     *
+     * The destructor, Copy(), and Load() are the callers.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004b2778
+     * @ghidraAddress PAL: 0x004f09a0
+     */
     void ReleaseTargetTex();
 
     // A point carried through a transform, the basis rows weighted by its components plus the

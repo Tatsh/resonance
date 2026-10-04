@@ -21,7 +21,6 @@ char g_szFormatStringBuffer[kFormatStringBufferSize] = {};
 
 } // namespace
 
-// NTSC-U/C: 0x0054f688, PAL: 0x0058fcc8
 const char *Rnd::MakeString(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -30,7 +29,6 @@ const char *Rnd::MakeString(const char *pszFormat, ...) {
     return g_szFormatStringBuffer;
 }
 
-// NTSC-U/C: 0x0054f6f0, PAL: 0x0058fd30
 const char *GetDirectoryFromPath(const char *pszPath) {
     strcpy(g_szDirectoryBuffer, pszPath);
     char *pszSeparator = strrchr(g_szDirectoryBuffer, '/');

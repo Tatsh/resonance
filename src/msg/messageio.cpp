@@ -31,7 +31,6 @@ MessageFactoryTable &MessageFactoryList() {
 
 } // namespace
 
-// NTSC-U/C: 0x00555948, PAL: 0x00595fd0
 MessageFactory::MessageFactory(int nType, MessageFactoryProc pfnCreate) {
     MessageFactoryEntry wanted;
     wanted.mType = nType; // Yes, the binary never writes the other field of the search key.
@@ -44,7 +43,6 @@ MessageFactory::MessageFactory(int nType, MessageFactoryProc pfnCreate) {
     MessageFactoryList().insert(position, entry);
 }
 
-// NTSC-U/C: 0x005563d0, PAL: 0x00596a58
 Message *Message::NewMessage(int nType) {
     MessageFactoryTable &table = MessageFactoryList();
     MessageFactoryEntry wanted;
@@ -56,14 +54,12 @@ Message *Message::NewMessage(int nType) {
     return (*entry->mpfnCreate)();
 }
 
-// NTSC-U/C: 0x00556290, PAL: 0x00596918
 std::ostream &Message::Print(std::ostream &stream) const {
     stream << "{" << GetName() << " ";
     PrintExtra(stream);
     return stream << "}";
 }
 
-// NTSC-U/C: 0x00555a18, PAL: 0x005960a0
 IBStream &operator>>(IBStream &stream, Message &msg) {
     char cPresent;
     unsigned short nType;
@@ -78,7 +74,6 @@ IBStream &operator>>(IBStream &stream, Message &msg) {
     return stream;
 }
 
-// NTSC-U/C: 0x00555b10, PAL: 0x00596198
 IBStream &operator>>(IBStream &stream, Message *&pMsg) {
     char cPresent;
     stream.Read(&cPresent, sizeof(cPresent));
@@ -102,7 +97,6 @@ IBStream &operator>>(IBStream &stream, Message *&pMsg) {
     return stream;
 }
 
-// NTSC-U/C: 0x00556448, PAL: 0x00596ad0
 OBStream &operator<<(OBStream &stream, Message &msg) {
     (void)msg.Type(); // Yes, the binary discards this call's result.
     const unsigned short nType = msg.Type();
@@ -112,7 +106,6 @@ OBStream &operator<<(OBStream &stream, Message &msg) {
     return stream;
 }
 
-// NTSC-U/C: 0x00556508, PAL: 0x00596b90
 OBStream &operator<<(OBStream &stream, Message *pMsg) {
     if (pMsg == nullptr) {
         char cAbsent = '0';

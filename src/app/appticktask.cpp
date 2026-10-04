@@ -68,24 +68,20 @@ inline int ClampTick(int nTick) {
 
 } // namespace
 
-// NTSC-U/C: 0x0013ad88, PAL: 0x0013b6d0
 TickTask::TickTask(Sch::TickClock *pClock, int nPeriod, int bAligned)
     : mClock(pClock), mPeriod(nPeriod), mNextTick(kTickInfinity), mEpoch(kTickInfinity),
       mAligned(bAligned) {
     mCommand.mValue = kUnallocatedCommand;
 }
 
-// NTSC-U/C: 0x0013adc8, PAL: 0x0013b710
 TickTask::~TickTask() {
     Stop();
 }
 
-// NTSC-U/C: 0x0013ac48, PAL: 0x0013b590
 void TickTask::Print(std::ostream &stream) {
     stream << kDescription;
 }
 
-// NTSC-U/C: 0x0013a860, PAL: 0x0013b1a8
 void TickTask::Start(int nEpochOffset) {
     mNextTick = mClock->SongTick();
     if (nEpochOffset == kTickInfinity) {
@@ -108,7 +104,6 @@ void TickTask::Start(int nEpochOffset) {
     }
 }
 
-// NTSC-U/C: 0x0013aa38, PAL: 0x0013b380
 void TickTask::Run() {
     const int nElapsed = Sch::Tick(ClampTick(mNextTick - mEpoch)).mTick;
     if (Tick(nElapsed) != 1) {
@@ -123,7 +118,6 @@ void TickTask::Run() {
     }
 }
 
-// NTSC-U/C: 0x0013ae10, PAL: 0x0013b758
 void TickTask::Stop() {
     const Sch::CmdID command = mCommand;
     mClock->Withdraw(command);

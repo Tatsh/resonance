@@ -454,51 +454,101 @@ public:
     int mPanelActive;
 
 private:
-    // NTSC-U/C: 0x0036a680, PAL: 0x00398b00
-    // Resolves the three scene views and the fade, and is reached only from
-    // Update()'s boot phase. The title is inferred from the three fields it writes.
+    /**
+     * Resolves the three scene views and the fade, and is reached only from Update()'s boot phase.
+     *
+     * The title is inferred from the three fields it writes.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0036a680
+     * @ghidraAddress PAL: 0x00398b00
+     */
     void ResolveSceneViews();
 
-    // NTSC-U/C: 0x003719a0, PAL: 0x003a0498
-    // Releases the animatable, drawable, and transformable lists of the screen scene
-    // at mScreenScene. Stop() is its one caller. The title is inferred.
+    /**
+     * Releases the animatable, drawable, and transformable lists of the screen scene at
+     * mScreenScene.
+     *
+     * Stop() is its one caller. The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003719a0
+     * @ghidraAddress PAL: 0x003a0498
+     */
     void ClearScreenScene();
 
-    // NTSC-U/C: 0x0036b938, PAL: 0x0039a020
-    // Handles a MetStartPauseMsg by activating the pause screen the game mode and play mode call
-    // for.
+    /**
+     * Handles a MetStartPauseMsg by activating the pause screen the game mode and play mode call
+     * for.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0036b938
+     * @ghidraAddress PAL: 0x0039a020
+     */
     void OnStartPause(Message *pMsg);
 
-    // NTSC-U/C: 0x0036bcb8, PAL: 0x0039a400
-    // Handles a MetFreqEndedMsg by choosing the screen the next fade promotes and starting that
-    // fade. The European release recognises the tutorial levels by their localised names, and
-    // offers the end-of-remix screen for an edited remix whether or not the front end uses the
-    // memory card.
+    /**
+     * Handles a MetFreqEndedMsg by choosing the screen the next fade promotes and starting that
+     * fade.
+     *
+     * The European release recognises the tutorial levels by their localised names, and offers the
+     * end-of-remix screen for an edited remix whether or not the front end uses the memory card.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0036bcb8
+     * @ghidraAddress PAL: 0x0039a400
+     */
     void OnFreqEnded(Message *pMsg);
 
-    // NTSC-U/C: 0x0036aae0, PAL: 0x00398fe0
-    // Chooses the end-of-game screen from the game parameters, the game mode, and the solo
-    // result. OnFreqEnded() is the caller. The title is inferred.
+    /**
+     * Chooses the end-of-game screen from the game parameters, the game mode, and the solo result.
+     *
+     * OnFreqEnded() is the caller. The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0036aae0
+     * @ghidraAddress PAL: 0x00398fe0
+     */
     MetScreen *SelectEndScreen();
 
-    // NTSC-U/C: 0x00371ba8, PAL: 0x003a06a0
-    // Translates a raw controller reading into a command, arms its auto-repeat, and delivers it
-    // to the active panel. DispatchPriv() expands it inline.
+    /**
+     * Translates a raw controller reading into a command, arms its auto-repeat, and delivers it to
+     * the active panel.
+     *
+     * DispatchPriv() expands it inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00371ba8
+     * @ghidraAddress PAL: 0x003a06a0
+     */
     inline void OnRawController(RawControllerMsg *pMsg);
 
-    // NTSC-U/C: 0x00369b08, PAL: 0x00397d88
-    // Creates the metagame, fonts, and shared-texture loaders. The constructor is the caller.
+    /**
+     * Creates the metagame, fonts, and shared-texture loaders.
+     *
+     * The constructor is the caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00369b08
+     * @ghidraAddress PAL: 0x00397d88
+     */
     static void CreateCommonLoaders();
 
-    // NTSC-U/C: 0x00369e50, PAL: 0x00398288
-    // Creates the arena loader, builds the main-menu screens, and starts the arena load.
+    /**
+     * Creates the arena loader, builds the main-menu screens, and starts the arena load.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00369e50
+     * @ghidraAddress PAL: 0x00398288
+     */
     static void CreateArenaLoader();
 
-    // NTSC-U/C: 0x003712d8, PAL: 0x0039fdd0
+    /**
+     * Queue the arena loader through EnqueueArenaLoader().
+     *
+     * @ghidraAddress NTSC-U/C: 0x003712d8
+     * @ghidraAddress PAL: 0x0039fdd0
+     */
     static void StartArenaLoad();
 
-    // NTSC-U/C: 0x00371438, PAL: 0x0039ff30
-    // Enqueues the arena loader while it is pending.
+    /**
+     * Enqueues the arena loader while it is pending.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00371438
+     * @ghidraAddress PAL: 0x0039ff30
+     */
     static void EnqueueArenaLoader();
 
 public:

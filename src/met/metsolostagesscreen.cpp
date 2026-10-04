@@ -354,7 +354,6 @@ inline void AddCardSlot(std::vector<MemcardConnectState> &slots) {
 
 } // namespace
 
-// NTSC-U/C: 0x0039e308, PAL: 0x003d0890
 MetSoloStagesScreen::MetSoloStagesScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mLeftArrow(nullptr), mRightArrow(nullptr), mScrollLeftTime(0.0f), mScrollRightTime(0.0f),
@@ -366,19 +365,16 @@ MetSoloStagesScreen::MetSoloStagesScreen(MetRenderer *pRenderer, int nPriority)
     mHelpKeys.push_back(MetText(kMetStrHLevels, kLevelsPrompt));
 }
 
-// NTSC-U/C: 0x0039ef80, PAL: 0x003d1628
 MetSoloStagesScreen::~MetSoloStagesScreen() {
     delete mStageList;
     delete mIndicatorList;
     ClearLevelLists();
 }
 
-// NTSC-U/C: 0x003aeb28, PAL: 0x003e2af8
 MetSoloStagesScreen *MetSoloStagesScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetSoloStagesScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x0039f720, PAL: 0x003d1df0
 void MetSoloStagesScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     BuildButtons();
@@ -434,7 +430,6 @@ void MetSoloStagesScreen::ResolveContainerViews() {
     mUnusedFirst = 0;
 }
 
-// NTSC-U/C: 0x003a09d0, PAL: 0x003d34a8
 void MetSoloStagesScreen::BuildButtons() {
     mStageButtonsView = FindObject<Rnd::View>(kStageButtonsView);
 
@@ -477,7 +472,6 @@ void MetSoloStagesScreen::BuildButtons() {
     AppendStyles(mClosedStyles, kClosedStyleButton);
 }
 
-// NTSC-U/C: 0x003a1c88, PAL: 0x003d4a20
 void MetSoloStagesScreen::ClearLevelLists() {
     for (int i = 0; i < kNumberedStageCount; ++i) {
         std::vector<StageListEntry>::iterator it = mStageLevels[i].begin();
@@ -493,7 +487,6 @@ void MetSoloStagesScreen::ClearLevelLists() {
     mCustomLevels.clear();
 }
 
-// NTSC-U/C: 0x003a75a8, PAL: 0x003db260
 void MetSoloStagesScreen::RebuildLevelLists() {
     ClearLevelLists();
     for (int i = 0; i < kNumberedStageCount; ++i) {
@@ -505,7 +498,6 @@ void MetSoloStagesScreen::RebuildLevelLists() {
     }
 }
 
-// NTSC-U/C: 0x003a79f0, PAL: 0x003db6d0
 void MetSoloStagesScreen::UpdateSecretLevels(int bUnlockAll) {
     const std::vector<StageListEntry> secretLevels(*GetStageList(kSecretLevelStage));
     for (unsigned i = 0; i < secretLevels.size(); ++i) {
@@ -543,7 +535,6 @@ void MetSoloStagesScreen::UpdateSecretLevels(int bUnlockAll) {
     }
 }
 
-// NTSC-U/C: 0x003a2190, PAL: 0x003d4fd8
 int MetSoloStagesScreen::IsStageUnavailable(int nStage) {
     const GameParams params(CurrentParams());
     if (params.mPlayMode == kPlayModeJam) {
@@ -557,12 +548,10 @@ int MetSoloStagesScreen::IsStageUnavailable(int nStage) {
     return 0;
 }
 
-// NTSC-U/C: 0x003aed00, PAL: 0x003e2cd0
 inline int MetSoloStagesScreen::IsStageSelectable(int nStage) {
     return (mStageLocked[nStage] == 0) && (IsLevelLocked(mSelectedLevel[nStage]) == 0);
 }
 
-// NTSC-U/C: 0x003aebb0, PAL: 0x003e2b80
 inline int MetSoloStagesScreen::IsStageBeaten(CampaignStats &stats, int nDifficulty, int nStage) {
     if (Application::shared()->GetPlayMode() == kPlayModeGame) {
         return stats.GetStageScoreBeaten(nDifficulty, nStage);
@@ -575,7 +564,6 @@ inline int MetSoloStagesScreen::IsStageBeaten(CampaignStats &stats, int nDifficu
     return 0;
 }
 
-// NTSC-U/C: 0x003a7f38, PAL: 0x003dbc38
 void MetSoloStagesScreen::SetUpStages(int bUnlockAll) {
     mStageList->SetSelected(kNoSelection);
     const GameParams params(CurrentParams());
@@ -682,7 +670,6 @@ void MetSoloStagesScreen::SetUpStages(int bUnlockAll) {
     ShowLevelDetails();
 }
 
-// NTSC-U/C: 0x003a26c0, PAL: 0x003d5690
 void MetSoloStagesScreen::ApplyStageStyles() {
     for (int i = 0; i < static_cast<int>(mStageList->mButtons.size()); ++i) {
         Rnd::Button *pButton = mStageList->GetButton(i);
@@ -696,7 +683,6 @@ void MetSoloStagesScreen::ApplyStageStyles() {
     }
 }
 
-// NTSC-U/C: 0x003a1f38, PAL: 0x003d4d10
 void MetSoloStagesScreen::RefreshStage() {
     mIndicatorList->SetSelected(kNoSelection);
     const int nStage = mStageList->mSelected;
@@ -736,7 +722,6 @@ void MetSoloStagesScreen::RefreshStage() {
     ShowStageBonus(nStage + 1);
 }
 
-// NTSC-U/C: 0x003a2368, PAL: 0x003d5278
 void MetSoloStagesScreen::ShowStageBonus(int nStage) {
     const GameParams params(CurrentParams());
     const int nDifficulty = Application::shared()->GetGameManager()->GetParams()->mDifficulty;
@@ -755,7 +740,6 @@ void MetSoloStagesScreen::ShowStageBonus(int nStage) {
     mStageBeatText->SetText(HxStr(Rnd::MakeString(kCountFormat, nAlbumValue)));
 }
 
-// NTSC-U/C: 0x003a2878, PAL: 0x003d5848
 int MetSoloStagesScreen::IsLevelLocked(int nLevel) {
     if (mUnlockAll != 0) {
         return 0;
@@ -808,7 +792,6 @@ int MetSoloStagesScreen::IsLevelLocked(int nLevel) {
     return nLocked;
 }
 
-// NTSC-U/C: 0x003a2d58, PAL: 0x003d5e60
 void MetSoloStagesScreen::RefreshIndicators(int bStageLocked) {
     CampaignStats &stats = FirstPersonaStats();
     const GameParams params(CurrentParams());
@@ -851,14 +834,12 @@ void MetSoloStagesScreen::RefreshIndicators(int bStageLocked) {
     }
 }
 
-// NTSC-U/C: 0x003aec70, PAL: 0x003e2c40
 void MetSoloStagesScreen::ShowIndicators(int nShowing) {
     for (int i = 0; i < static_cast<int>(mIndicatorList->mButtons.size()); ++i) {
         mIndicatorList->GetButton(i)->SetShowing(nShowing);
     }
 }
 
-// NTSC-U/C: 0x003a3238, PAL: 0x003d63d0
 void MetSoloStagesScreen::ShowLevelTexts(int nShowing) {
     mLabelText->SetShowing(nShowing);
     mGenreText->SetShowing(nShowing);
@@ -868,7 +849,6 @@ void MetSoloStagesScreen::ShowLevelTexts(int nShowing) {
     mStatusSlots[kTvRight].mMesh->SetShowing(nShowing);
 }
 
-// NTSC-U/C: 0x003a3310, PAL: 0x003d64a8
 void MetSoloStagesScreen::ShowWarning(bool bShow) {
     if (bShow) {
         mWarningText->SetShowing(1);
@@ -889,7 +869,6 @@ void MetSoloStagesScreen::ShowWarning(bool bShow) {
     mTvView->SetShowing(!bShow);
 }
 
-// NTSC-U/C: 0x003a3510, PAL: 0x003d66d0
 void MetSoloStagesScreen::StyleLevel(int bStageLocked, const HxStr &levelName) {
     const int nLocked = IsLevelLocked(mSelectedLevel[mStageList->mSelected]);
     Color color;
@@ -937,7 +916,6 @@ void MetSoloStagesScreen::StyleLevel(int bStageLocked, const HxStr &levelName) {
     ShowTex(mStatusSlots[kTvRight].mMat, mLevelStateTexs[nState]);
 }
 
-// NTSC-U/C: 0x003a3c68, PAL: 0x003d6f30
 void MetSoloStagesScreen::ShowLevelDetails() {
     if (mViewsUnresolved != 0) {
         return;
@@ -992,7 +970,6 @@ void MetSoloStagesScreen::ShowLevelDetails() {
     }
 }
 
-// NTSC-U/C: 0x003a4438, PAL: 0x003d78b0
 void MetSoloStagesScreen::UpdateArrows() {
     if (mLeftArrow != nullptr) {
         mLeftArrow->SetState(kButtonStateNormal);
@@ -1014,7 +991,6 @@ void MetSoloStagesScreen::UpdateArrows() {
     }
 }
 
-// NTSC-U/C: 0x003a4640, PAL: 0x003d7af8
 void MetSoloStagesScreen::LoadLevelTextures() {
     const int nStage = mStageList->mSelected;
     if (IsStageUnavailable(nStage) != 0) {
@@ -1036,7 +1012,6 @@ void MetSoloStagesScreen::LoadLevelTextures() {
     }
 }
 
-// NTSC-U/C: 0x003a52f8, PAL: 0x003d89b8
 void MetSoloStagesScreen::StartScroll() {
     if (IsStageUnavailable(mStageList->mSelected) != 0) {
         mScrollLeftTime = 0.0f;
@@ -1061,7 +1036,6 @@ void MetSoloStagesScreen::StartScroll() {
     }
 }
 
-// NTSC-U/C: 0x003a5810, PAL: 0x003d8f80
 void MetSoloStagesScreen::EnterAndShow() {
     SetShowing(0);
     bool bSaveFirst = false;
@@ -1183,7 +1157,6 @@ void MetSoloStagesScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x003a6690, PAL: 0x003da0a8
 void MetSoloStagesScreen::BeginExit() {
     mTvLabelTex = mBlankTex;
     mTvLogoTex = mBlankTex;
@@ -1195,7 +1168,6 @@ void MetSoloStagesScreen::BeginExit() {
     MetScreen::BeginExit();
 }
 
-// NTSC-U/C: 0x003a4810, PAL: 0x003d7d28
 void MetSoloStagesScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -1268,28 +1240,24 @@ void MetSoloStagesScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x003aed40, PAL: 0x003e2d10
 void MetSoloStagesScreen::PlaySlideSound(int nSelector) {
     if (IsStageSelectable(mStageList->mSelected) != 0) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x003aedb0, PAL: 0x003e2d80
 void MetSoloStagesScreen::PlayCycleLeftSound(int nSelector) {
     if (IsStageUnavailable(mStageList->mSelected) == 0) {
         MetScreen::PlayCycleLeftSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x003aee00, PAL: 0x003e2dd0
 void MetSoloStagesScreen::PlayCycleRightSound(int nSelector) {
     if (IsStageUnavailable(mStageList->mSelected) == 0) {
         MetScreen::PlayCycleRightSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x003a4df8, PAL: 0x003d8440
 void MetSoloStagesScreen::UpdateIdle(float flTime) {
     const bool bLogoAdvanced = mLogoPair.Advance() != 0;
     const bool bAdvanced = bLogoAdvanced | (mLabelPair.Advance() != 0);
@@ -1362,7 +1330,6 @@ void MetSoloStagesScreen::UpdateIdle(float flTime) {
     }
 }
 
-// NTSC-U/C: 0x003a54b8, PAL: 0x003d8b98
 void MetSoloStagesScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     if ((pButton == mLeftArrow) || (pButton == mRightArrow)) {
         int &nLevel = mSelectedLevel[mStageList->mSelected];
@@ -1391,7 +1358,6 @@ void MetSoloStagesScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     }
 }
 
-// NTSC-U/C: 0x003aee50, PAL: 0x003e2e20
 void MetSoloStagesScreen::OnEnterFinished() {
     mTvView->SetShowing(1);
     mScrollDirection = kScrollNone;
@@ -1399,7 +1365,6 @@ void MetSoloStagesScreen::OnEnterFinished() {
     MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
 }
 
-// NTSC-U/C: 0x003a6738, PAL: 0x003da150
 void MetSoloStagesScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         if (Application::shared()->GetGameManager()->GetParams()->mPlayMode == kPlayModeGame) {

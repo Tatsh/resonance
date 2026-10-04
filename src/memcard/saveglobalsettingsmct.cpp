@@ -6,7 +6,6 @@
 #include "memcard/memcardsavepaths.h"
 #include "memcard/memcarduser.h"
 
-// NTSC-U/C: 0x00178ab0, PAL: 0x0017c348
 SaveGlobalSettingsMCT::SaveGlobalSettingsMCT(
     MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie, GlobalSettings *pSettings)
     : SaveFileMCT(pUser, pCard, nPortSlot, nCookie),
@@ -14,12 +13,10 @@ SaveGlobalSettingsMCT::SaveGlobalSettingsMCT(
     pSettings->Save(mStream);
 }
 
-// NTSC-U/C: 0x00184e40, PAL: 0x0018a468
 SaveGlobalSettingsMCT::~SaveGlobalSettingsMCT() {
 }
 
 #ifndef VIDEO_STANDARD_PAL
-// NTSC-U/C: 0x00186578
 void SaveGlobalSettingsMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus != kMemcardStatusUnknown && mStatus != kMemcardStatusNotFormatted) {
@@ -37,7 +34,6 @@ void SaveGlobalSettingsMCT::OnCheckInfo(CheckInfoOp *pOp) {
 }
 #endif
 
-// NTSC-U/C: 0x00186610, PAL: 0x0018bfa0
 void SaveGlobalSettingsMCT::Finish() {
     mState = kMemcardTaskFinished;
 #ifdef VIDEO_STANDARD_PAL
@@ -47,7 +43,6 @@ void SaveGlobalSettingsMCT::Finish() {
 #endif
 }
 
-// NTSC-U/C: 0x00178c08, PAL: 0x0017c590
 void SaveGlobalSettingsMCT::Execute() {
     mState = kMemcardTaskRunning;
     mDirName = g_saveDirBase + g_globalSettingsDirSuffix;

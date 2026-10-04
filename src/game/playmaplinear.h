@@ -290,6 +290,8 @@ protected:
      *
      * @param nBar The bar.
      * @return The index of the last window entry starting at or before the bar.
+     * @ghidraAddress NTSC-U/C: 0x0012ade8
+     * @ghidraAddress PAL: 0x0012b520
      */
     int WindowIndex(int nBar);
 

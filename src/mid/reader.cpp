@@ -45,20 +45,17 @@ constexpr int kTempoMiddleShift = 8;
 
 } // namespace
 
-// NTSC-U/C: 0x003d4a68, PAL: 0x0040c958
 Mid::Reader::Reader(HxIListChunk *pReader, Receiver *pReceiver)
     : mFormat(-1), mTrackCount(0), mDivision(0), mTargetDivision(kTargetDivision), mTrack(0),
       mReceiver(pReceiver), mTick(0), mRunningStatus(0), mTrackDone(0), mReader(pReader),
       mCompare(nullptr) {
 }
 
-// NTSC-U/C: 0x003d6528, PAL: 0x0040e418
 void Mid::Reader::ReadAllTracks() {
     while (ReadChunk()) {
     }
 }
 
-// NTSC-U/C: 0x003d4ac8, PAL: 0x0040c9b8
 bool Mid::Reader::ReadChunk() {
     HxChunkHeader *pId = mReader->Next();
     if (pId == nullptr) {
@@ -76,19 +73,16 @@ bool Mid::Reader::ReadChunk() {
     return true;
 }
 
-// NTSC-U/C: 0x003d65a8, PAL: 0x0040e498
 void Mid::Reader::AllTracksRead() {
     mReceiver->AllDone();
 }
 
-// NTSC-U/C: 0x003d6558, PAL: 0x0040e448
 void Mid::Reader::ReadHeader(HxStream &stream) {
     stream.ReadNum(&mFormat, sizeof(mFormat))
         .ReadNum(&mTrackCount, sizeof(mTrackCount))
         .ReadNum(&mDivision, sizeof(mDivision));
 }
 
-// NTSC-U/C: 0x003d65d8, PAL: 0x0040e4c8
 void Mid::Reader::ReadTrackChunk(HxStream &stream) {
     switch (mFormat) {
     case kFormatSingleTrack:
@@ -100,7 +94,6 @@ void Mid::Reader::ReadTrackChunk(HxStream &stream) {
     }
 }
 
-// NTSC-U/C: 0x003d6610, PAL: 0x0040e500
 void Mid::Reader::ReadTrack(HxStream &stream) {
     mReceiver->NewTrack(static_cast<unsigned char>(mTrack));
     mTrackDone = 0;
@@ -113,7 +106,6 @@ void Mid::Reader::ReadTrack(HxStream &stream) {
     ++mTrack;
 }
 
-// NTSC-U/C: 0x003d4c10, PAL: 0x0040cb00
 void Mid::Reader::ReadEvent(HxStream &stream) {
     HxVarLenNumber delta;
     delta.Read(stream);
@@ -161,7 +153,6 @@ void Mid::Reader::ReadEvent(HxStream &stream) {
     QueueEvent(tick, nStatus, nData1, nData2);
 }
 
-// NTSC-U/C: 0x003d4df0, PAL: 0x0040cce0
 void Mid::Reader::ReadSystemEvent(HxStream &stream) {
     switch (mRunningStatus) {
     case kStatusSysEx:
@@ -180,7 +171,6 @@ void Mid::Reader::ReadSystemEvent(HxStream &stream) {
     }
 }
 
-// NTSC-U/C: 0x003d4f00, PAL: 0x0040cdf0
 void Mid::Reader::ReadMeta(unsigned char nType, HxStream &stream) {
     HxVarLenNumber length;
     length.Read(stream);
@@ -223,7 +213,6 @@ void Mid::Reader::ReadMeta(unsigned char nType, HxStream &stream) {
     stream.SetMarker(nStart + length, kHxSeekSet);
 }
 
-// NTSC-U/C: 0x003d5260, PAL: 0x0040d150
 void Mid::Reader::SendChannelMsg(Sch::Tick tick,
                                  unsigned char nStatus,
                                  unsigned char nData1,
@@ -248,7 +237,6 @@ void Mid::Reader::SendChannelMsg(Sch::Tick tick,
     }
 }
 
-// NTSC-U/C: 0x003d66a8, PAL: 0x0040e598
 void Mid::Reader::QueueEvent(Sch::Tick tick,
                              unsigned char nStatus,
                              unsigned char nData1,
@@ -270,7 +258,6 @@ void Mid::Reader::QueueEvent(Sch::Tick tick,
     mPending.push_back(event);
 }
 
-// NTSC-U/C: 0x003d5140, PAL: 0x0040d030
 void Mid::Reader::Flush() {
     if (mPending.size() == 0) {
         return;

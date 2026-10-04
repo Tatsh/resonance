@@ -4,29 +4,23 @@
 #include "msg/trackselectmsg.h"
 #include "msg/trackselectpacket.h"
 
-// NTSC-U/C: 0x00122f10, PAL: 0x00123540
 NetPlayer::NetPlayer(int nId, int nTrack, const HxStr &name, const FreqAppearance *pAppearance)
     : Player(nId, name, pAppearance), mTrack(nTrack), mPlace(0) {
 }
 
-// NTSC-U/C: 0x00125a98, PAL: 0x00126110
-//
-// Every instruction of the routine is the inlined base destructor, restoring the three base
-// tables and releasing the pointer Player declares, so the original body is empty.
 NetPlayer::~NetPlayer() {
+    // Every instruction of the routine is the inlined base destructor, restoring the three base
+    // tables and releasing the pointer Player declares.
 }
 
-// NTSC-U/C: 0x00125c48, PAL: 0x001262d0
 int NetPlayer::GetTrack() {
     return mTrack;
 }
 
-// NTSC-U/C: 0x00125c50, PAL: 0x001262d8
 int NetPlayer::GetPlace() {
     return mPlace;
 }
 
-// NTSC-U/C: 0x00122f78, PAL: 0x001235a8
 void NetPlayer::OnTrackSelectPacket(TrackSelectPacket *pPacket) {
     if (pPacket->mPlayer != this) {
         return;
@@ -40,7 +34,6 @@ void NetPlayer::OnTrackSelectPacket(TrackSelectPacket *pPacket) {
     Send(&message);
 }
 
-// NTSC-U/C: 0x00125f70, PAL: 0x00126608
 void NetPlayer::DispatchPriv(Message *message) {
     const int nType = message->Type();
     if (nType == g_nTrackSelectPacketType) {

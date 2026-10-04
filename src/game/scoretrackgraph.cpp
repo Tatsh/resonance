@@ -22,7 +22,6 @@ constexpr int kMapped = 0;
 
 } // namespace
 
-// NTSC-U/C: 0x001cee50, PAL: 0x001d4d08
 ScoreTrackGraph::ScoreTrackGraph(TrackData *pTrackData)
     : mTrack(pTrackData->mIndex), mTrackData(pTrackData), mPhraseMgr(nullptr),
       mPhrasePlayer(nullptr), mQuantizer(nullptr), mMuseSynth(nullptr), mUnused(0), mMixer(nullptr),
@@ -39,7 +38,6 @@ ScoreTrackGraph::ScoreTrackGraph(TrackData *pTrackData)
     mPhraseMgr->mPhrasePlayer = mPhrasePlayer;
 }
 
-// NTSC-U/C: 0x001cf840, PAL: 0x001d56f8
 ScoreTrackGraph::~ScoreTrackGraph() {
     delete mMuseSynth;
     delete mMixer;
@@ -48,7 +46,6 @@ ScoreTrackGraph::~ScoreTrackGraph() {
     delete mQuantizer;
 }
 
-// NTSC-U/C: 0x001cf088, PAL: 0x001d4f40
 void ScoreTrackGraph::Start() {
     mPhraseMgr->StartCommands();
     MidiChase chase;
@@ -63,36 +60,29 @@ void ScoreTrackGraph::Start() {
     mSequencer->Start(Sch::Tick(0).mTick);
 }
 
-// NTSC-U/C: 0x001cf918, PAL: 0x001d57d0
 void ScoreTrackGraph::Stop() {
     mPhraseMgr->WithdrawCommands();
     delete mSequencer;
     mSequencer = nullptr;
 }
 
-// NTSC-U/C: 0x001cf750, PAL: 0x001d5608
 void ScoreTrackGraph::ConnectGamer(MsgSource *) {
 }
 
-// NTSC-U/C: 0x001cf758, PAL: 0x001d5610
 int ScoreTrackGraph::HasNothingPending() {
     return 1;
 }
 
-// NTSC-U/C: 0x001cf760, PAL: 0x001d5618
 void ScoreTrackGraph::GivePhrases(int, Player *) {
 }
 
-// NTSC-U/C: 0x001cf768, PAL: 0x001d5620
 int ScoreTrackGraph::CanGivePhrases() {
     return 0;
 }
 
-// NTSC-U/C: 0x001cf778, PAL: 0x001d5630
 void ScoreTrackGraph::CreatePowerbarMgr() {
 }
 
-// NTSC-U/C: 0x001cf978, PAL: 0x001d5830
 PhraseDatabase *ScoreTrackGraph::GetPhraseDatabase() {
     return mPhraseMgr->mDatabase;
 }

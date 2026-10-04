@@ -305,7 +305,6 @@ static void _build_pantable(void) {
     }
 }
 
-// NTSC-U/C: 0x0668, PAL: 0x0668
 void _build_chorus(int iDepth) {
     int i;
 
@@ -324,7 +323,6 @@ void _build_chorus(int iDepth) {
     }
 }
 
-// NTSC-U/C: 0x0868, PAL: 0x0868
 int HandleTransIntr(int ch, void *common) {
     int *c = common;
 
@@ -333,7 +331,6 @@ int HandleTransIntr(int ch, void *common) {
     return 1;
 }
 
-// NTSC-U/C: 0x08c8, PAL: 0x08c8
 int MemCpy_IOPtoSPU(void *pIOP, void *pSPU, int iBlockSize) {
     sceSdVoiceTrans(
         SD_CORE_0, SD_TRANS_MODE_WRITE | SD_TRANS_BY_DMA, pIOP, (unsigned int)pSPU, iBlockSize);
@@ -342,7 +339,6 @@ int MemCpy_IOPtoSPU(void *pIOP, void *pSPU, int iBlockSize) {
     return 0;
 }
 
-// NTSC-U/C: 0x0954, PAL: 0x0954
 int StartAutoDMA(void *pIOP, void *pSPU, int iDirection) {
     (void)pIOP;
     (void)pSPU;
@@ -350,7 +346,6 @@ int StartAutoDMA(void *pIOP, void *pSPU, int iDirection) {
     return -1;
 }
 
-// NTSC-U/C: 0x098c, PAL: 0x098c
 int StopAutoDMA(void *pIOP, void *pSPU, int iDirection) {
     (void)pIOP;
     (void)pSPU;
@@ -358,7 +353,6 @@ int StopAutoDMA(void *pIOP, void *pSPU, int iDirection) {
     return -1;
 }
 
-// NTSC-U/C: 0x09c4, PAL: 0x09c4
 void _init_channels(void) {
     int i;
 
@@ -376,7 +370,6 @@ void _init_channels(void) {
     }
 }
 
-// NTSC-U/C: 0x0b4c, PAL: 0x0b4c
 void _init_banks(void) {
     int i;
 
@@ -385,12 +378,10 @@ void _init_banks(void) {
     }
 }
 
-// NTSC-U/C: 0x0be4, PAL: 0x0be4
 void hs_prog_change(int iChan, int iProg) {
     gChan[iChan].iProg = iProg;
 }
 
-// NTSC-U/C: 0x0c2c, PAL: 0x0c2c
 int get_free_slot(int which_core) {
     static int last_voice[HSYN_CORES];
     int core;
@@ -569,7 +560,6 @@ static void CheckEffBits(int iSet, int *effArr, int iSlot, int reg) {
     }
 }
 
-// NTSC-U/C: 0x1c44, PAL: 0x1c44
 int _note_2_pitch(int base_note, int new_note, int detune, int samp_rate) {
     int scePitch = sceSdNote2Pitch(base_note, 0, new_note, detune);
 
@@ -580,7 +570,6 @@ int _note_2_pitch(int base_note, int new_note, int detune, int samp_rate) {
     return scePitch;
 }
 
-// NTSC-U/C: 0x1d14, PAL: 0x1d14
 int _apply_channel_to_note(sSynNote *pNote, int do_set) {
     int i_vols[2];
     int pan;
@@ -635,7 +624,6 @@ int _apply_channel_to_note(sSynNote *pNote, int do_set) {
             pNote->t_vol[1] != i_vols[1]);
 }
 
-// NTSC-U/C: 0x2240, PAL: 0x2240
 int _fire_off_sample(int iSamp,
                      int iNote,
                      int iChan,
@@ -766,7 +754,6 @@ int _fire_off_sample(int iSamp,
     return pNote - gCurrentNotes;
 }
 
-// NTSC-U/C: 0x2c6c, PAL: 0x2c6c
 int hs_note_on(int iChan, int iNote, int iVol) {
     int i;
     int splitcnt;
@@ -831,7 +818,6 @@ int hs_note_on(int iChan, int iNote, int iVol) {
     return note1;
 }
 
-// NTSC-U/C: 0x3250, PAL: 0x3250
 int hs_kill_idx(sSynNote *pNote, int iAlreadyOff) {
     int slot = pNote->slot;
 
@@ -845,7 +831,6 @@ int hs_kill_idx(sSynNote *pNote, int iAlreadyOff) {
     return _free_note(pNote, 0);
 }
 
-// NTSC-U/C: 0x33cc, PAL: 0x33cc
 int hs_idx_off(int noteidx) {
     int slot;
 
@@ -858,7 +843,6 @@ int hs_idx_off(int noteidx) {
     return 0;
 }
 
-// NTSC-U/C: 0x34e0, PAL: 0x34e0
 int hs_note_off(int iChan, int iNote) {
     int noteidx = _find_note(iChan, iNote);
 
@@ -875,7 +859,6 @@ int hs_note_off(int iChan, int iNote) {
     return 0;
 }
 
-// NTSC-U/C: 0x3654, PAL: 0x3654
 int hs_check_playing(sSynNote *pNote) {
     int slot = pNote->slot;
 
@@ -1008,7 +991,6 @@ static int _move_vol_towards(sSynNote *pNote, int which) {
     return 1;
 }
 
-// NTSC-U/C: 0x4334, PAL: 0x4334
 unsigned short _apply_chorus(unsigned short c_pitch,
                              unsigned short rate,
                              unsigned short depth,
@@ -1017,7 +999,6 @@ unsigned short _apply_chorus(unsigned short c_pitch,
     return c_pitch + chr_curve[*pos >> kChorusPositionShift] * depth / kQ15One;
 }
 
-// NTSC-U/C: 0x43f8, PAL: 0x43f8
 int hs_update_note_and_fx(sSynNote *pNote) {
     int changed = 0;
     int use_pitch;
@@ -1046,7 +1027,6 @@ int hs_update_note_and_fx(sSynNote *pNote) {
     return 0;
 }
 
-// NTSC-U/C: 0x4654, PAL: 0x4654
 int hs_reapply_channel(int iChan) {
     int i;
 
@@ -1059,13 +1039,11 @@ int hs_reapply_channel(int iChan) {
     return 0;
 }
 
-// NTSC-U/C: 0x477c, PAL: 0x477c
 int ShowSynthState(int iFlags) {
     (void)iFlags;
     return 0;
 }
 
-// NTSC-U/C: 0x47ac, PAL: 0x47ac
 void ResetSynthState(void) {
     int i;
 
@@ -1078,7 +1056,6 @@ void ResetSynthState(void) {
     _init_banks();
 }
 
-// NTSC-U/C: 0x4840, PAL: 0x4840
 void _do_reg_out(void) {
     int i;
 
@@ -1109,7 +1086,6 @@ void _do_reg_out(void) {
     }
 }
 
-// NTSC-U/C: 0x4bf4, PAL: 0x4bf4
 void HardSynthAllNotesOff(int iChan, int do_now) {
     int i;
 
@@ -1139,7 +1115,6 @@ static inline void SetChannelFx(int chan, int value, int bit) {
     }
 }
 
-// NTSC-U/C: 0x4d70, PAL: 0x4d70
 unsigned char *HandleMidiMessage(unsigned char *pMidiMsg) {
     int consumed = kMidiMessage;
     int chan = pMidiMsg[0] & kMidiChannelMask;
@@ -1233,12 +1208,10 @@ unsigned char *HandleMidiMessage(unsigned char *pMidiMsg) {
     return &pMidiMsg[consumed];
 }
 
-// NTSC-U/C: 0x5744, PAL: 0x5744
 int HardSynthLoadBD(int ipBd, int ipSpu, int iSize) {
     return MemCpy_IOPtoSPU((void *)ipBd, (void *)ipSpu, iSize);
 }
 
-// NTSC-U/C: 0x579c, PAL: 0x579c
 int HardSynthAttachHDtoBD(int port, int ipHd, int ipSpu, int bank) {
     (void)port;
     if (bank < 0 || bank >= HSYN_BANKS) {
@@ -1250,7 +1223,6 @@ int HardSynthAttachHDtoBD(int port, int ipHd, int ipSpu, int bank) {
     return 0;
 }
 
-// NTSC-U/C: 0x586c, PAL: 0x586c
 int HardSynthInvalidateBank(int bank) {
     int i;
 
@@ -1267,7 +1239,6 @@ int HardSynthInvalidateBank(int bank) {
     return 0;
 }
 
-// NTSC-U/C: 0x5a28, PAL: 0x5a28
 void HardSynthInvalidateHd(unsigned char *pHd) {
     int bank;
 
@@ -1279,7 +1250,6 @@ void HardSynthInvalidateHd(unsigned char *pHd) {
     }
 }
 
-// NTSC-U/C: 0x5acc, PAL: 0x5acc
 int HardSynthClearHDBD(void) {
     if (!gContextSet) {
         return -1;
@@ -1288,7 +1258,6 @@ int HardSynthClearHDBD(void) {
     return 0;
 }
 
-// NTSC-U/C: 0x5b20, PAL: 0x5b20
 void MidiBufferSetup(void) {
     int buf;
 
@@ -1300,7 +1269,6 @@ void MidiBufferSetup(void) {
     }
 }
 
-// NTSC-U/C: 0x5b7c, PAL: 0x5b7c
 int HardSynthKillOld(void) {
     int i;
 
@@ -1312,7 +1280,6 @@ int HardSynthKillOld(void) {
     return 0;
 }
 
-// NTSC-U/C: 0x5c54, PAL: 0x5c54
 int HardSynthUpdate(void) {
     int i;
 
@@ -1325,7 +1292,6 @@ int HardSynthUpdate(void) {
     return 0;
 }
 
-// NTSC-U/C: 0x5d34, PAL: 0x5d34
 int HardSynthParseNew(unsigned char *pMidiBlock, int iBlockSize, int buf) {
     unsigned char *pBlock = pMidiBlock;
 
@@ -1447,7 +1413,6 @@ static int stop_timer(TimerCtx *timer) {
     return 0;
 }
 
-// NTSC-U/C: 0x6390, PAL: 0x6390
 int HardSynthPause(void) {
     int i;
 
@@ -1464,7 +1429,6 @@ int HardSynthPause(void) {
     return 0;
 }
 
-// NTSC-U/C: 0x64e0, PAL: 0x64e0
 int HardSynthResume(void) {
     int i;
 
@@ -1481,20 +1445,17 @@ int HardSynthResume(void) {
     return 0;
 }
 
-// NTSC-U/C: 0x6660, PAL: 0x6660
 int HardSynthSetRemix(int parm) {
     gSynthRun.remix_mode = parm != 0;
     return 0;
 }
 
-// NTSC-U/C: 0x66a4, PAL: 0x66a4
 int HardSynthSetMono(int parm) {
     gSynthRun.mono_mode = parm != 0;
     gChansChanged = kAllChannelMask;
     return 0;
 }
 
-// NTSC-U/C: 0x66f4, PAL: 0x66f4
 void HardSynthConfig(sSynthConfig *pConfig) {
     int i;
 
@@ -1509,7 +1470,6 @@ void HardSynthConfig(sSynthConfig *pConfig) {
     }
 }
 
-// NTSC-U/C: 0x6800, PAL: 0x6800
 int HardSynthInit(void) {
     _init_channels();
     _init_banks();
@@ -1526,20 +1486,17 @@ int HardSynthInit(void) {
     return (int)hsBf_T; // The EE writes MIDI streams to this IOP address.
 }
 
-// NTSC-U/C: 0x68d0, PAL: 0x68d0
 int HardSynthReset(void) {
     ResetSynthState();
     return 0;
 }
 
-// NTSC-U/C: 0x690c, PAL: 0x690c
 int HardSynthShutdown(void) {
     stop_timer(&gTimer);
     clear_timer(&gTimer);
     return 0;
 }
 
-// NTSC-U/C: 0x6960, PAL: 0x6960
 void HardSynthInfo(int what) {
     switch (what) {
     case kHardSynthInfoShowState:

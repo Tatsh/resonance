@@ -155,7 +155,6 @@ inline void WriteDisplayRegisters(GsDoubleBuffer::DispEnv &env, int bEnableCircu
 
 } // namespace
 
-// NTSC-U/C: 0x0058e9b0, PAL: 0x005d1d08
 void GsDoubleBuffer::SetDefaults(
     short nWidth, short nHeight, short nPsm, short nZTest, short nZPsm, short nClear) {
     mWidth = nWidth;
@@ -187,14 +186,12 @@ void GsDoubleBuffer::SetDefaults(
     SetDrawBuffersSmall(this, nWidth, nHeight, nPsm, mFbp0, mFbp1, mZbp, nZTest, nZPsm, nClear);
 }
 
-// NTSC-U/C: 0x0058e330, PAL: 0x005d1688
 void SetDispBuffers(
     GsDoubleBuffer *pBuffers, short nWidth, short nHeight, short nPsm, short nFbp0, short nFbp1) {
     BuildDispEnv(pBuffers->mDisp[0], nWidth, nHeight, nPsm, nFbp0);
     BuildDispEnv(pBuffers->mDisp[1], nWidth, nHeight, nPsm, nFbp1);
 }
 
-// NTSC-U/C: 0x0058e538, PAL: 0x005d1890
 void SetDrawBuffersSmall(GsDoubleBuffer *pBuffers,
                          short nWidth,
                          short nHeight,
@@ -216,7 +213,6 @@ void SetDrawBuffersSmall(GsDoubleBuffer *pBuffers,
     BuildDrawHalf(pBuffers->mHalves[1], nWidth, nHeight, nPsm, nFbp1, qwZbuf, nZTest, nZPsm);
 }
 
-// NTSC-U/C: 0x0058e7e8, PAL: 0x005d1b40
 void PutDrawBufferSmall(GsDoubleBuffer *pBuffers, int nHalf, int bClear) {
     const unsigned long long qwLoops = bClear != 0 ? kDrawAndClearPairs : kDrawEnvPairs;
     GsDoubleBuffer::DrawHalf *pHalves = pBuffers->mHalves;
@@ -229,7 +225,6 @@ void PutDrawBufferSmall(GsDoubleBuffer *pBuffers, int nHalf, int bClear) {
     }
 }
 
-// NTSC-U/C: 0x0058e860, PAL: 0x005d1bb8
 void PutDispBuffer(GsDoubleBuffer *pBuffers, int nHalf, int bEnableCircuit1) {
     if (nHalf == 0) {
         WriteDisplayRegisters(pBuffers->mDisp[0], bEnableCircuit1);

@@ -139,6 +139,9 @@ public:
     /**
      * Slot 12.
      *
+     * The only slot with no fallback to the default palette. A canvas with no palette does nothing
+     * here.
+     *
      * @ghidraAddress NTSC-U/C: 0x006362d0
      * @ghidraAddress PAL: 0x00676e60
      */
@@ -170,6 +173,9 @@ public:
 
     /**
      * Slot 23.
+     *
+     * Native is the palette index for this format, so the store narrows and forwards to
+     * DrawPixel8U().
      *
      * @ghidraAddress NTSC-U/C: 0x00635c18
      * @ghidraAddress PAL: 0x006767a8
@@ -205,6 +211,9 @@ public:
 
     /**
      * Slot 33.
+     *
+     * Native is the palette index for this format, so the read forwards the result of
+     * GetPixel8U() unchanged.
      *
      * @ghidraAddress NTSC-U/C: 0x00635c48
      * @ghidraAddress PAL: 0x006767d8

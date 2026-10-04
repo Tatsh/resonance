@@ -24,7 +24,6 @@ constexpr int kBarTicks = 1920;
 
 } // namespace
 
-// NTSC-U/C: 0x0019daf0, PAL: 0x001a3858
 AxingSTG::AxingSTG(TrackData *pTrackData) : ScoreTrackGraph(pTrackData) {
     mMuseSynth->CreateSustainer();
 
@@ -41,7 +40,6 @@ AxingSTG::AxingSTG(TrackData *pTrackData) : ScoreTrackGraph(pTrackData) {
         new GsPeriodical(mApplication->GetSongClock(), mPhraseMaker, Sch::Tick(kBarTicks).mTick);
 }
 
-// NTSC-U/C: 0x0019de08, PAL: 0x001a3b70
 AxingSTG::~AxingSTG() {
     AxingSTG::Stop(); // The binary calls this class's body rather than dispatching.
     delete mPeriodical;
@@ -55,7 +53,6 @@ AxingSTG::~AxingSTG() {
     delete mAutoRiffer;
 }
 
-// NTSC-U/C: 0x0019e720, PAL: 0x001a4488
 void AxingSTG::Start() {
     if (mApplication->GetGameManager()->GetPlayMode() == kPlayModeAnnouncing) {
         const unsigned char nStatus =
@@ -66,7 +63,6 @@ void AxingSTG::Start() {
     mPeriodical->Post();
 }
 
-// NTSC-U/C: 0x0019e798, PAL: 0x001a4500
 void AxingSTG::Stop() {
     if (mApplication->GetGameManager()->GetPlayMode() == kPlayModeAnnouncing) {
         const unsigned char nStatus =
@@ -77,7 +73,6 @@ void AxingSTG::Stop() {
     ScoreTrackGraph::Stop();
 }
 
-// NTSC-U/C: 0x0019df58, PAL: 0x001a3cc0
 void AxingSTG::ConnectInputs(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
     pPrimary->AddSink(mMixer);
     pPrimary->AddSink(mPhraseMaker);
@@ -115,13 +110,11 @@ void AxingSTG::ConnectInputs(MsgSource *pPrimary, MsgSource *pOptional, MsgSourc
     mPhrasePlayer->AddSink(mMuseSynth);
 }
 
-// NTSC-U/C: 0x0019e810, PAL: 0x001a4578
 void AxingSTG::SetMixerOutput(MsgSink *pOutput) {
     mMuseSynth->AddSink(mMixer);
     mMixer->mOutput = pOutput;
 }
 
-// NTSC-U/C: 0x0019e850, PAL: 0x001a45b8
 void AxingSTG::ConnectToTunnel(MsgSink *pSink) {
     mPhraseMgr->AddSink(pSink);
     mPhraseMaker->AddSink(pSink);
@@ -131,7 +124,6 @@ void AxingSTG::ConnectToTunnel(MsgSink *pSink) {
     mAutoRiffer->mSource.AddSink(pSink);
 }
 
-// NTSC-U/C: 0x0019e928, PAL: 0x001a4690
 void AxingSTG::SetNetSink(MsgSink *pSink) {
     if (pSink != nullptr) {
         mPhraseMgr->mNetSink = pSink;

@@ -30,7 +30,6 @@ enum {
 // Records the first compact-disc open, as the shipped program does. Nothing else reads it.
 static int g_bCdInitialized;
 
-// NTSC-U/C: 0x0058de70, PAL: 0x005d11c8
 int strFileOpen(StrFile *pFile, const char *pszName) {
     char szPath[kPathSize];
     char szDev[kDeviceSize];
@@ -111,7 +110,6 @@ int strFileOpen(StrFile *pFile, const char *pszName) {
     return 1;
 }
 
-// NTSC-U/C: 0x0058e130, PAL: 0x005d1488
 int strFileClose(StrFile* pFile) {
     if (pFile->isOnCD != 0) {
         sceCdStStop();
@@ -123,7 +121,6 @@ int strFileClose(StrFile* pFile) {
     return 1;
 }
 
-// NTSC-U/C: 0x0058e180, PAL: 0x005d14d8
 int strFileRead(StrFile *pFile, void *pBuffer, int nSize) {
     if (pFile->isOnCD != 0) {
         unsigned int nError = 0;

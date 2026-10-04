@@ -202,12 +202,24 @@ public:
     float GetValue(int nTick);
 
 private:
-    // Written behind the value list, as the count and the entries in a narrower form than the
-    // gems use.
-    // NTSC-U/C: 0x001b5500, PAL: 0x001bb2d8
+    /**
+     * Written behind the value list, as the count and the entries in a narrower form than the gems
+     * use.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001b5500
+     * @ghidraAddress PAL: 0x001bb2d8
+     */
     void SaveValues(OBStream &stream);
 
-    // NTSC-U/C: 0x001b55f8, PAL: 0x001bb3d0
+    /**
+     * Replace the value list with the one SaveValues() writes.
+     *
+     * Each entry is a 16-bit tick and an 8-bit value, scaled back to a float.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress NTSC-U/C: 0x001b55f8
+     * @ghidraAddress PAL: 0x001bb3d0
+     */
     void LoadValues(IBStream &stream);
 
     std::vector<Gem> mGems;               // +0x08, labelled `gems: `

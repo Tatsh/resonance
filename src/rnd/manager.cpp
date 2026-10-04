@@ -158,11 +158,9 @@ int g_nRndManagerFileVersion;
 // NTSC-U/C: 0x00719888, PAL: 0x0075d788
 int g_nRndManagerLoadFrameCounter;
 
-// NTSC-U/C: 0x005200c0, PAL: 0x00560618
 Manager::Manager() {
 }
 
-// NTSC-U/C: 0x00519bb8, PAL: 0x00559f88
 void Manager::Init() {
     ResetFrameTimer();
 
@@ -198,12 +196,10 @@ void Manager::Init() {
     RegisterMultiMeshClass();
 }
 
-// NTSC-U/C: 0x00519a98, PAL: 0x00559e48
 void Manager::RegisterClass(const HxStr &name, ClassFactory pfnCreate) {
     mClasses[name] = pfnCreate;
 }
 
-// NTSC-U/C: 0x005205b0, PAL: 0x00560b08
 Object *Manager::Create(const HxStr &className, const HxStr &objectName) {
     const auto it = mClasses.find(className);
     if (it != mClasses.end()) {
@@ -213,13 +209,11 @@ Object *Manager::Create(const HxStr &className, const HxStr &objectName) {
     return nullptr;
 }
 
-// NTSC-U/C: 0x00520498, PAL: 0x005609f0
 Object *Manager::Find(const HxStr &name) {
     const auto it = mObjects.find(name);
     return it != mObjects.end() ? it->second : nullptr;
 }
 
-// NTSC-U/C: 0x0051be08, PAL: 0x0055c2c8
 void Manager::RemapLegacyClassName(HxStr &name) {
     if (g_nRndManagerFileVersion < kMixInRenameVersion) {
         if (name == "AnimObject") {
@@ -243,7 +237,6 @@ void Manager::RemapLegacyClassName(HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x0051b450, PAL: 0x0055b888
 void Manager::Read(Stream &stream) {
     stream.ReadLE(&g_nRndManagerFileVersion, sizeof(g_nRndManagerFileVersion));
     if (g_nRndManagerFileVersion > kManagerFileVersion) {
@@ -344,7 +337,6 @@ void Manager::Read(Stream &stream) {
     }
 }
 
-// NTSC-U/C: 0x00520648, PAL: 0x00560ba0
 void Manager::LoadFile(const HxStr &path) {
     FileStream stream(path, kOpenForReading);
     if (stream.Fail()) {
@@ -356,11 +348,9 @@ void Manager::LoadFile(const HxStr &path) {
     Read(stream);
 }
 
-// NTSC-U/C: 0x00520348, PAL: 0x005608a0
 Manager::~Manager() {
 }
 
-// NTSC-U/C: 0x0051aff8, PAL: 0x0055b430
 void Manager::Write(Stream &stream) {
     std::list<Object *> objects;
     for (const auto &entry : mObjects) {
@@ -388,7 +378,6 @@ void Manager::Write(Stream &stream) {
     }
 }
 
-// NTSC-U/C: 0x005199d8, PAL: 0x00559d88
 bool Manager::Contains(const Object *pObject) {
     for (const auto &entry : mObjects) {
         if (entry.second == pObject) {
@@ -398,7 +387,6 @@ bool Manager::Contains(const Object *pObject) {
     return false;
 }
 
-// NTSC-U/C: 0x005204e8, PAL: 0x00560a40
 void Manager::SaveFile(const HxStr &path) {
     FileStream stream(path, kOpenForWriting);
     if (stream.Fail()) {
@@ -409,7 +397,6 @@ void Manager::SaveFile(const HxStr &path) {
     Write(stream);
 }
 
-// NTSC-U/C: 0x0051ad98, PAL: 0x0055b1d0
 void Manager::DumpText(Dbg &sink) {
     sink.Print("[Manager]\n");
     DumpRegisteredClasses(sink.Print("registeredClasses:"), mClasses)->Print("\n");
@@ -435,7 +422,6 @@ void Manager::DumpText(Dbg &sink) {
     }
 }
 
-// NTSC-U/C: 0x0051a428, PAL: 0x0055a820
 Object *Manager::ResolveAndLinkObject(
     Object *pSource, const HxStr &prefix, unsigned nFlags, int bRecurse, int bLink) {
     const HxStr &className = pSource->ClassName();
@@ -520,7 +506,6 @@ Object *Manager::ResolveAndLinkObject(
     return pClone;
 }
 
-// NTSC-U/C: 0x0051bf70, PAL: 0x0055c430
 void Manager::DeleteLoadedObjects() {
     for (;;) {
         auto entry = mObjects.begin();

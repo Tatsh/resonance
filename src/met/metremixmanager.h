@@ -431,15 +431,35 @@ public:
     static constexpr int kFactorySlot = -1;
 
 private:
-    // NTSC-U/C: 0x003610a8, PAL: 0x0038e568
+    /**
+     * The shared manager, looked up first through CacheSharedInstance().
+     *
+     * @return The recorded manager.
+     * @ghidraAddress NTSC-U/C: 0x003610a8
+     * @ghidraAddress PAL: 0x0038e568
+     */
     static MetRemixManager *ResolveSharedInstance();
-    // NTSC-U/C: 0x00361210, PAL: 0x0038e6d0
+    /**
+     * Find the screen with the registry name and record it as the shared manager, unless one is
+     * already recorded.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00361210
+     * @ghidraAddress PAL: 0x0038e6d0
+     */
     static void CacheSharedInstance();
-    // NTSC-U/C: 0x00357f80, PAL: 0x00384f10
-    // Starts reading the remix index file, recording the request in mIndexRequest.
+    /**
+     * Starts reading the remix index file, recording the request in mIndexRequest.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00357f80
+     * @ghidraAddress PAL: 0x00384f10
+     */
     void LoadIndex();
-    // NTSC-U/C: 0x003580f0, PAL: 0x003850d8
-    // Starts reading one remix file, recording the request in mRemixRequest.
+    /**
+     * Starts reading one remix file, recording the request in mRemixRequest.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003580f0
+     * @ghidraAddress PAL: 0x003850d8
+     */
     void LoadRemixFile(const HxStr &fileName);
     // NTSC-U/C: 0x00361418, PAL: 0x0038e8f8
     // A factory remix is read from its file and any other through the memory card.
@@ -455,8 +475,14 @@ private:
     // Saves the playlist again with a copy of mReturnScreens as the return screens.
     // OnMsgScreenDismissed() expands it at each retry.
     inline void RetrySavePlayList();
-    // NTSC-U/C: 0x003613d8, PAL: 0x0038e8b8
-    // Clamps into zero through the track count. The range admits one past the end.
+    /**
+     * Clamps into zero through the track count.
+     *
+     * The range admits one past the end.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003613d8
+     * @ghidraAddress PAL: 0x0038e8b8
+     */
     void SetCurrentTrack(int nTrack);
     // NTSC-U/C: 0x003610d0, PAL: 0x0038e590
     // Pushes every screen listed in mRestoreScreens and activates the first.

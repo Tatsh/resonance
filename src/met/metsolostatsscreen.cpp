@@ -94,22 +94,18 @@ inline void LabelHeading(const char *pszTextName, MetStringId nLabelId, const ch
 
 } // namespace
 
-// NTSC-U/C: 0x003af2e0, PAL: 0x003e32c8
 MetSoloStatsScreen::MetSoloStatsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
 }
 
-// NTSC-U/C: 0x003b5218, PAL: 0x003e9770
 MetSoloStatsScreen::~MetSoloStatsScreen() {
 }
 
-// NTSC-U/C: 0x003b5190, PAL: 0x003e96e8
 MetSoloStatsScreen *MetSoloStatsScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetSoloStatsScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x003af450, PAL: 0x003e3498
 void MetSoloStatsScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
@@ -135,7 +131,6 @@ void MetSoloStatsScreen::ResolveContainerViews() {
     mHotText = FindObject<Rnd::Text>(kHotText);
 }
 
-// NTSC-U/C: 0x003b0378, PAL: 0x003e4678
 void MetSoloStatsScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     GameStats *pStats = Application::shared()->GetGameManager()->GetStats();

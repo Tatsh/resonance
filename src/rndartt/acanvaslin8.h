@@ -100,6 +100,8 @@ public:
     /**
      * Slot 46.
      *
+     * The source position is advanced in place, so the caller sees where the row ended.
+     *
      * @ghidraAddress NTSC-U/C: 0x00628db0
      * @ghidraAddress PAL: 0x00669940
      */
@@ -112,6 +114,9 @@ public:
 
     /**
      * Slot 47. Unpacks nibbles, honouring the source's odd-start flag.
+     *
+     * The nibble phase starts from the odd-start flag and alternates per pixel, and the low nibble
+     * of a byte is the earlier pixel.
      *
      * @ghidraAddress NTSC-U/C: 0x00628848
      * @ghidraAddress PAL: 0x006693d8

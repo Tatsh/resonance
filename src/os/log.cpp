@@ -36,7 +36,6 @@ char g_szFatalMessage[kFatalMessageSize];
 
 } // namespace
 
-// NTSC-U/C: 0x0052e3e8, PAL: 0x0056da60
 void Warn(const char *pszFormat, ...) {
     if (WarningsEnabled() != 1) {
         return;
@@ -49,7 +48,6 @@ void Warn(const char *pszFormat, ...) {
     va_end(args);
 }
 
-// NTSC-U/C: 0x0052e510, PAL: 0x0056dbc0
 void SysAssert(const char *pszMessage, const char *pszFile, unsigned int nLine) {
     // The image builds the text in a pre-standard strstream, terminates it with ends, and never
     // releases the frozen buffer. A string stream produces the same text without the leak.
@@ -59,7 +57,6 @@ void SysAssert(const char *pszMessage, const char *pszFile, unsigned int nLine) 
     exit(0);
 }
 
-// NTSC-U/C: 0x0052ea68, PAL: 0x0056e160
 void AlertScriptTemplate(int nTemplate, ...) {
     const HxStr format = Resid2Str(nTemplate);
     va_list args;
@@ -68,7 +65,6 @@ void AlertScriptTemplate(int nTemplate, ...) {
     va_end(args);
 }
 
-// NTSC-U/C: 0x0052e868, PAL: 0x0056df18
 void Fatal(const char *pszFormat, ...) {
     MemCloseLogAndReport();
 
@@ -81,7 +77,6 @@ void Fatal(const char *pszFormat, ...) {
     }
 }
 
-// NTSC-U/C: 0x0052e960, PAL: 0x0056e018
 void Error(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
@@ -89,7 +84,6 @@ void Error(const char *pszFormat, ...) {
     va_end(args);
 }
 
-// NTSC-U/C: 0x00466368, PAL: 0x004a3d98
 void ShowReportedMessage(const HxStr &text, int nDuration) {
     if (ScreenMessagesEnabled() == 1) {
         ShowScreenMessage(text.mStr != nullptr ? text.mStr : g_szEmptyString, nDuration);
@@ -97,7 +91,6 @@ void ShowReportedMessage(const HxStr &text, int nDuration) {
     std::cout << text << std::endl;
 }
 
-// NTSC-U/C: 0x004663d8, PAL: 0x004a3e08
 void ShowAlertMessage(const HxStr &text) {
     ShowScreenMessage(text.mStr != nullptr ? text.mStr : g_szEmptyString, kAlertMessageDuration);
     std::cout << "Alert! " << text << std::endl;

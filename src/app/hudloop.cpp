@@ -8,7 +8,6 @@
 #include "rnd/manager.h"
 #include "rnd/mesh.h"
 
-// NTSC-U/C: 0x00417b40, PAL: 0x00451b00
 HudLoop::HudLoop(int nIndex) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
@@ -23,7 +22,6 @@ HudLoop::HudLoop(int nIndex) {
     SetShowing(1);
 }
 
-// NTSC-U/C: 0x00429e38, PAL: 0x00465478
 void HudLoop::SetShowing(int nShowing) {
     mIndicator->SetShowing(nShowing);
 }

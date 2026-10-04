@@ -52,7 +52,6 @@ static union {
 // NTSC-U/C: 0x008e5240, PAL: 0x0092a240. SIF DMA needs the 64-byte alignment retail gives it.
 static HeapLoadArgs g_heapLoad __attribute__((aligned(64)));
 
-// NTSC-U/C: 0x005e5f88, PAL: 0x00628170
 int sceSifInitIopHeap(void) {
     int nDelay;
 
@@ -71,7 +70,6 @@ int sceSifInitIopHeap(void) {
     return 0;
 }
 
-// NTSC-U/C: 0x005e6010, PAL: 0x006281f8
 void *sceSifAllocIopHeap(unsigned int size) {
     if (_bind < 0) {
         return NULL;
@@ -91,7 +89,6 @@ void *sceSifAllocIopHeap(unsigned int size) {
     return (void *)(uintptr_t)g_nHeapReceive;
 }
 
-// NTSC-U/C: 0x005e6080, PAL: 0x00628268
 void *sceSifAllocSysMemory(int type, unsigned int size, void *addr) {
     if (_bind < 0) {
         return NULL;
@@ -113,7 +110,6 @@ void *sceSifAllocSysMemory(int type, unsigned int size, void *addr) {
     return (void *)(uintptr_t)g_nHeapReceive;
 }
 
-// NTSC-U/C: 0x005e6100, PAL: 0x006282e8
 int sceSifFreeIopHeap(void *addr) {
     if (_bind < 0) {
         return 0;
@@ -133,12 +129,10 @@ int sceSifFreeIopHeap(void *addr) {
     return g_nHeapReceive;
 }
 
-// NTSC-U/C: 0x005e6178, PAL: 0x00628360
 int sceSifFreeSysMemory(void *addr) {
     return sceSifFreeIopHeap(addr);
 }
 
-// NTSC-U/C: 0x005e6198, PAL: 0x00628380
 int sceSifLoadIopHeap(const char *filename, void *addr) {
     int nLength;
 

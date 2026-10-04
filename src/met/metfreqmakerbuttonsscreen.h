@@ -229,17 +229,31 @@ public:
     void SetEditing(int nEditing);
 
 private:
-    // NTSC-U/C: 0x0025a228, PAL: 0x002702c8
-    // Label `RANDOMIZE.txt` with `MUTATE` while editing and `RANDOMIZE` while creating.
+    /**
+     * Label `RANDOMIZE.txt` with `MUTATE` while editing and `RANDOMIZE` while creating.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0025a228
+     * @ghidraAddress PAL: 0x002702c8
+     */
     void UpdateRandomizeLabel();
 
-    // NTSC-U/C: 0x0025a3e0, PAL: 0x002704c8
-    // Show the inventory page a part button selects, or hide the pages for the edit,
-    // name, randomise, and save buttons. The directions screen is resolved and not used.
+    /**
+     * Show the inventory page a part button selects, or hide the pages for the edit, name,
+     * randomise, and save buttons.
+     *
+     * The directions screen is resolved and not used.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0025a3e0
+     * @ghidraAddress PAL: 0x002704c8
+     */
     void ShowPageForButton(Rnd::Button *pButton);
 
-    // NTSC-U/C: 0x0025a5e0, PAL: 0x00270710
-    // Show the directions page for a button, or the blank page for no button.
+    /**
+     * Show the directions page for a button, or the blank page for no button.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0025a5e0
+     * @ghidraAddress PAL: 0x00270710
+     */
     void ShowDirectionsForButton(Rnd::Button *pButton);
 
     // Resolve the canvas and hand its persona to MetPersonaSaverScreen::StartSave(). The card is

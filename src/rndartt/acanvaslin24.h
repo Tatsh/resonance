@@ -52,6 +52,8 @@ public:
     /**
      * Slot 12. Empty, because a 24-bit pixel has no alpha bit to key.
      *
+     * The override exists only because ACanvas24 declares the slot pure.
+     *
      * @param nColorKey The colour the other formats would make transparent, unused here.
      * @ghidraAddress NTSC-U/C: 0x006184a8
      * @ghidraAddress PAL: 0x00659038
@@ -122,6 +124,8 @@ public:
     /**
      * Slot 49.
      *
+     * The key is compared against the low byte of the transparent colour.
+     *
      * @ghidraAddress NTSC-U/C: 0x006186f8
      * @ghidraAddress PAL: 0x00659288
      */
@@ -130,6 +134,9 @@ public:
     /**
      * Slot 53.
      *
+     * A keyed row compares the pixel's three bytes, widened with a zero, against the whole
+     * transparent colour.
+     *
      * @ghidraAddress NTSC-U/C: 0x00618270
      * @ghidraAddress PAL: 0x00658e00
      */
@@ -137,6 +144,8 @@ public:
 
     /**
      * Slot 75.
+     *
+     * The key is compared against the low byte of the transparent colour.
      *
      * @ghidraAddress NTSC-U/C: 0x00618800
      * @ghidraAddress PAL: 0x00659390

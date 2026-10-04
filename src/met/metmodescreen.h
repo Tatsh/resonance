@@ -148,9 +148,15 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // NTSC-U/C: 0x002e8398, PAL: 0x0030b748
-    // Sets the play mode for the selected button and goes on to the skill screen for a game or the
-    // remix type screen for a jam. The title is inferred.
+    /**
+     * Sets the play mode for the selected button and goes on to the skill screen for a game or the
+     * remix type screen for a jam.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002e8398
+     * @ghidraAddress PAL: 0x0030b748
+     */
     void GoToSelectedMode();
 
     MetButtonList *mButtonList; // +0x8c

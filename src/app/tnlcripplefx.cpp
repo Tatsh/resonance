@@ -25,7 +25,6 @@ constexpr float kTurnBackLead = 6500.0f;
 
 } // namespace
 
-// NTSC-U/C: 0x0043e1f0, PAL: 0x0047aa80
 TnlCrippleFX::TnlCrippleFX(int nIndex, float flRate)
     : mView(dynamic_cast<Rnd::View *>(
           Rnd::TheManager.Find(HxStr(Rnd::MakeString("cripfx%d.view", nIndex))))),
@@ -37,7 +36,6 @@ TnlCrippleFX::TnlCrippleFX(int nIndex, float flRate)
     mView->SetShowing(0);
 }
 
-// NTSC-U/C: 0x004568b8, PAL: 0x00493de8
 void TnlCrippleFX::Start(const std::vector<TnlPlayer *> &targets, float flFrame) {
     mState = kStateRunning;
     mTargets = targets;
@@ -46,7 +44,6 @@ void TnlCrippleFX::Start(const std::vector<TnlPlayer *> &targets, float flFrame)
     mView->SetShowing(1);
 }
 
-// NTSC-U/C: 0x0043e500, PAL: 0x0047adf0
 void TnlCrippleFX::SetFrame(float flFrame) {
     mView->SetFrame(flFrame * mRate);
     if (mState == kStateIdle) {

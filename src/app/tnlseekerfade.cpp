@@ -20,7 +20,6 @@ constexpr float kFadeInRate = 0.2f;
 
 } // namespace
 
-// NTSC-U/C: 0x00438308, PAL: 0x004740b8
 TnlSeekerFade::TnlSeekerFade(int nIndex, const Color &color)
     : mActive(1), mFirstSlice(kNoSlice), mSliceCount(0), mRing(kNoRing), mColor(color),
       mFadeRate(0.0f), mIndex(nIndex) {
@@ -36,7 +35,6 @@ TnlSeekerFade::TnlSeekerFade(int nIndex, const Color &color)
     SetActive(1);
 }
 
-// NTSC-U/C: 0x00454a68, PAL: 0x00491f98
 void TnlSeekerFade::SetActive(int nActive) {
     mActive = nActive;
     if (nActive) {
@@ -46,7 +44,6 @@ void TnlSeekerFade::SetActive(int nActive) {
     }
 }
 
-// NTSC-U/C: 0x00454b58, PAL: 0x00492088
 void TnlSeekerFade::Update() {
     float flAlpha = mColor.a + mFadeRate;
     if (flAlpha < 0.0f) {

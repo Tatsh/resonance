@@ -88,19 +88,34 @@ public:
     void SetJamEffectsMgr(JamEffectsMgr *pJamEffects);
 
 private:
-    // Sends the riff of every gem of the bar from nFrom on, positioned nElapsed earlier, as one
-    // sequence. A phrase without an owner plays nothing. Records the bar in mLastBar.
-    // NTSC-U/C: 0x001c1978, PAL: 0x001c77c0
+    /**
+     * Sends the riff of every gem of the bar from nFrom on, positioned nElapsed earlier, as one
+     * sequence.
+     *
+     * A phrase without an owner plays nothing. Records the bar in mLastBar.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001c1978
+     * @ghidraAddress PAL: 0x001c77c0
+     */
     void PlayBarGems(Phrase *pPhrase, int nBar, Sch::Tick from, Sch::Tick elapsed);
 
-    // Sends the riff of every gem of the phrase from nFrom on as one sequence, transposing each by
-    // the gem's transposition. A gem without a riff abandons the bar before anything is sent or
-    // mLastBar changes.
-    // NTSC-U/C: 0x001c1ba8, PAL: 0x001c79f0
+    /**
+     * Sends the riff of every gem of the phrase from nFrom on as one sequence, transposing each by
+     * the gem's transposition.
+     *
+     * A gem without a riff abandons the bar before anything is sent or mLastBar changes.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001c1ba8
+     * @ghidraAddress PAL: 0x001c79f0
+     */
     void PlayPhraseGems(Phrase *pPhrase, int nBar, Sch::Tick from, Sch::Tick elapsed);
 
-    // Sends the phrase's own sequence when it has one, and records the bar in mLastBar.
-    // NTSC-U/C: 0x001c28a0, PAL: 0x001c86e8
+    /**
+     * Sends the phrase's own sequence when it has one, and records the bar in mLastBar.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001c28a0
+     * @ghidraAddress PAL: 0x001c86e8
+     */
     void PlayPhraseMuse(Phrase *pPhrase, int nBar);
 
     PhraseMgr *mPhraseMgr;       // +0x18

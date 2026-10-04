@@ -620,12 +620,25 @@ private:
     // half, and AddRefObjects() is its only caller.
     void AddObjectRefs();
 
-    // Drop the reference on each object this mesh points at. The destructor, Load(), and Copy()
-    // are its callers. 0x00493d48.
+    /**
+     * Drop the reference on each object this mesh points at.
+     *
+     * The destructor, Load(), and Copy() are its callers.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00493d48
+     * @ghidraAddress PAL: 0x004d1bf8
+     */
     void ReleaseObjects();
 
-    // Empty the vertex vector when mVertsOwner is another mesh, and the face and edge vectors when
-    // mFacesOwner is another mesh. Load() and Copy() are its callers. 0x0047fe68.
+    /**
+     * Empty the vertex vector when mVertsOwner is another mesh, and the face and edge vectors when
+     * mFacesOwner is another mesh.
+     *
+     * Load() and Copy() are its callers.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0047fe68
+     * @ghidraAddress PAL: 0x004bdb60
+     */
     void ClearSharedGeometry();
 
     // One face in AssignFlatVerts(). A face that joins a coplanar neighbour's fan records that
@@ -643,20 +656,32 @@ private:
         Vector3 mNormal;
     };
 
-    // Add face to the fan that primary heads when the two share a vertex of pMesh, their normals
-    // are within two degrees, and the shared vertices retain one pivot for the whole fan. Records
-    // primary in face.mPrimaryFace whether or not it joins. AssignFlatVerts() is the only caller.
-    // 0x004832d0.
+    /**
+     * Add face to the fan that primary heads when the two share a vertex of pMesh, their normals
+     * are within two degrees, and the shared vertices retain one pivot for the whole fan.
+     *
+     * Records primary in face.mPrimaryFace whether or not it joins. AssignFlatVerts() is the only
+     * caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004832d0
+     * @ghidraAddress PAL: 0x004c10a0
+     */
     friend bool JoinFaces(Mesh *pMesh, FlatFace &primary, FlatFace &face);
 
-    // Give every face a first vertex of its own for flat shading, which reads the colour and the
-    // normal of the first vertex only. Coplanar neighbours join one fan and share its vertex. A
-    // bipartite matching of fans to vertices picks each fan's vertex, and a fan left unmatched
-    // splits a vertex, appending a copy to the keys of every animation in anims. Each face is then
-    // rotated to start at its vertex, and Sync() follows. WeldVerts() is the only caller. The
-    // matcher at 0x00569bf0 is upstream code from the vendored netflow package (its diagnostics
-    // read "Inconsistent matching between %d(U) and %d(V)"), and it is not reconstructed.
-    // NTSC-U/C: 0x00483438, PAL: 0x004c1208
+    /**
+     * Give every face a first vertex of its own for flat shading, which reads the colour and the
+     * normal of the first vertex only.
+     *
+     * Coplanar neighbours join one fan and share its vertex. A bipartite matching of fans to
+     * vertices picks each fan's vertex, and a fan left unmatched splits a vertex, appending a copy
+     * to the keys of every animation in anims. Each face is then rotated to start at its vertex,
+     * and Sync() follows. WeldVerts() is the only caller. The matcher at 0x00569bf0 is upstream
+     * code from the vendored netflow package (its diagnostics read "Inconsistent matching between
+     * %d(U) and %d(V)"), and it is not reconstructed.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00483438
+     * @ghidraAddress PAL: 0x004c1208
+     */
     void AssignFlatVerts(std::list<MeshAnim *> &anims);
 
     // Data members follow the recovered offset order, and the access specifiers interleave.

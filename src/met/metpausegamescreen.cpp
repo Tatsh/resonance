@@ -37,14 +37,12 @@ constexpr int kTutorialPhase = 5;
 
 } // namespace
 
-// NTSC-U/C: 0x0031c368, PAL: 0x00342550
 MetPauseGameScreen::MetPauseGameScreen(MetRenderer *pRenderer, int nPriority)
     : MetPauseBaseScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
     mReturnPanel = kPanelName;
 }
 
-// NTSC-U/C: 0x0031c508, PAL: 0x00342750
 void MetPauseGameScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     for (int i = 1; i <= kOptionCount; ++i) {
@@ -54,7 +52,6 @@ void MetPauseGameScreen::ResolveContainerViews() {
     }
 }
 
-// NTSC-U/C: 0x0031c658, PAL: 0x003428c8
 void MetPauseGameScreen::EnterAndShow() {
     GameParams params(*Application::shared()->GetGameManager()->GetParams());
     Rnd::Text *pPaused = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kPausedText)));
@@ -90,7 +87,6 @@ void MetPauseGameScreen::EnterAndShow() {
     MetPauseBaseScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x0031fa40, PAL: 0x003463f8
 MetPauseGameScreen *MetPauseGameScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetPauseGameScreen(pRenderer, nPriority);
 }

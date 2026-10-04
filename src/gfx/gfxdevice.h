@@ -458,30 +458,62 @@ public:
     void FlipFrameBuffer();
 
 private:
-    // Start the DMA transfer of the packet, on VIF1 when mnUseVu1 is set and on the GIF otherwise.
-    // FlushGifPacket() expands it inline, and the out-of-line copy at 0x004a00e8 has no caller.
+    /**
+     * Start the DMA transfer of the packet, on VIF1 when mnUseVu1 is set and on the GIF otherwise.
+     *
+     * FlushGifPacket() expands it inline, and the out-of-line copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004a00e8
+     * @ghidraAddress PAL: 0x004de170
+     */
     void SendPacket();
 
-    // Wait for mnSwapVblank, show the drawn half, invert mnDrawBuffer, select the other half for
-    // drawing, and copy that half's context 1 registers into mGsRegs with PRIM invalidated.
-    // PresentFrame() expands it inline, and the out-of-line copy at 0x004a0238 has no caller.
+    /**
+     * Wait for mnSwapVblank, show the drawn half, invert mnDrawBuffer, select the other half for
+     * drawing, and copy that half's context 1 registers into mGsRegs with PRIM invalidated.
+     *
+     * PresentFrame() expands it inline, and the out-of-line copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004a0238
+     * @ghidraAddress PAL: 0x004de2c0
+     */
     void SwapBuffers();
 
-    // Draw a string in the debug stroke font. Each glyph is a six-point line strip from the table
-    // at 0x006f2f28, scaled to a cell of rect.w by rect.h from a pen at rect.x and rect.y, in GS
-    // primitive pixels. Letters of either case share one glyph, and '.' through '9' follow them.
-    // Any other character draws nothing and advances the pen two cells, and a glyph advances it
-    // one and a half. The caller opens a REGLIST tag of PRIM, RGBAQ, and six XYZ2 first. The
-    // routine writes through Rnd::ThePs rather than a receiver. 0x0049bc20.
+    /**
+     * Draw a string in the debug stroke font.
+     *
+     * Each glyph is a six-point line strip from the table at 0x006f2f28, scaled to a cell of rect.w
+     * by rect.h from a pen at rect.x and rect.y, in GS primitive pixels. Letters of either case
+     * share one glyph, and '.' through '9' follow them. Any other character draws nothing and
+     * advances the pen two cells, and a glyph advances it one and a half. The caller opens a
+     * REGLIST tag of PRIM, RGBAQ, and six XYZ2 first. The routine writes through Rnd::ThePs rather
+     * than a receiver.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0049bc20
+     * @ghidraAddress PAL: 0x004d9c40
+     */
     static void DrawDebugText(const char *pszText, const Rect &rect, const Color &color);
 
-    // Draw one flat sprite over rect, in GS primitive pixels. The caller opens a REGLIST tag of
-    // PRIM, RGBAQ, and two XYZ2 first. The routine writes through Rnd::ThePs rather than a
-    // receiver. 0x0049c630.
+    /**
+     * Draw one flat sprite over rect, in GS primitive pixels.
+     *
+     * The caller opens a REGLIST tag of PRIM, RGBAQ, and two XYZ2 first. The routine writes through
+     * Rnd::ThePs rather than a receiver.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0049c630
+     * @ghidraAddress PAL: 0x004da650
+     */
     static void DrawTimingBar(const Rect &rect, const Color &color);
 
-    // Average the frame time and the sync time over five frames and print "fps %d sync %d" near the
-    // top right corner. No caller survives. 0x0049c388.
+    /**
+     * Average the frame time and the sync time over five frames and print "fps %d sync %d" near the
+     * top right corner.
+     *
+     * No caller survives.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0049c388
+     * @ghidraAddress PAL: 0x004da3a8
+     */
     void DrawFpsReadout();
 
     // Frame-rate sampling for DrawFpsReadout().

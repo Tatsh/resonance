@@ -26,7 +26,6 @@ inline float ClampToUnit(float flValue) {
 
 } // namespace
 
-// NTSC-U/C: 0x00176f38, PAL: 0x001799b0
 FreqPart::FreqPart() {
     mPosition.w = 1.0f;
     mPalettePosition.x = 0.0f;
@@ -34,7 +33,6 @@ FreqPart::FreqPart() {
     Reset();
 }
 
-// NTSC-U/C: 0x00176ed0, PAL: 0x00179948
 FreqPart::FreqPart(FreqPartTemplate *pTemplate) {
     mPosition.w = 1.0f;
     mPalettePosition.x = 0.0f;
@@ -48,7 +46,6 @@ FreqPart::FreqPart(FreqPartTemplate *pTemplate) {
     mMirrored = 0;
 }
 
-// NTSC-U/C: 0x00176f78, PAL: 0x001799f0
 FreqPart::FreqPart(const FreqPart &other) {
     mPosition.w = 1.0f;
     mPalettePosition.x = 0.0f;
@@ -57,12 +54,10 @@ FreqPart::FreqPart(const FreqPart &other) {
     *this = other;
 }
 
-// NTSC-U/C: 0x00176fd0, PAL: 0x00179a48
 FreqPart::~FreqPart() {
     delete mMesh;
 }
 
-// NTSC-U/C: 0x00174de8, PAL: 0x00177818
 void FreqPart::operator=(const FreqPart &other) {
     mTemplate = other.mTemplate;
     mPosition = other.mPosition;
@@ -79,13 +74,11 @@ void FreqPart::operator=(const FreqPart &other) {
     mPalettePosition = other.mPalettePosition;
 }
 
-// NTSC-U/C: 0x00177100, PAL: 0x00179b78
 void FreqPart::SetMesh(Rnd::Mesh *pMesh) {
     delete mMesh;
     mMesh = pMesh;
 }
 
-// NTSC-U/C: 0x00177160, PAL: 0x00179bd8
 void FreqPart::SetColor(const Color &color) {
     if (mTemplate->mColorable == 0) {
         mColor.r = 0.0f;
@@ -98,7 +91,6 @@ void FreqPart::SetColor(const Color &color) {
     mMesh->SetVertexColor(mColor);
 }
 
-// NTSC-U/C: 0x001771b8, PAL: 0x00179c30
 void FreqPart::Reset() {
     mTemplate = nullptr;
     mPosition.x = 0.0f;
@@ -111,7 +103,6 @@ void FreqPart::Reset() {
     mPalettePosition.y = kNoPalettePosition;
 }
 
-// NTSC-U/C: 0x001771f8, PAL: 0x00179c70
 void FreqPart::Pack(Packed *pOut) {
     pOut->mId = static_cast<short>(mTemplate->mId);
     if (mMirrored != 0) {
@@ -128,7 +119,6 @@ void FreqPart::Pack(Packed *pOut) {
         static_cast<unsigned char>(static_cast<int>(mPalettePosition.y * kPaletteByteScale));
 }
 
-// NTSC-U/C: 0x00177038, PAL: 0x00179ab0
 void FreqPart::Unpack(const Packed &packed) {
     int nId = packed.mId;
     mTemplate = MetFreqMakerAssetManager::shared()->GetPart(nId < 0 ? -nId : nId);

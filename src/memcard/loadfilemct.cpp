@@ -11,11 +11,9 @@ LoadFileMCT::LoadFileMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int 
     : MemcardTask(pUser, pCard, nPortSlot, nCookie) {
 }
 
-// NTSC-U/C: 0x001847e0, PAL: 0x00189cd8
 LoadFileMCT::~LoadFileMCT() {
 }
 
-// NTSC-U/C: 0x00185e20, PAL: 0x0018b8d8
 void LoadFileMCT::Load(const HxStr &path, void *pBuffer, int nLength) {
     mPath = path;
     mBuffer = pBuffer;
@@ -23,12 +21,10 @@ void LoadFileMCT::Load(const HxStr &path, void *pBuffer, int nLength) {
     Execute();
 }
 
-// NTSC-U/C: 0x001f61b0, PAL: 0x001fcbc0
 void LoadFileMCT::SetState(int nState) {
     mState = nState;
 }
 
-// NTSC-U/C: 0x00185f08, PAL: 0x0018b9c0
 void LoadFileMCT::RunStep() {
     switch (mState) {
     case kLoadFileStateOpen:
@@ -51,7 +47,6 @@ void LoadFileMCT::RunStep() {
     }
 }
 
-// NTSC-U/C: 0x00185db8, PAL: 0x0018b870
 void LoadFileMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus != kMemcardStatusUnknown) {
@@ -63,7 +58,6 @@ void LoadFileMCT::OnCheckInfo(CheckInfoOp *pOp) {
     Finish();
 }
 
-// NTSC-U/C: 0x00185d00, PAL: 0x0018b7b8
 void LoadFileMCT::OnRead(ReadOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus == kMemcardStatusOk) {
@@ -75,7 +69,6 @@ void LoadFileMCT::OnRead(ReadOp *pOp) {
     Finish();
 }
 
-// NTSC-U/C: 0x00185ca0, PAL: 0x0018b758
 void LoadFileMCT::OnOpenRead(OpenReadOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus == kMemcardStatusOk) {
@@ -88,7 +81,6 @@ void LoadFileMCT::OnOpenRead(OpenReadOp *pOp) {
     Finish();
 }
 
-// NTSC-U/C: 0x00185d58, PAL: 0x0018b810
 void LoadFileMCT::OnClose(CloseOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus == kMemcardStatusOk) {
@@ -100,13 +92,11 @@ void LoadFileMCT::OnClose(CloseOp *pOp) {
     Finish();
 }
 
-// NTSC-U/C: 0x00185ec0, PAL: 0x0018b978
 void LoadFileMCT::Finish() {
     SetState(kLoadFileStateDone);
     mUser->OnFileLoaded(mStatus);
 }
 
-// NTSC-U/C: 0x00185e80, PAL: 0x0018b938
 void LoadFileMCT::Execute() {
     SetState(kLoadFileStateOpen);
     mCard->CheckInfo(this, mPortSlot, mCookie);

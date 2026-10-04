@@ -180,10 +180,16 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // NTSC-U/C: 0x00232598, PAL: 0x00246400
-    // Posts the help text for the selected button. Either play button selects the play text and
-    // the save button the save text. Any other selection posts two empty strings. The European
-    // release posts the texts of the current language instead of their keys.
+    /**
+     * Posts the help text for the selected button.
+     *
+     * Either play button selects the play text and the save button the save text. Any other
+     * selection posts two empty strings. The European release posts the texts of the current
+     * language instead of their keys.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00232598
+     * @ghidraAddress PAL: 0x00246400
+     */
     void UpdateHelpText();
 
     MetButtonList *mButtons; // +0x8c

@@ -83,18 +83,32 @@ public:
     virtual void UnusedHook() = 0;
 
 private:
-    // Fills g_metCheatSequences with three cheats and g_gameCheatSequences with eleven, reusing
-    // one stack record, and sets the registered flag.
-    // NTSC-U/C: 0x001dabc8, PAL: 0x001e0b38
+    /**
+     * Fills g_metCheatSequences with three cheats and g_gameCheatSequences with eleven, reusing one
+     * stack record, and sets the registered flag.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001dabc8
+     * @ghidraAddress PAL: 0x001e0b38
+     */
     void RegisterCheats();
 
-    // Appends a copy of the cheat to g_gameCheatSequences. RegisterCheats() passes its own
-    // receiver, which the body does not read. The title is inferred.
-    // NTSC-U/C: 0x001deb30, PAL: 0x001e4bb0
+    /**
+     * Appends a copy of the cheat to g_gameCheatSequences.
+     *
+     * RegisterCheats() passes its own receiver, which the body does not read. The title is
+     * inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001deb30
+     * @ghidraAddress PAL: 0x001e4bb0
+     */
     void AddGameCheat(const CheatSequence &cheat);
 
-    // Appends a copy of the cheat to g_metCheatSequences, as AddGameCheat() does.
-    // NTSC-U/C: 0x001deb90, PAL: 0x001e4c10
+    /**
+     * Appends a copy of the cheat to g_metCheatSequences, as AddGameCheat() does.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001deb90
+     * @ghidraAddress PAL: 0x001e4c10
+     */
     void AddMetCheat(const CheatSequence &cheat);
 
     // The table the constructor stores. +0x04

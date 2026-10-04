@@ -42,7 +42,10 @@ public:
      */
     MetMultiEndRemixScreen(MetRenderer *pRenderer, int nPriority);
 
-    /** @ghidraAddress 0x002f1500 */
+    /**
+     * @ghidraAddress NTSC-U/C: 0x002f1500
+     * @ghidraAddress PAL: 0x003150a8
+     */
     virtual ~MetMultiEndRemixScreen();
 
     /**

@@ -209,8 +209,14 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
-    // Empty the three channels unless this animation owns its keys. SetKeysOwner() inlines it.
-    // NTSC-U/C: 0x00545570, PAL: 0x005852e8
+    /**
+     * Empty the three channels unless this animation owns its keys.
+     *
+     * SetKeysOwner() inlines it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00545570
+     * @ghidraAddress PAL: 0x005852e8
+     */
     void ClearKeys();
 
     // No class derives from Rnd::LightAnim and no access from outside it is recovered. Every

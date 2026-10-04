@@ -115,17 +115,31 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // NTSC-U/C: 0x0020d448, PAL: 0x00216b98
-    // Shows the working copy's two settings on the two rows.
+    /**
+     * Shows the working copy's two settings on the two rows.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0020d448
+     * @ghidraAddress PAL: 0x00216b98
+     */
     void UpdateOptionLabels();
 
-    // NTSC-U/C: 0x00211578, PAL: 0x0021af38
-    // Switches one row's setting and shows it. Any other row only refreshes the labels.
+    /**
+     * Switches one row's setting and shows it.
+     *
+     * Any other row only refreshes the labels.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00211578
+     * @ghidraAddress PAL: 0x0021af38
+     */
     void ToggleOption(int nRow);
 
-    // NTSC-U/C: 0x002115c8, PAL: 0x0021af88
-    // Stores the working copy into GlobalSettings, applies the audio mode to the synthesiser, and
-    // applies the force-feedback setting to the world when one exists.
+    /**
+     * Stores the working copy into GlobalSettings, applies the audio mode to the synthesiser, and
+     * applies the force-feedback setting to the world when one exists.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002115c8
+     * @ghidraAddress PAL: 0x0021af88
+     */
     void ApplyOptions();
 
     MetButtonList *mRows;                    // +0x8c

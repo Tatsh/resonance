@@ -148,6 +148,9 @@ public:
     /**
      * Write revision 7 of the emitter to stream.
      *
+     * The instance list is not written. A reloaded emitter starts empty, and Load() repopulates it
+     * through Regenerate().
+     *
      * @param stream The stream to write to.
      * @ghidraAddress NTSC-U/C: 0x00459bd8
      * @ghidraAddress PAL: 0x00497160
@@ -636,36 +639,62 @@ protected:
     virtual void SetFrameSelf(float flFrame);
 
 private:
-    // NTSC-U/C: 0x0045e528, PAL: 0x0049bbd0
-    // Drops the reference on every object member and empties mInstances. The
-    // destructor and Copy() invoke it, and the title is inferred.
+    /**
+     * Drops the reference on every object member and empties mInstances.
+     *
+     * The destructor and Copy() invoke it, and the title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0045e528
+     * @ghidraAddress PAL: 0x0049bbd0
+     */
     void ReleaseRefs();
 
-    // NTSC-U/C: 0x0045e5e0, PAL: 0x0049bc88
-    // Takes a reference on every object member and then calls Regenerate(). Copy()
-    // invokes it, and the title is inferred.
+    /**
+     * Takes a reference on every object member and then calls Regenerate().
+     *
+     * Copy() invokes it, and the title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0045e5e0
+     * @ghidraAddress PAL: 0x0049bc88
+     */
     void AcquireRefs();
 
     // The four draw paths DrawShowing() selects from the table at 0x0081c448. Each receives the
     // composed transform of one instance and the age of that instance in frames.
 
-    // NTSC-U/C: 0x0045ea70, PAL: 0x0049c118
-    // Installs the transform as the local transform of mView, drives mView to the age
-    // when mAnimateFromStart is set, recomposes, and draws.
+    /**
+     * Installs the transform as the local transform of mView, drives mView to the age when
+     * mAnimateFromStart is set, recomposes, and draws.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0045ea70
+     * @ghidraAddress PAL: 0x0049c118
+     */
     void DrawInstanceView(const Transform &xfm, float flAge);
 
-    // NTSC-U/C: 0x0045eb00, PAL: 0x0049c1a8
-    // Installs the transform as the local transform of mMesh, recomposes, and draws.
+    /**
+     * Installs the transform as the local transform of mMesh, recomposes, and draws.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0045eb00
+     * @ghidraAddress PAL: 0x0049c1a8
+     */
     void DrawInstanceMesh(const Transform &xfm, float flAge);
 
-    // NTSC-U/C: 0x0045eb78, PAL: 0x0049c220
-    // Stores the transform in the entry of the transform list of mMultiMesh that
-    // mMultiMeshCursor addresses and advances the cursor.
+    /**
+     * Stores the transform in the entry of the transform list of mMultiMesh that mMultiMeshCursor
+     * addresses and advances the cursor.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0045eb78
+     * @ghidraAddress PAL: 0x0049c220
+     */
     void DrawInstanceMultiMesh(const Transform &xfm, float flAge);
 
-    // NTSC-U/C: 0x0045ebb8, PAL: 0x0049c260
-    // Moves the particle mParticleCursor addresses to the translation of the
-    // transform and advances the cursor, and does nothing once the cursor is null.
+    /**
+     * Moves the particle mParticleCursor addresses to the translation of the transform and advances
+     * the cursor, and does nothing once the cursor is null.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0045ebb8
+     * @ghidraAddress PAL: 0x0049c260
+     */
     void DrawInstanceParticle(const Transform &xfm, float flAge);
 
     // No class derives from Rnd::Generator and nothing outside it accesses a member directly.

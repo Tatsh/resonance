@@ -67,7 +67,13 @@ public:
     void Run(int nTick);
 
 private:
-    // NTSC-U/C: 0x001b4548, PAL: 0x001ba320
+    /**
+     * Queue a new PeriodicalCmd for this object at a song position on the clock under mCommand.
+     *
+     * @param nTick The song position to run at, in MIDI ticks.
+     * @ghidraAddress NTSC-U/C: 0x001b4548
+     * @ghidraAddress PAL: 0x001ba320
+     */
     void PostAt(int nTick);
 
     int mOrigin;               // +0x00, from PhraseMaker::GetPeriodOrigin()

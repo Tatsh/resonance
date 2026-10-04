@@ -12,62 +12,50 @@
 // NTSC-U/C: 0x00686290, PAL: 0x006c74f8
 int sMuseID;
 
-// NTSC-U/C: 0x001aa440, PAL: 0x001b01a8
 MusePlayer::MusePlayer() : mId(++sMuseID) {
 }
 
-// NTSC-U/C: 0x001aa4d8, PAL: 0x001b0240
 MuseSynth::MuseSynth(Sch::TickClock *pClock)
     : mClock(pClock), mSustainer(nullptr), mOutput(&mSplitter) {
 }
 
-// NTSC-U/C: 0x001aa5d8, PAL: 0x001b0340
 MuseSynth::~MuseSynth() {
     ReleaseAllPlayers();
     delete mSustainer;
 }
 
-// NTSC-U/C: 0x001aad98, PAL: 0x001b0b00
 MsgSplitter::~MsgSplitter() {
 }
 
-// NTSC-U/C: 0x001aae68, PAL: 0x001b0bd0
 MsgSplitter::MsgSplitter() {
 }
 
-// NTSC-U/C: 0x001aafb0, PAL: 0x001b0d18
 void MuseSynth::CreateSustainer() {
     mSustainer = new SynthSustainer();
     mOutput = mSustainer;
     mSustainer->mSink = &mSplitter;
 }
 
-// NTSC-U/C: 0x001aaf68, PAL: 0x001b0cd0
 int MuseSynth::IsActive() const {
     return mPlayers.size() != 0;
 }
 
-// NTSC-U/C: 0x001ab038, PAL: 0x001b0da0
 void MuseSynth::AddSink(MsgSink *pSink) {
     mSplitter.MsgSource::AddSink(pSink);
 }
 
-// NTSC-U/C: 0x001ab058, PAL: 0x001b0dc0
 void MuseSynth::OnStdMidi(StdMidiMsg *pMsg) {
     mOutput->Dispatch(pMsg);
 }
 
-// NTSC-U/C: 0x001ab088, PAL: 0x001b0df0
 void MuseSynth::OnSustainNote(SustainNoteMsg *pMsg) {
     mOutput->Dispatch(pMsg);
 }
 
-// NTSC-U/C: 0x001ab0b8, PAL: 0x001b0e20
 void MuseSynth::OnAllNotesOff() {
     ReleaseAllPlayers();
 }
 
-// NTSC-U/C: 0x001ab0d8, PAL: 0x001b0e40
 void MuseSynth::ReleaseAllPlayers() {
     for (std::list<MusePlayer *>::iterator it = mPlayers.begin(); it != mPlayers.end(); ++it) {
         (*it)->Stop();
@@ -76,7 +64,6 @@ void MuseSynth::ReleaseAllPlayers() {
     mPlayers.clear();
 }
 
-// NTSC-U/C: 0x001aa690, PAL: 0x001b03f8
 void MuseSynth::StartNotePlayer(Message *pMsg) {
     NoteMsg *pNote = static_cast<NoteMsg *>(pMsg);
     NotePlayer *pPlayer = new NotePlayer(
@@ -85,7 +72,6 @@ void MuseSynth::StartNotePlayer(Message *pMsg) {
     pPlayer->Start(mOutput);
 }
 
-// NTSC-U/C: 0x001aa7c0, PAL: 0x001b0528
 void MuseSynth::StartMultiMusePlayer(Message *pMsg) {
     MultiMusePlayer *pMultiPlayer =
         new MultiMusePlayer(static_cast<MultiMuseMsg *>(pMsg)->mMuse, this, mClock);
@@ -93,7 +79,6 @@ void MuseSynth::StartMultiMusePlayer(Message *pMsg) {
     pMultiPlayer->Start(mOutput);
 }
 
-// NTSC-U/C: 0x001aa908, PAL: 0x001b0670
 void MuseSynth::RetainOnly(MusePlayer *pPlayer) {
     if (pPlayer->DisplacesSiblings() == 0) {
         return;
@@ -110,13 +95,11 @@ void MuseSynth::RetainOnly(MusePlayer *pPlayer) {
     }
 }
 
-// NTSC-U/C: 0x001aa9f0, PAL: 0x001b0758
 void MuseSynth::PlayerFinished(MusePlayer *pPlayer) {
     mPlayers.remove(pPlayer);
     delete pPlayer;
 }
 
-// NTSC-U/C: 0x001ab170, PAL: 0x001b0ed8
 void MuseSynth::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(StdMidiMsg::sID) ||
@@ -137,7 +120,6 @@ void MuseSynth::DispatchPriv(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x001ab4a8, PAL: 0x001b1210
 void MsgSplitter::DispatchPriv(Message *pMsg) {
     Send(pMsg);
 }

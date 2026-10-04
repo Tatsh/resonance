@@ -29,7 +29,6 @@ inline int KilobytesOf(int nLength) {
 
 } // namespace
 
-// PAL: 0x0017ae70
 SaveSpaceCheckerMCT::SaveSpaceCheckerMCT(SaveFileMCT *pOwner,
                                          const std::vector<SaveFileEntry> *pFiles,
                                          const HxStr &dirName,
@@ -42,11 +41,9 @@ SaveSpaceCheckerMCT::SaveSpaceCheckerMCT(SaveFileMCT *pOwner,
     mCard->ListDir(this, mPortSlot, pattern, mCookie, kListDirModeFresh);
 }
 
-// PAL: 0x00189ac0
 SaveSpaceCheckerMCT::~SaveSpaceCheckerMCT() {
 }
 
-// PAL: 0x0017b050
 void SaveSpaceCheckerMCT::OnListDir(ListDirOp *pOp) {
     int nNewFiles = 0;
     int nKilobytes = 0;
@@ -87,11 +84,9 @@ void SaveSpaceCheckerMCT::OnListDir(ListDirOp *pOp) {
     mOwner->OnSpaceChecked(nKilobytes);
 }
 
-// PAL: 0x00189828
 void SaveSpaceCheckerMCT::Finish() {
 }
 
-// PAL: 0x00189830
 void SaveSpaceCheckerMCT::Execute() {
     std::cout << "SaveSpaceCheckerMCT::" << __func__ << "()\n\n";
 }

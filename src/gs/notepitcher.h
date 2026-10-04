@@ -165,22 +165,36 @@ protected:
     virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x001b3a38, PAL: 0x001b9810
+    /**
+     * The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001b3a38
+     * @ghidraAddress PAL: 0x001b9810
+     */
     void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
 
-    // Returns non-zero when nTick differs from mLastPitchPosition. PostPitchMsg() calls it at
-    // NTSC-U/C 0x001b1fa4 (PAL 0x001b7d7c).
-    // NTSC-U/C: 0x001b3b88, PAL: 0x001b9960
+    /**
+     * Returns non-zero when nTick differs from mLastPitchPosition.
+     *
+     * PostPitchMsg() calls it at NTSC-U/C 0x001b1fa4 (PAL 0x001b7d7c).
+     *
+     * @ghidraAddress NTSC-U/C: 0x001b3b88
+     * @ghidraAddress PAL: 0x001b9960
+     */
     int IsOtherTick(int nTick);
 
-    // Reports whether mPlayer may play nBar. In play mode 1 that is TrackData::QueryBar() and
-    // Player::IsFreestyleBar(). Otherwise the bar needs TrackData::QueryBar() and, unless
-    // mAllowOwnedBars is set, must lack an owner or equal nCurrentBar. An owned bar must also
-    // belong to mPlayer.
-    // PostSeekerMsgSecond() expands it inline, and PostPitchMsg() and PostPhraseCapturedMsg() call
-    // the out-of-line copy. The title is inferred.
-    // NTSC-U/C: 0x001b3a68, PAL: 0x001b9840
+    /**
+     * Reports whether mPlayer may play nBar.
+     *
+     * In play mode 1 that is TrackData::QueryBar() and Player::IsFreestyleBar(). Otherwise the bar
+     * needs TrackData::QueryBar() and, unless mAllowOwnedBars is set, must lack an owner or equal
+     * nCurrentBar. An owned bar must also belong to mPlayer. PostSeekerMsgSecond() expands it
+     * inline, and PostPitchMsg() and PostPhraseCapturedMsg() call the out-of-line copy. The title
+     * is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001b3a68
+     * @ghidraAddress PAL: 0x001b9840
+     */
     int CanPlayBar(int nBar, int nCurrentBar);
 
     PhraseMgr *mPhraseMgr; // +0x38

@@ -95,7 +95,6 @@ inline HxStr ConfigText(MetStringId nId, const char *pszKey) {
 
 } // namespace
 
-// NTSC-U/C: 0x00372120, PAL: 0x003a0c30
 MetSaveRemix::MetSaveRemix(MetRenderer *pRenderer,
                            int nPriority,
                            const HxStr &name,
@@ -105,11 +104,9 @@ MetSaveRemix::MetSaveRemix(MetRenderer *pRenderer,
       mRefreshFirstCardSlot(0), mCopying(0), mAlbumNumber(0) {
 }
 
-// NTSC-U/C: 0x00372248, PAL: 0x003a0d60
 MetSaveRemix::~MetSaveRemix() {
 }
 
-// NTSC-U/C: 0x00372488, PAL: 0x003a0fd0
 void MetSaveRemix::RecordPendingSave(const MemcardConnectState &selection,
                                      int nOwnerPad,
                                      HxStr remixName,
@@ -127,7 +124,6 @@ void MetSaveRemix::RecordPendingSave(const MemcardConnectState &selection,
     MemcardManager::shared()->CreateGetConnectStateTask(selection.mPortSlot);
 }
 
-// NTSC-U/C: 0x0037a650, PAL: 0x003aa228
 void MetSaveRemix::OnKeyboardTextEntered(const HxStr &text) {
     mRemixName = text;
     MemcardManager::shared()->mUser = this;
@@ -136,20 +132,16 @@ void MetSaveRemix::OnKeyboardTextEntered(const HxStr &text) {
     MetMsgScreen::SetOwnerPad(mOwnerPad);
 }
 
-// NTSC-U/C: 0x0037a618, PAL: 0x003aa0c8
 void MetSaveRemix::OnSaveAbandoned() {
 }
 
-// NTSC-U/C: 0x0037a620, PAL: 0x003aa0d0
 void MetSaveRemix::OnSaveDialogueClosed() {
 }
 
-// NTSC-U/C: 0x0037a628, PAL: 0x003aa200
 void MetSaveRemix::OnDuplicateNameDeclined() {
     OnSaveAbandoned();
 }
 
-// NTSC-U/C: 0x00372c10, PAL: 0x003a1840
 void MetSaveRemix::OnConnectState(MemcardConnectState state, int nStatus) {
 #ifdef VIDEO_STANDARD_PAL
     // The European release also offers to format a card the enquiry reports as unformatted.
@@ -216,7 +208,6 @@ void MetSaveRemix::OnConnectState(MemcardConnectState state, int nStatus) {
     MetMsgScreen::SetOwnerPad(mOwnerPad);
 }
 
-// NTSC-U/C: 0x00373808, PAL: 0x003a2b28
 void MetSaveRemix::OnCardFormatted([[maybe_unused]] int nPortSlot, int nStatus) {
     switch (nStatus) {
     case kMemcardStatusOk: {
@@ -265,7 +256,6 @@ void MetSaveRemix::OnCardFormatted([[maybe_unused]] int nPortSlot, int nStatus) 
     }
 }
 
-// NTSC-U/C: 0x00374b58, PAL: 0x003a4158
 #ifdef VIDEO_STANDARD_PAL
 void MetSaveRemix::OnRemixSaved([[maybe_unused]] int nPortSlot, int nStatus, int nKilobytes) {
 #else
@@ -342,7 +332,6 @@ void MetSaveRemix::OnRemixSaved([[maybe_unused]] int nPortSlot, int nStatus) {
     }
 }
 
-// NTSC-U/C: 0x00374208, PAL: 0x003a36b8
 void MetSaveRemix::OnRemixesListed([[maybe_unused]] int nPortSlot, [[maybe_unused]] int nStatus) {
     const int nCount = mCardRemixes.size();
     bool bDuplicate = false;
@@ -387,7 +376,6 @@ void MetSaveRemix::OnRemixesListed([[maybe_unused]] int nPortSlot, [[maybe_unuse
     }
 }
 
-// NTSC-U/C: 0x00375590, PAL: 0x003a4dd8
 void MetSaveRemix::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kMemCheckDialogue) {
         if (nChoice == kChoiceSecond) {

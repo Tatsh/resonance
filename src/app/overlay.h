@@ -132,137 +132,279 @@ private:
     // act on the track display of the message's player, which FindTrack() looks up, and show text
     // through HudTextMessage::Show() at scale 1 for 1500 unless noted.
 
-    // NTSC-U/C: 0x0041fdd8, PAL: 0x0045b408
-    // TrackSelectMsg. Shows the track's instrument name on the selecting player's
-    // label, records the track, lights the effect lamps from the renderer's cell for the current
-    // bar, and banks the player's points unless mTutorial is set.
+    /**
+     * Handle a TrackSelectMsg.
+     *
+     * Shows the track's instrument name on the selecting player's label, records the track, lights
+     * the effect lamps from the renderer's cell for the current bar, and banks the player's points
+     * unless mTutorial is set.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041fdd8
+     * @ghidraAddress PAL: 0x0045b408
+     */
     void OnTrackSelect(Message *pMsg);
 
-    // NTSC-U/C: 0x0042aec8, PAL: 0x004662e0
-    // inlined. GameOverMsg. Runs script template 1001 when mTutorial is set.
+    /**
+     * Handle a GameOverMsg.
+     *
+     * Runs script template 1001 when mTutorial is set. Its caller inlines this handler.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0042aec8
+     * @ghidraAddress PAL: 0x004662e0
+     */
     void OnGameOver();
 
-    // NTSC-U/C: 0x0041e020, PAL: 0x00458fb0
-    // WinMsg. Resets every multiplier to 1. With the win sequence enabled in
-    // kGameModeSolo and a winner, starts the win message. Otherwise shows `YOU WIN`, `GAME OVER`,
-    // or `YOU LOSE` on each track display at scale 2 for 3000, over two lines when there are two
-    // or more displays, with the freestyle prompt for a solo winner. The European release also
-    // uses two lines in French.
+    /**
+     * Handle a WinMsg.
+     *
+     * Resets every multiplier to 1. With the win sequence enabled in kGameModeSolo and a winner,
+     * starts the win message. Otherwise shows `YOU WIN`, `GAME OVER`, or `YOU LOSE` on each track
+     * display at scale 2 for 3000, over two lines when there are two or more displays, with the
+     * freestyle prompt for a solo winner. The European release also uses two lines in French.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041e020
+     * @ghidraAddress PAL: 0x00458fb0
+     */
     void OnWin(Message *pMsg);
 
-    // NTSC-U/C: 0x0041e9b8, PAL: 0x00459b58
-    // ChoosePowerupMsg. Shows the chosen kind on the player's powerup indicator in
-    // kPlayModeGame, and selects its effect lamp name otherwise. Runs script template 1016 when
-    // mTutorial is set.
+    /**
+     * Handle a ChoosePowerupMsg.
+     *
+     * Shows the chosen kind on the player's powerup indicator in kPlayModeGame, and selects its
+     * effect lamp name otherwise. Runs script template 1016 when mTutorial is set.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041e9b8
+     * @ghidraAddress PAL: 0x00459b58
+     */
     void OnChoosePowerup(Message *pMsg);
 
-    // NTSC-U/C: 0x0041eba0, PAL: 0x00459d40
-    // CaughtPowerbarMsg. Shows `<kind>\nCAPTURED` in the player's text message for
-    // 1500. DispatchPriv() ignores a PowerupCountMsg outright.
+    /**
+     * Handle a CaughtPowerbarMsg.
+     *
+     * Shows `<kind>\nCAPTURED` in the player's text message for 1500. DispatchPriv() ignores a
+     * PowerupCountMsg outright.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041eba0
+     * @ghidraAddress PAL: 0x00459d40
+     */
     void OnCaughtPowerbar(Message *pMsg);
 
-    // NTSC-U/C: 0x0041eda8, PAL: 0x00459ff8
-    // DeployedPowerupMsg. In kPlayModeGame, shows `<kind>\nDEPLOYED`, sets the
-    // display's mDeployedPowerup, and shows `YOU GOT\nBUMPED!` on the target's display for a
-    // bumper.
+    /**
+     * Handle a DeployedPowerupMsg.
+     *
+     * In kPlayModeGame, shows `<kind>\nDEPLOYED`, sets the display's mDeployedPowerup, and shows
+     * `YOU GOT\nBUMPED!` on the target's display for a bumper.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041eda8
+     * @ghidraAddress PAL: 0x00459ff8
+     */
     void OnDeployedPowerup(Message *pMsg);
 
-    // NTSC-U/C: 0x0042aff0, PAL: 0x00466408
-    // inlined. PointAmountMsg. Records the new score in the player's badge, pending an
-    // untimed redraw.
+    /**
+     * Handle a PointAmountMsg.
+     *
+     * Records the new score in the player's badge, pending an untimed redraw. Its caller inlines
+     * this handler.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0042aff0
+     * @ghidraAddress PAL: 0x00466408
+     */
     void OnPointAmount(Message *pMsg);
 
-    // NTSC-U/C: 0x0041f310, PAL: 0x0045a7e8
-    // JuiceAmountMsg. In kGameModeSolo and kPlayModeGame, sets the player's energy
-    // level to the juice amount and pulses the player's icon while the juice is above 0.85.
+    /**
+     * Handle a JuiceAmountMsg.
+     *
+     * In kGameModeSolo and kPlayModeGame, sets the player's energy level to the juice amount and
+     * pulses the player's icon while the juice is above 0.85.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041f310
+     * @ghidraAddress PAL: 0x0045a7e8
+     */
     void OnJuiceAmount(Message *pMsg);
 
-    // NTSC-U/C: 0x0042b068, PAL: 0x00466480
-    // inlined. PhraseCapturedMsg. Runs script template 1005 when mTutorial is set.
-    // Otherwise, in kPlayModeGame before the bar in mLastBar, shows the capturing player's
-    // points leaving.
+    /**
+     * Handle a PhraseCapturedMsg.
+     *
+     * Runs script template 1005 when mTutorial is set. Otherwise, in kPlayModeGame before the bar
+     * in mLastBar, shows the capturing player's points leaving. Its caller inlines this handler.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0042b068
+     * @ghidraAddress PAL: 0x00466480
+     */
     void OnPhraseCaptured(Message *pMsg);
 
-    // NTSC-U/C: 0x0041f5e8, PAL: 0x0045ab90
-    // TextMsg. Shows the message's text in the first track display's text message.
+    /**
+     * Handle a TextMsg.
+     *
+     * Shows the message's text in the first track display's text message.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041f5e8
+     * @ghidraAddress PAL: 0x0045ab90
+     */
     void OnText(Message *pMsg);
 
-    // NTSC-U/C: 0x0041f708, PAL: 0x0045acd0
-    // LoopToggleMsg. Outside kPlayModeGame, shows the player's loop indicator and,
-    // once the song is under way, `LOOP ON` or `LOOP OFF`. Runs script template 1011 when
-    // mTutorial is set.
+    /**
+     * Handle a LoopToggleMsg.
+     *
+     * Outside kPlayModeGame, shows the player's loop indicator and, once the song is under way,
+     * `LOOP ON` or `LOOP OFF`. Runs script template 1011 when mTutorial is set.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041f708
+     * @ghidraAddress PAL: 0x0045acd0
+     */
     void OnLoopToggle(Message *pMsg);
 
-    // NTSC-U/C: 0x0041f440, PAL: 0x0045a918
-    // AdvanceSectionToggleMsg. Without mTutorial, restyles the section blocks and,
-    // outside playback, shows `ADVANCE TO\nNEXT SECTION` or `REPEAT\nSECTION` on every display.
+    /**
+     * Handle an AdvanceSectionToggleMsg.
+     *
+     * Without mTutorial, restyles the section blocks and, outside playback, shows `ADVANCE TO\nNEXT
+     * SECTION` or `REPEAT\nSECTION` on every display.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041f440
+     * @ghidraAddress PAL: 0x0045a918
+     */
     void OnAdvanceSectionToggle(Message *pMsg);
 
-    // NTSC-U/C: 0x0041fba0, PAL: 0x0045b1a8
-    // ShowEraseEffectMsg. Shows `BAR ERASED` for a range under two bars and
-    // `TRACK ERASED` otherwise.
+    /**
+     * Handle a ShowEraseEffectMsg.
+     *
+     * Shows `BAR ERASED` for a range under two bars and `TRACK ERASED` otherwise.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041fba0
+     * @ghidraAddress PAL: 0x0045b1a8
+     */
     void OnShowEraseEffect(Message *pMsg);
 
-    // NTSC-U/C: 0x0041f9a8, PAL: 0x0045af98
-    // PlaybackToggleMsg. Records the state in mPlaybackOn, shows or hides the edit
-    // prompt, runs the assembly and letterbox animations the matching way, hides the FreQ icons
-    // during playback, and hides every text message.
+    /**
+     * Handle a PlaybackToggleMsg.
+     *
+     * Records the state in mPlaybackOn, shows or hides the edit prompt, runs the assembly and
+     * letterbox animations the matching way, hides the FreQ icons during playback, and hides every
+     * text message.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041f9a8
+     * @ghidraAddress PAL: 0x0045af98
+     */
     void OnPlaybackToggle(Message *pMsg);
 
-    // NTSC-U/C: 0x0042aef8, PAL: 0x00466310
-    // inlined. ToggleGhostMsg. Outside kPlayModeGame, lights or darkens the player's
-    // kHudItemGuides lamp. Runs script template 1021 when mTutorial is set.
+    /**
+     * Handle a ToggleGhostMsg.
+     *
+     * Outside kPlayModeGame, lights or darkens the player's kHudItemGuides lamp. Runs script
+     * template 1021 when mTutorial is set. Its caller inlines this handler.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0042aef8
+     * @ghidraAddress PAL: 0x00466310
+     */
     void OnToggleGhost(Message *pMsg);
 
-    // NTSC-U/C: 0x0042b130, PAL: 0x00466548
-    // inlined. JamEffectMsg. Runs script template 1017 in kPlayModeJam when mTutorial
-    // is set. The message is not read.
+    /**
+     * Handle a JamEffectMsg.
+     *
+     * Runs script template 1017 in kPlayModeJam when mTutorial is set. The message is not read. Its
+     * caller inlines this handler.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0042b130
+     * @ghidraAddress PAL: 0x00466548
+     */
     void OnJamEffect();
 
-    // NTSC-U/C: 0x0041fed8, PAL: 0x0045b508
-    // CatchMsg. In kPlayModeGame before the last bar, pulses the points readout to
-    // the share of the phrase caught. In an easy solo game without mTutorial, counts catches on
-    // bars that cannot be captured and shows `ROTATE TO\nNEW TRACK` at the third.
+    /**
+     * Handle a CatchMsg.
+     *
+     * In kPlayModeGame before the last bar, pulses the points readout to the share of the phrase
+     * caught. In an easy solo game without mTutorial, counts catches on bars that cannot be
+     * captured and shows `ROTATE TO\nNEW TRACK` at the third.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041fed8
+     * @ghidraAddress PAL: 0x0045b508
+     */
     void OnCatch(Message *pMsg);
 
-    // NTSC-U/C: 0x0042b178, PAL: 0x00466590
-    // inlined. PhraseMuffedMsg. In kPlayModeGame without mTutorial, banks the
-    // player's points.
+    /**
+     * Handle a PhraseMuffedMsg.
+     *
+     * In kPlayModeGame without mTutorial, banks the player's points. Its caller inlines this
+     * handler.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0042b178
+     * @ghidraAddress PAL: 0x00466590
+     */
     void OnPhraseMuffed(Message *pMsg);
 
-    // NTSC-U/C: 0x004201c0, PAL: 0x00466610
-    // BeginPhraseCatchMsg. In kPlayModeGame before the last bar and without
-    // mTutorial, shows the phrase's points and multiplier on the player's readout.
+    /**
+     * Handle a BeginPhraseCatchMsg.
+     *
+     * In kPlayModeGame before the last bar and without mTutorial, shows the phrase's points and
+     * multiplier on the player's readout.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004201c0
+     * @ghidraAddress PAL: 0x00466610
+     */
     void OnBeginPhraseCatch(Message *pMsg);
 
-    // NTSC-U/C: 0x0042b1f8, PAL: 0x004667a0
-    // inlined. FadeGameMsg. Starts the screen flash over the message's duration, and
-    // hides the win message's prompt when the game fades out.
+    /**
+     * Handle a FadeGameMsg.
+     *
+     * Starts the screen flash over the message's duration, and hides the win message's prompt when
+     * the game fades out. Its caller inlines this handler.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0042b1f8
+     * @ghidraAddress PAL: 0x004667a0
+     */
     void OnFadeGame(Message *pMsg);
 
-    // NTSC-U/C: 0x00420588, PAL: 0x0045b808
-    // PlayersTrackNeutralizedMsg. Shows `NEUTRALIZED!\n<points> POINTS`.
+    /**
+     * Handle a PlayersTrackNeutralizedMsg.
+     *
+     * Shows `NEUTRALIZED!\n<points> POINTS`.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00420588
+     * @ghidraAddress PAL: 0x0045b808
+     */
     void OnPlayersTrackNeutralized(Message *pMsg);
 
-    // NTSC-U/C: 0x00420408, PAL: 0x004666e0
-    // MultiplierStateMsg. Without mTutorial and before the last bar, shows the base
-    // plus the bonus multiplier and selects the hot material while a bonus applies.
+    /**
+     * Handle a MultiplierStateMsg.
+     *
+     * Without mTutorial and before the last bar, shows the base plus the bonus multiplier and
+     * selects the hot material while a bonus applies.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00420408
+     * @ghidraAddress PAL: 0x004666e0
+     */
     void OnMultiplierState(Message *pMsg);
 
-    // NTSC-U/C: 0x0041f138, PAL: 0x0045a470
-    // PowerupFailedMsg. Shows the failure text for the powerup kind at scale 0.8.
+    /**
+     * Handle a PowerupFailedMsg.
+     *
+     * Shows the failure text for the powerup kind at scale 0.8.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0041f138
+     * @ghidraAddress PAL: 0x0045a470
+     */
     void OnPowerupFailed(Message *pMsg);
 
-    // NTSC-U/C: 0x0042ae88, PAL: 0x004662a0
-    // The badge whose mPlayer is pPlayer, or null.
+    /**
+     * The badge whose mPlayer is pPlayer, or null.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0042ae88
+     * @ghidraAddress PAL: 0x004662a0
+     */
     HudBadge *FindBadge(Player *pPlayer);
 
     // The track display whose mPlayer is pPlayer, or null. Every handler inlines the search, and
     // no out-of-line copy is recovered.
     HudTrack *FindTrack(Player *pPlayer);
 
-    // Sets the layout prefix g_hudLayoutName to `HUD<n>`. The constructor inlines the body, and
-    // the out-of-line copy has no caller.
+    /**
+     * Sets the layout prefix g_hudLayoutName to `HUD<n>`.
+     *
+     * The constructor inlines the body, and the out-of-line copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00429938
+     * @ghidraAddress PAL: 0x00464f78
+     */
     static void SetLayoutName(int nLayout);
 
 public:

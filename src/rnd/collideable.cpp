@@ -83,16 +83,13 @@ static Stream &operator>>(Stream &stream, std::list<Collideable *> &collides) {
     return stream;
 }
 
-// NTSC-U/C: 0x00502668, PAL: 0x00541470
 Collideable::Collideable() {
 }
 
-// NTSC-U/C: 0x00502518, PAL: 0x00541320
 Collideable::~Collideable() {
     ReleaseCollidesRefs();
 }
 
-// NTSC-U/C: 0x00500348, PAL: 0x0053f0f8
 Collideable *Collideable::Parent() {
     for (std::list<Object *>::iterator it = mRefs.begin(); it != mRefs.end(); ++it) {
         Collideable *pCandidate = dynamic_cast<Collideable *>(*it);
@@ -107,7 +104,6 @@ Collideable *Collideable::Parent() {
     return nullptr;
 }
 
-// NTSC-U/C: 0x00500858, PAL: 0x0053f608
 void Collideable::AddCollide(Collideable *pCollide) {
     if (std::find(mCollides.begin(), mCollides.end(), pCollide) != mCollides.end()) {
         Rnd::TheDbg.Notify(kAlreadyInFormat, NameText(pCollide), NameText(this));
@@ -120,7 +116,6 @@ void Collideable::AddCollide(Collideable *pCollide) {
     mCollides.push_back(pCollide);
 }
 
-// NTSC-U/C: 0x005009d8, PAL: 0x0053f788
 void Collideable::RemoveCollide(Collideable *pCollide) {
     if (std::find(mCollides.begin(), mCollides.end(), pCollide) == mCollides.end()) {
         return;
@@ -132,21 +127,18 @@ void Collideable::RemoveCollide(Collideable *pCollide) {
     mCollides.remove(pCollide);
 }
 
-// NTSC-U/C: 0x00502a28, PAL: 0x00541838
 void Collideable::FindCollisions(const Segment &ray, std::list<Collision> &collisions) {
     for (std::list<Collideable *>::iterator it = mCollides.begin(); it != mCollides.end(); ++it) {
         (*it)->FindCollisions(ray, collisions);
     }
 }
 
-// NTSC-U/C: 0x00502ab8, PAL: 0x005418c8
 void Collideable::FindCollisions(const Vector2 &point, std::list<Collision> &collisions) {
     for (std::list<Collideable *>::iterator it = mCollides.begin(); it != mCollides.end(); ++it) {
         (*it)->FindCollisions(point, collisions);
     }
 }
 
-// NTSC-U/C: 0x00502948, PAL: 0x00541758
 void Collideable::ReleaseCollidesRefs() {
     for (std::list<Collideable *>::iterator it = mCollides.begin(); it != mCollides.end(); ++it) {
         if (*it != nullptr) {
@@ -155,7 +147,6 @@ void Collideable::ReleaseCollidesRefs() {
     }
 }
 
-// NTSC-U/C: 0x005029b8, PAL: 0x005417c8
 void Collideable::AcquireCollidesRefs() {
     for (std::list<Collideable *>::iterator it = mCollides.begin(); it != mCollides.end(); ++it) {
         if (*it != nullptr) {
@@ -164,7 +155,6 @@ void Collideable::AcquireCollidesRefs() {
     }
 }
 
-// NTSC-U/C: 0x00502880, PAL: 0x00541690
 void Collideable::DumpText(Dbg &sink) {
     if (sink.mDumpLevel <= 0) {
         return;
@@ -175,7 +165,6 @@ void Collideable::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x005028f0, PAL: 0x00541700
 void Collideable::Save(Stream &stream) {
     int nRevision = kCollideableRevision;
     stream.WriteLE(&nRevision, sizeof(nRevision));
@@ -183,7 +172,6 @@ void Collideable::Save(Stream &stream) {
     stream << mCollides;
 }
 
-// NTSC-U/C: 0x005005f0, PAL: 0x0053f3a0
 void Collideable::Load(Stream &stream) {
     int nRevision = 0;
     stream.ReadLE(&nRevision, sizeof(nRevision));
@@ -202,7 +190,6 @@ void Collideable::Load(Stream &stream) {
     AcquireCollidesRefs();
 }
 
-// NTSC-U/C: 0x00500730, PAL: 0x0053f4e0
 void Collideable::Copy(const Object *pSource, unsigned nFlags) {
     const Collideable *pSourceCollideable = dynamic_cast<const Collideable *>(pSource);
 
@@ -213,7 +200,6 @@ void Collideable::Copy(const Object *pSource, unsigned nFlags) {
     AcquireCollidesRefs();
 }
 
-// NTSC-U/C: 0x00500410, PAL: 0x0053f1c0
 void Collideable::Replace(Object *pFrom, Object *pTo) {
     for (std::list<Collideable *>::iterator it = mCollides.begin(); it != mCollides.end();) {
         if (*it == pTo) {

@@ -166,8 +166,11 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // PAL: 0x00224ec0
-    // Starts the selected song's logo and picture loads and fills the three level texts.
+    /**
+     * Starts the selected song's logo and picture loads and fills the three level texts.
+     *
+     * @ghidraAddress PAL: 0x00224ec0
+     */
     void ShowSelectedSong();
 
     TexturePairRecord *mLogoPair;  // +0x8c `gSongLogo1.tex` and `gSongLogo2.tex`

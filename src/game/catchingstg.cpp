@@ -20,7 +20,6 @@ constexpr int kExportLeadStep = 120;
 
 } // namespace
 
-// NTSC-U/C: 0x0019fb80, PAL: 0x001a58e8
 CatchingSTG::CatchingSTG(TrackData *pTrackData)
     : ScoreTrackGraph(pTrackData), mNeutralizer(nullptr), mCatcher(nullptr) {
     mNeutralizer = new PhraseNeutralizer(mTrackData, mPhraseMgr);
@@ -42,26 +41,22 @@ CatchingSTG::CatchingSTG(TrackData *pTrackData)
     mPhraseMgr->mExportLead = Sch::Tick((mTrack * kExportLeadStep) + kExportLeadStep);
 }
 
-// NTSC-U/C: 0x001a0450, PAL: 0x001a61b8
 CatchingSTG::~CatchingSTG() {
     CatchingSTG::Stop(); // The binary calls this class's body rather than dispatching.
     delete mCatcher;
     delete mNeutralizer;
 }
 
-// NTSC-U/C: 0x001a04d8, PAL: 0x001a6240
 void CatchingSTG::Start() {
     ScoreTrackGraph::Start();
     mCatcher->Start();
 }
 
-// NTSC-U/C: 0x001a0518, PAL: 0x001a6280
 void CatchingSTG::Stop() {
     mCatcher->Stop();
     ScoreTrackGraph::Stop();
 }
 
-// NTSC-U/C: 0x0019fd88, PAL: 0x001a5af0
 void CatchingSTG::ConnectInputs(MsgSource *pPrimary, MsgSource *pOptional, MsgSource *pSecondary) {
     pPrimary->AddSink(mMixer);
     pPrimary->AddSink(mCatcher);
@@ -83,37 +78,31 @@ void CatchingSTG::ConnectInputs(MsgSource *pPrimary, MsgSource *pOptional, MsgSo
     mPhrasePlayer->AddSink(mMuseSynth);
 }
 
-// NTSC-U/C: 0x001a0558, PAL: 0x001a62c0
 void CatchingSTG::ConnectGamer(MsgSource *pSource) {
     pSource->AddSink(mMixer);
 }
 
-// NTSC-U/C: 0x001a0588, PAL: 0x001a62f0
 void CatchingSTG::SetMixerOutput(MsgSink *pOutput) {
     mMuseSynth->AddSink(mMixer);
     mMixer->mOutput = pOutput;
 }
 
-// NTSC-U/C: 0x001a05c8, PAL: 0x001a6330
 void CatchingSTG::ConnectToTunnel(MsgSink *pSink) {
     mPhraseMgr->AddSink(pSink);
     mCatcher->AddSink(pSink);
     mNeutralizer->AddSink(pSink);
 }
 
-// NTSC-U/C: 0x001a0650, PAL: 0x001a63b8
 void CatchingSTG::SetNetSink(MsgSink *pSink) {
     if (pSink != nullptr) {
         mPhraseMgr->mNetSink = pSink;
     }
 }
 
-// NTSC-U/C: 0x001a06f0, PAL: 0x001a6458
 int CatchingSTG::HasNothingPending() {
     return mCatcher->IsPhraseRunEmpty();
 }
 
-// NTSC-U/C: 0x001a0668, PAL: 0x001a63d0
 void CatchingSTG::GivePhrases(int nTick, Player *pPlayer) {
     // Yes, the binary discards this call's result. It is what remains of a compiled-away assertion.
     mApplication->GetGameMode();
@@ -122,12 +111,10 @@ void CatchingSTG::GivePhrases(int nTick, Player *pPlayer) {
     dynamic_cast<SingleCatcher *>(mCatcher)->ResetOwners(nTick, pPlayer);
 }
 
-// NTSC-U/C: 0x001a0428, PAL: 0x001a6190
 int CatchingSTG::CanGivePhrases() {
     return 1;
 }
 
-// NTSC-U/C: 0x001a0720, PAL: 0x001a6488
 void CatchingSTG::CreatePowerbarMgr() {
     mPhraseMgr->CreatePowerbarMgr();
 }

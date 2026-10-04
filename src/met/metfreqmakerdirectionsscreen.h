@@ -191,13 +191,24 @@ public:
 
 private:
 #ifdef VIDEO_STANDARD_PAL
-    // PAL: 0x00278e00
-    // Fill the text column of every page from the current language. The title is inferred.
+    /**
+     * Fill the text column of every page from the current language.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress PAL: 0x00278e00
+     */
     void LoadPageTexts();
 #endif
 
-    // NTSC-U/C: 0x0026a008, PAL: 0x00281930
-    // The cell at one row and column of a page table. The body does not read this object.
+    /**
+     * The cell at one row and column of a page table.
+     *
+     * The body does not read this object.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0026a008
+     * @ghidraAddress PAL: 0x00281930
+     */
     const HxStr &PageCell(int nRow, int nColumn, const HxStr (*pTable)[2]);
 
     Rnd::View *mRowTemplate; // +0x90, resolved by slot 38

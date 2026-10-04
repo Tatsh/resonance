@@ -230,7 +230,8 @@ private:
     // Link the node in ahead of the ring head, which makes it the last position of a pass.
     void Link();
 
-    // Take a node out of the ring and make it self-linked again. 0x004b6490 and every
+    // Take a node out of the ring and make it self-linked again, moving the head along when the
+    // head is the node being removed. 0x004b6490 and every
     // transition out of kTaskStateRunning inlined a copy of this.
     static void Unlink(Node *pNode);
 

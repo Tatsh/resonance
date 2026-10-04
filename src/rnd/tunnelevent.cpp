@@ -33,7 +33,6 @@ void ReadObjectRef(Stream &stream, T *&refOut) {
 
 } // namespace
 
-// NTSC-U/C: 0x0046dd40, PAL: 0x004ab880
 void TunnelEvent::Save(Stream &stream) const {
     WriteObjectRef(stream, mObject);
     stream.WriteLE(&mFrame, sizeof(mFrame))
@@ -41,7 +40,6 @@ void TunnelEvent::Save(Stream &stream) const {
         .WriteLE(&mUser, sizeof(mUser));
 }
 
-// NTSC-U/C: 0x0046de48, PAL: 0x004ab988
 void TunnelEvent::Load(Stream &stream) {
     mUser = 0;
     ReadObjectRef(stream, mObject);
@@ -51,7 +49,6 @@ void TunnelEvent::Load(Stream &stream) {
     }
 }
 
-// NTSC-U/C: 0x00477630, PAL: 0x004b52a8
 void TunnelEvent::Replace(Object *pFrom, Object *pTo, Object *pReferrer) {
     if (mObject == pFrom && mObject != nullptr) {
         pFrom->RemoveRef(pReferrer);

@@ -23,12 +23,10 @@ constexpr int kUnallocatedCommand = -2;
 
 } // namespace
 
-// NTSC-U/C: 0x004a7780, PAL: 0x004e5890
 Sch::TimeClock::TimeClock(Scheduler *pWatchdog)
     : mNegatedOrigin(0), mPausedNs(0), mHasOrigin(0), mWatchdog(pWatchdog) {
 }
 
-// NTSC-U/C: 0x004a7828, PAL: 0x004e5938
 void Sch::TimeClock::SetOrigin(long long nNanoseconds) {
     if (mHasOrigin == 0) {
         mHasOrigin = 1;
@@ -36,7 +34,6 @@ void Sch::TimeClock::SetOrigin(long long nNanoseconds) {
     }
 }
 
-// NTSC-U/C: 0x004a77c0, PAL: 0x004e58d0
 long long Sch::TimeClock::Now() {
     if (mHasOrigin == 0) {
         return mPausedNs;
@@ -44,7 +41,6 @@ long long Sch::TimeClock::Now() {
     return mWatchdog->mNowNs + mNegatedOrigin;
 }
 
-// NTSC-U/C: 0x004a7878, PAL: 0x004e5988
 void Sch::TimeClock::Pause() {
     if (mHasOrigin != 0) {
         mHasOrigin = 0;
@@ -52,7 +48,6 @@ void Sch::TimeClock::Pause() {
     }
 }
 
-// NTSC-U/C: 0x004a7848, PAL: 0x004e5958
 void Sch::TimeClock::Resume() {
     if (mHasOrigin == 0) {
         mHasOrigin = 1;
@@ -60,7 +55,6 @@ void Sch::TimeClock::Resume() {
     }
 }
 
-// NTSC-U/C: 0x004a78b8, PAL: 0x004e59c8
 void Sch::TimeClock::Post(
     Sch::Command *pCommand, Sch::Time tick, CmdID &id, int bRecordable, int bDelta) {
     Sch::TimedCommand *pTimed = new Sch::TimedCommand(pCommand, tick, bDelta);
@@ -73,14 +67,12 @@ void Sch::TimeClock::Post(
     Attachment::ReleaseIfSet(pTimed);
 }
 
-// NTSC-U/C: 0x004a60a0, PAL: 0x004e4140
 void Sch::TimeClock::PostIn(Sch::Command *pCommand, Sch::Time tick, CmdID &id, int bRecordable) {
     Sch::TimedCommand *pTimed = new Sch::TimedCommand(pCommand, tick, kDeltaPost);
     mWatchdog->QueueDelta(pTimed, tick.mValue, id, bRecordable, kDefaultOrder);
     Attachment::ReleaseIfSet(pTimed);
 }
 
-// NTSC-U/C: 0x004a6178, PAL: 0x004e4218
 void Sch::TimeClock::PostIn(Sch::Command *pCommand, Sch::Time tick) {
     CmdID id;
     id.mValue = kUnallocatedCommand;
@@ -89,7 +81,6 @@ void Sch::TimeClock::PostIn(Sch::Command *pCommand, Sch::Time tick) {
     Attachment::ReleaseIfSet(pTimed);
 }
 
-// NTSC-U/C: 0x004a79d0, PAL: 0x004e5ae0
 void Sch::TimeClock::Withdraw(const CmdID &id) {
     const CmdID copy = id; // Yes, the binary copies the handle to the stack first.
     mWatchdog->WithdrawByCmdID(copy);

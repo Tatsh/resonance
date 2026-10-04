@@ -68,7 +68,6 @@ inline void ShowScreen(const char *pszName, int nShowing) {
 
 } // namespace
 
-// NTSC-U/C: 0x00240c28, PAL: 0x002556d8
 MetJukeboxTopButtonsScreen::MetJukeboxTopButtonsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer,
                 nPriority,
@@ -79,16 +78,13 @@ MetJukeboxTopButtonsScreen::MetJukeboxTopButtonsScreen(MetRenderer *pRenderer, i
     mButtons = new MetButtonList;
 }
 
-// NTSC-U/C: 0x00246778, PAL: 0x0025b890
 MetJukeboxTopButtonsScreen::~MetJukeboxTopButtonsScreen() {
 }
 
-// NTSC-U/C: 0x002466f0, PAL: 0x0025b808
 MetJukeboxTopButtonsScreen *MetJukeboxTopButtonsScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetJukeboxTopButtonsScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x00240e28, PAL: 0x00255950
 void MetJukeboxTopButtonsScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     mButtons->Add(HxStr(kSavedRemixesObject), MetText(kMetStrJbbSavedRemixes, kSavedRemixesLabel));
@@ -99,7 +95,6 @@ void MetJukeboxTopButtonsScreen::ResolveContainerViews() {
     mButtons->SetSelected(kSavedRemixesButton);
 }
 
-// NTSC-U/C: 0x00241120, PAL: 0x00255d20
 void MetJukeboxTopButtonsScreen::OnExitFinished() {
     if (mExitChoice == kExitCancelled) {
         PushNamedScreen(HxStr(kLeftGizmoScreen));
@@ -109,7 +104,6 @@ void MetJukeboxTopButtonsScreen::OnExitFinished() {
     }
 }
 
-// NTSC-U/C: 0x00241320, PAL: 0x00255f98
 void MetJukeboxTopButtonsScreen::ShowSelectedPanel() {
     const int nSelected = mButtons->mSelected;
     ShowScreen(kCustomRemixesScreen, kHidden);
@@ -157,7 +151,6 @@ void MetJukeboxTopButtonsScreen::ShowSelectedPanel() {
     }
 }
 
-// NTSC-U/C: 0x00241b08, PAL: 0x00256940
 void MetJukeboxTopButtonsScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
     mExitChoice = kExitNotCancelled;
@@ -195,7 +188,6 @@ void MetJukeboxTopButtonsScreen::EnterAndShow() {
     ShowSelectedPanel();
 }
 
-// NTSC-U/C: 0x00242140, PAL: 0x002570e8
 void MetJukeboxTopButtonsScreen::BeginExit() {
     MetScreen::BeginExit();
     ExitScreenByName(HxStr(kCustomRemixesScreen));
@@ -205,7 +197,6 @@ void MetJukeboxTopButtonsScreen::BeginExit() {
     ExitScreenByName(HxStr(kDoneScreen));
 }
 
-// NTSC-U/C: 0x002467e8, PAL: 0x0025b910
 void MetJukeboxTopButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandLeft:
@@ -229,11 +220,9 @@ void MetJukeboxTopButtonsScreen::HandleCommand(const MetScreenCommand *pCommand)
     }
 }
 
-// NTSC-U/C: 0x002468b8, PAL: 0x0025b9e0
 void MetJukeboxTopButtonsScreen::OnEnterFinished() {
     ShowSelectedPanel();
 }
 
-// NTSC-U/C: 0x002468d8, PAL: 0x0025ba00
 void MetJukeboxTopButtonsScreen::UpdateIdle(float) {
 }

@@ -44,7 +44,6 @@ char *AlignZoneStart(void *pBlock) {
 
 } // namespace
 
-// NTSC-U/C: 0x00461190, PAL: 0x0049e850
 int ZoneCreate(const char *pszName, int nSize) {
     if (bZonesInUse == 0) {
         return kNoZone;
@@ -86,7 +85,6 @@ int ZoneCreate(const char *pszName, int nSize) {
     return nZone;
 }
 
-// NTSC-U/C: 0x004612e0, PAL: 0x0049e9a0
 void *ZoneAlloc(unsigned nSize) {
     if (bZonesInUse == 0) {
         return MemAllocTagged(nSize, __FILE__, __LINE__);
@@ -117,7 +115,6 @@ void *ZoneAlloc(unsigned nSize) {
     return pBlock;
 }
 
-// NTSC-U/C: 0x004613d0, PAL: 0x0049ea90
 void *ZoneGrabTemp([[maybe_unused]] int nSize) {
     if (g_pTempBuffer == nullptr) {
         if (bZonesInUse != 0) {
@@ -150,7 +147,6 @@ void *ZoneGrabTemp([[maybe_unused]] int nSize) {
     return g_pTempBuffer;
 }
 
-// NTSC-U/C: 0x00461518, PAL: 0x0049ebd8
 void ZoneInit(int nEnabled) {
     if (bZonesInUse != 0) {
         FreeAllZones();
@@ -158,7 +154,6 @@ void ZoneInit(int nEnabled) {
     bZonesInUse = nEnabled;
 }
 
-// NTSC-U/C: 0x00461558, PAL: 0x0049ec18
 void FreeAllZones() {
     for (int i = 0; i < kZoneCount; ++i) {
         if (zoneDescs[i].mBlock != nullptr) {
@@ -169,14 +164,12 @@ void FreeAllZones() {
     zhCurr = kNoZone;
 }
 
-// NTSC-U/C: 0x004615d8, PAL: 0x0049ec98
 void InitializeZoneList() {
     for (const ZoneConfig *pConfig = g_aZoneConfigs; pConfig->mName != nullptr; ++pConfig) {
         ZoneCreate(pConfig->mName, pConfig->mSizeKb * 1024);
     }
 }
 
-// NTSC-U/C: 0x00461628, PAL: 0x0049ece8
 void ZoneDelete(int nZone) {
     if (bZonesInUse == 0) {
         return;
@@ -195,7 +188,6 @@ void ZoneDelete(int nZone) {
     }
 }
 
-// NTSC-U/C: 0x004616c8, PAL: 0x0049ed88
 void ReleaseAllZoneSlots() {
     for (int i = 0; i < kZoneCount; ++i) {
         if (zoneDescs[i].mBlock != nullptr) {
@@ -204,7 +196,6 @@ void ReleaseAllZoneSlots() {
     }
 }
 
-// NTSC-U/C: 0x00461770, PAL: 0x0049ee30
 int FindZoneByName(const char *pszName) {
     for (int i = 0; i < kZoneCount; ++i) {
         if (zoneDescs[i].mBlock != nullptr && strcmp(zoneDescs[i].mName, pszName) == 0) {
@@ -214,7 +205,6 @@ int FindZoneByName(const char *pszName) {
     return kNoZone;
 }
 
-// NTSC-U/C: 0x004617f8, PAL: 0x0049eeb8
 void ZoneSetCurrent(int nZone) {
     if (bZonesInUse == 0) {
         return;
@@ -222,17 +212,14 @@ void ZoneSetCurrent(int nZone) {
     zhCurr = nZone;
 }
 
-// NTSC-U/C: 0x00461818, PAL: 0x0049eed8
 int ZoneGetCurrent() {
     return zhCurr;
 }
 
-// NTSC-U/C: 0x00461828, PAL: 0x0049eee8
 void ZoneReset() {
     ZoneResetZone(zhCurr);
 }
 
-// NTSC-U/C: 0x00461850, PAL: 0x0049ef10
 void ZoneResetZone(int nZone) {
     if (bZonesInUse == 0) {
         return;
@@ -249,7 +236,6 @@ void ZoneResetZone(int nZone) {
     pZone->mCur = pZone->mStart;
 }
 
-// NTSC-U/C: 0x004618b0, PAL: 0x0049ef70
 void ZoneFree(void *pBlock) {
     if (bZonesInUse != 0 && zhCurr != kNoZone) {
         return;
@@ -257,7 +243,6 @@ void ZoneFree(void *pBlock) {
     MemFreeTagged(pBlock, __FILE__, __LINE__);
 }
 
-// NTSC-U/C: 0x00461900, PAL: 0x0049efc0
 int ZoneGetAvail(int nDefault) {
     if (bZonesInUse == 0) {
         return nDefault;
@@ -273,7 +258,6 @@ int ZoneGetAvail(int nDefault) {
     return pZone->mSize - (pZone->mCur - pZone->mStart);
 }
 
-// NTSC-U/C: 0x00461968, PAL: 0x0049f028
 int FindZoneForPointer(const void *pBlock) {
     const char *pAddress = static_cast<const char *>(pBlock);
     for (int i = 0; i < kZoneCount; ++i) {
@@ -288,12 +272,10 @@ int FindZoneForPointer(const void *pBlock) {
     return kNoZone;
 }
 
-// NTSC-U/C: 0x004619c8, PAL: 0x0049f088
 void ZoneReleaseTemp() {
     g_bTempGrabbed = 0;
 }
 
-// NTSC-U/C: 0x004619d8, PAL: 0x0049f098
 void ZoneDump() {
     if (bZonesInUse == 0) {
         return;

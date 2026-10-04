@@ -672,7 +672,6 @@ static int sceMpegUpdatePictureNumber(void) {
     return g_nMpegLatestPictureNumber;
 }
 
-// NTSC-U/C: 0x0060ba60, PAL: 0x0064c6d0
 int sceMpegNextPictureHeader(void) {
     StreamEntry entry;
 
@@ -1269,7 +1268,6 @@ static const unsigned long long g_streamTemplates[10][2] = {
     { 0xbd90000000ULL, 0xffff000000ULL },
 };
 
-// NTSC-U/C: 0x005e0ad8, PAL: 0x00622a18
 void sceMpegResetRingPointers(void *pRing, void *pBase, int nSize) {
     MpegRing *ring;
 
@@ -1280,7 +1278,6 @@ void sceMpegResetRingPointers(void *pRing, void *pBase, int nSize) {
     ring->mWrite = (int)(uintptr_t)pBase;
 }
 
-// NTSC-U/C: 0x005e0af0, PAL: 0x00622a30
 int sceMpegCommitWritePointer(void *pRing) {
     MpegRing *ring;
     int value;
@@ -1291,7 +1288,6 @@ int sceMpegCommitWritePointer(void *pRing) {
     return value;
 }
 
-// NTSC-U/C: 0x005e0b00, PAL: 0x00622a40
 void sceMpegRewindWritePointer(void *pRing) {
     MpegRing *ring;
     int value;
@@ -1301,7 +1297,6 @@ void sceMpegRewindWritePointer(void *pRing) {
     ring->mWrite = value;
 }
 
-// NTSC-U/C: 0x005e0b10, PAL: 0x00622a50
 void *sceMpegCheckWorkAreaSize(void *pRing, int nNeed, int nAlign) {
     MpegRing *ring;
     unsigned int write;
@@ -1327,7 +1322,6 @@ void *sceMpegCheckWorkAreaSize(void *pRing, int nNeed, int nAlign) {
     return (void *)(uintptr_t)aligned;
 }
 
-// NTSC-U/C: 0x0060ded0, PAL: 0x0064eb40
 void sceMpegRaiseError(const char *pFormat) {
     sceMpeg *decoder;
     MpegWork *work;
@@ -1349,12 +1343,10 @@ void sceMpegRaiseError(const char *pFormat) {
     sceMpegInvokeCallbackSlot(decoder, &entry);
 }
 
-// NTSC-U/C: 0x0060de90, PAL: 0x0064eb00
 void sceMpegPrintErrorLine(const char *pMessage) {
     printf("[MPEG ERROR]%s\n", pMessage);
 }
 
-// NTSC-U/C: 0x0060dea0, PAL: 0x0064eb10
 void sceMpegReportErrorFormatted(const char *pFormat, ...) {
     char buffer[kErrorMessageSize];
     va_list args;
@@ -1393,7 +1385,6 @@ int sceIpuSync(int nMode) {
     return 0;
 }
 
-// NTSC-U/C: 0x0060dd78, PAL: 0x0064e9e8
 void sceMpegResetMcBuffers(void) {
     int base;
 
@@ -1406,7 +1397,6 @@ void sceMpegResetMcBuffers(void) {
     g_mpegIpuTable.mCurrent = 0;
 }
 
-// NTSC-U/C: 0x0060ddc8, PAL: 0x0064ea38
 void sceMpegResetIpuChannels(void *pDecoder) {
     volatile unsigned int *pStatus;
     volatile unsigned int *pStatusSet;
@@ -1446,7 +1436,6 @@ void sceMpegResetIpuChannels(void *pDecoder) {
     sceIpuSync(0);
 }
 
-// NTSC-U/C: 0x0060dce0, PAL: 0x0064e950
 void sceMpegSelectMpeg1(void) {
     g_nMpegIsMpeg2 = 0;
     sceIpuSetMpeg1Mode(1);
@@ -1528,8 +1517,6 @@ static inline int IpuWaitIdle(void) {
     return value;
 }
 
-// NTSC-U/C: 0x0061da40, PAL: 0x0065e5d0
-// Resets the IPU and loads both quantiser matrices, the colour lookup table, and the threshold.
 int sceIpuResetAndLoadTables(void) {
     int i;
 
@@ -1560,7 +1547,6 @@ int sceIpuResetAndLoadTables(void) {
     return IpuWaitIdle();
 }
 
-// NTSC-U/C: 0x005caa58, PAL: 0x0060c9b8
 int sceMpegDemuxPss(sceMpeg *pMpeg, unsigned char *pStart, int nSize) {
     return sceMpegDemuxPssRing(pMpeg, pStart, nSize, NULL, -1);
 }
@@ -1588,7 +1574,6 @@ static unsigned long long buildStreamKey(int nType, int nChannel) {
     return g_streamTemplates[nType][0] | ((unsigned long long)(long long)nChannel << shift);
 }
 
-// NTSC-U/C: 0x005e08e8, PAL: 0x00622828
 void sceMpegReset(void *pDecoder) {
     sceMpeg *decoder;
     MpegWork *work;
@@ -1625,7 +1610,6 @@ int sceMpegClearRefBuff(void *pDecoder) {
     return 1;
 }
 
-// NTSC-U/C: 0x005e0490, PAL: 0x006223d0
 int sceMpegInit(void) {
     volatile unsigned int *pStatus;
     volatile unsigned int *pStatusSet;
@@ -2015,7 +1999,6 @@ static int isPacketStart(const BitReader *pReader) {
            peekBits(pReader, 32) != kPackStartCode && peekBits(pReader, 32) != kProgramEndCode;
 }
 
-// NTSC-U/C: 0x005ca768, PAL: 0x0060c6c8
 int sceMpegDemuxPssRing(sceMpeg *pMpeg,
                         unsigned char *pStart,
                         int nSize,
@@ -2091,7 +2074,6 @@ int sceMpegDemuxPssRing(sceMpeg *pMpeg,
     }
 }
 
-// NTSC-U/C: 0x005e08c8, PAL: 0x00622808
 int sceMpegIsEnd(void *pDecoder) {
     MpegWork *work;
 
@@ -4838,7 +4820,6 @@ static int decodePictureInner(void *pDecoder) {
     return 1;
 }
 
-// NTSC-U/C: 0x005e07b0, PAL: 0x006226f0
 int sceMpegGetPicture(void *pDecoder, void *pPicture, int nMacroblocks) {
     MpegWork *work;
     uintptr_t picture;
@@ -4856,7 +4837,6 @@ int sceMpegGetPicture(void *pDecoder, void *pPicture, int nMacroblocks) {
     return decodePictureInner(pDecoder);
 }
 
-// NTSC-U/C: 0x005e07f8, PAL: 0x00622738
 int sceMpegGetPictureRAW8(void *pDecoder, void *pPicture, int nMacroblocks) {
     MpegWork *work;
     uintptr_t picture;
@@ -4874,7 +4854,6 @@ int sceMpegGetPictureRAW8(void *pDecoder, void *pPicture, int nMacroblocks) {
     return decodePictureInner(pDecoder);
 }
 
-// NTSC-U/C: 0x005e0840, PAL: 0x00622780
 int sceMpegGetPictureRAW8xy(void *pDecoder, void *pPicture, int nMbWidth, int nMbHeight) {
     MpegWork *work;
     uintptr_t picture;
@@ -4892,7 +4871,6 @@ int sceMpegGetPictureRAW8xy(void *pDecoder, void *pPicture, int nMbWidth, int nM
     return decodePictureInner(pDecoder);
 }
 
-// NTSC-U/C: 0x005e0530, PAL: 0x00622470
 void *sceMpegCreateDecoderContext(void *pDecoder, void *pWork, int nWorkSize) {
     sceMpeg *decoder;
     uintptr_t work;
@@ -4971,7 +4949,6 @@ void *sceMpegCreateDecoderContext(void *pDecoder, void *pWork, int nWorkSize) {
     return (void *)(uintptr_t)sceMpegCommitWritePointer(ring);
 }
 
-// NTSC-U/C: 0x005e0990, PAL: 0x006228d0
 void *sceMpegSetCallbackSlot(void *pDecoder, int nSlot, void *pfnCallback, void *pData) {
     MpegWork *work;
     void *old;
@@ -4983,7 +4960,6 @@ void *sceMpegSetCallbackSlot(void *pDecoder, int nSlot, void *pfnCallback, void 
     return old;
 }
 
-// NTSC-U/C: 0x005e09b8, PAL: 0x006228f8
 int sceMpegInvokeCallbackSlot(void *pDecoder, void *pEntry) {
     MpegWork *work;
     StreamEntry *entry;
@@ -5009,13 +4985,11 @@ int sceMpegInvokeCallbackSlot(void *pDecoder, void *pEntry) {
     return callback(pDecoder, pEntry, slot->data);
 }
 
-// NTSC-U/C: 0x005e0770, PAL: 0x006226b0
 int sceMpegDelete(void *pDecoder) {
     (void)pDecoder;
     return 1;
 }
 
-// NTSC-U/C: 0x005e0890, PAL: 0x006227d0
 void sceMpegSetDecodeMode(void *pDecoder, int nIntra, int nPredicted, int nBidirectional) {
     MpegWork *work;
 
@@ -5026,7 +5000,6 @@ void sceMpegSetDecodeMode(void *pDecoder, int nIntra, int nPredicted, int nBidir
     work->mDecodeLimits[kPictureCountPredicted] = nPredicted;
 }
 
-// NTSC-U/C: 0x005e08d8, PAL: 0x00622818
 int sceMpegIsRefBuffEmpty(void *pDecoder) {
     MpegWork *work;
     unsigned int value;
@@ -5036,7 +5009,6 @@ int sceMpegIsRefBuffEmpty(void *pDecoder) {
     return value < 1u;
 }
 
-// NTSC-U/C: 0x005caa78, PAL: 0x0060c9d8
 sceMpegCallback sceMpegAddStrCallback(
     void *pDecoder, int nType, int nChannel, sceMpegCallback pfnCallback, void *pData) {
     MpegWork *work;

@@ -92,6 +92,8 @@ typedef struct {
  * Bind the sdrdrv server.
  *
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x00576fe0
+ * @ghidraAddress PAL: 0x005b74a8
  */
 int sceSdRemoteInit(void);
 
@@ -100,6 +102,8 @@ int sceSdRemoteInit(void);
  *
  * @param arg Nonzero to wait for the result. An rSd command and the call's arguments follow.
  * @return The call's result when @p arg is nonzero.
+ * @ghidraAddress NTSC-U/C: 0x00577120
+ * @ghidraAddress PAL: 0x005b75e8
  */
 int sceSdRemote(int arg, ...);
 

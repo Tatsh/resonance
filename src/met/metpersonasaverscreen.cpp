@@ -257,7 +257,6 @@ inline void OpenNameKeyboard(MetPersonaData *pPersona, MetKBUser *pUser) {
 
 } // namespace
 
-// NTSC-U/C: 0x0032e858, PAL: 0x00356da0
 void MetPersonaSaverScreen::StartSave(const std::vector<HxStr> &screens,
                                       MetPersonaData *pPersona,
                                       const MemcardConnectState &slot,
@@ -277,7 +276,6 @@ void MetPersonaSaverScreen::StartSave(const std::vector<HxStr> &screens,
     pLoadGame->ActivateNamedPanel(HxStr(kOwnScreenName));
 }
 
-// NTSC-U/C: 0x0032eaa8, PAL: 0x00357068
 void MetPersonaSaverScreen::StartDelete(const std::vector<HxStr> &screens,
                                         MetPersonaData *pPersona,
                                         const MemcardConnectState &slot) {
@@ -295,18 +293,15 @@ void MetPersonaSaverScreen::StartDelete(const std::vector<HxStr> &screens,
     pLoadGame->ActivateNamedPanel(HxStr(kOwnScreenName));
 }
 
-// NTSC-U/C: 0x0032ece0, PAL: 0x00357320
 MetPersonaSaverScreen::MetPersonaSaverScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mIsCopy(0), mConfirmReplace(0), mRefreshingSettingsCard(0) {
 }
 
-// NTSC-U/C: 0x0032f020, PAL: 0x003576d0
 MetPersonaSaverScreen::~MetPersonaSaverScreen() {
     ClearPersonas();
 }
 
-// NTSC-U/C: 0x0032f1e0, PAL: 0x003578b8
 void MetPersonaSaverScreen::CommitSave() {
     if (mIsCopy != 0 || mTargetSlot.mPortSlot != 0 ||
         MetFrontEndState::shared()->mUsingMemcard != 0 || mPersona == nullptr) {
@@ -353,7 +348,6 @@ void MetPersonaSaverScreen::CommitSave() {
     BeginExit();
 }
 
-// NTSC-U/C: 0x0032f4d0, PAL: 0x00357bd8
 void MetPersonaSaverScreen::ClearPersonas() {
     // Yes, the binary re-reads the size on every iteration rather than caching it.
     for (unsigned index = 0; index < mPersonas.size(); ++index) {
@@ -362,7 +356,6 @@ void MetPersonaSaverScreen::ClearPersonas() {
     mPersonas.clear();
 }
 
-// NTSC-U/C: 0x0032f5a0, PAL: 0x00357ca8
 void MetPersonaSaverScreen::OnConnectState(MemcardConnectState state, int nStatus) {
 #ifdef VIDEO_STANDARD_PAL
     // The European release offers to format a card that reports itself unformatted.
@@ -459,7 +452,6 @@ void MetPersonaSaverScreen::OnConnectState(MemcardConnectState state, int nStatu
     }
 }
 
-// NTSC-U/C: 0x00331358, PAL: 0x00359ed0
 void MetPersonaSaverScreen::OnCardFormatted(int, int nStatus) {
     std::vector<HxStr> buttons;
     switch (nStatus) {
@@ -495,7 +487,6 @@ void MetPersonaSaverScreen::OnCardFormatted(int, int nStatus) {
     }
 }
 
-// NTSC-U/C: 0x00331d48, PAL: 0x0035aa48
 int MetPersonaSaverScreen::CheckPersonaLimit() {
     if (mPersonas.size() < static_cast<unsigned>(kMaxPersonas)) {
         return 1;
@@ -515,7 +506,6 @@ int MetPersonaSaverScreen::CheckPersonaLimit() {
     return 0;
 }
 
-// NTSC-U/C: 0x00332130, PAL: 0x0035aeb0
 void MetPersonaSaverScreen::SyncActivePersona() {
     std::vector<MetPersonaData *> roster(*Application::shared()->GetGameManager()->GetPersonas());
     MetPersonaData *pActive = roster.size() != 0 ? roster[0] : nullptr;
@@ -524,7 +514,6 @@ void MetPersonaSaverScreen::SyncActivePersona() {
     }
 }
 
-// NTSC-U/C: 0x00332428, PAL: 0x0035b1a8
 void MetPersonaSaverScreen::OnPersonasLoaded(int, int) {
     MetPersonaData *pPersona = mPersona;
     if (pPersona->mAppearance.mUserName == kNoText) {
@@ -634,7 +623,6 @@ void MetPersonaSaverScreen::OnPersonasLoaded(int, int) {
     MemcardManager::shared()->CreateSavePersonasTask(mTargetSlot.mPortSlot, mPersonas);
 }
 
-// NTSC-U/C: 0x00333210, PAL: 0x0035c120
 #ifdef VIDEO_STANDARD_PAL
 void MetPersonaSaverScreen::OnPersonasSaved(int nPortSlot, int nStatus, int nKilobytes) {
 #else
@@ -681,7 +669,6 @@ void MetPersonaSaverScreen::OnPersonasSaved(int nPortSlot, int nStatus) {
     }
 }
 
-// NTSC-U/C: 0x003346c8, PAL: 0x0035dbd8
 void MetPersonaSaverScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kMemCheckDialogue) {
         if (nChoice == kChoiceSecond) {
@@ -793,7 +780,6 @@ void MetPersonaSaverScreen::LeaveWithoutSaving() {
     }
 }
 
-// PAL: 0x0035da70
 void MetPersonaSaverScreen::KeepInLoadList() {
     int bFound = 0;
     for (std::vector<MetPersonaData *>::size_type i = 0; i < MetPersonaData::loadList()->size();
@@ -816,7 +802,6 @@ void MetPersonaSaverScreen::KeepInLoadList() {
 }
 #endif
 
-// NTSC-U/C: 0x003350f8, PAL: 0x0035ee80
 #ifdef VIDEO_STANDARD_PAL
 void MetPersonaSaverScreen::AskToReplace(int bInLoadList) {
 #else
@@ -846,12 +831,10 @@ void MetPersonaSaverScreen::AskToReplace() {
                        this);
 }
 
-// NTSC-U/C: 0x00338f98, PAL: 0x00362f70
 MetPersonaSaverScreen *MetPersonaSaverScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetPersonaSaverScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x00339020, PAL: 0x00362ff8
 void MetPersonaSaverScreen::SetSaveRequest(const std::vector<HxStr> &screens,
                                            MetPersonaData *pPersona,
                                            const MemcardConnectState &slot) {
@@ -860,23 +843,19 @@ void MetPersonaSaverScreen::SetSaveRequest(const std::vector<HxStr> &screens,
     mTargetSlot = slot;
 }
 
-// NTSC-U/C: 0x003390a0, PAL: 0x00363078
 void MetPersonaSaverScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 }
 
-// NTSC-U/C: 0x003390c0, PAL: 0x00363098
 void MetPersonaSaverScreen::EnterAndShow() {
     SetShowing(0); // Yes, the binary does not run MetScreen::EnterAndShow().
 }
 
-// NTSC-U/C: 0x003390f0, PAL: 0x003630c8
 void MetPersonaSaverScreen::OnPanelActivated() {
     mRefreshingSettingsCard = 0;
     CommitSave();
 }
 
-// NTSC-U/C: 0x00339110, PAL: 0x003630e8
 void MetPersonaSaverScreen::BeginExit() {
     mRenderer->RemoveScreen(this);
     const int nCount = mReturnScreens.size();
@@ -886,7 +865,6 @@ void MetPersonaSaverScreen::BeginExit() {
     ActivateNamedPanel(mReturnScreens[0]);
 }
 
-// NTSC-U/C: 0x003391a8, PAL: 0x00363180
 void MetPersonaSaverScreen::OnKeyboardTextEntered(const HxStr &text) {
     mPersona->SetName(text);
 }

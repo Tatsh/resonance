@@ -9,22 +9,19 @@ constexpr int kNameBufferSize = 0x100;
 
 static char g_szNameBuffer[kNameBufferSize];
 
-// NTSC-U/C: 0x0050fb60, PAL: 0x0054f148
 Stream &Stream::ReadLE(void *pDest, int nSize) {
     return Read(pDest, nSize);
 }
 
-// NTSC-U/C: 0x0050fb88, PAL: 0x0054f170
 Stream &Stream::WriteLE(const void *pSrc, int nSize) {
     return Write(pSrc, nSize);
 }
 
-// The image emits no out-of-line copy for the base destructor.
-// The base stores no member, so the body performs no work.
 Stream::~Stream() {
+    // The image emits no out-of-line copy for the base destructor. The base stores no member, so
+    // the body performs no work.
 }
 
-// NTSC-U/C: 0x0050f140, PAL: 0x0054e6e8
 Stream &Stream::ReadString(HxStr &name) {
     name.Clear();
 

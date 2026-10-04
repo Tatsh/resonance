@@ -202,29 +202,24 @@ static Stream &operator>>(Stream &stream, std::vector<Arena::Section> &sections)
     return stream;
 }
 
-// NTSC-U/C: 0x005b6600, PAL: 0x005f8c68
 Arena::~Arena() {
     RemoveInstancesFromHitList();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x005b6c58, PAL: 0x005f92c0
 Arena::Arena(const HxStr &name)
     : Object(name), mLoopDist{0.0f, 0.0f, 0.0f, 1.0f}, mLoopFrames(kDefaultLoopFrames) {
     AddInstancesToHitList();
 }
 
-// NTSC-U/C: 0x005bb9d8, PAL: 0x005fe0a0
 const HxStr &Arena::ClassName() const {
     return g_arenaClassName;
 }
 
-// NTSC-U/C: 0x005bb9e8, PAL: 0x005fe0b0
 Vector3 &Arena::LoopDist() {
     return mLoopDist;
 }
 
-// NTSC-U/C: 0x005b5f08, PAL: 0x005f8570
 void Arena::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
@@ -247,10 +242,6 @@ void Arena::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x005b60c0, PAL: 0x005f8728
-//
-// The base blocks are written in a different order from the one DumpText() uses, and mDrawOrder
-// is not written at all, because AddInstancesToHitList() rebuilds it from the section count.
 void Arena::Save(Stream &stream) {
     const int nRevision = kArenaRevision;
     stream.WriteLE(&nRevision, sizeof(nRevision));
@@ -268,7 +259,6 @@ void Arena::Save(Stream &stream) {
     stream << mSections;
 }
 
-// NTSC-U/C: 0x005b61e8, PAL: 0x005f8850
 void Arena::Load(Stream &stream) {
     stream.ReadLE(&g_nRndArenaLoadRevision, sizeof(g_nRndArenaLoadRevision));
     if (g_nRndArenaLoadRevision >= kArenaRejectedRevision) {
@@ -297,7 +287,6 @@ void Arena::Load(Stream &stream) {
     AddInstancesToHitList();
 }
 
-// NTSC-U/C: 0x005b6338, PAL: 0x005f89a0
 void Arena::Replace(Object *pFrom, Object *pTo) {
     Animatable::Replace(pFrom, pTo);
     Collideable::Replace(pFrom, pTo);
@@ -328,7 +317,6 @@ void Arena::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// NTSC-U/C: 0x005bbbb0, PAL: 0x005fe278
 void Arena::Copy(const Object *pSource, unsigned nFlags) {
     // Yes, the binary reads through the cast result without testing it for null.
     const Arena *pArena = dynamic_cast<const Arena *>(pSource);
@@ -343,7 +331,6 @@ void Arena::Copy(const Object *pSource, unsigned nFlags) {
     AddInstancesToHitList();
 }
 
-// NTSC-U/C: 0x005bbc98, PAL: 0x005fe360
 void Arena::AddInstancesToHitList() {
     for (std::vector<Section>::iterator it = mSections.begin(); it != mSections.end(); ++it) {
         if (it->mView != nullptr) {
@@ -353,7 +340,6 @@ void Arena::AddInstancesToHitList() {
     mDrawOrder.resize(mSections.size(), DrawEntry());
 }
 
-// NTSC-U/C: 0x005bbd30, PAL: 0x005fe3f8
 void Arena::RemoveInstancesFromHitList() {
     for (std::vector<Section>::iterator it = mSections.begin(); it != mSections.end(); ++it) {
         if (it->mView != nullptr) {
@@ -363,7 +349,6 @@ void Arena::RemoveInstancesFromHitList() {
     mDrawOrder.clear();
 }
 
-// NTSC-U/C: 0x005b64e0, PAL: 0x005f8b48
 void Arena::UpdateSection(Section &section) {
     if (section.mView == nullptr) {
         return;
@@ -381,7 +366,6 @@ void Arena::UpdateSection(Section &section) {
     }
 }
 
-// NTSC-U/C: 0x005b7a90, PAL: 0x005fa0f8
 void Arena::SetLoopDist(const Vector3 &loopDist) {
     if ((loopDist.x == mLoopDist.x) && (loopDist.y == mLoopDist.y) && (loopDist.z == mLoopDist.z)) {
         return;
@@ -393,7 +377,6 @@ void Arena::SetLoopDist(const Vector3 &loopDist) {
     SetFrameSelf(mFilteredFrame);
 }
 
-// NTSC-U/C: 0x005b7c48, PAL: 0x005fa2b0
 void Arena::SetLoopFrames(float flLoopFrames) {
     if (flLoopFrames == 0.0f) {
         Rnd::TheDbg.Notify("Can't set frames = 0\n");
@@ -409,7 +392,6 @@ void Arena::SetLoopFrames(float flLoopFrames) {
     SetFrameSelf(mFilteredFrame);
 }
 
-// NTSC-U/C: 0x005b7de0, PAL: 0x005fa448
 void Arena::SetSectionCount(unsigned int nCount) {
     for (unsigned int i = nCount; i < mSections.size(); ++i) {
         Section &section = mSections[i];
@@ -422,7 +404,6 @@ void Arena::SetSectionCount(unsigned int nCount) {
     mDrawOrder.resize(nCount, DrawEntry());
 }
 
-// NTSC-U/C: 0x005b8020, PAL: 0x005fa688
 void Arena::SetSectionView(int nIndex, View *pView) {
     Section &section = mSections[nIndex];
     SetSectionLoop(section, 0);
@@ -436,7 +417,6 @@ void Arena::SetSectionView(int nIndex, View *pView) {
     UpdateSection(section);
 }
 
-// NTSC-U/C: 0x005b8170, PAL: 0x005fa7d8
 void Arena::SetSectionRange(int nIndex, float flStartFrame, float flEndFrame) {
     Section &section = mSections[nIndex];
     SetSectionLoop(section, 0);
@@ -445,7 +425,6 @@ void Arena::SetSectionRange(int nIndex, float flStartFrame, float flEndFrame) {
     UpdateSection(section);
 }
 
-// NTSC-U/C: 0x005bbda8, PAL: 0x005fe470
 void Arena::SetSectionLoop(Section &section, int nLoop) {
     if ((section.mView == nullptr) || (section.mLoop == nLoop)) {
         return;
@@ -470,7 +449,6 @@ void Arena::SetSectionLoop(Section &section, int nLoop) {
     }
 }
 
-// NTSC-U/C: 0x005bbeb0, PAL: 0x005fe578
 void Arena::SetFrameSelf(float flFrame) {
     (void)flFrame; // Yes, the binary places the sections from mFilteredFrame instead.
     std::list<DrawEntry>::iterator entry = mDrawOrder.begin();
@@ -486,7 +464,6 @@ void Arena::SetFrameSelf(float flFrame) {
     mDrawOrder.sort();
 }
 
-// NTSC-U/C: 0x005bbf80, PAL: 0x005fe648
 int Arena::UpdateWorldXfm(Transformable *pParent, int nForce) {
     const int nChanged = Transformable::UpdateWorldXfm(pParent, nForce);
     for (Section &section : mSections) {
@@ -497,7 +474,6 @@ int Arena::UpdateWorldXfm(Transformable *pParent, int nForce) {
     return nChanged;
 }
 
-// NTSC-U/C: 0x005bc020, PAL: 0x005fe6e8
 int Arena::DrawShowing() {
     for (DrawEntry &entry : mDrawOrder) {
         if (entry.mView != nullptr) {
@@ -507,7 +483,6 @@ int Arena::DrawShowing() {
     return 1;
 }
 
-// NTSC-U/C: 0x005bc090, PAL: 0x005fe758
 void Arena::FindCollisions(const Segment &ray, std::list<Collision> &collisions) {
     for (Section &section : mSections) {
         if ((section.mView != nullptr) && section.mView->GetShowing()) {
@@ -516,7 +491,6 @@ void Arena::FindCollisions(const Segment &ray, std::list<Collision> &collisions)
     }
 }
 
-// NTSC-U/C: 0x005bc128, PAL: 0x005fe7f0
 void Arena::SetSectionTeleport(int nIndex, int nTeleport) {
     Section &section = mSections[nIndex];
     if ((section.mTeleport != nTeleport) && (section.mView != nullptr)) {
@@ -537,23 +511,19 @@ void Arena::SetSectionTeleport(int nIndex, int nTeleport) {
     section.mTeleport = nTeleport;
 }
 
-// NTSC-U/C: 0x005bb870, PAL: 0x005fdf38
 void *Arena::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kArenaTag);
 }
 
-// NTSC-U/C: 0x005bb890, PAL: 0x005fdf58
 void Arena::operator delete(void *pBlock) {
     OperatorDeleteOverride(pBlock, kArenaTag);
 }
 
-// NTSC-U/C: 0x005bbb28, PAL: 0x005fe1f0
 Arena *NewArena(const HxStr &name) {
     // The binary bills the allocation to the tag "Rnd::Arena" and the object is 0x150 bytes.
     return new Arena(name);
 }
 
-// NTSC-U/C: 0x005bb8f0, PAL: 0x005fdfb8
 Arena *NewArenaThroughHook(const HxStr &name) {
     try {
         return g_pfnNewArena(name);
@@ -562,10 +532,9 @@ Arena *NewArenaThroughHook(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x005bba98, PAL: 0x005fe160
-// The null test in the body is the conversion of an Arena pointer to its virtual Rnd::Object base
-// rather than a check the source asks for.
 Object *CreateRegisteredArena(const HxStr &name) {
+    // The null test in the body is the conversion of an Arena pointer to its virtual Rnd::Object
+    // base rather than a check the source requests.
     try {
         return g_pfnNewArena(name);
     } catch (...) {
@@ -573,7 +542,6 @@ Object *CreateRegisteredArena(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x005bb8b0, PAL: 0x005fdf78
 void Arena::Init() {
     g_pfnNewArena = NewArena;
     TheManager.RegisterClass(g_arenaClassName, CreateRegisteredArena);

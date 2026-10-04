@@ -107,7 +107,6 @@ inline long long WatchdogNowNs() {
 
 } // namespace
 
-// NTSC-U/C: 0x002ba4a0, PAL: 0x002d9c10
 MetLogoScreen::MetLogoScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mBlinkTime(0), mAttractEnabled(0), mLastActivityNs(kNoActivity) {
@@ -119,19 +118,16 @@ MetLogoScreen::MetLogoScreen(MetRenderer *pRenderer, int nPriority)
 #endif
 }
 
-// NTSC-U/C: 0x002be418, PAL: 0x002da698
 MetLogoScreen::~MetLogoScreen() {
 #ifdef VIDEO_STANDARD_PAL
     delete mFade;
 #endif
 }
 
-// NTSC-U/C: 0x002be390, PAL: 0x002de138
 MetLogoScreen *MetLogoScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLogoScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x002be670, PAL: 0x002de378
 void MetLogoScreen::RecordUnlock() {
     PlayActivateSound();
     MetFrontEndState::shared()->mUnlockAll = 1;
@@ -145,7 +141,6 @@ void MetLogoScreen::UpdateBlink(float flTime) {
     mWaveView->SetFrame(flTime);
 }
 
-// NTSC-U/C: 0x002ba6d0, PAL: 0x002d9f00
 void MetLogoScreen::ResolveContainerViews() {
     ResolveAnimationViews();
     mView = FindObject<Rnd::View>(HxStr(kLogoView));
@@ -179,7 +174,6 @@ void MetLogoScreen::ResolveContainerViews() {
     SetShowing(0);
 }
 
-// NTSC-U/C: 0x002bac40, PAL: 0x002da778
 void MetLogoScreen::UpdateIdle(float flTime) {
     const long long llNowNs = WatchdogNowNs();
     if (Application::shared()->GetGameManager()->GetPoller()->mPressedThisPoll) {
@@ -199,7 +193,6 @@ void MetLogoScreen::UpdateIdle(float flTime) {
 #endif
 }
 
-// NTSC-U/C: 0x002bae40, PAL: 0x002da988
 void MetLogoScreen::OnEnterFinished() {
     mLastActivityNs = WatchdogNowNs();
     mAttractEnabled = QueryConfigFlag(kAttractEnabledConfigCode);
@@ -208,7 +201,6 @@ void MetLogoScreen::OnEnterFinished() {
     PlaySoundByName(kFrequencySound);
 }
 
-// NTSC-U/C: 0x002baf20, PAL: 0x002daa68
 void MetLogoScreen::OnExitFinished() {
     if (mAttractStarted) {
         mAttractStarted = 0;
@@ -237,7 +229,6 @@ void MetLogoScreen::OnExitFinished() {
     }
 }
 
-// NTSC-U/C: 0x002be4d8, PAL: 0x002de1c0
 void MetLogoScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (pCommand->mCommand == kMetScreenCommandSelect || pCommand->mCommand == kCommandStart) {
         PlaySoundByName(kSlideSound);
@@ -250,7 +241,6 @@ void MetLogoScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x002be540, PAL: 0x002de248
 void MetLogoScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
     for (int i = 0; i < kLegalTextCount; ++i) {
@@ -258,12 +248,10 @@ void MetLogoScreen::EnterAndShow() {
     }
 }
 
-// NTSC-U/C: 0x002be5a8, PAL: 0x002de2b0
 void MetLogoScreen::UpdateIdleAnimation(float flTime) {
     UpdateBlink(flTime);
 }
 
-// NTSC-U/C: 0x002be6a0, PAL: 0x002de3c8
 void MetLogoScreen::DispatchPriv(Message *pMsg) {
     if (pMsg->Type() == g_nMetUnlockStagesMsgType) {
         RecordUnlock();
@@ -271,7 +259,6 @@ void MetLogoScreen::DispatchPriv(Message *pMsg) {
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// PAL: 0x002de3a8
 void MetLogoScreen::OnFadeInDone() {
     mRenderer->RemoveScreen(this);
 }

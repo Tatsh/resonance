@@ -69,13 +69,20 @@ public:
     void Disable();
 
 private:
-    // NTSC-U/C: 0x001a6e60, PAL: 0x001acbc8
-    // Forwards the message unless notes are stopped and its status is a note-off or a
-    // note-on.
+    /**
+     * Forwards the message unless notes are stopped and its status is a note-off or a note-on.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001a6e60
+     * @ghidraAddress PAL: 0x001acbc8
+     */
     void OnMsg(StdMidiMsg &msg);
 
-    // NTSC-U/C: 0x001a6eb0, PAL: 0x001acc18
-    // Forwards the message unless notes are stopped.
+    /**
+     * Forwards the message unless notes are stopped.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001a6eb0
+     * @ghidraAddress PAL: 0x001acc18
+     */
     void OnMsg(NoteMsg &msg);
 
     int mEnabled; // +0x18

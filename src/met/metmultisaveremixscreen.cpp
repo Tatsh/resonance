@@ -69,17 +69,14 @@ constexpr int kResolveArenaView = 0;
 
 } // namespace
 
-// NTSC-U/C: 0x002fa0b0, PAL: 0x0031e200
 MetMultiSaveRemixScreen::MetMultiSaveRemixScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mSaveCount(0) {
 }
 
-// NTSC-U/C: 0x002fa280, PAL: 0x0031e430
 MetMultiSaveRemixScreen::~MetMultiSaveRemixScreen() {
 }
 
-// NTSC-U/C: 0x002fa4e8, PAL: 0x0031e698
 void MetMultiSaveRemixScreen::EnterAndShow() {
     SetShowing(0);
     PushNamedScreen(HxStr(kEndRemixScreen));
@@ -120,7 +117,6 @@ void MetMultiSaveRemixScreen::EnterAndShow() {
     BeginExit();
 }
 
-// NTSC-U/C: 0x002fa7c0, PAL: 0x0031e8a8
 void MetMultiSaveRemixScreen::OnExitFinished() {
     if (mSaveCount == 0) {
 #ifdef VIDEO_STANDARD_PAL
@@ -162,7 +158,6 @@ void MetMultiSaveRemixScreen::OnExitFinished() {
     mSaveIndex = 0;
 }
 
-// NTSC-U/C: 0x002facc0, PAL: 0x0031efd0
 void MetMultiSaveRemixScreen::OnSaveFinished(int) {
     ++mSaveIndex;
     if (static_cast<std::vector<int>::size_type>(mSaveIndex) == mReadyPlayers.size()) {
@@ -220,7 +215,6 @@ void MetMultiSaveRemixScreen::OnSaveFinished(int) {
 #endif
 }
 
-// NTSC-U/C: 0x002fb248, PAL: 0x0031f6a8
 void MetMultiSaveRemixScreen::SetOwnerScreenShowing(int bShowing) {
     mEndScreenExited = bShowing ^ 1;
     if (bShowing != 0) {
@@ -230,7 +224,6 @@ void MetMultiSaveRemixScreen::SetOwnerScreenShowing(int bShowing) {
     }
 }
 
-// NTSC-U/C: 0x002fb350, PAL: 0x0031f7e0
 void MetMultiSaveRemixScreen::ReturnToRemixType() {
 #ifndef VIDEO_STANDARD_PAL
     mRenderer->ResolveArenaView(kResolveArenaView);
@@ -241,12 +234,10 @@ void MetMultiSaveRemixScreen::ReturnToRemixType() {
     ActivateNamedPanel(HxStr(kRemixTypeScreen));
 }
 
-// NTSC-U/C: 0x002fedc0, PAL: 0x00323310
 MetMultiSaveRemixScreen *MetMultiSaveRemixScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMultiSaveRemixScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x002fee48, PAL: 0x00323398
 void MetMultiSaveRemixScreen::OnHelpRequested() {
     mEndScreenExited = 1;
     ExitScreenByName(HxStr(kEndRemixScreen));

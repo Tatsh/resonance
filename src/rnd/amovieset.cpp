@@ -94,7 +94,6 @@ const char *const g_apszMovieStreamErrors[] = {"NO ERROR",
                                                "Can't access device",
                                                "Exceeded limit"};
 
-// NTSC-U/C: 0x0057f7b8, PAL: 0x005c27f0
 AMovieSet::AMovieSet(const char *pszPath, int bStreaming, int *pnError) {
     *pnError = 0;
     mBuffer = nullptr;
@@ -154,7 +153,6 @@ AMovieSet::AMovieSet(const char *pszPath, int bStreaming, int *pnError) {
     g_pendingStreams.push_back(this);
 }
 
-// NTSC-U/C: 0x00580858, PAL: 0x005c3890
 AMovieSet::~AMovieSet() {
     if (mFile >= 0) {
         close(mFile);
@@ -165,7 +163,6 @@ AMovieSet::~AMovieSet() {
     delete mCircBuff;
 }
 
-// NTSC-U/C: 0x005808e8, PAL: 0x005c3920
 inline int AMovieSet::RequestRead(int nBytes) {
     if (mStreaming == 0 || mLoaded == 0 || g_nStreamingReadPending != 0) {
         return 0;
@@ -197,7 +194,6 @@ inline int AMovieSet::RequestRead(int nBytes) {
     return nBytes;
 }
 
-// NTSC-U/C: 0x0057fac8, PAL: 0x005c2b00
 void AMovieSet::Update(int nTick, int nReadSize) {
     if (mSoundHold > 0) {
         --mSoundHold;
@@ -316,7 +312,6 @@ void AMovieSet::Update(int nTick, int nReadSize) {
     }
 }
 
-// NTSC-U/C: 0x0057ffd0, PAL: 0x005c3008
 int AMovieSet::ParseHeader(char *pBuffer, int nBytes) {
     mBuffer = pBuffer;
     AMovieChunkHdr *pHeader = reinterpret_cast<AMovieChunkHdr *>(pBuffer);
@@ -348,7 +343,6 @@ int AMovieSet::ParseHeader(char *pBuffer, int nBytes) {
     return 0;
 }
 
-// NTSC-U/C: 0x005808d0, PAL: 0x005c3908
 void AMovieSet::AssignHandler(int nTrackId, ChunkHandler pfnHandler, void *pData) {
     mHandlers[nTrackId] = pfnHandler;
     mHandlerData[nTrackId] = pData;
@@ -356,7 +350,6 @@ void AMovieSet::AssignHandler(int nTrackId, ChunkHandler pfnHandler, void *pData
 
 } // namespace Rnd
 
-// NTSC-U/C: 0x00580178, PAL: 0x005c31b0
 void MovieAsyncCallback::Done(
     int nHandle, [[maybe_unused]] int nFile, void *pBuffer, int nLength, int nStatus) {
     for (auto it = g_pendingStreams.begin(); it != g_pendingStreams.end(); ++it) {
@@ -380,7 +373,6 @@ void MovieAsyncCallback::Done(
     Fatal("HEY - MOVIE LOAD CALLBACK CAN'T FIND HANDLE %d\n", nHandle);
 }
 
-// NTSC-U/C: 0x005809f0, PAL: 0x005c3a28
 void MovieStreamingAsyncCallback::Done(int nHandle,
                                        [[maybe_unused]] int nFile,
                                        [[maybe_unused]] void *pBuffer,

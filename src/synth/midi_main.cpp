@@ -230,7 +230,6 @@ int g_nSynthStreamFrame;
 // NTSC-U/C: 0x006e9dc4, PAL: 0x0072d784
 int g_nSoundBankMovieTick;
 
-// NTSC-U/C: 0x00464378, PAL: 0x004a1e58
 void SetBankLoadProgressHook(void (*pfnProgress)()) {
     g_pfnBankLoadProgress = pfnProgress;
 }
@@ -245,7 +244,6 @@ constexpr int kSoundSelectorReleaseBank = 0x8130;
 // Tag a released slot is marked with.
 constexpr int kBankSlotTagNone = -1;
 
-// NTSC-U/C: 0x00461a88, PAL: 0x0049f148
 void RegisterBankSlot(int nTag, int nDest, int nIopAddress) {
     bool bClaimed = false;
     for (auto &slot : g_bankSlots) {
@@ -272,7 +270,6 @@ void RegisterBankSlot(int nTag, int nDest, int nIopAddress) {
     }
 }
 
-// NTSC-U/C: 0x004642c8, PAL: 0x004a1da8
 void ReleaseBankSlotAt(int nDest) {
     for (auto &slot : g_bankSlots) {
         if (slot.mDest == nDest) {
@@ -287,7 +284,6 @@ void ReleaseBankSlotAt(int nDest) {
     }
 }
 
-// NTSC-U/C: 0x00461bb8, PAL: 0x0049f278
 void ReleaseAllBankSlots() {
     for (const auto &slot : g_bankSlots) {
         if (slot.mIopAddress != 0) {
@@ -297,7 +293,6 @@ void ReleaseAllBankSlots() {
     g_bankSlots.clear();
 }
 
-// NTSC-U/C: 0x00464628, PAL: 0x004a2108
 int IsBankXferBusy() {
     if (g_nHdXferInFlight != 0) {
         return 1;
@@ -312,13 +307,11 @@ int IsBankXferBusy() {
 // the string.
 char g_szFourCc[2 * sizeof(int)];
 
-// NTSC-U/C: 0x00464b50, PAL: 0x004a2510
 char *FourCcToString(const void *pFourCc) {
     *reinterpret_cast<int *>(g_szFourCc) = *static_cast<const int *>(pFourCc);
     return g_szFourCc;
 }
 
-// NTSC-U/C: 0x00464ba0, PAL: 0x004a2560
 void SetSynthStreamBar(int nBar) {
     if (g_pSynthStream != nullptr) {
         g_nSynthStreamFrame = nBar * kSynthStreamFramesPerBar;
@@ -335,7 +328,6 @@ inline void RotateBankIopAddress() {
     }
 }
 
-// NTSC-U/C: 0x00461db8, PAL: 0x0049f478
 int XferBankFromMemory(const void *pData, int nLength) {
     ReleaseBankSlotAt(g_nBankDestAddress);
     RotateBankIopAddress();
@@ -352,7 +344,6 @@ int XferBankFromMemory(const void *pData, int nLength) {
     return 0;
 }
 
-// NTSC-U/C: 0x00461f28, PAL: 0x0049f5e8
 int StartBdBankXfer(const char *pszPath) {
     AsyncCheck(1);
     g_bankCommand.mBankAddress = g_nBankIopAddress;
@@ -383,7 +374,6 @@ int StartBdBankXfer(const char *pszPath) {
     return nLength;
 }
 
-// NTSC-U/C: 0x00461c68, PAL: 0x0049f328
 int StartHdBankXfer(const char *pszPath, int nPlacement) {
     AsyncCheck(1);
     strcpy(g_szHdBankPath, pszPath);
@@ -411,7 +401,6 @@ int StartHdBankXfer(const char *pszPath, int nPlacement) {
     return 0;
 }
 
-// NTSC-U/C: 0x004620b0, PAL: 0x0049f770
 void LoadSoundBank(const char *pszBdPath, const char *pszHdPath, int nTag, int nPlacement) {
     const int nPreviousDest = g_nBankDestAddress;
     g_nSynthXferTag = nTag;
@@ -440,9 +429,6 @@ void LoadSoundBank(const char *pszBdPath, const char *pszHdPath, int nTag, int n
     g_nBankDestAddress = g_anBankDestAddress[g_nBankDestIndex];
 }
 
-// NTSC-U/C: 0x00464ad0, PAL: 0x004a2490
-// The command number stays in its second argument register from entry so that the
-// report below can print it.
 void SynthCommand(int nCommand) {
     switch (nCommand) {
     case 0:
@@ -459,7 +445,6 @@ void SynthCommand(int nCommand) {
     }
 }
 
-// NTSC-U/C: 0x00462558, PAL: 0x0049ffa0
 void DumpSynthVoices(int bActiveOnly) {
     int nActive = 0;
     for (int nCore = 0; nCore < kSpu2CoreCount; ++nCore) {
@@ -552,7 +537,6 @@ struct HardEffectCommand {
 // NTSC-U/C: 0x00894d40, PAL: 0x008d9d40
 alignas(64) HardEffectCommand g_hardEffectCommand;
 
-// NTSC-U/C: 0x00462340, PAL: 0x0049fbd8
 void ConfigureSpu2Effects(int bEnable) {
     for (int nCore = 0; nCore < kSpu2CoreCount; ++nCore) {
         if (bEnable != 0 && QueryConfigFlag(kTemplateUseHardEffect, nCore) != 0) {
@@ -633,7 +617,6 @@ void ConfigureSpu2Effects(int bEnable) {
     SubmitSoundDriverRequest(kSoundSelectorHardEffect, reinterpret_cast<uintptr_t>(&command));
 }
 
-// NTSC-U/C: 0x004649f8, PAL: 0x004a23b8
 void InitSpu2Cores() {
     sceSdRemoteInit(); // Yes, the binary discards this call's result.
     sceSdRemote(kSdRemoteBlocking, rSdInit, 0);
@@ -706,7 +689,6 @@ int g_anChannelProgram[kMidiChannelCount] = {
 int g_anChannelBank[kMidiChannelCount] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
-// NTSC-U/C: 0x00462290, PAL: 0x0049fb28
 void ps2_InitMSin() {
     msinBf.mBufferSize = kMidiStreamBufferSize;
     msinCtx.buffGrpNum = kMidiInputGroupCount;
@@ -728,7 +710,6 @@ void ps2_InitMSin() {
     sceMSIn_PutMsg(&msinCtx, kMidiInputPort, kMidiProgramChange);
 }
 
-// NTSC-U/C: 0x00464928, PAL: 0x004a22e8
 void SendMidiToDriver(unsigned char nStatus, unsigned char nData1, unsigned char nData2) {
     const unsigned nType = nStatus & kMidiStatusTypeMask;
     if (nType == kMidiProgramChange) {
@@ -753,27 +734,22 @@ void SendMidiToDriver(unsigned char nStatus, unsigned char nData1, unsigned char
 // SubmitDriverAllNotesOff().
 constexpr int kSoundSelectorAllNotesOff = 0xc0;
 
-// NTSC-U/C: 0x004649d8, PAL: 0x004a2398
 void SubmitDriverAllNotesOff() {
     SubmitSoundDriverRequest(kSoundSelectorAllNotesOff, 0);
 }
 
-// NTSC-U/C: 0x00464868, PAL: 0x004a2288
 void SubmitDriverSetMono(int bMono) {
     SubmitSoundDriverRequest(kSoundSelectorMono, bMono);
 }
 
-// NTSC-U/C: 0x00464888, PAL: 0x004a22a8
 void SubmitDriverSetRemix(int bRemix) {
     SubmitSoundDriverRequest(kSoundSelectorRemix, bRemix);
 }
 
-// NTSC-U/C: 0x004648a8, PAL: 0x004a22c8
 void SubmitDriverSetPaused(int bPaused) {
     SubmitSoundDriverRequest(kSoundSelectorPause, bPaused);
 }
 
-// NTSC-U/C: 0x004648c8, PAL: 0x0049fa38
 void PollSynthEvents() {
     if (msinBf.mValidSize != 0) {
         const int nBuffer = g_nMidiEventBufferIndex;
@@ -800,14 +776,12 @@ void PollSynthEvents() {
 #endif
 }
 
-// NTSC-U/C: 0x004645c8, PAL: 0x004a20a8
 void WaitForBankTransfers() {
     while (IsBankXferBusy() != 0) {
         AsyncPumpCompletedRequests();
     }
 }
 
-// NTSC-U/C: 0x00464660, PAL: 0x004a2140
 void ReleaseSoundBanks() {
     SubmitDriverAllNotesOff();
     ReleaseAllBankSlots();
@@ -818,7 +792,6 @@ void ReleaseSoundBanks() {
     g_hdBankName = "";
 }
 
-// NTSC-U/C: 0x004647a8, PAL: 0x0049f950
 void InitSynthDriver() {
     if (g_bSynthDriverReady != 0) {
         return;
@@ -848,18 +821,15 @@ void InitSynthDriver() {
     g_nBankIopIndex = kBankIopIndexAfterInit;
 }
 
-// NTSC-U/C: 0x00464b48, PAL: 0x004a2508
 void ShutdownSynthDriver() {
 }
 
-// NTSC-U/C: 0x00464bc8, PAL: 0x004a2588
 void PollSynthStream() {
     if (g_pSynthStream != nullptr) {
         g_pSynthStream->Update(g_nSynthStreamFrame, kSynthStreamReadSize);
     }
 }
 
-// NTSC-U/C: 0x00464b68, PAL: 0x004a2528
 void StopSoundBankMovie() {
     if (g_pSynthStream != nullptr) {
         delete g_pSynthStream;
@@ -926,7 +896,6 @@ void OnSoundBankMovieChunk(Rnd::AMovieChunkHdr *pHeader,
     }
 }
 
-// NTSC-U/C: 0x00462908, PAL: 0x004a0350
 void StartSoundBankMovie(const char *pszPath) {
     // The binary expands StopSoundBankMovie() here rather than calling it.
     if (g_pSynthStream != nullptr) {
@@ -945,7 +914,6 @@ void StartSoundBankMovie(const char *pszPath) {
     g_pSynthStream->mLoopTicks = nTick;
 }
 
-// NTSC-U/C: 0x005f9638, PAL: 0x0063a348
 int ezMidiInit() {
     sceSifInitRpc(0);
     do {
@@ -961,7 +929,6 @@ int ezMidiInit() {
     return 1;
 }
 
-// NTSC-U/C: 0x005f96c8, PAL: 0x0063a3d8
 int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
     if (g_bSoundRequestPending != 0) {
         while (sceSifCheckStatRpc(&gCd.rpcd) == kSifRpcStillRunning) {
@@ -1004,7 +971,6 @@ int SubmitSoundDriverRequest(int nSelector, uintptr_t nArgument) {
     return g_anSoundDriverReply[0];
 }
 
-// NTSC-U/C: 0x005f97d0, PAL: 0x0063a4e0
 int ezTransToIOP(int nIopAddress, const void *pSource, int nLength) {
     transData.data = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(pSource));
     transData.addr = static_cast<unsigned int>(nIopAddress);

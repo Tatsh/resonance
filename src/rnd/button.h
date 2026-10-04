@@ -221,12 +221,24 @@ public:
     void SetState(int nState);
 
 private:
-    // Take a reference on both targets and on every palette entry. Load() and Copy() are its
-    // callers. 0x00534820.
+    /**
+     * Take a reference on both targets and on every palette entry.
+     *
+     * Load() and Copy() are its callers.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00534820
+     * @ghidraAddress PAL: 0x005740a0
+     */
     void AddObjectRefs();
 
-    // Drop the reference on both targets and on every palette entry. The destructor, Load(), and
-    // Copy() are its callers. 0x00534900.
+    /**
+     * Drop the reference on both targets and on every palette entry.
+     *
+     * The destructor, Load(), and Copy() are its callers.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00534900
+     * @ghidraAddress PAL: 0x00574180
+     */
     void RemoveObjectRefs();
 
     // Declared in recovered offset order.

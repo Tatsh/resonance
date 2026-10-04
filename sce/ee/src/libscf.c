@@ -242,7 +242,6 @@ int sceScfGetTimezone(void) {
     return nTimezone;
 }
 
-// NTSC-U/C: absent, PAL: 0x005a59f0
 int sceScfGetLanguage(void) {
     unsigned int nConfig;
     unsigned int nVersion;
@@ -306,7 +305,6 @@ void sceScfApplyMinuteOffset(sceCdCLOCK *pClock, int nMinutes) {
     sceScfClockToBcd(pClock);
 }
 
-// NTSC-U/C: 0x005f3650, PAL: 0x005a6258
 void sceScfGetLocalTimefromRTC(sceCdCLOCK *pClock) {
     int nTimezone = sceScfGetTimezone();
     int nSummer = sceScfGetSummerTime();

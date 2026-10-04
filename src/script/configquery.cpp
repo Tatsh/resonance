@@ -22,7 +22,6 @@ inline const char *ExpressionText(const HxStr &expression) {
 
 } // namespace
 
-// NTSC-U/C: 0x00509110, PAL: 0x00548308
 int QueryConfigValue(int nEventCode, ...) {
     va_list args;
     va_start(args, nEventCode);
@@ -38,7 +37,6 @@ int QueryConfigValue(int nEventCode, ...) {
     return 0;
 }
 
-// NTSC-U/C: 0x005093e0, PAL: 0x00548628
 int QueryConfigFlag(int nEventCode, ...) {
     va_list args;
     va_start(args, nEventCode);
@@ -54,7 +52,6 @@ int QueryConfigFlag(int nEventCode, ...) {
     return 0;
 }
 
-// NTSC-U/C: 0x005096d0, PAL: 0x00548970
 HxStr QueryConfigString(int nEventCode, ...) {
     va_list args;
     va_start(args, nEventCode);
@@ -70,7 +67,6 @@ HxStr QueryConfigString(int nEventCode, ...) {
     }
 }
 
-// NTSC-U/C: 0x00509b78, PAL: 0x00548ea0
 void QueryConfigStrings(std::vector<HxStr> *pResult, int nEventCode, ...) {
     va_list args;
     va_start(args, nEventCode);
@@ -89,7 +85,6 @@ void QueryConfigStrings(std::vector<HxStr> *pResult, int nEventCode, ...) {
     }
 }
 
-// NTSC-U/C: 0x0050a1a0, PAL: 0x00549528
 void QueryConfigVector(std::vector<int> *pResult, int nEventCode, ...) {
     va_list args;
     va_start(args, nEventCode);

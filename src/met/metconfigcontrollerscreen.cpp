@@ -245,7 +245,6 @@ inline void ToggleStick(Rnd::Text *pText) {
 
 } // namespace
 
-// NTSC-U/C: 0x001ff1e0, PAL: 0x002066c8
 MetConfigControllerScreen::MetConfigControllerScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreenMultiSoundBank(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
@@ -270,12 +269,10 @@ MetConfigControllerScreen::MetConfigControllerScreen(MetRenderer *pRenderer, int
     }
 }
 
-// NTSC-U/C: 0x002008e8, PAL: 0x00208cb0
 MetConfigControllerScreen::~MetConfigControllerScreen() {
     delete mRows;
 }
 
-// NTSC-U/C: 0x001fff40, PAL: 0x00207618
 void MetConfigControllerScreen::ResolveContainerViews() {
     MetScreenMultiSoundBank::ResolveContainerViews();
 
@@ -319,7 +316,6 @@ void MetConfigControllerScreen::ResolveContainerViews() {
     }
 }
 
-// NTSC-U/C: 0x00200ba8, PAL: 0x00208f98
 void MetConfigControllerScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (pCommand->mPadIndex != mControllerIndex + 1) {
         return;
@@ -404,7 +400,6 @@ void MetConfigControllerScreen::HandleCommand(const MetScreenCommand *pCommand) 
     UpdateButtonHighlight();
 }
 
-// NTSC-U/C: 0x00201478, PAL: 0x00209bd0
 void MetConfigControllerScreen::EnterAndShow() {
     mRows->SetSelected(0);
 
@@ -438,7 +433,6 @@ void MetConfigControllerScreen::EnterAndShow() {
     MetScreenMultiSoundBank::EnterAndShow();
 }
 
-// NTSC-U/C: 0x00201790, PAL: 0x00209fa0
 void MetConfigControllerScreen::OnExitFinished() {
     if (MetFrontEndState::shared()->mReturnScreen == kPauseGameScreen ||
         MetFrontEndState::shared()->mReturnScreen == kPauseRemixScreen) {
@@ -478,7 +472,6 @@ void MetConfigControllerScreen::OnExitFinished() {
     }
 }
 
-// NTSC-U/C: 0x00201eb8, PAL: 0x0020a818
 void MetConfigControllerScreen::ClearDuplicateAssignment(int nRow) {
     if (IsStickRow(nRow)) {
         Rnd::Text *pOther = mRowValueTexts[nRow == kRowExpression ? kRowRemixFX : kRowExpression];
@@ -504,7 +497,6 @@ void MetConfigControllerScreen::ClearDuplicateAssignment(int nRow) {
     }
 }
 
-// NTSC-U/C: 0x00202070, PAL: 0x0020ab70
 void MetConfigControllerScreen::UpdateButtonHighlight() {
     const int nRow = mRows->mSelected;
     HxStr value(mRowValueTexts[nRow]->mPreWrapText);
@@ -517,7 +509,6 @@ void MetConfigControllerScreen::UpdateButtonHighlight() {
     SetButtonHighlights(static_cast<unsigned>(nButton) < kButtonCount ? nButton : kButtonNone);
 }
 
-// NTSC-U/C: 0x002022a0, PAL: 0x0020afa8
 void MetConfigControllerScreen::ShowConfig(ControllerConfig &config) {
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
         const int nButton = config.GetButtonIndex(nRow);
@@ -532,66 +523,56 @@ void MetConfigControllerScreen::ShowConfig(ControllerConfig &config) {
     }
 }
 
-// NTSC-U/C: 0x00206828, PAL: 0x0020f6f0
 MetConfigControllerScreen *MetConfigControllerScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetConfigControllerScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x002068b0, PAL: 0x0020f778
 void MetConfigControllerScreen::PlaySlideSound(int nSelector) {
     if (nSelector == mControllerIndex + 1) {
         MetScreenMultiSoundBank::PlaySlideSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x002068e0, PAL: 0x0020f7a8
 void MetConfigControllerScreen::PlayCycleLeftSound(int nSelector) {
     if (nSelector == mControllerIndex + 1) {
         MetScreenMultiSoundBank::PlayCycleLeftSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x00206910, PAL: 0x0020f7d8
 void MetConfigControllerScreen::PlayCycleRightSound(int nSelector) {
     if (nSelector == mControllerIndex + 1) {
         MetScreenMultiSoundBank::PlayCycleRightSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x00206940, PAL: 0x0020f808
 void MetConfigControllerScreen::PlayHighSound(int nSelector) {
     if (nSelector == mControllerIndex + 1) {
         MetScreenMultiSoundBank::PlayHighSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x00206970, PAL: 0x0020f838
 void MetConfigControllerScreen::PlayLeaveSound(int nSelector) {
     if (nSelector == mControllerIndex + 1) {
         MetScreenMultiSoundBank::PlayLeaveSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x002069a0, PAL: 0x0020f868
 void MetConfigControllerScreen::BeginExit() {
     SetButtonHighlights(kButtonNone);
     MetScreenMultiSoundBank::BeginExit();
 }
 
-// NTSC-U/C: 0x002069d0, PAL: 0x0020f898
 void MetConfigControllerScreen::OnEnterFinished() {
     ClearDuplicateAssignment(mRows->mSelected);
     UpdateButtonHighlight();
 }
 
-// NTSC-U/C: 0x00206a08, PAL: 0x0020f8d0
 void MetConfigControllerScreen::SetButtonHighlights(int nButton) {
     for (int i = 0; i < kButtonCount; ++i) {
         mButtonMeshes[i]->SetShowing(i == nButton);
     }
 }
 
-// NTSC-U/C: 0x00206aa0, PAL: 0x0020f968
 int MetConfigControllerScreen::StoreConfig() {
     ControllerConfig &config = GlobalSettings::shared()->mControllers[mControllerIndex];
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
@@ -600,7 +581,6 @@ int MetConfigControllerScreen::StoreConfig() {
     return 1;
 }
 
-// NTSC-U/C: 0x00206b30, PAL: 0x0020ae38
 int MetConfigControllerScreen::ButtonIndexForText(const HxStr &text) const {
     if (text == LeftStickName()) {
         return kButtonLeftStick;
@@ -612,7 +592,6 @@ int MetConfigControllerScreen::ButtonIndexForText(const HxStr &text) const {
     return static_cast<unsigned>(nButton) < kButtonCount ? nButton : kButtonNone;
 }
 
-// NTSC-U/C: 0x00206bb0, PAL: 0x0020f9f8
 void MetConfigControllerScreen::OnMsgScreenDismissed(const HxStr &name,
                                                      [[maybe_unused]] int nChoice) {
     if (name == kMissingValuesDialogue) {
@@ -623,7 +602,6 @@ void MetConfigControllerScreen::OnMsgScreenDismissed(const HxStr &name,
     }
 }
 
-// NTSC-U/C: 0x00206ca8, PAL: 0x0020fb10
 bool MetConfigControllerScreen::AllRowsAssigned() const {
     for (int nRow = 0; nRow < kRowCount; ++nRow) {
         if (ButtonIndexForText(mRowValueTexts[nRow]->mPreWrapText) == kButtonNone) {
@@ -633,7 +611,6 @@ bool MetConfigControllerScreen::AllRowsAssigned() const {
     return true;
 }
 
-// NTSC-U/C: 0x00206d88, PAL: 0x0020fb88
 char MetConfigControllerScreen::PreviousButtonCode(int nRow, char code) const {
     switch (nRow) {
     case kRowLeftNote1:
@@ -663,7 +640,6 @@ char MetConfigControllerScreen::PreviousButtonCode(int nRow, char code) const {
     }
 }
 
-// NTSC-U/C: 0x00206e30, PAL: 0x0020fc30
 char MetConfigControllerScreen::NextButtonCode(int nRow, char code) const {
     // Yes, the binary moves an unassigned row to the last code of its range in both directions.
     switch (nRow) {

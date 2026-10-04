@@ -31,7 +31,6 @@ long long g_llFrameTimerCycles;
 // The static initialiser zeroes every word except mStartCycles.
 ProfileTimer g_frameTimer;
 
-// NTSC-U/C: 0x0053dcf8, PAL: 0x0057d928
 void ResetFrameTimer() {
     g_flCyclesToMilliseconds = kMillisecondsPerCycle;
     if (--g_frameTimer.mDepth == 0) {

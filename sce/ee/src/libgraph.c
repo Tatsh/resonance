@@ -108,7 +108,6 @@ static GsState *sceGsGetGParam(void) {
     return &g_GsStateBlock;
 }
 
-// NTSC-U/C: 0x005963e0, PAL: 0x005d97e8
 void VSync(void) {
     INTC_STAT = kIntcVblankStartBit;
     while ((INTC_STAT & kIntcVblankStartBit) == 0U) {
@@ -179,8 +178,6 @@ static void sceGsPutDispEnv(const sceGsDispEnv *pDisp) {
     }
 }
 
-// NTSC-U/C: 0x006002d0, PAL: 0x00641060
-// Resets the VIF1, VU1, and GIF path, then primes VIF1 through its FIFO.
 void sceGsResetPath(void) {
     unsigned int clip = 0U;
 
@@ -196,10 +193,6 @@ void sceGsResetPath(void) {
     GIF_CTRL = 1U;
 }
 
-// NTSC-U/C: 0x00600338, PAL: 0x005c5468
-// Resets the graphics state. Mode one clears the vertical blank flag, mode
-// five replays the video setup while retaining the blank handler, mode zero
-// additionally removes that handler, and other modes return quietly.
 void sceGsResetGraph(short nMode, short nInterlace, short nOutputMode, short nFieldMode) {
     GsState *state;
 
@@ -240,9 +233,6 @@ void sceGsResetGraph(short nMode, short nInterlace, short nOutputMode, short nFi
     SetGsCrt((short)(nInterlace & 1), (short)(nOutputMode & 0xFF), (short)(nFieldMode & 1));
 }
 
-// NTSC-U/C: 0x00596708, PAL: 0x005d9b10
-// Waits for the next vertical blank and returns the field it began in.
-// Progressive modes report field one.
 int sceGsSyncV(int nMode) {
     GsState *state = sceGsGetGParam();
     unsigned long long status;
@@ -264,8 +254,6 @@ int sceGsSyncV(int nMode) {
     return field;
 }
 
-// NTSC-U/C: 0x00621c20, PAL: 0x006627b0
-// Fills the four alpha environment pairs and returns the pair count.
 int sceGsSetDefAlphaEnv(sceGsAlphaEnv *pAlpha, short nPabe) {
     pAlpha->mWords[1] = 0x42ULL;
     pAlpha->mWords[0] = 0x44ULL;
@@ -307,9 +295,6 @@ static unsigned long long MakeDisplayWord(const GsState *state,
     return across | down | magnify | width | (lines << 44);
 }
 
-// NTSC-U/C: 0x006217c8, PAL: 0x00662358
-// Fills the five display registers. The output mode selects the timing
-// branch, and unknown modes only report an error.
 void sceGsSetDefDispEnv(
     sceGsDispEnv *pDisp, short nPsm, short nWidth, short nHeight, short nDx, short nDy) {
     GsState *state = sceGsGetGParam();
@@ -340,10 +325,6 @@ void sceGsSetDefDispEnv(
     pDisp->bgcolor = 0ULL;
 }
 
-// NTSC-U/C: 0x00621a38, PAL: 0x006625c8
-// Fills the eight draw environment pairs and returns the pair count. The
-// depth buffer follows the frame buffer, dithering follows the colour
-// depth, and the test word follows the depth test.
 int sceGsSetDefDrawEnv(
     sceGsDrawEnv1 *pDraw, short nPsm, short nWidth, short nHeight, short nZTest, short nZPsm) {
     unsigned long long frame;
@@ -392,10 +373,6 @@ int sceGsSetDefDrawEnv(
     return 8;
 }
 
-// NTSC-U/C: 0x00622508, PAL: 0x00664970
-// Fills the six clear packet pairs and returns the pair count. The packet
-// disables testing, draws one sprite in the clear colour, then restores the
-// requested test.
 int sceGsSetDefClear(sceGsClear *pClear,
                      short nZTest,
                      short nX,
@@ -441,10 +418,6 @@ int sceGsSetDefClear(sceGsClear *pClear,
     return 6;
 }
 
-// NTSC-U/C: 0x005e4b30, PAL: 0x00626cf0
-// Fills the display, draw, and clear halves plus the two display tags. The
-// clear halves stay empty unless requested, and interlaced modes patch the
-// first half frame addresses for the odd field.
 int sceGsSetDefDBuff(sceGsDBuff *pDBuff,
                      short nPsm,
                      short nWidth,
@@ -486,9 +459,6 @@ int sceGsSetDefDBuff(sceGsDBuff *pDBuff,
     return pages & 0x1FF;
 }
 
-// NTSC-U/C: 0x00612600, PAL: 0x00653190
-// Sends one draw environment packet through the GIF channel. A busy channel
-// waits briefly, and an expiry reports an error.
 int sceGsPutDrawEnv(sceGifTag *pGifTag) {
     unsigned int spins = 0U;
     unsigned long long first;
@@ -518,9 +488,6 @@ int sceGsPutDrawEnv(sceGifTag *pGifTag) {
     return 0;
 }
 
-// NTSC-U/C: 0x005e4948, PAL: 0x00626b08
-// Fills the twelve word load image descriptor and returns the register
-// count. Oversized transfers only report an error.
 int sceGsSetDefLoadImage(sceGsLoadImage *pLoadImage,
                          short nTbp,
                          short nTbw,
@@ -596,9 +563,6 @@ int sceGsSetDefLoadImage(sceGsLoadImage *pLoadImage,
     return 6;
 }
 
-// NTSC-U/C: 0x005e2a08, PAL: 0x00624b18
-// Sends one load image descriptor, then streams the source pixels behind
-// it. Either busy wait shares a single spin budget.
 int sceGsExecLoadImage(sceGsLoadImage *pLoadImage, const void *pSource) {
     unsigned int spins = 0U;
     unsigned int address;
@@ -640,9 +604,6 @@ int sceGsExecLoadImage(sceGsLoadImage *pLoadImage, const void *pSource) {
     return 0;
 }
 
-// NTSC-U/C: 0x005e4808, PAL: 0x006269c8
-// Fills the store image packet and returns the register count. The packet
-// spans 0x70 bytes of tag, register data, and register identifiers.
 int sceGsSetDefStoreImage(sceGsStoreImage *pStoreImage,
                           short nSbp,
                           short nSbw,
@@ -702,10 +663,6 @@ static inline int StoreImageWaitFifo(int *pSpins) {
     return 0;
 }
 
-// NTSC-U/C: 0x005a3550, PAL: 0x005e6658
-// Streams one store image descriptor, then receives the pixels at the
-// destination. Ragged widths round the height up and drain the remainder
-// through the stack slot.
 int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     // The MSKPATH3 code restored to the VIF1 FIFO after image store work, padded with three NOP
     // codes.
@@ -906,10 +863,6 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
     return 0;
 }
 
-// NTSC-U/C: 0x00552270, PAL: 0x005928b0
-// Synchronises the graphics path. Mode zero waits for VIF1, GIF, and VU1 with one spin budget
-// shared across every wait, and dumps the channel registers when the budget runs out. Other modes
-// report the busy units as a mask. The timeout argument is accepted but unused.
 int sceGsSyncPath(int nMode, unsigned short nTimeout) {
     unsigned int spins = 0U;
     unsigned int vuStatus;
@@ -986,9 +939,6 @@ timeout:
     return -1;
 }
 
-// NTSC-U/C: 0x0062dca0, PAL: 0x0066e830
-// Recentres the half pixel offset on the scissor extent, adding a half dot
-// of vertical offset for the odd field.
 void sceGsSetHalfOffset(void *pDrawEnv, int nOffsetX, int nOffsetY, int nField) {
     volatile unsigned long long *words = (volatile unsigned long long *)pDrawEnv;
     unsigned long long scissor = words[6];
@@ -1006,10 +956,6 @@ void sceGsSetHalfOffset(void *pDrawEnv, int nOffsetX, int nOffsetY, int nField) 
     }
 }
 
-// NTSC-U/C: 0x0062d998, PAL: 0x0066e528
-// Presents one double buffer half. The display environment of the selected
-// field goes to the privileged registers, and the matching display tag is
-// sent through the GIF channel.
 void sceGsSwapDBuff(sceGsDBuff *pDBuff, int nField) {
     int field = nField & 1;
     unsigned char *base = (unsigned char *)pDBuff;
@@ -1024,9 +970,6 @@ void sceGsSwapDBuff(sceGsDBuff *pDBuff, int nField) {
     }
 }
 
-// NTSC-U/C: 0x005e8558, PAL: 0x0058fb90
-// Installs the vertical blank handler, replacing the previous one, or
-// removes it when null. Returns the previous handler.
 int (*sceGsSyncVCallback(int (*pfnHandler)(int)))(int) {
     GsState *state = sceGsGetGParam();
     int (*oldHandler)(int) = state->vblankHandler;

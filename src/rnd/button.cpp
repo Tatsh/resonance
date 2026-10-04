@@ -114,14 +114,12 @@ template Stream &operator>> <Font>(Stream &stream, std::vector<Font *> &entries)
 
 } // namespace
 
-// NTSC-U/C: 0x00530eb8, PAL: 0x005706b0
 Button::Button(const HxStr &name)
     : Object(name), mState(0), mMesh(nullptr), mText(nullptr),
       mMats(kInitialPaletteSize, static_cast<Mat *>(nullptr)),
       mFonts(kInitialPaletteSize, static_cast<Font *>(nullptr)) {
 }
 
-// NTSC-U/C: 0x00534900, PAL: 0x00574180
 void Button::RemoveObjectRefs() {
     if (mMesh != nullptr) {
         mMesh->RemoveRef(this);
@@ -141,7 +139,6 @@ void Button::RemoveObjectRefs() {
     }
 }
 
-// NTSC-U/C: 0x00534820, PAL: 0x005740a0
 void Button::AddObjectRefs() {
     if (mMesh != nullptr) {
         mMesh->AddRef(this);
@@ -161,18 +158,15 @@ void Button::AddObjectRefs() {
     }
 }
 
-// NTSC-U/C: 0x00530cd0, PAL: 0x005704c8
 Button::~Button() {
     RemoveObjectRefs();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x00534620, PAL: 0x00573ea0
 const HxStr &Button::ClassName() const {
     return g_buttonClassName;
 }
 
-// NTSC-U/C: 0x005304f0, PAL: 0x0056fc98
 void Button::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     if (sink.mDumpLevel <= 0) {
@@ -195,7 +189,6 @@ void Button::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x00530690, PAL: 0x0056fe38
 void Button::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.WriteLE(&nVersion, sizeof(nVersion));
@@ -206,7 +199,6 @@ void Button::Save(Stream &stream) {
     stream << mFonts;
 }
 
-// NTSC-U/C: 0x00530a20, PAL: 0x00570218
 void Button::Replace(Object *pFrom, Object *pTo) {
     if (mMesh == pFrom) {
         if (pFrom != nullptr) {
@@ -265,7 +257,6 @@ void Button::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// NTSC-U/C: 0x00534780, PAL: 0x00574000
 void Button::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
     // The cast result is dereferenced with no null check, so a pSource of another class faults here
     // rather than being rejected. No base implementation is invoked and nFlags is never read.
@@ -280,7 +271,6 @@ void Button::Copy(const Object *pSource, [[maybe_unused]] unsigned nFlags) {
     AddObjectRefs();
 }
 
-// NTSC-U/C: 0x005307f8, PAL: 0x0056ffa0
 void Button::Load(Stream &stream) {
     stream.ReadLE(&g_nRndButtonLoadVersion, sizeof(g_nRndButtonLoadVersion));
     if (g_nRndButtonLoadVersion > kSerialVersion) {
@@ -308,17 +298,14 @@ void Button::Load(Stream &stream) {
     AddObjectRefs();
 }
 
-// NTSC-U/C: 0x005344b8, PAL: 0x00573d38
 void *Button::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kButtonTag);
 }
 
-// NTSC-U/C: 0x005344d8, PAL: 0x00573d58
 void Button::operator delete(void *pBlock) {
     OperatorDeleteOverride(pBlock, kButtonTag);
 }
 
-// NTSC-U/C: 0x005349e0, PAL: 0x00574260
 void Button::SetShowing(int nShowing) {
     if (mMesh != nullptr) {
         mMesh->SetShowing(nShowing);
@@ -328,7 +315,6 @@ void Button::SetShowing(int nShowing) {
     }
 }
 
-// NTSC-U/C: 0x00534a48, PAL: 0x005742c8
 void Button::SetState(int nState) {
     if (mState == nState) {
         return;
@@ -342,7 +328,6 @@ void Button::SetState(int nState) {
     }
 }
 
-// NTSC-U/C: 0x00534ad0, PAL: 0x00574350
 void Button::SetMesh(Mesh *pMesh) {
     if (mMesh != nullptr) {
         mMesh->RemoveRef(this);
@@ -356,7 +341,6 @@ void Button::SetMesh(Mesh *pMesh) {
     }
 }
 
-// NTSC-U/C: 0x00534b48, PAL: 0x005743c8
 void Button::SetText(Text *pText) {
     if (mText != nullptr) {
         mText->RemoveRef(this);
@@ -370,7 +354,6 @@ void Button::SetText(Text *pText) {
     }
 }
 
-// NTSC-U/C: 0x00534bd0, PAL: 0x00574450
 void Button::SetMat(int nState, Mat *pMat) {
     if (mMats[nState] != nullptr) {
         mMats[nState]->RemoveRef(this);
@@ -384,7 +367,6 @@ void Button::SetMat(int nState, Mat *pMat) {
     }
 }
 
-// NTSC-U/C: 0x00534c78, PAL: 0x005744f8
 void Button::SetFont(int nState, Font *pFont) {
     if (mFonts[nState] != nullptr) {
         mFonts[nState]->RemoveRef(this);
@@ -398,7 +380,6 @@ void Button::SetFont(int nState, Font *pFont) {
     }
 }
 
-// NTSC-U/C: 0x005346f8, PAL: 0x00573f78
 Button *NewButton(const HxStr &name) {
     return new Button(name);
 }
@@ -406,7 +387,6 @@ Button *NewButton(const HxStr &name) {
 // NTSC-U/C: 0x0071d900, PAL: 0x00761370
 Button *(*g_pfnNewButton)(const HxStr &name) = NewButton;
 
-// NTSC-U/C: 0x00534538, PAL: 0x00573db8
 Button *NewButtonThroughHook(const HxStr &name) {
     try {
         return g_pfnNewButton(name);
@@ -415,7 +395,6 @@ Button *NewButtonThroughHook(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x00534678, PAL: 0x00573ef8
 Object *CreateRegisteredButton(const HxStr &name) {
     try {
         return g_pfnNewButton(name);
@@ -424,7 +403,6 @@ Object *CreateRegisteredButton(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x005344f8, PAL: 0x00573d78
 void RegisterButtonClass() {
     g_pfnNewButton = NewButton;
     TheManager.RegisterClass(g_buttonClassName, CreateRegisteredButton);

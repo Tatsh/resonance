@@ -92,7 +92,6 @@ inline void FillElement(RemixIndexElement &element,
 
 } // namespace
 
-// NTSC-U/C: 0x00179ec0, PAL: 0x0017e068
 SaveRemixMCT::SaveRemixMCT(MemcardUser *pUser,
                            Memcard *pCard,
                            int nPortSlot,
@@ -116,7 +115,6 @@ SaveRemixMCT::SaveRemixMCT(MemcardUser *pUser,
 {
 }
 
-// NTSC-U/C: 0x001850a8, PAL: 0x0018a898
 SaveRemixMCT::~SaveRemixMCT() {
 #ifndef VIDEO_STANDARD_PAL
     delete mSaveTask;
@@ -124,14 +122,12 @@ SaveRemixMCT::~SaveRemixMCT() {
     delete mLoadTask;
 }
 
-// NTSC-U/C: 0x00179c28, PAL: 0x0017dd60
 void SaveRemixMCT::AppendDirInfo(std::vector<RemixDirInfo> &infos,
                                  const HxStr &name,
                                  int nEntryCount) {
     infos.push_back(RemixDirInfo(name, nEntryCount));
 }
 
-// NTSC-U/C: 0x00179d60, PAL: 0x0017ded0
 HxStr SaveRemixMCT::ChooseTargetDir(const std::vector<RemixDirInfo> &infos) {
     unsigned int nHighest = 0;
     for (auto it = infos.begin(); it != infos.end(); ++it) {
@@ -145,14 +141,12 @@ HxStr SaveRemixMCT::ChooseTargetDir(const std::vector<RemixDirInfo> &infos) {
     return g_remixDirBase + HxStr(szNumber);
 }
 
-// NTSC-U/C: 0x0017a778, PAL: 0x0017eb60
 void SaveRemixMCT::ListRemixDir() {
     HxStr pattern = g_saveDirBase + g_remixDirSuffix + kAnyDirectory;
     mCard->ListDir(this, mPortSlot, pattern, mCookie, kListDirModeFresh);
 }
 
 #ifndef VIDEO_STANDARD_PAL
-// NTSC-U/C: 0x00186a40
 void SaveRemixMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (pOp->mStatus != kMemcardStatusUnknown && pOp->mStatus != kMemcardStatusNotFormatted) {
@@ -169,7 +163,6 @@ void SaveRemixMCT::OnCheckInfo(CheckInfoOp *pOp) {
 }
 #endif
 
-// NTSC-U/C: 0x0017a430, PAL: 0x0017e768
 void SaveRemixMCT::OnListDir(ListDirOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus == kMemcardStatusOk) {
@@ -192,7 +185,6 @@ void SaveRemixMCT::OnListDir(ListDirOp *pOp) {
     ReadTargetIndex();
 }
 
-// NTSC-U/C: 0x0017a928, PAL: 0x0017ed88
 void SaveRemixMCT::ReadNextIndex() {
     mCurrentDir = mDirNames.front();
     mDirNames.erase(mDirNames.begin());
@@ -202,7 +194,6 @@ void SaveRemixMCT::ReadNextIndex() {
     mLoadTask->Load(mCurrentDir + kIndexFileName, mStream.mBuffer, mStream.Capacity());
 }
 
-// NTSC-U/C: 0x0017ab50, PAL: 0x0017f000
 void SaveRemixMCT::ReadTargetIndex() {
     IOBPreallocMemStream *pPayload = Application::shared()->GetLog();
     char szName[kPayloadRemixNameSize];
@@ -215,7 +206,6 @@ void SaveRemixMCT::ReadTargetIndex() {
     mLoadTask->Load(mTargetDir + kIndexFileName, mStream.mBuffer, mStream.Capacity());
 }
 
-// NTSC-U/C: 0x0017ad70, PAL: 0x0017f260
 void SaveRemixMCT::OnFileLoaded(int nStatus) {
     mStatus = nStatus;
     if (nStatus != kMemcardStatusOk && mStep != kStepReadTargetIndex) {
@@ -265,7 +255,6 @@ void SaveRemixMCT::OnFileLoaded(int nStatus) {
 }
 
 #ifndef VIDEO_STANDARD_PAL
-// NTSC-U/C: 0x0017ba98
 void SaveRemixMCT::WritePayload() {
     const HxStr dirNumber(TextOf(mTargetDir) + kRemixDirNumberOffset);
     const HxStr fileName = HxStr(kPathSeparator) + mPayloadFileName;
@@ -280,7 +269,6 @@ void SaveRemixMCT::WritePayload() {
 }
 #endif
 
-// NTSC-U/C: 0x0017b318, PAL: 0x0017f868
 void SaveRemixMCT::WriteIndex() {
 #ifdef VIDEO_STANDARD_PAL
     mState = kMemcardTaskRunning;
@@ -339,7 +327,6 @@ void SaveRemixMCT::WriteIndex() {
 }
 
 #ifndef VIDEO_STANDARD_PAL
-// NTSC-U/C: 0x00186ad8
 void SaveRemixMCT::OnFileSaved(int nStatus) {
     mStatus = nStatus;
     if (nStatus != kMemcardStatusOk) {
@@ -356,7 +343,6 @@ void SaveRemixMCT::OnFileSaved(int nStatus) {
 }
 #endif
 
-// NTSC-U/C: 0x00186b60, PAL: 0x0018c338
 void SaveRemixMCT::Finish() {
     mState = kMemcardTaskFinished;
 #ifdef VIDEO_STANDARD_PAL
@@ -366,7 +352,6 @@ void SaveRemixMCT::Finish() {
 #endif
 }
 
-// NTSC-U/C: 0x00186a08, PAL: 0x0018c310
 void SaveRemixMCT::Execute() {
     mState = kMemcardTaskRunning;
     mStep = 0;

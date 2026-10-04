@@ -4,7 +4,6 @@
 
 #include "memcard/memcardcbhandler.h"
 
-// NTSC-U/C: 0x0055eed8, PAL: 0x005a01a8
 DeleteFileOp::DeleteFileOp(MemcardCBHandler *pHandler,
                            int nPortSlot,
                            const HxStr &path,
@@ -12,11 +11,9 @@ DeleteFileOp::DeleteFileOp(MemcardCBHandler *pHandler,
     : MemcardOp(pHandler, nPortSlot, nCookie), mPath(path) {
 }
 
-// NTSC-U/C: 0x0055dff8, PAL: 0x0059f290
 DeleteFileOp::~DeleteFileOp() {
 }
 
-// NTSC-U/C: 0x0055ef68, PAL: 0x005a0238
 void DeleteFileOp::Execute() {
     sceMcDelete(mPortSlot >> kMemcardPortShift,
                 mPortSlot & kMemcardSlotMask,
@@ -24,13 +21,11 @@ void DeleteFileOp::Execute() {
     mIssued = kMemcardOpInFlight;
 }
 
-// NTSC-U/C: 0x0055e060, PAL: 0x0059f308
 void DeleteFileOp::NotifyDone() {
     InterpretResult();
     mHandler->OnDeleteFile(this);
 }
 
-// NTSC-U/C: 0x0055efb8, PAL: 0x005a0288
 void DeleteFileOp::InterpretResult() {
     switch (mResult) {
     case sceMcResSucceed:

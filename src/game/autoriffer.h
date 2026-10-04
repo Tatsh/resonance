@@ -87,38 +87,70 @@ public:
     void AddSink(MsgSink *pSink);
 
 private:
-    // Starts the riff of the message's level at its quantised position for this track's player.
-    // A bar AxePhraseMaker::IsBarPlayable() rejects plays SND_INACTIVE instead.
-    // NTSC-U/C: 0x00199160, PAL: 0x0019eec8
+    /**
+     * Starts the riff of the message's level at its quantised position for this track's player.
+     *
+     * A bar AxePhraseMaker::IsBarPlayable() rejects plays SND_INACTIVE instead.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00199160
+     * @ghidraAddress PAL: 0x0019eec8
+     */
     void OnPitchRiff(PitchRiffMsg *pMsg);
 
-    // Clears the held flag of the message's level and switches to the lowest held level's riff at
-    // the quantised position. With no level held it sends an AllNotesOffMsg, withdraws mCommand,
-    // and releases the button, without the flag reset StopRiff() performs.
-    // NTSC-U/C: 0x001992e0, PAL: 0x0019f048
+    /**
+     * Clears the held flag of the message's level and switches to the lowest held level's riff at
+     * the quantised position.
+     *
+     * With no level held it sends an AllNotesOffMsg, withdraws mCommand, and releases the button,
+     * without the flag reset StopRiff() performs.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001992e0
+     * @ghidraAddress PAL: 0x0019f048
+     */
     void OnStopRiff(StopRiffMsg *pMsg);
 
-    // Stops the riff and hands the erase to AxePhraseMaker::Erase() when the bar is playable.
-    // NTSC-U/C: 0x00199480, PAL: 0x0019f1e8
+    /**
+     * Stops the riff and hands the erase to AxePhraseMaker::Erase() when the bar is playable.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00199480
+     * @ghidraAddress PAL: 0x0019f1e8
+     */
     void OnErase(EraseMsg *pMsg);
 
-    // When a riff is playing, clears every held flag, sends an AllNotesOffMsg, withdraws
-    // mCommand, and releases every button with an AxeButtonMsg.
-    // NTSC-U/C: 0x00199590, PAL: 0x0019f2f8
+    /**
+     * When a riff is playing, clears every held flag, sends an AllNotesOffMsg, withdraws mCommand,
+     * and releases every button with an AxeButtonMsg.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00199590
+     * @ghidraAddress PAL: 0x0019f2f8
+     */
     void StopRiff(int nTick);
 
-    // Sends an AllNotesOffMsg to mSynth and the current riff as a MultiMuseMsg, then schedules
-    // the file-local Cmd at the end of the riff after the rounded position.
-    // NTSC-U/C: 0x00199758, PAL: 0x0019f4c0
+    /**
+     * Sends an AllNotesOffMsg to mSynth and the current riff as a MultiMuseMsg, then schedules the
+     * file-local Cmd at the end of the riff after the rounded position.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00199758
+     * @ghidraAddress PAL: 0x0019f4c0
+     */
     void PlayRiff(int nTick);
 
-    // The out-of-line copy of the GameOverMsg branch DispatchPriv() expands inline. It stops the
-    // riff at position zero and reads nothing from the message.
-    // NTSC-U/C: 0x0019a920, PAL: 0x001a0688
+    /**
+     * The out-of-line copy of the GameOverMsg branch DispatchPriv() expands inline.
+     *
+     * It stops the riff at position zero and reads nothing from the message.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019a920
+     * @ghidraAddress PAL: 0x001a0688
+     */
     void OnGameOver();
 
-    // The out-of-line copy of the TrackSelectMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x0019a898, PAL: 0x001a0600
+    /**
+     * The out-of-line copy of the TrackSelectMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019a898
+     * @ghidraAddress PAL: 0x001a0600
+     */
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
     int mTrack;                  // +0x04, copied from TrackData::mIndex

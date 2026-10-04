@@ -188,10 +188,15 @@ public:
     std::list<Rnd::Drawable *> mDrawables;
 
 private:
-    // Copy Rnd::TheManager.mLoaded into mLoadedObjects, then append every `Tex` in mLoaded and then
-    // in mMergeObjects to mObjects and every `Text` to mDrawables. PollAsyncLoads() is the one
-    // caller, and the name is inferred.
-    // NTSC-U/C: 0x003f8460, PAL: 0x00430cc0
+    /**
+     * Copy Rnd::TheManager.mLoaded into mLoadedObjects, then append every `Tex` in mLoaded and then
+     * in mMergeObjects to mObjects and every `Text` to mDrawables.
+     *
+     * PollAsyncLoads() is the one caller, and the name is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003f8460
+     * @ghidraAddress PAL: 0x00430cc0
+     */
     void HarvestLoadedObjects();
 
     // Every object the request loaded, copied from Rnd::TheManager.mLoaded.

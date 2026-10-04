@@ -669,7 +669,12 @@ public:
     static int mapping_ass_subscript_handler(PyObject *self, PyObject *key, PyObject *value);
 
 private:
-    // Throw the Py::RuntimeError every default protocol member raises.
+    /**
+     * Throw the Py::RuntimeError every default protocol member raises.
+     *
+     * @ghidraAddress NTSC-U/C: 0x005aa420
+     * @ghidraAddress PAL: 0x005ec930
+     */
     void missing_method();
 };
 

@@ -12,7 +12,6 @@ constexpr float kParticleCost = 2.0f;
 
 } // namespace
 
-// NTSC-U/C: 0x004121d0, PAL: 0x0044bcb0
 TnlGemEffectKind::TnlGemEffectKind(const char *pszName) {
     mParticleSys = dynamic_cast<Rnd::ParticleSys *>(
         Rnd::TheManager.Find(HxStr(Rnd::MakeString("%s.ps", pszName))));

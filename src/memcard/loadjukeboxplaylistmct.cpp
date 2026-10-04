@@ -15,7 +15,6 @@ constexpr int kIndexTextSize = 16;
 
 } // namespace
 
-// NTSC-U/C: 0x001797e8, PAL: 0x0017d750
 LoadJukeboxPlayListMCT::LoadJukeboxPlayListMCT(MemcardUser *pUser,
                                                Memcard *pCard,
                                                int nPortSlot,
@@ -27,11 +26,9 @@ LoadJukeboxPlayListMCT::LoadJukeboxPlayListMCT(MemcardUser *pUser,
       mIndex(nIndex) {
 }
 
-// NTSC-U/C: 0x00185918, PAL: 0x0018b328
 LoadJukeboxPlayListMCT::~LoadJukeboxPlayListMCT() {
 }
 
-// NTSC-U/C: 0x001867a8, PAL: 0x0018c0a0
 void LoadJukeboxPlayListMCT::Finish() {
     MemcardTask::mState = kMemcardTaskFinished;
     if (mStatus == kMemcardStatusOk) {
@@ -41,7 +38,6 @@ void LoadJukeboxPlayListMCT::Finish() {
     mUser->OnJukeboxPlayListLoaded(mPortSlot, mStatus);
 }
 
-// NTSC-U/C: 0x001798e0, PAL: 0x0017d860
 void LoadJukeboxPlayListMCT::Execute() {
     MemcardTask::mState = kMemcardTaskRunning;
     char szIndex[kIndexTextSize];

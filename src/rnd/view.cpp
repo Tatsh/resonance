@@ -65,37 +65,30 @@ static Object *NewCollideableView(const HxStr &name) {
     return pView;
 }
 
-// NTSC-U/C: 0x004e2048, PAL: 0x00520900
 void *View::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kViewTag);
 }
 
-// NTSC-U/C: 0x004e2068, PAL: 0x00520920
 void View::operator delete(void *pBlock) {
     OperatorDeleteOverride(pBlock, kViewTag);
 }
 
-// NTSC-U/C: 0x004e2740, PAL: 0x00520ff8
 View::View(const HxStr &name)
     : Object(name), mAnimatable(0), mTransformable(0), mDrawable(0), mCollideable(0) {
 }
 
-// NTSC-U/C: 0x004e21b8, PAL: 0x00520a70
 View::~View() {
     RemoveObjectRefs();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x004e2730, PAL: 0x00520fe8
 void View::RemoveObjectRefs() {
 }
 
-// NTSC-U/C: 0x004e2720, PAL: 0x00520fd8
 const HxStr &View::ClassName() const {
     return g_viewClassName;
 }
 
-// NTSC-U/C: 0x004e3768, PAL: 0x00522020
 void View::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
@@ -104,7 +97,6 @@ void View::DumpText(Dbg &sink) {
     Collideable::DumpText(sink);
 }
 
-// NTSC-U/C: 0x004e37d0, PAL: 0x00522088
 void View::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.WriteLE(&nVersion, sizeof(nVersion));
@@ -114,7 +106,6 @@ void View::Save(Stream &stream) {
     Collideable::Save(stream);
 }
 
-// NTSC-U/C: 0x004e36f8, PAL: 0x00521fb0
 void View::Replace(Object *pFrom, Object *pTo) {
     Animatable::Replace(pFrom, pTo);
     Transformable::Replace(pFrom, pTo);
@@ -122,7 +113,6 @@ void View::Replace(Object *pFrom, Object *pTo) {
     Collideable::Replace(pFrom, pTo);
 }
 
-// NTSC-U/C: 0x004e3850, PAL: 0x00522108
 void View::Copy(const Object *pSource, unsigned nFlags) {
     (void)dynamic_cast<const View *>(pSource); // Yes, the binary discards the cast.
     Animatable::Copy(pSource, nFlags);
@@ -131,7 +121,6 @@ void View::Copy(const Object *pSource, unsigned nFlags) {
     Collideable::Copy(pSource, nFlags);
 }
 
-// NTSC-U/C: 0x004e0128, PAL: 0x0051e978
 void View::Load(Stream &stream) {
     // A view created for a bare mix-in key reads only that mix-in's record.
     if (mAnimatable != 0) {
@@ -169,10 +158,9 @@ void View::Load(Stream &stream) {
     }
 }
 
-// NTSC-U/C: 0x004e2088, PAL: 0x00520940
-// The five registered creators above inline this body, handler and all, and set their flag after
-// it even when it produced null.
 View *View::NewView(const HxStr &name) {
+    // The five registered creators above inline this body, handler and all, and set their flag
+    // after it even when it produced null.
     try {
         return new View(name);
     } catch (...) {
@@ -180,7 +168,6 @@ View *View::NewView(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x004dff48, PAL: 0x0051e720
 void View::Init() {
     TheManager.RegisterClass(g_viewClassName, NewViewObject);
     TheManager.RegisterClass(HxStr("Animatable"), NewAnimatableView);

@@ -65,10 +65,16 @@ public:
     int Translate(const MetControllerReading *pReading, MetScreenCommand *pCommand);
 
 private:
-    // NTSC-U/C: 0x002e3ac0, PAL: 0x00306a80
-    // Translates one analogue reading. A value below 0.1 yields nNegative and one above 0.9 yields
-    // nPositive, each only once until the stick returns to the centre, where the direction is
-    // released and 0 is returned. A direction already held returns -1.
+    /**
+     * Translates one analogue reading.
+     *
+     * A value below 0.1 yields nNegative and one above 0.9 yields nPositive, each only once until
+     * the stick returns to the centre, where the direction is released and 0 is returned. A
+     * direction already held returns -1.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002e3ac0
+     * @ghidraAddress PAL: 0x00306a80
+     */
     int AxisCommand(int nButton, int nPadIndex, float flValue, int nNegative, int nPositive);
 
     // Which directions each controller holds, by button. +0x00

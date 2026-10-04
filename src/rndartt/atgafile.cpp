@@ -30,7 +30,6 @@ constexpr unsigned char kPacketCountMask = 0x7f;
 
 } // namespace
 
-// NTSC-U/C: 0x0061fff8, PAL: 0x00660b88
 int ATgaFile::StartRead() {
     TgaHeader header;
     fread(&header, 1, kHeaderSize, mFile);
@@ -56,7 +55,6 @@ int ATgaFile::StartRead() {
     return kAGfxFileOk;
 }
 
-// NTSC-U/C: 0x00620508, PAL: 0x00661098
 int ATgaFile::ReadFrame(ABitmap &image, int *pbEnd) {
     if (mImageRead != 0) {
         *pbEnd = 1;
@@ -76,12 +74,10 @@ int ATgaFile::ReadFrame(ABitmap &image, int *pbEnd) {
     return nResult;
 }
 
-// NTSC-U/C: 0x00620500, PAL: 0x00661090
 int ATgaFile::Write([[maybe_unused]] const ABitmap &bitmap) {
     return kAGfxFileUnsupported;
 }
 
-// NTSC-U/C: 0x00620128, PAL: 0x00660cb8
 int ATgaFile::ReadPixels(ABitmap *pImage) {
     // The one pixel a run-length encoded packet is read into.
     // NTSC-U/C: 0x007a8100, PAL: 0x007ebe00

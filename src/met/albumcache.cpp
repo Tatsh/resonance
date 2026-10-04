@@ -43,17 +43,14 @@ int &LevelStageEntry(const HxStr &name) {
 
 } // namespace
 
-// NTSC-U/C: 0x003f7a30, PAL: 0x00430240
 int IsAlbumLevel([[maybe_unused]] const HxStr &name) {
     return 1;
 }
 
-// NTSC-U/C: 0x003f7a38, PAL: 0x00430248
 int GetAlbumLevelStage(const HxStr &name) {
     return LevelStageEntry(name);
 }
 
-// NTSC-U/C: 0x003f7a58, PAL: 0x00430268
 int GetAlbumLevelValue(int nLevel, int nDifficulty) {
     int &value = g_albumLevelValues[nLevel * kDifficultyCount + nDifficulty];
     if (value == kNotCached) {
@@ -62,7 +59,6 @@ int GetAlbumLevelValue(int nLevel, int nDifficulty) {
     return g_albumLevelValues[nLevel * kDifficultyCount + nDifficulty];
 }
 
-// NTSC-U/C: 0x003f7ad8, PAL: 0x004302e8
 int GetAlbumJukeboxValue() {
     if (g_nAlbumJukeboxValue == kNotCached) {
         g_nAlbumJukeboxValue = QueryConfigValue(kJukeboxConfigCode);
@@ -70,7 +66,6 @@ int GetAlbumJukeboxValue() {
     return g_nAlbumJukeboxValue;
 }
 
-// NTSC-U/C: 0x003f79a8, PAL: 0x004301b8
 void ClearAlbumCache() {
     g_albumLevelStages.clear();
     std::fill(g_albumLevelValues.begin(), g_albumLevelValues.end(), kNotCached);

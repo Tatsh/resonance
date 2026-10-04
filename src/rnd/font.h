@@ -361,13 +361,26 @@ public:
     void SetSize(float flSize);
 
 private:
-    // Take this object's reference on mMat and empty mCharMap, so the metrics are measured again
-    // on the next lookup. SetMat(), SetSize(), and the setter at 0x004d0530 are the callers. The
-    // title is inferred. 0x004d0768.
+    /**
+     * Take this object's reference on mMat and empty mCharMap, so the metrics are measured again on
+     * the next lookup.
+     *
+     * SetMat(), SetSize(), and the setter at 0x004d0530 are the callers. The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004d0768
+     * @ghidraAddress PAL: 0x0050eba0
+     */
     void OnChanged();
 
-    // Drop this object's reference on mMat. The destructor is its only out-of-line caller, and
-    // Replace(), Load(), and Copy() inline the same body. 0x004d0738.
+    /**
+     * Drop this object's reference on mMat.
+     *
+     * The destructor is its only out-of-line caller, and Replace(), Load(), and Copy() inline the
+     * same body.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004d0738
+     * @ghidraAddress PAL: 0x0050eb70
+     */
     void RemoveMatRef();
 
     // Declared in recovered offset order, with the access specifiers interleaved.

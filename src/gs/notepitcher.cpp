@@ -54,7 +54,6 @@ inline Sch::Tick MakePosition(int nTick) {
 
 } // namespace
 
-// NTSC-U/C: 0x001b1ce0, PAL: 0x001b7ab8
 NotePitcher::NotePitcher(PhraseMgr *pPhraseMgr,
                          Quantizer *pQuantizer,
                          Sch::TickClock *pClock,
@@ -71,7 +70,6 @@ NotePitcher::NotePitcher(PhraseMgr *pPhraseMgr,
     mBarDivisor = mPhraseMgr->mBarTicks;
 }
 
-// NTSC-U/C: 0x001b1f10, PAL: 0x001b7ce8
 void NotePitcher::PostPitchMsg(PitchRiffMsg *pMsg) {
     if (pMsg->mTrack != mTrack || pMsg->mPlayer != mPlayer) {
         return;
@@ -105,7 +103,6 @@ void NotePitcher::PostPitchMsg(PitchRiffMsg *pMsg) {
     mLastPitchPosition.mTick = nTick;
 }
 
-// NTSC-U/C: 0x001b20b0, PAL: 0x001b7e88
 void NotePitcher::PostAllNotesOffMsg(EraseMsg *pMsg) {
     if (pMsg->mTrack != mTrack || pMsg->mPlayer != mPlayer || mPlayModeOne != 0) {
         return;
@@ -145,7 +142,6 @@ void NotePitcher::PostAllNotesOffMsg(EraseMsg *pMsg) {
     mLastErasePosition = pMsg->mPosition;
 }
 
-// NTSC-U/C: 0x001b22f0, PAL: 0x001b80c8
 void NotePitcher::PostSeekerMsg(TrackSelectMsg *pMsg) {
     if (pMsg->mTrack != mTrack || pMsg->mPlace != 0) {
         return;
@@ -161,7 +157,6 @@ void NotePitcher::PostSeekerMsg(TrackSelectMsg *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x001b2400, PAL: 0x001b81d8
 void NotePitcher::PostPhraseCapturedMsg(int nGem, int nTick) {
     const int nBar = nTick / mBarDivisor;
     if (mCapturedBar != nBar) {
@@ -203,7 +198,6 @@ void NotePitcher::PostPhraseCapturedMsg(int nGem, int nTick) {
     mPhraseMgr->ReplayBar(mCapturedBar, MakePosition(offset.mTick + Sch::Tick(1).mTick).mTick);
 }
 
-// NTSC-U/C: 0x001b2710, PAL: 0x001b84e8
 void NotePitcher::PostSeekerMsgSecond(int nBar, int bForce) {
     if (mPlayer->IsNull() != 0) {
         return;
@@ -242,17 +236,14 @@ void NotePitcher::PostSeekerMsgSecond(int nBar, int bForce) {
     Send(&off);
 }
 
-// NTSC-U/C: 0x001b39c0, PAL: 0x001b9798
 NotePitcher::~NotePitcher() {
 }
 
-// NTSC-U/C: 0x001b3b98, PAL: 0x001b9970
 int NotePitcher::Tick(int nElapsedTicks) {
     PostSeekerMsgSecond(nElapsedTicks / mBarDivisor, 0);
     return 1;
 }
 
-// NTSC-U/C: 0x001b3bd0, PAL: 0x001b99a8
 void NotePitcher::DispatchPriv(Message *pMsg) {
     const int nType = pMsg->Type();
     if (nType == static_cast<int>(PitchRiffMsg::sID)) {
@@ -278,14 +269,12 @@ void NotePitcher::DispatchPriv(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x001b3a38, PAL: 0x001b9810
 void NotePitcher::OnInvalidateSeeker(InvalidateSeekerMsg *pMsg) {
     if (pMsg->mTrack == mTrack) {
         PostSeekerMsgSecond(pMsg->mBar, 0);
     }
 }
 
-// NTSC-U/C: 0x001b3a68, PAL: 0x001b9840
 int NotePitcher::CanPlayBar(int nBar, int nCurrentBar) {
     if (mPlayModeOne != 0) {
         int bPlayable = 0;
@@ -306,7 +295,6 @@ int NotePitcher::CanPlayBar(int nBar, int nCurrentBar) {
     return bPlayable != 0 && pOwner == mPlayer;
 }
 
-// NTSC-U/C: 0x001b3b88, PAL: 0x001b9960
 int NotePitcher::IsOtherTick(int nTick) {
     return mLastPitchPosition.mTick != nTick;
 }

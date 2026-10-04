@@ -333,6 +333,8 @@ int sceGsExecLoadImage(sceGsLoadImage *pLoadImage, const void *pSource);
 /**
  * Fill an image download descriptor.
  *
+ * The packet spans 0x70 bytes of GIFtag, register data, and register identifiers.
+ *
  * @param pStoreImage The descriptor.
  * @param nSbp Source buffer base pointer.
  * @param nSbw Source buffer width.

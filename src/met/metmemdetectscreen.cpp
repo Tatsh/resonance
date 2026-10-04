@@ -111,7 +111,6 @@ inline void ShowNoSpaceWarning(MetScreen *pOwner, MetStringId nFormatId, int nCl
 
 } // namespace
 
-// NTSC-U/C: 0x002deab8, PAL: 0x003017e0
 MetMemDetectScreen::MetMemDetectScreen(MetRenderer *pRenderer,
                                        int nPriority,
                                        const HxStr &name,
@@ -121,17 +120,14 @@ MetMemDetectScreen::MetMemDetectScreen(MetRenderer *pRenderer,
       mPersonaLoadRequested(0), mAutosaveNoticeTime(0) {
 }
 
-// NTSC-U/C: 0x002deb08, PAL: 0x00301830
 MetMemDetectScreen::~MetMemDetectScreen() {
 }
 
-// NTSC-U/C: 0x002d89c8, PAL: 0x002fb180
 MetMemDetectScreen *MetMemDetectScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMemDetectScreen(
         pRenderer, nPriority, HxStr(kNoName), HxStr(kNoName), HxStr(kNoName));
 }
 
-// NTSC-U/C: 0x002d8b80, PAL: 0x002fb390
 void MetMemDetectScreen::StartDetect() {
     mAutosaveNoticeTime = 0;
 #ifndef VIDEO_STANDARD_PAL
@@ -148,7 +144,6 @@ void MetMemDetectScreen::StartDetect() {
     MemcardManager::shared()->CreateGetAllConnectStatesTask(&GlobalSettings::shared()->mCardSlots);
 }
 
-// NTSC-U/C: 0x002d8e98, PAL: 0x002fb458
 void MetMemDetectScreen::OnAllConnectStates() {
     if (GlobalSettings::shared()->mCardSlots.size() == 0) {
         OnNoCard();
@@ -189,7 +184,6 @@ void MetMemDetectScreen::OnAllConnectStates() {
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// PAL: 0x002fde10
 void MetMemDetectScreen::ShowFormatCheck(const MemcardConnectState &slot) {
     std::vector<HxStr> buttons;
     buttons.push_back(GetMetString(kMetStrMsgNO));
@@ -205,7 +199,6 @@ void MetMemDetectScreen::ShowFormatCheck(const MemcardConnectState &slot) {
 }
 #endif
 
-// NTSC-U/C: 0x002d9628, PAL: 0x002fb8c8
 void MetMemDetectScreen::OnCardFormatted(int, int nStatus) {
     std::vector<HxStr> buttons;
     switch (nStatus) {
@@ -255,7 +248,6 @@ void MetMemDetectScreen::OnCardFormatted(int, int nStatus) {
     }
 }
 
-// NTSC-U/C: 0x002d9e40, PAL: 0x002fc220
 void MetMemDetectScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kNoCardMessage) {
         if (nChoice == kChoiceSecond) {
@@ -334,7 +326,6 @@ void MetMemDetectScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// NTSC-U/C: 0x002da868, PAL: 0x002fcd88
 void MetMemDetectScreen::OnMinimumSaveSpace(int, int, int nSkipWarning, int nCampaign) {
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
     std::vector<HxStr> buttons;
@@ -355,7 +346,6 @@ void MetMemDetectScreen::OnMinimumSaveSpace(int, int, int nSkipWarning, int nCam
     }
 }
 #else
-// NTSC-U/C: 0x002da868
 void MetMemDetectScreen::OnMinimumSaveSpace(int, int nSpace) {
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
     std::vector<HxStr> buttons;
@@ -402,7 +392,6 @@ void MetMemDetectScreen::OnMinimumSaveSpace(int, int nSpace) {
 }
 #endif
 
-// NTSC-U/C: 0x002db328, PAL: 0x002fda28
 void MetMemDetectScreen::StartLoadPersonas() {
     mPersonaLoadRequested = 1;
     std::vector<HxStr> buttons;
@@ -421,17 +410,14 @@ void MetMemDetectScreen::StartLoadPersonas() {
         GlobalSettings::shared()->mCardSlots[0].mPortSlot, MetPersonaData::loadList());
 }
 
-// NTSC-U/C: 0x002deb70, PAL: 0x00301898
 void MetMemDetectScreen::OnGlobalSettingsLoaded(int, int) {
     StartLoadPersonas();
 }
 
-// NTSC-U/C: 0x002deb98, PAL: 0x003018c0
 void MetMemDetectScreen::OnPersonasLoaded(int, int) {
     StartSaveSpaceCheck();
 }
 
-// NTSC-U/C: 0x002debc0, PAL: 0x003018e8
 void MetMemDetectScreen::StartSaveSpaceCheck() {
     GlobalSettings::shared(); // Yes, the binary discards this call's result.
     MemcardManager::shared()->mUser = this;
@@ -439,7 +425,6 @@ void MetMemDetectScreen::StartSaveSpaceCheck() {
         GlobalSettings::shared()->mCardSlots[0].mPortSlot);
 }
 
-// NTSC-U/C: 0x002dec10, PAL: 0x00301938
 void MetMemDetectScreen::UpdateIdle(float flTime) {
     if (mAutosaveNoticeTime != 0 && mAutosaveNoticeTime + kAutosaveNoticeDuration < flTime) {
         mAutosaveNoticeTime = 0;

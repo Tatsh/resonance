@@ -181,18 +181,15 @@ static unsigned int _sceSifSendCmd(unsigned int fcode,
     return sceSifSetDma(aTransfers, nCount);
 }
 
-// NTSC-U/C: 0x005d3588, PAL: 0x006155f0
 int sceSifGetSreg(int reg) {
     return soft_reg[reg];
 }
 
-// NTSC-U/C: 0x005d35a0, PAL: 0x00615608
 int sceSifSetSreg(int reg, int value) {
     soft_reg[reg] = value;
     return value;
 }
 
-// NTSC-U/C: 0x005d35d0, PAL: 0x00615638
 void sceSifInitCmd(void) {
     volatile unsigned int *pDmacStat = (volatile unsigned int *)kDmacStatRegister;
     volatile unsigned int *pSif0Chcr = (volatile unsigned int *)kSif0ChcrRegister;
@@ -254,14 +251,12 @@ void sceSifInitCmd(void) {
     sceSifSendCmd(SIF_CMDC_INIT_CMD, &g_cmdInitPacket, sizeof(g_cmdInitPacket), NULL, NULL, 0);
 }
 
-// NTSC-U/C: 0x005d3850, PAL: 0x006158b8
 void sceSifExitCmd(void) {
     DisableDmac(DMAC_SIF0);
     RemoveDmacHandler(DMAC_SIF0, sif0_handleid);
     g_nCmdInitialized = 0;
 }
 
-// NTSC-U/C: 0x005d3888, PAL: 0x006158f0
 sceSifCmdData *sceSifSetCmdBuffer(sceSifCmdData *db, int size) {
     sceSifCmdData *pPrevious = _data_table.pUserHandlers;
 
@@ -270,7 +265,6 @@ sceSifCmdData *sceSifSetCmdBuffer(sceSifCmdData *db, int size) {
     return pPrevious;
 }
 
-// NTSC-U/C: 0x005d38a0, PAL: 0x00615908
 sceSifCmdData *sceSifSetSysCmdBuffer(sceSifCmdData *db, int size) {
     sceSifCmdData *pPrevious = _data_table.pSystemHandlers;
 
@@ -279,7 +273,6 @@ sceSifCmdData *sceSifSetSysCmdBuffer(sceSifCmdData *db, int size) {
     return pPrevious;
 }
 
-// NTSC-U/C: 0x005d38b8, PAL: 0x00615920
 void sceSifAddCmdHandler(unsigned int fcode, sceSifCmdHandler handler, void *data) {
     sceSifCmdData *pTable = _data_table.pUserHandlers;
 
@@ -290,7 +283,6 @@ void sceSifAddCmdHandler(unsigned int fcode, sceSifCmdHandler handler, void *dat
     pTable[fcode & ~SIF_CMDC_SYSTEM].func = handler;
 }
 
-// NTSC-U/C: 0x005d38e8, PAL: 0x00615950
 void sceSifRemoveCmdHandler(unsigned int fcode) {
     sceSifCmdData *pTable = _data_table.pUserHandlers;
 
@@ -300,7 +292,6 @@ void sceSifRemoveCmdHandler(unsigned int fcode) {
     pTable[fcode & ~SIF_CMDC_SYSTEM].func = NULL;
 }
 
-// NTSC-U/C: 0x005d3a48, PAL: 0x00615ab0
 unsigned int sceSifSendCmd(unsigned int fcode,
                            void *packet,
                            int packet_size,
@@ -310,7 +301,6 @@ unsigned int sceSifSendCmd(unsigned int fcode,
     return _sceSifSendCmd(fcode, 0, packet, packet_size, src_extra, dest_extra, size_extra);
 }
 
-// NTSC-U/C: 0x005d3a88, PAL: 0x00615af0
 unsigned int isceSifSendCmd(unsigned int fcode,
                             void *packet,
                             int packet_size,
@@ -321,7 +311,6 @@ unsigned int isceSifSendCmd(unsigned int fcode,
         fcode, SIF_CMDM_INTR, packet, packet_size, src_extra, dest_extra, size_extra);
 }
 
-// NTSC-U/C: 0x005d3bf0, PAL: 0x00615c58
 void sceSifWriteBackDCache(void *addr, int size) {
     uintptr_t nLine;
     uintptr_t nLast;

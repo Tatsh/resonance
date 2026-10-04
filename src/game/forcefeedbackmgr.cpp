@@ -297,19 +297,16 @@ inline void PostAt(Sch::TickClock *pClock, Sch::Command *pCommand, int nTick) {
 
 } // namespace
 
-// NTSC-U/C: 0x0016dae0, PAL: 0x001703f0
 ForceFeedbackMgr::ForceFeedbackMgr() : mFlags(0), mUnusedTime(0), mPulseLength{0} {
     LoadConfig();
     g_pForceFeedbackMgr = this;
 }
 
-// NTSC-U/C: 0x0016dca8, PAL: 0x001705b8
 ForceFeedbackMgr::~ForceFeedbackMgr() {
     mEffects.clear();
     g_pForceFeedbackMgr = nullptr;
 }
 
-// NTSC-U/C: 0x0016de58, PAL: 0x00170768
 void ForceFeedbackMgr::LoadConfig() {
     std::vector<int> values;
     QueryConfigVector(&values, kMetronomeQuery);
@@ -335,7 +332,6 @@ void ForceFeedbackMgr::LoadConfig() {
     mSlots.clear();
 }
 
-// NTSC-U/C: 0x0016e1b8, PAL: 0x00170ac8
 void ForceFeedbackMgr::StartMetronome(const Sch::Tick &delay) {
     mFlags &= ~kFlagStopped;
     if (mFlags != 0 && mFlags != kFlagPaused) {
@@ -346,7 +342,6 @@ void ForceFeedbackMgr::StartMetronome(const Sch::Tick &delay) {
     PostAt(SongClock(), pCommand, when.mTick);
 }
 
-// NTSC-U/C: 0x0016e2b8, PAL: 0x00170bc8
 void ForceFeedbackMgr::SetPlayerCount(unsigned int nPlayers) {
     mSlots.resize(nPlayers, Slot());
     if (static_cast<int>(nPlayers) <= kMaxVibratingPlayers) { // The binary tests the count signed.
@@ -359,7 +354,6 @@ void ForceFeedbackMgr::SetPlayerCount(unsigned int nPlayers) {
     mFlags |= kFlagTooManyPlayers;
 }
 
-// NTSC-U/C: 0x0016e408, PAL: 0x00170d18
 void ForceFeedbackMgr::PulseBeat() {
     if (mFlags == 0) {
         for (unsigned int i = 0; i < mSlots.size(); ++i) {
@@ -384,7 +378,6 @@ void ForceFeedbackMgr::PulseBeat() {
     PostAt(pClock, pNext, when.mTick);
 }
 
-// NTSC-U/C: 0x0016e610, PAL: 0x00170f20
 void ForceFeedbackMgr::SyncMetronome() {
     Sch::TempoMap *pTempo = SongClock()->mTempoMap;
     const int nNow = SongClock()->SongTick();
@@ -406,7 +399,6 @@ void ForceFeedbackMgr::SyncMetronome() {
     PostAt(pClock, pCommand, when.mTick);
 }
 
-// NTSC-U/C: 0x0016e848, PAL: 0x00171158
 void ForceFeedbackMgr::PlayEffect(int nPlayerSlot, int nEffect) {
     if (mFlags != 0 || nPlayerSlot == kNoPlayerSlot) {
         return;
@@ -437,7 +429,6 @@ void ForceFeedbackMgr::PlayEffect(int nPlayerSlot, int nEffect) {
     PostAt(pClock, pDone, doneWhen.mTick);
 }
 
-// NTSC-U/C: 0x001704c8, PAL: 0x00172dd8
 void ForceFeedbackMgr::Suspend(unsigned char nMask) {
     for (unsigned int i = 0; i < mSlots.size(); ++i) {
         SetBothMotors(i, kMotorOff, kMotorOff);
@@ -445,7 +436,6 @@ void ForceFeedbackMgr::Suspend(unsigned char nMask) {
     mFlags |= nMask;
 }
 
-// NTSC-U/C: 0x00170588, PAL: 0x00172e98
 void ForceFeedbackMgr::SetPaused(int bPaused) {
     if (!bPaused) {
         mFlags &= ~kFlagPaused;
@@ -457,7 +447,6 @@ void ForceFeedbackMgr::SetPaused(int bPaused) {
     mFlags |= kFlagPaused;
 }
 
-// NTSC-U/C: 0x00170648, PAL: 0x00172f58
 void ForceFeedbackMgr::SetJukeboxMode(int bJukebox) {
     if (!bJukebox) {
         mFlags &= ~kFlagJukebox;
@@ -469,7 +458,6 @@ void ForceFeedbackMgr::SetJukeboxMode(int bJukebox) {
     mFlags |= kFlagJukebox;
 }
 
-// NTSC-U/C: 0x00170708, PAL: 0x00173018
 void ForceFeedbackMgr::SetPlaybackMode(int bPlayback) {
     if (!bPlayback) {
         mFlags &= ~kFlagPlayback;
@@ -481,7 +469,6 @@ void ForceFeedbackMgr::SetPlaybackMode(int bPlayback) {
     mFlags |= kFlagPlayback;
 }
 
-// NTSC-U/C: 0x001707c8, PAL: 0x001730d8
 void ForceFeedbackMgr::SetEnabled(int bEnabled) {
     if (bEnabled) {
         mFlags &= ~kFlagDisabled;
@@ -493,14 +480,12 @@ void ForceFeedbackMgr::SetEnabled(int bEnabled) {
     mFlags |= kFlagDisabled;
 }
 
-// NTSC-U/C: 0x00170890, PAL: 0x001731a0
 void ForceFeedbackMgr::SetPowerup(unsigned int nPlayerSlot, int bPowerup) {
     if (nPlayerSlot < mSlots.size()) {
         mSlots[nPlayerSlot].mPowerup = bPowerup;
     }
 }
 
-// NTSC-U/C: 0x001708d0, PAL: 0x001731e0
 void ForceFeedbackMgr::StopAll([[maybe_unused]] Sch::Tick when) {
     for (unsigned int i = 0; i < mSlots.size(); ++i) {
         SetBothMotors(i, kMotorOff, kMotorOff);
@@ -512,7 +497,6 @@ void ForceFeedbackMgr::StopAll([[maybe_unused]] Sch::Tick when) {
     mFlags |= kFlagStopped;
 }
 
-// NTSC-U/C: 0x001709f8, PAL: 0x00173308
 void ForceFeedbackMgr::SetBigMotor(int nPlayerSlot, int nLevel) {
     if (mFlags != 0) {
         return;
@@ -521,7 +505,6 @@ void ForceFeedbackMgr::SetBigMotor(int nPlayerSlot, int nLevel) {
     ApplyMotors(nPlayerSlot);
 }
 
-// NTSC-U/C: 0x00170a30, PAL: 0x00173340
 void ForceFeedbackMgr::SetSmallMotor(int nPlayerSlot, int nState) {
     if (mFlags != 0) {
         return;
@@ -530,7 +513,6 @@ void ForceFeedbackMgr::SetSmallMotor(int nPlayerSlot, int nState) {
     ApplyMotors(nPlayerSlot);
 }
 
-// NTSC-U/C: 0x00170a68, PAL: 0x00173378
 void ForceFeedbackMgr::SetBothMotors(int nPlayerSlot, int nSmallState, int nBigLevel) {
     if (mFlags != 0) {
         return;
@@ -540,34 +522,28 @@ void ForceFeedbackMgr::SetBothMotors(int nPlayerSlot, int nSmallState, int nBigL
     ApplyMotors(nPlayerSlot);
 }
 
-// NTSC-U/C: 0x00170ab0, PAL: 0x001733c0
 void ForceFeedbackMgr::ApplyMotors(int nPlayerSlot) {
     InputPoller *pPoller = Application::shared()->GetGameManager()->GetPoller();
     const Slot &slot = mSlots[nPlayerSlot];
     pPoller->SetVibration(nPlayerSlot + 1, slot.mSmallMotor, slot.mBigMotor);
 }
 
-// NTSC-U/C: 0x00170b20, PAL: 0x00173430
 void ForceFeedbackMgr::PlayUnusedEffect(Player *pPlayer) {
     PlayEffect(pPlayer->GetInputSlot(), kEffectUnused);
 }
 
-// NTSC-U/C: 0x00170b68, PAL: 0x00173478
 void ForceFeedbackMgr::PlayBumpEffect(Player *pPlayer) {
     PlayEffect(pPlayer->GetInputSlot(), kEffectBump);
 }
 
-// NTSC-U/C: 0x00170bb0, PAL: 0x001734c0
 void ForceFeedbackMgr::PlayAutocatchEffect(Player *pPlayer) {
     PlayEffect(pPlayer->GetInputSlot(), kEffectAutocatch);
 }
 
-// NTSC-U/C: 0x00170bf8, PAL: 0x00173508
 void ForceFeedbackMgr::PlayNeutralizedEffect(Player *pPlayer) {
     PlayEffect(pPlayer->GetInputSlot(), kEffectNeutralized);
 }
 
-// NTSC-U/C: 0x00170c40, PAL: 0x00173550
 void ForceFeedbackMgr::PlayCrippleEffect(Player *pPlayer) {
     PlayEffect(pPlayer->GetInputSlot(), kEffectCripple);
 }

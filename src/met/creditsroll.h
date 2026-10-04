@@ -115,22 +115,65 @@ private:
     // The four persona burn textures are used in turn.
     static constexpr int kBurnSlotCount = 4;
 
-    // NTSC-U/C: 0x00165658, PAL: 0x00167760
+    /**
+     * The band of one picture on screen, from the projected height of each of its vertices.
+     *
+     * A picture with a vertex in the visible band, or with vertices both above and below it,
+     * counts as visible.
+     *
+     * @param pPicture The picture, or null.
+     * @return kBandVisible, kBandAbove, kBandBelow, or kBandAbsent for a null or empty picture.
+     * @ghidraAddress NTSC-U/C: 0x00165658
+     * @ghidraAddress PAL: 0x00167760
+     */
     int ClassifyPicture(Rnd::Mesh *pPicture);
-    // NTSC-U/C: 0x001658c8, PAL: 0x001679d0
+    /**
+     * The band of one text on screen, from the projected top and bottom of its vertical bounds.
+     *
+     * @param pText The text, or null.
+     * @return kBandVisible, kBandAbove, kBandBelow, or kBandAbsent for a null text.
+     * @ghidraAddress NTSC-U/C: 0x001658c8
+     * @ghidraAddress PAL: 0x001679d0
+     */
     int ClassifyText(Rnd::Text *pText);
-    // NTSC-U/C: 0x00169970, PAL: 0x0016bb58
-    // The combined band of one credit.
+    /**
+     * The combined band of one credit.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00169970
+     * @ghidraAddress PAL: 0x0016bb58
+     */
     int Classify(Rnd::Mesh *pPicture, Rnd::Text *pText);
-    // NTSC-U/C: 0x00169900, PAL: 0x0016bae8
+    /**
+     * The picture of one credit.
+     *
+     * @param nIndex The credit index.
+     * @return The picture, or null when the index is outside the loaded credits.
+     * @ghidraAddress NTSC-U/C: 0x00169900
+     * @ghidraAddress PAL: 0x0016bae8
+     */
     Rnd::Mesh *GetPicture(int nIndex);
-    // NTSC-U/C: 0x00169938, PAL: 0x0016bb20
+    /**
+     * The text of one credit.
+     *
+     * @param nIndex The credit index.
+     * @return The text, or null when the index is outside the loaded credits.
+     * @ghidraAddress NTSC-U/C: 0x00169938
+     * @ghidraAddress PAL: 0x0016bb20
+     */
     Rnd::Text *GetText(int nIndex);
-    // NTSC-U/C: 0x001699e8, PAL: 0x0016bbd0
-    // The receiver is not read.
+    /**
+     * The receiver is not read.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001699e8
+     * @ghidraAddress PAL: 0x0016bbd0
+     */
     void SetShowing(Rnd::Mesh *pPicture, Rnd::Text *pText, int nShowing);
-    // NTSC-U/C: 0x00169860, PAL: 0x0016ba48
-    // Update() expands the same search inline.
+    /**
+     * Update() expands the same search inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00169860
+     * @ghidraAddress PAL: 0x0016ba48
+     */
     static inline MetPersonaData *FindPersona(const HxStr &name,
                                               const std::vector<MetPersonaData *> &identities);
 

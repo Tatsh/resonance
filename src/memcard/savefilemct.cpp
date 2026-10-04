@@ -61,7 +61,6 @@ const float kIconLightAmbient[] = {0.5f, 0.5f, 0.5f, 0.0f};
 } // namespace
 
 #ifdef VIDEO_STANDARD_PAL
-// PAL: 0x00189900
 SaveFileMCT::SaveFileMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int nCookie)
     : MemcardTask(pUser, pCard, nPortSlot, nCookie), mKilobytes(0), mSkipIconFiles(0), mExecuted(0),
       mFreeClusters(0) {
@@ -72,11 +71,9 @@ SaveFileMCT::SaveFileMCT(MemcardUser *pUser, Memcard *pCard, int nPortSlot, int 
 }
 #endif
 
-// NTSC-U/C: 0x00184658, PAL: 0x00189968
 SaveFileMCT::~SaveFileMCT() {
 }
 
-// NTSC-U/C: 0x001859e8, PAL: 0x0017a1c0
 void SaveFileMCT::Save(const HxStr &dirName,
                        const HxStr &fileName,
                        const HxStr &iconTitle,
@@ -101,7 +98,6 @@ void SaveFileMCT::Save(const HxStr &dirName,
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// PAL: 0x0017a6f0
 void SaveFileMCT::RunStep() {
     HxStr path;
     switch (mStep) {
@@ -147,7 +143,6 @@ void SaveFileMCT::RunStep() {
     }
 }
 #else
-// NTSC-U/C: 0x001776e8
 void SaveFileMCT::RunStep() {
     HxStr path;
     switch (mStep) {
@@ -218,7 +213,6 @@ void SaveFileMCT::RunStep() {
 }
 #endif
 
-// NTSC-U/C: 0x00177ca0, PAL: 0x0017ab40
 void SaveFileMCT::BuildIconSys(const char *pszTitle) {
     sceMcIconSys pattern;
     memset(pattern.BgColor, 0, sizeof(pattern.BgColor));
@@ -259,7 +253,6 @@ void SaveFileMCT::BuildIconSys(const char *pszTitle) {
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// PAL: 0x0018b5d8
 void SaveFileMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus != kMemcardStatusUnknown && mStatus != kMemcardStatusNotFormatted) {
@@ -274,7 +267,6 @@ void SaveFileMCT::OnCheckInfo(CheckInfoOp *pOp) {
     }
 }
 
-// PAL: 0x0018b660
 void SaveFileMCT::OnSpaceChecked(int nKilobytes) {
     mKilobytes = nKilobytes;
     if (mFreeClusters < nKilobytes) {
@@ -289,13 +281,11 @@ void SaveFileMCT::OnSpaceChecked(int nKilobytes) {
     RunStep();
 }
 
-// PAL: 0x0018b6d8
 void SaveFileMCT::StartSpaceCheck() {
     mSpaceChecker = new SaveSpaceCheckerMCT(this, &mFiles, mDirName, mCard, mPortSlot, mCookie);
 }
 #endif
 
-// NTSC-U/C: 0x00185c20, PAL: 0x0018b558
 void SaveFileMCT::OnCreateDir(CreateDirOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus == kMemcardStatusOk || mStatus == kMemcardStatusNoEntry) {
@@ -307,7 +297,6 @@ void SaveFileMCT::OnCreateDir(CreateDirOp *pOp) {
     Finish();
 }
 
-// NTSC-U/C: 0x00185b40, PAL: 0x0018b4a8
 void SaveFileMCT::OnWrite(WriteOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus != kMemcardStatusOk) {
@@ -326,7 +315,6 @@ void SaveFileMCT::OnWrite(WriteOp *pOp) {
 #endif
 }
 
-// NTSC-U/C: 0x00185ae0, PAL: 0x0018b448
 void SaveFileMCT::OnOpenWrite(OpenWriteOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus == kMemcardStatusOk) {
@@ -339,7 +327,6 @@ void SaveFileMCT::OnOpenWrite(OpenWriteOp *pOp) {
     Finish();
 }
 
-// NTSC-U/C: 0x00185bc0, PAL: 0x0018b4f8
 void SaveFileMCT::OnClose(CloseOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus == kMemcardStatusOk) {
@@ -351,14 +338,12 @@ void SaveFileMCT::OnClose(CloseOp *pOp) {
     Finish();
 }
 
-// NTSC-U/C: 0x00185a88, PAL: 0x0018b410
 void SaveFileMCT::Finish() {
     mStep = kSaveFileStepDone;
     mUser->OnFileSaved(mStatus);
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// PAL: 0x0017a390
 void SaveFileMCT::Execute() {
     mExecuted = 1;
     mFileIndex = 0;
@@ -377,7 +362,6 @@ void SaveFileMCT::Execute() {
     mCard->CheckInfo(this, mPortSlot, mCookie);
 }
 #else
-// NTSC-U/C: 0x00185ac0
 void SaveFileMCT::Execute() {
     mStep = kSaveFileStepCreateDir;
     RunStep();

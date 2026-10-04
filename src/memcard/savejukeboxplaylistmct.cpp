@@ -15,7 +15,6 @@ constexpr int kIndexTextSize = 16;
 
 } // namespace
 
-// NTSC-U/C: 0x00178d58, PAL: 0x0017c7c8
 SaveJukeboxPlayListMCT::SaveJukeboxPlayListMCT(MemcardUser *pUser,
                                                Memcard *pCard,
                                                int nPortSlot,
@@ -27,12 +26,10 @@ SaveJukeboxPlayListMCT::SaveJukeboxPlayListMCT(MemcardUser *pUser,
     pPlayList->save(&mStream);
 }
 
-// NTSC-U/C: 0x00184ee8, PAL: 0x0018a5e8
 SaveJukeboxPlayListMCT::~SaveJukeboxPlayListMCT() {
 }
 
 #ifndef VIDEO_STANDARD_PAL
-// NTSC-U/C: 0x00186650
 void SaveJukeboxPlayListMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     if (mStatus != kMemcardStatusUnknown && mStatus != kMemcardStatusNotFormatted) {
@@ -50,7 +47,6 @@ void SaveJukeboxPlayListMCT::OnCheckInfo(CheckInfoOp *pOp) {
 }
 #endif
 
-// NTSC-U/C: 0x001866e8, PAL: 0x0018bfe0
 void SaveJukeboxPlayListMCT::Finish() {
     mState = kMemcardTaskFinished;
 #ifdef VIDEO_STANDARD_PAL
@@ -60,7 +56,6 @@ void SaveJukeboxPlayListMCT::Finish() {
 #endif
 }
 
-// NTSC-U/C: 0x00178ec0, PAL: 0x0017ca28
 void SaveJukeboxPlayListMCT::Execute() {
     mState = kMemcardTaskRunning;
     mDirName = g_saveDirBase + g_jukeboxDirSuffix;

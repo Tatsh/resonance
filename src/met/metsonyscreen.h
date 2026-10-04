@@ -177,11 +177,16 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // NTSC-U/C: 0x003ba620, PAL: 0x003ef2c0
-    // Removes this screen from the renderer, clears its background scene, installs the main
-    // loop's keep-alive draw as the bank-load progress hook, runs the synth's LoadBankSet4() and
-    // the renderer's RendererBase slot 5, and hands the renderer a MetFreqEndedMsg with a payload
-    // of 1. Slot 36 is its one caller, and the title is inferred.
+    /**
+     * Removes this screen from the renderer, clears its background scene, installs the main loop's
+     * keep-alive draw as the bank-load progress hook, runs the synth's LoadBankSet4() and the
+     * renderer's RendererBase slot 5, and hands the renderer a MetFreqEndedMsg with a payload of 1.
+     *
+     * Slot 36 is its one caller, and the title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003ba620
+     * @ghidraAddress PAL: 0x003ef2c0
+     */
     void Finish();
 
     // The frame EnterAndShow() ran at, cleared once the fade out starts. +0x90

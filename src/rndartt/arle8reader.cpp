@@ -8,10 +8,9 @@ constexpr unsigned char kControlLiteralFlag = 0x80;
 
 } // namespace
 
-// NTSC-U/C: 0x0060da78, PAL: 0x0064e6e8
-// The keyed and the opaque walks are separate code in the binary rather than one walk
-// with the comparison inside it, and the shape here reproduces that.
 unsigned char *ARle8Reader::UnpackRow(unsigned char *pDest) {
+    // The keyed and the opaque walks are separate code in the binary rather than one walk with the
+    // comparison inside it, and the shape here reproduces that.
     if (*mSource == kControlTerminator) {
         return pDest;
     }
@@ -69,16 +68,12 @@ unsigned char *ARle8Reader::UnpackRow(unsigned char *pDest) {
     return pDest;
 }
 
-// NTSC-U/C: 0x0060dc98, PAL: 0x0064e908
 void ARle8Reader::UnpackAll(unsigned char *pDest) {
     while (*mSource != kControlTerminator) {
         pDest = UnpackRow(pDest);
     }
 }
 
-// NTSC-U/C: 0x0060dc10, PAL: 0x0064e880
-// mWidth is read once before the first row and re-derived from a register afterwards,
-// so a width written between rows would not be seen.
 void ARle8Reader::SkipRow(int nRows) {
     if (*mSource == kControlTerminator) {
         return;

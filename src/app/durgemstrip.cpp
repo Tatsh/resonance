@@ -34,7 +34,6 @@ inline void SetPaddingWords(Transform &xfm) {
 
 } // namespace
 
-// NTSC-U/C: 0x004329e8, PAL: 0x0046e6f8
 DurGemStrip::DurGemStrip(Rnd::View *pView) : mId(kFreeId) {
     mString = Rnd::String::New(DurGemTrails::NewStringName());
     mString->SetLinePairs(0);
@@ -43,12 +42,10 @@ DurGemStrip::DurGemStrip(Rnd::View *pView) : mId(kFreeId) {
     pView->AddDraw(mString);
 }
 
-// NTSC-U/C: 0x004372d8, PAL: 0x00473070
 DurGemStrip::~DurGemStrip() {
     delete mString;
 }
 
-// NTSC-U/C: 0x00437340, PAL: 0x004730d8
 bool DurGemStrip::Start(int nLane,
                         const Color &color,
                         int nId,
@@ -79,7 +76,6 @@ bool DurGemStrip::Start(int nLane,
     return true;
 }
 
-// NTSC-U/C: 0x00432b90, PAL: 0x0046e8c0
 void DurGemStrip::Update(float flFrame) {
     if (mId == kFreeId) {
         return;
@@ -104,7 +100,6 @@ void DurGemStrip::Update(float flFrame) {
     }
 }
 
-// NTSC-U/C: 0x00437480, PAL: 0x00473218
 bool DurGemStrip::Stop(int nId, float flFrame) {
     if (mId != nId) {
         return false;
@@ -114,7 +109,6 @@ bool DurGemStrip::Stop(int nId, float flFrame) {
     return true;
 }
 
-// NTSC-U/C: 0x004374c0, PAL: 0x00473258
 bool DurGemStrip::GetHeadPos(float flFrame, Vector3 *pOut) {
     if (mId == kFreeId) {
         return false;

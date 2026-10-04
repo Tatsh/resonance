@@ -65,14 +65,12 @@ static const char *const kExpansionPakScreen = "MetExpansionPakScreen";
 
 } // namespace
 
-// NTSC-U/C: 0x002071f0, PAL: 0x00210008
 MetConfigOptionsButtonsScreen::MetConfigOptionsButtonsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mOptionButtons(nullptr), mControllerIndex(kFirstController) {
     mOptionButtons = new MetButtonList();
 }
 
-// NTSC-U/C: 0x002073c8, PAL: 0x00210240
 void MetConfigOptionsButtonsScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -108,7 +106,6 @@ void MetConfigOptionsButtonsScreen::HandleCommand(const MetScreenCommand *pComma
     }
 }
 
-// NTSC-U/C: 0x00207660, PAL: 0x00210540
 void MetConfigOptionsButtonsScreen::EnterAndShow() {
     const int bDiscButton = GlobalSettings::shared()->mGameOptions.mExpansionPack;
 
@@ -154,7 +151,6 @@ void MetConfigOptionsButtonsScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x00207fc0, PAL: 0x00211070
 void MetConfigOptionsButtonsScreen::OnRepeatingSoundFinished(Rnd::Button *pButton) {
     HxStr name(pButton->mName);
     if (name == kControllerButton || name == kMemoryButton || name == kGameButton ||
@@ -169,7 +165,6 @@ void MetConfigOptionsButtonsScreen::OnRepeatingSoundFinished(Rnd::Button *pButto
     }
 }
 
-// NTSC-U/C: 0x00208270, PAL: 0x00211398
 void MetConfigOptionsButtonsScreen::OnExitFinished() {
     if (mExitChoice == kExitCancelled) {
         if (MetFrontEndState::shared()->mReturnScreen == kPauseGameScreen) {
@@ -218,21 +213,17 @@ void MetConfigOptionsButtonsScreen::OnExitFinished() {
     }
 }
 
-// NTSC-U/C: 0x0020bff0, PAL: 0x00215420
 void MetConfigOptionsButtonsScreen::PlayCycleLeftSound([[maybe_unused]] int nSelector) {
 }
 
-// NTSC-U/C: 0x0020bff8, PAL: 0x00215428
 void MetConfigOptionsButtonsScreen::PlayCycleRightSound([[maybe_unused]] int nSelector) {
 }
 
-// NTSC-U/C: 0x0020c000, PAL: 0x00215430
 MetConfigOptionsButtonsScreen *MetConfigOptionsButtonsScreen::New(MetRenderer *pRenderer,
                                                                   int nPriority) {
     return new MetConfigOptionsButtonsScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x0020c088, PAL: 0x002154b8
 MetConfigOptionsButtonsScreen::~MetConfigOptionsButtonsScreen() {
     delete mOptionButtons;
 }

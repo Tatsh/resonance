@@ -19,11 +19,9 @@ constexpr float kEndCapV = 1.0f;
 
 } // namespace
 
-// NTSC-U/C: 0x0046ed38, PAL: 0x004ac938
 TunnelSeekSection::TunnelSeekSection() : mRing(-1), mSlice(kTunnelSeekNoSlice) {
 }
 
-// NTSC-U/C: 0x004780d0, PAL: 0x004b5d48
 void TunnelSeekSection::Set(int nSlice, int nRing, int bEndCap, int bStartCap) {
     mSlice = nSlice;
     mDirty = 1;
@@ -32,13 +30,11 @@ void TunnelSeekSection::Set(int nSlice, int nRing, int bEndCap, int bStartCap) {
     mStartCap = bStartCap;
 }
 
-// NTSC-U/C: 0x004780f0, PAL: 0x004b5d68
 void TunnelSeekSection::Invalidate() {
     mSlice = kTunnelSeekNoSlice;
     mDirty = 1;
 }
 
-// NTSC-U/C: 0x0046ed78, PAL: 0x004ac978
 void TunnelSeekSection::Build(const HxStr &name, const LodMesh &templates) {
     mMeshes.Build(name, templates.size(), true);
     mMeshes.ShareFaces(templates);
@@ -46,7 +42,6 @@ void TunnelSeekSection::Build(const HxStr &name, const LodMesh &templates) {
     mMeshes.front()->SetDepthChain(Mesh::kZModeZReadOnly, Mesh::kZFuncEqual);
 }
 
-// NTSC-U/C: 0x0046ee80, PAL: 0x004aca80
 void TunnelSeekSection::Update(Tunnel *pTunnel, const Color &color) {
     const int nSlice = Tunnel::WrapIndex(mSlice, pTunnel->mSliceCount);
     const int nRing = Tunnel::WrapIndex(mRing, pTunnel->mRingCount);

@@ -69,24 +69,20 @@ inline Rnd::View *FindCanvasView() {
 
 } // namespace
 
-// NTSC-U/C: 0x0025e5a8, PAL: 0x00274810
 MetFreqMakerCanvasScreen::MetFreqMakerCanvasScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mPersona(nullptr), mModified(0), mFreqName(DefaultFreqName()), mViewAttached(0) {
 }
 
-// NTSC-U/C: 0x00262030, PAL: 0x002787c0
 MetFreqMakerCanvasScreen::~MetFreqMakerCanvasScreen() {
     mViewAttached = 0;
     mPersona = nullptr;
 }
 
-// NTSC-U/C: 0x00261fa8, PAL: 0x00278738
 MetFreqMakerCanvasScreen *MetFreqMakerCanvasScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetFreqMakerCanvasScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x0025e978, PAL: 0x00274dd0
 void MetFreqMakerCanvasScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
     Rnd::View *pView = FindCanvasView();
@@ -94,7 +90,6 @@ void MetFreqMakerCanvasScreen::EnterAndShow() {
     mAppearance.attachTo(pView);
 }
 
-// NTSC-U/C: 0x002620d8, PAL: 0x00278878
 int MetFreqMakerCanvasScreen::PollContainerLoad() {
     if (!MetFreqMakerAssetManager::shared()->PollLoad()) {
         return 0;
@@ -102,28 +97,22 @@ int MetFreqMakerCanvasScreen::PollContainerLoad() {
     return MetScreen::PollContainerLoad();
 }
 
-// NTSC-U/C: 0x002620c8, PAL: 0x00278868
 void MetFreqMakerCanvasScreen::HandleCommand(const MetScreenCommand *) {
 }
 
-// NTSC-U/C: 0x00261f80, PAL: 0x00278710
 void MetFreqMakerCanvasScreen::PlayCycleLeftSound(int) {
 }
 
-// NTSC-U/C: 0x00261f88, PAL: 0x00278718
 void MetFreqMakerCanvasScreen::PlayCycleRightSound(int) {
 }
 
-// NTSC-U/C: 0x002620d0, PAL: 0x00278870
 void MetFreqMakerCanvasScreen::OnRepeatingSoundFinished(Rnd::Button *) {
 }
 
-// NTSC-U/C: 0x0025e898, PAL: 0x00274cd0
 void MetFreqMakerCanvasScreen::OnExitFinished() {
     mAppearance.detachFrom(FindCanvasView());
 }
 
-// NTSC-U/C: 0x0025e798, PAL: 0x00274a60
 void MetFreqMakerCanvasScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     Rnd::View *pView = FindCanvasView();
@@ -136,7 +125,6 @@ void MetFreqMakerCanvasScreen::ResolveContainerViews() {
     mViewAttached = 1;
 }
 
-// NTSC-U/C: 0x0025ea68, PAL: 0x00275158
 void MetFreqMakerCanvasScreen::CommitPersona() {
     if (mPersona != nullptr) {
         mPersona->mAppearance.mDetail->clear();
@@ -161,7 +149,6 @@ void MetFreqMakerCanvasScreen::CommitPersona() {
     mModified = 0;
 }
 
-// NTSC-U/C: 0x0025ec80, PAL: 0x002753a0
 void MetFreqMakerCanvasScreen::SetFreqName(const HxStr &name) {
     mFreqName = name;
     Rnd::Text *pText = dynamic_cast<Rnd::Text *>(Rnd::TheManager.Find(HxStr(kNameText)));
@@ -169,23 +156,19 @@ void MetFreqMakerCanvasScreen::SetFreqName(const HxStr &name) {
     mModified = 1;
 }
 
-// NTSC-U/C: 0x00262120, PAL: 0x002788c0
 void MetFreqMakerCanvasScreen::SelectTemplate(const HxStr &name) {
     mAppearance.selectTemplate(name);
 }
 
-// NTSC-U/C: 0x00262140, PAL: 0x002788e0
 void MetFreqMakerCanvasScreen::PlaceCursor() {
     mAppearance.placeCursor();
     mModified = 1;
 }
 
-// NTSC-U/C: 0x00262170, PAL: 0x00278910
 void MetFreqMakerCanvasScreen::ResetCursor() {
     mAppearance.resetCursor();
 }
 
-// NTSC-U/C: 0x00262190, PAL: 0x00278930
 void MetFreqMakerCanvasScreen::HandleCanvasCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kCanvasCommandBringForward:
@@ -214,23 +197,19 @@ void MetFreqMakerCanvasScreen::HandleCanvasCommand(const MetScreenCommand *pComm
     }
 }
 
-// NTSC-U/C: 0x00262250, PAL: 0x002789f0
 void MetFreqMakerCanvasScreen::SetColor(const Color &color, const Vector2 &palettePosition) {
     mAppearance.setColor(color, palettePosition);
 }
 
-// NTSC-U/C: 0x00262270, PAL: 0x00278a10
 std::list<FreqPart *> &MetFreqMakerCanvasScreen::GetParts() {
     return mAppearance.parts();
 }
 
-// NTSC-U/C: 0x00262290, PAL: 0x00278a30
 FreqPart *MetFreqMakerCanvasScreen::SelectPart(int nIndex) {
     mModified = 1;
     return mAppearance.selectPart(nIndex);
 }
 
-// NTSC-U/C: 0x002622b8, PAL: 0x00274ee0
 void MetFreqMakerCanvasScreen::LoadPersona(MetPersonaData *pPersona) {
     mPersona = pPersona;
     mAppearance.clear();
@@ -246,7 +225,6 @@ void MetFreqMakerCanvasScreen::LoadPersona(MetPersonaData *pPersona) {
     mModified = 0;
 }
 
-// NTSC-U/C: 0x00262350, PAL: 0x00274ff0
 void MetFreqMakerCanvasScreen::LoadPrefab(MetPersonaData *pSource, int nRandomize) {
     mPersona = nullptr;
     mAppearance.clear();
@@ -266,29 +244,24 @@ void MetFreqMakerCanvasScreen::LoadPrefab(MetPersonaData *pSource, int nRandomiz
     mModified = 1;
 }
 
-// NTSC-U/C: 0x00262440, PAL: 0x00278a58
 void MetFreqMakerCanvasScreen::RevertSelection() {
     mAppearance.revertSelection();
 }
 
-// NTSC-U/C: 0x00262460, PAL: 0x00278a78
 HxStr *MetFreqMakerCanvasScreen::GetFreqName() {
     return &mFreqName;
 }
 
-// NTSC-U/C: 0x00262468, PAL: 0x00278a80
 void MetFreqMakerCanvasScreen::DeletePart(int nIndex) {
     mAppearance.deletePart(nIndex);
     mModified = 1;
 }
 
-// NTSC-U/C: 0x00262498, PAL: 0x00278ab0
 void MetFreqMakerCanvasScreen::Randomize() {
     mAppearance.randomize();
     mModified = 1;
 }
 
-// NTSC-U/C: 0x002624c8, PAL: 0x00278ae0
 void MetFreqMakerCanvasScreen::RecentrePart(int nIndex) {
     mAppearance.recentrePart(nIndex);
     mModified = 1;

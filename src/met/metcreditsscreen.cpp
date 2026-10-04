@@ -42,14 +42,12 @@ constexpr int kVectorComponents = 3;
 
 } // namespace
 
-// NTSC-U/C: 0x00211970, PAL: 0x0021b348
 MetCreditsScreen::MetCreditsScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mCreditsRoll(nullptr) {
     mShowsLoadedDrawables = 0;
 }
 
-// NTSC-U/C: 0x00211ae8, PAL: 0x0021b520
 void MetCreditsScreen::ResolveContainerViews() {
     ResolveAnimationViews();
     mView = dynamic_cast<Rnd::View *>(Rnd::TheManager.Find(HxStr(kViewName)));
@@ -105,7 +103,6 @@ void MetCreditsScreen::AddLeadingCredit() {
 }
 #endif
 
-// NTSC-U/C: 0x00211e40, PAL: 0x0021b910
 void MetCreditsScreen::OnExitFinished() {
     mCreditsRoll->HideAll();
     PushNamedScreen(HxStr(kHelpScreen));
@@ -114,33 +111,26 @@ void MetCreditsScreen::OnExitFinished() {
     ActivateNamedPanel(HxStr(kOptionsButtonsScreen));
 }
 
-// NTSC-U/C: 0x00214d58, PAL: 0x0021e940
 void MetCreditsScreen::PlaySlideSound([[maybe_unused]] int nSelector) {
 }
 
-// NTSC-U/C: 0x00214d60, PAL: 0x0021e948
 void MetCreditsScreen::PlayHighSound([[maybe_unused]] int nSelector) {
 }
 
-// NTSC-U/C: 0x00214d68, PAL: 0x0021e950
 void MetCreditsScreen::PlayCycleLeftSound([[maybe_unused]] int nSelector) {
 }
 
-// NTSC-U/C: 0x00214d70, PAL: 0x0021e958
 void MetCreditsScreen::PlayCycleRightSound([[maybe_unused]] int nSelector) {
 }
 
-// NTSC-U/C: 0x00214d78, PAL: 0x0021e960
 MetCreditsScreen *MetCreditsScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetCreditsScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x00214e00, PAL: 0x0021e9e8
 MetCreditsScreen::~MetCreditsScreen() {
     delete mCreditsRoll;
 }
 
-// NTSC-U/C: 0x00214e70, PAL: 0x0021ea58
 void MetCreditsScreen::EnterAndShow() {
     mCreditsRoll->Reset();
     SetShowing(1);
@@ -150,7 +140,6 @@ void MetCreditsScreen::EnterAndShow() {
     OnEnterFinished();
 }
 
-// NTSC-U/C: 0x00214ee0, PAL: 0x0021eac8
 void MetCreditsScreen::UpdateIdle(float flTime) {
     const float flFrame = flTime - mStartFrame;
     mAnimation->SetFrame(flFrame);
@@ -172,7 +161,6 @@ void MetCreditsScreen::UpdateIdle(float flTime) {
     }
 }
 
-// NTSC-U/C: 0x00214f68, PAL: 0x0021eb50
 void MetCreditsScreen::HandleCommand(const MetScreenCommand *pCommand) {
     if (pCommand->mCommand == kMetScreenCommandBack) {
         BeginExit();

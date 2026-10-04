@@ -90,7 +90,6 @@ HxStr g_arenaName("");
 // NTSC-U/C: 0x006e2530, PAL: 0x00725e38
 HxStr g_levelName("");
 
-// NTSC-U/C: 0x0042c2e0, PAL: 0x00467da0
 Renderer::Renderer()
     : mSongClock(Application::shared()->GetSongClock()), mSongTick(0.0f), mDrawTimingGraph(0),
       mDrawRenderStats(0), mCellsPerRow(0), mRowCount(0), mTunnel(nullptr), mOverlay(nullptr),
@@ -159,7 +158,6 @@ Renderer::Renderer()
     g_pRenderer = this;
 }
 
-// NTSC-U/C: 0x0042ce08, PAL: 0x004689c0
 Renderer::~Renderer() {
     g_pRenderer = nullptr;
     delete mArena;
@@ -167,7 +165,6 @@ Renderer::~Renderer() {
     delete mTunnel;
 }
 
-// NTSC-U/C: 0x0042d3b8, PAL: 0x00468f70
 void Renderer::DispatchPriv(Message *pMsg) {
     int nType = pMsg->Type();
     if (nType == g_nGameBeginMsgType) {
@@ -181,13 +178,11 @@ void Renderer::DispatchPriv(Message *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x00432460, PAL: 0x0046e138
 void Renderer::PollMessages() {
     mSongTick = static_cast<float>(mSongClock->SongTick());
     RendererBase::PollMessages();
 }
 
-// NTSC-U/C: 0x004324a0, PAL: 0x0046e178
 void Renderer::Update() {
     mTunnel->SetFrame(mSongTick);
     mOverlay->SetFrame(mSongTick);
@@ -200,7 +195,6 @@ void Renderer::Update() {
     mHudView->UpdateWorldXfm(nullptr, 0);    // Yes, the binary discards the result.
 }
 
-// NTSC-U/C: 0x0042d258, PAL: 0x00468e10
 void Renderer::Draw() {
     mOuterView->Draw();
 
@@ -230,7 +224,6 @@ void Renderer::Draw() {
     }
 }
 
-// NTSC-U/C: 0x004322b8, PAL: 0x0046df90
 Renderer::Cell *Renderer::GetCell(int nTrack, int nBar) {
     int nSlice = nBar % mCellsPerRow;
     if (nSlice < 0) {
@@ -239,7 +232,6 @@ Renderer::Cell *Renderer::GetCell(int nTrack, int nBar) {
     return &mCells[nTrack * mCellsPerRow + nSlice];
 }
 
-// NTSC-U/C: 0x0042b7a0, PAL: 0x00466d60
 void Renderer::LoadCommon() {
     if (g_pTunnelLoader != nullptr) {
         return;
@@ -262,7 +254,6 @@ void Renderer::LoadCommon() {
     g_pHudLoader->Enqueue();
 }
 
-// NTSC-U/C: 0x0042bb38, PAL: 0x004673e8
 void Renderer::UnloadCommon() {
     UnloadLevel();
 
@@ -290,7 +281,6 @@ void Renderer::UnloadCommon() {
     }
 }
 
-// NTSC-U/C: 0x0042bbe8, PAL: 0x004674c8
 void Renderer::LoadLevel(const GameParams &params) {
     HxStr level(params.mLevelName);
     HxStr arena(params.mArenaName);
@@ -324,7 +314,6 @@ void Renderer::LoadLevel(const GameParams &params) {
     }
 }
 
-// NTSC-U/C: 0x00432128, PAL: 0x0046de00
 void Renderer::UnloadLevel() {
     delete g_pLevelLoader;
     g_pLevelLoader = nullptr;
@@ -335,7 +324,6 @@ void Renderer::UnloadLevel() {
     g_arenaName = "";
 }
 
-// NTSC-U/C: 0x00432080, PAL: 0x0046dd38
 int Renderer::PollCommon(float *pflProgress) {
     if (g_pTunnelLoader == nullptr) {
         return 0;
@@ -358,7 +346,6 @@ int Renderer::PollCommon(float *pflProgress) {
 #endif
 }
 
-// NTSC-U/C: 0x004321a8, PAL: 0x0046de80
 int Renderer::PollLevel(float *pflProgress) {
     if (g_pArenaLoader == nullptr) {
         return 0;
@@ -371,7 +358,6 @@ int Renderer::PollLevel(float *pflProgress) {
     return nArenaDone != 0 && nLevelDone != 0;
 }
 
-// NTSC-U/C: 0x00432228, PAL: 0x0046df00
 int Renderer::IsLevelLoaded(const HxStr &arena, const HxStr &level) {
     if (!(g_arenaName == arena) || !(g_levelName == level)) {
         return 0;
@@ -386,7 +372,6 @@ int Renderer::IsLevelLoaded(const HxStr &arena, const HxStr &level) {
     return nArenaDone != 0 && nLevelDone != 0;
 }
 
-// NTSC-U/C: 0x0042d068, PAL: 0x00468c20
 void Renderer::OnBarStatus(BarStatusMsg *pMsg) {
     bool bOverlayChanged = false;
     bool bTunnelChanged = false;
@@ -432,7 +417,6 @@ void Renderer::OnBarStatus(BarStatusMsg *pMsg) {
     }
 }
 
-// NTSC-U/C: 0x00432318, PAL: 0x0046dff0
 void Renderer::OnPointAmount(Message *pMsg) {
     Send(pMsg);
 
@@ -463,7 +447,6 @@ void Renderer::OnPointAmount(Message *pMsg) {
     mLeader = pLeader;
 }
 
-// NTSC-U/C: 0x004322f8, PAL: 0x0046dfd0
 void Renderer::OnMsg([[maybe_unused]] const GameBeginMsg &msg) {
     CallScriptTemplate(kGameBeginScriptTemplate);
 }

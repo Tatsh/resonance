@@ -12,7 +12,6 @@ unsigned Timer::sElapsedTimer;
 
 unsigned Timer::sLastCycleDelta;
 
-// NTSC-U/C: 0x004fefb0, PAL: 0x0053dd60
 void Timer::Init() {
     sClock2Ms = 1.0f / kCyclesPerMillisecond;
     (void)ReadCycleCount(); // Yes, the binary discards this reading.

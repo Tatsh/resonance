@@ -85,6 +85,10 @@ public:
     /**
      * Slot 49.
      *
+     * The destination row advances by two per source row. The copy covers every other row of the
+     * destination and consumes half the source height, where the run length encoded sibling
+     * advances by one.
+     *
      * @param source The source bitmap.
      * @param nX The destination column.
      * @param nY The destination row.

@@ -435,7 +435,6 @@ static Stream &operator<<(Stream &stream, const std::list<TransAnim::RotKey> &ke
     return stream;
 }
 
-// NTSC-U/C: 0x004f4020, PAL: 0x00532c58
 float TransAnim::FilteredFrameEnd() {
     const float flTrans =
         mFramesOwner->mTransKeys.size() != 0 ? mFramesOwner->mTransKeys.back().mFrame : 0.0f;
@@ -446,7 +445,6 @@ float TransAnim::FilteredFrameEnd() {
     return std::max(flTrans, std::max(flRot, flScale));
 }
 
-// NTSC-U/C: 0x004f4188, PAL: 0x00532dc0
 float TransAnim::StartFrame() {
     const float flTrans =
         mFramesOwner->mTransKeys.size() != 0 ? mFramesOwner->mTransKeys.front().mFrame : 0.0f;
@@ -457,7 +455,6 @@ float TransAnim::StartFrame() {
     return std::min(flTrans, std::min(flRot, flScale));
 }
 
-// NTSC-U/C: 0x004f2ab0, PAL: 0x005316a0
 void TransAnim::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Animatable::DumpText(sink);
@@ -501,10 +498,6 @@ void TransAnim::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x004f2d50, PAL: 0x00531940
-//
-// The three channels are written interleaved with the flags rather than in one block, and the
-// order below is the order the reader has to expect.
 void TransAnim::Save(Stream &stream) {
     int nRevision = kTransAnimRevision;
     stream.WriteLE(&nRevision, sizeof(nRevision));
@@ -535,7 +528,6 @@ void TransAnim::Save(Stream &stream) {
     stream.Write(&cFollowPath, sizeof(cFollowPath));
 }
 
-// NTSC-U/C: 0x004f28c8, PAL: 0x005314b8
 void TransAnim::Replace(Object *pFrom, Object *pTo) {
     Animatable::Replace(pFrom, pTo);
     Drawable::Replace(pFrom, pTo);
@@ -576,7 +568,6 @@ void TransAnim::Replace(Object *pFrom, Object *pTo) {
     mFramesOwner = this;
 }
 
-// NTSC-U/C: 0x004f3e90, PAL: 0x00532ac8
 void TransAnim::Copy(const Object *pSource, unsigned nFlags) {
     const TransAnim *pSourceAnim = dynamic_cast<const TransAnim *>(pSource);
 
@@ -619,7 +610,6 @@ void TransAnim::Copy(const Object *pSource, unsigned nFlags) {
     }
 }
 
-// NTSC-U/C: 0x004fd000, PAL: 0x0053bce8
 void TransAnim::SetTrans(Transformable *pTrans) {
     if (mTrans != nullptr) {
         mTrans->RemoveRef(this);
@@ -630,7 +620,6 @@ void TransAnim::SetTrans(Transformable *pTrans) {
     }
 }
 
-// NTSC-U/C: 0x004fd2c8, PAL: 0x0053bfb0
 void TransAnim::SetFrameSelf(float flFrame) {
     if (mTrans == nullptr) {
         return;
@@ -737,7 +726,6 @@ static inline bool BuildFollowPathBasis(const std::list<TransAnim::TransKey> &pa
     return true;
 }
 
-// NTSC-U/C: 0x004f42f0, PAL: 0x00532f28
 void TransAnim::EvalFrame(float flFrame, float *pXfm, int nResetEmpty) {
     float *const pTranslation = XfmRowOf(pXfm, kXfmRowTranslation);
     if (!mFramesOwner->mTransKeys.empty()) {
@@ -835,7 +823,6 @@ void TransAnim::EvalFrame(float flFrame, float *pXfm, int nResetEmpty) {
     Vec3Scale(pBasisZ, scale.z, pBasisZ);
 }
 
-// NTSC-U/C: 0x00552588, PAL: 0x00592bc8
 void TransAnim::RotKey::ComputeSplineTangents(const RotKey *pPrev, const RotKey *pNext) {
     const float flTension = mShape[kShapeTension];
     const float flContinuity = mShape[kShapeContinuity];
@@ -863,7 +850,6 @@ void TransAnim::RotKey::ComputeSplineTangents(const RotKey *pPrev, const RotKey 
     }
 }
 
-// NTSC-U/C: 0x00552748, PAL: 0x00592d88
 void TransAnim::TransKey::ComputeSplineTangents(const TransKey *pPrev, const TransKey *pNext) {
     const float flTension = mShape[kShapeTension];
     const float flContinuity = mShape[kShapeContinuity];
@@ -910,7 +896,6 @@ void TransAnim::TransKey::ComputeSplineTangents(const TransKey *pPrev, const Tra
 
 // The coefficients below are those of the cubic Hermite basis and of its derivative.
 
-// NTSC-U/C: 0x00552af8, PAL: 0x00593138
 void TransAnim::TransKey::EvaluateSpline(const TransKey *pNext, float *pOut, float flT) const {
     if (flT == 0.0f) {
         std::copy(std::begin(mValue), std::end(mValue), pOut);
@@ -937,7 +922,6 @@ void TransAnim::TransKey::EvaluateSpline(const TransKey *pNext, float *pOut, flo
     std::copy(std::begin(afSum), std::end(afSum), pOut);
 }
 
-// NTSC-U/C: 0x00552cb8, PAL: 0x005932f8
 Vector3 TransAnim::TransKey::EvaluateSplineDerivative(const TransKey *pNext, float flT) const {
     const float flT2 = flT * flT;
     const float flSixT = flT * 6.0f;
@@ -964,7 +948,6 @@ static inline float KeyVectorLength(const float *pVec) {
     return std::sqrt((pVec[0] * pVec[0]) + (pVec[1] * pVec[1]) + (pVec[2] * pVec[2]));
 }
 
-// NTSC-U/C: 0x00554d90, PAL: 0x00595418
 float Length(const TransAnim::TransKey &first, const TransAnim::TransKey &next) {
     float flLength = 0.0f;
     float flT = 0.0f;
@@ -976,7 +959,6 @@ float Length(const TransAnim::TransKey &first, const TransAnim::TransKey &next) 
     return flLength;
 }
 
-// NTSC-U/C: 0x00554c68, PAL: 0x005952f0
 void TransAnim::RotKey::EvaluateSpline(const RotKey *pNext, Quat &out, float flT) const {
     if (flT == 0.0f) {
         out = mQuat;
@@ -1026,7 +1008,6 @@ static inline void SpreadFramesByChordLength(std::list<TransAnim::TransKey> &key
     }
 }
 
-// NTSC-U/C: 0x004f4c48, PAL: 0x00533880
 void TransAnim::Normalize() {
     std::list<TransKey> &keys = mFramesOwner->mTransKeys;
     if (keys.size() < kMinNormalizeKeys) {
@@ -1098,7 +1079,6 @@ void TransAnim::Normalize() {
     }
 }
 
-// NTSC-U/C: 0x004fb7e0, PAL: 0x0053a4c8
 void TransAnim::SetRepeatTrans(int nRepeat) {
     mRepeatTrans = nRepeat;
     if (nRepeat == 0) {
@@ -1108,24 +1088,20 @@ void TransAnim::SetRepeatTrans(int nRepeat) {
     }
 }
 
-// NTSC-U/C: 0x004fc000, PAL: 0x0053ace8
 TransAnim::TransAnim(const HxStr &name)
     : Object(name), mTrans(nullptr), mRotInterp(kInterpLinear), mTransInterp(kInterpTCB),
       mScaleInterp(kInterpLinear), mFramesOwner(this), mRepeatTrans(0), mFollowPath(0) {
 }
 
-// NTSC-U/C: 0x004fbb78, PAL: 0x0053a860
 TransAnim::~TransAnim() {
     ReleaseObjects();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x004fbf60, PAL: 0x0053ac48
 const HxStr &TransAnim::ClassName() const {
     return g_transAnimClassName;
 }
 
-// NTSC-U/C: 0x004fd058, PAL: 0x0053bd40
 void TransAnim::ClearKeys() {
     if (mFramesOwner == this) {
         return;
@@ -1135,7 +1111,6 @@ void TransAnim::ClearKeys() {
     mScaleKeys.clear();
 }
 
-// NTSC-U/C: 0x004fd168, PAL: 0x0053be50
 void TransAnim::AddRefObjects() {
     if (mTrans != nullptr) {
         mTrans->AddRef(this);
@@ -1145,7 +1120,6 @@ void TransAnim::AddRefObjects() {
     }
 }
 
-// NTSC-U/C: 0x004fd118, PAL: 0x0053be00
 void TransAnim::ReleaseObjects() {
     if (mTrans != nullptr) {
         mTrans->RemoveRef(this);
@@ -1155,7 +1129,6 @@ void TransAnim::ReleaseObjects() {
     }
 }
 
-// NTSC-U/C: 0x004fd0a0, PAL: 0x0053bd88
 void TransAnim::SetFramesOwner(TransAnim *pOwner) {
     if (mFramesOwner != nullptr) {
         mFramesOwner->RemoveRef(this);
@@ -1170,7 +1143,6 @@ void TransAnim::SetFramesOwner(TransAnim *pOwner) {
 // NTSC-U/C: 0x00706828, PAL: 0x0074a348
 HxStr g_transAnimClassName("TransAnim");
 
-// NTSC-U/C: 0x004fc740, PAL: 0x0053b428
 TransAnim *NewTransAnim(const HxStr &name) {
     try {
         return new TransAnim(name);
@@ -1182,7 +1154,6 @@ TransAnim *NewTransAnim(const HxStr &name) {
 // NTSC-U/C: 0x00706820, PAL: 0x0074a340
 TransAnim *(*TransAnim::sNew)(const HxStr &name) = NewTransAnim;
 
-// NTSC-U/C: 0x004fba90, PAL: 0x0053a778
 TransAnim *NewTransAnimThroughHook(const HxStr &name) {
     try {
         return TransAnim::sNew(name);
@@ -1191,7 +1162,6 @@ TransAnim *NewTransAnimThroughHook(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x004fbf70, PAL: 0x0053ac58
 Object *CreateRegisteredTransAnim(const HxStr &name) {
     try {
         return TransAnim::sNew(name);
@@ -1200,13 +1170,11 @@ Object *CreateRegisteredTransAnim(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x004fba50, PAL: 0x0053a738
 void RegisterTransAnimClass() {
     TransAnim::sNew = NewTransAnim;
     TheManager.RegisterClass(g_transAnimClassName, CreateRegisteredTransAnim);
 }
 
-// NTSC-U/C: 0x004f2f68, PAL: 0x00531b58
 void TransAnim::Load(Stream &stream) {
     int nRevision = 0;
     stream.ReadLE(&nRevision, sizeof(nRevision));

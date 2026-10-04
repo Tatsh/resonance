@@ -305,13 +305,25 @@ protected:
     virtual int DrawShowing();
 
 private:
-    // Registers this environment as a referrer of every mLights entry. Inlined in Load(), Copy(),
-    // and the tail of Replace(). The out-of-line copy at 0x00519400 has no caller.
+    /**
+     * Registers this environment as a referrer of every mLights entry.
+     *
+     * Inlined in Load(), Copy(), and the tail of Replace(). The out-of-line copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00519400
+     * @ghidraAddress PAL: 0x00559798
+     */
     void AcquireLightsRefs();
 
-    // Drops this environment's registration on every mLights entry. Inlined in Load() and
-    // Copy(). The destructors of this class and Rnd::PsEnviron call the out-of-line copy
-    // at 0x00519390.
+    /**
+     * Drops this environment's registration on every mLights entry.
+     *
+     * Inlined in Load() and Copy(). The destructors of this class and Rnd::PsEnviron call the
+     * out-of-line copy.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00519390
+     * @ghidraAddress PAL: 0x00559728
+     */
     void ReleaseLightsRefs();
 };
 

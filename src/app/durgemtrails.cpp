@@ -52,7 +52,6 @@ inline void SetPaddingWords(Transform &xfm) {
 // NTSC-U/C: 0x006e3440, PAL: 0x00726d58
 int g_nDurGemStringCount = 1;
 
-// NTSC-U/C: 0x00432f60, PAL: 0x0046ecb0
 DurGemTrails::DurGemTrails(AppTunnel *pTunnel, int nMaxPoints)
     : mLaneCount(kLaneCount), mRowCount(kRowCount), mMaxPoints(nMaxPoints), mTunnel(pTunnel) {
     mRows.resize(mLaneCount * mRowCount, nullptr);
@@ -63,7 +62,6 @@ DurGemTrails::DurGemTrails(AppTunnel *pTunnel, int nMaxPoints)
     }
 }
 
-// NTSC-U/C: 0x00433320, PAL: 0x0046f090
 DurGemTrails::~DurGemTrails() {
     for (DurGemRowString *pRow : mRows) {
         delete pRow;
@@ -73,14 +71,12 @@ DurGemTrails::~DurGemTrails() {
     }
 }
 
-// NTSC-U/C: 0x004377f0, PAL: 0x00473588
 void DurGemTrails::CreateLane(float flWidth, int nLane, Rnd::Mat *pMat) {
     for (int nRow = 0; nRow < mRowCount; ++nRow) {
         mRows[nRow * mLaneCount + nLane] = new DurGemRowString(nLane, pMat, mView, flWidth);
     }
 }
 
-// NTSC-U/C: 0x004337d8, PAL: 0x0046f548
 void DurGemTrails::AddSegment(int nLane,
                               const Color &color,
                               float flStartFrame,
@@ -127,7 +123,6 @@ void DurGemTrails::AddSegment(int nLane,
     it->Init(mView, nLane, nRow, points, color, pMat, flWidth);
 }
 
-// NTSC-U/C: 0x00433530, PAL: 0x0046f2a0
 void DurGemTrails::SubdivideSegment(int nLane,
                                     Vector3 *pPoints,
                                     int nFirst,
@@ -163,7 +158,6 @@ void DurGemTrails::SubdivideSegment(int nLane,
     }
 }
 
-// NTSC-U/C: 0x004378e0, PAL: 0x00473678
 bool DurGemTrails::NeedsSubdivision(int nLane,
                                     const Vector3 &first,
                                     const Vector3 &last,
@@ -193,7 +187,6 @@ bool DurGemTrails::NeedsSubdivision(int nLane,
     return kMinOffsetSquared < offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
 }
 
-// NTSC-U/C: 0x00433c40, PAL: 0x0046f9b0
 void DurGemTrails::EndTrail(int nLane, int nRow) {
     DurGemRowString *pRow = GetRowString(nLane, nRow);
     if (pRow != nullptr) {
@@ -209,7 +202,6 @@ void DurGemTrails::EndTrail(int nLane, int nRow) {
     }
 }
 
-// NTSC-U/C: 0x00433db0, PAL: 0x0046fb20
 void DurGemTrails::StartStrip(
     int nLane, const Color &color, int nId, float flFrame, float flBlend) {
     const DurGemRowString *pTemplate = mRows[nLane];
@@ -222,7 +214,6 @@ void DurGemTrails::StartStrip(
     }
 }
 
-// NTSC-U/C: 0x00437a60, PAL: 0x004737f8
 void DurGemTrails::StopStrip(int nId, float flFrame) {
     for (DurGemStrip *pStrip : mStrips) {
         if (pStrip->Stop(nId, flFrame)) {
@@ -231,7 +222,6 @@ void DurGemTrails::StopStrip(int nId, float flFrame) {
     }
 }
 
-// NTSC-U/C: 0x00433f80, PAL: 0x0046fcf0
 void DurGemTrails::Update(float flFrame) {
     const int nFirstRow = static_cast<int>((flFrame - kLookBehindFrames) / kSliceFrames);
     const int nEndRow = nFirstRow + mRowCount;
@@ -291,17 +281,14 @@ void DurGemTrails::Update(float flFrame) {
     }
 }
 
-// NTSC-U/C: 0x00436e38, PAL: 0x00472bd0
 HxStr DurGemTrails::NewStringName() {
     return HxStr(Rnd::MakeString(kStringNameFormat, ++g_nDurGemStringCount));
 }
 
-// NTSC-U/C: 0x00437af8, PAL: 0x00473890
 DurGemRowString *DurGemTrails::GetRowString(int nLane, int nRow) {
     return mRows[WrapIndex(nRow, mRowCount) * mLaneCount + nLane];
 }
 
-// NTSC-U/C: 0x00436e88, PAL: 0x00472c20
 std::list<DurGemCurve>::iterator DurGemTrails::FindFirstCurve(std::list<DurGemCurve> &curves,
                                                               int nRow) {
     auto it = curves.begin();

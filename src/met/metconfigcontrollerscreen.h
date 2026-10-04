@@ -210,44 +210,84 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // NTSC-U/C: 0x00201eb8, PAL: 0x0020a818
-    // Clears every other row that shows the same button as nRow. On a stick row it places the
-    // other stick on the other stick row instead.
+    /**
+     * Clears every other row that shows the same button as nRow.
+     *
+     * On a stick row it places the other stick on the other stick row instead.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00201eb8
+     * @ghidraAddress PAL: 0x0020a818
+     */
     void ClearDuplicateAssignment(int nRow);
 
-    // NTSC-U/C: 0x00202070, PAL: 0x0020ab70
-    // Highlights the button mesh of the selected row's button.
+    /**
+     * Highlights the button mesh of the selected row's button.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00202070
+     * @ghidraAddress PAL: 0x0020ab70
+     */
     void UpdateButtonHighlight();
 
-    // NTSC-U/C: 0x002022a0, PAL: 0x0020afa8
-    // Shows one mapping in the value texts.
+    /**
+     * Shows one mapping in the value texts.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002022a0
+     * @ghidraAddress PAL: 0x0020afa8
+     */
     void ShowConfig(ControllerConfig &config);
 
-    // NTSC-U/C: 0x00206a08, PAL: 0x0020f8d0
-    // Shows the highlight mesh of one button and hides the others. -1 hides every mesh.
+    /**
+     * Shows the highlight mesh of one button and hides the others. -1 hides every mesh.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00206a08
+     * @ghidraAddress PAL: 0x0020f8d0
+     */
     void SetButtonHighlights(int nButton);
 
-    // NTSC-U/C: 0x00206aa0, PAL: 0x0020f968
-    // Stores the value texts into this controller's mapping. Always returns 1, and the one caller
-    // discards it.
+    /**
+     * Stores the value texts into this controller's mapping.
+     *
+     * Always returns 1, and the one caller discards it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00206aa0
+     * @ghidraAddress PAL: 0x0020f968
+     */
     int StoreConfig();
 
-    // NTSC-U/C: 0x00206b30, PAL: 0x0020ae38
-    // Maps a value text to a button index, or -1.
+    /**
+     * Maps a value text to a button index, or -1.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00206b30
+     * @ghidraAddress PAL: 0x0020ae38
+     */
     int ButtonIndexForText(const HxStr &text) const;
 
-    // NTSC-U/C: 0x00206ca8, PAL: 0x0020fb10
-    // Reports whether every row has a button.
+    /**
+     * Reports whether every row has a button.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00206ca8
+     * @ghidraAddress PAL: 0x0020fb10
+     */
     bool AllRowsAssigned() const;
 
-    // NTSC-U/C: 0x00206d88, PAL: 0x0020fb88
-    // The code before one code in a row's range. Returns 0 for a stick row. `this` is passed and
-    // not read.
+    /**
+     * The code before one code in a row's range.
+     *
+     * Returns 0 for a stick row. `this` is passed and not read.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00206d88
+     * @ghidraAddress PAL: 0x0020fb88
+     */
     char PreviousButtonCode(int nRow, char code) const;
 
-    // NTSC-U/C: 0x00206e30, PAL: 0x0020fc30
-    // The code after one code in a row's range. Returns 0 for a stick row. `this` is passed and
-    // not read.
+    /**
+     * The code after one code in a row's range.
+     *
+     * Returns 0 for a stick row. `this` is passed and not read.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00206e30
+     * @ghidraAddress PAL: 0x0020fc30
+     */
     char NextButtonCode(int nRow, char code) const;
 
     MetButtonList *mRows;                    // +0x90

@@ -44,12 +44,10 @@ constexpr int kHeld = 1;
 
 } // namespace
 
-// NTSC-U/C: 0x002e33f0, PAL: 0x003063b0
 MetCommandMap::MetCommandMap() {
     mHeld.resize(kControllerCount, std::map<int, int>());
 }
 
-// NTSC-U/C: 0x002e3738, PAL: 0x003066f8
 int MetCommandMap::Translate(const MetControllerReading *pReading, MetScreenCommand *pCommand) {
     pCommand->mPadIndex = pReading->mPadIndex;
     if (pReading->mTag == kKeyTag && pReading->mValue > 0.0f) {
@@ -93,7 +91,6 @@ int MetCommandMap::Translate(const MetControllerReading *pReading, MetScreenComm
     return pCommand->mCommand != kNoCommand;
 }
 
-// NTSC-U/C: 0x002e3ac0, PAL: 0x00306a80
 int MetCommandMap::AxisCommand(
     int nButton, int nPadIndex, float flValue, int nNegative, int nPositive) {
     if (flValue < kAxisLow) {

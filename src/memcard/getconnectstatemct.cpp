@@ -14,7 +14,6 @@ constexpr int kFirstMultiTapSlot = 2;
 
 } // namespace
 
-// NTSC-U/C: 0x001848f8, PAL: 0x00189e00
 GetConnectStateMCT::GetConnectStateMCT(MemcardUser *pUser,
                                        Memcard *pCard,
                                        int nPortSlot,
@@ -22,11 +21,9 @@ GetConnectStateMCT::GetConnectStateMCT(MemcardUser *pUser,
     : MemcardTask(pUser, pCard, nPortSlot, nCookie) {
 }
 
-// NTSC-U/C: 0x001849c8, PAL: 0x00189ed0
 GetConnectStateMCT::~GetConnectStateMCT() {
 }
 
-// NTSC-U/C: 0x00177fb0, PAL: 0x0017b370
 void GetConnectStateMCT::OnCheckInfo(CheckInfoOp *pOp) {
     mStatus = pOp->mStatus;
     mConnectState.mPortSlot = mPortSlot;
@@ -69,13 +66,11 @@ void GetConnectStateMCT::OnCheckInfo(CheckInfoOp *pOp) {
     Finish();
 }
 
-// NTSC-U/C: 0x00185ff0, PAL: 0x0018baa8
 void GetConnectStateMCT::Finish() {
     mState = kMemcardTaskFinished;
     mUser->OnConnectState(mConnectState, mStatus);
 }
 
-// NTSC-U/C: 0x00186070, PAL: 0x0018bb28
 void GetConnectStateMCT::Execute() {
     mState = kMemcardTaskRunning;
     mCard->CheckInfo(this, mPortSlot, mCookie);

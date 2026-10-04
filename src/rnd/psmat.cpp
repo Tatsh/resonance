@@ -114,18 +114,16 @@ Transform *g_pSelectedStageXfm;
 // NTSC-U/C: 0x0076d67c, PAL: 0x007b13d4
 int g_nLightingEnabled;
 
-// The constructor body is empty. 0x005914b8 inlines the whole of it.
 PsMat::PsMat(const HxStr &name) : Mat(name) {
+    // The constructor body is empty. 0x005914b8 inlines the whole of it.
 }
 
-// NTSC-U/C: 0x00591590, PAL: 0x005d4928
 PsMat::~PsMat() {
     if (PsMat::sCurrent == this) {
         PsMat::sCurrent = nullptr;
     }
 }
 
-// NTSC-U/C: 0x00591240, PAL: 0x005d45c0
 void PsMat::InstallCreator() {
     g_pfnNewMat = NewPsMat;
     PsMat::sCurrent = nullptr;
@@ -150,13 +148,11 @@ void PsMat::InstallCreator() {
     g_sphereMapUvXfm.mTranslation.y = 0.5f;
 }
 
-// NTSC-U/C: 0x005916b0, PAL: 0x005d4a48
 void PsMat::SetAmbient(const Color &color) {
     mAmbient = color;
     PsMat::sCurrent = nullptr;
 }
 
-// NTSC-U/C: 0x005916c8, PAL: 0x005d4a60
 void PsMat::SetDiffuse(const Color &color) {
     mDiffuse.r = color.r;
     mDiffuse.g = color.g;
@@ -164,19 +160,16 @@ void PsMat::SetDiffuse(const Color &color) {
     PsMat::sCurrent = nullptr;
 }
 
-// NTSC-U/C: 0x005916f0, PAL: 0x005d4a88
 void PsMat::SetEmissive(const Color &color) {
     mEmissive = color;
     PsMat::sCurrent = nullptr;
 }
 
-// NTSC-U/C: 0x00591730, PAL: 0x005d4ac8
 void PsMat::SetAlpha(float flAlpha) {
     mDiffuse.a = flAlpha;
     PsMat::sCurrent = nullptr;
 }
 
-// NTSC-U/C: 0x00591708, PAL: 0x005d4aa0
 void PsMat::SetSpecular(const Color &color, float flAlpha) {
     mSpecular.r = color.r;
     mSpecular.g = color.g;
@@ -185,7 +178,6 @@ void PsMat::SetSpecular(const Color &color, float flAlpha) {
     PsMat::sCurrent = nullptr;
 }
 
-// NTSC-U/C: 0x005914b8, PAL: 0x005d4850
 Mat *NewPsMat(const HxStr &name) {
     // The binary bills the allocation to the tag "Rnd::Mat" and rounds the object up to 0xa0
     // bytes.
@@ -194,7 +186,6 @@ Mat *NewPsMat(const HxStr &name) {
 
 Mat *(*g_pfnNewMat)(const HxStr &name) = nullptr;
 
-// NTSC-U/C: 0x0058eb40, PAL: 0x005d1e98
 int PsMat::Select() {
     if (this == PsMat::sCurrent && mStages.size() < 2) {
         if (g_nBlendOverridden != 0) {
@@ -217,7 +208,6 @@ int PsMat::Select() {
     return static_cast<unsigned>(g_nSelectedStage) < mStages.size();
 }
 
-// NTSC-U/C: 0x005910b0, PAL: 0x005d4430
 void PsMat::SelectDefault() {
     ++g_renderStats.mnMatSelects;
     g_nAlphaBlendEnabled = 1;
@@ -231,7 +221,6 @@ void PsMat::SelectDefault() {
     Rnd::ThePs.SetGsReg(kGsRegDimx, kDimxStandard, kDimxMask);
 }
 
-// NTSC-U/C: 0x00591170, PAL: 0x005d44f0
 void PsMat::SelectAlphaBlend() {
     if (this == PsMat::sCurrent && g_nAlphaBlendEnabled != 0) {
         return;
@@ -241,7 +230,6 @@ void PsMat::SelectAlphaBlend() {
     g_nBlendOverridden = 1;
 }
 
-// NTSC-U/C: 0x0058ec80, PAL: 0x005d1fd8
 void PsMat::SelectBlendMode() {
     BlendMode nBlend = mBlend;
     if (g_nSelectedStage != 0) {
@@ -305,7 +293,6 @@ void PsMat::SelectBlendMode() {
     }
 }
 
-// NTSC-U/C: 0x0058eef8, PAL: 0x005d2250
 void PsMat::BindStageTexture() {
     g_nLightingEnabled = mEnable;
     if (mStages.size() == 0) {
@@ -333,7 +320,6 @@ void PsMat::BindStageTexture() {
     SelectStageClamp(stage);
 }
 
-// NTSC-U/C: 0x0058f038, PAL: 0x005d2390
 void PsMat::SetupUvXfm() {
     if (g_nStageTextureBound == 0) {
         g_pSelectedUvXfm = nullptr;
@@ -366,11 +352,10 @@ void PsMat::SetupUvXfm() {
     g_pSelectedUvXfm = &g_stageUvXfm;
 }
 
-// NTSC-U/C: 0x005911d8, PAL: 0x005d4558
-// The compiler inlined this into BindStageTexture(), and nothing calls the out-of-line body, so it
-// is dead in the shipped image. Its own receiver is unused, which is what identifies
-// it as an instance method rather than a free function.
 void PsMat::SelectStageClamp(const Stage &stage) {
+    // The compiler inlined this into BindStageTexture(). The out-of-line body is never called and
+    // is dead in the shipped image. Its receiver is unused, which identifies it as an instance
+    // method rather than a free function.
     if (stage.mWrap == kWrapModeClamp) {
         Rnd::ThePs.SetGsReg(kGsRegClamp1, kClampBothAxes, kClampModeMask);
     } else {

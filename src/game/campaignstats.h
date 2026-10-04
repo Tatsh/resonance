@@ -328,34 +328,71 @@ public:
     void PrintLevels(std::ostream &stream);
 
 private:
-    // File each listed album level's index in mLevels under its stage, after emptying the five
-    // stage vectors. A level whose stage is outside 1 through 5 is not filed.
+    /**
+     * File each listed album level's index in mLevels under its stage, after emptying the five
+     * stage vectors.
+     *
+     * A level whose stage is outside 1 through 5 is not filed.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00140b40
+     * @ghidraAddress PAL: 0x00141520
+     */
     void RebuildStageLevels();
 
-    // Report whether name is in the global level list. The body does not read this object.
+    /**
+     * Report whether name is in the global level list.
+     *
+     * The body does not read this object.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00144c38
+     * @ghidraAddress PAL: 0x00145750
+     */
     int IsLevelListed(const HxStr &name);
 
-    // Run RebuildStageLevels(), recount stages 1 through 5 at every difficulty, completion before
-    // score, and then recompute the unlock level.
+    /**
+     * Run RebuildStageLevels(), recount stages 1 through 5 at every difficulty, completion before
+     * score, and then recompute the unlock level.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00145068
+     * @ghidraAddress PAL: 0x00145b80
+     */
     void RecountAll();
 
-    // NTSC-U/C: 0x00141b90, PAL: 0x00142648
-    // Recount the beaten levels of one stage at one difficulty into mStageCompleted. Each level's
-    // name is copied and discarded, which matches the binary.
+    /**
+     * Recount the beaten levels of one stage at one difficulty into mStageCompleted.
+     *
+     * Each level's name is copied and discarded, which matches the binary.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00141b90
+     * @ghidraAddress PAL: 0x00142648
+     */
     void RecountStageCompleted(int nDifficulty, int nStage);
 
-    // NTSC-U/C: 0x00141898, PAL: 0x00142310
-    // Recount the total high score of the beaten levels of one stage at one difficulty into
-    // mStageScores, and set mStageScoreBeaten when the stage is complete and the total reaches the
-    // stage's album value.
+    /**
+     * Recount the total high score of the beaten levels of one stage at one difficulty into
+     * mStageScores, and set mStageScoreBeaten when the stage is complete and the total reaches the
+     * stage's album value.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00141898
+     * @ghidraAddress PAL: 0x00142310
+     */
     void RecountStageScore(int nDifficulty, int nStage);
 
-    // NTSC-U/C: 0x00141cb8, PAL: 0x00142780
-    // Recompute mUnlockLevel from stage completion and return it.
+    /**
+     * Recompute mUnlockLevel from stage completion and return it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00141cb8
+     * @ghidraAddress PAL: 0x00142780
+     */
     int UpdateUnlockLevel();
 
-    // Zeroes the ten counter arrays, counts each stage's album levels in the global level list into
-    // the first of them, and then runs RecountAll().
+    /**
+     * Zeroes the ten counter arrays, counts each stage's album levels in the global level list into
+     * the first of them, and then runs RecountAll().
+     *
+     * @ghidraAddress NTSC-U/C: 0x00140a68
+     * @ghidraAddress PAL: 0x00141448
+     */
     void ResetCounters();
 
 public:

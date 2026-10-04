@@ -176,10 +176,16 @@ public:
     }
 
 private:
-    // NTSC-U/C: 0x002fb350, PAL: 0x0031f7e0
-    // Resolves the arena view, runs the renderer's two hooks, and pushes and activates
-    // `MetRemixTypeScreen`. Slots 2 and 36 are its callers, and the title is inferred. The
-    // European release only pushes and activates the screen.
+    /**
+     * Resolves the arena view, runs the renderer's two hooks, and pushes and activates
+     * `MetRemixTypeScreen`.
+     *
+     * Slots 2 and 36 are its callers, and the title is inferred. The European release only pushes
+     * and activates the screen.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002fb350
+     * @ghidraAddress PAL: 0x0031f7e0
+     */
     void ReturnToRemixType();
 
     // The players MetFrontEndState holds, at most this many.

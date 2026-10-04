@@ -77,15 +77,12 @@ inline int IndexForChannels(APalette *pPalette, const unsigned char *pRGB) {
 
 } // namespace
 
-// NTSC-U/C: 0x006302f8, PAL: 0x00670e88
 ACanvas24::ACanvas24(const ABitmap &bitmap) : ACanvas(bitmap), mColorNative(0) {
 }
 
-// NTSC-U/C: 0x00630278, PAL: 0x00670e08
 ACanvas24::~ACanvas24() {
 }
 
-// NTSC-U/C: 0x00630448, PAL: 0x00670fd8
 void ACanvas24::SetColor8(int nIndex) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -94,31 +91,24 @@ void ACanvas24::SetColor8(int nIndex) {
     ChannelsFrom8888(pPalette->mEntries[nIndex & static_cast<int>(kChannelMask)], mColorChannels);
 }
 
-// NTSC-U/C: 0x00630330, PAL: 0x00670ec0
 void ACanvas24::SetColor15(unsigned short nColor) {
     ChannelsFromColor15(nColor & kColor15Mask, mColorChannels);
 }
 
-// NTSC-U/C: 0x00630360, PAL: 0x00670ef0
 void ACanvas24::SetColor24(const unsigned char *pRGB) {
     mColorChannels[kRedChannel] = pRGB[kRedChannel];
     mColorChannels[kGreenChannel] = pRGB[kGreenChannel];
     mColorChannels[kBlueChannel] = pRGB[kBlueChannel];
 }
 
-// NTSC-U/C: 0x00630380, PAL: 0x00670f10
-// Byte for byte the same store as SetColorNative(), in a separate slot: for this
-// format an 8888 colour and the native word are the same thing.
 void ACanvas24::SetColor32(unsigned int nColor) {
     mColorNative = nColor;
 }
 
-// NTSC-U/C: 0x00630388, PAL: 0x00670f18
 void ACanvas24::SetColorNative(unsigned int nColor) {
     mColorNative = nColor;
 }
 
-// NTSC-U/C: 0x00630108, PAL: 0x00670c98
 int ACanvas24::GetColor8() {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -127,30 +117,24 @@ int ACanvas24::GetColor8() {
     return IndexForChannels(pPalette, mColorChannels);
 }
 
-// NTSC-U/C: 0x00630390, PAL: 0x00670f20
 unsigned short ACanvas24::GetColor15() {
     return Color15FromChannels(mColorChannels);
 }
 
-// NTSC-U/C: 0x006303c8, PAL: 0x00670f58
 void ACanvas24::GetColor24(unsigned char *pRGB) {
     pRGB[kRedChannel] = mColorChannels[kRedChannel];
     pRGB[kGreenChannel] = mColorChannels[kGreenChannel];
     pRGB[kBlueChannel] = mColorChannels[kBlueChannel];
 }
 
-// NTSC-U/C: 0x006303e8, PAL: 0x00670f78
-// Byte for byte the same load as GetColorNative(), in a separate slot.
 unsigned int ACanvas24::GetColor32() {
     return mColorNative;
 }
 
-// NTSC-U/C: 0x006303f0, PAL: 0x00670f80
 unsigned int ACanvas24::GetColorNative() {
     return mColorNative;
 }
 
-// NTSC-U/C: 0x00630498, PAL: 0x00671028
 void ACanvas24::DrawPixel8U(int nX, int nY, int nIndex) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -161,28 +145,22 @@ void ACanvas24::DrawPixel8U(int nX, int nY, int nIndex) {
     DrawPixel24U(nX, nY, rgb);
 }
 
-// NTSC-U/C: 0x00630508, PAL: 0x00671098
 void ACanvas24::DrawPixel15U(int nX, int nY, unsigned short nColor) {
     unsigned char rgb[kChannelCount];
     ChannelsFromColor15(nColor & kColor15Mask, rgb);
     DrawPixel24U(nX, nY, rgb);
 }
 
-// NTSC-U/C: 0x00630558, PAL: 0x006710e8
 void ACanvas24::DrawPixel32U(int nX, int nY, unsigned int nColor) {
     unsigned char rgb[kChannelCount];
     ChannelsFrom8888(nColor, rgb);
     DrawPixel24U(nX, nY, rgb);
 }
 
-// NTSC-U/C: 0x006303f8, PAL: 0x00670f88
-// For this format the native word is an 8888 colour, so the store forwards to the
-// colourless slot through the table rather than converting.
 void ACanvas24::DrawPixelNativeU(int nX, int nY, unsigned int nColor) {
     DrawPixel32U(nX, nY, nColor);
 }
 
-// NTSC-U/C: 0x006301b0, PAL: 0x00670d40
 int ACanvas24::GetPixel8U(int nX, int nY) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -193,22 +171,18 @@ int ACanvas24::GetPixel8U(int nX, int nY) {
     return IndexForChannels(pPalette, rgb);
 }
 
-// NTSC-U/C: 0x00630598, PAL: 0x00671128
 unsigned short ACanvas24::GetPixel15U(int nX, int nY) {
     unsigned char rgb[kChannelCount];
     GetPixel24U(nX, nY, rgb);
     return Color15FromChannels(rgb);
 }
 
-// NTSC-U/C: 0x006305f0, PAL: 0x00671180
 unsigned int ACanvas24::GetPixel32U(int nX, int nY) {
     unsigned char rgb[kChannelCount];
     GetPixel24U(nX, nY, rgb);
     return Rgb8888FromChannels(rgb);
 }
 
-// NTSC-U/C: 0x00630420, PAL: 0x00670fb0
-// The read counterpart of DrawPixelNativeU().
 unsigned int ACanvas24::GetPixelNativeU(int nX, int nY) {
     return GetPixel32U(nX, nY);
 }

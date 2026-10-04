@@ -240,11 +240,17 @@ public:
     void GetMeshReferrers(std::vector<Mesh *> &meshes);
 
 protected:
-    // Drop this material's reference on every stage texture. Walks mStages and calls
-    // Rnd::Object::RemoveRef() for each stage whose mTex is set. Both destructors in the hierarchy
-    // call it out of line, this class's at 0x004dbb10 and Rnd::PsMat's at 0x005915d4, which is the
-    // evidence for protected rather than private access. Copy() and Load() inline the same body
-    // instead of calling it. 0x004dcd20.
+    /**
+     * Drop this material's reference on every stage texture.
+     *
+     * Walks mStages and calls Rnd::Object::RemoveRef() for each stage whose mTex is set. Both
+     * destructors in the hierarchy call it out of line, this class's at 0x004dbb10 and Rnd::PsMat's
+     * at 0x005915d4, which is the evidence for protected rather than private access. Copy() and
+     * Load() inline the same body instead of calling it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004dcd20
+     * @ghidraAddress PAL: 0x0051b2c0
+     */
     void RemoveStageTexRefs();
 
 public:

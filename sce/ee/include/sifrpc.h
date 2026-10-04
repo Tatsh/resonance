@@ -248,6 +248,9 @@ sceSifServeData *sceSifGetNextRequest(sceSifQueueData *qd);
 /**
  * Run the request function of a server and send its reply to the IOP.
  *
+ * A request that expects no completion command has its reply packet written straight into the IOP
+ * packet, retried until the DMA queue takes it.
+ *
  * @param sd Server with a pending request.
  * @ghidraAddress NTSC-U/C: 0x005657e0
  * @ghidraAddress PAL: 0x005a3f50

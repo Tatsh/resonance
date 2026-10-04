@@ -63,37 +63,28 @@ inline APalette *ResolvePalette(APalette *pOwn) {
 
 } // namespace
 
-// NTSC-U/C: 0x00635bc0, PAL: 0x00676750
 ACanvas8::ACanvas8(const ABitmap &bitmap) : ACanvas(bitmap), mColor(0) {
 }
 
-// NTSC-U/C: 0x00635b40, PAL: 0x006766d0
 ACanvas8::~ACanvas8() {
 }
 
-// NTSC-U/C: 0x00635bf8, PAL: 0x00676788
 void ACanvas8::SetColor8(int nIndex) {
     mColor = static_cast<unsigned char>(nIndex);
 }
 
-// NTSC-U/C: 0x00635c00, PAL: 0x00676790
-// Byte for byte the same store as SetColor8(), in a separate slot.
 void ACanvas8::SetColorNative(unsigned int nColor) {
     mColor = static_cast<unsigned char>(nColor);
 }
 
-// NTSC-U/C: 0x00635c08, PAL: 0x00676798
 int ACanvas8::GetColor8() {
     return mColor;
 }
 
-// NTSC-U/C: 0x00635c10, PAL: 0x006767a0
-// Byte for byte the same load as GetColor8(), in a separate slot.
 unsigned int ACanvas8::GetColorNative() {
     return mColor;
 }
 
-// NTSC-U/C: 0x00635c70, PAL: 0x00676800
 void ACanvas8::SetColor15(unsigned short nColor) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -107,7 +98,6 @@ void ACanvas8::SetColor15(unsigned short nColor) {
         pPalette->FindClosest(Rgb8888From1555(nColor), kPaletteFirstIndex, kPaletteLastIndex));
 }
 
-// NTSC-U/C: 0x00635d08, PAL: 0x00676898
 void ACanvas8::SetColor24(const unsigned char *pRGB) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -121,7 +111,6 @@ void ACanvas8::SetColor24(const unsigned char *pRGB) {
         pPalette->FindClosest(Rgb8888FromChannels(pRGB), kPaletteFirstIndex, kPaletteLastIndex));
 }
 
-// NTSC-U/C: 0x00635db0, PAL: 0x00676940
 void ACanvas8::SetColor32(unsigned int nColor) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -135,7 +124,6 @@ void ACanvas8::SetColor32(unsigned int nColor) {
         pPalette->FindClosest(nColor, kPaletteFirstIndex, kPaletteLastIndex));
 }
 
-// NTSC-U/C: 0x00635e30, PAL: 0x006769c0
 unsigned short ACanvas8::GetColor15() {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -144,7 +132,6 @@ unsigned short ACanvas8::GetColor15() {
     return APackRgb1555From8888(pPalette->mEntries[mColor]);
 }
 
-// NTSC-U/C: 0x00635e78, PAL: 0x00676a08
 void ACanvas8::GetColor24(unsigned char *pRGB) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -156,7 +143,6 @@ void ACanvas8::GetColor24(unsigned char *pRGB) {
     pRGB[0] = static_cast<unsigned char>(nColor);
 }
 
-// NTSC-U/C: 0x00635ec0, PAL: 0x00676a50
 unsigned int ACanvas8::GetColor32() {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -165,11 +151,8 @@ unsigned int ACanvas8::GetColor32() {
     return pPalette->mEntries[mColor];
 }
 
-// NTSC-U/C: 0x006362d0, PAL: 0x00676e60
-// The only slot with no fallback to the default palette: a canvas with no palette of
-// its own does nothing here. It also re-reads the palette pointer and the entry count on every
-// iteration rather than caching either.
 void ACanvas8::SetAlphaValues(unsigned int nColorKey) {
+    // The palette pointer and the entry count are re-read on every iteration rather than cached.
     if (mBitmap.mPalette == nullptr) {
         return;
     }
@@ -181,13 +164,10 @@ void ACanvas8::SetAlphaValues(unsigned int nColorKey) {
     }
 }
 
-// NTSC-U/C: 0x00635c18, PAL: 0x006767a8
-// Native is the palette index for this format, so the store narrows and forwards.
 void ACanvas8::DrawPixelNativeU(int nX, int nY, unsigned int nColor) {
     DrawPixel8U(nX, nY, static_cast<int>(nColor & kChannelMask));
 }
 
-// NTSC-U/C: 0x00635ef8, PAL: 0x00676a88
 void ACanvas8::DrawPixel15U(int nX, int nY, unsigned short nColor) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -203,7 +183,6 @@ void ACanvas8::DrawPixel15U(int nX, int nY, unsigned short nColor) {
     DrawPixel8U(nX, nY, nIndex & static_cast<int>(kChannelMask));
 }
 
-// NTSC-U/C: 0x00635fd8, PAL: 0x00676b68
 void ACanvas8::DrawPixel24U(int nX, int nY, const unsigned char *pRGB) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -219,7 +198,6 @@ void ACanvas8::DrawPixel24U(int nX, int nY, const unsigned char *pRGB) {
     DrawPixel8U(nX, nY, nIndex & static_cast<int>(kChannelMask));
 }
 
-// NTSC-U/C: 0x006360c8, PAL: 0x00676c58
 void ACanvas8::DrawPixel32U(int nX, int nY, unsigned int nColor) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -234,13 +212,10 @@ void ACanvas8::DrawPixel32U(int nX, int nY, unsigned int nColor) {
     DrawPixel8U(nX, nY, nIndex & static_cast<int>(kChannelMask));
 }
 
-// NTSC-U/C: 0x00635c48, PAL: 0x006767d8
-// Native is the palette index for this format, so the read forwards unchanged.
 unsigned int ACanvas8::GetPixelNativeU(int nX, int nY) {
     return static_cast<unsigned int>(GetPixel8U(nX, nY));
 }
 
-// NTSC-U/C: 0x00636190, PAL: 0x00676d20
 unsigned short ACanvas8::GetPixel15U(int nX, int nY) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -249,7 +224,6 @@ unsigned short ACanvas8::GetPixel15U(int nX, int nY) {
     return APackRgb1555From8888(pPalette->mEntries[GetPixel8U(nX, nY)]);
 }
 
-// NTSC-U/C: 0x006361f8, PAL: 0x00676d88
 void ACanvas8::GetPixel24U(int nX, int nY, unsigned char *pRGB) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {
@@ -261,7 +235,6 @@ void ACanvas8::GetPixel24U(int nX, int nY, unsigned char *pRGB) {
     pRGB[0] = static_cast<unsigned char>(nColor);
 }
 
-// NTSC-U/C: 0x00636270, PAL: 0x00676e00
 unsigned int ACanvas8::GetPixel32U(int nX, int nY) {
     APalette *pPalette = ResolvePalette(mBitmap.mPalette);
     if (pPalette == nullptr) {

@@ -83,16 +83,13 @@ static Stream &operator>>(Stream &stream, std::list<Drawable *> &draws) {
     return stream;
 }
 
-// NTSC-U/C: 0x005066f8, PAL: 0x005455b8
 Drawable::Drawable() : mShowing(1), mHighlight(0) {
 }
 
-// NTSC-U/C: 0x00506590, PAL: 0x00545450
 Drawable::~Drawable() {
     ReleaseDrawsRefs();
 }
 
-// NTSC-U/C: 0x00506920, PAL: 0x005457e8
 void Drawable::Draw() {
     if (mShowing == 0) {
         return;
@@ -105,22 +102,18 @@ void Drawable::Draw() {
     }
 }
 
-// NTSC-U/C: 0x005066d8, PAL: 0x00545598
 void Drawable::SetShowing(int nShowing) {
     mShowing = nShowing;
 }
 
-// NTSC-U/C: 0x00506c88, PAL: 0x00545b50
 void Drawable::SetHighlight(int nHighlight) {
     mHighlight = nHighlight;
 }
 
-// NTSC-U/C: 0x005066f0, PAL: 0x005455b0
 int Drawable::DrawShowing() {
     return 1;
 }
 
-// NTSC-U/C: 0x00502d78, PAL: 0x00541ba0
 Drawable *Drawable::Parent() {
     for (std::list<Object *>::iterator it = mRefs.begin(); it != mRefs.end(); ++it) {
         Drawable *pCandidate = dynamic_cast<Drawable *>(*it);
@@ -135,7 +128,6 @@ Drawable *Drawable::Parent() {
     return nullptr;
 }
 
-// NTSC-U/C: 0x00503188, PAL: 0x00541fb0
 void Drawable::AddDraw(Drawable *pDraw, Drawable *pBefore) {
     if (std::find(mDraws.begin(), mDraws.end(), pDraw) != mDraws.end()) {
         Rnd::TheDbg.Notify(kAlreadyInFormat, NameText(pDraw), NameText(this));
@@ -149,17 +141,14 @@ void Drawable::AddDraw(Drawable *pDraw, Drawable *pBefore) {
     mDraws.insert(at, pDraw);
 }
 
-// NTSC-U/C: 0x005064e0, PAL: 0x005453a0
 void Drawable::AddDraw(Drawable *pDraw) {
     AddDraw(pDraw, mDraws.empty() ? nullptr : mDraws.front());
 }
 
-// NTSC-U/C: 0x00506528, PAL: 0x005453e8
 Drawable *Drawable::Find(const HxStr &name) {
     return dynamic_cast<Drawable *>(TheManager.Find(name));
 }
 
-// NTSC-U/C: 0x00503360, PAL: 0x00542188
 void Drawable::RemoveDraw(Drawable *pDraw) {
     if (std::find(mDraws.begin(), mDraws.end(), pDraw) == mDraws.end()) {
         return;
@@ -170,7 +159,6 @@ void Drawable::RemoveDraw(Drawable *pDraw) {
     mDraws.remove(pDraw);
 }
 
-// NTSC-U/C: 0x00503420, PAL: 0x00542248
 void Drawable::RemoveAllDraws() {
     for (std::list<Drawable *>::iterator it = mDraws.begin(); it != mDraws.end();) {
         if (*it != nullptr) {
@@ -180,7 +168,6 @@ void Drawable::RemoveAllDraws() {
     }
 }
 
-// NTSC-U/C: 0x005034b8, PAL: 0x005422e0
 void Drawable::MoveDraw(Drawable *pDraw, int nSteps) {
     std::list<Drawable *>::iterator it = std::find(mDraws.begin(), mDraws.end(), pDraw);
     if (it == mDraws.end()) {
@@ -201,7 +188,6 @@ void Drawable::MoveDraw(Drawable *pDraw, int nSteps) {
     mDraws.splice(pos, mDraws, it);
 }
 
-// NTSC-U/C: 0x00506ba8, PAL: 0x00545a70
 void Drawable::ReleaseDrawsRefs() {
     for (std::list<Drawable *>::iterator it = mDraws.begin(); it != mDraws.end(); ++it) {
         if (*it != nullptr) {
@@ -210,7 +196,6 @@ void Drawable::ReleaseDrawsRefs() {
     }
 }
 
-// NTSC-U/C: 0x00506c18, PAL: 0x00545ae0
 void Drawable::AcquireDrawsRefs() {
     for (std::list<Drawable *>::iterator it = mDraws.begin(); it != mDraws.end(); ++it) {
         if (*it != nullptr) {
@@ -219,7 +204,6 @@ void Drawable::AcquireDrawsRefs() {
     }
 }
 
-// NTSC-U/C: 0x005069a8, PAL: 0x00545870
 void Drawable::DumpText(Dbg &sink) {
     if (sink.mDumpLevel <= 0) {
         return;
@@ -234,7 +218,6 @@ void Drawable::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x00506b28, PAL: 0x005459f0
 void Drawable::Save(Stream &stream) {
     int nRevision = kDrawableRevision;
     stream.WriteLE(&nRevision, sizeof(nRevision));
@@ -245,7 +228,6 @@ void Drawable::Save(Stream &stream) {
     stream << mDraws;
 }
 
-// NTSC-U/C: 0x00503020, PAL: 0x00541e48
 void Drawable::Load(Stream &stream) {
     int nRevision = 0;
     stream.ReadLE(&nRevision, sizeof(nRevision));
@@ -268,7 +250,6 @@ void Drawable::Load(Stream &stream) {
     AcquireDrawsRefs();
 }
 
-// NTSC-U/C: 0x00506a88, PAL: 0x00545950
 void Drawable::Copy(const Object *pSource, unsigned nFlags) {
     const Drawable *pSourceDrawable = dynamic_cast<const Drawable *>(pSource);
 
@@ -280,7 +261,6 @@ void Drawable::Copy(const Object *pSource, unsigned nFlags) {
     AcquireDrawsRefs();
 }
 
-// NTSC-U/C: 0x00502e40, PAL: 0x00541c68
 void Drawable::Replace(Object *pFrom, Object *pTo) {
     for (std::list<Drawable *>::iterator it = mDraws.begin(); it != mDraws.end();) {
         if (*it == pTo) {

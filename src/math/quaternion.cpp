@@ -44,7 +44,6 @@ inline float RowLength(const float *pMat3Rows, int nRow) {
 
 } // namespace
 
-// NTSC-U/C: 0x004efd80, PAL: 0x0052e970
 Quat &Quat::Set(const float *pAxis, float flAngle) {
     const float flHalf = flAngle * 0.5f;
     const float flSin = sinf(flHalf);
@@ -56,7 +55,6 @@ Quat &Quat::Set(const float *pAxis, float flAngle) {
     return *this;
 }
 
-// NTSC-U/C: 0x004f0350, PAL: 0x0052ef40
 void Rnd::MakeAxisAngle(const Quat &quat, float *pAxis, float *pflAngle) {
     *pflAngle = (quat.w > 1.0f) ? 0.0f : (2.0f * acosf(quat.w));
 
@@ -73,7 +71,6 @@ void Rnd::MakeAxisAngle(const Quat &quat, float *pAxis, float *pflAngle) {
     pAxis[2] = quat.z * flScale;
 }
 
-// NTSC-U/C: 0x004f0230, PAL: 0x0052ee20
 Quat EulerAnglesToQuat(const float *pAngles) {
     Vector3 half;
     half.w = 1.0f;
@@ -101,7 +98,6 @@ Quat EulerAnglesToQuat(const float *pAngles) {
     return out;
 }
 
-// NTSC-U/C: 0x004ee9c0, PAL: 0x0052d568
 Quat &Quat::Set(const float *pMat3Rows) {
     // The image writes the destination in place and indexes it by axis. Gathering the components
     // into a local first is indistinguishable from writing in place.
@@ -151,7 +147,6 @@ Quat &Quat::Set(const float *pMat3Rows) {
     return *this;
 }
 
-// NTSC-U/C: 0x004f06a0, PAL: 0x0052f290
 void QuatMultiply(const Quat &a, const Quat &b, Quat &out) {
     const float flX = (((a.w * b.x) + (a.x * b.w)) + (a.y * b.z)) - (a.z * b.y);
     const float flY = (((a.w * b.y) + (a.y * b.w)) + (a.z * b.x)) - (a.x * b.z);
@@ -164,7 +159,6 @@ void QuatMultiply(const Quat &a, const Quat &b, Quat &out) {
     out.w = flW;
 }
 
-// NTSC-U/C: 0x004f0178, PAL: 0x0052ed68
 Quat QuatRotateByVector(const Quat &quat, const float *pRotVec) {
     const float flAngle =
         sqrtf((pRotVec[0] * pRotVec[0]) + (pRotVec[1] * pRotVec[1]) + (pRotVec[2] * pRotVec[2]));
@@ -180,7 +174,6 @@ Quat QuatRotateByVector(const Quat &quat, const float *pRotVec) {
     return out;
 }
 
-// NTSC-U/C: 0x004eec20, PAL: 0x0052d7c8
 void QuatSlerp(const Quat &from, const Quat &to, Quat &out, float flT) {
     if (flT == 0.0f) {
         out = from;
@@ -220,7 +213,6 @@ void QuatSlerp(const Quat &from, const Quat &to, Quat &out, float flT) {
     out.w = (dFromScale * from.w) + (dToScale * target.w);
 }
 
-// NTSC-U/C: 0x004f0600, PAL: 0x0052f1f0
 void Rnd::MakeRotMatrix(const Quat &quat, float *pMat3Rows) {
     const float flX2 = quat.x + quat.x;
     const float flY2 = quat.y + quat.y;
@@ -249,7 +241,6 @@ void Rnd::MakeRotMatrix(const Quat &quat, float *pMat3Rows) {
     pMat3Rows[10] = 1.0f - flXx - flYy;
 }
 
-// NTSC-U/C: 0x004efe08, PAL: 0x0052e9f8
 void Rnd::MakeEuler(const float *pMat3Rows, float *pAngles) {
     const float flYRowZ = MatAt(pMat3Rows, kRowY, kZ);
     if (fabsf(flYRowZ) > kGimbalLockLimit) {
@@ -264,7 +255,6 @@ void Rnd::MakeEuler(const float *pMat3Rows, float *pAngles) {
     pAngles[kY] = atan2f(-MatAt(pMat3Rows, kRowX, kZ), MatAt(pMat3Rows, kRowZ, kZ));
 }
 
-// NTSC-U/C: 0x004efed8, PAL: 0x0052eac8
 void Mat33ExtractScale(const float *pMat3Rows, float *pScale) {
     const float flLenZ = RowLength(pMat3Rows, kRowZ);
     const float flLenX = RowLength(pMat3Rows, kRowX);
@@ -286,7 +276,6 @@ void Mat33ExtractScale(const float *pMat3Rows, float *pScale) {
     pScale[kY] = flLenY;
 }
 
-// NTSC-U/C: 0x004effe0, PAL: 0x0052ebd0
 void LerpEulerAngles(const float *pFrom, const float *pTo, float *pOut, float flT) {
     // The image reads every input before it writes the first output.
     float aflOut[kComponentCount];

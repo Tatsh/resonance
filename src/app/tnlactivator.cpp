@@ -58,7 +58,6 @@ T *FindObject(const char *pszName) {
 
 } // namespace
 
-// NTSC-U/C: 0x0043b3d8, PAL: 0x004778f8
 TnlActivator::TnlActivator(int nIndex, HxStr colorName, TnlPlayer *pOwner)
     : mIndex(nIndex), mRotView(FindObject<Rnd::View>(Rnd::MakeString("activator rot%d", nIndex))),
       mMesh(FindObject<Rnd::Mesh>(Rnd::MakeString("activator%d", nIndex))),
@@ -89,7 +88,6 @@ TnlActivator::TnlActivator(int nIndex, HxStr colorName, TnlPlayer *pOwner)
     SetLeader(0);
 }
 
-// NTSC-U/C: 0x0043baf8, PAL: 0x004780c0
 void TnlActivator::Update(float flFrame, float flScaledFrame) {
     int nSettled = 1;
     if (mTargetAngle != mAngle) {
@@ -159,12 +157,10 @@ void TnlActivator::Update(float flFrame, float flScaledFrame) {
     mPointer.Update(flScaledFrame);
 }
 
-// NTSC-U/C: 0x00455ac8, PAL: 0x00492ff8
 void TnlActivator::SetRotShowing(int nShowing) {
     mRotView->SetShowing(nShowing);
 }
 
-// NTSC-U/C: 0x00455a40, PAL: 0x00492f70
 void TnlActivator::SetLeader(int nLeader) {
     if (nLeader) {
         mFxView->AddTrans(mLeader);
@@ -174,7 +170,6 @@ void TnlActivator::SetLeader(int nLeader) {
     mLeader->SetShowing(nLeader);
 }
 
-// NTSC-U/C: 0x00455c98, PAL: 0x004931c8
 void TnlActivator::SetGhost(int nGhost) {
     mGhost = nGhost;
     if (mLevel) {
@@ -187,7 +182,6 @@ void TnlActivator::SetGhost(int nGhost) {
     }
 }
 
-// NTSC-U/C: 0x00455af8, PAL: 0x00493028
 void TnlActivator::SetSuppressed(int nSuppressed) {
     SetRotShowing(nSuppressed ^ 1); // Yes, the binary flips the low bit rather than testing zero.
     const int nGhost = mGhost;
@@ -196,7 +190,6 @@ void TnlActivator::SetSuppressed(int nSuppressed) {
     mGhost = nGhost;
 }
 
-// NTSC-U/C: 0x00455b70, PAL: 0x004930a0
 void TnlActivator::MoveToTrack(int nLevel, int nKind, float flTrack) {
     if (!mTurning && !mLevel && mGhost && !mSuppressed) {
         mOwner->mTunnel->HideTrackGhost(mTrack);

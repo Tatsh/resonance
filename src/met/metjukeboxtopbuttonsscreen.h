@@ -146,9 +146,13 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // Hide the five sub-screens, show the ones the selected button owns, record the sub-screen
-    // that receives commands in mCommandTargetScreen, and replace the title.
-    // NTSC-U/C: 0x00241320, PAL: 0x00255f98
+    /**
+     * Hide the five sub-screens, show the ones the selected button owns, record the sub-screen that
+     * receives commands in mCommandTargetScreen, and replace the title.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00241320
+     * @ghidraAddress PAL: 0x00255f98
+     */
     void ShowSelectedPanel();
 
     HxStr mCommandTargetScreen; // +0x8c

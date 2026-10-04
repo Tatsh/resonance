@@ -63,7 +63,6 @@ constexpr int kSelectAlternateCycles = 2;
 
 } // namespace
 
-// NTSC-U/C: 0x002ad7e8, PAL: 0x002cc120
 MetLocNumPlayScreen::MetLocNumPlayScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr) {
@@ -74,7 +73,6 @@ MetLocNumPlayScreen::MetLocNumPlayScreen(MetRenderer *pRenderer, int nPriority)
     mHelpKeys.push_back(MetText(kMetStrHMultiTips, kTipsKey));
 }
 
-// NTSC-U/C: 0x002adbf0, PAL: 0x002cc5f0
 void MetLocNumPlayScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
@@ -91,7 +89,6 @@ void MetLocNumPlayScreen::ResolveContainerViews() {
     mButtonList->Add(HxStr(kTipsButton), tipsLabel);
 }
 
-// NTSC-U/C: 0x002adef0, PAL: 0x002cc9b0
 void MetLocNumPlayScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -126,7 +123,6 @@ void MetLocNumPlayScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x002ae218, PAL: 0x002ccd70
 void MetLocNumPlayScreen::EnterAndShow() {
     HxStr title = MetConfigText(kMetStrTMNumP, kTitleConfigCode, kTitleKey);
     MetScreenTitleScreen::SetTitle(title);
@@ -143,7 +139,6 @@ void MetLocNumPlayScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x002ae350, PAL: 0x002ccee0
 void MetLocNumPlayScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     mExitChoice = kExitChoice;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
@@ -152,7 +147,6 @@ void MetLocNumPlayScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// NTSC-U/C: 0x002ae4f0, PAL: 0x002cd0e0
 void MetLocNumPlayScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kTopLogoScreen));
@@ -176,20 +170,16 @@ void MetLocNumPlayScreen::OnExitFinished() {
     }
 }
 
-// NTSC-U/C: 0x002b0f70, PAL: 0x002cfd38
 void MetLocNumPlayScreen::PlayCycleLeftSound(int) {
 }
 
-// NTSC-U/C: 0x002b0f78, PAL: 0x002cfd40
 void MetLocNumPlayScreen::PlayCycleRightSound(int) {
 }
 
-// NTSC-U/C: 0x002b0f80, PAL: 0x002cfd48
 MetLocNumPlayScreen *MetLocNumPlayScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetLocNumPlayScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x002b1008, PAL: 0x002cfdd0
 MetLocNumPlayScreen::~MetLocNumPlayScreen() {
     delete mButtonList;
 }

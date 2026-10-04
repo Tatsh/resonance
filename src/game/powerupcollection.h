@@ -108,6 +108,8 @@ public:
     /**
      * Select one entry by index, without checking its count.
      *
+     * An index outside the vector is not tested for.
+     *
      * @param nIndex The entry, or -1 for none.
      * @ghidraAddress NTSC-U/C: 0x001cb450
      * @ghidraAddress PAL: 0x001d1308

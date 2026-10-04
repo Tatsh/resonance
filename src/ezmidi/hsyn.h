@@ -240,6 +240,8 @@ extern int rate_R;
  * Fill the quarter-sine chorus curve.
  *
  * @param iDepth Ignored.
+ * @ghidraAddress NTSC-U/C: 0x0668
+ * @ghidraAddress PAL: 0x0668
  */
 void _build_chorus(int iDepth);
 
@@ -249,6 +251,8 @@ void _build_chorus(int iDepth);
  * @param ch Transfer channel.
  * @param common Counter to increment.
  * @return One.
+ * @ghidraAddress NTSC-U/C: 0x0868
+ * @ghidraAddress PAL: 0x0868
  */
 int HandleTransIntr(int ch, void *common);
 
@@ -259,6 +263,8 @@ int HandleTransIntr(int ch, void *common);
  * @param pSPU SPU2 destination.
  * @param iBlockSize Byte count.
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x08c8
+ * @ghidraAddress PAL: 0x08c8
  */
 int MemCpy_IOPtoSPU(void *pIOP, void *pSPU, int iBlockSize);
 
@@ -269,6 +275,8 @@ int MemCpy_IOPtoSPU(void *pIOP, void *pSPU, int iBlockSize);
  * @param pSPU Ignored.
  * @param iDirection Ignored.
  * @return -1.
+ * @ghidraAddress NTSC-U/C: 0x0954
+ * @ghidraAddress PAL: 0x0954
  */
 int StartAutoDMA(void *pIOP, void *pSPU, int iDirection);
 
@@ -279,13 +287,25 @@ int StartAutoDMA(void *pIOP, void *pSPU, int iDirection);
  * @param pSPU Ignored.
  * @param iDirection Ignored.
  * @return -1.
+ * @ghidraAddress NTSC-U/C: 0x098c
+ * @ghidraAddress PAL: 0x098c
  */
 int StopAutoDMA(void *pIOP, void *pSPU, int iDirection);
 
-/** Reset every channel to its default MIDI state. */
+/**
+ * Reset every channel to its default MIDI state.
+ *
+ * @ghidraAddress NTSC-U/C: 0x09c4
+ * @ghidraAddress PAL: 0x09c4
+ */
 void _init_channels(void);
 
-/** Detach every bank slot. */
+/**
+ * Detach every bank slot.
+ *
+ * @ghidraAddress NTSC-U/C: 0x0b4c
+ * @ghidraAddress PAL: 0x0b4c
+ */
 void _init_banks(void);
 
 /**
@@ -293,6 +313,8 @@ void _init_banks(void);
  *
  * @param iChan Channel.
  * @param iProg Program.
+ * @ghidraAddress NTSC-U/C: 0x0be4
+ * @ghidraAddress PAL: 0x0be4
  */
 void hs_prog_change(int iChan, int iProg);
 
@@ -301,6 +323,8 @@ void hs_prog_change(int iChan, int iProg);
  *
  * @param which_core Core, or -1 for either.
  * @return The voice slot, or -1 when every voice is in use.
+ * @ghidraAddress NTSC-U/C: 0x0c2c
+ * @ghidraAddress PAL: 0x0c2c
  */
 int get_free_slot(int which_core);
 
@@ -312,6 +336,8 @@ int get_free_slot(int which_core);
  * @param detune Fine tuning.
  * @param samp_rate Recorded rate in hertz.
  * @return The pitch register value, limited to the largest the SPU2 accepts.
+ * @ghidraAddress NTSC-U/C: 0x1c44
+ * @ghidraAddress PAL: 0x1c44
  */
 int _note_2_pitch(int base_note, int new_note, int detune, int samp_rate);
 
@@ -321,6 +347,8 @@ int _note_2_pitch(int base_note, int new_note, int detune, int samp_rate);
  * @param pNote Note.
  * @param do_set Nonzero to write the registers now.
  * @return Nonzero when the pitch or the target volume changed.
+ * @ghidraAddress NTSC-U/C: 0x1d14
+ * @ghidraAddress PAL: 0x1d14
  */
 int _apply_channel_to_note(sSynNote *pNote, int do_set);
 
@@ -335,6 +363,8 @@ int _apply_channel_to_note(sSynNote *pNote, int do_set);
  * @param pSplitOffs Key split, or null.
  * @param xflags One for the second voice of a chorus pair.
  * @return The note index, or a negative error code.
+ * @ghidraAddress NTSC-U/C: 0x2240
+ * @ghidraAddress PAL: 0x2240
  */
 int _fire_off_sample(int iSamp,
                      int iNote,
@@ -351,6 +381,8 @@ int _fire_off_sample(int iSamp,
  * @param iNote Note.
  * @param iVol Velocity.
  * @return The note index, or a negative error code.
+ * @ghidraAddress NTSC-U/C: 0x2c6c
+ * @ghidraAddress PAL: 0x2c6c
  */
 int hs_note_on(int iChan, int iNote, int iVol);
 
@@ -360,6 +392,8 @@ int hs_note_on(int iChan, int iNote, int iVol);
  * @param pNote Note.
  * @param iAlreadyOff Nonzero when the voice is already keyed off.
  * @return Zero, or -1 when the note was not sounding.
+ * @ghidraAddress NTSC-U/C: 0x3250
+ * @ghidraAddress PAL: 0x3250
  */
 int hs_kill_idx(sSynNote *pNote, int iAlreadyOff);
 
@@ -368,6 +402,8 @@ int hs_kill_idx(sSynNote *pNote, int iAlreadyOff);
  *
  * @param noteidx Note index.
  * @return Zero, or -1 when the note was not sounding.
+ * @ghidraAddress NTSC-U/C: 0x33cc
+ * @ghidraAddress PAL: 0x33cc
  */
 int hs_idx_off(int noteidx);
 
@@ -377,6 +413,8 @@ int hs_idx_off(int noteidx);
  * @param iChan Channel.
  * @param iNote Note.
  * @return Zero, or -1 when the note is not playing.
+ * @ghidraAddress NTSC-U/C: 0x34e0
+ * @ghidraAddress PAL: 0x34e0
  */
 int hs_note_off(int iChan, int iNote);
 
@@ -385,6 +423,8 @@ int hs_note_off(int iChan, int iNote);
  *
  * @param pNote Note.
  * @return Zero, or -1 when the note was released.
+ * @ghidraAddress NTSC-U/C: 0x3654
+ * @ghidraAddress PAL: 0x3654
  */
 int hs_check_playing(sSynNote *pNote);
 
@@ -396,6 +436,8 @@ int hs_check_playing(sSynNote *pNote);
  * @param depth Pitch range.
  * @param pos Curve position to advance.
  * @return The pitch register value with the chorus applied.
+ * @ghidraAddress NTSC-U/C: 0x4334
+ * @ghidraAddress PAL: 0x4334
  */
 unsigned short _apply_chorus(unsigned short c_pitch,
                              unsigned short rate,
@@ -407,6 +449,8 @@ unsigned short _apply_chorus(unsigned short c_pitch,
  *
  * @param pNote Note.
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x43f8
+ * @ghidraAddress PAL: 0x43f8
  */
 int hs_update_note_and_fx(sSynNote *pNote);
 
@@ -415,6 +459,8 @@ int hs_update_note_and_fx(sSynNote *pNote);
  *
  * @param iChan Channel, or -1 for every channel.
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x4654
+ * @ghidraAddress PAL: 0x4654
  */
 int hs_reapply_channel(int iChan);
 
@@ -423,13 +469,25 @@ int hs_reapply_channel(int iChan);
  *
  * @param iFlags Sections to print.
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x477c
+ * @ghidraAddress PAL: 0x477c
  */
 int ShowSynthState(int iFlags);
 
-/** Reset every program, voice, channel, and bank slot. */
+/**
+ * Reset every program, voice, channel, and bank slot.
+ *
+ * @ghidraAddress NTSC-U/C: 0x47ac
+ * @ghidraAddress PAL: 0x47ac
+ */
 void ResetSynthState(void);
 
-/** Write the key-on, key-off, and changed voice mix switches of both cores. */
+/**
+ * Write the key-on, key-off, and changed voice mix switches of both cores.
+ *
+ * @ghidraAddress NTSC-U/C: 0x4840
+ * @ghidraAddress PAL: 0x4840
+ */
 void _do_reg_out(void);
 
 /**
@@ -437,6 +495,8 @@ void _do_reg_out(void);
  *
  * @param iChan Channel, or -1 for every channel.
  * @param do_now Nonzero to read and write the SPU2 switches around the change.
+ * @ghidraAddress NTSC-U/C: 0x4bf4
+ * @ghidraAddress PAL: 0x4bf4
  */
 void HardSynthAllNotesOff(int iChan, int do_now);
 
@@ -445,6 +505,8 @@ void HardSynthAllNotesOff(int iChan, int do_now);
  *
  * @param pMidiMsg Message.
  * @return The next message.
+ * @ghidraAddress NTSC-U/C: 0x4d70
+ * @ghidraAddress PAL: 0x4d70
  */
 unsigned char *HandleMidiMessage(unsigned char *pMidiMsg);
 
@@ -455,6 +517,8 @@ unsigned char *HandleMidiMessage(unsigned char *pMidiMsg);
  * @param ipSpu SPU2 address.
  * @param iSize Byte count.
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x5744
+ * @ghidraAddress PAL: 0x5744
  */
 int HardSynthLoadBD(int ipBd, int ipSpu, int iSize);
 
@@ -466,6 +530,8 @@ int HardSynthLoadBD(int ipBd, int ipSpu, int iSize);
  * @param ipSpu SPU2 address of the body.
  * @param bank Bank slot.
  * @return Zero, or -1 for an invalid slot.
+ * @ghidraAddress NTSC-U/C: 0x579c
+ * @ghidraAddress PAL: 0x579c
  */
 int HardSynthAttachHDtoBD(int port, int ipHd, int ipSpu, int bank);
 
@@ -474,6 +540,8 @@ int HardSynthAttachHDtoBD(int port, int ipHd, int ipSpu, int bank);
  *
  * @param bank Bank slot.
  * @return Zero, or -1 when the slot was empty.
+ * @ghidraAddress NTSC-U/C: 0x586c
+ * @ghidraAddress PAL: 0x586c
  */
 int HardSynthInvalidateBank(int bank);
 
@@ -481,6 +549,8 @@ int HardSynthInvalidateBank(int bank);
  * Detach the bank slot that uses a header.
  *
  * @param pHd IOP address of the header.
+ * @ghidraAddress NTSC-U/C: 0x5a28
+ * @ghidraAddress PAL: 0x5a28
  */
 void HardSynthInvalidateHd(unsigned char *pHd);
 
@@ -488,16 +558,25 @@ void HardSynthInvalidateHd(unsigned char *pHd);
  * Clear the flag an attached bank sets.
  *
  * @return Zero, or -1 when no bank was attached since the last call.
+ * @ghidraAddress NTSC-U/C: 0x5acc
+ * @ghidraAddress PAL: 0x5acc
  */
 int HardSynthClearHDBD(void);
 
-/** Empty the MIDI stream buffers. */
+/**
+ * Empty the MIDI stream buffers.
+ *
+ * @ghidraAddress NTSC-U/C: 0x5b20
+ * @ghidraAddress PAL: 0x5b20
+ */
 void MidiBufferSetup(void);
 
 /**
  * Release every note whose voice has fallen silent.
  *
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x5b7c
+ * @ghidraAddress PAL: 0x5b7c
  */
 int HardSynthKillOld(void);
 
@@ -505,6 +584,8 @@ int HardSynthKillOld(void);
  * Apply one tick of updates to every sounding note.
  *
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x5c54
+ * @ghidraAddress PAL: 0x5c54
  */
 int HardSynthUpdate(void);
 
@@ -515,6 +596,8 @@ int HardSynthUpdate(void);
  * @param iBlockSize Byte count.
  * @param buf Ignored.
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x5d34
+ * @ghidraAddress PAL: 0x5d34
  */
 int HardSynthParseNew(unsigned char *pMidiBlock, int iBlockSize, int buf);
 
@@ -522,6 +605,8 @@ int HardSynthParseNew(unsigned char *pMidiBlock, int iBlockSize, int buf);
  * Stop the pitch of every note on the channels pausing affects.
  *
  * @return Zero, or one when already paused.
+ * @ghidraAddress NTSC-U/C: 0x6390
+ * @ghidraAddress PAL: 0x6390
  */
 int HardSynthPause(void);
 
@@ -529,6 +614,8 @@ int HardSynthPause(void);
  * Restore the pitch of every note HardSynthPause() stopped.
  *
  * @return Zero, or -1 when not paused.
+ * @ghidraAddress NTSC-U/C: 0x64e0
+ * @ghidraAddress PAL: 0x64e0
  */
 int HardSynthResume(void);
 
@@ -537,6 +624,8 @@ int HardSynthResume(void);
  *
  * @param parm Nonzero to enable.
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x6660
+ * @ghidraAddress PAL: 0x6660
  */
 int HardSynthSetRemix(int parm);
 
@@ -545,6 +634,8 @@ int HardSynthSetRemix(int parm);
  *
  * @param parm Nonzero to enable.
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x66a4
+ * @ghidraAddress PAL: 0x66a4
  */
 int HardSynthSetMono(int parm);
 
@@ -552,6 +643,8 @@ int HardSynthSetMono(int parm);
  * Replace the settings and recompute the chorus rates.
  *
  * @param pConfig New settings, or null to retain the current settings.
+ * @ghidraAddress NTSC-U/C: 0x66f4
+ * @ghidraAddress PAL: 0x66f4
  */
 void HardSynthConfig(sSynthConfig *pConfig);
 
@@ -559,6 +652,8 @@ void HardSynthConfig(sSynthConfig *pConfig);
  * Initialise the synthesiser, start its tick thread, and start the tick timer.
  *
  * @return The IOP address of the MIDI stream buffers the EE writes to.
+ * @ghidraAddress NTSC-U/C: 0x6800
+ * @ghidraAddress PAL: 0x6800
  */
 int HardSynthInit(void);
 
@@ -566,6 +661,8 @@ int HardSynthInit(void);
  * Reset the synthesiser state.
  *
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x68d0
+ * @ghidraAddress PAL: 0x68d0
  */
 int HardSynthReset(void);
 
@@ -573,6 +670,8 @@ int HardSynthReset(void);
  * Stop and release the tick timer.
  *
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x690c
+ * @ghidraAddress PAL: 0x690c
  */
 int HardSynthShutdown(void);
 
@@ -580,6 +679,8 @@ int HardSynthShutdown(void);
  * Handle a diagnostic request.
  *
  * @param what Zero or one to print the state, two to switch mono output.
+ * @ghidraAddress NTSC-U/C: 0x6960
+ * @ghidraAddress PAL: 0x6960
  */
 void HardSynthInfo(int what);
 

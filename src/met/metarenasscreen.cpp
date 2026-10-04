@@ -129,7 +129,6 @@ inline HxStr Concatenate(const HxStr &left, char ch) {
 
 } // namespace
 
-// NTSC-U/C: 0x001f65a0, PAL: 0x001fcfc8
 MetArenasScreen::MetArenasScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mArenaButtons(nullptr), mScreenshots(nullptr) {
@@ -137,18 +136,15 @@ MetArenasScreen::MetArenasScreen(MetRenderer *pRenderer, int nPriority)
     mHelpKeys.push_back(MetText(kMetStrHArenas, kArenasObject));
 }
 
-// NTSC-U/C: 0x001fc690, PAL: 0x00203b20
 MetArenasScreen *MetArenasScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetArenasScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x001f70f0, PAL: 0x001fdc98
 MetArenasScreen::~MetArenasScreen() {
     delete mArenaButtons;
     delete mScreenshots;
 }
 
-// NTSC-U/C: 0x001f7750, PAL: 0x001fe3b8
 void MetArenasScreen::EnterAndShow() {
     HxStr mode;
     HxStr kind;
@@ -186,7 +182,6 @@ void MetArenasScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x001f75c8, PAL: 0x001fe1f0
 void MetArenasScreen::UpdateScreenshot() {
     (void)GetArenaList(); // Yes, the binary discards this call's result.
     const int nSelected = mArenaButtons->mSelected;
@@ -207,7 +202,6 @@ void MetArenasScreen::UpdateScreenshot() {
     mScreenshots->Load(TexturePairRecord::ArenaPath(name));
 }
 
-// NTSC-U/C: 0x001f7d40, PAL: 0x001fee58
 void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
     mArenaButtons->SetSelected(kNoSelection);
     const int nArenaCount = GetArenaList()->size();
@@ -269,7 +263,6 @@ void MetArenasScreen::SetupArenaButtons(int bUnlockAll) {
     pPanel->SetShowing(kHidden);
 }
 
-// NTSC-U/C: 0x001f7310, PAL: 0x001fdeb8
 void MetArenasScreen::HandleCommand(const MetScreenCommand *pCommand) {
     const int nSelected = mArenaButtons->mSelected;
     switch (pCommand->mCommand) {
@@ -307,22 +300,18 @@ void MetArenasScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x001fc718, PAL: 0x00203ba8
 void MetArenasScreen::PlaySlideSound(int nSelector) {
     if (mArenaButtons->mSelected < mUnlockedCount || mArenaButtons->mSelected == mNoArenaIndex) {
         MetScreen::PlaySlideSound(nSelector);
     }
 }
 
-// NTSC-U/C: 0x001fc680, PAL: 0x00203b10
 void MetArenasScreen::PlayCycleLeftSound(int) {
 }
 
-// NTSC-U/C: 0x001fc688, PAL: 0x00203b18
 void MetArenasScreen::PlayCycleRightSound(int) {
 }
 
-// NTSC-U/C: 0x001f8af0, PAL: 0x001ffe58
 void MetArenasScreen::UpdateIdle(float) {
     mScreenshots->Advance(); // Yes, the binary discards whether the pair advanced.
     Rnd::Mesh *pPanel = dynamic_cast<Rnd::Mesh *>(Rnd::TheManager.Find(HxStr(kArenaPanelMesh)));
@@ -334,7 +323,6 @@ void MetArenasScreen::UpdateIdle(float) {
     mScreenshotMat->mStages[0].SetTex(mScreenshots->Current());
 }
 
-// NTSC-U/C: 0x001f8378, PAL: 0x001ff518
 void MetArenasScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     const int nSelected = mArenaButtons->mSelected;
     (void)GetArenaList(); // Yes, the binary discards this call's result.
@@ -351,12 +339,10 @@ void MetArenasScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// NTSC-U/C: 0x001fc758, PAL: 0x00203be8
 void MetArenasScreen::OnEnterFinished() {
     MetHelpScreen::SetText(mHelpKeys[0], mRenderer->mAnimationFrame);
 }
 
-// NTSC-U/C: 0x001f8658, PAL: 0x001ff8a0
 void MetArenasScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         if (MetFrontEndState::shared()->mReturnScreen == kRemixLoadScreen) {
@@ -377,7 +363,6 @@ void MetArenasScreen::OnExitFinished() {
     mArenaButtons->SetSelected(kNoSelection);
 }
 
-// NTSC-U/C: 0x001f6a08, PAL: 0x001fd4a8
 void MetArenasScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
     // Yes, the binary empties mUnlockedFonts twice and never empties mUnlockedMats.

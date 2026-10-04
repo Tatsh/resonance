@@ -21,7 +21,6 @@ constexpr int kDeployUnused = 0;
 
 } // namespace
 
-// NTSC-U/C: 0x001cad70, PAL: 0x001d0c28
 PowerupCollection::PowerupCollection(LocalPlayer *pOwner, int bUnlimited)
     : mSelected(-1), mOwner(pOwner), mUnlimited(bUnlimited) {
     std::vector<int> types;
@@ -38,15 +37,13 @@ PowerupCollection::PowerupCollection(LocalPlayer *pOwner, int bUnlimited)
     }
 }
 
-// NTSC-U/C: 0x001cb090, PAL: 0x001d0f48
-// The vector release and the base destructor after it are both compiler expansions.
 PowerupCollection::~PowerupCollection() {
+    // The vector release and the base destructor after it are both compiler expansions.
     for (std::vector<PowCount>::iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
         delete it->mPowerup;
     }
 }
 
-// NTSC-U/C: 0x001cb230, PAL: 0x001d10e8
 void PowerupCollection::Add(PowerupType type) {
     std::vector<PowCount>::iterator it = std::find(mEntries.begin(), mEntries.end(), type);
     if (it == mEntries.end()) {
@@ -63,7 +60,6 @@ void PowerupCollection::Add(PowerupType type) {
     }
 }
 
-// NTSC-U/C: 0x001cb320, PAL: 0x001d11d8
 void PowerupCollection::SelectRelative(int nDelta) {
     if (nDelta == 0) {
         return;
@@ -93,11 +89,8 @@ void PowerupCollection::SelectRelative(int nDelta) {
     Send(&msg);
 }
 
-// NTSC-U/C: 0x001cb450, PAL: 0x001d1308
-// The index is stored before it is used, and an index outside the vector is not
-// tested for.
 void PowerupCollection::Select(int nIndex) {
-    mSelected = nIndex;
+    mSelected = nIndex; // The index is stored before it is used.
     int nType = -1;
     if (nIndex != -1) {
         nType = mEntries[nIndex].mPowerup->Type();
@@ -106,8 +99,6 @@ void PowerupCollection::Select(int nIndex) {
     Send(&msg);
 }
 
-// NTSC-U/C: 0x001cb500, PAL: 0x001d13b8
-// The selected entry is read with no test against -1.
 void PowerupCollection::Deploy(int nTrack, int nBar) {
     if (mEntries[mSelected].mPowerup->Deploy(nTrack, nBar, mOwner, kDeployUnused) == 0) {
         return;
@@ -123,12 +114,10 @@ void PowerupCollection::Deploy(int nTrack, int nBar) {
     }
 }
 
-// NTSC-U/C: 0x001cc9a0, PAL: 0x001d2858
 int PowerupCollection::HasSelection() const {
     return mSelected != -1;
 }
 
-// NTSC-U/C: 0x001cb620, PAL: 0x001d14d8
 void PowerupCollection::SendState() const {
     for (std::vector<PowCount>::const_iterator it = mEntries.begin(); it != mEntries.end(); ++it) {
         if (it->mCount != 0) {

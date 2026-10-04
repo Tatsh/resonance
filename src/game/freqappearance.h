@@ -305,10 +305,15 @@ public:
     HxStr mUserName;
 
 private:
-    // NTSC-U/C: 0x001744f8, PAL: 0x00176ed0
-    // Fill bytes 7 through 14 of pDest with 0x80, copy seven source bytes with each zero replaced
-    // by 0xff, and set bit n of byte 7 for each zero at position n. The image has no caller, and
-    // the name is inferred.
+    /**
+     * Fill bytes 7 through 14 of pDest with 0x80, copy seven source bytes with each zero replaced
+     * by 0xff, and set bit n of byte 7 for each zero at position n.
+     *
+     * The image has no caller, and the name is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001744f8
+     * @ghidraAddress PAL: 0x00176ed0
+     */
     static void EncodeNonZeroBytes(const unsigned char *pSource, unsigned char *pDest);
 
 public:

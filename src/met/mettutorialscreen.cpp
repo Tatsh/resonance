@@ -80,7 +80,6 @@ constexpr int kSelectAlternateCycles = 2;
 
 } // namespace
 
-// NTSC-U/C: 0x003c7a88, PAL: 0x003fed10
 MetTutorialScreen::MetTutorialScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr) {
@@ -89,17 +88,14 @@ MetTutorialScreen::MetTutorialScreen(MetRenderer *pRenderer, int nPriority)
     mHelpKeys.push_back(MetText(kMetStrHTutR, kSecondPrompt));
 }
 
-// NTSC-U/C: 0x003cc1a8, PAL: 0x00403a40
 MetTutorialScreen *MetTutorialScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetTutorialScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x003cc230, PAL: 0x00403ac8
 MetTutorialScreen::~MetTutorialScreen() {
     delete mButtonList;
 }
 
-// NTSC-U/C: 0x003c82a0, PAL: 0x003ff6e8
 void MetTutorialScreen::EnterAndShow() {
     if (MetFrontEndState::shared()->mPendingTransition != 0) {
         MetFrontEndState::shared()->mReturnScreen = HxStr(kNoName);
@@ -121,7 +117,6 @@ void MetTutorialScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x003c7d78, PAL: 0x003ff098
 void MetTutorialScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 
@@ -137,7 +132,6 @@ void MetTutorialScreen::ResolveContainerViews() {
     }
 }
 
-// NTSC-U/C: 0x003c7f10, PAL: 0x003ff2a0
 void MetTutorialScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -173,15 +167,12 @@ void MetTutorialScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x003cc198, PAL: 0x00403a30
 void MetTutorialScreen::PlayCycleLeftSound(int) {
 }
 
-// NTSC-U/C: 0x003cc1a0, PAL: 0x00403a38
 void MetTutorialScreen::PlayCycleRightSound(int) {
 }
 
-// NTSC-U/C: 0x003c84d8, PAL: 0x003ff998
 void MetTutorialScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     mExitChoice = kExitToButtonAction;
     ExitScreenByName(HxStr(kLeftGizmoScreen));
@@ -190,7 +181,6 @@ void MetTutorialScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// NTSC-U/C: 0x003c8678, PAL: 0x003ffb98
 void MetTutorialScreen::OnExitFinished() {
     if (mExitChoice == kExitBack) {
         PushNamedScreen(HxStr(kLeftGizmoSmallScreen));

@@ -167,12 +167,10 @@ static unsigned char g_time_stamps[kTimeStampCount][kTimeStampSize];
 // NTSC-U/C: 0x0089dd80, PAL: 0x008e2dc0
 static void *g_cutscene_memory;
 
-// NTSC-U/C: 0x00510f20, PAL: 0x00551198
 void ErrMessage(char *message) {
     printf("[ Error ] %s\n", message);
 }
 
-// NTSC-U/C: 0x00510f48, PAL: 0x005511c0
 void switchThread(void) {
     RotateThreadReadyQueue(g_default_priority);
 }
@@ -402,7 +400,6 @@ static void free_all(void) {
     MemFreeTagged(g_cutscene_memory, __FILE__, __LINE__);
 }
 
-// NTSC-U/C: 0x00511010, PAL: 0x00551288
 void play_cutscene(const char *name, int with_audio) {
     const char *path = strchr(name, ':');
     if (path != NULL) {

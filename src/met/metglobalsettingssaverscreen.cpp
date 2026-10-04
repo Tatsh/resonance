@@ -84,23 +84,19 @@ inline const char *RecordedCardName() {
 
 } // namespace
 
-// NTSC-U/C: 0x0027c4f8, PAL: 0x00295210
 MetGlobalSettingsSaverScreen::MetGlobalSettingsSaverScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(
           pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)) {
 }
 
-// NTSC-U/C: 0x0027c680, PAL: 0x00295400
 MetGlobalSettingsSaverScreen::~MetGlobalSettingsSaverScreen() {
 }
 
-// NTSC-U/C: 0x00281fc0, PAL: 0x0029bd18
 MetGlobalSettingsSaverScreen *MetGlobalSettingsSaverScreen::New(MetRenderer *pRenderer,
                                                                 int nPriority) {
     return new MetGlobalSettingsSaverScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x0027c2e0, PAL: 0x00295010
 void MetGlobalSettingsSaverScreen::StartSave(const std::vector<HxStr> &screens) {
     MetScreen *pScreen = MetScreen::FindScreenByName(HxStr(kOwnScreenName));
     MetGlobalSettingsSaverScreen *pSaver =
@@ -124,17 +120,14 @@ void MetGlobalSettingsSaverScreen::StartSave(const std::vector<HxStr> &screens) 
 #endif
 }
 
-// NTSC-U/C: 0x00282048, PAL: 0x0029bda0
 void MetGlobalSettingsSaverScreen::SetReturnScreens(const std::vector<HxStr> &screens) {
     mReturnScreens = screens;
 }
 
-// NTSC-U/C: 0x00282088, PAL: 0x0029bde0
 void MetGlobalSettingsSaverScreen::EnterAndShow() {
     RequestConnectState();
 }
 
-// NTSC-U/C: 0x002820a8, PAL: 0x00295540
 inline void MetGlobalSettingsSaverScreen::RequestConnectState() {
     MemcardManager::shared()->mUser = this;
 #ifdef VIDEO_STANDARD_PAL
@@ -155,7 +148,6 @@ inline void MetGlobalSettingsSaverScreen::RequestConnectState() {
 #endif
 }
 
-// NTSC-U/C: 0x002820f8, PAL: 0x0029be00
 void MetGlobalSettingsSaverScreen::BeginExit() {
     mRenderer->RemoveScreen(this);
     int nCount = mReturnScreens.size();
@@ -165,12 +157,10 @@ void MetGlobalSettingsSaverScreen::BeginExit() {
     ActivateNamedPanel(mReturnScreens[0]);
 }
 
-// NTSC-U/C: 0x00282068, PAL: 0x0029bdc0
 void MetGlobalSettingsSaverScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 }
 
-// The binary expands the routine in place in OnConnectState().
 inline void MetGlobalSettingsSaverScreen::ShowFormatCheck(const MemcardConnectState &state) {
     std::vector<HxStr> buttons;
     buttons.push_back(MetText(kMetStrMsgNO, kNoButton));
@@ -186,7 +176,6 @@ inline void MetGlobalSettingsSaverScreen::ShowFormatCheck(const MemcardConnectSt
                        this);
 }
 
-// NTSC-U/C: 0x0027c7a8, PAL: 0x002956b8
 void MetGlobalSettingsSaverScreen::OnConnectState(MemcardConnectState state, int nStatus) {
     if (nStatus == kMemcardStatusOk) {
         if (state.mFormatted != 0) {
@@ -227,7 +216,6 @@ void MetGlobalSettingsSaverScreen::OnConnectState(MemcardConnectState state, int
                        this);
 }
 
-// NTSC-U/C: 0x0027d258, PAL: 0x00296800
 void MetGlobalSettingsSaverScreen::OnCardFormatted([[maybe_unused]] int nPortSlot, int nStatus) {
     switch (nStatus) {
     case kMemcardStatusOk: {
@@ -278,7 +266,6 @@ void MetGlobalSettingsSaverScreen::OnCardFormatted([[maybe_unused]] int nPortSlo
     }
 }
 
-// NTSC-U/C: 0x0027dc70, PAL: 0x002973a8
 void MetGlobalSettingsSaverScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kMemCheckDialogue) {
         if (nChoice == kChoiceSecond) {
@@ -335,7 +322,6 @@ void MetGlobalSettingsSaverScreen::OnMsgScreenDismissed(const HxStr &name, int n
     RequestConnectState();
 }
 
-// NTSC-U/C: 0x0027e080, PAL: 0x00297bc8
 #ifdef VIDEO_STANDARD_PAL
 void MetGlobalSettingsSaverScreen::OnGlobalSettingsSaved([[maybe_unused]] int nPortSlot,
                                                          int nStatus,

@@ -64,16 +64,28 @@ public:
     virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // Sends controller mController on mChannel with mValue, dated at the song clock's tick.
-    // NTSC-U/C: 0x0019abd8, PAL: 0x001a0940
+    /**
+     * Sends controller mController on mChannel with mValue, dated at the song clock's tick.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019abd8
+     * @ghidraAddress PAL: 0x001a0940
+     */
     void SendController();
 
-    // The out-of-line copy of the AxisFXMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x0019b498, PAL: 0x001a1200
+    /**
+     * The out-of-line copy of the AxisFXMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019b498
+     * @ghidraAddress PAL: 0x001a1200
+     */
     void OnAxisFX(AxisFXMsg *pMsg);
 
-    // The out-of-line copy of the MultiMuseMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x0019b4b8, PAL: 0x001a1220
+    /**
+     * The out-of-line copy of the MultiMuseMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0019b4b8
+     * @ghidraAddress PAL: 0x001a1220
+     */
     void OnMultiMuse();
 
     unsigned char mChannel;    // +0x1c

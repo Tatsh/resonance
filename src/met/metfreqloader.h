@@ -96,10 +96,13 @@ public:
     int IsLoaded();
 
 private:
-    // NTSC-U/C: 0x002a0e30, PAL: 0x002bebe8
-    // Read a persona count and then each persona from the buffer, marking each one with
-    // 1 at MetPersonaData +0x15c, rebuilding its campaign level list, and appending it to
-    // mIdentities.
+    /**
+     * Read a persona count and then each persona from the buffer, marking each one with 1 at
+     * MetPersonaData +0x15c, rebuilding its campaign level list, and appending it to mIdentities.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002a0e30
+     * @ghidraAddress PAL: 0x002bebe8
+     */
     void ParseIdentities(const void *pBuffer, int nLength);
 
     std::vector<MetPersonaData *> *mIdentities; // +0x04

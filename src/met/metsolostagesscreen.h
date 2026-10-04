@@ -227,93 +227,182 @@ public:
     };
 
 private:
-    // NTSC-U/C: 0x003a09d0, PAL: 0x003d34a8
-    // Builds both button lists, the wire meshes, the icon materials, and the stage-button styles.
+    /**
+     * Builds both button lists, the wire meshes, the icon materials, and the stage-button styles.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a09d0
+     * @ghidraAddress PAL: 0x003d34a8
+     */
     void BuildButtons();
 
-    // NTSC-U/C: 0x003a1c88, PAL: 0x003d4a20
-    // Empties the five stage level lists and the custom list, one element at a time.
+    /**
+     * Empties the five stage level lists and the custom list, one element at a time.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a1c88
+     * @ghidraAddress PAL: 0x003d4a20
+     */
     void ClearLevelLists();
 
-    // NTSC-U/C: 0x003a1f38, PAL: 0x003d4d10
-    // Points mCurrentLevels at the selected stage's list and shows its indicators and wires.
+    /**
+     * Points mCurrentLevels at the selected stage's list and shows its indicators and wires.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a1f38
+     * @ghidraAddress PAL: 0x003d4d10
+     */
     void RefreshStage();
 
-    // NTSC-U/C: 0x003a2190, PAL: 0x003d4fd8
-    // Reports whether the stage is unavailable in a remix or at the current difficulty.
+    /**
+     * Reports whether the stage is unavailable in a remix or at the current difficulty.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a2190
+     * @ghidraAddress PAL: 0x003d4fd8
+     */
     int IsStageUnavailable(int nStage);
 
-    // NTSC-U/C: 0x003a2368, PAL: 0x003d5278
-    // Shows the stage bonus and the score still needed to beat the stage.
+    /**
+     * Shows the stage bonus and the score still needed to beat the stage.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a2368
+     * @ghidraAddress PAL: 0x003d5278
+     */
     void ShowStageBonus(int nStage);
 
-    // NTSC-U/C: 0x003a26c0, PAL: 0x003d5690
-    // Styles every stage button as open or closed.
+    /**
+     * Styles every stage button as open or closed.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a26c0
+     * @ghidraAddress PAL: 0x003d5690
+     */
     void ApplyStageStyles();
 
-    // NTSC-U/C: 0x003a2878, PAL: 0x003d5848
-    // Reports whether a level of the selected stage is locked. The European release applies the
-    // secret-level rules to the fifth stage only.
+    /**
+     * Reports whether a level of the selected stage is locked.
+     *
+     * The European release applies the secret-level rules to the fifth stage only.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a2878
+     * @ghidraAddress PAL: 0x003d5848
+     */
     int IsLevelLocked(int nLevel);
 
-    // NTSC-U/C: 0x003a2d58, PAL: 0x003d5e60
-    // Styles each indicator button as won, open, or locked. The European release does not hide or
-    // disable the secret indicators while the first stage is selected.
+    /**
+     * Styles each indicator button as won, open, or locked.
+     *
+     * The European release does not hide or disable the secret indicators while the first stage is
+     * selected.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a2d58
+     * @ghidraAddress PAL: 0x003d5e60
+     */
     void RefreshIndicators(int bStageLocked);
 
-    // NTSC-U/C: 0x003a3238, PAL: 0x003d63d0
-    // Shows or hides the level texts and the two status meshes.
+    /**
+     * Shows or hides the level texts and the two status meshes.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a3238
+     * @ghidraAddress PAL: 0x003d63d0
+     */
     void ShowLevelTexts(int nShowing);
 
-    // NTSC-U/C: 0x003a3310, PAL: 0x003d64a8
-    // Shows the stage warning in place of the television, or the reverse.
+    /**
+     * Shows the stage warning in place of the television, or the reverse.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a3310
+     * @ghidraAddress PAL: 0x003d64a8
+     */
     void ShowWarning(bool bShow);
 
-    // NTSC-U/C: 0x003a3510, PAL: 0x003d66d0
-    // Colours the television and the level texts for a locked, open, or won level.
+    /**
+     * Colours the television and the level texts for a locked, open, or won level.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a3510
+     * @ghidraAddress PAL: 0x003d66d0
+     */
     void StyleLevel(int bStageLocked, const HxStr &levelName);
 
-    // NTSC-U/C: 0x003a3c68, PAL: 0x003d6f30
-    // Fills the level texts for the selected level.
+    /**
+     * Fills the level texts for the selected level.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a3c68
+     * @ghidraAddress PAL: 0x003d6f30
+     */
     void ShowLevelDetails();
 
-    // NTSC-U/C: 0x003a4438, PAL: 0x003d78b0
-    // Moves the highlight to the selected stage's arrow buttons.
+    /**
+     * Moves the highlight to the selected stage's arrow buttons.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a4438
+     * @ghidraAddress PAL: 0x003d78b0
+     */
     void UpdateArrows();
 
-    // NTSC-U/C: 0x003a4640, PAL: 0x003d7af8
-    // Starts the logo and label loads for the selected level.
+    /**
+     * Starts the logo and label loads for the selected level.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a4640
+     * @ghidraAddress PAL: 0x003d7af8
+     */
     void LoadLevelTextures();
 
-    // NTSC-U/C: 0x003a52f8, PAL: 0x003d89b8
-    // Starts a scroll of the television panel.
+    /**
+     * Starts a scroll of the television panel.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a52f8
+     * @ghidraAddress PAL: 0x003d89b8
+     */
     void StartScroll();
 
-    // NTSC-U/C: 0x003a75a8, PAL: 0x003db260
-    // Copies the level lists from MetSongLists, adding the stage 6 list to the fifth stage.
+    /**
+     * Copies the level lists from MetSongLists, adding the stage 6 list to the fifth stage.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a75a8
+     * @ghidraAddress PAL: 0x003db260
+     */
     void RebuildLevelLists();
 
-    // NTSC-U/C: 0x003a79f0, PAL: 0x003db6d0
-    // Records which of the two secret levels are open.
+    /**
+     * Records which of the two secret levels are open.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a79f0
+     * @ghidraAddress PAL: 0x003db6d0
+     */
     void UpdateSecretLevels(int bUnlockAll);
 
-    // NTSC-U/C: 0x003a7f38, PAL: 0x003dbc38
-    // Opens or closes each stage and selects the first stage and level still to play.
+    /**
+     * Opens or closes each stage and selects the first stage and level still to play.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003a7f38
+     * @ghidraAddress PAL: 0x003dbc38
+     */
     void SetUpStages(int bUnlockAll);
 
-    // NTSC-U/C: 0x003aebb0, PAL: 0x003e2b80
-    // Reports whether a persona has beaten a stage, at the difficulty in a game and at any
-    // difficulty otherwise. IsLevelLocked() expands it inline, and this out-of-line copy has no
-    // caller.
+    /**
+     * Reports whether a persona has beaten a stage, at the difficulty in a game and at any
+     * difficulty otherwise.
+     *
+     * IsLevelLocked() expands it inline, and this out-of-line copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003aebb0
+     * @ghidraAddress PAL: 0x003e2b80
+     */
     int IsStageBeaten(CampaignStats &stats, int nDifficulty, int nStage);
 
-    // NTSC-U/C: 0x003aec70, PAL: 0x003e2c40
-    // Shows or hides every indicator button.
+    /**
+     * Shows or hides every indicator button.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003aec70
+     * @ghidraAddress PAL: 0x003e2c40
+     */
     void ShowIndicators(int nShowing);
 
-    // NTSC-U/C: 0x003aed00, PAL: 0x003e2cd0
-    // Reports whether a stage and its recorded level are open. Slots 19 and 20 expand it inline,
-    // and this out-of-line copy has no caller.
+    /**
+     * Reports whether a stage and its recorded level are open.
+     *
+     * Slots 19 and 20 expand it inline, and this out-of-line copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x003aed00
+     * @ghidraAddress PAL: 0x003e2cd0
+     */
     int IsStageSelectable(int nStage);
 
     Rnd::Button *mLeftArrow;             // +0x8c "ss_left_0%d.but" for the selected stage

@@ -27,7 +27,6 @@ static const char *const kMasterScriptPath = "Global/GrvScript.py";
 // Number of arguments hxutl.traceback_str takes.
 static const int kTracebackArgCount = 2;
 
-// NTSC-U/C: 0x005072e8, PAL: 0x005461e8
 PyShell::PyShell() {
     try {
         Py::Module main(HxStr("__main__"));
@@ -66,7 +65,6 @@ PyShell::PyShell() {
 // open, and the call is written here because nothing in the image establishes that class.
 PyShell::~PyShell() = default;
 
-// NTSC-U/C: 0x00508ca8, PAL: 0x00547e08
 Py::Object PyShell::Eval(const HxStr &source, int nStartSymbol) {
     char *pszSource = const_cast<char *>(source.mStr != nullptr ? source.mStr : g_szEmptyString);
     PyObject *pResult = PyRun_String(pszSource, nStartSymbol, mDict.mPtr, mDict.mPtr);
@@ -76,7 +74,6 @@ Py::Object PyShell::Eval(const HxStr &source, int nStartSymbol) {
     return Py::Object(Py::FromAPI(pResult).mPtr);
 }
 
-// NTSC-U/C: 0x00508de8, PAL: 0x00547f48
 void PyShell::RunMasterInitScript() {
     HxStr path = GetFreqRoot();
     path += kMasterScriptPath;
@@ -89,7 +86,6 @@ void PyShell::RunMasterInitScript() {
     }
 }
 
-// NTSC-U/C: 0x00507f58, PAL: 0x00547018
 void PyShell::ReportError(const HxStr &context, int bWithTraceback) {
     HxStr message;
     PyObject *pType = nullptr;

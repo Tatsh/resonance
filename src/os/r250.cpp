@@ -29,7 +29,6 @@ int g_nR250Index = 0;
 // NTSC-U/C: 0x0071c8e4, PAL: 0x00760824
 int g_nR250LagIndex = kR250Lag;
 
-// NTSC-U/C: 0x0052d038, PAL: 0x0056d6c8
 void SeedR250(int nSeed) {
     unsigned int nValue = static_cast<unsigned int>(nSeed);
     for (int i = 0; i < kR250TableSize; ++i) {
@@ -42,7 +41,6 @@ void SeedR250(int nSeed) {
     g_nR250LagIndex = kR250Lag;
 }
 
-// NTSC-U/C: 0x0052cfd0, PAL: 0x0056d660
 int NextR250() {
     const int nValue = g_aR250Table[g_nR250Index] ^ g_aR250Table[g_nR250LagIndex];
     g_aR250Table[g_nR250Index] = nValue;
@@ -55,12 +53,10 @@ int NextR250() {
     return nValue;
 }
 
-// NTSC-U/C: 0x0052d098, PAL: 0x0056d728
 int RandomInt(int nLow, int nHigh) {
     return nLow + (NextR250() % (nHigh - nLow));
 }
 
-// NTSC-U/C: 0x0052d0e0, PAL: 0x0056d770
 float RandomFloat() {
     return static_cast<float>(NextR250() & kFloatBitsMask) * kFloatScale;
 }

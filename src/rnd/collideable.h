@@ -220,8 +220,12 @@ protected:
     void ReleaseCollidesRefs();
 
 private:
-    // NTSC-U/C: 0x005029b8, PAL: 0x005417c8
-    // Only Copy() and Load() invoke this, and both inline it.
+    /**
+     * Only Copy() and Load() invoke this, and both inline it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x005029b8
+     * @ghidraAddress PAL: 0x005417c8
+     */
     void AcquireCollidesRefs();
 
     // The collideables this one hit-tests after itself, each of which registers this object as a

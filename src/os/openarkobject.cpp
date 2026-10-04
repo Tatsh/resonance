@@ -90,7 +90,6 @@ OpenArkObject::~OpenArkObject() {
     }
 }
 
-// NTSC-U/C: 0x00559858, PAL: 0x0059a9b0
 int OpenArkObject::Open(const char *pszPath) {
     HxStr strName(nullptr);
     HxStr strPath(pszPath);
@@ -202,7 +201,6 @@ int OpenArkObject::Open(const char *pszPath) {
     return 1;
 }
 
-// NTSC-U/C: 0x00559f70, PAL: 0x0059b180
 int OpenArkObject::Close(const char *pszPath) {
     unsigned nArk = 0;
     while (nArk < g_apMountedArks.size()) {
@@ -235,7 +233,6 @@ int OpenArkObject::Close(const char *pszPath) {
     return 1;
 }
 
-// NTSC-U/C: 0x0055a1a0, PAL: 0x0059b3c0
 int EraseArkStream(int nHandle) {
     for (unsigned i = 0; i < gOpenArkFileTable.size(); ++i) {
         if (gOpenArkFileTable[i].mHandle == nHandle) {
@@ -249,18 +246,15 @@ int EraseArkStream(int nHandle) {
 // NTSC-U/C: 0x00725e88, PAL: 0x00769b28
 int gOpenFileIndex = 1;
 
-// NTSC-U/C: 0x0055c158, PAL: 0x0059d378
 ArkStream *LookupOpenFile(int nHandle) {
     return FindStreamRecord(nHandle);
 }
 
-// NTSC-U/C: 0x0055be80, PAL: 0x0059d0a0
 ArkFileEntry *FindOpenFileInArk(int nHandle) {
     const ArkStream *pStream = FindStreamRecord(nHandle);
     return (pStream != nullptr) ? pStream->mEntry : nullptr;
 }
 
-// NTSC-U/C: 0x0055bf88, PAL: 0x0059d1a8
 int FindOpenFileInArkTrueSize(int nStream) {
     const ArkStream *pStream = FindStreamRecord(nStream);
     const ArkFileEntry *pEntry = (pStream != nullptr) ? pStream->mEntry : nullptr;
@@ -270,7 +264,6 @@ int FindOpenFileInArkTrueSize(int nStream) {
     return pEntry->mSize;
 }
 
-// NTSC-U/C: 0x0055c000, PAL: 0x0059d220
 int GetArkfileIdFromFileFd(int nHandle) {
     const ArkStream *pStream = LookupOpenFile(nHandle);
     if (pStream == nullptr) {
@@ -279,7 +272,6 @@ int GetArkfileIdFromFileFd(int nHandle) {
     return pStream->mFile;
 }
 
-// NTSC-U/C: 0x0055c028, PAL: 0x0059d248
 int ArkfileGetCurrAbsOffset(int nStream) {
     const ArkStream *pStream = LookupOpenFile(nStream);
     if (pStream == nullptr) {
@@ -288,7 +280,6 @@ int ArkfileGetCurrAbsOffset(int nStream) {
     return pStream->mArkPosition;
 }
 
-// NTSC-U/C: 0x0055bd38, PAL: 0x0059cf58
 int SeekArkStream(int nStream, int nOffset, int nOrigin) {
     ArkStream *pStream = LookupOpenFile(nStream);
     if (pStream == nullptr) {
@@ -325,7 +316,6 @@ int SeekArkStream(int nStream, int nOffset, int nOrigin) {
     return pStream->mPosition;
 }
 
-// NTSC-U/C: 0x0055a590, PAL: 0x0059b7b0
 int ArkfileGetBaseSector(int nFile) {
     const unsigned nArks = g_apMountedArks.size();
     for (unsigned i = 0; i < nArks; ++i) {
@@ -343,7 +333,6 @@ int ArkfileGetBaseSector(int nFile) {
     return 0;
 }
 
-// NTSC-U/C: 0x0055a410, PAL: 0x0059b630
 int ArkfileLogicalToPhysicalSector(int nFile, int nSector) {
     for (unsigned i = 0; i < g_apMountedArks.size(); ++i) {
         OpenArkObject *pArk = g_apMountedArks[i];
@@ -379,18 +368,15 @@ int ArkfileLogicalToPhysicalSector(int nFile, int nSector) {
     return nSector;
 }
 
-// NTSC-U/C: 0x0055c400, PAL: 0x0059d620
 int OpenStreamByPath(const char *pszPath) {
     sceCdSync(SCECdBlock);
     return sceOpen(pszPath, kOpenReadOnly);
 }
 
-// NTSC-U/C: 0x0055c438, PAL: 0x0059d658
 void CloseLoadFile(int nFile) {
     sceClose(nFile);
 }
 
-// NTSC-U/C: 0x0055c498, PAL: 0x0059d6b8
 void ReadStreamChunk(int nFile, int nSector, void *pBuffer, unsigned nLength) {
     // Yes, the binary maps the chunk again although ReadArkStreamThroughCache() already has.
     const int nPhysical = ArkfileLogicalToPhysicalSector(nFile, nSector);
@@ -399,7 +385,6 @@ void ReadStreamChunk(int nFile, int nSector, void *pBuffer, unsigned nLength) {
     sceRead(nFile, pBuffer, nLength);
 }
 
-// NTSC-U/C: 0x0055c340, PAL: 0x0059d560
 short HashArkString(const char *pszName) {
     unsigned short nHash = 0;
     int nShift = 0;
@@ -410,7 +395,6 @@ short HashArkString(const char *pszName) {
     return static_cast<short>(nHash);
 }
 
-// NTSC-U/C: 0x0055c050, PAL: 0x0059d270
 ArkFileEntry *OpenArkObject::FindFileEntry(short nNameHash,
                                            short nRelPathHash,
                                            const char *pszName,
@@ -427,7 +411,6 @@ ArkFileEntry *OpenArkObject::FindFileEntry(short nNameHash,
     return nullptr;
 }
 
-// NTSC-U/C: 0x0055a868, PAL: 0x0059ba88
 int OpenArkObject::MapPathToArkIndex(const char *pszPath, char *pszName, char *pszRelPath) {
     if (pszPath[0] == '/') {
         return -1;
@@ -470,7 +453,6 @@ int OpenArkObject::MapPathToArkIndex(const char *pszPath, char *pszName, char *p
     return -1;
 }
 
-// NTSC-U/C: 0x0055a6d0, PAL: 0x0059b8f0
 ArkFileEntry *OpenArkObject::FindFileEntryByPath(const char *pszPath,
                                                  char *pszName,
                                                  char *pszRelPath,
@@ -511,7 +493,6 @@ ArkFileEntry *OpenArkObject::FindFileEntryByPath(const char *pszPath,
     return nullptr;
 }
 
-// NTSC-U/C: 0x0055c288, PAL: 0x0059d4a8
 int OpenArkObject::OpenStream(ArkFileEntry *pEntry) {
     ArkStream stream;
     stream.mArkPosition = pEntry->mSector * mSectorSize + pEntry->mSectorOffset;
@@ -523,7 +504,6 @@ int OpenArkObject::OpenStream(ArkFileEntry *pEntry) {
     return stream.mHandle;
 }
 
-// NTSC-U/C: 0x0055c1b8, PAL: 0x0059d3d8
 OpenArkObject *ArkStream::FindArk() const {
     const int nArks = g_apMountedArks.size();
     for (int i = 0; i < nArks; ++i) {
@@ -534,7 +514,6 @@ OpenArkObject *ArkStream::FindArk() const {
     return nullptr;
 }
 
-// NTSC-U/C: 0x0055bce8, PAL: 0x0059cf08
 int OpenFileInArk(const char *pszPath) {
     char szName[kArkNameBufferSize];
     char szRelPath[kArkRelPathBufferSize];
@@ -546,7 +525,6 @@ int OpenFileInArk(const char *pszPath) {
     return g_apMountedArks[nArk]->OpenStream(pEntry);
 }
 
-// NTSC-U/C: 0x0055bee0, PAL: 0x0059d100
 int GetArkFileLengthByPath(const char *pszPath) {
     char szName[kArkNameBufferSize];
     char szRelPath[kArkRelPathBufferSize];
@@ -558,7 +536,6 @@ int GetArkFileLengthByPath(const char *pszPath) {
     return pEntry->mLength;
 }
 
-// NTSC-U/C: 0x0055a280, PAL: 0x0059b4a0
 int ReadArkStreamThroughCache(int nHandle, void *pBuffer, unsigned nBytes) {
     ArkStream *pStream = LookupOpenFile(nHandle);
     if (pStream == nullptr) {
@@ -605,7 +582,6 @@ int ReadArkStreamThroughCache(int nHandle, void *pBuffer, unsigned nBytes) {
     return nBytes;
 }
 
-// NTSC-U/C: 0x0055aa38, PAL: 0x0059bc58
 void OpenArkObject::PrintHeader() const {
     std::cout << "================== OpenArkObject Header ===================" << std::endl
               << " sig             " << mSig << std::endl
@@ -623,7 +599,6 @@ void OpenArkObject::PrintHeader() const {
               << std::endl;
 }
 
-// NTSC-U/C: 0x0055ac30, PAL: 0x0059be50
 void OpenArkObject::PrintRelPaths() const {
     std::cout << "============== OpenArkObject Relative Paths ===============" << std::endl;
     for (int i = 0; i < mNumPaths; ++i) {
@@ -634,7 +609,6 @@ void OpenArkObject::PrintRelPaths() const {
     std::cout << kArkDumpRule << std::endl << std::endl;
 }
 
-// NTSC-U/C: 0x0055ada0, PAL: 0x0059bfc0
 void OpenArkObject::PrintFiles() const {
     std::cout << "================== OpenArkObject Files ====================" << std::endl;
     for (int i = 0; i < mNumFiles; ++i) {
@@ -649,7 +623,6 @@ void OpenArkObject::PrintFiles() const {
     std::cout << kArkDumpRule << std::endl << std::endl;
 }
 
-// NTSC-U/C: 0x0055afc8, PAL: 0x0059c1e8
 void OpenArkObject::DumpStrings() const {
     std::cout << "================= OpenArkObject Strings ===================" << std::endl
               << " Files: " << std::endl;
@@ -663,7 +636,6 @@ void OpenArkObject::DumpStrings() const {
     std::cout << kArkDumpRule << std::endl << std::endl;
 }
 
-// NTSC-U/C: 0x0055c3a0, PAL: 0x0059d5c0
 void OpenArkObject::PrintAll() const {
     PrintHeader();
     PrintFiles();
@@ -671,12 +643,10 @@ void OpenArkObject::PrintAll() const {
     DumpStrings();
 }
 
-// NTSC-U/C: 0x0055c3e0, PAL: 0x0059d600
 int IoctlFile(int nFile, int nRequest, void *pArg) {
     return sceIoctl(nFile, nRequest, pArg);
 }
 
-// NTSC-U/C: 0x0055c458, PAL: 0x0059d678
 void WaitForFileIdle(int nFile) {
     if (nFile < 0) {
         return;
@@ -691,7 +661,6 @@ void WaitForFileIdle(int nFile) {
 const char *const g_apSessionArkPaths[kSessionArkCount] = {
     "ark/root.ark", "ark/levels.ark", "ark/arenas.ark"};
 
-// NTSC-U/C: 0x004dfb20, PAL: 0x0051e280
 int InitArk() {
     if (UsingArkFiles() == 0) {
         return 1;
@@ -706,7 +675,6 @@ int InitArk() {
     return 1;
 }
 
-// NTSC-U/C: 0x004dfbd8, PAL: 0x0051e338
 int CloseArk() {
     int nClosed = 0;
     if (UsingArkFiles()) {

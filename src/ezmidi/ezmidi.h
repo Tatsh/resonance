@@ -38,6 +38,8 @@ enum {
  * Enable the SPU2 DMA interrupts and serve #EZMIDI_RPC_SERVER. It does not return.
  *
  * @return Zero.
+ * @ghidraAddress NTSC-U/C: 0x00d0
+ * @ghidraAddress PAL: 0x00d0
  */
 int sce_midi_loop(void);
 

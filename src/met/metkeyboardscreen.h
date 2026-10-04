@@ -317,187 +317,374 @@ public:
     virtual void ResolveContainerViews();
 
 private:
-    // NTSC-U/C: 0x00282ef0, PAL: 0x0029dce8
-    // Apply one key by name. The named keys go to their handlers, the twelve function keys insert
-    // their macro, and every other name is typed as its first character.
+    /**
+     * Apply one key by name.
+     *
+     * The named keys go to their handlers, the twelve function keys insert their macro, and every
+     * other name is typed as its first character.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00282ef0
+     * @ghidraAddress PAL: 0x0029dce8
+     */
     void DispatchKeyName(const HxStr &name);
 
 #ifdef VIDEO_STANDARD_PAL
-    // PAL: 0x0029c770
-    // Fill the named key labels from the European text table. The caption beside each of the
-    // three wide keys moves right by the growth of its label's end. ResolveContainerViews() runs
-    // it last. The name is inferred.
+    /**
+     * Fill the named key labels from the European text table.
+     *
+     * The caption beside each of the three wide keys moves right by the growth of its label's end.
+     * ResolveContainerViews() runs it last. The name is inferred.
+     *
+     * @ghidraAddress PAL: 0x0029c770
+     */
     void LocalizeKeyLabels();
 #endif
 
-    // NTSC-U/C: 0x00283f38, PAL: 0x0029eee8
-    // Highlight the selected key's button and show its macro when it is a function key. Nothing
-    // happens on a function key while macros are disabled.
+    /**
+     * Highlight the selected key's button and show its macro when it is a function key.
+     *
+     * Nothing happens on a function key while macros are disabled.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00283f38
+     * @ghidraAddress PAL: 0x0029eee8
+     */
     void HighlightCurrentKey();
 
-    // NTSC-U/C: 0x00284788, PAL: 0x0029f948
-    // Step the selection right until the key name changes, wrapping within the row.
+    /**
+     * Step the selection right until the key name changes, wrapping within the row.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00284788
+     * @ghidraAddress PAL: 0x0029f948
+     */
     void MoveRight();
 
-    // NTSC-U/C: 0x002848e0, PAL: 0x0029fae0
-    // Step the selection left until the key name changes, wrapping within the row.
+    /**
+     * Step the selection left until the key name changes, wrapping within the row.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002848e0
+     * @ghidraAddress PAL: 0x0029fae0
+     */
     void MoveLeft();
 
-    // NTSC-U/C: 0x00284a30, PAL: 0x0029fc70
-    // Step the selection down until the key name changes, wrapping within the column, and past
-    // the function keys while macros are disabled.
+    /**
+     * Step the selection down until the key name changes, wrapping within the column, and past the
+     * function keys while macros are disabled.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00284a30
+     * @ghidraAddress PAL: 0x0029fc70
+     */
     void MoveDown();
 
-    // NTSC-U/C: 0x00284bb0, PAL: 0x0029fe28
-    // Step the selection up, as MoveDown() steps it down.
+    /**
+     * Step the selection up, as MoveDown() steps it down.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00284bb0
+     * @ghidraAddress PAL: 0x0029fe28
+     */
     void MoveUp();
 
-    // NTSC-U/C: 0x00284ec0, PAL: 0x002a01c0
-    // Show the macro of a function key beside the caret, or report that it does not fit.
+    /**
+     * Show the macro of a function key beside the caret, or report that it does not fit.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00284ec0
+     * @ghidraAddress PAL: 0x002a01c0
+     */
     void ShowMacro(const HxStr &key);
 
-    // NTSC-U/C: 0x002850b8, PAL: 0x002a0428
-    // Append the default macro of one function key to the text when it fits.
+    /**
+     * Append the default macro of one function key to the text when it fits.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002850b8
+     * @ghidraAddress PAL: 0x002a0428
+     */
     void InsertMacro(int nIndex);
 
-    // NTSC-U/C: 0x00285378, PAL: 0x002a0748
-    // Inline, with this out-of-line copy.
-    // Find the button of a key. A single letter uses its case-specific button.
+    /**
+     * Find the button of a key.
+     *
+     * A single letter uses its case-specific button. Callers inline the body, and this routine is
+     * the out-of-line copy.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00285378
+     * @ghidraAddress PAL: 0x002a0748
+     */
     Rnd::Button *FindKeyButton(const HxStr &key);
 
-    // NTSC-U/C: 0x00285b08, PAL: 0x002a10c8
-    // Toggle shift, which caps also releases.
+    /**
+     * Toggle shift, which caps also releases.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00285b08
+     * @ghidraAddress PAL: 0x002a10c8
+     */
     void OnShift();
 
-    // NTSC-U/C: 0x00285e28, PAL: 0x002a13e8
-    // Delete the character before the caret.
+    /**
+     * Delete the character before the caret.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00285e28
+     * @ghidraAddress PAL: 0x002a13e8
+     */
     void OnBackspace();
 
-    // NTSC-U/C: 0x00285fa0, PAL: 0x002a1560
-    // Move the caret left.
+    /**
+     * Move the caret left.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00285fa0
+     * @ghidraAddress PAL: 0x002a1560
+     */
     void OnCaretLeft();
 
-    // NTSC-U/C: 0x00286120, PAL: 0x002a16e0
-    // Move the caret right.
+    /**
+     * Move the caret right.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00286120
+     * @ghidraAddress PAL: 0x002a16e0
+     */
     void OnCaretRight();
 
-    // NTSC-U/C: 0x002862b0, PAL: 0x002a1870
-    // Toggle caps lock, which also releases shift.
+    /**
+     * Toggle caps lock, which also releases shift.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002862b0
+     * @ghidraAddress PAL: 0x002a1870
+     */
     void OnCaps();
 
-    // NTSC-U/C: 0x002865a0, PAL: 0x002a1b60
-    // Insert three spaces when they fit.
+    /**
+     * Insert three spaces when they fit.
+     *
+     * @ghidraAddress NTSC-U/C: 0x002865a0
+     * @ghidraAddress PAL: 0x002a1b60
+     */
     void OnTab();
 
-    // NTSC-U/C: 0x00286850, PAL: 0x002a1ef8
-    // Insert one space when it fits.
+    /**
+     * Insert one space when it fits.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00286850
+     * @ghidraAddress PAL: 0x002a1ef8
+     */
     void OnSpace();
 
-    // NTSC-U/C: 0x00286ab0, PAL: 0x002a21c0
-    // Delete the character at the caret.
+    /**
+     * Delete the character at the caret.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00286ab0
+     * @ghidraAddress PAL: 0x002a21c0
+     */
     void OnDelete();
 
-    // NTSC-U/C: 0x00286c10, PAL: 0x002a2320
-    // Insert the first character of a key name when it fits.
+    /**
+     * Insert the first character of a key name when it fits.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00286c10
+     * @ghidraAddress PAL: 0x002a2320
+     */
     void OnCharacter(const HxStr &key);
 
-    // NTSC-U/C: 0x0028c3e8, PAL: 0x002a80d0
-    // Inline, with this out-of-line copy.
-    // Show the caret beside the character it precedes.
+    /**
+     * Show the caret beside the character it precedes.
+     *
+     * Callers inline the body, and this routine is the out-of-line copy.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028c3e8
+     * @ghidraAddress PAL: 0x002a80d0
+     */
     void UpdateCursor();
 
-    // NTSC-U/C: 0x0028c7c0, PAL: 0x002a84c0
-    // Hide the caret and restart its blink.
+    /**
+     * Hide the caret and restart its blink.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028c7c0
+     * @ghidraAddress PAL: 0x002a84c0
+     */
     void ResetCaret();
 
-    // NTSC-U/C: 0x0028c828, PAL: 0x002a8528
-    // Empty in the image. Slot 36 calls it last. The title is inferred.
+    /**
+     * Empty in the image.
+     *
+     * Slot 36 calls it last. The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028c828
+     * @ghidraAddress PAL: 0x002a8528
+     */
     void OnDeparted();
 
-    // NTSC-U/C: 0x0028c870, PAL: 0x002a8570
-    // Inline, with this out-of-line copy.
-    // The name of the selected key.
+    /**
+     * The name of the selected key.
+     *
+     * Callers inline the body, and this routine is the out-of-line copy.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028c870
+     * @ghidraAddress PAL: 0x002a8570
+     */
     HxStr *CurrentKey();
 
-    // NTSC-U/C: 0x0028c898, PAL: 0x002a8598
-    // Inline, with this out-of-line copy.
-    // Put a key's button back in its resting state, latched for an active shift or caps key.
+    /**
+     * Put a key's button back in its resting state, latched for an active shift or caps key.
+     *
+     * Callers inline the body, and this routine is the out-of-line copy.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028c898
+     * @ghidraAddress PAL: 0x002a8598
+     */
     void UnhighlightKey(const HxStr &key);
 
-    // NTSC-U/C: 0x0028c9c8, PAL: 0x002a86c8
-    // Inline, with this out-of-line copy and no call site.
-    // Remove one character of the text.
+    /**
+     * Remove one character of the text.
+     *
+     * Callers inline the body, and this out-of-line copy has no call site.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028c9c8
+     * @ghidraAddress PAL: 0x002a86c8
+     */
     void RemoveChar(int nIndex);
 
-    // NTSC-U/C: 0x0028c9e8, PAL: 0x002a86e8
-    // Inline, with this out-of-line copy and no call site.
-    // Append to the text.
+    /**
+     * Append to the text.
+     *
+     * Callers inline the body, and this out-of-line copy has no call site.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028c9e8
+     * @ghidraAddress PAL: 0x002a86e8
+     */
     void AppendText(const HxStr &text);
 
-    // NTSC-U/C: 0x0028ca08, PAL: 0x002a8708
-    // Inline, with this out-of-line copy and no call site.
-    // Insert into the text at a position, or append past its end.
+    /**
+     * Insert into the text at a position, or append past its end.
+     *
+     * Callers inline the body, and this out-of-line copy has no call site.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028ca08
+     * @ghidraAddress PAL: 0x002a8708
+     */
     void InsertText(const HxStr &text, unsigned nPos);
 
-    // NTSC-U/C: 0x0028ca58, PAL: 0x002a8758
-    // Inline, with this out-of-line copy.
-    // The horizontal position the end of the text is laid out at, truncated.
+    /**
+     * The horizontal position the end of the text is laid out at, truncated.
+     *
+     * Callers inline the body, and this routine is the out-of-line copy.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028ca58
+     * @ghidraAddress PAL: 0x002a8758
+     */
     int TextEndX();
 
-    // NTSC-U/C: 0x0028caf8, PAL: 0x002a87f8
-    // Inline, with this out-of-line copy.
-    // Clear the macro caption.
+    /**
+     * Clear the macro caption.
+     *
+     * Callers inline the body, and this routine is the out-of-line copy.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028caf8
+     * @ghidraAddress PAL: 0x002a87f8
+     */
     void HideMacro();
 
-    // NTSC-U/C: 0x0028cc50, PAL: 0x002a8978
-    // Whether a key is one of the twelve function keys.
+    /**
+     * Whether a key is one of the twelve function keys.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028cc50
+     * @ghidraAddress PAL: 0x002a8978
+     */
     bool IsMacroKey(const HxStr &key);
 
-    // NTSC-U/C: 0x0028ccb8, PAL: 0x002a89e0
-    // Record the key a press is applying.
+    /**
+     * Record the key a press is applying.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028ccb8
+     * @ghidraAddress PAL: 0x002a89e0
+     */
     void SetPendingCommand(const HxStr &key);
 
-    // NTSC-U/C: 0x0028cd00, PAL: 0x002a8a38
-    // Inline, with this out-of-line copy.
-    // Replace the shared ticker text with the argument and repost it at the renderer's current
-    // time, doing nothing when the text has not changed. The text is a function-local static
-    // HxStr at 0x00891b18 behind the guard flag at 0x006a7ce0, and 0x0028ccd8 is its destructor.
+    /**
+     * Replace the shared ticker text with the argument and repost it at the renderer's current
+     * time, doing nothing when the text has not changed.
+     *
+     * The text is a function-local static HxStr at 0x00891b18 behind the guard flag at 0x006a7ce0,
+     * and 0x0028ccd8 is its destructor. Callers inline the body, and this routine is the
+     * out-of-line copy.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028cd00
+     * @ghidraAddress PAL: 0x002a8a38
+     */
     void SetTickerText(const HxStr &text);
 
-    // NTSC-U/C: 0x0028cda8, PAL: 0x002a8ae0
-    // Commit the text and depart.
+    /**
+     * Commit the text and depart.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028cda8
+     * @ghidraAddress PAL: 0x002a8ae0
+     */
     void OnEnter();
 
     // Press a key as the controller's shortcut commands do. Inline at each of HandleCommand()'s
     // five sites, with no out-of-line copy.
     void PressKey(const HxStr &key);
 
-    // NTSC-U/C: 0x0028ce70, PAL: 0x002a8ba8
-    // Insert the macro of one function key and move the caret past it.
+    /**
+     * Insert the macro of one function key and move the caret past it.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028ce70
+     * @ghidraAddress PAL: 0x002a8ba8
+     */
     void OnMacro(int nIndex);
 
-    // NTSC-U/C: 0x0028c830, PAL: 0x002a8530
-    // Assigns the entered text. Open() is the one caller.
+    /**
+     * Assigns the entered text.
+     *
+     * Open() is the one caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028c830
+     * @ghidraAddress PAL: 0x002a8530
+     */
     void SetText(const HxStr &text);
 
-    // NTSC-U/C: 0x0028c850, PAL: 0x002a8550
-    // Assigns the prompt. Open() is the one caller.
+    /**
+     * Assigns the prompt.
+     *
+     * Open() is the one caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028c850
+     * @ghidraAddress PAL: 0x002a8550
+     */
     void SetPrompt(const HxStr &prompt);
 
-    // NTSC-U/C: 0x0028cad0, PAL: 0x002a87d0
-    // Records the receiver of the committed text. Open() is the one caller.
+    /**
+     * Records the receiver of the committed text.
+     *
+     * Open() is the one caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028cad0
+     * @ghidraAddress PAL: 0x002a87d0
+     */
     void SetUser(MetKBUser *pUser);
 
-    // NTSC-U/C: 0x0028c3e0, PAL: 0x002a80c8
-    // Records the one controller the keyboard accepts. Open() is the one caller.
+    /**
+     * Records the one controller the keyboard accepts.
+     *
+     * Open() is the one caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028c3e0
+     * @ghidraAddress PAL: 0x002a80c8
+     */
     void SetSelector(int nSelector);
 
-    // NTSC-U/C: 0x0028cad8, PAL: 0x002a87d8
-    // Assigns the ticker text slot 33 posts. Open() is the one caller.
+    /**
+     * Assigns the ticker text slot 33 posts.
+     *
+     * Open() is the one caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028cad8
+     * @ghidraAddress PAL: 0x002a87d8
+     */
     void SetTicker(const HxStr &ticker);
 
-    // NTSC-U/C: 0x0028cab0, PAL: 0x002a87b0
-    // Assigns the registry key of the screen slot 36 departs to.
+    /**
+     * Assigns the registry key of the screen slot 36 departs to.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0028cab0
+     * @ghidraAddress PAL: 0x002a87b0
+     */
     void SetReturnScreen(const HxStr &returnScreen);
 
     // The macro list the keyboard offers. Open() stores the request's list here, or the default

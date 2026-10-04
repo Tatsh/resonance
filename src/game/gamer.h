@@ -251,62 +251,117 @@ public:
     void AdvanceAt(Sch::Tick position);
 
 private:
-    // NTSC-U/C: 0x00116920, PAL: 0x00116dd8
-    // Outside jam or in a network game, and outside the tutorial, ignores the message. Otherwise
-    // advances at the message's position unless the player's GetInputSlot() is non-zero.
+    /**
+     * Outside jam or in a network game, and outside the tutorial, ignores the message.
+     *
+     * Otherwise advances at the message's position unless the player's GetInputSlot() is non-zero.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00116920
+     * @ghidraAddress PAL: 0x00116dd8
+     */
     void OnMsg(const AdvanceSectionMsg &msg);
 
-    // NTSC-U/C: 0x001169a8, PAL: 0x00116e60
-    // Outside jam and before the game ends, passes the message to the capturing
-    // player, then in a solo game outside the tutorial runs FreeTracksAfterCapture().
+    /**
+     * Outside jam and before the game ends, passes the message to the capturing player, then in a
+     * solo game outside the tutorial runs FreeTracksAfterCapture().
+     *
+     * @ghidraAddress NTSC-U/C: 0x001169a8
+     * @ghidraAddress PAL: 0x00116e60
+     */
     void OnPhraseCaptured(PhraseCapturedMsg *pMsg);
 
-    // NTSC-U/C: 0x00111080, PAL: 0x001114e0
-    // For a non-catch track, gives the player an eight-bar freestyle span, frees the
-    // track for it, invalidates the track's seeker, marks the message handled, and sends a
-    // FreestyleFXMsg.
+    /**
+     * For a non-catch track, gives the player an eight-bar freestyle span, frees the track for it,
+     * invalidates the track's seeker, marks the message handled, and sends a FreestyleFXMsg.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00111080
+     * @ghidraAddress PAL: 0x001114e0
+     */
     void OnEnableFreestyle(EnableFreestyleMsg *pMsg);
 
-    // NTSC-U/C: 0x00110e60, PAL: 0x001112c0
-    // In jam, toggles playback at the message's bar, switching the input bindings
-    // and the play map, and announces the change in a PlaybackToggleMsg.
+    /**
+     * In jam, toggles playback at the message's bar, switching the input bindings and the play map,
+     * and announces the change in a PlaybackToggleMsg.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00110e60
+     * @ghidraAddress PAL: 0x001112c0
+     */
     void OnPlaybackMode(PlaybackModeMsg *pMsg);
 
-    // NTSC-U/C: 0x00111230, PAL: 0x00111690
-    // Sends a CripplePacket naming every other player on the message's track, and
-    // marks the message handled when there is one.
+    /**
+     * Sends a CripplePacket naming every other player on the message's track, and marks the message
+     * handled when there is one.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00111230
+     * @ghidraAddress PAL: 0x00111690
+     */
     void OnCripple(CrippleMsg *pMsg);
 
-    // NTSC-U/C: 0x00112838, PAL: 0x00112c98
-    // Posts a GamerCmd for the bar on the song clock under mCommand, one tick before
-    // the bar starts unless the bar starts at zero. The title is inferred.
+    /**
+     * Posts a GamerCmd for the bar on the song clock under mCommand, one tick before the bar starts
+     * unless the bar starts at zero.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00112838
+     * @ghidraAddress PAL: 0x00112c98
+     */
     void ScheduleBar(int nBar);
 
-    // NTSC-U/C: 0x001116c8, PAL: 0x00111b28
-    // Sends an AdvanceSectionToggleMsg for the bar, then an InvalidateTrackMsg from the following
-    // step's mapped position through mInvalidateBars further and an InvalidateSeekerMsg through
-    // each track's source, and runs script template 1013. The title is inferred.
+    /**
+     * Sends an AdvanceSectionToggleMsg for the bar, then an InvalidateTrackMsg from the following
+     * step's mapped position through mInvalidateBars further and an InvalidateSeekerMsg through
+     * each track's source, and runs script template 1013.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001116c8
+     * @ghidraAddress PAL: 0x00111b28
+     */
     void AdvanceTo(int nBar, int nAdvance);
 
-    // NTSC-U/C: 0x00111c90, PAL: 0x001120f0
-    // Sends a TracksOnMsg with the count of catch tracks whose phrase at the bar has
-    // an owner. Returns true when no enabled catch track has an unowned phrase with gems there.
-    // The title is inferred.
+    /**
+     * Sends a TracksOnMsg with the count of catch tracks whose phrase at the bar has an owner.
+     *
+     * Returns true when no enabled catch track has an unowned phrase with gems there. The title is
+     * inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00111c90
+     * @ghidraAddress PAL: 0x001120f0
+     */
     bool SendTracksOn(int nBar);
 
-    // NTSC-U/C: 0x00111e30, PAL: 0x00112290
-    // When SendTracksOn() returns true, frees every non-catch track from mFreeEndBar
-    // to the following step bar and sends a FreestyleFXMsg for each. The title is inferred.
+    /**
+     * When SendTracksOn() returns true, frees every non-catch track from mFreeEndBar to the
+     * following step bar and sends a FreestyleFXMsg for each.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00111e30
+     * @ghidraAddress PAL: 0x00112290
+     */
     bool FreeTracksAfterCapture(int nBar);
 
-    // NTSC-U/C: 0x001118c0, PAL: 0x00111d20
-    // Records every player's score in mStats, sends a WinMsg with the players on the
-    // best score, plays `SND_WIN`, and ends the game. The title is inferred.
+    /**
+     * Records every player's score in mStats, sends a WinMsg with the players on the best score,
+     * plays `SND_WIN`, and ends the game.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001118c0
+     * @ghidraAddress PAL: 0x00111d20
+     */
     void DeclareWinners();
 
-    // NTSC-U/C: 0x00111b78, PAL: 0x00111fd8
-    // Records player 0's score, best streak, and capture ratio in mStats, with
-    // the fraction of the song reached. The title is inferred.
+    /**
+     * Records player 0's score, best streak, and capture ratio in mStats, with the fraction of the
+     * song reached.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00111b78
+     * @ghidraAddress PAL: 0x00111fd8
+     */
     void RecordSoloStats(int bCompleted, int nBar);
 
     // How the game has ended. The constructor starts at kEndStateNone.

@@ -72,81 +72,66 @@ void ForceCdOnlyBoot() {
 
 } // namespace
 
-// NTSC-U/C: 0x0050ef90, PAL: 0x0054e508
 HostMode GetHostMode() {
     return static_cast<HostMode>(g_nHostMode);
 }
 
-// NTSC-U/C: 0x0050efa0, PAL: 0x0054e518
 int UsingArkFiles() {
     return g_nUsingArkFiles;
 }
 
-// NTSC-U/C: 0x0050efb0, PAL: 0x0054e528
 int WarningsEnabled() {
     return g_nWarningsEnabled;
 }
 
-// NTSC-U/C: 0x0050efc0, PAL: 0x0054e538
 int ScreenMessagesEnabled() {
     return g_nScreenMessagesEnabled;
 }
 
-// NTSC-U/C: 0x0050efd0, PAL: 0x0054e548
 int UsingCdMedia() {
     return g_nUsingCdMedia;
 }
 
-// NTSC-U/C: 0x0050ef30, PAL: 0x0054e4a8
 HxStr GetFreqRoot() {
     return HxStr("");
 }
 
-// NTSC-U/C: 0x0050d9f0, PAL: 0x0054cea8
 HxStr MakeFreqPath(const HxStr &name) {
     HxStr path(GetFreqRoot());
     path += name;
     return path;
 }
 
-// NTSC-U/C: 0x0050efe0, PAL: 0x0054e558
 int DebugKeysEnabled() {
     return g_nDebugKeysEnabled;
 }
 
-// NTSC-U/C: 0x0050eff0, PAL: 0x0054e568
 int MidiErrorLogEnabled() {
     return g_nMidiErrorLogEnabled;
 }
 
-// NTSC-U/C: 0x0050f000, PAL: 0x0054e578
 int MemAccountingEnabled() {
     return g_nMemAccountingEnabled;
 }
 
-// NTSC-U/C: 0x0050f010, PAL: 0x0054e588
 int IntroMovieEnabled() {
     return g_nIntroMovieEnabled;
 }
 
 #ifdef VIDEO_STANDARD_PAL
-// PAL: 0x0054e5a8
 int GetLanguage() {
     return g_nLanguage;
 }
 
-// PAL: 0x0054e5b8
 void SetLanguage(int nLanguage) {
     g_nLanguage = nLanguage;
 }
 #endif
 
-// NTSC-U/C: 0x0050ef60, PAL: 0x0054e4d8
 HxStr GetVersionString() {
     return g_versionString;
 }
 
-// NTSC-U/C: 0x0050f030, PAL: 0x0054e5c8
 void ConfigureRetailBoot() {
     g_nHostMode = kHostModeCdOnly;
     g_nIntroMovieEnabled = 1;
@@ -158,7 +143,6 @@ void ConfigureRetailBoot() {
     g_nMemAccountingEnabled = 0;
 }
 
-// NTSC-U/C: 0x0050f080, PAL: 0x0054e618
 void InitBootConfig() {
     ForceCdOnlyBoot();
     InitializeZoneList();
@@ -167,12 +151,10 @@ void InitBootConfig() {
 #endif
 }
 
-// NTSC-U/C: 0x0050f0a8, PAL: 0x0054e650
 void TerminateBootConfig() {
     ReleaseAllZoneSlots();
 }
 
-// NTSC-U/C: 0x0050f0c8, PAL: 0x0054e670
 bool CheckCDFile(const char *pszPath) {
     const int nDescriptor = sceOpen(pszPath, kOpenReadOnly);
     if (nDescriptor < 0) {

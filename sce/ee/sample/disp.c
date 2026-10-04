@@ -113,7 +113,6 @@ static unsigned char *ToUncachedAddress(const void *pAddress) {
     return (unsigned char *)((nAddress & kPhysicalAddressMask) | kUncachedSegment);
 }
 
-// NTSC-U/C: 0x005d2860, PAL: 0x006148a8
 void clearGsMem(int nRed, int nGreen, int nBlue, int nWidth, int nHeight) {
     void *pBuffer = memalign(kPacketAlign, kPacketBufferSize);
     sceDmaChan *pChannel = sceDmaGetChan(SCE_DMA_GIF);
@@ -168,7 +167,6 @@ void clearGsMem(int nRed, int nGreen, int nBlue, int nWidth, int nHeight) {
     free(pBuffer);
 }
 
-// NTSC-U/C: 0x005d2ab8, PAL: 0x00614b00
 void setImageTag(void *pTag, void *pImage, int nField, int nWidth, int nHeight) {
     sceGifPkData packet;
     unsigned char *image = (unsigned char *)pImage;
@@ -238,7 +236,6 @@ void setImageTag(void *pTag, void *pImage, int nField, int nWidth, int nHeight) 
     sceGifPkTerminate(&packet);
 }
 
-// NTSC-U/C: 0x005d2e38, PAL: 0x00614e80
 int vblankHandler(int nCause) {
     (void)nCause;
     sceDmaChan *pChannel = sceDmaGetChan(SCE_DMA_GIF);
@@ -290,7 +287,6 @@ int vblankHandler(int nCause) {
     return 0;
 }
 
-// NTSC-U/C: 0x005d3008, PAL: 0x00615050
 void startDisplay(int nWaitField) {
     // Wait for the field to move off the requested one, so playback starts on its complement.
     while (sceGsSyncV(0) == nWaitField) {
@@ -300,13 +296,11 @@ void startDisplay(int nWaitField) {
     g_endimageCount = 0;
 }
 
-// NTSC-U/C: 0x005d3050, PAL: 0x00615098
 void endDisplay(void) {
     g_isDisplaying = 0;
     g_emptyCount = 0;
 }
 
-// NTSC-U/C: 0x005d3068, PAL: 0x006150b0
 int handler_endimage(int nCause) {
     (void)nCause;
     if (g_frameShown != 0) {
@@ -317,7 +311,6 @@ int handler_endimage(int nCause) {
     return 0;
 }
 
-// NTSC-U/C: 0x0059afa0, PAL: 0x005de438
 int videoCallback(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     (void)pMpeg;
     sceMpegCbDataStr *packet = (sceMpegCbDataStr *)pCallbackData;
@@ -402,7 +395,6 @@ static void AudioCommitCopied(AudioDec *pAudioDec, int nCopied) {
     pAudioDec->put = (pAudioDec->put + nCopied) % pAudioDec->bufferSize;
 }
 
-// NTSC-U/C: 0x0059b0c8, PAL: 0x005de560
 int pcmCallback(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
     sceMpegCbDataStr *packet = (sceMpegCbDataStr *)pCallbackData;
     ReadBuf *readBuffer = (ReadBuf *)pData;

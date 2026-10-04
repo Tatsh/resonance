@@ -328,9 +328,14 @@ protected:
     int mBillboard; // +0xa4
 
 private:
-    // NTSC-U/C: 0x004fcf88, PAL: 0x0053bc70
-    // Marks this object dirty and registers it as a referrer of every mTransList
-    // entry. Copy() invokes it and Load() inlines the same body.
+    /**
+     * Marks this object dirty and registers it as a referrer of every mTransList entry.
+     *
+     * Copy() invokes it and Load() inlines the same body.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004fcf88
+     * @ghidraAddress PAL: 0x0053bc70
+     */
     void AcquireTransRefs();
 
     std::list<Transformable *> mTransList; // +0x04

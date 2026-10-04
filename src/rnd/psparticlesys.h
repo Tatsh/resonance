@@ -67,30 +67,53 @@ protected:
     virtual int DrawShowing();
 
 private:
-    // Submit one GS point per particle from the packed vertices, each with its colour and
-    // position. The point counter advances by the whole vertex count first. DrawShowing() expands
-    // the body, and the out-of-line copy at 0x005ffaf0 has no caller. The body reads no member,
-    // but the copy still receives the object in its first argument register.
+    /**
+     * Submit one GS point per particle from the packed vertices, each with its colour and position.
+     *
+     * The point counter advances by the whole vertex count first. DrawShowing() expands the body,
+     * and the out-of-line copy has no caller. The body reads no member, but the copy still receives
+     * the object in its first argument register.
+     *
+     * @ghidraAddress NTSC-U/C: 0x005ffaf0
+     * @ghidraAddress PAL: 0x00640868
+     */
     void EmitGifPoints(int nVertCount);
 
-    // Submit one GS line per particle from the packed vertex pairs. Each pair yields a two-vertex
-    // line with a colour of its own, and the line counter advances by the whole vertex count
-    // before any of them is examined. 0x005fc570.
+    /**
+     * Submit one GS line per particle from the packed vertex pairs.
+     *
+     * Each pair yields a two-vertex line with a colour of its own, and the line counter advances by
+     * the whole vertex count before any of them is examined.
+     *
+     * @ghidraAddress NTSC-U/C: 0x005fc570
+     * @ghidraAddress PAL: 0x0063d280
+     */
     void EmitGifLines(int nVertCount);
 
-    // Submit one GS sprite per particle from the packed vertex pairs. The first vertex of a pair
-    // is the near corner and the second the far one, and a pair is rejected when the near corner
-    // falls below zero or the far corner passes 0xffff in either axis. A textured sprite sends
-    // three quadwords per vertex, and an untextured one sends the colour and both positions.
-    // NTSC-U/C: 0x005fc6d0, PAL: 0x0063d3e0
+    /**
+     * Submit one GS sprite per particle from the packed vertex pairs.
+     *
+     * The first vertex of a pair is the near corner and the second the far one, and a pair is
+     * rejected when the near corner falls below zero or the far corner passes 0xffff in either
+     * axis. A textured sprite sends three quadwords per vertex, and an untextured one sends the
+     * colour and both positions.
+     *
+     * @ghidraAddress NTSC-U/C: 0x005fc6d0
+     * @ghidraAddress PAL: 0x0063d3e0
+     */
     void EmitGifSprites(int nVertCount);
 
-    // Upload the live list to VU1 as sprite records and call the microprogram. Two quadwords
-    // travel per particle, the colour and the position, and half the size is written into the
-    // fourth word of the position first because a GS sprite takes a centre and a half extent.
-    // A batch closes at 162 particles or at 254 destination quadwords, whichever comes first, and
-    // the first batch enters through MSCAL 0x258 while every batch after it uses MSCNT.
-    // NTSC-U/C: 0x005fc940, PAL: 0x0063d650
+    /**
+     * Upload the live list to VU1 as sprite records and call the microprogram.
+     *
+     * Two quadwords travel per particle, the colour and the position, and half the size is written
+     * into the fourth word of the position first because a GS sprite takes a centre and a half
+     * extent. A batch closes at 162 particles or at 254 destination quadwords, whichever comes
+     * first, and the first batch enters through MSCAL 0x258 while every batch after it uses MSCNT.
+     *
+     * @ghidraAddress NTSC-U/C: 0x005fc940
+     * @ghidraAddress PAL: 0x0063d650
+     */
     void DrawSpritesDmaKicked();
 };
 

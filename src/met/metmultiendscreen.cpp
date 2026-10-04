@@ -55,19 +55,16 @@ constexpr int kResolveArenaView = 0;
 
 } // namespace
 
-// NTSC-U/C: 0x002f58d0, PAL: 0x003196a8
 MetMultiEndScreen::MetMultiEndScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mButtonList(nullptr) {
     mButtonList = new MetButtonList();
 }
 
-// NTSC-U/C: 0x002f5d20, PAL: 0x00319b60
 MetMultiEndScreen::~MetMultiEndScreen() {
     delete mButtonList;
 }
 
-// NTSC-U/C: 0x002f5f90, PAL: 0x00319dd0
 void MetMultiEndScreen::HandleCommand(const MetScreenCommand *pCommand) {
     switch (pCommand->mCommand) {
     case kMetScreenCommandPrevious:
@@ -94,7 +91,6 @@ void MetMultiEndScreen::HandleCommand(const MetScreenCommand *pCommand) {
     }
 }
 
-// NTSC-U/C: 0x002f6158, PAL: 0x00319fd8
 void MetMultiEndScreen::EnterAndShow() {
     mButtonList->Clear();
 
@@ -124,7 +120,6 @@ void MetMultiEndScreen::EnterAndShow() {
     MetScreen::EnterAndShow();
 }
 
-// NTSC-U/C: 0x002f6640, PAL: 0x0031a5c0
 void MetMultiEndScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     ExitScreenByName(HxStr(kMultiStatsScreen));
     ExitScreenByName(HxStr(kTitleScreen));
@@ -132,7 +127,6 @@ void MetMultiEndScreen::OnRepeatingSoundFinished(Rnd::Button *) {
     BeginExit();
 }
 
-// NTSC-U/C: 0x002f67d8, PAL: 0x0031a7b8
 void MetMultiEndScreen::OnExitFinished() {
     if (mButtonList->mSelected == kAgainButtonIndex) {
         MetFrontEndState::shared()->mReturnScreen = HxStr(kOwnScreenName);
@@ -148,19 +142,15 @@ void MetMultiEndScreen::OnExitFinished() {
     mButtonList->SetSelected(kNoSelection);
 }
 
-// NTSC-U/C: 0x002f9d98, PAL: 0x0031ded0
 void MetMultiEndScreen::PlayCycleLeftSound(int) {
 }
 
-// NTSC-U/C: 0x002f9da0, PAL: 0x0031ded8
 void MetMultiEndScreen::PlayCycleRightSound(int) {
 }
 
-// NTSC-U/C: 0x002f9da8, PAL: 0x0031dee0
 void MetMultiEndScreen::PlayLeaveSound(int) {
 }
 
-// NTSC-U/C: 0x002f9db0, PAL: 0x0031dee8
 MetMultiEndScreen *MetMultiEndScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetMultiEndScreen(pRenderer, nPriority);
 }

@@ -19,7 +19,6 @@ HxChunkName g_lablChunkName("labl");
 HxChunkName g_ltxtChunkName("ltxt");
 HxChunkName g_adtlChunkName("adtl");
 
-// NTSC-U/C: 0x00146550, PAL: 0x00147068
 HxStream &operator>>(HxStream &stream, HxChunkName &name) {
     stream.ReadData(name.mText, HxChunkName::kLength);
     return stream;

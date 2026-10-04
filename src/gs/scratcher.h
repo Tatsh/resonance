@@ -149,17 +149,30 @@ protected:
     virtual void DispatchPriv(Message *pMsg);
 
 private:
-    // The out-of-line copy of the PitchRiffMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x001d1cc8, PAL: 0x001d7b80
+    /**
+     * The out-of-line copy of the PitchRiffMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d1cc8
+     * @ghidraAddress PAL: 0x001d7b80
+     */
     void OnPitchRiffMsg(PitchRiffMsg *pMsg);
 
-    // The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
-    // NTSC-U/C: 0x001d1d18, PAL: 0x001d7bd0
+    /**
+     * The out-of-line copy of the InvalidateSeekerMsg branch DispatchPriv() expands inline.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d1d18
+     * @ghidraAddress PAL: 0x001d7bd0
+     */
     void OnInvalidateSeeker(InvalidateSeekerMsg *pMsg);
 
-    // Returns TrackData::QueryBar() for the bar on mTrackData. OnPitchRiff() calls it (at
-    // `0x001d03dc`).
-    // NTSC-U/C: 0x001d1d48, PAL: 0x001d7c00
+    /**
+     * Returns TrackData::QueryBar() for the bar on mTrackData.
+     *
+     * OnPitchRiff() calls it (at `0x001d03dc`).
+     *
+     * @ghidraAddress NTSC-U/C: 0x001d1d48
+     * @ghidraAddress PAL: 0x001d7c00
+     */
     int QueryBar(int nBar);
 
     PhraseMgr *mPhraseMgr;       // +0x38

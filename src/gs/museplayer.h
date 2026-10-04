@@ -36,6 +36,8 @@ public:
     /**
      * Release a player to the untagged heap.
      *
+     * No out-of-line body exists.
+     *
      * @param pBlock The block.
      */
     void operator delete(void *pBlock);

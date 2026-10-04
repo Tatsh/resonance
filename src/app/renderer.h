@@ -241,22 +241,36 @@ public:
     static int IsLevelLoaded(const HxStr &arena, const HxStr &level);
 
 private:
-    // NTSC-U/C: 0x004322f8, PAL: 0x0046dfd0
-    // Runs script template 1000. DispatchPriv() inlines the body, and this copy has
-    // no caller.
+    /**
+     * Runs script template 1000.
+     *
+     * DispatchPriv() inlines the body, and this copy has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004322f8
+     * @ghidraAddress PAL: 0x0046dfd0
+     */
     void OnMsg(const GameBeginMsg &msg);
 
-    // NTSC-U/C: 0x0042d068, PAL: 0x00468c20
-    // Merges the payload into the cell for its track and bar, then tells the overlay
-    // when the bar or the effect mask changed and the tunnel when the bar or any of the other
-    // three fields changed.
+    /**
+     * Merges the payload into the cell for its track and bar, then tells the overlay when the bar
+     * or the effect mask changed and the tunnel when the bar or any of the other three fields
+     * changed.
+     *
+     * @ghidraAddress NTSC-U/C: 0x0042d068
+     * @ghidraAddress PAL: 0x00468c20
+     */
     void OnBarStatus(BarStatusMsg *pMsg);
 
-    // NTSC-U/C: 0x00432318, PAL: 0x0046dff0
-    // Sends the message on, then outside game mode 1 and play mode 2 finds the one
-    // world player with the highest score and reports a change of leader to the tunnel and the
-    // overlay. A tie for the top score produces no leader. DispatchPriv() inlines the body, and
-    // this copy has no caller.
+    /**
+     * Sends the message on, then outside game mode 1 and play mode 2 finds the one world player
+     * with the highest score and reports a change of leader to the tunnel and the overlay.
+     *
+     * A tie for the top score produces no leader. DispatchPriv() inlines the body, and this copy
+     * has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00432318
+     * @ghidraAddress PAL: 0x0046dff0
+     */
     void OnPointAmount(Message *pMsg);
 
     // The world's song clock, read once by the constructor through Globals::GetSongClock().

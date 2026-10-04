@@ -153,7 +153,6 @@ void CopyTransformToXfm(const Transform &xfm, float aflDest[kXfmRowCount][kXfmRo
 
 } // namespace
 
-// NTSC-U/C: 0x004ebbe8, PAL: 0x0052a758
 MultiMesh *NewMultiMesh(const HxStr &name) {
     // The binary allocates the 0x38 bytes the object occupies.
     return new MultiMesh(name);
@@ -168,7 +167,6 @@ HxStr g_multiMeshClassName("MultiMesh");
 // NTSC-U/C: 0x00895038, PAL: 0x008da048
 int g_nRndMultiMeshLoadVersion;
 
-// NTSC-U/C: 0x004ebb58, PAL: 0x0052a6c8
 Object *CreateRegisteredMultiMesh(const HxStr &name) {
     try {
         return g_pfnNewMultiMesh(name);
@@ -177,19 +175,16 @@ Object *CreateRegisteredMultiMesh(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x004e8830, PAL: 0x00527368
 MultiMesh::MultiMesh(const HxStr &name) : Object(name), mMesh(nullptr) {
     // The constructor acquires the mesh reference even though the mesh it has just set is null.
     AcquireMeshRef();
 }
 
-// NTSC-U/C: 0x004e85c0, PAL: 0x005270f8
 MultiMesh::~MultiMesh() {
     ReleaseMeshRef();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x004e81a0, PAL: 0x00526ca8
 void MultiMesh::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
@@ -205,7 +200,6 @@ void MultiMesh::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x004ebd10, PAL: 0x0052a880
 void MultiMesh::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.WriteLE(&nVersion, sizeof(nVersion));
@@ -215,7 +209,6 @@ void MultiMesh::Save(Stream &stream) {
     WriteTransformList(stream, mTransforms);
 }
 
-// NTSC-U/C: 0x004ebe40, PAL: 0x0052a9b0
 void MultiMesh::Replace(Object *pFrom, Object *pTo) {
     Drawable::Replace(pFrom, pTo);
 
@@ -228,12 +221,10 @@ void MultiMesh::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// NTSC-U/C: 0x004eba80, PAL: 0x0052a5f0
 const HxStr &MultiMesh::ClassName() const {
     return g_multiMeshClassName;
 }
 
-// NTSC-U/C: 0x004ebc60, PAL: 0x0052a7d0
 void MultiMesh::Copy(const Object *pSource, unsigned nFlags) {
     const MultiMesh *pSourceMulti = dynamic_cast<const MultiMesh *>(pSource);
 
@@ -246,7 +237,6 @@ void MultiMesh::Copy(const Object *pSource, unsigned nFlags) {
     AcquireMeshRef();
 }
 
-// NTSC-U/C: 0x004e8288, PAL: 0x00526d90
 void MultiMesh::Load(Stream &stream) {
     stream.ReadLE(&g_nRndMultiMeshLoadVersion, sizeof(g_nRndMultiMeshLoadVersion));
     if (g_nRndMultiMeshLoadVersion > kSerialVersion) {
@@ -265,21 +255,18 @@ void MultiMesh::Load(Stream &stream) {
     AcquireMeshRef();
 }
 
-// NTSC-U/C: 0x004ebde0, PAL: 0x0052a950
 void MultiMesh::AcquireMeshRef() {
     if (mMesh != nullptr) {
         mMesh->AddRef(this);
     }
 }
 
-// NTSC-U/C: 0x004ebe10, PAL: 0x0052a980
 void MultiMesh::ReleaseMeshRef() {
     if (mMesh != nullptr) {
         mMesh->RemoveRef(this);
     }
 }
 
-// NTSC-U/C: 0x004ebaa0, PAL: 0x0052a610
 Transform &MultiMesh::GetTransform(int nIndex) {
     auto it = mTransforms.begin();
     // Yes, the binary counts the index down to zero. A negative index walks forward.
@@ -289,14 +276,12 @@ Transform &MultiMesh::GetTransform(int nIndex) {
     return *it;
 }
 
-// NTSC-U/C: 0x004ebae8, PAL: 0x0052a658
 void MultiMesh::RemoveTransform(int nIndex) {
     auto it = mTransforms.begin();
     std::advance(it, nIndex);
     mTransforms.erase(it);
 }
 
-// NTSC-U/C: 0x004ebf18, PAL: 0x0052aa88
 void MultiMesh::SetMesh(Mesh *pMesh) {
     if (mMesh != nullptr) {
         mMesh->RemoveRef(this);
@@ -307,7 +292,6 @@ void MultiMesh::SetMesh(Mesh *pMesh) {
     }
 }
 
-// NTSC-U/C: 0x004e83d0, PAL: 0x00526f08
 int MultiMesh::DrawShowing() {
     if (mMesh == nullptr) {
         return 1;

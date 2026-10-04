@@ -145,7 +145,6 @@ MeshFace BlankFace() {
 
 } // namespace
 
-// NTSC-U/C: 0x004c89c0, PAL: 0x00506bc8
 Text::Text(const HxStr &name)
     : Object(name), mAlign(kDefaultAlign), mFont(nullptr), mWordWrap(0),
       mWrapWidth(kDefaultWrapWidth), mMesh(nullptr), mZTest(0) {
@@ -155,7 +154,6 @@ Text::Text(const HxStr &name)
     mColor.a = 1.0f;
 }
 
-// NTSC-U/C: 0x004cf958, PAL: 0x0050dcd0
 void Text::ReleaseObjects() {
     if (mFont != nullptr) {
         mFont->RemoveRef(this);
@@ -164,7 +162,6 @@ void Text::ReleaseObjects() {
     mMesh = nullptr;
 }
 
-// NTSC-U/C: 0x004cf9b8, PAL: 0x0050dd30
 void Text::AddRefObjects() {
     if (mFont != nullptr) {
         mFont->AddRef(this);
@@ -172,18 +169,15 @@ void Text::AddRefObjects() {
     RebuildText();
 }
 
-// NTSC-U/C: 0x004cf2b8, PAL: 0x0050d618
 Text::~Text() {
     ReleaseObjects();
     ReleaseAllRefs();
 }
 
-// NTSC-U/C: 0x004cf760, PAL: 0x0050dad8
 const HxStr &Text::ClassName() const {
     return g_textClassName;
 }
 
-// NTSC-U/C: 0x004cf9f8, PAL: 0x0050dd70
 void Text::RebuildText() {
     if (mWordWrap != 0 && mFont != nullptr) {
         mText = ApplyWordWrap(mPreWrapText);
@@ -193,31 +187,26 @@ void Text::RebuildText() {
     BuildGlyphMesh();
 }
 
-// NTSC-U/C: 0x004cff48, PAL: 0x0050e340
 void Text::SetAlign(int nAlign) {
     mAlign = nAlign;
     RebuildText();
 }
 
-// NTSC-U/C: 0x004d0168, PAL: 0x0050e580
 void Text::SetText(const HxStr &text) {
     mPreWrapText = text;
     RebuildText();
 }
 
-// NTSC-U/C: 0x004cfab8, PAL: 0x0050de50
 void Text::SetWordWrap(int nWordWrap) {
     mWordWrap = nWordWrap;
     RebuildText();
 }
 
-// NTSC-U/C: 0x004cfb78, PAL: 0x0050df30
 void Text::SetWrapWidth(float flWrapWidth) {
     mWrapWidth = flWrapWidth;
     RebuildText();
 }
 
-// NTSC-U/C: 0x004cfde0, PAL: 0x0050e1b8
 void Text::SetFont(Font *pFont) {
     if (mFont != nullptr) {
         mFont->RemoveRef(this);
@@ -229,7 +218,6 @@ void Text::SetFont(Font *pFont) {
     RebuildText();
 }
 
-// NTSC-U/C: 0x004cfec8, PAL: 0x0050e2c0
 void Text::SetColor(const Color &color) {
     mColor = color;
     if (mMesh == nullptr) {
@@ -242,7 +230,6 @@ void Text::SetColor(const Color &color) {
     mMesh->SyncChanged(Mesh::kSyncColors);
 }
 
-// NTSC-U/C: 0x004d0378, PAL: 0x0050e7b0
 void Text::SetShowing(int nShowing) {
     if (nShowing == mShowing) {
         return;
@@ -256,7 +243,6 @@ void Text::SetShowing(int nShowing) {
     BuildGlyphMesh();
 }
 
-// NTSC-U/C: 0x004d0328, PAL: 0x0050e760
 void Text::SetHighlight(int nHighlight) {
     Drawable::SetHighlight(nHighlight);
     if (mMesh != nullptr) {
@@ -264,7 +250,6 @@ void Text::SetHighlight(int nHighlight) {
     }
 }
 
-// NTSC-U/C: 0x004d02f8, PAL: 0x0050e730
 int Text::DrawShowing() {
     if (mMesh != nullptr) {
         mMesh->Draw();
@@ -272,7 +257,6 @@ int Text::DrawShowing() {
     return 1;
 }
 
-// NTSC-U/C: 0x004d02a0, PAL: 0x0050e6d8
 void Text::SetBillboard(int nBillboard) {
     Transformable::SetBillboard(nBillboard);
     if (mMesh != nullptr) {
@@ -280,7 +264,6 @@ void Text::SetBillboard(int nBillboard) {
     }
 }
 
-// NTSC-U/C: 0x004d03e0, PAL: 0x0050e818
 int Text::UpdateWorldXfm(Transformable *pParent, int nForce) {
     const int nMoved = Transformable::UpdateWorldXfm(pParent, nForce);
     if (mMesh != nullptr) {
@@ -289,7 +272,6 @@ int Text::UpdateWorldXfm(Transformable *pParent, int nForce) {
     return nMoved;
 }
 
-// NTSC-U/C: 0x004c7ef8, PAL: 0x005060d0
 void Text::FindCollisions(const Segment &ray, std::list<Collision> &collisions) {
     if (mShowing == 0) {
         return;
@@ -308,7 +290,6 @@ void Text::FindCollisions(const Segment &ray, std::list<Collision> &collisions) 
     Collideable::FindCollisions(ray, collisions);
 }
 
-// NTSC-U/C: 0x004c7fc0, PAL: 0x00506198
 void Text::DumpText(Dbg &sink) {
     Object::DumpText(sink);
     Drawable::DumpText(sink);
@@ -356,7 +337,6 @@ void Text::DumpText(Dbg &sink) {
     sink.Print("\n");
 }
 
-// NTSC-U/C: 0x004c8330, PAL: 0x00506508
 void Text::Save(Stream &stream) {
     const int nVersion = kSerialVersion;
     stream.WriteLE(&nVersion, sizeof(nVersion));
@@ -381,7 +361,6 @@ void Text::Save(Stream &stream) {
     stream.Write(&chZTest, sizeof(chZTest));
 }
 
-// NTSC-U/C: 0x004cf888, PAL: 0x0050dc00
 void Text::Replace(Object *pFrom, Object *pTo) {
     Drawable::Replace(pFrom, pTo);
     Collideable::Replace(pFrom, pTo);
@@ -401,7 +380,6 @@ void Text::Replace(Object *pFrom, Object *pTo) {
     }
 }
 
-// NTSC-U/C: 0x004cfca8, PAL: 0x0050e080
 void Text::Copy(const Object *pSource, unsigned nFlags) {
     // The cast result is dereferenced with no null check, so a pSource of another class faults here
     // rather than being rejected.
@@ -424,7 +402,6 @@ void Text::Copy(const Object *pSource, unsigned nFlags) {
     AddRefObjects();
 }
 
-// NTSC-U/C: 0x004c8560, PAL: 0x00506738
 void Text::Load(Stream &stream) {
     int nVersion = 0;
     stream.ReadLE(&nVersion, sizeof(nVersion));
@@ -522,7 +499,6 @@ float Text::MeasureRun(const char *pText, int nCount) {
     return static_cast<float>(static_cast<int>(flWidth));
 }
 
-// NTSC-U/C: 0x004d0010, PAL: 0x0050e428
 float Text::GetFontWidth(const char *pText, int nCount) {
     float flWidth = 0.0f;
     if (mFont == nullptr) {
@@ -534,7 +510,6 @@ float Text::GetFontWidth(const char *pText, int nCount) {
     return flWidth;
 }
 
-// NTSC-U/C: 0x004d0088, PAL: 0x0050e4a0
 void Text::GetVerticalBounds(float &flTop, float &flBottom) {
     if (mFont == nullptr) {
         flTop = 0.0f;
@@ -556,7 +531,6 @@ void Text::GetVerticalBounds(float &flTop, float &flBottom) {
     }
 }
 
-// NTSC-U/C: 0x004d0238, PAL: 0x0050e670
 int Text::CountLines() {
     int nNewlines = 0;
     for (int nFound = mText.Find('\n', 0); static_cast<unsigned>(nFound) != g_nHxStrNoPosition;
@@ -566,7 +540,6 @@ int Text::CountLines() {
     return nNewlines + 1;
 }
 
-// NTSC-U/C: 0x004c9278, PAL: 0x00507490
 int Text::HowManyFit(const char *pText) {
     if (*pText == '\n') {
         return 0;
@@ -624,7 +597,6 @@ int Text::HowManyFit(const char *pText) {
     }
 }
 
-// NTSC-U/C: 0x004c95d0, PAL: 0x005077e8
 HxStr Text::ApplyWordWrap(const HxStr &text) {
     char szLine[kWrapBufferSize];
     strcpy(szLine, StringText(text));
@@ -659,7 +631,6 @@ HxStr Text::ApplyWordWrap(const HxStr &text) {
     return HxStr(szLine);
 }
 
-// NTSC-U/C: 0x004c9ca0, PAL: 0x00507f08
 void Text::EmitLineGlyphs(
     float flLineY, float flLineWidth, int nCharBase, const char *pBegin, const char *pEnd) {
     float flX = 0.0f;
@@ -725,7 +696,6 @@ void Text::EmitLineGlyphs(
     }
 }
 
-// NTSC-U/C: 0x004c9780, PAL: 0x005079c8
 void Text::BuildGlyphMesh() {
     delete mMesh;
     mMesh = nullptr;
@@ -801,7 +771,6 @@ void Text::BuildGlyphMesh() {
     mMesh->UpdateWorldXfm(this, 1);
 }
 
-// NTSC-U/C: 0x004c9e98, PAL: 0x00508100
 Vector3 Text::CharPosition(int nIndex) {
     if (mMesh == nullptr || mFont == nullptr || mMesh->mVertsOwner->mVerts.empty()) {
         return Vector3{0.0f, 0.0f, 0.0f, 1.0f};
@@ -829,17 +798,14 @@ Vector3 Text::CharPosition(int nIndex) {
     return pos;
 }
 
-// NTSC-U/C: 0x004cf150, PAL: 0x0050d4b0
 void *Text::operator new(size_t nSize) {
     return AllocateTaggedMemory(nSize, kTextTag);
 }
 
-// NTSC-U/C: 0x004cf170, PAL: 0x0050d4d0
 void Text::operator delete(void *pBlock) {
     OperatorDeleteOverride(pBlock, kTextTag);
 }
 
-// NTSC-U/C: 0x004cf800, PAL: 0x0050db78
 Text *NewText(const HxStr &name) {
     return new Text(name);
 }
@@ -847,7 +813,6 @@ Text *NewText(const HxStr &name) {
 // NTSC-U/C: 0x006feca8, PAL: 0x007426a8
 Text *(*Text::sNew)(const HxStr &name) = NewText;
 
-// NTSC-U/C: 0x004cf1d0, PAL: 0x0050d530
 Text *NewTextThroughHook(const HxStr &name) {
     try {
         return Text::sNew(name);
@@ -856,7 +821,6 @@ Text *NewTextThroughHook(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x004cf770, PAL: 0x0050dae8
 Object *CreateRegisteredText(const HxStr &name) {
     try {
         return Text::sNew(name);
@@ -865,7 +829,6 @@ Object *CreateRegisteredText(const HxStr &name) {
     }
 }
 
-// NTSC-U/C: 0x004cf190, PAL: 0x0050d4f0
 void RegisterTextClass() {
     Text::sNew = NewText;
     TheManager.RegisterClass(g_textClassName, CreateRegisteredText);

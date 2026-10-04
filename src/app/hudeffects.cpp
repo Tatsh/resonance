@@ -20,7 +20,6 @@ constexpr int kLampKindsConfigCode = 0x389;
 
 } // namespace
 
-// NTSC-U/C: 0x00417f50, PAL: 0x00451f90
 HudEffects::HudEffects(int nIndex) {
     const char *pszLayout =
         g_hudLayoutName.mStr != nullptr ? g_hudLayoutName.mStr : g_szEmptyString;
@@ -54,7 +53,6 @@ HudEffects::HudEffects(int nIndex) {
     mWires->SetShowing(Application::shared()->GetPlayMode() == kPlayModeJam);
 }
 
-// NTSC-U/C: 0x00418760, PAL: 0x00452860
 void HudEffects::SetMask(BarStatusMsg::Effects effects) {
     for (std::vector<Lamp>::iterator it = mLamps.begin(); it != mLamps.end(); ++it) {
         if (it->mKind == kHudItemGuides) {
@@ -64,14 +62,12 @@ void HudEffects::SetMask(BarStatusMsg::Effects effects) {
     }
 }
 
-// NTSC-U/C: 0x00429e98, PAL: 0x004654d8
 void HudEffects::Select(int nKind) {
     for (std::vector<Lamp>::iterator it = mLamps.begin(); it != mLamps.end(); ++it) {
         it->mText->SetFont(it->mKind == nKind ? mSelectedFont : mPlainFont);
     }
 }
 
-// NTSC-U/C: 0x00429f28, PAL: 0x00465568
 void HudEffects::SetLit(int nKind, int nLit) {
     for (std::vector<Lamp>::iterator it = mLamps.begin(); it != mLamps.end(); ++it) {
         if (it->mKind == nKind) {

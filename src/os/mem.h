@@ -413,6 +413,8 @@ void HeapFree(void *pBlock);
  * @param pBlock The block to resize.
  * @param nSize The new size in bytes.
  * @return The block, which differs from pBlock only when it moved.
+ * @ghidraAddress NTSC-U/C: 0x00589278
+ * @ghidraAddress PAL: 0x005cc4f0
  */
 #ifdef __cplusplus
 extern "C" {

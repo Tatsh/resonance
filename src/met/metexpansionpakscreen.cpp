@@ -86,14 +86,12 @@ inline void MergeLevelLists(const std::vector<MetPersonaData *> &personas) {
 
 } // namespace
 
-// NTSC-U/C: 0x00218320, PAL: 0x0022a848
 MetExpansionPakScreen::MetExpansionPakScreen(MetRenderer *pRenderer, int nPriority)
     : MetScreen(pRenderer, nPriority, HxStr(kScreenName), HxStr(kDirectory), HxStr(kContainerName)),
       mFade(nullptr) {
     mFade = new MetFade(pRenderer);
 }
 
-// NTSC-U/C: 0x00218518, PAL: 0x0022aaa8
 void MetExpansionPakScreen::UpdateIdle(float flTime) {
     mFade->Update(flTime);
     if (mFinished != 0) {
@@ -191,7 +189,6 @@ void MetExpansionPakScreen::UpdateIdle(float flTime) {
                              this);
 }
 
-// NTSC-U/C: 0x002193e8, PAL: 0x0022bb70
 void MetExpansionPakScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice) {
     if (name == kPrepareMessage) {
         std::vector<HxStr> buttons;
@@ -250,7 +247,6 @@ void MetExpansionPakScreen::OnMsgScreenDismissed(const HxStr &name, int nChoice)
     BeginExit();
 }
 
-// NTSC-U/C: 0x00219e80, PAL: 0x0022c7b8
 void MetExpansionPakScreen::OnFadeInDone() {
     std::vector<HxStr> buttons;
     MetMsgScreen::Show(HxStr(kPrepareMessage),
@@ -261,7 +257,6 @@ void MetExpansionPakScreen::OnFadeInDone() {
                        this);
 }
 
-// NTSC-U/C: 0x0021a128, PAL: 0x0022cac0
 void MetExpansionPakScreen::OnFadeOutDone() {
     mRenderer->RemoveScreen(this);
     if (mExitChoice == kExitCancelled) {
@@ -278,22 +273,18 @@ void MetExpansionPakScreen::OnFadeOutDone() {
     }
 }
 
-// NTSC-U/C: 0x0021d820, PAL: 0x00230378
 MetExpansionPakScreen *MetExpansionPakScreen::New(MetRenderer *pRenderer, int nPriority) {
     return new MetExpansionPakScreen(pRenderer, nPriority);
 }
 
-// NTSC-U/C: 0x0021d8a8, PAL: 0x00230400
 MetExpansionPakScreen::~MetExpansionPakScreen() {
     delete mFade;
 }
 
-// NTSC-U/C: 0x0021d928, PAL: 0x00230480
 void MetExpansionPakScreen::ResolveContainerViews() {
     MetScreen::ResolveContainerViews();
 }
 
-// NTSC-U/C: 0x0021d948, PAL: 0x002304a0
 void MetExpansionPakScreen::EnterAndShow() {
     mState = kStateIdle;
     mDiscSwap.Reset();
@@ -305,12 +296,10 @@ void MetExpansionPakScreen::EnterAndShow() {
     mFade->FadeIn(kFadeDuration, mRenderer->mAnimationFrame, this, kRetainView);
 }
 
-// NTSC-U/C: 0x0021d9a8, PAL: 0x00230500
 void MetExpansionPakScreen::BeginExit() {
     mFade->FadeOut(kFadeDuration, mRenderer->mAnimationFrame, this, kReleaseView);
 }
 
-// NTSC-U/C: 0x0021d9e0, PAL: 0x00230538
 void MetExpansionPakScreen::OnMsgScreenShown(const HxStr &name) {
     if (name == kPrepareMessage) {
         mPrepareShown = 1;

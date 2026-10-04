@@ -76,19 +76,34 @@ public:
     void Enable(long long nMask);
 
 private:
-    // For a message on this track, flips the effect's bit in the step value of the message's bar,
-    // enables or disables the effect to match, sends an InvalidateTrackMsg for the whole song to
-    // the phrase manager, and sends a RemixFXMsg. An effect type from 5 through 10 also marks the
-    // world's statistics.
-    // NTSC-U/C: 0x001a54d8, PAL: 0x001ab240
+    /**
+     * For a message on this track, flips the effect's bit in the step value of the message's bar,
+     * enables or disables the effect to match, sends an InvalidateTrackMsg for the whole song to
+     * the phrase manager, and sends a RemixFXMsg.
+     *
+     * An effect type from 5 through 10 also marks the world's statistics.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001a54d8
+     * @ghidraAddress PAL: 0x001ab240
+     */
     void PostRemixFxMsg(JamEffectMsg *pMsg);
 
-    // Returns the first effect whose Type() is nType, or null.
-    // NTSC-U/C: 0x001a62d8, PAL: 0x001ac040
+    /**
+     * Returns the first effect whose Type() is nType, or null.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001a62d8
+     * @ghidraAddress PAL: 0x001ac040
+     */
     Effector *GetEffector(int nType) const;
 
-    // Passes one flag to every effect's SetEnabled(). The image has no caller.
-    // NTSC-U/C: 0x001a6350, PAL: 0x001ac0b8
+    /**
+     * Passes one flag to every effect's SetEnabled().
+     *
+     * The image has no caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x001a6350
+     * @ghidraAddress PAL: 0x001ac0b8
+     */
     void EnableAll(int bEnabled);
 
     PlayMap *mPlayMap;                  // +0x18, not read by any recovered routine

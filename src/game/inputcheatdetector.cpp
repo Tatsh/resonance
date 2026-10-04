@@ -85,7 +85,6 @@ std::vector<InputCheatDetector::CheatSequence> g_metCheatSequences;
 // NTSC-U/C: 0x00691e28, PAL: 0x006d30b0
 std::vector<InputCheatDetector::CheatSequence> g_gameCheatSequences;
 
-// NTSC-U/C: 0x001daaf8, PAL: 0x001e0a68
 InputCheatDetector::InputCheatDetector(std::vector<CheatSequence> *pCheats) : mCheats(pCheats) {
     if (!g_bCheatsRegistered) {
         RegisterCheats();
@@ -95,7 +94,6 @@ InputCheatDetector::InputCheatDetector(std::vector<CheatSequence> *pCheats) : mC
     }
 }
 
-// NTSC-U/C: 0x001dabc8, PAL: 0x001e0b38
 void InputCheatDetector::RegisterCheats() {
     CheatSequence cheat;
 
@@ -193,7 +191,6 @@ void InputCheatDetector::RegisterCheats() {
     g_bCheatsRegistered = 1;
 }
 
-// NTSC-U/C: 0x001dc658, PAL: 0x001e25e8
 void InputCheatDetector::OnControllerReading(int nType, int nSlot, int nButton, float flValue) {
     if (!(nButton < kFirstNonButton) || nType != kJoystickType || !(flValue >= kPressThreshold)) {
         return;
@@ -224,12 +221,10 @@ void InputCheatDetector::OnControllerReading(int nType, int nSlot, int nButton, 
     }
 }
 
-// NTSC-U/C: 0x001deb30, PAL: 0x001e4bb0
 void InputCheatDetector::AddGameCheat(const CheatSequence &cheat) {
     g_gameCheatSequences.push_back(cheat);
 }
 
-// NTSC-U/C: 0x001deb90, PAL: 0x001e4c10
 void InputCheatDetector::AddMetCheat(const CheatSequence &cheat) {
     g_metCheatSequences.push_back(cheat);
 }

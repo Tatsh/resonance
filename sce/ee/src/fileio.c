@@ -480,7 +480,6 @@ static int FsCall(int nFunction, int nPacketSize, int nSema, int bNoWait, const 
     return *pResult;
 }
 
-// NTSC-U/C: 0x0056ad00, PAL: 0x005ab1c8
 int sceOpen(const char *pszPath, int nFlags, ...) {
     va_list args;
     int nMode;
@@ -556,7 +555,6 @@ int sceOpen(const char *pszPath, int nFlags, ...) {
     return FsHandleIndex(pHandle);
 }
 
-// NTSC-U/C: 0x0056af88, PAL: 0x005ab450
 int sceClose(int nDescriptor) {
     FsHandle *pHandle = FsFindHandle(nDescriptor);
     int nSema;
@@ -604,7 +602,6 @@ int sceClose(int nDescriptor) {
     return nResult >= 0 ? 0 : nResult;
 }
 
-// NTSC-U/C: 0x0056b108, PAL: 0x005ab5d0
 int sceLseek(int nDescriptor, int nOffset, int nWhence) {
     FsHandle *pHandle = FsFindHandle(nDescriptor);
     unsigned int nFlags;
@@ -638,7 +635,6 @@ int sceLseek(int nDescriptor, int nOffset, int nWhence) {
                   &nResult);
 }
 
-// NTSC-U/C: 0x0056b340, PAL: 0x005ab808
 int sceRead(int nDescriptor, void *pBuffer, int nBytes) {
     FsHandle *pHandle = FsFindHandle(nDescriptor);
     unsigned int nFlags;
@@ -678,7 +674,6 @@ int sceRead(int nDescriptor, void *pBuffer, int nBytes) {
                   &nResult);
 }
 
-// NTSC-U/C: 0x0056b5b0, PAL: 0x005aba78
 int sceWrite(int nDescriptor, const void *pBuffer, int nBytes) {
     FsHandle *pHandle = FsFindHandle(nDescriptor);
     const unsigned char *pUncached;
@@ -728,7 +723,6 @@ int sceWrite(int nDescriptor, const void *pBuffer, int nBytes) {
                   &nResult);
 }
 
-// NTSC-U/C: 0x0056b870, PAL: 0x005abd38
 int sceIoctl(int nDescriptor, int nRequest, void *pArg) {
     FsHandle *pHandle = FsFindHandle(nDescriptor);
     int nSema;
@@ -785,7 +779,6 @@ int sceIoctl(int nDescriptor, int nRequest, void *pArg) {
     return FsCall(kFsFunctionIoctl, sizeof(FsIoctlPacket), nSema, 0, &nResult);
 }
 
-// NTSC-U/C: 0x0056acc8, PAL: 0x005ab190
 int sceFsReset(void) {
     g_bFsBound = 0;
     memset(g_abFsServerVersion, 0, sizeof(g_abFsServerVersion));

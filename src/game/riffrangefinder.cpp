@@ -2,7 +2,6 @@
 
 #include "msg/notemsg.h"
 
-// NTSC-U/C: 0x001c4538, PAL: 0x001ca380
 void RiffRangeFinder::DispatchPriv(Message *pMsg) {
     if (pMsg->Type() != static_cast<int>(NoteMsg::sID)) {
         return;

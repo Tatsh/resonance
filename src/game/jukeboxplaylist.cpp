@@ -10,12 +10,10 @@ constexpr int kPlayListVersion = 1;
 
 } // namespace
 
-// NTSC-U/C: 0x001e5da8, PAL: 0x001ebf28
 JukeboxPlayList::~JukeboxPlayList() {
     clear();
 }
 
-// NTSC-U/C: 0x001e1e38, PAL: 0x001e7f20
 void JukeboxPlayList::save(OBStream *pStream) {
     int version = kPlayListVersion;
     pStream->WriteLE(&version, sizeof(version));
@@ -30,7 +28,6 @@ void JukeboxPlayList::save(OBStream *pStream) {
     }
 }
 
-// NTSC-U/C: 0x001e1f70, PAL: 0x001e8058
 void JukeboxPlayList::load(IBStream *pStream) {
     int version;
     pStream->ReadLE(&version, sizeof(version));
@@ -54,7 +51,6 @@ void JukeboxPlayList::load(IBStream *pStream) {
     }
 }
 
-// NTSC-U/C: 0x001e21b8, PAL: 0x001e82b8
 void JukeboxPlayList::AddEntry(const MetRemixRecord &record) {
     JukeboxPlayListEntry *pEntry = new JukeboxPlayListEntry;
     pEntry->factory = record.factory;
@@ -62,7 +58,6 @@ void JukeboxPlayList::AddEntry(const MetRemixRecord &record) {
     entries.push_back(pEntry);
 }
 
-// NTSC-U/C: 0x001e20f8, PAL: 0x001e81e8
 void JukeboxPlayList::RemoveEntry(int nIndex) {
     if (entries.size() == 0) {
         return;
@@ -77,14 +72,12 @@ void JukeboxPlayList::RemoveEntry(int nIndex) {
     }
 }
 
-// NTSC-U/C: 0x001e5fa0, PAL: 0x001ec120
 void JukeboxPlayList::SwapEntries(int nFirst, int nSecond) {
     JukeboxPlayListEntry *pFirst = entries[nFirst];
     entries[nFirst] = entries[nSecond];
     entries[nSecond] = pFirst;
 }
 
-// NTSC-U/C: 0x001e2248, PAL: 0x001e8350
 void JukeboxPlayList::clear() {
     for (auto it = entries.begin(); it != entries.end(); ++it) {
         delete *it;
@@ -92,7 +85,6 @@ void JukeboxPlayList::clear() {
     entries.clear();
 }
 
-// NTSC-U/C: 0x001e5f10, PAL: 0x001ec090
 void JukeboxPlayList::RemoveStaleEntries() {
     auto it = entries.begin();
     while (it != entries.end()) {
@@ -104,7 +96,6 @@ void JukeboxPlayList::RemoveStaleEntries() {
     }
 }
 
-// NTSC-U/C: 0x001e5ec0, PAL: 0x001ec040
 JukeboxPlayListEntry *JukeboxPlayList::GetEntry(int nIndex) {
     if (entries.size() == 0) {
         return nullptr;

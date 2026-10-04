@@ -227,9 +227,49 @@ public:
      */
     virtual void DumpText(Dbg &sink);
 
+    /**
+     * Write the revision, the showing flag as one byte, and the draw list.
+     *
+     * @param stream The stream to write to.
+     * @ghidraAddress NTSC-U/C: 0x00506b28
+     * @ghidraAddress PAL: 0x005459f0
+     */
     virtual void Save(Stream &stream);
+
+    /**
+     * Point every mDraws entry that is pFrom at pTo instead, moving the reference, and drop the
+     * entries left null.
+     *
+     * An entry already equal to pTo is reported through the debug sink.
+     *
+     * @param pFrom The object to replace.
+     * @param pTo The replacement, which only counts when it is a Drawable.
+     * @ghidraAddress NTSC-U/C: 0x00502e40
+     * @ghidraAddress PAL: 0x00541c68
+     */
     virtual void Replace(Object *pFrom, Object *pTo);
+
+    /**
+     * Take the showing flag, and with kCopyChildLists the draw list, from another drawable.
+     *
+     * The references on the old and new draw lists are released and taken around the copy.
+     *
+     * @param pSource The drawable to copy from.
+     * @param nFlags The copy flags.
+     * @ghidraAddress NTSC-U/C: 0x00506a88
+     * @ghidraAddress PAL: 0x00545950
+     */
     virtual void Copy(const Object *pSource, unsigned nFlags);
+
+    /**
+     * Read what Save() writes, replacing the draw list and moving its references.
+     *
+     * A revision newer than this build supports is reported and aborts the load.
+     *
+     * @param stream The stream to read from.
+     * @ghidraAddress NTSC-U/C: 0x00503020
+     * @ghidraAddress PAL: 0x00541e48
+     */
     virtual void Load(Stream &stream);
 
 protected:
@@ -263,8 +303,12 @@ public:
     int mShowing; // +0x04
 
 private:
-    // NTSC-U/C: 0x00506c18, PAL: 0x00545ae0
-    // Only Copy() and Load() invoke this.
+    /**
+     * Only Copy() and Load() invoke this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00506c18
+     * @ghidraAddress PAL: 0x00545ae0
+     */
     void AcquireDrawsRefs();
 
     int mHighlight;               // +0x08

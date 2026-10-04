@@ -284,24 +284,49 @@ private:
     // Gem flash record, the element of mGemFlashes. The name is inferred.
     class GemFlash {
     public:
-        // Release the flash particle. The destructor inlines the body. The deleting copy
-        // at 0x00456cd0 has no callers.
+        /**
+         * Release the flash particle.
+         *
+         * The destructor inlines the body. The deleting copy has no callers.
+         *
+         * @ghidraAddress NTSC-U/C: 0x00456cd0
+         * @ghidraAddress PAL: 0x00494200
+         */
         ~GemFlash();
 
-        // Take a white particle of size 1 at pos when the record is free, reporting 1, else
-        // report 0. StartGemFlash() inlines it. 0x00456d28.
+        /**
+         * Take a white particle of size 1 at pos when the record is free, reporting 1, else report
+         * 0.
+         *
+         * StartGemFlash() inlines it.
+         *
+         * @ghidraAddress NTSC-U/C: 0x00456d28
+         * @ghidraAddress PAL: 0x00494258
+         */
         int Start(const Vector3 &pos);
 
-        // Shrink the flash by 0.1, and release it once its size is not positive. SetFrame()
-        // inlines it. 0x00456db0.
+        /**
+         * Shrink the flash by 0.1, and release it once its size is not positive.
+         *
+         * SetFrame() inlines it.
+         *
+         * @ghidraAddress NTSC-U/C: 0x00456db0
+         * @ghidraAddress PAL: 0x004942e0
+         */
         void Update();
 
         Rnd::ParticleSys *mSystem; // "gem_flash.ps", shared by every record.
         Rnd::Particle *mParticle;  // The flash, or null while the record is free.
     };
 
-    // Offer a fire to each TnlFireFX in turn until one starts it. DispatchPriv() inlines this.
-    // NTSC-U/C: 0x004576a0, PAL: 0x00494bd0
+    /**
+     * Offer a fire to each TnlFireFX in turn until one starts it.
+     *
+     * DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004576a0
+     * @ghidraAddress PAL: 0x00494bd0
+     */
     void StartFireFX(float flPathStart,
                      int nIndex,
                      int nSlot,
@@ -309,126 +334,308 @@ private:
                      const Color &altColor,
                      float flPathEnd);
 
-    // Launch the first idle TnlCrippleFX at the targets, through TnlCrippleFX::Start() inlined.
-    // Returns 1 when one launched. DispatchPriv() inlines this. 0x00457758.
+    /**
+     * Launch the first idle TnlCrippleFX at the targets, through TnlCrippleFX::Start() inlined.
+     *
+     * Returns 1 when one launched. DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00457758
+     * @ghidraAddress PAL: 0x00494c88
+     */
     int StartCrippleFX(const std::vector<TnlPlayer *> &targets, float flFrame);
 
-    // Start the first idle TnlBumpFX. Returns 1 when one started. DispatchPriv() inlines this.
-    // NTSC-U/C: 0x00457828, PAL: 0x00494d58
+    /**
+     * Start the first idle TnlBumpFX.
+     *
+     * Returns 1 when one started. DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00457828
+     * @ghidraAddress PAL: 0x00494d58
+     */
     int StartBumpFX(int nStep, const HxStr &colorName, int nForward, float flPathOffset);
 
-    // Start the first idle TnlSnake, through TnlSnake::Start() inlined. Returns 1 when one
-    // started. DispatchPriv() inlines this. 0x00457880.
+    /**
+     * Start the first idle TnlSnake, through TnlSnake::Start() inlined.
+     *
+     * Returns 1 when one started. DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00457880
+     * @ghidraAddress PAL: 0x00494db0
+     */
     int StartSnake(float flFrame, int nRing, const Color &color, float flPhase, float flAmplitude);
 
-    // Append a trigger to mPendingTriggers. DispatchPriv() inlines this. 0x004579e0.
+    /**
+     * Append a trigger to mPendingTriggers.
+     *
+     * DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004579e0
+     * @ghidraAddress PAL: 0x00494f10
+     */
     void AddPendingTrigger(TnlTrigger *pTrigger, float flFrame);
 
-    // Move the first unplaced particle of "string flare.ps" onto one ring at the renderer's song
-    // tick, pushed outwards by 0.97. Nothing calls the out-of-line copy. 0x00457ae0.
+    /**
+     * Move the first unplaced particle of "string flare.ps" onto one ring at the renderer's song
+     * tick, pushed outwards by 0.97.
+     *
+     * Nothing calls the out-of-line copy.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00457ae0
+     * @ghidraAddress PAL: 0x00495010
+     */
     void PlaceStringFlareOnRing(int nRing, float flBlend);
 
-    // Append a panel to mPanels and set the frame it starts from. OnBarChanged() is the caller.
-    // NTSC-U/C: 0x00447268, PAL: 0x00484498
+    /**
+     * Append a panel to mPanels and set the frame it starts from.
+     *
+     * OnBarChanged() is the caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00447268
+     * @ghidraAddress PAL: 0x00484498
+     */
     void AddPanel(TnlPanel *pPanel, float flStartFrame);
 
-    // GemMsg: queue a gem of the kind the track, the powerup, the ghost flag, and the jukebox
-    // select. 0x00447638.
+    /**
+     * On a GemMsg, queue a gem of the kind the track, the powerup, the ghost flag, and the jukebox
+     * select.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00447638
+     * @ghidraAddress PAL: 0x00484868
+     */
     void OnGem(GemMsg *pMsg);
 
-    // CatchMsg: mark the catcher target, and flash and pulse on a hit or queue a miss gem.
-    // NTSC-U/C: 0x00447938, PAL: 0x00484b88
+    /**
+     * On a CatchMsg, mark the catcher target, and flash and pulse on a hit or queue a miss gem.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00447938
+     * @ghidraAddress PAL: 0x00484b88
+     */
     void OnCatch(CatchMsg *pMsg);
 
-    // PhraseMuffedMsg: redraw the bar's panel when the player tried the phrase. 0x00447ba8.
+    /**
+     * On a PhraseMuffedMsg, redraw the bar's panel when the player tried the phrase.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00447ba8
+     * @ghidraAddress PAL: 0x00484df8
+     */
     void OnPhraseMuffed(PhraseMuffedMsg *pMsg);
 
-    // PitchMsg: flash at the pitched gem and mark the catcher target. 0x00447cc0.
+    /**
+     * On a PitchMsg, flash at the pitched gem and mark the catcher target.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00447cc0
+     * @ghidraAddress PAL: 0x00484f10
+     */
     void OnPitch(PitchMsg *pMsg);
 
-    // SeekerMsg: move or clear the player's seeker range and sabre trail. 0x00447eb0.
+    /**
+     * On a SeekerMsg, move or clear the player's seeker range and sabre trail.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00447eb0
+     * @ghidraAddress PAL: 0x00485100
+     */
     void OnSeeker(SeekerMsg *pMsg);
 
-    // ShowEraseEffectMsg: schedule a panel effect for every erased bar still ahead. 0x004481d0.
+    /**
+     * On a ShowEraseEffectMsg, schedule a panel effect for every erased bar still ahead.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004481d0
+     * @ghidraAddress PAL: 0x00485420
+     */
     void OnShowEraseEffect(ShowEraseEffectMsg *pMsg);
 
-    // SectionCapturedMsg: run a fire along the captured track. 0x00448530.
+    /**
+     * On a SectionCapturedMsg, run a fire along the captured track.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00448530
+     * @ghidraAddress PAL: 0x00485780
+     */
     void OnSectionCaptured(SectionCapturedMsg *pMsg);
 
-    // CripplePacket: launch a crippler at the target players. 0x004486f8.
+    /**
+     * On a CripplePacket, launch a crippler at the target players.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004486f8
+     * @ghidraAddress PAL: 0x00485968
+     */
     void OnCripple(CripplePacket *pPacket);
 
-    // FreestyleFXMsg: two snakes and a full-screen fire along the track. 0x00448a08.
+    /**
+     * On a FreestyleFXMsg, start two snakes and a full-screen fire along the track.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00448a08
+     * @ghidraAddress PAL: 0x00485c78
+     */
     void OnFreestyleFX(FreestyleFXMsg *pMsg);
 
-    // DeployedPowerupMsg: the effect of a neutralizer, autocatcher, bumper, or multiplier.
-    // NTSC-U/C: 0x00448d58, PAL: 0x00485fc8
+    /**
+     * On a DeployedPowerupMsg, show the effect of a neutralizer, autocatcher, bumper, or
+     * multiplier.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00448d58
+     * @ghidraAddress PAL: 0x00485fc8
+     */
     void OnDeployedPowerup(DeployedPowerupMsg *pMsg);
 
-    // NowBarMsg: ease the player's pointer toward a lane. DispatchPriv() inlines this.
-    // NTSC-U/C: 0x00457cf0, PAL: 0x00495220
+    /**
+     * On a NowBarMsg, ease the player's pointer toward a lane.
+     *
+     * DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00457cf0
+     * @ghidraAddress PAL: 0x00495220
+     */
     void OnNowBar(NowBarMsg *pMsg);
 
-    // ClearGemMsg: remove one gem. DispatchPriv() inlines this. 0x00457d88.
+    /**
+     * On a ClearGemMsg, remove one gem.
+     *
+     * DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00457d88
+     * @ghidraAddress PAL: 0x004952b8
+     */
     void OnClearGem(ClearGemMsg *pMsg);
 
-    // ClearGemsMsg: remove one bar's gems and end its trail. DispatchPriv() inlines this.
-    // NTSC-U/C: 0x00457dd8, PAL: 0x00495308
+    /**
+     * On a ClearGemsMsg, remove one bar's gems and end its trail.
+     *
+     * DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00457dd8
+     * @ghidraAddress PAL: 0x00495308
+     */
     void OnClearGems(ClearGemsMsg *pMsg);
 
-    // SusGemMsg: start or stop a sustain strip. DispatchPriv() inlines this. 0x00457e48.
+    /**
+     * On a SusGemMsg, start or stop a sustain strip.
+     *
+     * DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00457e48
+     * @ghidraAddress PAL: 0x00495378
+     */
     void OnSusGem(SusGemMsg *pMsg);
 
-    // DurGemMsg: add a duration gem segment. DispatchPriv() inlines this. 0x00457f38.
+    /**
+     * On a DurGemMsg, add a duration gem segment.
+     *
+     * DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00457f38
+     * @ghidraAddress PAL: 0x00495488
+     */
     void OnDurGem(DurGemMsg *pMsg);
 
-    // TrackSelectMsg: turn the player's seeker, activator, grid markers, and now-ring slot to the
-    // selected track. 0x00447328.
+    /**
+     * On a TrackSelectMsg, turn the player's seeker, activator, grid markers, and now-ring slot to
+     * the selected track.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00447328
+     * @ghidraAddress PAL: 0x00484558
+     */
     void OnTrackSelect(TrackSelectMsg *pMsg);
 
-    // On AdvanceSectionToggleMsg, rewrite the boundary text, move mNextStepBar to the next step,
-    // rebuild every sabre trail, and replay OnBarChanged() over the window. The message is not
-    // read. 0x00448048.
+    /**
+     * On AdvanceSectionToggleMsg, rewrite the boundary text, move mNextStepBar to the next step,
+     * rebuild every sabre trail, and replay OnBarChanged() over the window.
+     *
+     * The message is not read.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00448048
+     * @ghidraAddress PAL: 0x00485298
+     */
     void OnAdvanceSectionToggle(AdvanceSectionToggleMsg *pMsg);
 
-    // PlaybackToggleMsg: zoom the camera rig, record the jukebox flag, reassign the gem kinds, and
-    // suppress or restore every activator and the now ring. 0x00448330.
+    /**
+     * On a PlaybackToggleMsg, zoom the camera rig, record the jukebox flag, reassign the gem kinds,
+     * and suppress or restore every activator and the now ring.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00448330
+     * @ghidraAddress PAL: 0x00485580
+     */
     void OnPlaybackToggle(PlaybackToggleMsg *pMsg);
 
-    // WinMsg: draw the arms in each winner's view and start them, and in kGameModeSolo stop the
-    // first winner's blink and start the lattice. 0x00449240.
+    /**
+     * On a WinMsg, draw the arms in each winner's view and start them, and in kGameModeSolo stop
+     * the first winner's blink and start the lattice.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00449240
+     * @ghidraAddress PAL: 0x004864f0
+     */
     void OnWin(WinMsg *pMsg);
 
-    // MultiplierStateMsg: switch the player's catcher to the multiplier texture while a bonus
-    // applies. 0x00449450.
+    /**
+     * On a MultiplierStateMsg, switch the player's catcher to the multiplier texture while a bonus
+     * applies.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00449450
+     * @ghidraAddress PAL: 0x00486700
+     */
     void OnMultiplierState(MultiplierStateMsg *pMsg);
 
-    // PowerupFailedMsg: after a failed freestyler, show the player's arrow over every axe,
-    // scratch, and vocal track for 2000 scaled frames. 0x00449500.
+    /**
+     * On a PowerupFailedMsg, after a failed freestyler, show the player's arrow over every axe,
+     * scratch, and vocal track for 2000 scaled frames.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00449500
+     * @ghidraAddress PAL: 0x004867b0
+     */
     void OnPowerupFailed(PowerupFailedMsg *pMsg);
 
-    // AxeButtonMsg: spin or reset the player's pointer. DispatchPriv() inlines this. 0x00457ff0.
+    /**
+     * On an AxeButtonMsg, spin or reset the player's pointer.
+     *
+     * DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00457ff0
+     * @ghidraAddress PAL: 0x00495560
+     */
     void OnAxeButton(AxeButtonMsg *pMsg);
 
-    // PlayersTrackNeutralizedMsg: rumble the player's controller. DispatchPriv() inlines this.
-    // NTSC-U/C: 0x004580e8, PAL: 0x00495658
+    /**
+     * On a PlayersTrackNeutralizedMsg, rumble the player's controller.
+     *
+     * DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004580e8
+     * @ghidraAddress PAL: 0x00495658
+     */
     void OnPlayersTrackNeutralized(PlayersTrackNeutralizedMsg *pMsg);
 
-    // ToggleGhostMsg: show or hide the player's track ghost. DispatchPriv() inlines this.
-    // NTSC-U/C: 0x00458120, PAL: 0x00495690
+    /**
+     * On a ToggleGhostMsg, show or hide the player's track ghost.
+     *
+     * DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00458120
+     * @ghidraAddress PAL: 0x00495690
+     */
     void OnToggleGhost(ToggleGhostMsg *pMsg);
 
-    // JuiceAmountMsg: in a solo game, blink the player's activator while the juice is low.
-    // DispatchPriv() inlines this. 0x004581b8.
+    /**
+     * On a JuiceAmountMsg, in a solo game, blink the player's activator while the juice is low.
+     *
+     * DispatchPriv() inlines this.
+     *
+     * @ghidraAddress NTSC-U/C: 0x004581b8
+     * @ghidraAddress PAL: 0x00495728
+     */
     void OnJuiceAmount(JuiceAmountMsg *pMsg);
 
     // Find the TnlPlayer of a game player, or null. The search is inlined wherever a handler
     // needs it, and the image has no out-of-line copy.
     TnlPlayer *FindTnlPlayer(Player *pPlayer);
 
-    // Move each ghost material's alpha by its fade rate. A ghost that fades out completely hides
-    // its gem kind, and either end of the range stops the fade. SetFrame() is the caller.
-    // NTSC-U/C: 0x00446460, PAL: 0x00483690
+    /**
+     * Move each ghost material's alpha by its fade rate.
+     *
+     * A ghost that fades out completely hides its gem kind, and either end of the range stops the
+     * fade. SetFrame() is the caller.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00446460
+     * @ghidraAddress PAL: 0x00483690
+     */
     void UpdateGhostFades();
 
     Renderer *mRenderer; // +0x04

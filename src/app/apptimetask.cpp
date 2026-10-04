@@ -62,23 +62,19 @@ int Cmd::sCmdID;
 
 } // namespace
 
-// NTSC-U/C: 0x0013b100, PAL: 0x0013ba48
 TimeTask::TimeTask(Sch::TimeClock *pClock, long long nPeriodNs)
     : mClock(pClock), mPeriodNs(nPeriodNs), mNextNs(0), mEpochNs(0) {
     mCommand.mValue = kUnallocatedCommand;
 }
 
-// NTSC-U/C: 0x0013b138, PAL: 0x0013ba80
 TimeTask::~TimeTask() {
     Stop();
 }
 
-// NTSC-U/C: 0x0013afc0, PAL: 0x0013b908
 void TimeTask::Print(std::ostream &stream) {
     stream << kDescription;
 }
 
-// NTSC-U/C: 0x0013b180, PAL: 0x0013bac8
 void TimeTask::Start(long long nEpochOffsetNs) {
     mNextNs = mClock->Now();
     if (nEpochOffsetNs == kNoEpochOffset) {
@@ -89,7 +85,6 @@ void TimeTask::Start(long long nEpochOffsetNs) {
     Run();
 }
 
-// NTSC-U/C: 0x0013ae70, PAL: 0x0013b7b8
 void TimeTask::Run() {
     if (Tick(mNextNs - mEpochNs) != 1) {
         return;
@@ -104,7 +99,6 @@ void TimeTask::Run() {
     }
 }
 
-// NTSC-U/C: 0x0013b1f0, PAL: 0x0013bb38
 void TimeTask::Stop() {
     const Sch::CmdID command = mCommand;
     mClock->Withdraw(command);

@@ -143,19 +143,32 @@ private:
     // The requirement entry that disables a track.
     enum { kNeverEnabled = -1 };
 
-    // NTSC-U/C: 0x00101f10, PAL: 0x00101f10
-    // Clears the requirement lists, sizes them to mTrackCount, and fills each from
-    // nConfigCode with the one-based track number as the lookup argument, storing each value less
-    // one. The title is inferred.
+    /**
+     * Clears the requirement lists, sizes them to mTrackCount, and fills each from nConfigCode with
+     * the one-based track number as the lookup argument, storing each value less one.
+     *
+     * The title is inferred.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00101f10
+     * @ghidraAddress PAL: 0x00101f10
+     */
     void Init(int nConfigCode);
 
-    // NTSC-U/C: 0x00105498, PAL: 0x00105498
-    // Sets pOwned[i] for each of the kOwnedTrackCount tracks to whether the track has
-    // an owner at nBar.
+    /**
+     * Sets pOwned[i] for each of the kOwnedTrackCount tracks to whether the track has an owner at
+     * nBar.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00105498
+     * @ghidraAddress PAL: 0x00105498
+     */
     void QueryOwnershipAtSongBar(int *pOwned, int nBar) const;
 
-    // NTSC-U/C: 0x00105530, PAL: 0x00105530
-    // Reports whether every requirement of nTrack is owned in pOwned.
+    /**
+     * Reports whether every requirement of nTrack is owned in pOwned.
+     *
+     * @ghidraAddress NTSC-U/C: 0x00105530
+     * @ghidraAddress PAL: 0x00105530
+     */
     int IsTrackEnabled(int nTrack, const int *pOwned);
 
     int mTrackCount;
