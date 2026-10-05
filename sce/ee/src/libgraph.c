@@ -98,9 +98,7 @@ enum {
 };
 
 // The spin budget every libgraph busy wait shares.
-enum {
-    kChannelSpinLimit = 0x1000000
-};
+enum { kChannelSpinLimit = 0x1000000 };
 
 // NTSC-U/C: 0x006004c8, PAL: 0x005c55f8
 // Returns the shared graphics state block.
@@ -286,8 +284,8 @@ static unsigned long long MakeDisplayWord(const GsState *state,
 
     if (state->interlaceMode == kGsInterlace) {
         down = (unsigned long long)((nDy + nOffsetYInterlaced) & 0xFFF) << 12;
-        lines = (unsigned long long)(long long)(state->fieldMode == 0 ? nHeight - 1
-                                                                      : nHeight * 2 - 1);
+        lines =
+            (unsigned long long)(long long)(state->fieldMode == 0 ? nHeight - 1 : nHeight * 2 - 1);
     } else {
         down = (unsigned long long)((nDy + nOffsetYProgressive) & 0xFFF) << 12;
         lines = (unsigned long long)(long long)(nHeight - 1);
@@ -313,7 +311,7 @@ void sceGsSetDefDispEnv(
         pDisp->smode2 = 1ULL;
     }
     buffer = ((unsigned long long)(nPsm & 0xF) << 15) |
-        ((((unsigned long long)(width + 0x3F) >> 6) & 0x3FULL) << 9);
+             ((((unsigned long long)(width + 0x3F) >> 6) & 0x3FULL) << 9);
     pDisp->dispfb = buffer;
     if (output == kGsNtsc) {
         pDisp->display = MakeDisplayWord(state, nWidth, nHeight, nDx, nDy, 0x27C, 0x32, 0x19);
@@ -334,7 +332,7 @@ int sceGsSetDefDrawEnv(
     unsigned long long test;
 
     frame = (((unsigned long long)(nPsm & 0xF)) << 24) |
-        ((((unsigned long long)(nWidth + 0x3F) >> 6) & 0x3FULL) << 16);
+            ((((unsigned long long)(nWidth + 0x3F) >> 6) & 0x3FULL) << 16);
     pDraw->frame1 = frame;
     pDraw->frame1addr = 0x4CULL;
     pDraw->zbuf1addr = 0x4EULL;
@@ -345,11 +343,10 @@ int sceGsSetDefDrawEnv(
     }
     pDraw->zbuf1 = depth;
     offset = (((unsigned long long)(0x800 - (nWidth >> 1))) << 4) |
-        (((unsigned long long)(0x800 - (nHeight >> 1))) << 36);
+             (((unsigned long long)(0x800 - (nHeight >> 1))) << 36);
     pDraw->xyoffset1 = offset;
     pDraw->xyoffset1addr = 0x18ULL;
-    clip = (((unsigned long long)(nWidth - 1)) << 16) |
-        (((unsigned long long)(nHeight - 1)) << 48);
+    clip = (((unsigned long long)(nWidth - 1)) << 16) | (((unsigned long long)(nHeight - 1)) << 48);
     pDraw->scissor1 = clip;
     pDraw->scissor1addr = 0x40ULL;
     pDraw->prmodecontaddr = 0x1AULL;
@@ -391,7 +388,7 @@ int sceGsSetDefClear(sceGsClear *pClear,
 
     first = ((unsigned long long)(nX << 4)) | (((unsigned long long)(nY << 4)) << 16);
     second = ((unsigned long long)((nX + nWidth) << 4)) |
-        ((unsigned long long)((nY + nHeight) << 4) << 16);
+             ((unsigned long long)((nY + nHeight) << 4) << 16);
     first |= ((unsigned long long)nZ) << 32;
     second |= ((unsigned long long)nZ) << 32;
     colour = (nRed & 0xFFULL) | ((nGreen & 0xFFULL) << 8) | ((nBlue & 0xFFULL) << 16);
@@ -436,10 +433,28 @@ int sceGsSetDefDBuff(sceGsDBuff *pDBuff,
     sceGsSetDefDrawEnv(&pDBuff->draw0, nPsm, nWidth, nHeight, nZTest, nZPsm);
     sceGsSetDefDrawEnv(&pDBuff->draw1, nPsm, nWidth, nHeight, nZTest, nZPsm);
     if (nClear != 0) {
-        sceGsSetDefClear(&pDBuff->clear0, nZTest, (short)clearX, (short)clearY, nWidth,
-            nHeight, 0ULL, 0ULL, 0ULL, 0ULL, 0U);
-        sceGsSetDefClear(&pDBuff->clear1, nZTest, (short)clearX, (short)clearY, nWidth,
-            nHeight, 0ULL, 0ULL, 0ULL, 0ULL, 0U);
+        sceGsSetDefClear(&pDBuff->clear0,
+                         nZTest,
+                         (short)clearX,
+                         (short)clearY,
+                         nWidth,
+                         nHeight,
+                         0ULL,
+                         0ULL,
+                         0ULL,
+                         0ULL,
+                         0U);
+        sceGsSetDefClear(&pDBuff->clear1,
+                         nZTest,
+                         (short)clearX,
+                         (short)clearY,
+                         nWidth,
+                         nHeight,
+                         0ULL,
+                         0ULL,
+                         0ULL,
+                         0ULL,
+                         0U);
     }
     pDBuff->giftag0.mWords[0] = loops | 0x8000ULL | 0x1000000000000000ULL;
     pDBuff->giftag0.mWords[1] = 0xEULL;
@@ -454,8 +469,7 @@ int sceGsSetDefDBuff(sceGsDBuff *pDBuff,
     pages >>= 1;
     pDBuff->disp[1].dispfb =
         (pDBuff->disp[1].dispfb & ~0x1FFULL) | (unsigned long long)(pages & 0x1FF);
-    pDBuff->draw0.frame1 =
-        (pDBuff->draw0.frame1 & ~0x1FFULL) | (unsigned long long)(pages & 0x1FF);
+    pDBuff->draw0.frame1 = (pDBuff->draw0.frame1 & ~0x1FFULL) | (unsigned long long)(pages & 0x1FF);
     return pages & 0x1FF;
 }
 
@@ -541,8 +555,8 @@ int sceGsSetDefLoadImage(sceGsLoadImage *pLoadImage,
     pLoadImage->mWords[11] = 0ULL;
     pLoadImage->mWords[0] = 0ULL;
     pLoadImage->mWords[1] = 0ULL;
-    pLoadImage->mWords[10] = (((unsigned long long)(count & 0x7FFF)) | 0x8000ULL) &
-        0xF3FFFFFFFFFFFFFFULL;
+    pLoadImage->mWords[10] =
+        (((unsigned long long)(count & 0x7FFF)) | 0x8000ULL) & 0xF3FFFFFFFFFFFFFFULL;
     pLoadImage->mWords[10] |= 0x0800000000000000ULL;
     buffer = (((unsigned long long)nTbp) << 32) | (((unsigned long long)nTbw) << 48);
     buffer |= ((unsigned long long)nPsm) << 56;
@@ -756,12 +770,12 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
         rounded = 0;
     }
     if (ragged != 0) {
-        unsigned long long size = ((unsigned long long)width) |
-            (((unsigned long long)rounded) << 32);
+        unsigned long long size =
+            ((unsigned long long)width) | (((unsigned long long)rounded) << 32);
         volatile unsigned long long *uncached;
 
-        uncached = (volatile unsigned long long *)(uintptr_t)(
-            ((uintptr_t)pStoreImage + 0x40U) | 0x20000000U);
+        uncached = (volatile unsigned long long *)(uintptr_t)(((uintptr_t)pStoreImage + 0x40U) |
+                                                              0x20000000U);
         *uncached = size;
     }
     if ((VIF1_CHCR & 0x100U) != 0U) {
@@ -852,7 +866,8 @@ int sceGsExecStoreImage(sceGsStoreImage *pStoreImage, void *pDest) {
             if (StoreImageWaitFifo(&spins) != 0) {
                 return -1;
             }
-            last.quad = ee_load_quadword(VIF1_FIFO); // The binary drains the padding and discards it.
+            last.quad =
+                ee_load_quadword(VIF1_FIFO); // The binary drains the padding and discards it.
         }
     }
     VIF1_STAT = 0U;

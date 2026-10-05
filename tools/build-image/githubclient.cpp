@@ -1,9 +1,10 @@
 #include "githubclient.h"
 
 #include <format>
-#include <httplib.h>
 #include <regex>
 #include <utility>
+
+#include <httplib.h>
 
 #include "imageerror.h"
 

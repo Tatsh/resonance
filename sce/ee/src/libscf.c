@@ -62,7 +62,18 @@ static char g_szScfRomVersion[16];
 
 // Month lengths for the day arithmetic below, read from the image.
 static const unsigned char kMonthLengths[12] = {
-    31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
+    31,
+    28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
 };
 
 // NTSC-U/C: 0x005f2d08, PAL: 0x005a5910

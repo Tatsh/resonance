@@ -1,8 +1,9 @@
 #include "met/metstrings.h"
 
 #ifdef VIDEO_STANDARD_PAL
-#include <libscf.h>
 #include <stdio.h>
+
+#include <libscf.h>
 
 #include "os/hostmode.h"
 

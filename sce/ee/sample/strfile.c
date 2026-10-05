@@ -1,12 +1,13 @@
 #include "ezmpeg/strfile.h"
 
 #include <ctype.h>
-#include <ezmpeg.h>
-#include <libcdvd.h>
-#include <sifdev.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <ezmpeg.h>
+#include <libcdvd.h>
+#include <sifdev.h>
 
 #include "os/log.h"
 
@@ -110,7 +111,7 @@ int strFileOpen(StrFile *pFile, const char *pszName) {
     return 1;
 }
 
-int strFileClose(StrFile* pFile) {
+int strFileClose(StrFile *pFile) {
     if (pFile->isOnCD != 0) {
         sceCdStStop();
         void *pHeap = *(void **)&pFile->cdFile[kHeapSlot];
@@ -124,10 +125,8 @@ int strFileClose(StrFile* pFile) {
 int strFileRead(StrFile *pFile, void *pBuffer, int nSize) {
     if (pFile->isOnCD != 0) {
         unsigned int nError = 0;
-        int nSectors = sceCdStRead((unsigned int)nSize >> kSectorShift,
-                                   (unsigned int *)pBuffer,
-                                   1,
-                                   &nError);
+        int nSectors =
+            sceCdStRead((unsigned int)nSize >> kSectorShift, (unsigned int *)pBuffer, 1, &nError);
         return nSectors << kSectorShift;
     }
     return sceRead(pFile->fd, pBuffer, nSize);

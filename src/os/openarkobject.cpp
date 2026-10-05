@@ -2,10 +2,11 @@
 
 #include <ctype.h>
 #include <iostream>
-#include <libcdvd.h>
-#include <sifdev.h>
 #include <string.h>
 #include <vector>
+
+#include <libcdvd.h>
+#include <sifdev.h>
 
 #include "os/async.h"
 #include "os/fileio.h"

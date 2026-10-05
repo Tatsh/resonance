@@ -2,9 +2,10 @@
 
 #include <cstring>
 #include <iostream>
-#include <libgraph.h>
 #include <list>
 #include <vector>
+
+#include <libgraph.h>
 
 #include "math/color.h"
 #include "met/metfreqmakerassetmanager.h"

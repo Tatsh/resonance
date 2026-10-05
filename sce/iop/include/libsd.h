@@ -75,12 +75,12 @@ typedef struct {
 
 /** Reverb settings of a core. */
 typedef struct {
-    int core;     /*!< Core number. */
-    int mode;     /*!< Reverb mode. */
+    int core;      /*!< Core number. */
+    int mode;      /*!< Reverb mode. */
     short depth_L; /*!< Left depth. */
     short depth_R; /*!< Right depth. */
-    int delay;    /*!< Delay of the echo modes. */
-    int feedback; /*!< Feedback of the echo modes. */
+    int delay;     /*!< Delay of the echo modes. */
+    int feedback;  /*!< Feedback of the echo modes. */
 } sceSdEffectAttr;
 
 /**

@@ -3,13 +3,14 @@
 #include <algorithm>
 #include <ctype.h>
 #include <iostream>
+#include <stdlib.h>
+
 #include <libcdvd.h>
 #include <libgraph.h>
 #include <libmc.h>
 #include <libmtap.h>
 #include <sifdev.h>
 #include <sifrpc.h>
-#include <stdlib.h>
 
 #include "os/async.h"
 #include "os/hostmode.h"

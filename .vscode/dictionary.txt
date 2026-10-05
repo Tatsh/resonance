@@ -191,6 +191,7 @@ crti
 crtn
 csclientstatuspacket
 csinitiateplaypacket
+ctype
 cureff
 cwrite
 cycl
@@ -307,6 +308,7 @@ fcget
 fcntl
 fcset
 fdata
+fenv
 ffmd
 fileobject
 filetab
@@ -500,6 +502,7 @@ intobject
 intr
 intrcode
 intrman
+inttypes
 invalidateseekermsg
 invalidatetrackmsg
 invers
@@ -1144,6 +1147,7 @@ sequencercmd
 serialiser
 setattro
 setinboth
+setjmp
 setmat
 shellcheck
 shellformat
@@ -1200,9 +1204,16 @@ sstv
 startable
 statusline
 stcycl
+stdalign
 stdarg
+stdatomic
+stdbool
 stdc
+stddef
+stdint
+stdlib
 stdmidimsg
+stdnoreturn
 stmask
 stmblk
 stmnblk
@@ -1251,6 +1262,7 @@ texburn
 texs
 textmsg
 texturepairrecord
+tgmath
 thbase
 thid
 tickclock
@@ -1323,6 +1335,7 @@ tuplerepeat
 tutorialrmx
 tvel
 typeobject
+uchar
 ucnhash
 udnl
 udvare
@@ -1386,6 +1399,8 @@ vudata
 vutext
 waheffector
 wbdc
+wchar
+wctype
 wdelete
 werror
 wextra

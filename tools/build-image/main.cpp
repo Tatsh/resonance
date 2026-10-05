@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <argparse/argparse.hpp>
 #include <charconv>
 #include <cstdint>
 #include <cstdlib>
@@ -11,11 +10,13 @@
 #include <map>
 #include <memory>
 #include <optional>
-#include <spdlog/spdlog.h>
 #include <string>
 #include <string_view>
 #include <system_error>
 #include <vector>
+
+#include <argparse/argparse.hpp>
+#include <spdlog/spdlog.h>
 
 #include "directoryvolume.h"
 #include "fileio.h"

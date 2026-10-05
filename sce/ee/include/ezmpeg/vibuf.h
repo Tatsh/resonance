@@ -32,21 +32,21 @@ typedef struct {
  * every access.
  */
 typedef struct {
-    unsigned char *mData;           /**< +0x00. Ring base. */
-    int mTagBase;                   /**< +0x04. Uncached base of the DMA tag ring. */
-    int mCapacitySectors;           /**< +0x08. Sector budget for free space. Inferred. */
-    int mReadSectors;               /**< +0x0c. Read position in sectors. Inferred. */
-    int mBufferedSectors;           /**< +0x10. Buffered whole sectors. Inferred. */
-    int mBufferedBytes;             /**< +0x14. Buffered bytes past the whole sectors. */
-    int mSize;                      /**< +0x18. Ring capacity in bytes. */
+    unsigned char *mData;               /**< +0x00. Ring base. */
+    int mTagBase;                       /**< +0x04. Uncached base of the DMA tag ring. */
+    int mCapacitySectors;               /**< +0x08. Sector budget for free space. Inferred. */
+    int mReadSectors;                   /**< +0x0c. Read position in sectors. Inferred. */
+    int mBufferedSectors;               /**< +0x10. Buffered whole sectors. Inferred. */
+    int mBufferedBytes;                 /**< +0x14. Buffered bytes past the whole sectors. */
+    int mSize;                          /**< +0x18. Ring capacity in bytes. */
     unsigned char mSavedChannels[0x24]; /**< +0x1c. IPU channel words saved across a stop. */
-    int mSemaId;                    /**< +0x40. Semaphore guarding the record. */
-    int mActive;                    /**< +0x44. 1 while the input DMA runs. */
-    long long mTotalPut;            /**< +0x48. Bytes accepted through EndPut over the lifetime. */
-    ViTimeStamp *mTimeStamps;       /**< +0x50. Stamp ring base. */
-    int mTimeStampCapacity;         /**< +0x54. Stamp ring capacity in entries. */
-    int mTimeStampCount;            /**< +0x58. Stamps held. */
-    int mTimeStampIndex;            /**< +0x5c. Next stamp slot. */
+    int mSemaId;                        /**< +0x40. Semaphore guarding the record. */
+    int mActive;                        /**< +0x44. 1 while the input DMA runs. */
+    long long mTotalPut;      /**< +0x48. Bytes accepted through EndPut over the lifetime. */
+    ViTimeStamp *mTimeStamps; /**< +0x50. Stamp ring base. */
+    int mTimeStampCapacity;   /**< +0x54. Stamp ring capacity in entries. */
+    int mTimeStampCount;      /**< +0x58. Stamps held. */
+    int mTimeStampIndex;      /**< +0x5c. Next stamp slot. */
 } ViBuf;
 
 /**

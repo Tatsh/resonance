@@ -172,15 +172,8 @@ int sceSdRemote(int nControl, ...) {
                       (void *)(uintptr_t)pPacket->mArgument1);
         return nResult;
     }
-    sceSifCallRpc(pClient,
-                  nCommand,
-                  nFlag,
-                  pPacket,
-                  kSdrSendSize,
-                  pPacket,
-                  kSdrReceiveSize,
-                  pfnEnd,
-                  pPacket);
+    sceSifCallRpc(
+        pClient, nCommand, nFlag, pPacket, kSdrSendSize, pPacket, kSdrReceiveSize, pfnEnd, pPacket);
     nResult = pPacket->mResult;
     return nResult;
 }

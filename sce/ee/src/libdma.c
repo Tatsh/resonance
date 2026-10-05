@@ -70,34 +70,33 @@ enum {
 
 // Channel register block. Offsets match the image. Gaps preserve the hardware spacing.
 typedef struct {
-    volatile unsigned int mChcr; // The control word resides at offset 0x00.
+    volatile unsigned int mChcr;   // The control word resides at offset 0x00.
     unsigned char mReserved04[12]; // Padding occupies offsets 0x04 to 0x0F.
-    volatile unsigned int mMadr; // The address word resides at offset 0x10.
+    volatile unsigned int mMadr;   // The address word resides at offset 0x10.
     unsigned char mReserved14[12]; // Padding occupies offsets 0x14 to 0x1F.
-    volatile unsigned int mQwc; // The count word resides at offset 0x20.
+    volatile unsigned int mQwc;    // The count word resides at offset 0x20.
     unsigned char mReserved24[12]; // Padding occupies offsets 0x24 to 0x2F.
-    volatile unsigned int mTadr; // The tag word resides at offset 0x30.
+    volatile unsigned int mTadr;   // The tag word resides at offset 0x30.
     unsigned char mReserved34[12]; // Padding occupies offsets 0x34 to 0x3F.
-    volatile unsigned int mAsr0; // The first tag address save word resides at offset 0x40.
+    volatile unsigned int mAsr0;   // The first tag address save word resides at offset 0x40.
     unsigned char mReserved44[12]; // Padding occupies offsets 0x44 to 0x4F.
-    volatile unsigned int mAsr1; // The second tag address save word resides at offset 0x50.
+    volatile unsigned int mAsr1;   // The second tag address save word resides at offset 0x50.
     unsigned char mReserved54[44]; // Padding occupies offsets 0x54 to 0x7F.
-    volatile unsigned int mSadr; // The scratchpad address word resides at offset 0x80.
+    volatile unsigned int mSadr;   // The scratchpad address word resides at offset 0x80.
 } DmaChannelRegs;
 
 // The register block of each channel, VIF0 through the scratchpad input.
 // NTSC-U/C: 0x0077fc08, PAL: 0x00768d98
-static DmaChannelRegs *dch[kChannelCount] = {
-    (DmaChannelRegs *)(uintptr_t)0x10008000U,
-    (DmaChannelRegs *)(uintptr_t)0x10009000U,
-    (DmaChannelRegs *)(uintptr_t)0x1000A000U,
-    (DmaChannelRegs *)(uintptr_t)0x1000B000U,
-    (DmaChannelRegs *)(uintptr_t)0x1000B400U,
-    (DmaChannelRegs *)(uintptr_t)0x1000C000U,
-    (DmaChannelRegs *)(uintptr_t)0x1000C400U,
-    (DmaChannelRegs *)(uintptr_t)0x1000C800U,
-    (DmaChannelRegs *)(uintptr_t)0x1000D000U,
-    (DmaChannelRegs *)(uintptr_t)0x1000D400U};
+static DmaChannelRegs *dch[kChannelCount] = {(DmaChannelRegs *)(uintptr_t)0x10008000U,
+                                             (DmaChannelRegs *)(uintptr_t)0x10009000U,
+                                             (DmaChannelRegs *)(uintptr_t)0x1000A000U,
+                                             (DmaChannelRegs *)(uintptr_t)0x1000B000U,
+                                             (DmaChannelRegs *)(uintptr_t)0x1000B400U,
+                                             (DmaChannelRegs *)(uintptr_t)0x1000C000U,
+                                             (DmaChannelRegs *)(uintptr_t)0x1000C400U,
+                                             (DmaChannelRegs *)(uintptr_t)0x1000C800U,
+                                             (DmaChannelRegs *)(uintptr_t)0x1000D000U,
+                                             (DmaChannelRegs *)(uintptr_t)0x1000D400U};
 
 // Whether the reset clears each channel. The three SIF channels are excluded, as the IOP link
 // runs over them.
@@ -110,48 +109,48 @@ static sceDmaEnv sceDmaCurrentEnv;
 
 // Raw environment view. Offsets match the image. Members expose every byte the put path validates.
 typedef struct {
-    unsigned char mStallSource; // The stall source channel resides at offset 0x00.
-    unsigned char mStallDrain; // The stall drain channel resides at offset 0x01.
-    unsigned char mMfifoDrain; // The MFIFO drain channel resides at offset 0x02.
-    unsigned char mReleaseCycle; // The release cycle resides at offset 0x03.
-    unsigned short mExpress; // The express channel mask resides at offset 0x04.
-    unsigned short mNotify; // The notify channel mask resides at offset 0x06.
-    unsigned short mStallQwc; // The stall quadword count resides at offset 0x08.
-    unsigned short mTransferQwc; // The transfer quadword count resides at offset 0x0A.
+    unsigned char mStallSource;      // The stall source channel resides at offset 0x00.
+    unsigned char mStallDrain;       // The stall drain channel resides at offset 0x01.
+    unsigned char mMfifoDrain;       // The MFIFO drain channel resides at offset 0x02.
+    unsigned char mReleaseCycle;     // The release cycle resides at offset 0x03.
+    unsigned short mExpress;         // The express channel mask resides at offset 0x04.
+    unsigned short mNotify;          // The notify channel mask resides at offset 0x06.
+    unsigned short mStallQwc;        // The stall quadword count resides at offset 0x08.
+    unsigned short mTransferQwc;     // The transfer quadword count resides at offset 0x0A.
     unsigned int mRingBufferAddress; // The MFIFO ring buffer address resides at offset 0x0C.
-    unsigned int mRingBufferMask; // The MFIFO ring buffer mask resides at offset 0x10.
+    unsigned int mRingBufferMask;    // The MFIFO ring buffer mask resides at offset 0x10.
 } DmaEnvRaw;
 
 // Queue record. Offsets match the video input buffer. Saved words preserve channel positions.
 typedef struct {
-    unsigned char *mData; // The ring base resides at offset 0x00.
-    unsigned int mTagBase; // The tag base resides at offset 0x04.
-    int mCapacitySectors; // The sector budget resides at offset 0x08.
-    int mReadSectors; // The read position resides at offset 0x0C.
-    int mBufferedSectors; // The buffered sectors reside at offset 0x10.
-    int mBufferedBytes; // The buffered remainder resides at offset 0x14.
-    int mSize; // The ring size resides at offset 0x18.
-    int mSavedMadr; // The saved address resides at offset 0x1C.
-    int mSavedTadr; // The saved tag resides at offset 0x20.
-    int mSavedQwc; // The saved count resides at offset 0x24.
-    int mSavedChcr; // The saved control resides at offset 0x28.
-    int mSavedFromMadr; // The saved input address resides at offset 0x2C.
-    int mSavedFromQwc; // The saved input count resides at offset 0x30.
-    int mSavedFromChcr; // The saved input control resides at offset 0x34.
-    int mSavedIpuBp; // The saved buffer pointer resides at offset 0x38.
-    int mSavedIpuCtrl; // The saved control resides at offset 0x3C.
-    int mSemaId; // The semaphore identifier resides at offset 0x40.
-    int mActive; // The active flag resides at offset 0x44.
-    long long mTotalPut; // The lifetime total resides at offset 0x48.
+    unsigned char *mData;     // The ring base resides at offset 0x00.
+    unsigned int mTagBase;    // The tag base resides at offset 0x04.
+    int mCapacitySectors;     // The sector budget resides at offset 0x08.
+    int mReadSectors;         // The read position resides at offset 0x0C.
+    int mBufferedSectors;     // The buffered sectors reside at offset 0x10.
+    int mBufferedBytes;       // The buffered remainder resides at offset 0x14.
+    int mSize;                // The ring size resides at offset 0x18.
+    int mSavedMadr;           // The saved address resides at offset 0x1C.
+    int mSavedTadr;           // The saved tag resides at offset 0x20.
+    int mSavedQwc;            // The saved count resides at offset 0x24.
+    int mSavedChcr;           // The saved control resides at offset 0x28.
+    int mSavedFromMadr;       // The saved input address resides at offset 0x2C.
+    int mSavedFromQwc;        // The saved input count resides at offset 0x30.
+    int mSavedFromChcr;       // The saved input control resides at offset 0x34.
+    int mSavedIpuBp;          // The saved buffer pointer resides at offset 0x38.
+    int mSavedIpuCtrl;        // The saved control resides at offset 0x3C.
+    int mSemaId;              // The semaphore identifier resides at offset 0x40.
+    int mActive;              // The active flag resides at offset 0x44.
+    long long mTotalPut;      // The lifetime total resides at offset 0x48.
     ViTimeStamp *mTimeStamps; // The stamp ring resides at offset 0x50.
-    int mTimeStampCapacity; // The stamp capacity resides at offset 0x54.
-    int mTimeStampCount; // The stamp count resides at offset 0x58.
-    int mTimeStampIndex; // The stamp index resides at offset 0x5C.
+    int mTimeStampCapacity;   // The stamp capacity resides at offset 0x54.
+    int mTimeStampCount;      // The stamp count resides at offset 0x58.
+    int mTimeStampIndex;      // The stamp index resides at offset 0x5C.
 } DmaQueue;
 
 // Tag slot. Each slot spans sixteen bytes. Only the low word carries an entry.
 typedef struct {
-    unsigned long long mLow; // The low word resides at offset 0x00.
+    unsigned long long mLow;  // The low word resides at offset 0x00.
     unsigned long long mHigh; // The high word resides at offset 0x08.
 } DmaTag;
 
@@ -660,16 +659,16 @@ int viBufRestartDMA(ViBuf *buffer) {
         const unsigned int endTag =
             (((unsigned int)capacity << 4) + queue->mTagBase + 0x10U) & 0x0FFFFFFFU;
         const unsigned int savedMadr = (unsigned int)queue->mSavedMadr;
-        const int savedSector = (savedMadr == endTag) ? 0 : (int)((savedMadr - base) >> kSectorShift);
+        const int savedSector =
+            (savedMadr == endTag) ? 0 : (int)((savedMadr - base) >> kSectorShift);
         const int rewoundSector = (madr == endTag) ? 0 : (int)((madr - base) >> kSectorShift);
 
         if (savedSector != rewoundSector) {
             const unsigned int ringBytes = (unsigned int)capacity << kSectorShift;
             const unsigned int savedWrapped = base + (savedMadr - base) % ringBytes;
             const unsigned int nextRead =
-                base +
-                ((unsigned int)((queue->mReadSectors + queue->mBufferedSectors) % capacity)
-                 << kSectorShift);
+                base + ((unsigned int)((queue->mReadSectors + queue->mBufferedSectors) % capacity)
+                        << kSectorShift);
             const unsigned int tagId = (savedWrapped == nextRead) ? 0U : 3U;
             const int behind = (rewoundSector + capacity - queue->mReadSectors) % capacity;
 

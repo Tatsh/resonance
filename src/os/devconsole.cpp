@@ -1,6 +1,7 @@
 #include "os/devconsole.h"
 
 #include <cstdint>
+
 #include <eekernel.h>
 #include <libdev.h>
 #include <libdma.h>

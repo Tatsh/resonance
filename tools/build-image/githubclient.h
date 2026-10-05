@@ -2,9 +2,10 @@
 
 #include <cstdint>
 #include <expected>
-#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include "error.h"
 

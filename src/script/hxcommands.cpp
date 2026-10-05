@@ -1,7 +1,8 @@
 #include <cstring>
 #include <exception>
-#include <libscf.h>
 #include <sstream>
+
+#include <libscf.h>
 
 #include "app/application.h"
 #include "app/attachment.h"

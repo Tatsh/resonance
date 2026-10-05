@@ -1,10 +1,11 @@
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include <deci2.h>
 #include <eekernel.h>
 #include <eeregs.h>
 #include <libkernelinternal.h>
-#include <stdarg.h>
-#include <stddef.h>
-#include <stdint.h>
 
 enum {
     kStatusEie = 0x10000,

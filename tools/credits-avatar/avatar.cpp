@@ -4,12 +4,13 @@
 #include <cstdio>
 #include <fcntl.h>
 #include <format>
-#include <httplib.h>
 #include <memory>
 #include <spawn.h>
-#include <spdlog/spdlog.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+#include <httplib.h>
+#include <spdlog/spdlog.h>
 
 extern char **environ;
 

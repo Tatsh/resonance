@@ -1,5 +1,9 @@
 #include "ezmpeg/disp.h"
 
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+
 #include <eekernel.h>
 #include <eeregs.h>
 #include <ezmpeg.h>
@@ -7,9 +11,6 @@
 #include <libgifpk.h>
 #include <libgraph.h>
 #include <malloc.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
 
 #include "app/cutscene.h"
 #include "ezmpeg/videodec.h"
@@ -109,9 +110,8 @@ void clearGsMem(int nRed, int nGreen, int nBlue, int nWidth, int nHeight) {
     db.giftag0.mWords[1] = 0ULL;
     unsigned long long tagWord0 = db.giftag0.mWords[0];
     unsigned long long tagWord1 = db.giftag0.mWords[1];
-    tagWord0 =
-        (((tagWord0 & 0xffffffffffff8000ULL) | 0x8008ULL) & 0x0fffffffffffffffULL) |
-        0x1000000000000000ULL;
+    tagWord0 = (((tagWord0 & 0xffffffffffff8000ULL) | 0x8008ULL) & 0x0fffffffffffffffULL) |
+               0x1000000000000000ULL;
     tagWord1 = (tagWord1 & 0xfffffffffffffff0ULL) | 0xeULL;
     db.giftag0.mWords[0] = tagWord0;
     db.giftag0.mWords[1] = tagWord1;
@@ -178,9 +178,8 @@ void setImageTag(void *pTag, void *pImage, int nField, int nWidth, int nHeight) 
             for (int row = 0; row < rows; ++row) {
                 sceGifPkCnt(&packet, 0, 0, 0);
                 sceGifPkOpenGsAD(&packet, &g_packetHeaders[1]);
-                const unsigned long long position =
-                    ((unsigned long long)(column * 16) << 32) |
-                    ((unsigned long long)(row * 16) << 48);
+                const unsigned long long position = ((unsigned long long)(column * 16) << 32) |
+                                                    ((unsigned long long)(row * 16) << 48);
                 sceGifPkAddGsAD(&packet, 0x51, position);
                 // The transfer always runs from the host to local memory.
                 sceGifPkAddGsAD(&packet, 0x53, 0);
@@ -209,9 +208,8 @@ void setImageTag(void *pTag, void *pImage, int nField, int nWidth, int nHeight) 
     sceGifPkAddGsAD(&packet, 0, 0x116);
     const unsigned long long firstColour = 8ULL | (8ULL << 16);
     const unsigned long long firstCorner = 0x6c00ULL | (kSpriteTop << 16);
-    const unsigned long long secondColour =
-        (8ULL + (unsigned long long)(nWidth * 16)) |
-        ((8ULL + (unsigned long long)(nHeight * 16)) << 16);
+    const unsigned long long secondColour = (8ULL + (unsigned long long)(nWidth * 16)) |
+                                            ((8ULL + (unsigned long long)(nHeight * 16)) << 16);
     const unsigned long long secondCorner =
         (0x6c00ULL + 0x2800ULL) | ((kSpriteTop + kSpriteHeight) << 16);
     sceGifPkAddGsAD(&packet, 3, firstColour);
@@ -323,8 +321,7 @@ int videoCallback(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
                           readBuffer->data,
                           remaining);
     if (copied > 0) {
-        if (videoDecPutTs(&videoDec, packet->pts, packet->dts, putA, copied) ==
-            0) {
+        if (videoDecPutTs(&videoDec, packet->pts, packet->dts, putA, copied) == 0) {
             ErrMessage("pts buffer overflow\n");
         }
     }
@@ -334,7 +331,8 @@ int videoCallback(sceMpeg *pMpeg, void *pCallbackData, void *pData) {
 
 // NTSC-U/C: 0x00567920, PAL: 0x005a7de8
 // Compute the two staging spans for one audio packet. Inferred.
-static void AudioPutSpans(AudioDec *pAudioDec, int *pFirstSpan, int *pFirstSize, int *pSecondSpan, int *pSecondSize) {
+static void AudioPutSpans(
+    AudioDec *pAudioDec, int *pFirstSpan, int *pFirstSize, int *pSecondSpan, int *pSecondSize) {
     if (pAudioDec->state == 0) {
         *pFirstSpan = (int)(uintptr_t)((unsigned char *)pAudioDec + pAudioDec->headerCount + 4);
         *pFirstSize = 0x28 - pAudioDec->headerCount;

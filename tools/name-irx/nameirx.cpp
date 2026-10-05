@@ -3,12 +3,13 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
-#include <elfio/elfio.hpp>
 #include <format>
 #include <spanstream>
-#include <spdlog/spdlog.h>
 #include <string>
 #include <utility>
+
+#include <elfio/elfio.hpp>
+#include <spdlog/spdlog.h>
 
 namespace Tools::NameIrx {
 

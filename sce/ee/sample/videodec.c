@@ -1,10 +1,11 @@
 #include "ezmpeg/videodec.h"
 
-#include <ezmpeg.h>
-#include <libmpeg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <ezmpeg.h>
+#include <libmpeg.h>
 
 #include "app/cutscene.h"
 #include "ezmpeg/disp.h"
@@ -126,10 +127,8 @@ static int decode(VideoDec *pVideoDec) {
                     unsigned char *pTag = (unsigned char *)voBuf.tag + tagOffset;
                     unsigned char *pData = (unsigned char *)voBuf.data + dataOffset;
 
-                    setImageTag(pTag + kTagFirstFieldOffset, pData, 0, width,
-                                height);
-                    setImageTag(pTag + kTagSecondFieldOffset, pData, 1, width,
-                                height);
+                    setImageTag(pTag + kTagFirstFieldOffset, pData, 0, width, height);
+                    setImageTag(pTag + kTagSecondFieldOffset, pData, 1, width, height);
                     tagOffset += kTagEntrySize;
                     dataOffset += kFrameDataSize;
                     ++slotIndex;
@@ -163,7 +162,8 @@ void videoDecCreate(VideoDec *pVideoDec,
     sceMpegSetCallbackSlot(pVideoDec, 3, mpegRestartDMA, NULL);
     sceMpegSetCallbackSlot(pVideoDec, 5, mpegTS, NULL);
     videoDecReset(pVideoDec);
-    sceDmaCreateQueueSemaphore(inputBuf(pVideoDec), pData, pTag, nTagSize, pTimeStamps, nTimeStamps);
+    sceDmaCreateQueueSemaphore(
+        inputBuf(pVideoDec), pData, pTag, nTagSize, pTimeStamps, nTimeStamps);
 }
 
 int videoDecDelete(VideoDec *pVideoDec) {
@@ -217,12 +217,11 @@ int videoDecFlush(VideoDec *pVideoDec) {
     }
     putAddress = (uintptr_t)pPut;
     wrappedAddress = (uintptr_t)pWrappedPut;
-    pUncachedPut =
-        (unsigned char *)((putAddress & kPhysicalAddressMask) | kUncachedSegment);
-    pUncachedWrapped = (unsigned char *)((wrappedAddress & kPhysicalAddressMask) |
-                                         kUncachedSegment);
-    copied = cpy2area(pUncachedPut, putSize, pUncachedWrapped, wrappedSize, endCode,
-                      kFlushWriteSize, NULL, 0);
+    pUncachedPut = (unsigned char *)((putAddress & kPhysicalAddressMask) | kUncachedSegment);
+    pUncachedWrapped =
+        (unsigned char *)((wrappedAddress & kPhysicalAddressMask) | kUncachedSegment);
+    copied = cpy2area(
+        pUncachedPut, putSize, pUncachedWrapped, wrappedSize, endCode, kFlushWriteSize, NULL, 0);
     viBufEndPut(inputBuf(&videoDec), copied);
     viBufFlush(inputBuf(pVideoDec));
     if (pVideoDec->state != 0) {
@@ -294,13 +293,13 @@ void videoDecMain(VideoDec *pVideoDec) {
 #pragma GCC diagnostic ignored "-Wnonnull"
 #endif
 int cpy2area(unsigned char *pDestA,
-                    int nDestA,
-                    unsigned char *pDestB,
-                    int nDestB,
-                    unsigned char *pSrcA,
-                    int nSrcA,
-                    unsigned char *pSrcB,
-                    int nSrcB) {
+             int nDestA,
+             unsigned char *pDestB,
+             int nDestB,
+             unsigned char *pSrcA,
+             int nSrcA,
+             unsigned char *pSrcB,
+             int nSrcB) {
     if (nDestA + nDestB < nSrcA + nSrcB) {
         return 0;
     }

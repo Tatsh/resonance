@@ -132,9 +132,9 @@ static void chaMemFree(void *pBlock) {
             unsigned int nPreviousHeader;
 
             if ((nNextHeader >> 28) == 0u) {
-                nHeader = (nHeader & 0xf0000000u) |
-                          (((nHeader & 0x0fffffffu) + 1u + (nNextHeader & 0x0fffffffu)) &
-                           0x0fffffffu);
+                nHeader =
+                    (nHeader & 0xf0000000u) |
+                    (((nHeader & 0x0fffffffu) + 1u + (nNextHeader & 0x0fffffffu)) & 0x0fffffffu);
                 *pHeader = nHeader;
             }
             // The first block is its own predecessor.
@@ -161,9 +161,9 @@ void sceDevVif0Reset(void) {
 void sceDevVu0Reset(void) {
     unsigned int nStatus;
 
-    __asm__ volatile ("cfc2 %0, $vi28" : "=r" (nStatus));
+    __asm__ volatile("cfc2 %0, $vi28" : "=r"(nStatus));
     nStatus |= 2u;
-    __asm__ volatile ("ctc2 %0, $vi28" : : "r" (nStatus));
+    __asm__ volatile("ctc2 %0, $vi28" : : "r"(nStatus));
 }
 
 void sceDevConsInit(void) {
@@ -175,8 +175,10 @@ void sceDevConsInit(void) {
     }
 }
 
-int sceDevConsOpen(
-    unsigned int nGsX, unsigned int nGsY, unsigned int nColumns, unsigned int nRows) {
+int sceDevConsOpen(unsigned int nGsX,
+                   unsigned int nGsY,
+                   unsigned int nColumns,
+                   unsigned int nRows) {
     DevConsole *pConsoles = s_Cons;
     DevConsole *pConsole = NULL;
     int nIndex;

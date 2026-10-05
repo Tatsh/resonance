@@ -4,8 +4,9 @@
 #include <format>
 #include <iterator>
 #include <regex>
-#include <spdlog/spdlog.h>
 #include <system_error>
+
+#include <spdlog/spdlog.h>
 
 #include "byteorder.h"
 #include "fileio.h"

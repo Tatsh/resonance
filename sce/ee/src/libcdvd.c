@@ -1,8 +1,9 @@
+#include <stdio.h>
+
 #include <eekernel.h>
 #include <libcdvd.h>
 #include <sifcmd.h>
 #include <sifrpc.h>
-#include <stdio.h>
 
 enum {
     kCdServerInit = 0x80000592,
@@ -987,10 +988,10 @@ int sceCdStRead(unsigned int size, unsigned int *buf, unsigned int mode, unsigne
             nLastError = nError;
             if (g_nCdDebug > 0) {
                 scePrintf("sceCdStRead BLK Read cur_size= %d read_size= %d req_size= %d err 0x%x\n",
-                       nRead,
-                       nPass,
-                       size,
-                       nError);
+                          nRead,
+                          nPass,
+                          size,
+                          nError);
             }
         } else if (nPass == 0) {
             sceCdDelayThread(kStreamRetryTicks);

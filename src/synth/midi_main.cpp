@@ -1,13 +1,14 @@
 #include "synth/midi_main.h"
 
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include <csl.h>
 #include <eekernel.h>
 #include <libsdr.h>
 #include <msin.h>
 #include <sifdev.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "app/application.h"
 #include "os/async.h"

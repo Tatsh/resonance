@@ -1,7 +1,8 @@
 #include "ezmpeg/vibuf.h"
 
-#include <eekernel.h>
 #include <stddef.h>
+
+#include <eekernel.h>
 
 // Sectors hold 2048 bytes, and BeginPut always keeps two sectors free.
 enum {

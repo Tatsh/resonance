@@ -1,10 +1,11 @@
-#include <argparse/argparse.hpp>
 #include <cstdlib>
 #include <exception>
 #include <filesystem>
 #include <iostream>
-#include <spdlog/spdlog.h>
 #include <string>
+
+#include <argparse/argparse.hpp>
+#include <spdlog/spdlog.h>
 
 #include "fileio.h"
 #include "logging.h"

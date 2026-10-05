@@ -55,15 +55,21 @@ IncludeBlocks: 'Regroup'
 IncludeCategories:
   - CaseSensitive: true
     Priority: 1
-    Regex: '^<[a-z]'
+    Regex: '^<(assert|complex|ctype|errno|fcntl|fenv|float|inttypes|iso646|limits|locale|math|pthread|setjmp|signal|spawn|stdalign|stdarg|stdatomic|stdbool|stddef|stdint|stdio|stdlib|stdnoreturn|string|strings|sys/[a-z_]+|tgmath|threads|time|uchar|unistd|wchar|wctype)\.h>$'
+  - CaseSensitive: true
+    Priority: 1
+    Regex: '^<[a-z_]+>$'
   - CaseSensitive: true
     Priority: 2
-    Regex: '^<[A-Z][A-Za-z0-9]*/'
+    Regex: '^<[a-z]'
   - CaseSensitive: true
     Priority: 3
-    Regex: '^<[A-Z][^/]*>'
+    Regex: '^<[A-Z][A-Za-z0-9]*/'
   - CaseSensitive: true
     Priority: 4
+    Regex: '^<[A-Z][^/]*>'
+  - CaseSensitive: true
+    Priority: 5
     Regex: '^"'
 IncludeIsMainRegex: '(Test)?$'
 IndentCaseLabels: false

@@ -18,9 +18,9 @@ typedef struct _moduleinfo {
 
 /** Kernel result codes the module compares against. */
 enum KernelErrorCode {
-    KE_OK = 0,     /*!< Success. */
-    KE_ERROR = -1,              /*!< Unspecified failure. */
-    KE_TIMER_NOT_INUSE = -156,  /*!< The timer is not running. */
+    KE_OK = 0,                 /*!< Success. */
+    KE_ERROR = -1,             /*!< Unspecified failure. */
+    KE_TIMER_NOT_INUSE = -156, /*!< The timer is not running. */
 };
 
 /** Interrupt numbers of the IOP interrupt controller and its DMA channels. */
@@ -34,11 +34,11 @@ enum INUM {
 
 /** Creation parameters of a thread. */
 struct ThreadParam {
-    unsigned int attr;      /*!< Attribute bits such as #TH_C. */
-    unsigned int option;    /*!< Caller-defined option word. */
-    void (*entry)(void);    /*!< Entry point. */
-    int stackSize;          /*!< Stack size in bytes. */
-    int initPriority;       /*!< Starting priority, where a smaller value runs first. */
+    unsigned int attr;   /*!< Attribute bits such as #TH_C. */
+    unsigned int option; /*!< Caller-defined option word. */
+    void (*entry)(void); /*!< Entry point. */
+    int stackSize;       /*!< Stack size in bytes. */
+    int initPriority;    /*!< Starting priority, where a smaller value runs first. */
 };
 
 /** A 64-bit system clock value in bus cycles. */

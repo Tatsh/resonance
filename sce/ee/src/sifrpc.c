@@ -89,7 +89,7 @@ typedef struct {
     int nPacketId;
     RpcPacket *pPackets;
     int nPacketCount;
-    int nUnusedFirst; // Cleared by sceSifInitRpc() and never read.
+    int nUnusedFirst;  // Cleared by sceSifInitRpc() and never read.
     int nUnusedSecond; // Cleared by sceSifInitRpc() and never read.
     RpcPacket *pReplies;
     int nReplyCount;

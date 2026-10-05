@@ -36,41 +36,41 @@ enum {
 // One stream entry, 0x18 bytes. The key is compared as eight bytes, the template copies the
 // eight bytes for the stream type, and the callback returns on duplicate registration.
 typedef struct {
-    unsigned long long key; // Combined key, compared as a pair. +0x00
+    unsigned long long key;          // Combined key, compared as a pair. +0x00
     unsigned long long templateBits; // Template for the stream type. +0x08
-    sceMpegCallback callback; // Stream callback, returned on duplicate registration. +0x10
-    void *data; // Stream data. +0x14
+    sceMpegCallback callback;        // Stream callback, returned on duplicate registration. +0x10
+    void *data;                      // Stream data. +0x14
 } StreamEntry;
 
 // One callback slot, 8 bytes. Seven slots run from +0x0c to +0x44, where the table pointer
 // sits. Slots two and three start with default callbacks.
 typedef struct {
     void *callback; // Slot callback. A replacement returns the old callback. +0x00
-    void *data; // Slot data. +0x04
+    void *data;     // Slot data. +0x04
 } MpegSlot;
 
 // The input ring at +0x108. The base and size bound the buffer while the write pointer doubles
 // as the bump allocator cursor and the commit pointer saves it.
 typedef struct {
-    int mBase; // Buffer base, set at reset. +0x00
-    int mSize; // Buffer size, set at reset. +0x04
-    int mWrite; // Write position, bumped by allocation. +0x08
+    int mBase;   // Buffer base, set at reset. +0x00
+    int mSize;   // Buffer size, set at reset. +0x04
+    int mWrite;  // Write position, bumped by allocation. +0x08
     int mCommit; // Committed write position. +0x0c
 } MpegRing;
 
 // The work area behind the decoder context pointer. Reserved members are never read or written.
 typedef struct {
-    int mCompleted; // Set to 1 when the picture is done and cleared to arm or fail. +0x00
+    int mCompleted;    // Set to 1 when the picture is done and cleared to arm or fail. +0x00
     int mPictureIndex; // Pictures decoded since the last flush. +0x04
-    int mOutputState; // Idle, decoding, or shown, and cleared by sceMpegReset(). +0x08
+    int mOutputState;  // Idle, decoding, or shown, and cleared by sceMpegReset(). +0x08
     MpegSlot mSlots[kSlotCount]; // Callback slots. +0x0c
-    StreamEntry *mStreamTable; // Stream entries, bump-allocated from the ring. +0x44
-    int mStreamCount; // Entries used. Duplicates overwrite and still count. +0x48
-    int mReserved4C[9]; // Untouched at creation. +0x4c
+    StreamEntry *mStreamTable;   // Stream entries, bump-allocated from the ring. +0x44
+    int mStreamCount;            // Entries used. Duplicates overwrite and still count. +0x48
+    int mReserved4C[9];          // Untouched at creation. +0x4c
     int mUseDefaultPtsGap; // Set to 1 to interpolate a missing stamp from the default gap. +0x70
-    int mReserved74; // Untouched at creation. +0x74
+    int mReserved74;       // Untouched at creation. +0x74
     unsigned long long mDefaultPtsGap; // Stamp ticks per frame for the interpolation. +0x78
-    int mLastPts; // Stamp of the last output picture, -1 at creation and on drain. +0x80
+    int mLastPts;    // Stamp of the last output picture, -1 at creation and on drain. +0x80
     int mReserved84; // Untouched at creation. +0x84
     unsigned long long mDisplayFieldCount; // Fields the displayed picture occupies. +0x88
     int mOddGapPictures; // Pictures interpolated with an odd gap, for the rounding. +0x90
@@ -83,21 +83,21 @@ typedef struct {
     // Copied from the displayed picture. +0xc0
     int mFrameCentreVerticalOffset[kFrameCentreOffsetCount];
     int mDisplayHorizontalSize; // Copied from the displayed picture. +0xcc
-    int mDisplayVerticalSize; // Copied from the displayed picture. +0xd0
-    int mFirstFieldStructure; // The picture_structure of the sequence's first picture. +0xd4
-    int mPictureAddress; // Output buffer of the picture under decode. +0xd8
-    int mOutputWidth; // Output buffer width in pixels, or 0 for a macroblock count. +0xdc
-    int mOutputHeight; // Output buffer height in pixels, or 0 for a macroblock count. +0xe0
+    int mDisplayVerticalSize;   // Copied from the displayed picture. +0xd0
+    int mFirstFieldStructure;   // The picture_structure of the sequence's first picture. +0xd4
+    int mPictureAddress;        // Output buffer of the picture under decode. +0xd8
+    int mOutputWidth;           // Output buffer width in pixels, or 0 for a macroblock count. +0xdc
+    int mOutputHeight;      // Output buffer height in pixels, or 0 for a macroblock count. +0xe0
     int mOutputMacroblocks; // Output buffer capacity in macroblocks. +0xe4
     // Treated as broken_link and only ever cleared. The purpose is inferred. +0xe8
     int mForceBrokenLink;
-    int mReservedEC; // Untouched by the observed code. +0xec
-    long long mPendingPts; // Pending time stamp, or -1 when there is none. +0xf0
-    int mPendingPtsState; // Armed, then ready once a picture is output. +0xf8
-    int mFirstFrameBuffer; // First of three frame buffers carved from the ring per sequence. +0xfc
+    int mReservedEC;        // Untouched by the observed code. +0xec
+    long long mPendingPts;  // Pending time stamp, or -1 when there is none. +0xf0
+    int mPendingPtsState;   // Armed, then ready once a picture is output. +0xf8
+    int mFirstFrameBuffer;  // First of three frame buffers carved from the ring per sequence. +0xfc
     int mSecondFrameBuffer; // +0x100
-    int mThirdFrameBuffer; // +0x104
-    MpegRing mRing; // Input ring. +0x108
+    int mThirdFrameBuffer;  // +0x104
+    MpegRing mRing;         // Input ring. +0x108
 } MpegWork;
 
 // One motion compensation job for a kernel, 28 bytes. The source spans two staged macroblock
@@ -122,20 +122,20 @@ enum {
 // One macroblock in flight, 0x140 bytes. Two alternate so the kernels of one macroblock run while
 // the IPU decodes the next.
 typedef struct {
-    int mStaging;                                     // Reference macroblocks land here. +0x000
-    int mCoefficients;                                // The IPU writes the block here. +0x004
-    int mRefLeft[kMcPredictionSlots];                 // Left reference column pair. +0x008
-    int mRefRight[kMcPredictionSlots];                // Right reference column pair. +0x018
-    MpegMcKernel mLumaKernels[kMcPredictionSlots];    // +0x028
-    MpegMcKernel mChromaKernels[kMcPredictionSlots];  // +0x038
-    MpegMcDescriptor mLuma[kMcPredictionSlots];       // +0x048
-    MpegMcDescriptor mChroma[kMcPredictionSlots];     // +0x0b8
-    int mOutput;                                      // Macroblock in the frame. +0x128
-    int mPredictionCount;                             // +0x12c
-    int mIntra;                                       // +0x130
-    int mFollowsCoded;                                // Coded and adjacent, and never read. +0x134
-    int mDmaPending;                                  // References are being staged. +0x138
-    int mNotCoded;                                    // The macroblock has no block data. +0x13c
+    int mStaging;                                    // Reference macroblocks land here. +0x000
+    int mCoefficients;                               // The IPU writes the block here. +0x004
+    int mRefLeft[kMcPredictionSlots];                // Left reference column pair. +0x008
+    int mRefRight[kMcPredictionSlots];               // Right reference column pair. +0x018
+    MpegMcKernel mLumaKernels[kMcPredictionSlots];   // +0x028
+    MpegMcKernel mChromaKernels[kMcPredictionSlots]; // +0x038
+    MpegMcDescriptor mLuma[kMcPredictionSlots];      // +0x048
+    MpegMcDescriptor mChroma[kMcPredictionSlots];    // +0x0b8
+    int mOutput;                                     // Macroblock in the frame. +0x128
+    int mPredictionCount;                            // +0x12c
+    int mIntra;                                      // +0x130
+    int mFollowsCoded;                               // Coded and adjacent, and never read. +0x134
+    int mDmaPending;                                 // References are being staged. +0x138
+    int mNotCoded;                                   // The macroblock has no block data. +0x13c
 } MpegMcBuffer;
 
 // Motion compensation state at 0x007a30f8.
@@ -149,28 +149,27 @@ static MpegIpuTable g_mpegIpuTable;
 // One picture table, 0x68 bytes. The picture setup writes the first five words, and the reorder
 // step copies the picture header state into the rest when a picture is decoded into it.
 typedef struct {
-    int mBuffer; // Frame buffer address, uncached. +0x00
-    int mWidth; // Width in pixels. +0x04
-    int mHeight; // Height in pixels. +0x08
-    int mMbWidth; // Width in macroblocks. +0x0c
-    int mMbHeight; // Height in macroblocks and the column stride of the buffer. +0x10
+    int mBuffer;     // Frame buffer address, uncached. +0x00
+    int mWidth;      // Width in pixels. +0x04
+    int mHeight;     // Height in pixels. +0x08
+    int mMbWidth;    // Width in macroblocks. +0x0c
+    int mMbHeight;   // Height in macroblocks and the column stride of the buffer. +0x10
     int mReserved14; // Untouched by the observed writers. +0x14
-    long long mPts; // Presentation time stamp, or -1 when absent. +0x18
-    long long mDts; // Decoding time stamp, or -1 when absent. +0x20
-    int mDecoded; // Set to 1 once the picture is complete and cleared when it is reused. +0x28
-    int mPictureCodingType; // +0x2c
-    int mPictureStructure; // +0x30
-    int mProgressiveSequence; // +0x34
-    int mProgressiveFrame; // +0x38
-    int mTopFieldFirst; // +0x3c
-    int mRepeatFirstField; // +0x40
+    long long mPts;  // Presentation time stamp, or -1 when absent. +0x18
+    long long mDts;  // Decoding time stamp, or -1 when absent. +0x20
+    int mDecoded;    // Set to 1 once the picture is complete and cleared when it is reused. +0x28
+    int mPictureCodingType;                                    // +0x2c
+    int mPictureStructure;                                     // +0x30
+    int mProgressiveSequence;                                  // +0x34
+    int mProgressiveFrame;                                     // +0x38
+    int mTopFieldFirst;                                        // +0x3c
+    int mRepeatFirstField;                                     // +0x40
     int mFrameCentreHorizontalOffset[kFrameCentreOffsetCount]; // +0x44
-    int mFrameCentreVerticalOffset[kFrameCentreOffsetCount]; // +0x50
-    int mDisplayHorizontalSize; // +0x5c
-    int mDisplayVerticalSize; // +0x60
+    int mFrameCentreVerticalOffset[kFrameCentreOffsetCount];   // +0x50
+    int mDisplayHorizontalSize;                                // +0x5c
+    int mDisplayVerticalSize;                                  // +0x60
     int mReserved64; // Untouched by the observed writers. +0x64
 } MpegSeqTable;
-
 
 // Sequence table arenas at 0x007a2d50, nine of 0x68 bytes ending where the IPU table below
 // begins. Creation points the table slots at them in order.
@@ -180,10 +179,22 @@ static MpegSeqTable *g_mpegTables[kTableCount];
 // Nibble dispatch words at 0x007a3408, read in full. The last two are code addresses the image
 // stores as data; no call passes through them here.
 static unsigned int g_mpegNibbleTable[16] = {
-    0x00000001u, 0x00000001u, 0x00000000u, 0x00000000u,
-    0x00000000u, 0x00000001u, 0x00000001u, 0x00000001u,
-    0x00000001u, 0x00000001u, 0x00000000u, 0xffffffffu,
-    0x00000000u, 0x00000000u, 0x0060e880u, 0x0060e668u,
+    0x00000001u,
+    0x00000001u,
+    0x00000000u,
+    0x00000000u,
+    0x00000000u,
+    0x00000001u,
+    0x00000001u,
+    0x00000001u,
+    0x00000001u,
+    0x00000001u,
+    0x00000000u,
+    0xffffffffu,
+    0x00000000u,
+    0x00000000u,
+    0x0060e880u,
+    0x0060e668u,
 };
 
 // The scratchpad offsets of the two macroblock buffers sceMpegResetMcBuffers() places.
@@ -222,24 +233,24 @@ static int g_mpegShiftBudget;
 static int g_nMpegTemporalReference; // Word at NTSC-U/C: 0x007a2c78, PAL: 0x007e6978.
 // Word at NTSC-U/C: 0x007a2c7c, PAL: 0x007e697c, returned by the picture header search.
 static int g_nMpegPictureCodingType;
-static int g_nMpegVbvDelay; // Word at NTSC-U/C: 0x007a2c80, PAL: 0x007e6980.
-static int g_nMpegFullPelForwardVector; // Word at NTSC-U/C: 0x007a2c84, PAL: 0x007e6984.
-static int g_nMpegForwardFCode; // Word at NTSC-U/C: 0x007a2c88, PAL: 0x007e6988.
+static int g_nMpegVbvDelay;              // Word at NTSC-U/C: 0x007a2c80, PAL: 0x007e6980.
+static int g_nMpegFullPelForwardVector;  // Word at NTSC-U/C: 0x007a2c84, PAL: 0x007e6984.
+static int g_nMpegForwardFCode;          // Word at NTSC-U/C: 0x007a2c88, PAL: 0x007e6988.
 static int g_nMpegFullPelBackwardVector; // Word at NTSC-U/C: 0x007a2c8c, PAL: 0x007e698c.
-static int g_nMpegBackwardFCode; // Word at NTSC-U/C: 0x007a2c90, PAL: 0x007e6990.
+static int g_nMpegBackwardFCode;         // Word at NTSC-U/C: 0x007a2c90, PAL: 0x007e6990.
 // Word at NTSC-U/C: 0x007a3430, PAL: 0x007e7130, picture number of temporal reference 0.
 static int g_nMpegGopPictureBase;
 // Word at NTSC-U/C: 0x007a3434, PAL: 0x007e7134, highest picture number so far.
 static int g_nMpegLatestPictureNumber;
 // Word at NTSC-U/C: 0x007a3438, PAL: 0x007e7138, set by a GOP header until the next picture.
 static int g_nMpegGopStarted;
-static int g_nMpegDropFrameFlag; // Word at NTSC-U/C: 0x007a2d1c, PAL: 0x007e6a1c.
-static int g_nMpegTimeCodeHours; // Word at NTSC-U/C: 0x007a2d20, PAL: 0x007e6a20.
-static int g_nMpegTimeCodeMinutes; // Word at NTSC-U/C: 0x007a2d24, PAL: 0x007e6a24.
-static int g_nMpegTimeCodeSeconds; // Word at NTSC-U/C: 0x007a2d28, PAL: 0x007e6a28.
+static int g_nMpegDropFrameFlag;    // Word at NTSC-U/C: 0x007a2d1c, PAL: 0x007e6a1c.
+static int g_nMpegTimeCodeHours;    // Word at NTSC-U/C: 0x007a2d20, PAL: 0x007e6a20.
+static int g_nMpegTimeCodeMinutes;  // Word at NTSC-U/C: 0x007a2d24, PAL: 0x007e6a24.
+static int g_nMpegTimeCodeSeconds;  // Word at NTSC-U/C: 0x007a2d28, PAL: 0x007e6a28.
 static int g_nMpegTimeCodePictures; // Word at NTSC-U/C: 0x007a2d2c, PAL: 0x007e6a2c.
-static int g_nMpegClosedGop; // Word at NTSC-U/C: 0x007a2d30, PAL: 0x007e6a30.
-static int g_nMpegBrokenLink; // Word at NTSC-U/C: 0x007a2d34, PAL: 0x007e6a34.
+static int g_nMpegClosedGop;        // Word at NTSC-U/C: 0x007a2d30, PAL: 0x007e6a30.
+static int g_nMpegBrokenLink;       // Word at NTSC-U/C: 0x007a2d34, PAL: 0x007e6a34.
 // Words at NTSC-U/C: 0x007a3388, PAL: 0x007e7088, from the time stamp callback.
 static unsigned long long g_llMpegNextPts;
 // Words at NTSC-U/C: 0x007a3390, PAL: 0x007e7090, from the time stamp callback.
@@ -253,25 +264,25 @@ static int g_nMpegPictureNumber;
 static int g_nMpegResetDcPredictor;
 
 // Sequence header words and the frame geometry derived from them.
-static int g_nMpegCodedWidth; // Word at NTSC-U/C: 0x007a2c0c, PAL: 0x007e690c.
-static int g_nMpegCodedHeight; // Word at NTSC-U/C: 0x007a2c10, PAL: 0x007e6910.
-static int g_nMpegChromaWidth; // Word at NTSC-U/C: 0x007a2c14, PAL: 0x007e6914.
-static int g_nMpegChromaHeight; // Word at NTSC-U/C: 0x007a2c18, PAL: 0x007e6918.
-static int g_nMpegHorizontalSize; // Word at NTSC-U/C: 0x007a2c20, PAL: 0x007e6920.
-static int g_nMpegVerticalSize; // Word at NTSC-U/C: 0x007a2c24, PAL: 0x007e6924.
-static int g_nMpegMbWidth; // Word at NTSC-U/C: 0x007a2c28, PAL: 0x007e6928.
-static int g_nMpegMbHeight; // Word at NTSC-U/C: 0x007a2c2c, PAL: 0x007e692c.
-static int g_nMpegAspectRatioInformation; // Word at NTSC-U/C: 0x007a2c30, PAL: 0x007e6930.
-static int g_nMpegFrameRateCode; // Word at NTSC-U/C: 0x007a2c34, PAL: 0x007e6934.
-static int g_nMpegBitRate; // Word at NTSC-U/C: 0x007a2c38, PAL: 0x007e6938.
-static int g_nMpegVbvBufferSize; // Word at NTSC-U/C: 0x007a2c3c, PAL: 0x007e693c.
-static int g_nMpegConstrainedParametersFlag; // Word at NTSC-U/C: 0x007a2c40, PAL: 0x007e6940.
-static int g_nMpegProgressiveSequence; // Word at NTSC-U/C: 0x007a2c48, PAL: 0x007e6948.
-static int g_nMpegChromaFormat; // Word at NTSC-U/C: 0x007a2c4c, PAL: 0x007e694c.
-static int g_nMpegMatrixCoefficients; // Word at NTSC-U/C: 0x007a2c6c, PAL: 0x007e696c.
-static int g_nMpegFramePredFrameDct; // Word at NTSC-U/C: 0x007a2cb4, PAL: 0x007e69b4.
-static int g_nMpegProgressiveFrame; // Word at NTSC-U/C: 0x007a2cc8, PAL: 0x007e69c8.
-static int g_nMpegLoadIntraQuantiserMatrix; // Word at NTSC-U/C: 0x007a33a0, PAL: 0x007e70a0.
+static int g_nMpegCodedWidth;                  // Word at NTSC-U/C: 0x007a2c0c, PAL: 0x007e690c.
+static int g_nMpegCodedHeight;                 // Word at NTSC-U/C: 0x007a2c10, PAL: 0x007e6910.
+static int g_nMpegChromaWidth;                 // Word at NTSC-U/C: 0x007a2c14, PAL: 0x007e6914.
+static int g_nMpegChromaHeight;                // Word at NTSC-U/C: 0x007a2c18, PAL: 0x007e6918.
+static int g_nMpegHorizontalSize;              // Word at NTSC-U/C: 0x007a2c20, PAL: 0x007e6920.
+static int g_nMpegVerticalSize;                // Word at NTSC-U/C: 0x007a2c24, PAL: 0x007e6924.
+static int g_nMpegMbWidth;                     // Word at NTSC-U/C: 0x007a2c28, PAL: 0x007e6928.
+static int g_nMpegMbHeight;                    // Word at NTSC-U/C: 0x007a2c2c, PAL: 0x007e692c.
+static int g_nMpegAspectRatioInformation;      // Word at NTSC-U/C: 0x007a2c30, PAL: 0x007e6930.
+static int g_nMpegFrameRateCode;               // Word at NTSC-U/C: 0x007a2c34, PAL: 0x007e6934.
+static int g_nMpegBitRate;                     // Word at NTSC-U/C: 0x007a2c38, PAL: 0x007e6938.
+static int g_nMpegVbvBufferSize;               // Word at NTSC-U/C: 0x007a2c3c, PAL: 0x007e693c.
+static int g_nMpegConstrainedParametersFlag;   // Word at NTSC-U/C: 0x007a2c40, PAL: 0x007e6940.
+static int g_nMpegProgressiveSequence;         // Word at NTSC-U/C: 0x007a2c48, PAL: 0x007e6948.
+static int g_nMpegChromaFormat;                // Word at NTSC-U/C: 0x007a2c4c, PAL: 0x007e694c.
+static int g_nMpegMatrixCoefficients;          // Word at NTSC-U/C: 0x007a2c6c, PAL: 0x007e696c.
+static int g_nMpegFramePredFrameDct;           // Word at NTSC-U/C: 0x007a2cb4, PAL: 0x007e69b4.
+static int g_nMpegProgressiveFrame;            // Word at NTSC-U/C: 0x007a2cc8, PAL: 0x007e69c8.
+static int g_nMpegLoadIntraQuantiserMatrix;    // Word at NTSC-U/C: 0x007a33a0, PAL: 0x007e70a0.
 static int g_nMpegLoadNonIntraQuantiserMatrix; // Word at NTSC-U/C: 0x007a33a4, PAL: 0x007e70a4.
 
 // Fields the MPEG-2 extensions record.
@@ -609,7 +620,8 @@ static void sceMpegAssignFrameBuffers(MpegSeqTable *pFrameForward,
                                       int nBackwardBuffer,
                                       int nBidirectionalBuffer) {
     // A field starts half a frame of macroblocks into its frame buffer.
-    const int fieldBytes = g_nMpegCodedWidth * g_nMpegCodedHeight / (kMacroblockPixels * 2) * kMacroblockBytes;
+    const int fieldBytes =
+        g_nMpegCodedWidth * g_nMpegCodedHeight / (kMacroblockPixels * 2) * kMacroblockBytes;
     const int forward =
         (int)(((unsigned int)nForwardBuffer & kPhysicalAddressMask) | kUncachedSegment);
     const int backward =
@@ -623,15 +635,15 @@ static void sceMpegAssignFrameBuffers(MpegSeqTable *pFrameForward,
     pTopForward->mBuffer = forward;
     pTopBackward->mBuffer = backward;
     pTopBidirectional->mBuffer = bidirectional;
-    pBottomForward->mBuffer = (int)(((unsigned int)(fieldBytes + nForwardBuffer) &
-                                     kPhysicalAddressMask) |
-                                    kUncachedSegment);
-    pBottomBackward->mBuffer = (int)(((unsigned int)(fieldBytes + nBackwardBuffer) &
-                                      kPhysicalAddressMask) |
-                                     kUncachedSegment);
-    pBottomBidirectional->mBuffer = (int)(((unsigned int)(fieldBytes + nBidirectionalBuffer) &
-                                           kPhysicalAddressMask) |
-                                          kUncachedSegment);
+    pBottomForward->mBuffer =
+        (int)(((unsigned int)(fieldBytes + nForwardBuffer) & kPhysicalAddressMask) |
+              kUncachedSegment);
+    pBottomBackward->mBuffer =
+        (int)(((unsigned int)(fieldBytes + nBackwardBuffer) & kPhysicalAddressMask) |
+              kUncachedSegment);
+    pBottomBidirectional->mBuffer =
+        (int)(((unsigned int)(fieldBytes + nBidirectionalBuffer) & kPhysicalAddressMask) |
+              kUncachedSegment);
 }
 
 // NTSC-U/C: 0x0060b820, PAL: 0x0064c490
@@ -716,7 +728,8 @@ int sceMpegSequenceExtension(void) {
     if (g_nMpegProfileAndLevel != 0x48 && g_nMpegProfileAndLevel != 0x58) {
         sceMpegRaiseError("Unsupported profile/level");
     }
-    g_nMpegHorizontalSize = (int)((horizontalExt << 12) | ((unsigned int)g_nMpegHorizontalSize & 0xfff));
+    g_nMpegHorizontalSize =
+        (int)((horizontalExt << 12) | ((unsigned int)g_nMpegHorizontalSize & 0xfff));
     g_nMpegVerticalSize = (int)((verticalExt << 12) | ((unsigned int)g_nMpegVerticalSize & 0xfff));
     g_nMpegBitRate += (int)(bitRateExt << 18);
     g_nMpegVbvBufferSize += (int)(bufferExt << 10);
@@ -1016,7 +1029,8 @@ static void sceMpegExtensionAndUserData(void) {
 
 // NTSC-U/C: 0x0060bf70, PAL: 0x0064cbe0
 static int sceMpegUpdatePictureNumber(void) {
-    if (g_nMpegPictureCodingType != 3 && g_nMpegTemporalReference != g_nMpegPreviousTemporalReference) {
+    if (g_nMpegPictureCodingType != 3 &&
+        g_nMpegTemporalReference != g_nMpegPreviousTemporalReference) {
         if (g_nMpegTemporalReferenceWrapped != 0) {
             g_nMpegTemporalReferenceWrapped = 0;
             g_nMpegGopPictureBase += 0x400;
@@ -1028,7 +1042,8 @@ static int sceMpegUpdatePictureNumber(void) {
         g_nMpegPreviousTemporalReference = g_nMpegTemporalReference;
     }
     g_nMpegPictureNumber = g_nMpegGopPictureBase + g_nMpegTemporalReference;
-    if (g_nMpegTemporalReferenceWrapped != 0 && g_nMpegPreviousTemporalReference >= g_nMpegTemporalReference) {
+    if (g_nMpegTemporalReferenceWrapped != 0 &&
+        g_nMpegPreviousTemporalReference >= g_nMpegTemporalReference) {
         g_nMpegPictureNumber += 0x400;
     }
     if (g_nMpegLatestPictureNumber < g_nMpegPictureNumber) {
@@ -1146,7 +1161,8 @@ static int sceMpegSequenceHeader(void) {
     g_nMpegChromaHeight = g_nMpegCodedHeight >> 1;
     sceMpegRewindWritePointer(&work->mRing);
     // A macroblock stores 384 bytes for each 256 pixels.
-    frameBytes = (int)((unsigned int)(g_nMpegCodedWidth * (g_nMpegCodedHeight * kMacroblockBytes)) >> 8);
+    frameBytes =
+        (int)((unsigned int)(g_nMpegCodedWidth * (g_nMpegCodedHeight * kMacroblockBytes)) >> 8);
     work->mFirstFrameBuffer =
         (int)(uintptr_t)sceMpegCheckWorkAreaSize(&work->mRing, frameBytes, 0x40);
     work->mSecondFrameBuffer =
@@ -1154,17 +1170,17 @@ static int sceMpegSequenceHeader(void) {
     work->mThirdFrameBuffer =
         (int)(uintptr_t)sceMpegCheckWorkAreaSize(&work->mRing, frameBytes, 0x40);
     sceMpegAssignFrameBuffers(&g_mpegSeqAreas[0],
-                        &g_mpegSeqAreas[1],
-                        &g_mpegSeqAreas[2],
-                        &g_mpegSeqAreas[3],
-                        &g_mpegSeqAreas[4],
-                        &g_mpegSeqAreas[5],
-                        &g_mpegSeqAreas[6],
-                        &g_mpegSeqAreas[7],
-                        &g_mpegSeqAreas[8],
-                        work->mFirstFrameBuffer,
-                        work->mSecondFrameBuffer,
-                        work->mThirdFrameBuffer);
+                              &g_mpegSeqAreas[1],
+                              &g_mpegSeqAreas[2],
+                              &g_mpegSeqAreas[3],
+                              &g_mpegSeqAreas[4],
+                              &g_mpegSeqAreas[5],
+                              &g_mpegSeqAreas[6],
+                              &g_mpegSeqAreas[7],
+                              &g_mpegSeqAreas[8],
+                              work->mFirstFrameBuffer,
+                              work->mSecondFrameBuffer,
+                              work->mThirdFrameBuffer);
     sceMpegSetTableSize(&g_mpegSeqAreas[0], g_nMpegCodedWidth, g_nMpegCodedHeight);
     sceMpegSetTableSize(&g_mpegSeqAreas[1], g_nMpegCodedWidth, g_nMpegCodedHeight);
     sceMpegSetTableSize(&g_mpegSeqAreas[2], g_nMpegCodedWidth, g_nMpegCodedHeight);
@@ -1207,7 +1223,7 @@ int sceMpegNextPictureHeader(void) {
         sceMpegInvokeCallbackSlot(g_decoderInstance, &entry);
         g_llMpegNextPts = entry.templateBits;
         g_llMpegNextDts = (unsigned long long)(unsigned int)(uintptr_t)entry.data << 32 |
-            (unsigned int)(uintptr_t)entry.callback;
+                          (unsigned int)(uintptr_t)entry.callback;
         return g_nMpegPictureCodingType;
     }
 }
@@ -1228,16 +1244,16 @@ static void *g_defaultSlotThree;
 // Key and match mask for each stream type. A packet belongs to a stream when its key, masked,
 // equals the stream key. The mask also selects where the channel number goes.
 static const unsigned long long g_streamTemplates[10][2] = {
-    { 0xe000000000ULL, 0xff00000000ULL }, // MPEG-2 video, channel in the stream identifier.
-    { 0xbdffc00000ULL, 0xffffffffffULL },
-    { 0xbdffa00000ULL, 0xffffffffffULL }, // PCM audio.
-    { 0xbdffa10000ULL, 0xffffffffffULL },
-    { 0xbdff900000ULL, 0xffffffffffULL },
-    { 0xc000000000ULL, 0xff00000000ULL },
-    { 0xbd80000000ULL, 0xffff000000ULL },
-    { 0xbda0000000ULL, 0xffff000000ULL },
-    { 0xbd88000000ULL, 0xffff000000ULL },
-    { 0xbd90000000ULL, 0xffff000000ULL },
+    {0xe000000000ULL, 0xff00000000ULL}, // MPEG-2 video, channel in the stream identifier.
+    {0xbdffc00000ULL, 0xffffffffffULL},
+    {0xbdffa00000ULL, 0xffffffffffULL}, // PCM audio.
+    {0xbdffa10000ULL, 0xffffffffffULL},
+    {0xbdff900000ULL, 0xffffffffffULL},
+    {0xc000000000ULL, 0xff00000000ULL},
+    {0xbd80000000ULL, 0xffff000000ULL},
+    {0xbda0000000ULL, 0xffff000000ULL},
+    {0xbd88000000ULL, 0xffff000000ULL},
+    {0xbd90000000ULL, 0xffff000000ULL},
 };
 
 void sceMpegResetRingPointers(void *pRing, void *pBase, int nSize) {
@@ -1432,25 +1448,123 @@ typedef union {
 // The intra quantiser matrix, four quadwords, then the flat non-intra row the initialiser sends
 // four times.
 static const IpuQuad kIpuQuantRows[5] = {
-    {{0x08, 0x10, 0x10, 0x13, 0x10, 0x13, 0x16, 0x16,
-      0x16, 0x16, 0x16, 0x16, 0x1a, 0x18, 0x1a, 0x1b}},
-    {{0x1b, 0x1b, 0x1a, 0x1a, 0x1a, 0x1a, 0x1b, 0x1b,
-      0x1b, 0x1d, 0x1d, 0x1d, 0x22, 0x22, 0x22, 0x1d}},
-    {{0x1d, 0x1d, 0x1b, 0x1b, 0x1d, 0x1d, 0x20, 0x20,
-      0x22, 0x22, 0x25, 0x26, 0x25, 0x23, 0x23, 0x22}},
-    {{0x23, 0x26, 0x26, 0x28, 0x28, 0x28, 0x30, 0x30,
-      0x2e, 0x2e, 0x38, 0x38, 0x3a, 0x45, 0x45, 0x53}},
-    {{0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
-      0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10}},
+    {{0x08,
+      0x10,
+      0x10,
+      0x13,
+      0x10,
+      0x13,
+      0x16,
+      0x16,
+      0x16,
+      0x16,
+      0x16,
+      0x16,
+      0x1a,
+      0x18,
+      0x1a,
+      0x1b}},
+    {{0x1b,
+      0x1b,
+      0x1a,
+      0x1a,
+      0x1a,
+      0x1a,
+      0x1b,
+      0x1b,
+      0x1b,
+      0x1d,
+      0x1d,
+      0x1d,
+      0x22,
+      0x22,
+      0x22,
+      0x1d}},
+    {{0x1d,
+      0x1d,
+      0x1b,
+      0x1b,
+      0x1d,
+      0x1d,
+      0x20,
+      0x20,
+      0x22,
+      0x22,
+      0x25,
+      0x26,
+      0x25,
+      0x23,
+      0x23,
+      0x22}},
+    {{0x23,
+      0x26,
+      0x26,
+      0x28,
+      0x28,
+      0x28,
+      0x30,
+      0x30,
+      0x2e,
+      0x2e,
+      0x38,
+      0x38,
+      0x3a,
+      0x45,
+      0x45,
+      0x53}},
+    {{0x10,
+      0x10,
+      0x10,
+      0x10,
+      0x10,
+      0x10,
+      0x10,
+      0x10,
+      0x10,
+      0x10,
+      0x10,
+      0x10,
+      0x10,
+      0x10,
+      0x10,
+      0x10}},
 };
 
 // NTSC-U/C: 0x007a5b30, PAL: 0x007e9830
 // The colour lookup table for vector quantisation.
 static const IpuQuad kIpuVqTable[2] = {
-    {{0x00, 0x00, 0x21, 0x04, 0x42, 0x08, 0xe0, 0x03,
-      0x84, 0x10, 0xa5, 0x14, 0xc6, 0x18, 0xe7, 0x1c}},
-    {{0x1f, 0x00, 0x29, 0x25, 0x4a, 0x29, 0x00, 0x7c,
-      0x8c, 0x31, 0xad, 0x35, 0xff, 0x7f, 0xce, 0x39}},
+    {{0x00,
+      0x00,
+      0x21,
+      0x04,
+      0x42,
+      0x08,
+      0xe0,
+      0x03,
+      0x84,
+      0x10,
+      0xa5,
+      0x14,
+      0xc6,
+      0x18,
+      0xe7,
+      0x1c}},
+    {{0x1f,
+      0x00,
+      0x29,
+      0x25,
+      0x4a,
+      0x29,
+      0x00,
+      0x7c,
+      0x8c,
+      0x31,
+      0xad,
+      0x35,
+      0xff,
+      0x7f,
+      0xce,
+      0x39}},
 };
 
 enum {
@@ -1553,7 +1667,7 @@ void sceMpegReset(void *pDecoder) {
 }
 
 // Flag tables visited in binary order. Only six of the nine table slots participate.
-static const int kPendingTableOrder[6] = { 0, 3, 6, 1, 4, 7 };
+static const int kPendingTableOrder[6] = {0, 3, 6, 1, 4, 7};
 
 // NTSC-U/C: 0x005e0928, PAL: 0x00622868
 int sceMpegClearRefBuff(void *pDecoder) {
@@ -1605,8 +1719,8 @@ int sceMpegInit(void) {
 }
 
 // Bit reader over the input, 0x30 bytes. The cache has the next bits left-aligned, and each
-// advance refills it past 56 valid bits. A read of up to 32 bits therefore never needs a refill. The fetch pointer wraps
-// from the ring end back to its base.
+// advance refills it past 56 valid bits. A read of up to 32 bits therefore never needs a refill.
+// The fetch pointer wraps from the ring end back to its base.
 typedef struct {
     unsigned long long mCache;
     unsigned char *mStart;
@@ -1622,7 +1736,7 @@ typedef struct {
 typedef struct {
     int mScrExtension;
     unsigned int mScrLow; // System clock reference bits 31 to 0.
-    int mScrHigh; // System clock reference bit 32.
+    int mScrHigh;         // System clock reference bit 32.
     int mHasSystemHeader;
 } PackHeader;
 
@@ -1671,7 +1785,7 @@ static const unsigned long long kDefaultStreamKey = 0xbdffULL << 24;
 // Bits the optional PES fields occupy for each combination of the ES rate, trick mode, copy
 // information, and CRC flags.
 static const unsigned char kOptionalFieldBits[] = {
-    0, 16, 8, 24, 8, 24, 16, 32, 24, 40, 32, 48, 32, 48, 40, 56 };
+    0, 16, 8, 24, 8, 24, 16, 32, 24, 40, 32, 48, 32, 48, 40, 56};
 
 static unsigned long long streamKey(int nStreamId) {
     return (unsigned long long)(unsigned int)nStreamId << 32;
@@ -1695,10 +1809,8 @@ static void bitReaderAdvance(BitReader *pReader, int nBits) {
 }
 
 // NTSC-U/C: 0x00610268, PAL: 0x00650ed8
-static void initBitReader(BitReader *pReader,
-                          unsigned char *pStart,
-                          unsigned char *pRingBase,
-                          int nRingSize) {
+static void
+initBitReader(BitReader *pReader, unsigned char *pStart, unsigned char *pRingBase, int nRingSize) {
     pReader->mFetch = pStart;
     pReader->mRingEnd = (uintptr_t)pRingBase + (uintptr_t)(intptr_t)nRingSize;
     pReader->mRingSize = nRingSize;
@@ -1776,7 +1888,7 @@ static inline long long readTimestamp(BitReader *pReader) {
 
 // NTSC-U/C: 0x005cacc0, PAL: 0x0060cc20
 static int parseSystemHeader(BitReader *pReader, PackHeader *pPack) {
-    (void)pPack; // The image passes the pack header and never reads it.
+    (void)pPack;                // The image passes the pack header and never reads it.
     (void)getBits(pReader, 56); // Start code, header length, and the first rate bits.
     (void)getBits(pReader, 40); // The rest of the fixed fields.
     while (peekBits(pReader, 1) == 1) {
@@ -1955,22 +2067,19 @@ static int deliverPacket(sceMpeg *pMpeg,
 }
 
 static int isPacketStart(const BitReader *pReader) {
-    return peekBits(pReader, 24) == kPacketStartPrefix &&
-           peekBits(pReader, 32) != kPackStartCode && peekBits(pReader, 32) != kProgramEndCode;
+    return peekBits(pReader, 24) == kPacketStartPrefix && peekBits(pReader, 32) != kPackStartCode &&
+           peekBits(pReader, 32) != kProgramEndCode;
 }
 
-int sceMpegDemuxPssRing(sceMpeg *pMpeg,
-                        unsigned char *pStart,
-                        int nSize,
-                        unsigned char *pBuffer,
-                        int nBufferSize) {
+int sceMpegDemuxPssRing(
+    sceMpeg *pMpeg, unsigned char *pStart, int nSize, unsigned char *pBuffer, int nBufferSize) {
     MpegWork *work;
     StreamEntry *table;
     BitReader reader;
     PackHeader pack;
     // Packets without header data do not set the payload fields, so a callback sees the previous
     // packet's values. The image starts them from uninitialised stack memory.
-    PesPacket packet = { 0 };
+    PesPacket packet = {0};
     sceMpegCallback defaultCallback;
     void *defaultData;
     unsigned long long limit;
@@ -2046,7 +2155,6 @@ static int g_nMpegDecodeError;
 // Word at NTSC-U/C: 0x007a2d40, PAL: 0x007e6a40, quantiser_scale_code.
 static int g_nMpegQuantiserScaleCode;
 static int g_nMpegIntraSlice; // Word at NTSC-U/C: 0x007a33c0, PAL: 0x007e70c0, intra_slice.
-
 
 // The reference DMA chain. The word at 0x007a38b4 records its address.
 static unsigned long long g_mpegMcChain[kMcPredictionSlots * 4] __attribute__((aligned(64)));
@@ -2156,984 +2264,995 @@ void sceMpegMcPutBlock(int nDest, int nSource);
 
 // NTSC-U/C: 0x007a33c8, PAL: 0x007e70c8
 static const MpegMcKernel g_mpegLumaKernels[kMcKernelVariants] = {
-    sceMpegMcLumaCopy, sceMpegMcLumaHalfV, sceMpegMcLumaHalfH, sceMpegMcLumaHalfHV,
-    sceMpegMcLumaAverageCopy, sceMpegMcLumaAverageHalfV, sceMpegMcLumaAverageHalfH, sceMpegMcLumaAverageHalfHV,
+    sceMpegMcLumaCopy,
+    sceMpegMcLumaHalfV,
+    sceMpegMcLumaHalfH,
+    sceMpegMcLumaHalfHV,
+    sceMpegMcLumaAverageCopy,
+    sceMpegMcLumaAverageHalfV,
+    sceMpegMcLumaAverageHalfH,
+    sceMpegMcLumaAverageHalfHV,
 };
 
 // NTSC-U/C: 0x007a33e8, PAL: 0x007e70e8
 static const MpegMcKernel g_mpegChromaKernels[kMcKernelVariants] = {
-    sceMpegMcChromaCopy, sceMpegMcChromaHalfV, sceMpegMcChromaHalfH, sceMpegMcChromaHalfHV,
-    sceMpegMcChromaAverageCopy, sceMpegMcChromaAverageHalfV, sceMpegMcChromaAverageHalfH, sceMpegMcChromaAverageHalfHV,
+    sceMpegMcChromaCopy,
+    sceMpegMcChromaHalfV,
+    sceMpegMcChromaHalfH,
+    sceMpegMcChromaHalfHV,
+    sceMpegMcChromaAverageCopy,
+    sceMpegMcChromaAverageHalfV,
+    sceMpegMcChromaAverageHalfH,
+    sceMpegMcChromaAverageHalfHV,
 };
 
 // The routines retain the image's layout. Each starts at the same offset within a quadword and
 // the clamp constant at 0x0060a020 stays quadword aligned. The constant sits inside the last
 // routine's path and executes as a no-op shift of $zero.
-__asm__(
-    "    .text\n"
-    "    .set push\n"
-    "    .set noreorder\n"
-    "    .set nomacro\n"
-    "    .set noat\n"
-    "    .align 4\n"
-    "    nop\n"
-    "    nop\n"
-"    .type sceMpegMcLumaCopy, @function\n"
-    "sceMpegMcLumaCopy:\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $7,8($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    lw $12,16($4)\n"
-    "    sll $11,$12,0x1\n"
-    "    addiu $15,$0,-1\n"
-    "    mtsab $13,0\n"
-    ".LMcLumaCopyRow:\n"
-    "    lq $8,0($5)\n"
-    "    addi $7,$7,-1\n"
-    "    lq $9,0($6)\n"
-    "    addu $5,$5,$12\n"
-    "    qfsrv $10,$9,$8\n"
-    "    pextlb $8,$0,$10\n"
-    "    pextub $9,$0,$10\n"
-    "    sq $8,0($14)\n"
-    "    addu $6,$6,$12\n"
-    "    sq $9,16($14)\n"
-    "    bgtz $7,.LMcLumaCopyRow\n"
-    "    addu $14,$14,$11\n"
-    "    addiu $5,$5,128\n"
-    "    addiu $6,$6,128\n"
-    "    lw $7,12($4)\n"
-    "    and $10,$15,$7\n"
-    "    bne $10,$0,.LMcLumaCopyRow\n"
-    "    daddu $15,$0,$0\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcChromaCopy, @function\n"
-    "sceMpegMcChromaCopy:\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    lw $12,16($4)\n"
-    "    sll $11,$12,0x1\n"
-    "    mtsab $13,0\n"
-    "    addiu $24,$0,-1\n"
-    ".LMcChromaCopyPlane:\n"
-    "    lw $7,8($4)\n"
-    "    addiu $15,$0,-1\n"
-    ".LMcChromaCopyRow:\n"
-    "    ld $8,0($5)\n"
-    "    ld $9,0($6)\n"
-    "    pcpyld $8,$9,$8\n"
-    "    qfsrv $9,$8,$8\n"
-    "    pextlb $8,$0,$9\n"
-    "    sq $8,0($14)\n"
-    "    addi $7,$7,-1\n"
-    "    addu $5,$5,$12\n"
-    "    addu $14,$14,$11\n"
-    "    bgtz $7,.LMcChromaCopyRow\n"
-    "    addu $6,$6,$12\n"
-    "    addiu $5,$5,320\n"
-    "    addiu $6,$6,320\n"
-    "    lw $7,12($4)\n"
-    "    and $10,$15,$7\n"
-    "    bne $10,$0,.LMcChromaCopyRow\n"
-    "    daddu $15,$0,$0\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    addiu $5,$5,64\n"
-    "    addiu $6,$6,64\n"
-    "    addiu $14,$14,128\n"
-    "    bne $24,$0,.LMcChromaCopyPlane\n"
-    "    daddu $24,$0,$0\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcLumaHalfV, @function\n"
-    "sceMpegMcLumaHalfV:\n"
-    "    pnor $25,$0,$0\n"
-    "    psrlh $25,$25,0xf\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $7,8($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    lw $24,16($4)\n"
-    "    lq $8,0($5)\n"
-    "    sll $12,$24,0x1\n"
-    "    lq $9,0($6)\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $10,$9,$8\n"
-    "    pextlb $8,$0,$10\n"
-    "    addiu $11,$0,-1\n"
-    "    beq $7,$0,.LMcLumaHalfVBelow\n"
-    "    pextub $9,$0,$10\n"
-    ".LMcLumaHalfVRow:\n"
-    "    addu $5,$5,$24\n"
-    "    addu $6,$6,$24\n"
-    "    lq $10,0($5)\n"
-    "    lq $15,0($6)\n"
-    "    qfsrv $2,$15,$10\n"
-    "    pextlb $10,$0,$2\n"
-    "    addi $7,$7,-1\n"
-    "    pextub $15,$0,$2\n"
-    "    paddh $2,$8,$10\n"
-    "    paddh $3,$9,$15\n"
-    "    por $8,$10,$0\n"
-    "    por $9,$15,$0\n"
-    "    paddh $2,$2,$25\n"
-    "    paddh $3,$3,$25\n"
-    "    psrlh $2,$2,0x1\n"
-    "    psrlh $3,$3,0x1\n"
-    "    sq $2,0($14)\n"
-    "    sq $3,16($14)\n"
-    "    bgtz $7,.LMcLumaHalfVRow\n"
-    "    addu $14,$14,$12\n"
-    ".LMcLumaHalfVBelow:\n"
-    "    addiu $5,$5,128\n"
-    "    addiu $6,$6,128\n"
-    "    lw $7,12($4)\n"
-    "    and $10,$11,$7\n"
-    "    bne $10,$0,.LMcLumaHalfVRow\n"
-    "    daddu $11,$0,$0\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcChromaHalfV, @function\n"
-    "sceMpegMcChromaHalfV:\n"
-    "    pnor $25,$0,$0\n"
-    "    psrlh $25,$25,0xf\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    lw $12,16($4)\n"
-    "    addiu $11,$0,1\n"
-    "    sll $24,$12,0x1\n"
-    "    mtsab $13,0\n"
-    ".LMcChromaHalfVPlane:\n"
-    "    lw $7,8($4)\n"
-    "    ld $8,0($5)\n"
-    "    ld $9,0($6)\n"
-    "    pcpyld $8,$9,$8\n"
-    "    qfsrv $8,$8,$8\n"
-    "    ori $11,$11,0x8000\n"
-    "    beq $7,$0,.LMcChromaHalfVBelow\n"
-    "    pextlb $15,$0,$8\n"
-    ".LMcChromaHalfVRow:\n"
-    "    addu $5,$5,$12\n"
-    "    addu $6,$6,$12\n"
-    "    ld $8,0($5)\n"
-    "    ld $9,0($6)\n"
-    "    pcpyld $8,$9,$8\n"
-    "    qfsrv $8,$8,$8\n"
-    "    pextlb $10,$0,$8\n"
-    "    addi $7,$7,-1\n"
-    "    paddh $9,$10,$15\n"
-    "    por $15,$10,$0\n"
-    "    paddh $10,$9,$25\n"
-    "    psrlh $10,$10,0x1\n"
-    "    sq $10,0($14)\n"
-    "    bgtz $7,.LMcChromaHalfVRow\n"
-    "    addu $14,$14,$24\n"
-    ".LMcChromaHalfVBelow:\n"
-    "    psrah $10,$11,0xf\n"
-    "    addiu $5,$5,320\n"
-    "    lw $7,12($4)\n"
-    "    addiu $6,$6,320\n"
-    "    and $10,$10,$7\n"
-    "    bne $10,$0,.LMcChromaHalfVRow\n"
-    "    andi $11,$11,0x7fff\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    addiu $5,$5,64\n"
-    "    addiu $6,$6,64\n"
-    "    addiu $14,$14,128\n"
-    "    andi $10,$11,0x1\n"
-    "    bne $10,$0,.LMcChromaHalfVPlane\n"
-    "    andi $11,$11,0xfffe\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcLumaHalfH, @function\n"
-    "sceMpegMcLumaHalfH:\n"
-    "    pnor $25,$0,$0\n"
-    "    psrlh $25,$25,0xf\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $7,8($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    addiu $24,$0,1\n"
-    "    lw $9,16($4)\n"
-    "    sll $8,$9,0x1\n"
-    "    addiu $11,$0,-1\n"
-    ".LMcLumaHalfHRow:\n"
-    "    lq $10,0($5)\n"
-    "    lq $15,0($6)\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $2,$15,$10\n"
-    "    qfsrv $3,$10,$15\n"
-    "    pextlb $10,$0,$2\n"
-    "    addi $7,$7,-1\n"
-    "    pextub $15,$0,$2\n"
-    "    mtsab $24,0\n"
-    "    qfsrv $3,$3,$2\n"
-    "    pextlb $2,$0,$3\n"
-    "    pextub $3,$0,$3\n"
-    "    paddh $10,$10,$2\n"
-    "    paddh $15,$15,$3\n"
-    "    paddh $2,$10,$25\n"
-    "    paddh $3,$15,$25\n"
-    "    psrlh $2,$2,0x1\n"
-    "    psrlh $3,$3,0x1\n"
-    "    sq $2,0($14)\n"
-    "    sq $3,16($14)\n"
-    "    addu $5,$5,$9\n"
-    "    addu $6,$6,$9\n"
-    "    bgtz $7,.LMcLumaHalfHRow\n"
-    "    addu $14,$14,$8\n"
-    "    addiu $5,$5,128\n"
-    "    addiu $6,$6,128\n"
-    "    lw $7,12($4)\n"
-    "    and $12,$11,$7\n"
-    "    bne $12,$0,.LMcLumaHalfHRow\n"
-    "    daddu $11,$0,$0\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcChromaHalfH, @function\n"
-    "sceMpegMcChromaHalfH:\n"
-    "    pnor $25,$0,$0\n"
-    "    psrlh $25,$25,0xf\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    addiu $24,$0,1\n"
-    "    addiu $12,$0,-1\n"
-    "    lw $3,16($4)\n"
-    "    sll $2,$3,0x1\n"
-    ".LMcChromaHalfHPlane:\n"
-    "    lw $7,8($4)\n"
-    "    addiu $11,$0,-1\n"
-    ".LMcChromaHalfHRow:\n"
-    "    ld $8,0($5)\n"
-    "    ld $9,0($6)\n"
-    "    pcpyld $8,$9,$8\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $8,$8,$8\n"
-    "    pextlb $9,$0,$8\n"
-    "    addi $7,$7,-1\n"
-    "    addu $5,$5,$3\n"
-    "    addu $6,$6,$3\n"
-    "    mtsab $24,0\n"
-    "    qfsrv $10,$0,$8\n"
-    "    pextlb $8,$0,$10\n"
-    "    paddh $10,$9,$8\n"
-    "    paddh $10,$10,$25\n"
-    "    psrlh $10,$10,0x1\n"
-    "    sq $10,0($14)\n"
-    "    bgtz $7,.LMcChromaHalfHRow\n"
-    "    addu $14,$14,$2\n"
-    "    addiu $5,$5,320\n"
-    "    addiu $6,$6,320\n"
-    "    lw $7,12($4)\n"
-    "    and $10,$11,$7\n"
-    "    bne $10,$0,.LMcChromaHalfHRow\n"
-    "    daddu $11,$0,$0\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    addiu $5,$5,64\n"
-    "    addiu $6,$6,64\n"
-    "    addiu $14,$14,128\n"
-    "    bne $12,$0,.LMcChromaHalfHPlane\n"
-    "    daddu $12,$0,$0\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcLumaHalfHV, @function\n"
-    "sceMpegMcLumaHalfHV:\n"
-    "    pnor $25,$0,$0\n"
-    "    psrlh $25,$25,0xf\n"
-    "    psllh $25,$25,0x1\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $7,8($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    lw $12,16($4)\n"
-    "    addiu $24,$0,1\n"
-    "    lq $8,0($5)\n"
-    "    lq $9,0($6)\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $10,$9,$8\n"
-    "    qfsrv $15,$8,$9\n"
-    "    pextlb $8,$0,$10\n"
-    "    pextub $9,$0,$10\n"
-    "    addiu $11,$0,-1\n"
-    "    mtsab $24,0\n"
-    "    qfsrv $15,$15,$10\n"
-    "    pextlb $10,$0,$15\n"
-    "    pextub $15,$0,$15\n"
-    "    paddh $8,$8,$10\n"
-    "    beq $7,$0,.LMcLumaHalfHVBelow\n"
-    "    paddh $9,$9,$15\n"
-    ".LMcLumaHalfHVRow:\n"
-    "    addu $5,$5,$12\n"
-    "    addu $6,$6,$12\n"
-    "    lq $10,0($5)\n"
-    "    lq $15,0($6)\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $2,$15,$10\n"
-    "    qfsrv $3,$10,$15\n"
-    "    pextlb $10,$0,$2\n"
-    "    addi $7,$7,-1\n"
-    "    pextub $15,$0,$2\n"
-    "    mtsab $24,0\n"
-    "    qfsrv $3,$3,$2\n"
-    "    pextlb $2,$0,$3\n"
-    "    pextub $3,$0,$3\n"
-    "    paddh $10,$10,$2\n"
-    "    paddh $15,$15,$3\n"
-    "    paddh $2,$8,$10\n"
-    "    paddh $3,$9,$15\n"
-    "    por $8,$10,$0\n"
-    "    por $9,$15,$0\n"
-    "    paddh $2,$2,$25\n"
-    "    paddh $3,$3,$25\n"
-    "    psrlh $2,$2,0x2\n"
-    "    psrlh $3,$3,0x2\n"
-    "    sq $2,0($14)\n"
-    "    sll $10,$12,0x1\n"
-    "    sq $3,16($14)\n"
-    "    bgtz $7,.LMcLumaHalfHVRow\n"
-    "    addu $14,$14,$10\n"
-    ".LMcLumaHalfHVBelow:\n"
-    "    addiu $5,$5,128\n"
-    "    addiu $6,$6,128\n"
-    "    lw $7,12($4)\n"
-    "    and $10,$11,$7\n"
-    "    bne $10,$0,.LMcLumaHalfHVRow\n"
-    "    daddu $11,$0,$0\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcChromaHalfHV, @function\n"
-    "sceMpegMcChromaHalfHV:\n"
-    "    pnor $25,$0,$0\n"
-    "    psrlh $25,$25,0xf\n"
-    "    psllh $25,$25,0x1\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    lw $12,16($4)\n"
-    "    addiu $24,$0,1\n"
-    "    addiu $11,$0,1\n"
-    ".LMcChromaHalfHVPlane:\n"
-    "    lw $7,8($4)\n"
-    "    ld $8,0($5)\n"
-    "    ld $9,0($6)\n"
-    "    pcpyld $8,$9,$8\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $8,$8,$8\n"
-    "    pextlb $9,$0,$8\n"
-    "    addu $5,$5,$12\n"
-    "    ori $11,$11,0x8000\n"
-    "    mtsab $24,0\n"
-    "    qfsrv $10,$0,$8\n"
-    "    pextlb $8,$0,$10\n"
-    "    beq $7,$0,.LMcChromaHalfHVBelow\n"
-    "    paddh $15,$9,$8\n"
-    ".LMcChromaHalfHVRow:\n"
-    "    addu $6,$6,$12\n"
-    "    ld $8,0($5)\n"
-    "    ld $9,0($6)\n"
-    "    pcpyld $8,$9,$8\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $8,$8,$8\n"
-    "    pextlb $9,$0,$8\n"
-    "    addi $7,$7,-1\n"
-    "    addu $5,$5,$12\n"
-    "    mtsab $24,0\n"
-    "    qfsrv $10,$0,$8\n"
-    "    pextlb $8,$0,$10\n"
-    "    paddh $10,$9,$8\n"
-    "    paddh $9,$10,$15\n"
-    "    por $15,$10,$0\n"
-    "    paddh $10,$9,$25\n"
-    "    sll $8,$12,0x1\n"
-    "    psrlh $10,$10,0x2\n"
-    "    sq $10,0($14)\n"
-    "    bgtz $7,.LMcChromaHalfHVRow\n"
-    "    addu $14,$14,$8\n"
-    ".LMcChromaHalfHVBelow:\n"
-    "    psrah $10,$11,0xf\n"
-    "    addiu $5,$5,320\n"
-    "    lw $7,12($4)\n"
-    "    addiu $6,$6,320\n"
-    "    and $10,$10,$7\n"
-    "    bne $10,$0,.LMcChromaHalfHVRow\n"
-    "    andi $11,$11,0x7fff\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    addiu $5,$5,64\n"
-    "    addiu $6,$6,64\n"
-    "    addiu $14,$14,128\n"
-    "    andi $10,$11,0x1\n"
-    "    bne $10,$0,.LMcChromaHalfHVPlane\n"
-    "    andi $11,$11,0xfffe\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcLumaAverageCopy, @function\n"
-    "sceMpegMcLumaAverageCopy:\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $7,8($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    lw $9,16($4)\n"
-    "    sll $8,$9,0x1\n"
-    "    addiu $11,$0,-1\n"
-    "    mtsab $13,0\n"
-    ".LMcLumaAverageCopyRow:\n"
-    "    lq $10,0($5)\n"
-    "    lq $15,0($6)\n"
-    "    qfsrv $2,$15,$10\n"
-    "    pextlb $10,$0,$2\n"
-    "    pextub $15,$0,$2\n"
-    "    lq $2,0($14)\n"
-    "    lq $3,16($14)\n"
-    "    paddh $2,$2,$10\n"
-    "    paddh $3,$3,$15\n"
-    "    pcgth $10,$2,$0\n"
-    "    psrlh $10,$10,0xf\n"
-    "    paddh $10,$2,$10\n"
-    "    psrlh $2,$10,0x1\n"
-    "    pcgth $10,$3,$0\n"
-    "    psrlh $10,$10,0xf\n"
-    "    paddh $10,$3,$10\n"
-    "    psrlh $3,$10,0x1\n"
-    "    sq $2,0($14)\n"
-    "    sq $3,16($14)\n"
-    "    addi $7,$7,-1\n"
-    "    addu $5,$5,$9\n"
-    "    addu $14,$14,$8\n"
-    "    bgtz $7,.LMcLumaAverageCopyRow\n"
-    "    addu $6,$6,$9\n"
-    "    addiu $5,$5,128\n"
-    "    addiu $6,$6,128\n"
-    "    lw $7,12($4)\n"
-    "    and $12,$11,$7\n"
-    "    bne $12,$0,.LMcLumaAverageCopyRow\n"
-    "    daddu $11,$0,$0\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcChromaAverageCopy, @function\n"
-    "sceMpegMcChromaAverageCopy:\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    addiu $12,$0,-1\n"
-    "    lw $3,16($4)\n"
-    "    sll $2,$3,0x1\n"
-    "    mtsab $13,0\n"
-    ".LMcChromaAverageCopyPlane:\n"
-    "    lw $7,8($4)\n"
-    "    addiu $11,$0,-1\n"
-    ".LMcChromaAverageCopyRow:\n"
-    "    ld $8,0($5)\n"
-    "    ld $9,0($6)\n"
-    "    pcpyld $8,$9,$8\n"
-    "    qfsrv $8,$8,$8\n"
-    "    pextlb $9,$0,$8\n"
-    "    addi $7,$7,-1\n"
-    "    addu $5,$5,$3\n"
-    "    addu $6,$6,$3\n"
-    "    lq $8,0($14)\n"
-    "    paddh $10,$9,$8\n"
-    "    pcgth $9,$10,$0\n"
-    "    psrlh $9,$9,0xf\n"
-    "    paddh $10,$10,$9\n"
-    "    psrlh $10,$10,0x1\n"
-    "    sq $10,0($14)\n"
-    "    bgtz $7,.LMcChromaAverageCopyRow\n"
-    "    addu $14,$14,$2\n"
-    "    addiu $5,$5,320\n"
-    "    addiu $6,$6,320\n"
-    "    lw $7,12($4)\n"
-    "    and $10,$11,$7\n"
-    "    bne $10,$0,.LMcChromaAverageCopyRow\n"
-    "    daddu $11,$0,$0\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    addiu $5,$5,64\n"
-    "    addiu $6,$6,64\n"
-    "    addiu $14,$14,128\n"
-    "    bne $12,$0,.LMcChromaAverageCopyPlane\n"
-    "    daddu $12,$0,$0\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcLumaAverageHalfV, @function\n"
-    "sceMpegMcLumaAverageHalfV:\n"
-    "    pnor $25,$0,$0\n"
-    "    psrlh $25,$25,0xf\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $7,8($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    lw $12,16($4)\n"
-    "    lq $8,0($5)\n"
-    "    lq $9,0($6)\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $10,$9,$8\n"
-    "    sll $24,$12,0x1\n"
-    "    pextlb $8,$0,$10\n"
-    "    addiu $11,$0,-1\n"
-    "    beq $7,$0,.LMcLumaAverageHalfVBelow\n"
-    "    pextub $9,$0,$10\n"
-    ".LMcLumaAverageHalfVRow:\n"
-    "    addu $5,$5,$12\n"
-    "    addu $6,$6,$12\n"
-    "    lq $10,0($5)\n"
-    "    lq $15,0($6)\n"
-    "    qfsrv $2,$15,$10\n"
-    "    pextlb $10,$0,$2\n"
-    "    addi $7,$7,-1\n"
-    "    pextub $15,$0,$2\n"
-    "    paddh $2,$8,$10\n"
-    "    paddh $3,$9,$15\n"
-    "    por $8,$10,$0\n"
-    "    por $9,$15,$0\n"
-    "    paddh $2,$2,$25\n"
-    "    paddh $3,$3,$25\n"
-    "    psrlh $2,$2,0x1\n"
-    "    psrlh $3,$3,0x1\n"
-    "    lq $10,0($14)\n"
-    "    lq $15,16($14)\n"
-    "    paddh $2,$2,$10\n"
-    "    paddh $3,$3,$15\n"
-    "    pcgth $10,$2,$0\n"
-    "    psrlh $10,$10,0xf\n"
-    "    paddh $10,$2,$10\n"
-    "    psrlh $2,$10,0x1\n"
-    "    pcgth $10,$3,$0\n"
-    "    psrlh $10,$10,0xf\n"
-    "    paddh $10,$3,$10\n"
-    "    psrlh $3,$10,0x1\n"
-    "    sq $2,0($14)\n"
-    "    sq $3,16($14)\n"
-    "    bgtz $7,.LMcLumaAverageHalfVRow\n"
-    "    addu $14,$14,$24\n"
-    ".LMcLumaAverageHalfVBelow:\n"
-    "    addiu $5,$5,128\n"
-    "    addiu $6,$6,128\n"
-    "    lw $7,12($4)\n"
-    "    and $10,$11,$7\n"
-    "    bne $10,$0,.LMcLumaAverageHalfVRow\n"
-    "    daddu $11,$0,$0\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcChromaAverageHalfV, @function\n"
-    "sceMpegMcChromaAverageHalfV:\n"
-    "    pnor $25,$0,$0\n"
-    "    psrlh $25,$25,0xf\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    lw $12,16($4)\n"
-    "    addiu $11,$0,1\n"
-    "    sll $24,$12,0x1\n"
-    "    mtsab $13,0\n"
-    ".LMcChromaAverageHalfVPlane:\n"
-    "    lw $7,8($4)\n"
-    "    ld $8,0($5)\n"
-    "    ld $9,0($6)\n"
-    "    pcpyld $8,$9,$8\n"
-    "    qfsrv $8,$8,$8\n"
-    "    ori $11,$11,0x8000\n"
-    "    beq $7,$0,.LMcChromaAverageHalfVBelow\n"
-    "    pextlb $15,$0,$8\n"
-    ".LMcChromaAverageHalfVRow:\n"
-    "    addu $5,$5,$12\n"
-    "    addu $6,$6,$12\n"
-    "    ld $8,0($5)\n"
-    "    ld $9,0($6)\n"
-    "    pcpyld $8,$9,$8\n"
-    "    qfsrv $8,$8,$8\n"
-    "    pextlb $10,$0,$8\n"
-    "    addi $7,$7,-1\n"
-    "    paddh $9,$10,$15\n"
-    "    por $15,$10,$0\n"
-    "    paddh $10,$9,$25\n"
-    "    psrlh $10,$10,0x1\n"
-    "    lq $8,0($14)\n"
-    "    paddh $10,$10,$8\n"
-    "    pcgth $9,$10,$0\n"
-    "    psrlh $9,$9,0xf\n"
-    "    paddh $10,$10,$9\n"
-    "    psrlh $10,$10,0x1\n"
-    "    sq $10,0($14)\n"
-    "    bgtz $7,.LMcChromaAverageHalfVRow\n"
-    "    addu $14,$14,$24\n"
-    ".LMcChromaAverageHalfVBelow:\n"
-    "    psrah $10,$11,0xf\n"
-    "    addiu $5,$5,320\n"
-    "    lw $7,12($4)\n"
-    "    addiu $6,$6,320\n"
-    "    and $10,$10,$7\n"
-    "    bne $10,$0,.LMcChromaAverageHalfVRow\n"
-    "    andi $11,$11,0x7fff\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    addiu $5,$5,64\n"
-    "    addiu $6,$6,64\n"
-    "    addiu $14,$14,128\n"
-    "    andi $10,$11,0x1\n"
-    "    bne $10,$0,.LMcChromaAverageHalfVPlane\n"
-    "    andi $11,$11,0xfffe\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcLumaAverageHalfH, @function\n"
-    "sceMpegMcLumaAverageHalfH:\n"
-    "    pnor $25,$0,$0\n"
-    "    psrlh $25,$25,0xf\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $7,8($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    addiu $24,$0,1\n"
-    "    lw $9,16($4)\n"
-    "    sll $8,$9,0x1\n"
-    "    addiu $11,$0,-1\n"
-    ".LMcLumaAverageHalfHRow:\n"
-    "    lq $10,0($5)\n"
-    "    lq $15,0($6)\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $2,$15,$10\n"
-    "    qfsrv $3,$10,$15\n"
-    "    pextlb $10,$0,$2\n"
-    "    addi $7,$7,-1\n"
-    "    pextub $15,$0,$2\n"
-    "    mtsab $24,0\n"
-    "    qfsrv $3,$3,$2\n"
-    "    pextlb $2,$0,$3\n"
-    "    pextub $3,$0,$3\n"
-    "    paddh $10,$10,$2\n"
-    "    paddh $15,$15,$3\n"
-    "    paddh $2,$10,$25\n"
-    "    paddh $3,$15,$25\n"
-    "    psrlh $2,$2,0x1\n"
-    "    psrlh $3,$3,0x1\n"
-    "    lq $10,0($14)\n"
-    "    lq $15,16($14)\n"
-    "    paddh $2,$2,$10\n"
-    "    paddh $3,$3,$15\n"
-    "    pcgth $10,$2,$0\n"
-    "    psrlh $10,$10,0xf\n"
-    "    paddh $10,$2,$10\n"
-    "    psrlh $2,$10,0x1\n"
-    "    pcgth $10,$3,$0\n"
-    "    psrlh $10,$10,0xf\n"
-    "    paddh $10,$3,$10\n"
-    "    psrlh $3,$10,0x1\n"
-    "    sq $2,0($14)\n"
-    "    sq $3,16($14)\n"
-    "    addu $5,$5,$9\n"
-    "    addu $6,$6,$9\n"
-    "    bgtz $7,.LMcLumaAverageHalfHRow\n"
-    "    addu $14,$14,$8\n"
-    "    addiu $5,$5,128\n"
-    "    addiu $6,$6,128\n"
-    "    lw $7,12($4)\n"
-    "    and $12,$11,$7\n"
-    "    bne $12,$0,.LMcLumaAverageHalfHRow\n"
-    "    daddu $11,$0,$0\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcChromaAverageHalfH, @function\n"
-    "sceMpegMcChromaAverageHalfH:\n"
-    "    pnor $25,$0,$0\n"
-    "    psrlh $25,$25,0xf\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    addiu $24,$0,1\n"
-    "    addiu $12,$0,-1\n"
-    "    lw $3,16($4)\n"
-    "    sll $2,$3,0x1\n"
-    ".LMcChromaAverageHalfHPlane:\n"
-    "    lw $7,8($4)\n"
-    "    addiu $11,$0,-1\n"
-    ".LMcChromaAverageHalfHRow:\n"
-    "    ld $8,0($5)\n"
-    "    ld $9,0($6)\n"
-    "    pcpyld $8,$9,$8\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $8,$8,$8\n"
-    "    pextlb $9,$0,$8\n"
-    "    addi $7,$7,-1\n"
-    "    addu $5,$5,$3\n"
-    "    addu $6,$6,$3\n"
-    "    mtsab $24,0\n"
-    "    qfsrv $10,$0,$8\n"
-    "    pextlb $8,$0,$10\n"
-    "    paddh $10,$9,$8\n"
-    "    paddh $10,$10,$25\n"
-    "    psrlh $10,$10,0x1\n"
-    "    lq $8,0($14)\n"
-    "    paddh $10,$10,$8\n"
-    "    pcgth $9,$10,$0\n"
-    "    psrlh $9,$9,0xf\n"
-    "    paddh $10,$10,$9\n"
-    "    psrlh $10,$10,0x1\n"
-    "    sq $10,0($14)\n"
-    "    bgtz $7,.LMcChromaAverageHalfHRow\n"
-    "    addu $14,$14,$2\n"
-    "    addiu $5,$5,320\n"
-    "    addiu $6,$6,320\n"
-    "    lw $7,12($4)\n"
-    "    and $10,$11,$7\n"
-    "    bne $10,$0,.LMcChromaAverageHalfHRow\n"
-    "    daddu $11,$0,$0\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    addiu $5,$5,64\n"
-    "    addiu $6,$6,64\n"
-    "    addiu $14,$14,128\n"
-    "    bne $12,$0,.LMcChromaAverageHalfHPlane\n"
-    "    daddu $12,$0,$0\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcLumaAverageHalfHV, @function\n"
-    "sceMpegMcLumaAverageHalfHV:\n"
-    "    pnor $25,$0,$0\n"
-    "    psrlh $25,$25,0xf\n"
-    "    psllh $25,$25,0x1\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $7,8($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    lw $24,16($4)\n"
-    "    addiu $12,$0,1\n"
-    "    lq $8,0($5)\n"
-    "    lq $9,0($6)\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $10,$9,$8\n"
-    "    qfsrv $15,$8,$9\n"
-    "    pextlb $8,$0,$10\n"
-    "    pextub $9,$0,$10\n"
-    "    addiu $11,$0,-1\n"
-    "    mtsab $12,0\n"
-    "    qfsrv $15,$15,$10\n"
-    "    pextlb $10,$0,$15\n"
-    "    pextub $15,$0,$15\n"
-    "    paddh $8,$8,$10\n"
-    "    beq $7,$0,.LMcLumaAverageHalfHVBelow\n"
-    "    paddh $9,$9,$15\n"
-    ".LMcLumaAverageHalfHVRow:\n"
-    "    addu $5,$5,$24\n"
-    "    addu $6,$6,$24\n"
-    "    lq $10,0($5)\n"
-    "    lq $15,0($6)\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $2,$15,$10\n"
-    "    qfsrv $3,$10,$15\n"
-    "    pextlb $10,$0,$2\n"
-    "    addi $7,$7,-1\n"
-    "    pextub $15,$0,$2\n"
-    "    mtsab $12,0\n"
-    "    qfsrv $3,$3,$2\n"
-    "    pextlb $2,$0,$3\n"
-    "    pextub $3,$0,$3\n"
-    "    paddh $10,$10,$2\n"
-    "    paddh $15,$15,$3\n"
-    "    paddh $2,$8,$10\n"
-    "    paddh $3,$9,$15\n"
-    "    por $8,$10,$0\n"
-    "    por $9,$15,$0\n"
-    "    paddh $2,$2,$25\n"
-    "    paddh $3,$3,$25\n"
-    "    psrlh $2,$2,0x2\n"
-    "    psrlh $3,$3,0x2\n"
-    "    lq $10,0($14)\n"
-    "    lq $15,16($14)\n"
-    "    paddh $2,$2,$10\n"
-    "    paddh $3,$3,$15\n"
-    "    pcgth $10,$2,$0\n"
-    "    psrlh $10,$10,0xf\n"
-    "    paddh $10,$2,$10\n"
-    "    psrlh $2,$10,0x1\n"
-    "    pcgth $10,$3,$0\n"
-    "    psrlh $10,$10,0xf\n"
-    "    paddh $10,$3,$10\n"
-    "    psrlh $3,$10,0x1\n"
-    "    sq $2,0($14)\n"
-    "    sll $10,$24,0x1\n"
-    "    sq $3,16($14)\n"
-    "    bgtz $7,.LMcLumaAverageHalfHVRow\n"
-    "    addu $14,$14,$10\n"
-    ".LMcLumaAverageHalfHVBelow:\n"
-    "    addiu $5,$5,128\n"
-    "    addiu $6,$6,128\n"
-    "    lw $7,12($4)\n"
-    "    and $10,$11,$7\n"
-    "    bne $10,$0,.LMcLumaAverageHalfHVRow\n"
-    "    daddu $11,$0,$0\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcChromaAverageHalfHV, @function\n"
-    "sceMpegMcChromaAverageHalfHV:\n"
-    "    pnor $25,$0,$0\n"
-    "    psrlh $25,$25,0xf\n"
-    "    psllh $25,$25,0x1\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    lw $13,4($4)\n"
-    "    lw $12,16($4)\n"
-    "    addiu $24,$0,1\n"
-    "    addiu $11,$0,1\n"
-    ".LMcChromaAverageHalfHVPlane:\n"
-    "    lw $7,8($4)\n"
-    "    ld $8,0($5)\n"
-    "    ld $9,0($6)\n"
-    "    pcpyld $8,$9,$8\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $8,$8,$8\n"
-    "    pextlb $9,$0,$8\n"
-    "    addu $5,$5,$12\n"
-    "    ori $11,$11,0x8000\n"
-    "    mtsab $24,0\n"
-    "    qfsrv $10,$0,$8\n"
-    "    pextlb $8,$0,$10\n"
-    "    beq $7,$0,.LMcChromaAverageHalfHVBelow\n"
-    "    paddh $15,$9,$8\n"
-    ".LMcChromaAverageHalfHVRow:\n"
-    "    addu $6,$6,$12\n"
-    "    ld $8,0($5)\n"
-    "    ld $9,0($6)\n"
-    "    pcpyld $8,$9,$8\n"
-    "    mtsab $13,0\n"
-    "    qfsrv $8,$8,$8\n"
-    "    pextlb $9,$0,$8\n"
-    "    addi $7,$7,-1\n"
-    "    addu $5,$5,$12\n"
-    "    mtsab $24,0\n"
-    "    qfsrv $10,$0,$8\n"
-    "    pextlb $8,$0,$10\n"
-    "    paddh $10,$9,$8\n"
-    "    paddh $9,$10,$15\n"
-    "    por $15,$10,$0\n"
-    "    paddh $10,$9,$25\n"
-    "    psrlh $10,$10,0x2\n"
-    "    lq $8,0($14)\n"
-    "    paddh $10,$10,$8\n"
-    "    pcgth $9,$10,$0\n"
-    "    psrlh $9,$9,0xf\n"
-    "    paddh $10,$10,$9\n"
-    "    sll $8,$12,0x1\n"
-    "    psrlh $10,$10,0x1\n"
-    "    sq $10,0($14)\n"
-    "    bgtz $7,.LMcChromaAverageHalfHVRow\n"
-    "    addu $14,$14,$8\n"
-    ".LMcChromaAverageHalfHVBelow:\n"
-    "    psrah $10,$11,0xf\n"
-    "    addiu $5,$5,320\n"
-    "    lw $7,12($4)\n"
-    "    addiu $6,$6,320\n"
-    "    and $10,$10,$7\n"
-    "    bne $10,$0,.LMcChromaAverageHalfHVRow\n"
-    "    andi $11,$11,0x7fff\n"
-    "    lw $5,20($4)\n"
-    "    lw $6,24($4)\n"
-    "    lw $14,0($4)\n"
-    "    addiu $5,$5,64\n"
-    "    addiu $6,$6,64\n"
-    "    addiu $14,$14,128\n"
-    "    andi $10,$11,0x1\n"
-    "    bne $10,$0,.LMcChromaAverageHalfHVPlane\n"
-    "    andi $11,$11,0xfffe\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcAddBlock, @function\n"
-    "sceMpegMcAddBlock:\n"
-    "    addiu $12,$0,24\n"
-    "    lui $10,%hi(sceMpegMcClampLimit)\n"
-    "    addiu $10,$10,%lo(sceMpegMcClampLimit)\n"
-    "    lq $11,0($10)\n"
-    ".LMcAddBlockRow:\n"
-    "    lq $8,0($5)\n"
-    "    addi $12,$12,-1\n"
-    "    lq $13,0($6)\n"
-    "    addiu $4,$4,16\n"
-    "    lq $9,16($5)\n"
-    "    paddh $8,$8,$13\n"
-    "    lq $2,16($6)\n"
-    "    pminh $8,$8,$11\n"
-    "    paddh $9,$9,$2\n"
-    "    pmaxh $8,$8,$0\n"
-    "    pminh $9,$9,$11\n"
-    "    addiu $5,$5,32\n"
-    "    pmaxh $9,$9,$0\n"
-    "    addiu $6,$6,32\n"
-    "    ppacb $10,$9,$8\n"
-    "    bne $12,$0,.LMcAddBlockRow\n"
-    "    sq $10,-16($4)\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "    .type sceMpegMcPutBlock, @function\n"
-    "sceMpegMcPutBlock:\n"
-    "    addiu $12,$0,24\n"
-    "    lui $10,%hi(sceMpegMcClampLimit)\n"
-    "    addiu $10,$10,%lo(sceMpegMcClampLimit)\n"
-    "    lq $11,0($10)\n"
-    ".LMcPutBlockRow:\n"
-    "    lq $8,0($5)\n"
-    "    addi $12,$12,-1\n"
-    "    pminh $8,$8,$11\n"
-    "    lq $9,16($5)\n"
-    "    pmaxh $8,$8,$0\n"
-    "    pminh $9,$9,$11\n"
-    "    addiu $5,$5,32\n"
-    "    pmaxh $9,$9,$0\n"
-    "    addiu $4,$4,16\n"
-    "    ppacb $10,$9,$8\n"
-    "    bne $12,$0,.LMcPutBlockRow\n"
-    "    sq $10,-16($4)\n"
-    "    sll $0,$0,0x0\n"
-    "    sll $0,$0,0x0\n"
-    "sceMpegMcClampLimit:\n"
-    "    .word 0xff00ff\n"
-    "    .word 0xff00ff\n"
-    "    .word 0xff00ff\n"
-    "    .word 0xff00ff\n"
-    "    jr $31\n"
-    "    sll $0,$0,0x0\n"
-    "    .set pop\n");
+__asm__("    .text\n"
+        "    .set push\n"
+        "    .set noreorder\n"
+        "    .set nomacro\n"
+        "    .set noat\n"
+        "    .align 4\n"
+        "    nop\n"
+        "    nop\n"
+        "    .type sceMpegMcLumaCopy, @function\n"
+        "sceMpegMcLumaCopy:\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $7,8($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    lw $12,16($4)\n"
+        "    sll $11,$12,0x1\n"
+        "    addiu $15,$0,-1\n"
+        "    mtsab $13,0\n"
+        ".LMcLumaCopyRow:\n"
+        "    lq $8,0($5)\n"
+        "    addi $7,$7,-1\n"
+        "    lq $9,0($6)\n"
+        "    addu $5,$5,$12\n"
+        "    qfsrv $10,$9,$8\n"
+        "    pextlb $8,$0,$10\n"
+        "    pextub $9,$0,$10\n"
+        "    sq $8,0($14)\n"
+        "    addu $6,$6,$12\n"
+        "    sq $9,16($14)\n"
+        "    bgtz $7,.LMcLumaCopyRow\n"
+        "    addu $14,$14,$11\n"
+        "    addiu $5,$5,128\n"
+        "    addiu $6,$6,128\n"
+        "    lw $7,12($4)\n"
+        "    and $10,$15,$7\n"
+        "    bne $10,$0,.LMcLumaCopyRow\n"
+        "    daddu $15,$0,$0\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcChromaCopy, @function\n"
+        "sceMpegMcChromaCopy:\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    lw $12,16($4)\n"
+        "    sll $11,$12,0x1\n"
+        "    mtsab $13,0\n"
+        "    addiu $24,$0,-1\n"
+        ".LMcChromaCopyPlane:\n"
+        "    lw $7,8($4)\n"
+        "    addiu $15,$0,-1\n"
+        ".LMcChromaCopyRow:\n"
+        "    ld $8,0($5)\n"
+        "    ld $9,0($6)\n"
+        "    pcpyld $8,$9,$8\n"
+        "    qfsrv $9,$8,$8\n"
+        "    pextlb $8,$0,$9\n"
+        "    sq $8,0($14)\n"
+        "    addi $7,$7,-1\n"
+        "    addu $5,$5,$12\n"
+        "    addu $14,$14,$11\n"
+        "    bgtz $7,.LMcChromaCopyRow\n"
+        "    addu $6,$6,$12\n"
+        "    addiu $5,$5,320\n"
+        "    addiu $6,$6,320\n"
+        "    lw $7,12($4)\n"
+        "    and $10,$15,$7\n"
+        "    bne $10,$0,.LMcChromaCopyRow\n"
+        "    daddu $15,$0,$0\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    addiu $5,$5,64\n"
+        "    addiu $6,$6,64\n"
+        "    addiu $14,$14,128\n"
+        "    bne $24,$0,.LMcChromaCopyPlane\n"
+        "    daddu $24,$0,$0\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcLumaHalfV, @function\n"
+        "sceMpegMcLumaHalfV:\n"
+        "    pnor $25,$0,$0\n"
+        "    psrlh $25,$25,0xf\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $7,8($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    lw $24,16($4)\n"
+        "    lq $8,0($5)\n"
+        "    sll $12,$24,0x1\n"
+        "    lq $9,0($6)\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $10,$9,$8\n"
+        "    pextlb $8,$0,$10\n"
+        "    addiu $11,$0,-1\n"
+        "    beq $7,$0,.LMcLumaHalfVBelow\n"
+        "    pextub $9,$0,$10\n"
+        ".LMcLumaHalfVRow:\n"
+        "    addu $5,$5,$24\n"
+        "    addu $6,$6,$24\n"
+        "    lq $10,0($5)\n"
+        "    lq $15,0($6)\n"
+        "    qfsrv $2,$15,$10\n"
+        "    pextlb $10,$0,$2\n"
+        "    addi $7,$7,-1\n"
+        "    pextub $15,$0,$2\n"
+        "    paddh $2,$8,$10\n"
+        "    paddh $3,$9,$15\n"
+        "    por $8,$10,$0\n"
+        "    por $9,$15,$0\n"
+        "    paddh $2,$2,$25\n"
+        "    paddh $3,$3,$25\n"
+        "    psrlh $2,$2,0x1\n"
+        "    psrlh $3,$3,0x1\n"
+        "    sq $2,0($14)\n"
+        "    sq $3,16($14)\n"
+        "    bgtz $7,.LMcLumaHalfVRow\n"
+        "    addu $14,$14,$12\n"
+        ".LMcLumaHalfVBelow:\n"
+        "    addiu $5,$5,128\n"
+        "    addiu $6,$6,128\n"
+        "    lw $7,12($4)\n"
+        "    and $10,$11,$7\n"
+        "    bne $10,$0,.LMcLumaHalfVRow\n"
+        "    daddu $11,$0,$0\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcChromaHalfV, @function\n"
+        "sceMpegMcChromaHalfV:\n"
+        "    pnor $25,$0,$0\n"
+        "    psrlh $25,$25,0xf\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    lw $12,16($4)\n"
+        "    addiu $11,$0,1\n"
+        "    sll $24,$12,0x1\n"
+        "    mtsab $13,0\n"
+        ".LMcChromaHalfVPlane:\n"
+        "    lw $7,8($4)\n"
+        "    ld $8,0($5)\n"
+        "    ld $9,0($6)\n"
+        "    pcpyld $8,$9,$8\n"
+        "    qfsrv $8,$8,$8\n"
+        "    ori $11,$11,0x8000\n"
+        "    beq $7,$0,.LMcChromaHalfVBelow\n"
+        "    pextlb $15,$0,$8\n"
+        ".LMcChromaHalfVRow:\n"
+        "    addu $5,$5,$12\n"
+        "    addu $6,$6,$12\n"
+        "    ld $8,0($5)\n"
+        "    ld $9,0($6)\n"
+        "    pcpyld $8,$9,$8\n"
+        "    qfsrv $8,$8,$8\n"
+        "    pextlb $10,$0,$8\n"
+        "    addi $7,$7,-1\n"
+        "    paddh $9,$10,$15\n"
+        "    por $15,$10,$0\n"
+        "    paddh $10,$9,$25\n"
+        "    psrlh $10,$10,0x1\n"
+        "    sq $10,0($14)\n"
+        "    bgtz $7,.LMcChromaHalfVRow\n"
+        "    addu $14,$14,$24\n"
+        ".LMcChromaHalfVBelow:\n"
+        "    psrah $10,$11,0xf\n"
+        "    addiu $5,$5,320\n"
+        "    lw $7,12($4)\n"
+        "    addiu $6,$6,320\n"
+        "    and $10,$10,$7\n"
+        "    bne $10,$0,.LMcChromaHalfVRow\n"
+        "    andi $11,$11,0x7fff\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    addiu $5,$5,64\n"
+        "    addiu $6,$6,64\n"
+        "    addiu $14,$14,128\n"
+        "    andi $10,$11,0x1\n"
+        "    bne $10,$0,.LMcChromaHalfVPlane\n"
+        "    andi $11,$11,0xfffe\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcLumaHalfH, @function\n"
+        "sceMpegMcLumaHalfH:\n"
+        "    pnor $25,$0,$0\n"
+        "    psrlh $25,$25,0xf\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $7,8($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    addiu $24,$0,1\n"
+        "    lw $9,16($4)\n"
+        "    sll $8,$9,0x1\n"
+        "    addiu $11,$0,-1\n"
+        ".LMcLumaHalfHRow:\n"
+        "    lq $10,0($5)\n"
+        "    lq $15,0($6)\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $2,$15,$10\n"
+        "    qfsrv $3,$10,$15\n"
+        "    pextlb $10,$0,$2\n"
+        "    addi $7,$7,-1\n"
+        "    pextub $15,$0,$2\n"
+        "    mtsab $24,0\n"
+        "    qfsrv $3,$3,$2\n"
+        "    pextlb $2,$0,$3\n"
+        "    pextub $3,$0,$3\n"
+        "    paddh $10,$10,$2\n"
+        "    paddh $15,$15,$3\n"
+        "    paddh $2,$10,$25\n"
+        "    paddh $3,$15,$25\n"
+        "    psrlh $2,$2,0x1\n"
+        "    psrlh $3,$3,0x1\n"
+        "    sq $2,0($14)\n"
+        "    sq $3,16($14)\n"
+        "    addu $5,$5,$9\n"
+        "    addu $6,$6,$9\n"
+        "    bgtz $7,.LMcLumaHalfHRow\n"
+        "    addu $14,$14,$8\n"
+        "    addiu $5,$5,128\n"
+        "    addiu $6,$6,128\n"
+        "    lw $7,12($4)\n"
+        "    and $12,$11,$7\n"
+        "    bne $12,$0,.LMcLumaHalfHRow\n"
+        "    daddu $11,$0,$0\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcChromaHalfH, @function\n"
+        "sceMpegMcChromaHalfH:\n"
+        "    pnor $25,$0,$0\n"
+        "    psrlh $25,$25,0xf\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    addiu $24,$0,1\n"
+        "    addiu $12,$0,-1\n"
+        "    lw $3,16($4)\n"
+        "    sll $2,$3,0x1\n"
+        ".LMcChromaHalfHPlane:\n"
+        "    lw $7,8($4)\n"
+        "    addiu $11,$0,-1\n"
+        ".LMcChromaHalfHRow:\n"
+        "    ld $8,0($5)\n"
+        "    ld $9,0($6)\n"
+        "    pcpyld $8,$9,$8\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $8,$8,$8\n"
+        "    pextlb $9,$0,$8\n"
+        "    addi $7,$7,-1\n"
+        "    addu $5,$5,$3\n"
+        "    addu $6,$6,$3\n"
+        "    mtsab $24,0\n"
+        "    qfsrv $10,$0,$8\n"
+        "    pextlb $8,$0,$10\n"
+        "    paddh $10,$9,$8\n"
+        "    paddh $10,$10,$25\n"
+        "    psrlh $10,$10,0x1\n"
+        "    sq $10,0($14)\n"
+        "    bgtz $7,.LMcChromaHalfHRow\n"
+        "    addu $14,$14,$2\n"
+        "    addiu $5,$5,320\n"
+        "    addiu $6,$6,320\n"
+        "    lw $7,12($4)\n"
+        "    and $10,$11,$7\n"
+        "    bne $10,$0,.LMcChromaHalfHRow\n"
+        "    daddu $11,$0,$0\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    addiu $5,$5,64\n"
+        "    addiu $6,$6,64\n"
+        "    addiu $14,$14,128\n"
+        "    bne $12,$0,.LMcChromaHalfHPlane\n"
+        "    daddu $12,$0,$0\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcLumaHalfHV, @function\n"
+        "sceMpegMcLumaHalfHV:\n"
+        "    pnor $25,$0,$0\n"
+        "    psrlh $25,$25,0xf\n"
+        "    psllh $25,$25,0x1\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $7,8($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    lw $12,16($4)\n"
+        "    addiu $24,$0,1\n"
+        "    lq $8,0($5)\n"
+        "    lq $9,0($6)\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $10,$9,$8\n"
+        "    qfsrv $15,$8,$9\n"
+        "    pextlb $8,$0,$10\n"
+        "    pextub $9,$0,$10\n"
+        "    addiu $11,$0,-1\n"
+        "    mtsab $24,0\n"
+        "    qfsrv $15,$15,$10\n"
+        "    pextlb $10,$0,$15\n"
+        "    pextub $15,$0,$15\n"
+        "    paddh $8,$8,$10\n"
+        "    beq $7,$0,.LMcLumaHalfHVBelow\n"
+        "    paddh $9,$9,$15\n"
+        ".LMcLumaHalfHVRow:\n"
+        "    addu $5,$5,$12\n"
+        "    addu $6,$6,$12\n"
+        "    lq $10,0($5)\n"
+        "    lq $15,0($6)\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $2,$15,$10\n"
+        "    qfsrv $3,$10,$15\n"
+        "    pextlb $10,$0,$2\n"
+        "    addi $7,$7,-1\n"
+        "    pextub $15,$0,$2\n"
+        "    mtsab $24,0\n"
+        "    qfsrv $3,$3,$2\n"
+        "    pextlb $2,$0,$3\n"
+        "    pextub $3,$0,$3\n"
+        "    paddh $10,$10,$2\n"
+        "    paddh $15,$15,$3\n"
+        "    paddh $2,$8,$10\n"
+        "    paddh $3,$9,$15\n"
+        "    por $8,$10,$0\n"
+        "    por $9,$15,$0\n"
+        "    paddh $2,$2,$25\n"
+        "    paddh $3,$3,$25\n"
+        "    psrlh $2,$2,0x2\n"
+        "    psrlh $3,$3,0x2\n"
+        "    sq $2,0($14)\n"
+        "    sll $10,$12,0x1\n"
+        "    sq $3,16($14)\n"
+        "    bgtz $7,.LMcLumaHalfHVRow\n"
+        "    addu $14,$14,$10\n"
+        ".LMcLumaHalfHVBelow:\n"
+        "    addiu $5,$5,128\n"
+        "    addiu $6,$6,128\n"
+        "    lw $7,12($4)\n"
+        "    and $10,$11,$7\n"
+        "    bne $10,$0,.LMcLumaHalfHVRow\n"
+        "    daddu $11,$0,$0\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcChromaHalfHV, @function\n"
+        "sceMpegMcChromaHalfHV:\n"
+        "    pnor $25,$0,$0\n"
+        "    psrlh $25,$25,0xf\n"
+        "    psllh $25,$25,0x1\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    lw $12,16($4)\n"
+        "    addiu $24,$0,1\n"
+        "    addiu $11,$0,1\n"
+        ".LMcChromaHalfHVPlane:\n"
+        "    lw $7,8($4)\n"
+        "    ld $8,0($5)\n"
+        "    ld $9,0($6)\n"
+        "    pcpyld $8,$9,$8\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $8,$8,$8\n"
+        "    pextlb $9,$0,$8\n"
+        "    addu $5,$5,$12\n"
+        "    ori $11,$11,0x8000\n"
+        "    mtsab $24,0\n"
+        "    qfsrv $10,$0,$8\n"
+        "    pextlb $8,$0,$10\n"
+        "    beq $7,$0,.LMcChromaHalfHVBelow\n"
+        "    paddh $15,$9,$8\n"
+        ".LMcChromaHalfHVRow:\n"
+        "    addu $6,$6,$12\n"
+        "    ld $8,0($5)\n"
+        "    ld $9,0($6)\n"
+        "    pcpyld $8,$9,$8\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $8,$8,$8\n"
+        "    pextlb $9,$0,$8\n"
+        "    addi $7,$7,-1\n"
+        "    addu $5,$5,$12\n"
+        "    mtsab $24,0\n"
+        "    qfsrv $10,$0,$8\n"
+        "    pextlb $8,$0,$10\n"
+        "    paddh $10,$9,$8\n"
+        "    paddh $9,$10,$15\n"
+        "    por $15,$10,$0\n"
+        "    paddh $10,$9,$25\n"
+        "    sll $8,$12,0x1\n"
+        "    psrlh $10,$10,0x2\n"
+        "    sq $10,0($14)\n"
+        "    bgtz $7,.LMcChromaHalfHVRow\n"
+        "    addu $14,$14,$8\n"
+        ".LMcChromaHalfHVBelow:\n"
+        "    psrah $10,$11,0xf\n"
+        "    addiu $5,$5,320\n"
+        "    lw $7,12($4)\n"
+        "    addiu $6,$6,320\n"
+        "    and $10,$10,$7\n"
+        "    bne $10,$0,.LMcChromaHalfHVRow\n"
+        "    andi $11,$11,0x7fff\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    addiu $5,$5,64\n"
+        "    addiu $6,$6,64\n"
+        "    addiu $14,$14,128\n"
+        "    andi $10,$11,0x1\n"
+        "    bne $10,$0,.LMcChromaHalfHVPlane\n"
+        "    andi $11,$11,0xfffe\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcLumaAverageCopy, @function\n"
+        "sceMpegMcLumaAverageCopy:\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $7,8($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    lw $9,16($4)\n"
+        "    sll $8,$9,0x1\n"
+        "    addiu $11,$0,-1\n"
+        "    mtsab $13,0\n"
+        ".LMcLumaAverageCopyRow:\n"
+        "    lq $10,0($5)\n"
+        "    lq $15,0($6)\n"
+        "    qfsrv $2,$15,$10\n"
+        "    pextlb $10,$0,$2\n"
+        "    pextub $15,$0,$2\n"
+        "    lq $2,0($14)\n"
+        "    lq $3,16($14)\n"
+        "    paddh $2,$2,$10\n"
+        "    paddh $3,$3,$15\n"
+        "    pcgth $10,$2,$0\n"
+        "    psrlh $10,$10,0xf\n"
+        "    paddh $10,$2,$10\n"
+        "    psrlh $2,$10,0x1\n"
+        "    pcgth $10,$3,$0\n"
+        "    psrlh $10,$10,0xf\n"
+        "    paddh $10,$3,$10\n"
+        "    psrlh $3,$10,0x1\n"
+        "    sq $2,0($14)\n"
+        "    sq $3,16($14)\n"
+        "    addi $7,$7,-1\n"
+        "    addu $5,$5,$9\n"
+        "    addu $14,$14,$8\n"
+        "    bgtz $7,.LMcLumaAverageCopyRow\n"
+        "    addu $6,$6,$9\n"
+        "    addiu $5,$5,128\n"
+        "    addiu $6,$6,128\n"
+        "    lw $7,12($4)\n"
+        "    and $12,$11,$7\n"
+        "    bne $12,$0,.LMcLumaAverageCopyRow\n"
+        "    daddu $11,$0,$0\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcChromaAverageCopy, @function\n"
+        "sceMpegMcChromaAverageCopy:\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    addiu $12,$0,-1\n"
+        "    lw $3,16($4)\n"
+        "    sll $2,$3,0x1\n"
+        "    mtsab $13,0\n"
+        ".LMcChromaAverageCopyPlane:\n"
+        "    lw $7,8($4)\n"
+        "    addiu $11,$0,-1\n"
+        ".LMcChromaAverageCopyRow:\n"
+        "    ld $8,0($5)\n"
+        "    ld $9,0($6)\n"
+        "    pcpyld $8,$9,$8\n"
+        "    qfsrv $8,$8,$8\n"
+        "    pextlb $9,$0,$8\n"
+        "    addi $7,$7,-1\n"
+        "    addu $5,$5,$3\n"
+        "    addu $6,$6,$3\n"
+        "    lq $8,0($14)\n"
+        "    paddh $10,$9,$8\n"
+        "    pcgth $9,$10,$0\n"
+        "    psrlh $9,$9,0xf\n"
+        "    paddh $10,$10,$9\n"
+        "    psrlh $10,$10,0x1\n"
+        "    sq $10,0($14)\n"
+        "    bgtz $7,.LMcChromaAverageCopyRow\n"
+        "    addu $14,$14,$2\n"
+        "    addiu $5,$5,320\n"
+        "    addiu $6,$6,320\n"
+        "    lw $7,12($4)\n"
+        "    and $10,$11,$7\n"
+        "    bne $10,$0,.LMcChromaAverageCopyRow\n"
+        "    daddu $11,$0,$0\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    addiu $5,$5,64\n"
+        "    addiu $6,$6,64\n"
+        "    addiu $14,$14,128\n"
+        "    bne $12,$0,.LMcChromaAverageCopyPlane\n"
+        "    daddu $12,$0,$0\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcLumaAverageHalfV, @function\n"
+        "sceMpegMcLumaAverageHalfV:\n"
+        "    pnor $25,$0,$0\n"
+        "    psrlh $25,$25,0xf\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $7,8($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    lw $12,16($4)\n"
+        "    lq $8,0($5)\n"
+        "    lq $9,0($6)\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $10,$9,$8\n"
+        "    sll $24,$12,0x1\n"
+        "    pextlb $8,$0,$10\n"
+        "    addiu $11,$0,-1\n"
+        "    beq $7,$0,.LMcLumaAverageHalfVBelow\n"
+        "    pextub $9,$0,$10\n"
+        ".LMcLumaAverageHalfVRow:\n"
+        "    addu $5,$5,$12\n"
+        "    addu $6,$6,$12\n"
+        "    lq $10,0($5)\n"
+        "    lq $15,0($6)\n"
+        "    qfsrv $2,$15,$10\n"
+        "    pextlb $10,$0,$2\n"
+        "    addi $7,$7,-1\n"
+        "    pextub $15,$0,$2\n"
+        "    paddh $2,$8,$10\n"
+        "    paddh $3,$9,$15\n"
+        "    por $8,$10,$0\n"
+        "    por $9,$15,$0\n"
+        "    paddh $2,$2,$25\n"
+        "    paddh $3,$3,$25\n"
+        "    psrlh $2,$2,0x1\n"
+        "    psrlh $3,$3,0x1\n"
+        "    lq $10,0($14)\n"
+        "    lq $15,16($14)\n"
+        "    paddh $2,$2,$10\n"
+        "    paddh $3,$3,$15\n"
+        "    pcgth $10,$2,$0\n"
+        "    psrlh $10,$10,0xf\n"
+        "    paddh $10,$2,$10\n"
+        "    psrlh $2,$10,0x1\n"
+        "    pcgth $10,$3,$0\n"
+        "    psrlh $10,$10,0xf\n"
+        "    paddh $10,$3,$10\n"
+        "    psrlh $3,$10,0x1\n"
+        "    sq $2,0($14)\n"
+        "    sq $3,16($14)\n"
+        "    bgtz $7,.LMcLumaAverageHalfVRow\n"
+        "    addu $14,$14,$24\n"
+        ".LMcLumaAverageHalfVBelow:\n"
+        "    addiu $5,$5,128\n"
+        "    addiu $6,$6,128\n"
+        "    lw $7,12($4)\n"
+        "    and $10,$11,$7\n"
+        "    bne $10,$0,.LMcLumaAverageHalfVRow\n"
+        "    daddu $11,$0,$0\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcChromaAverageHalfV, @function\n"
+        "sceMpegMcChromaAverageHalfV:\n"
+        "    pnor $25,$0,$0\n"
+        "    psrlh $25,$25,0xf\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    lw $12,16($4)\n"
+        "    addiu $11,$0,1\n"
+        "    sll $24,$12,0x1\n"
+        "    mtsab $13,0\n"
+        ".LMcChromaAverageHalfVPlane:\n"
+        "    lw $7,8($4)\n"
+        "    ld $8,0($5)\n"
+        "    ld $9,0($6)\n"
+        "    pcpyld $8,$9,$8\n"
+        "    qfsrv $8,$8,$8\n"
+        "    ori $11,$11,0x8000\n"
+        "    beq $7,$0,.LMcChromaAverageHalfVBelow\n"
+        "    pextlb $15,$0,$8\n"
+        ".LMcChromaAverageHalfVRow:\n"
+        "    addu $5,$5,$12\n"
+        "    addu $6,$6,$12\n"
+        "    ld $8,0($5)\n"
+        "    ld $9,0($6)\n"
+        "    pcpyld $8,$9,$8\n"
+        "    qfsrv $8,$8,$8\n"
+        "    pextlb $10,$0,$8\n"
+        "    addi $7,$7,-1\n"
+        "    paddh $9,$10,$15\n"
+        "    por $15,$10,$0\n"
+        "    paddh $10,$9,$25\n"
+        "    psrlh $10,$10,0x1\n"
+        "    lq $8,0($14)\n"
+        "    paddh $10,$10,$8\n"
+        "    pcgth $9,$10,$0\n"
+        "    psrlh $9,$9,0xf\n"
+        "    paddh $10,$10,$9\n"
+        "    psrlh $10,$10,0x1\n"
+        "    sq $10,0($14)\n"
+        "    bgtz $7,.LMcChromaAverageHalfVRow\n"
+        "    addu $14,$14,$24\n"
+        ".LMcChromaAverageHalfVBelow:\n"
+        "    psrah $10,$11,0xf\n"
+        "    addiu $5,$5,320\n"
+        "    lw $7,12($4)\n"
+        "    addiu $6,$6,320\n"
+        "    and $10,$10,$7\n"
+        "    bne $10,$0,.LMcChromaAverageHalfVRow\n"
+        "    andi $11,$11,0x7fff\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    addiu $5,$5,64\n"
+        "    addiu $6,$6,64\n"
+        "    addiu $14,$14,128\n"
+        "    andi $10,$11,0x1\n"
+        "    bne $10,$0,.LMcChromaAverageHalfVPlane\n"
+        "    andi $11,$11,0xfffe\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcLumaAverageHalfH, @function\n"
+        "sceMpegMcLumaAverageHalfH:\n"
+        "    pnor $25,$0,$0\n"
+        "    psrlh $25,$25,0xf\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $7,8($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    addiu $24,$0,1\n"
+        "    lw $9,16($4)\n"
+        "    sll $8,$9,0x1\n"
+        "    addiu $11,$0,-1\n"
+        ".LMcLumaAverageHalfHRow:\n"
+        "    lq $10,0($5)\n"
+        "    lq $15,0($6)\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $2,$15,$10\n"
+        "    qfsrv $3,$10,$15\n"
+        "    pextlb $10,$0,$2\n"
+        "    addi $7,$7,-1\n"
+        "    pextub $15,$0,$2\n"
+        "    mtsab $24,0\n"
+        "    qfsrv $3,$3,$2\n"
+        "    pextlb $2,$0,$3\n"
+        "    pextub $3,$0,$3\n"
+        "    paddh $10,$10,$2\n"
+        "    paddh $15,$15,$3\n"
+        "    paddh $2,$10,$25\n"
+        "    paddh $3,$15,$25\n"
+        "    psrlh $2,$2,0x1\n"
+        "    psrlh $3,$3,0x1\n"
+        "    lq $10,0($14)\n"
+        "    lq $15,16($14)\n"
+        "    paddh $2,$2,$10\n"
+        "    paddh $3,$3,$15\n"
+        "    pcgth $10,$2,$0\n"
+        "    psrlh $10,$10,0xf\n"
+        "    paddh $10,$2,$10\n"
+        "    psrlh $2,$10,0x1\n"
+        "    pcgth $10,$3,$0\n"
+        "    psrlh $10,$10,0xf\n"
+        "    paddh $10,$3,$10\n"
+        "    psrlh $3,$10,0x1\n"
+        "    sq $2,0($14)\n"
+        "    sq $3,16($14)\n"
+        "    addu $5,$5,$9\n"
+        "    addu $6,$6,$9\n"
+        "    bgtz $7,.LMcLumaAverageHalfHRow\n"
+        "    addu $14,$14,$8\n"
+        "    addiu $5,$5,128\n"
+        "    addiu $6,$6,128\n"
+        "    lw $7,12($4)\n"
+        "    and $12,$11,$7\n"
+        "    bne $12,$0,.LMcLumaAverageHalfHRow\n"
+        "    daddu $11,$0,$0\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcChromaAverageHalfH, @function\n"
+        "sceMpegMcChromaAverageHalfH:\n"
+        "    pnor $25,$0,$0\n"
+        "    psrlh $25,$25,0xf\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    addiu $24,$0,1\n"
+        "    addiu $12,$0,-1\n"
+        "    lw $3,16($4)\n"
+        "    sll $2,$3,0x1\n"
+        ".LMcChromaAverageHalfHPlane:\n"
+        "    lw $7,8($4)\n"
+        "    addiu $11,$0,-1\n"
+        ".LMcChromaAverageHalfHRow:\n"
+        "    ld $8,0($5)\n"
+        "    ld $9,0($6)\n"
+        "    pcpyld $8,$9,$8\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $8,$8,$8\n"
+        "    pextlb $9,$0,$8\n"
+        "    addi $7,$7,-1\n"
+        "    addu $5,$5,$3\n"
+        "    addu $6,$6,$3\n"
+        "    mtsab $24,0\n"
+        "    qfsrv $10,$0,$8\n"
+        "    pextlb $8,$0,$10\n"
+        "    paddh $10,$9,$8\n"
+        "    paddh $10,$10,$25\n"
+        "    psrlh $10,$10,0x1\n"
+        "    lq $8,0($14)\n"
+        "    paddh $10,$10,$8\n"
+        "    pcgth $9,$10,$0\n"
+        "    psrlh $9,$9,0xf\n"
+        "    paddh $10,$10,$9\n"
+        "    psrlh $10,$10,0x1\n"
+        "    sq $10,0($14)\n"
+        "    bgtz $7,.LMcChromaAverageHalfHRow\n"
+        "    addu $14,$14,$2\n"
+        "    addiu $5,$5,320\n"
+        "    addiu $6,$6,320\n"
+        "    lw $7,12($4)\n"
+        "    and $10,$11,$7\n"
+        "    bne $10,$0,.LMcChromaAverageHalfHRow\n"
+        "    daddu $11,$0,$0\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    addiu $5,$5,64\n"
+        "    addiu $6,$6,64\n"
+        "    addiu $14,$14,128\n"
+        "    bne $12,$0,.LMcChromaAverageHalfHPlane\n"
+        "    daddu $12,$0,$0\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcLumaAverageHalfHV, @function\n"
+        "sceMpegMcLumaAverageHalfHV:\n"
+        "    pnor $25,$0,$0\n"
+        "    psrlh $25,$25,0xf\n"
+        "    psllh $25,$25,0x1\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $7,8($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    lw $24,16($4)\n"
+        "    addiu $12,$0,1\n"
+        "    lq $8,0($5)\n"
+        "    lq $9,0($6)\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $10,$9,$8\n"
+        "    qfsrv $15,$8,$9\n"
+        "    pextlb $8,$0,$10\n"
+        "    pextub $9,$0,$10\n"
+        "    addiu $11,$0,-1\n"
+        "    mtsab $12,0\n"
+        "    qfsrv $15,$15,$10\n"
+        "    pextlb $10,$0,$15\n"
+        "    pextub $15,$0,$15\n"
+        "    paddh $8,$8,$10\n"
+        "    beq $7,$0,.LMcLumaAverageHalfHVBelow\n"
+        "    paddh $9,$9,$15\n"
+        ".LMcLumaAverageHalfHVRow:\n"
+        "    addu $5,$5,$24\n"
+        "    addu $6,$6,$24\n"
+        "    lq $10,0($5)\n"
+        "    lq $15,0($6)\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $2,$15,$10\n"
+        "    qfsrv $3,$10,$15\n"
+        "    pextlb $10,$0,$2\n"
+        "    addi $7,$7,-1\n"
+        "    pextub $15,$0,$2\n"
+        "    mtsab $12,0\n"
+        "    qfsrv $3,$3,$2\n"
+        "    pextlb $2,$0,$3\n"
+        "    pextub $3,$0,$3\n"
+        "    paddh $10,$10,$2\n"
+        "    paddh $15,$15,$3\n"
+        "    paddh $2,$8,$10\n"
+        "    paddh $3,$9,$15\n"
+        "    por $8,$10,$0\n"
+        "    por $9,$15,$0\n"
+        "    paddh $2,$2,$25\n"
+        "    paddh $3,$3,$25\n"
+        "    psrlh $2,$2,0x2\n"
+        "    psrlh $3,$3,0x2\n"
+        "    lq $10,0($14)\n"
+        "    lq $15,16($14)\n"
+        "    paddh $2,$2,$10\n"
+        "    paddh $3,$3,$15\n"
+        "    pcgth $10,$2,$0\n"
+        "    psrlh $10,$10,0xf\n"
+        "    paddh $10,$2,$10\n"
+        "    psrlh $2,$10,0x1\n"
+        "    pcgth $10,$3,$0\n"
+        "    psrlh $10,$10,0xf\n"
+        "    paddh $10,$3,$10\n"
+        "    psrlh $3,$10,0x1\n"
+        "    sq $2,0($14)\n"
+        "    sll $10,$24,0x1\n"
+        "    sq $3,16($14)\n"
+        "    bgtz $7,.LMcLumaAverageHalfHVRow\n"
+        "    addu $14,$14,$10\n"
+        ".LMcLumaAverageHalfHVBelow:\n"
+        "    addiu $5,$5,128\n"
+        "    addiu $6,$6,128\n"
+        "    lw $7,12($4)\n"
+        "    and $10,$11,$7\n"
+        "    bne $10,$0,.LMcLumaAverageHalfHVRow\n"
+        "    daddu $11,$0,$0\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcChromaAverageHalfHV, @function\n"
+        "sceMpegMcChromaAverageHalfHV:\n"
+        "    pnor $25,$0,$0\n"
+        "    psrlh $25,$25,0xf\n"
+        "    psllh $25,$25,0x1\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    lw $13,4($4)\n"
+        "    lw $12,16($4)\n"
+        "    addiu $24,$0,1\n"
+        "    addiu $11,$0,1\n"
+        ".LMcChromaAverageHalfHVPlane:\n"
+        "    lw $7,8($4)\n"
+        "    ld $8,0($5)\n"
+        "    ld $9,0($6)\n"
+        "    pcpyld $8,$9,$8\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $8,$8,$8\n"
+        "    pextlb $9,$0,$8\n"
+        "    addu $5,$5,$12\n"
+        "    ori $11,$11,0x8000\n"
+        "    mtsab $24,0\n"
+        "    qfsrv $10,$0,$8\n"
+        "    pextlb $8,$0,$10\n"
+        "    beq $7,$0,.LMcChromaAverageHalfHVBelow\n"
+        "    paddh $15,$9,$8\n"
+        ".LMcChromaAverageHalfHVRow:\n"
+        "    addu $6,$6,$12\n"
+        "    ld $8,0($5)\n"
+        "    ld $9,0($6)\n"
+        "    pcpyld $8,$9,$8\n"
+        "    mtsab $13,0\n"
+        "    qfsrv $8,$8,$8\n"
+        "    pextlb $9,$0,$8\n"
+        "    addi $7,$7,-1\n"
+        "    addu $5,$5,$12\n"
+        "    mtsab $24,0\n"
+        "    qfsrv $10,$0,$8\n"
+        "    pextlb $8,$0,$10\n"
+        "    paddh $10,$9,$8\n"
+        "    paddh $9,$10,$15\n"
+        "    por $15,$10,$0\n"
+        "    paddh $10,$9,$25\n"
+        "    psrlh $10,$10,0x2\n"
+        "    lq $8,0($14)\n"
+        "    paddh $10,$10,$8\n"
+        "    pcgth $9,$10,$0\n"
+        "    psrlh $9,$9,0xf\n"
+        "    paddh $10,$10,$9\n"
+        "    sll $8,$12,0x1\n"
+        "    psrlh $10,$10,0x1\n"
+        "    sq $10,0($14)\n"
+        "    bgtz $7,.LMcChromaAverageHalfHVRow\n"
+        "    addu $14,$14,$8\n"
+        ".LMcChromaAverageHalfHVBelow:\n"
+        "    psrah $10,$11,0xf\n"
+        "    addiu $5,$5,320\n"
+        "    lw $7,12($4)\n"
+        "    addiu $6,$6,320\n"
+        "    and $10,$10,$7\n"
+        "    bne $10,$0,.LMcChromaAverageHalfHVRow\n"
+        "    andi $11,$11,0x7fff\n"
+        "    lw $5,20($4)\n"
+        "    lw $6,24($4)\n"
+        "    lw $14,0($4)\n"
+        "    addiu $5,$5,64\n"
+        "    addiu $6,$6,64\n"
+        "    addiu $14,$14,128\n"
+        "    andi $10,$11,0x1\n"
+        "    bne $10,$0,.LMcChromaAverageHalfHVPlane\n"
+        "    andi $11,$11,0xfffe\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcAddBlock, @function\n"
+        "sceMpegMcAddBlock:\n"
+        "    addiu $12,$0,24\n"
+        "    lui $10,%hi(sceMpegMcClampLimit)\n"
+        "    addiu $10,$10,%lo(sceMpegMcClampLimit)\n"
+        "    lq $11,0($10)\n"
+        ".LMcAddBlockRow:\n"
+        "    lq $8,0($5)\n"
+        "    addi $12,$12,-1\n"
+        "    lq $13,0($6)\n"
+        "    addiu $4,$4,16\n"
+        "    lq $9,16($5)\n"
+        "    paddh $8,$8,$13\n"
+        "    lq $2,16($6)\n"
+        "    pminh $8,$8,$11\n"
+        "    paddh $9,$9,$2\n"
+        "    pmaxh $8,$8,$0\n"
+        "    pminh $9,$9,$11\n"
+        "    addiu $5,$5,32\n"
+        "    pmaxh $9,$9,$0\n"
+        "    addiu $6,$6,32\n"
+        "    ppacb $10,$9,$8\n"
+        "    bne $12,$0,.LMcAddBlockRow\n"
+        "    sq $10,-16($4)\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "    .type sceMpegMcPutBlock, @function\n"
+        "sceMpegMcPutBlock:\n"
+        "    addiu $12,$0,24\n"
+        "    lui $10,%hi(sceMpegMcClampLimit)\n"
+        "    addiu $10,$10,%lo(sceMpegMcClampLimit)\n"
+        "    lq $11,0($10)\n"
+        ".LMcPutBlockRow:\n"
+        "    lq $8,0($5)\n"
+        "    addi $12,$12,-1\n"
+        "    pminh $8,$8,$11\n"
+        "    lq $9,16($5)\n"
+        "    pmaxh $8,$8,$0\n"
+        "    pminh $9,$9,$11\n"
+        "    addiu $5,$5,32\n"
+        "    pmaxh $9,$9,$0\n"
+        "    addiu $4,$4,16\n"
+        "    ppacb $10,$9,$8\n"
+        "    bne $12,$0,.LMcPutBlockRow\n"
+        "    sq $10,-16($4)\n"
+        "    sll $0,$0,0x0\n"
+        "    sll $0,$0,0x0\n"
+        "sceMpegMcClampLimit:\n"
+        "    .word 0xff00ff\n"
+        "    .word 0xff00ff\n"
+        "    .word 0xff00ff\n"
+        "    .word 0xff00ff\n"
+        "    jr $31\n"
+        "    sll $0,$0,0x0\n"
+        "    .set pop\n");
 
 // Rounds half a motion vector component away from zero for positive values, as the dual prime
 // derivation does.
@@ -3198,16 +3317,16 @@ static inline void sceMpegSplitMcRows(MpegMcDescriptor *pDescriptor,
 // Queues one prediction of the current macroblock, comprising the reference macroblocks to stage
 // and the luma and chroma kernel jobs that read them.
 static void sceMpegQueuePrediction(MpegSeqTable *pRef,
-                               int nSourceField,
-                               int nDestField,
-                               int nYOffset,
-                               int nHeight,
-                               int nX,
-                               int nY,
-                               int nDx,
-                               int nDy,
-                               int nFieldShift,
-                               int nAverage) {
+                                   int nSourceField,
+                                   int nDestField,
+                                   int nYOffset,
+                                   int nHeight,
+                                   int nX,
+                                   int nY,
+                                   int nDx,
+                                   int nDy,
+                                   int nFieldShift,
+                                   int nAverage) {
     MpegMcBuffer *buffer = &g_mpegIpuTable.mBuffers[g_mpegIpuTable.mCurrent];
     const int slot = buffer->mPredictionCount;
     MpegMcDescriptor *luma = &buffer->mLuma[slot];
@@ -3224,7 +3343,7 @@ static void sceMpegQueuePrediction(MpegSeqTable *pRef,
     const int chromaDy = nDy / 2;
     const int chromaX = (chromaDx >> 1) + (nX >> 1);
     const int chromaY = (nFieldShift != 0 ? (chromaDy >> 1) << 1 : chromaDy >> 1) + (nY >> 1) +
-        (nYOffset >> 1) + nSourceField;
+                        (nYOffset >> 1) + nSourceField;
     const int chromaColumn = chromaX >> kChromaRowShift;
     const int chromaRow = chromaY >> kChromaRowShift;
     const int chromaOffset = chromaY - (chromaRow << kChromaRowShift);
@@ -3241,7 +3360,7 @@ static void sceMpegQueuePrediction(MpegSeqTable *pRef,
 
     chroma->mShift = chromaX - (chromaColumn << kChromaRowShift);
     chroma->mDest = kMpegMcOutputBase + kChromaDestOffset +
-        ((nDestField + (nYOffset >> 1)) << kChromaDestRowShift);
+                    ((nDestField + (nYOffset >> 1)) << kChromaDestRowShift);
     sceMpegSplitMcRows(chroma, chromaOffset, nHeight >> 1, nFieldShift, chromaDy & 1, kChromaSize);
     chroma->mStride = kChromaSize << nFieldShift;
     chroma->mSourceLeft = chromaSource + (chromaOffset << kChromaRowShift) + kChromaPlaneOffset;
@@ -3259,12 +3378,12 @@ static void sceMpegQueuePrediction(MpegSeqTable *pRef,
 // Queues every prediction the macroblock's type and motion type call for. A backward prediction
 // averages with a forward one queued first.
 static void sceMpegQueuePredictions(int nX,
-                               int nY,
-                               int nMbType,
-                               int nMotionType,
-                               int pPmv[2][2][2],
-                               int pMvfs[2][2],
-                               int *pDmVector) {
+                                    int nY,
+                                    int nMbType,
+                                    int nMotionType,
+                                    int pPmv[2][2][2],
+                                    int pMvfs[2][2],
+                                    int *pDmVector) {
     int dmv[4];
     MpegSeqTable *fieldRefs[2][2];
     int formed = 0;
@@ -3275,23 +3394,68 @@ static void sceMpegQueuePredictions(int nX,
     if ((nMbType & kMbMotionForward) != 0 || g_nMpegPictureCodingType == kPictureP) {
         if (g_nMpegPictureStructure == kFramePicture) {
             if (nMotionType == kMcFrame || (nMbType & kMbMotionForward) == 0) {
-                sceMpegQueuePrediction(g_mpegTables[0], 0, 0, 0, kLumaSize, nX, nY, pPmv[0][0][0],
-                                   pPmv[0][0][1], 0, 0);
+                sceMpegQueuePrediction(g_mpegTables[0],
+                                       0,
+                                       0,
+                                       0,
+                                       kLumaSize,
+                                       nX,
+                                       nY,
+                                       pPmv[0][0][0],
+                                       pPmv[0][0][1],
+                                       0,
+                                       0);
             } else if (nMotionType == kMcField) {
-                sceMpegQueuePrediction(g_mpegTables[0], pMvfs[0][0], 0, 0, kHalfLumaSize, nX, nY,
-                                   pPmv[0][0][0], pPmv[0][0][1] >> 1, 1, 0);
-                sceMpegQueuePrediction(g_mpegTables[0], pMvfs[1][0], 1, 0, kHalfLumaSize, nX, nY,
-                                   pPmv[1][0][0], pPmv[1][0][1] >> 1, 1, 0);
+                sceMpegQueuePrediction(g_mpegTables[0],
+                                       pMvfs[0][0],
+                                       0,
+                                       0,
+                                       kHalfLumaSize,
+                                       nX,
+                                       nY,
+                                       pPmv[0][0][0],
+                                       pPmv[0][0][1] >> 1,
+                                       1,
+                                       0);
+                sceMpegQueuePrediction(g_mpegTables[0],
+                                       pMvfs[1][0],
+                                       1,
+                                       0,
+                                       kHalfLumaSize,
+                                       nX,
+                                       nY,
+                                       pPmv[1][0][0],
+                                       pPmv[1][0][1] >> 1,
+                                       1,
+                                       0);
             } else if (nMotionType == kMcDualPrime) {
                 sceMpegDualPrimeVectors(dmv, pDmVector, pPmv[0][0][0], pPmv[0][0][1] >> 1);
-                sceMpegQueuePrediction(g_mpegTables[0], 0, 0, 0, kHalfLumaSize, nX, nY, pPmv[0][0][0],
-                                   pPmv[0][0][1] >> 1, 1, 0);
-                sceMpegQueuePrediction(g_mpegTables[0], 1, 0, 0, kHalfLumaSize, nX, nY, dmv[0], dmv[1],
-                                   1, 1);
-                sceMpegQueuePrediction(g_mpegTables[0], 1, 1, 0, kHalfLumaSize, nX, nY, pPmv[0][0][0],
-                                   pPmv[0][0][1] >> 1, 1, 0);
-                sceMpegQueuePrediction(g_mpegTables[0], 0, 1, 0, kHalfLumaSize, nX, nY, dmv[2], dmv[3],
-                                   1, 1);
+                sceMpegQueuePrediction(g_mpegTables[0],
+                                       0,
+                                       0,
+                                       0,
+                                       kHalfLumaSize,
+                                       nX,
+                                       nY,
+                                       pPmv[0][0][0],
+                                       pPmv[0][0][1] >> 1,
+                                       1,
+                                       0);
+                sceMpegQueuePrediction(
+                    g_mpegTables[0], 1, 0, 0, kHalfLumaSize, nX, nY, dmv[0], dmv[1], 1, 1);
+                sceMpegQueuePrediction(g_mpegTables[0],
+                                       1,
+                                       1,
+                                       0,
+                                       kHalfLumaSize,
+                                       nX,
+                                       nY,
+                                       pPmv[0][0][0],
+                                       pPmv[0][0][1] >> 1,
+                                       1,
+                                       0);
+                sceMpegQueuePrediction(
+                    g_mpegTables[0], 0, 1, 0, kHalfLumaSize, nX, nY, dmv[2], dmv[3], 1, 1);
             } else {
                 sceMpegReportErrorFormatted("(a) invalid motion_type(%d)-0", nMotionType);
             }
@@ -3307,24 +3471,60 @@ static void sceMpegQueuePredictions(int nX,
                 other = bottom != pMvfs[0][0];
             }
             if (nMotionType == kMcField || (nMbType & kMbMotionForward) == 0) {
-                sceMpegQueuePrediction(fieldRefs[other][pMvfs[0][0]], 0, 0, 0, kLumaSize, nX, nY,
-                                   pPmv[0][0][0], pPmv[0][0][1], 0, 0);
+                sceMpegQueuePrediction(fieldRefs[other][pMvfs[0][0]],
+                                       0,
+                                       0,
+                                       0,
+                                       kLumaSize,
+                                       nX,
+                                       nY,
+                                       pPmv[0][0][0],
+                                       pPmv[0][0][1],
+                                       0,
+                                       0);
             } else if (nMotionType == kMc16x8) {
-                sceMpegQueuePrediction(fieldRefs[other][pMvfs[0][0]], 0, 0, 0, kHalfLumaSize, nX, nY,
-                                   pPmv[0][0][0], pPmv[0][0][1], 0, 0);
+                sceMpegQueuePrediction(fieldRefs[other][pMvfs[0][0]],
+                                       0,
+                                       0,
+                                       0,
+                                       kHalfLumaSize,
+                                       nX,
+                                       nY,
+                                       pPmv[0][0][0],
+                                       pPmv[0][0][1],
+                                       0,
+                                       0);
                 other = 0;
                 if (g_nMpegPictureCodingType == kPictureP && g_mpegSecondFieldPending != 0) {
                     other = bottom != pMvfs[1][0];
                 }
-                sceMpegQueuePrediction(fieldRefs[other][pMvfs[1][0]], 0, 0, kHalfLumaSize,
-                                   kHalfLumaSize, nX, nY, pPmv[1][0][0], pPmv[1][0][1], 0, 0);
+                sceMpegQueuePrediction(fieldRefs[other][pMvfs[1][0]],
+                                       0,
+                                       0,
+                                       kHalfLumaSize,
+                                       kHalfLumaSize,
+                                       nX,
+                                       nY,
+                                       pPmv[1][0][0],
+                                       pPmv[1][0][1],
+                                       0,
+                                       0);
             } else if (nMotionType == kMcDualPrime) {
                 other = g_mpegSecondFieldPending != 0;
                 sceMpegDualPrimeVectors(dmv, pDmVector, pPmv[0][0][0], pPmv[0][0][1]);
-                sceMpegQueuePrediction(fieldRefs[0][bottom], 0, 0, 0, kLumaSize, nX, nY, pPmv[0][0][0],
-                                   pPmv[0][0][1], 0, 0);
-                sceMpegQueuePrediction(fieldRefs[other][!bottom], 0, 0, 0, kLumaSize, nX, nY, dmv[0],
-                                   dmv[1], 0, 1);
+                sceMpegQueuePrediction(fieldRefs[0][bottom],
+                                       0,
+                                       0,
+                                       0,
+                                       kLumaSize,
+                                       nX,
+                                       nY,
+                                       pPmv[0][0][0],
+                                       pPmv[0][0][1],
+                                       0,
+                                       0);
+                sceMpegQueuePrediction(
+                    fieldRefs[other][!bottom], 0, 0, 0, kLumaSize, nX, nY, dmv[0], dmv[1], 0, 1);
             } else {
                 sceMpegReportErrorFormatted("(b) invalid motion_type(%d)-1", nMotionType);
             }
@@ -3336,23 +3536,76 @@ static void sceMpegQueuePredictions(int nX,
     }
     if (g_nMpegPictureStructure == kFramePicture) {
         if (nMotionType == kMcFrame) {
-            sceMpegQueuePrediction(g_mpegTables[1], 0, 0, 0, kLumaSize, nX, nY, pPmv[0][1][0],
-                               pPmv[0][1][1], 0, formed);
+            sceMpegQueuePrediction(g_mpegTables[1],
+                                   0,
+                                   0,
+                                   0,
+                                   kLumaSize,
+                                   nX,
+                                   nY,
+                                   pPmv[0][1][0],
+                                   pPmv[0][1][1],
+                                   0,
+                                   formed);
         } else {
-            sceMpegQueuePrediction(g_mpegTables[1], pMvfs[0][1], 0, 0, kHalfLumaSize, nX, nY,
-                               pPmv[0][1][0], pPmv[0][1][1] >> 1, 1, formed);
-            sceMpegQueuePrediction(g_mpegTables[1], pMvfs[1][1], 1, 0, kHalfLumaSize, nX, nY,
-                               pPmv[1][1][0], pPmv[1][1][1] >> 1, 1, formed);
+            sceMpegQueuePrediction(g_mpegTables[1],
+                                   pMvfs[0][1],
+                                   0,
+                                   0,
+                                   kHalfLumaSize,
+                                   nX,
+                                   nY,
+                                   pPmv[0][1][0],
+                                   pPmv[0][1][1] >> 1,
+                                   1,
+                                   formed);
+            sceMpegQueuePrediction(g_mpegTables[1],
+                                   pMvfs[1][1],
+                                   1,
+                                   0,
+                                   kHalfLumaSize,
+                                   nX,
+                                   nY,
+                                   pPmv[1][1][0],
+                                   pPmv[1][1][1] >> 1,
+                                   1,
+                                   formed);
         }
     } else if (nMotionType == kMcField) {
-        sceMpegQueuePrediction(pMvfs[0][1] != 0 ? g_mpegTables[7] : g_mpegTables[4], 0, 0, 0,
-                           kLumaSize, nX, nY, pPmv[0][1][0], pPmv[0][1][1], 0, formed);
+        sceMpegQueuePrediction(pMvfs[0][1] != 0 ? g_mpegTables[7] : g_mpegTables[4],
+                               0,
+                               0,
+                               0,
+                               kLumaSize,
+                               nX,
+                               nY,
+                               pPmv[0][1][0],
+                               pPmv[0][1][1],
+                               0,
+                               formed);
     } else if (nMotionType == kMc16x8) {
-        sceMpegQueuePrediction(pMvfs[0][1] != 0 ? g_mpegTables[7] : g_mpegTables[4], 0, 0, 0,
-                           kHalfLumaSize, nX, nY, pPmv[0][1][0], pPmv[0][1][1], 0, formed);
-        sceMpegQueuePrediction(pMvfs[1][1] != 0 ? g_mpegTables[7] : g_mpegTables[4], 0, 0,
-                           kHalfLumaSize, kHalfLumaSize, nX, nY, pPmv[1][1][0], pPmv[1][1][1], 0,
-                           formed);
+        sceMpegQueuePrediction(pMvfs[0][1] != 0 ? g_mpegTables[7] : g_mpegTables[4],
+                               0,
+                               0,
+                               0,
+                               kHalfLumaSize,
+                               nX,
+                               nY,
+                               pPmv[0][1][0],
+                               pPmv[0][1][1],
+                               0,
+                               formed);
+        sceMpegQueuePrediction(pMvfs[1][1] != 0 ? g_mpegTables[7] : g_mpegTables[4],
+                               0,
+                               0,
+                               kHalfLumaSize,
+                               kHalfLumaSize,
+                               nX,
+                               nY,
+                               pPmv[1][1][0],
+                               pPmv[1][1][1],
+                               0,
+                               formed);
     } else {
         sceMpegReportErrorFormatted("(c) invalid motion_type(%d)-2", nMotionType);
     }
@@ -3362,12 +3615,12 @@ static void sceMpegQueuePredictions(int nX,
 // Prepares the reconstruction of one macroblock. The routine stages its references by DMA to the
 // scratchpad, records whether it is intra, and locates it in the destination frame or field.
 static int sceMpegStartMotionCompensation(int nAddress,
-                              int nIncrement,
-                              int nMbType,
-                              int nMotionType,
-                              int pPmv[2][2][2],
-                              int pMvfs[2][2],
-                              int *pDmVector) {
+                                          int nIncrement,
+                                          int nMbType,
+                                          int nMotionType,
+                                          int pPmv[2][2][2],
+                                          int pMvfs[2][2],
+                                          int *pDmVector) {
     volatile unsigned int *pToSprChcr = (volatile unsigned int *)(uintptr_t)kToSprChcrAddress;
     const int row = nAddress / g_nMpegMbWidth;
     const int column = nAddress % g_nMpegMbWidth;
@@ -3390,12 +3643,18 @@ static int sceMpegStartMotionCompensation(int nAddress,
             g_nMpegDecodeError = 1;
             return 0;
         }
-        sceMpegQueuePredictions(column << kLumaRowShift, row << kLumaRowShift, nMbType, nMotionType,
-                           pPmv, pMvfs, pDmVector);
+        sceMpegQueuePredictions(column << kLumaRowShift,
+                                row << kLumaRowShift,
+                                nMbType,
+                                nMotionType,
+                                pPmv,
+                                pMvfs,
+                                pDmVector);
         while (((*pToSprChcr >> 8) & 1) != 0) {
         }
-        pTag = (volatile unsigned long long *)(uintptr_t)(
-            ((unsigned int)(uintptr_t)g_mpegMcChain & kPhysicalAddressMask) | kUncachedSegment);
+        pTag = (volatile unsigned long long *)(uintptr_t)(((unsigned int)(uintptr_t)g_mpegMcChain &
+                                                           kPhysicalAddressMask) |
+                                                          kUncachedSegment);
         count = g_mpegIpuTable.mBuffers[g_mpegIpuTable.mCurrent].mPredictionCount;
         for (i = 0; i < count; ++i) {
             buffer = &g_mpegIpuTable.mBuffers[g_mpegIpuTable.mCurrent];
@@ -3403,7 +3662,7 @@ static int sceMpegStartMotionCompensation(int nAddress,
             right = (unsigned int)buffer->mRefRight[i] & kPhysicalAddressMask;
             pTag[0] = (unsigned long long)left << 32 | kDmaTagRef | kStagingPairQwords;
             pTag[2] = (unsigned long long)right << 32 |
-                (i == count - 1 ? kDmaTagRefe : kDmaTagRef) | kStagingPairQwords;
+                      (i == count - 1 ? kDmaTagRefe : kDmaTagRef) | kStagingPairQwords;
             pTag += 4;
         }
         __asm__ __volatile__("sync" : : : "memory");
@@ -3601,10 +3860,8 @@ static int sceMpegSliceHeader(void) {
 // NTSC-U/C: 0x0060a628, PAL: 0x0064b298
 // Starts a slice. The routine finds its start code, reads its header and first increment, and
 // resets the predictors. The macroblock count argument is not read.
-static int sceMpegStartSlice(int nMacroblockCount,
-                              int *pAddress,
-                              int *pIncrement,
-                              int pPmv[2][2][2]) {
+static int
+sceMpegStartSlice(int nMacroblockCount, int *pAddress, int *pIncrement, int pPmv[2][2][2]) {
     int code;
     int extension;
     int increment;
@@ -3643,11 +3900,8 @@ static int sceMpegStartSlice(int nMacroblockCount,
 
 // NTSC-U/C: 0x0060af48, PAL: 0x0064bbb8
 // Applies one decoded motion vector component to its predictor.
-static void sceMpegDecodeMotionComponent(int *pPred,
-                               int nRSize,
-                               int nMotionCode,
-                               int nMotionResidual,
-                               int nFullPel) {
+static void sceMpegDecodeMotionComponent(
+    int *pPred, int nRSize, int nMotionCode, int nMotionResidual, int nFullPel) {
     const int limit = 16 << nRSize;
     int vector = *pPred;
 
@@ -3670,13 +3924,8 @@ static void sceMpegDecodeMotionComponent(int *pPred,
 
 // NTSC-U/C: 0x0060b150, PAL: 0x0064bdc0
 // Decodes one motion vector into pPmv, with its dual prime differential when nDmv is set.
-static void sceMpegMotionVector(int *pPmv,
-                               int *pDmVector,
-                               int nHRSize,
-                               int nVRSize,
-                               int nDmv,
-                               int nMvScale,
-                               int nFullPel) {
+static void sceMpegMotionVector(
+    int *pPmv, int *pDmVector, int nHRSize, int nVRSize, int nDmv, int nMvScale, int nFullPel) {
     int code;
     int residual;
 
@@ -3703,15 +3952,15 @@ static void sceMpegMotionVector(int *pPmv,
 // NTSC-U/C: 0x0060afd0, PAL: 0x0064bc40
 // Decodes the motion vectors of direction s.
 static void sceMpegMotionVectors(int pPmv[2][2][2],
-                               int *pDmVector,
-                               int pMvfs[2][2],
-                               int s,
-                               int nCount,
-                               int nMvFormat,
-                               int nHRSize,
-                               int nVRSize,
-                               int nDmv,
-                               int nMvScale) {
+                                 int *pDmVector,
+                                 int pMvfs[2][2],
+                                 int s,
+                                 int nCount,
+                                 int nMvFormat,
+                                 int nHRSize,
+                                 int nVRSize,
+                                 int nDmv,
+                                 int nMvScale) {
     if (nCount == 1) {
         if (nMvFormat == 0 && nDmv == 0) {
             pMvfs[1][s] = pMvfs[0][s] = sceMpegGetBits(1);
@@ -3731,11 +3980,11 @@ static void sceMpegMotionVectors(int pPmv[2][2][2],
 // Decodes one coded macroblock's header and vectors and starts the IPU on its block data. Returns
 // 0 after an error.
 static int sceMpegCodedMacroblock(int *pMbType,
-                              int *pMotionType,
-                              int *pDctType,
-                              int pPmv[2][2][2],
-                              int pMvfs[2][2],
-                              int *pDmVector) {
+                                  int *pMotionType,
+                                  int *pDctType,
+                                  int pPmv[2][2][2],
+                                  int pMvfs[2][2],
+                                  int *pDmVector) {
     volatile unsigned int *pControl = (volatile unsigned int *)(uintptr_t)kIpuControlAddress;
     MpegMcBuffer *buffer;
     int type;
@@ -3746,7 +3995,7 @@ static int sceMpegCodedMacroblock(int *pMbType,
     int mvScale;
 
     *pControl = (*pControl & ~(kIpuPictureTypeMask << kIpuPictureTypeShift)) |
-        ((unsigned int)g_nMpegPictureCodingType << kIpuPictureTypeShift);
+                ((unsigned int)g_nMpegPictureCodingType << kIpuPictureTypeShift);
     type = sceMpegDecodeVlc(kVdecMacroblockType);
     *pMbType = type;
     if (type == 0) {
@@ -3776,7 +4025,8 @@ static int sceMpegCodedMacroblock(int *pMbType,
     if (format == 0) {
         mvScale = g_nMpegPictureStructure == kFramePicture;
     }
-    if (g_nMpegPictureStructure == kFramePicture && g_nMpegFramePredFrameDct == 0 && (type & (kMbIntra | kMbPattern)) != 0) {
+    if (g_nMpegPictureStructure == kFramePicture && g_nMpegFramePredFrameDct == 0 &&
+        (type & (kMbIntra | kMbPattern)) != 0) {
         *pDctType = sceMpegGetBits(1);
     } else {
         *pDctType = 0;
@@ -3784,13 +4034,27 @@ static int sceMpegCodedMacroblock(int *pMbType,
     if ((type & kMbQuant) != 0) {
         g_nMpegQuantiserScaleCode = sceMpegGetBits(5);
     }
-    if ((type & kMbMotionForward) != 0 || ((type & kMbIntra) != 0 && g_nMpegConcealmentMotionVectors != 0)) {
+    if ((type & kMbMotionForward) != 0 ||
+        ((type & kMbIntra) != 0 && g_nMpegConcealmentMotionVectors != 0)) {
         if (g_nMpegIsMpeg2 != 0) {
-            sceMpegMotionVectors(pPmv, pDmVector, pMvfs, 0, count, format, g_anMpegFCodes[0] - 1,
-                               g_anMpegFCodes[1] - 1, dmv, mvScale);
+            sceMpegMotionVectors(pPmv,
+                                 pDmVector,
+                                 pMvfs,
+                                 0,
+                                 count,
+                                 format,
+                                 g_anMpegFCodes[0] - 1,
+                                 g_anMpegFCodes[1] - 1,
+                                 dmv,
+                                 mvScale);
         } else {
-            sceMpegMotionVector(pPmv[0][0], pDmVector, g_nMpegForwardFCode - 1, g_nMpegForwardFCode - 1, 0, 0,
-                               g_nMpegFullPelForwardVector);
+            sceMpegMotionVector(pPmv[0][0],
+                                pDmVector,
+                                g_nMpegForwardFCode - 1,
+                                g_nMpegForwardFCode - 1,
+                                0,
+                                0,
+                                g_nMpegFullPelForwardVector);
         }
     }
     if (g_nMpegDecodeError != 0) {
@@ -3798,11 +4062,24 @@ static int sceMpegCodedMacroblock(int *pMbType,
     }
     if ((type & kMbMotionBackward) != 0) {
         if (g_nMpegIsMpeg2 != 0) {
-            sceMpegMotionVectors(pPmv, pDmVector, pMvfs, 1, count, format, g_anMpegFCodes[2] - 1,
-                               g_anMpegFCodes[3] - 1, 0, mvScale);
+            sceMpegMotionVectors(pPmv,
+                                 pDmVector,
+                                 pMvfs,
+                                 1,
+                                 count,
+                                 format,
+                                 g_anMpegFCodes[2] - 1,
+                                 g_anMpegFCodes[3] - 1,
+                                 0,
+                                 mvScale);
         } else {
-            sceMpegMotionVector(pPmv[0][1], pDmVector, g_nMpegBackwardFCode - 1, g_nMpegBackwardFCode - 1, 0, 0,
-                               g_nMpegFullPelBackwardVector);
+            sceMpegMotionVector(pPmv[0][1],
+                                pDmVector,
+                                g_nMpegBackwardFCode - 1,
+                                g_nMpegBackwardFCode - 1,
+                                0,
+                                0,
+                                g_nMpegFullPelBackwardVector);
         }
     }
     if (g_nMpegDecodeError != 0) {
@@ -3819,9 +4096,9 @@ static int sceMpegCodedMacroblock(int *pMbType,
         *(volatile unsigned int *)(uintptr_t)kIpuFromChcrAddress = kDmaChcrStart;
         sceMpegWaitIpuIdle();
         sceMpegIssueIpuCommand(((unsigned int)(type & kMbIntra) << kBdecIntraShift) |
-                           ((unsigned int)g_nMpegQuantiserScaleCode << kBdecQuantiserShift) |
-                           ((unsigned int)g_nMpegResetDcPredictor << kBdecResetDcShift) | kIpuCommandBdec |
-                           ((unsigned int)*pDctType << kBdecDctTypeShift));
+                               ((unsigned int)g_nMpegQuantiserScaleCode << kBdecQuantiserShift) |
+                               ((unsigned int)g_nMpegResetDcPredictor << kBdecResetDcShift) |
+                               kIpuCommandBdec | ((unsigned int)*pDctType << kBdecDctTypeShift));
     } else {
         buffer->mNotCoded = 1;
     }
@@ -3858,7 +4135,8 @@ static int sceMpegCodedMacroblock(int *pMbType,
 
 // NTSC-U/C: 0x0060a950, PAL: 0x0064b5c0
 // Sets up a skipped macroblock. Returns 0 in an I picture, which may not skip.
-static int sceMpegSkippedMacroblock(int pPmv[2][2][2], int *pMotionType, int pMvfs[2][2], int *pMbType) {
+static int
+sceMpegSkippedMacroblock(int pPmv[2][2][2], int *pMotionType, int pMvfs[2][2], int *pMbType) {
     int result = 1;
 
     g_nMpegResetDcPredictor = 1;
@@ -3938,7 +4216,8 @@ static int sceMpegDecodeSlice(int nCounter, int nMacroblockCount) {
             g_nMpegDecodeError = 0;
             return kSliceSkipPicture;
         }
-        if (sceMpegStartMotionCompensation(address, increment, mbType, motionType, pmv, mvfs, dmVector) == 0) {
+        if (sceMpegStartMotionCompensation(
+                address, increment, mbType, motionType, pmv, mvfs, dmVector) == 0) {
             g_nMpegDecodeError = 0;
             return kSliceSkipPicture;
         }
@@ -4083,8 +4362,8 @@ static int sceMpegFromIpuHandler(int nChannel) {
             kIpuCommandColourConvert | kColourConvertChunkMacroblocks;
         g_nColourConvertNextAddress = (address + kColourConvertChunkBytes) & kPhysicalAddressMask;
     } else if (g_nFromIpuInterrupts == g_nColourConvertChunks - 1) {
-        remaining = g_nColourConvertRemaining -
-                    g_nFromIpuInterrupts * kColourConvertChunkMacroblocks;
+        remaining =
+            g_nColourConvertRemaining - g_nFromIpuInterrupts * kColourConvertChunkMacroblocks;
         g_nColourConvertRemaining = remaining;
         *MpegRegister(kIpuFromMadrAddress) = g_nColourConvertNextAddress;
         *MpegRegister(kIpuFromQwcAddress) = (unsigned int)remaining << kMacroblockQwcShift;
@@ -4211,10 +4490,8 @@ static int sceMpegCheckPictureBufferSize(MpegSeqTable *pTable) {
         fits = !(work->mOutputHeight < pTable->mHeight);
     }
     if (fits == 0) {
-        sprintf(message,
-                "Too small buffer size for %dx%d picture\n",
-                pTable->mWidth,
-                pTable->mHeight);
+        sprintf(
+            message, "Too small buffer size for %dx%d picture\n", pTable->mWidth, pTable->mHeight);
         sceMpegRaiseError(message);
     }
     return fits;
@@ -4333,17 +4610,16 @@ static void sceMpegGetPictureStamps(MpegSeqTable *pTable,
         work->mPendingPts = -1;
     }
     *pDts = pTable->mDts;
-    *pFlags = ((unsigned long long)(long long)pTable->mProgressiveSequence
-               << kPictureFlagProgressiveSequenceShift) |
-              (unsigned long long)(long long)pTable->mPictureCodingType |
-              ((unsigned long long)(long long)pTable->mRepeatFirstField
-               << kPictureFlagRepeatFirstFieldShift) |
-              ((unsigned long long)(long long)pTable->mTopFieldFirst
-               << kPictureFlagTopFieldFirstShift) |
-              ((unsigned long long)(long long)pTable->mProgressiveFrame
-               << kPictureFlagProgressiveFrameShift) |
-              ((unsigned long long)(long long)pTable->mPictureStructure
-               << kPictureFlagStructureShift);
+    *pFlags =
+        ((unsigned long long)(long long)pTable->mProgressiveSequence
+         << kPictureFlagProgressiveSequenceShift) |
+        (unsigned long long)(long long)pTable->mPictureCodingType |
+        ((unsigned long long)(long long)pTable->mRepeatFirstField
+         << kPictureFlagRepeatFirstFieldShift) |
+        ((unsigned long long)(long long)pTable->mTopFieldFirst << kPictureFlagTopFieldFirstShift) |
+        ((unsigned long long)(long long)pTable->mProgressiveFrame
+         << kPictureFlagProgressiveFrameShift) |
+        ((unsigned long long)(long long)pTable->mPictureStructure << kPictureFlagStructureShift);
 }
 
 // NTSC-U/C: 0x0060cd60, PAL: 0x0064d9d0
@@ -4357,9 +4633,9 @@ static void sceMpegOutputFramePicture(MpegSeqTable *pTable, int nIndex) {
     work = (MpegWork *)decoder->pContext;
     sceMpegGetPictureStamps(pTable, &decoder->pts, &decoder->dts, &decoder->flags);
     work->mLastPts = (int)decoder->pts;
-    work->mDisplayFieldCount = (unsigned int)
-        g_mpegFieldCountTable[(decoder->flags >> kPictureFlagFieldCountShift) &
-                              kPictureFlagFieldCountMask];
+    work->mDisplayFieldCount =
+        (unsigned int)g_mpegFieldCountTable[(decoder->flags >> kPictureFlagFieldCountShift) &
+                                            kPictureFlagFieldCountMask];
     work->mDisplayHorizontalSize = pTable->mDisplayHorizontalSize;
     work->mDisplayVerticalSize = pTable->mDisplayVerticalSize;
     for (i = 0; i < kFrameCentreOffsetCount; ++i) {
@@ -4503,8 +4779,7 @@ static int sceMpegSelectPictureTables(int bKeepReferences) {
         g_mpegCurrentTables[kCurrentFrame] = g_mpegTables[kTableFrameBidirectional];
         g_mpegCurrentTables[kCurrentTopField] = g_mpegTables[kTableTopBidirectional];
         g_mpegCurrentTables[kCurrentBottomField] = g_mpegTables[kTableBottomBidirectional];
-        if (work->mDecodeCounts[kPictureCountIntra] +
-                work->mDecodeCounts[kPictureCountPredicted] >=
+        if (work->mDecodeCounts[kPictureCountIntra] + work->mDecodeCounts[kPictureCountPredicted] >=
             threshold) {
             work->mForceBrokenLink = 0;
             g_nMpegBrokenLink = 0;
@@ -4542,8 +4817,8 @@ static int sceMpegSelectPictureTables(int bKeepReferences) {
                 ready = 1;
             }
         } else {
-            other = (structure != kPictureStructureTopField) ? g_mpegTables[kTableTopBackward]
-                                                             : g_mpegTables[kTableBottomBackward];
+            other = (structure != kPictureStructureTopField) ? g_mpegTables[kTableTopBackward] :
+                                                               g_mpegTables[kTableBottomBackward];
             if (g_nMpegPictureCodingType != kPictureCodingPredicted) {
                 ready = 1;
             } else if (bKeepReferences != 0 && other->mDecoded == 1) {
@@ -4695,8 +4970,9 @@ static int sceMpegDecodeFieldPicture(void *pDecoder, int nCount, int nLimit) {
         work->mCompleted = 1;
         return 0;
     }
-    expected = (work->mFirstFieldStructure != kPictureStructureTopField) ? kPictureStructureTopField
-                                                                : kPictureStructureBottomField;
+    expected = (work->mFirstFieldStructure != kPictureStructureTopField) ?
+                   kPictureStructureTopField :
+                   kPictureStructureBottomField;
     if (g_nMpegPictureStructure != expected) {
         return -1;
     }
@@ -4744,8 +5020,8 @@ static int decodePictureInner(void *pDecoder) {
         if (result != -1) {
             do {
                 state = sceMpegNextPictureHeader();
-            } while (state != kPictureSequenceEnd && g_nMpegPictureStructure != work->mFirstFieldStructure &&
-                     g_nMpegIsMpeg2 != 0);
+            } while (state != kPictureSequenceEnd &&
+                     g_nMpegPictureStructure != work->mFirstFieldStructure && g_nMpegIsMpeg2 != 0);
         }
         switch (state) {
         case kPictureSequenceEnd:
@@ -4850,7 +5126,8 @@ void *sceMpegCreateDecoderContext(void *pDecoder, void *pWork, int nWorkSize) {
     }
     context = (MpegWork *)aligned;
     ring = &context->mRing;
-    sceMpegResetRingPointers(ring, (void *)(aligned + (uintptr_t)kMinWorkSize), rest - kMinWorkSize);
+    sceMpegResetRingPointers(
+        ring, (void *)(aligned + (uintptr_t)kMinWorkSize), rest - kMinWorkSize);
     decoder->width = 0;
     decoder->height = 0;
     decoder->frameCount = 0;
@@ -4883,7 +5160,8 @@ void *sceMpegCreateDecoderContext(void *pDecoder, void *pWork, int nWorkSize) {
     context->mSlots[2].callback = g_defaultSlotTwo;
     context->mSlots[3].callback = g_defaultSlotThree;
     // The second default falls in the allocator call delay slot and still lands here.
-    context->mStreamTable = (StreamEntry *)sceMpegCheckWorkAreaSize(ring, kStreamAllocSize, kStreamAllocAlign);
+    context->mStreamTable =
+        (StreamEntry *)sceMpegCheckWorkAreaSize(ring, kStreamAllocSize, kStreamAllocAlign);
     context->mStreamCount = 0;
     context->mFirstFrameBuffer = 0;
     context->mSecondFrameBuffer = 0;

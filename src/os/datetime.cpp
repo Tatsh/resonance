@@ -1,8 +1,9 @@
 #include "os/datetime.h"
 
+#include <stdio.h>
+
 #include <libcdvd.h>
 #include <libscf.h>
-#include <stdio.h>
 
 #include "os/hxstr.h"
 

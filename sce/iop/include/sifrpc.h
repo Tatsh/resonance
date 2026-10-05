@@ -26,33 +26,33 @@ struct _sif_queue_data;
 
 /** A registered server. */
 typedef struct _sif_serve_data {
-    unsigned int command;             /*!< Server identifier. */
-    sceSifRpcFunc func;               /*!< Request handler. */
-    void *buff;                       /*!< Argument buffer. */
-    int size;                         /*!< Argument buffer size. */
-    sceSifRpcFunc cfunc;              /*!< Cancel handler. */
-    void *cbuff;                      /*!< Cancel buffer. */
-    int csize;                        /*!< Cancel buffer size. */
-    struct _sif_client_data *client;  /*!< Client of the current request. */
-    void *paddr;                      /*!< Packet address of the current request. */
-    unsigned int fno;                 /*!< Function number of the current request. */
-    void *receive;                    /*!< Reply buffer on the client side. */
-    int rsize;                        /*!< Reply size. */
-    int rmode;                        /*!< Reply mode. */
-    unsigned int rid;                 /*!< Reply identifier. */
-    struct _sif_serve_data *link;     /*!< Next server of the queue. */
-    struct _sif_serve_data *next;     /*!< Next pending request. */
-    struct _sif_queue_data *base;     /*!< Queue the server belongs to. */
+    unsigned int command;            /*!< Server identifier. */
+    sceSifRpcFunc func;              /*!< Request handler. */
+    void *buff;                      /*!< Argument buffer. */
+    int size;                        /*!< Argument buffer size. */
+    sceSifRpcFunc cfunc;             /*!< Cancel handler. */
+    void *cbuff;                     /*!< Cancel buffer. */
+    int csize;                       /*!< Cancel buffer size. */
+    struct _sif_client_data *client; /*!< Client of the current request. */
+    void *paddr;                     /*!< Packet address of the current request. */
+    unsigned int fno;                /*!< Function number of the current request. */
+    void *receive;                   /*!< Reply buffer on the client side. */
+    int rsize;                       /*!< Reply size. */
+    int rmode;                       /*!< Reply mode. */
+    unsigned int rid;                /*!< Reply identifier. */
+    struct _sif_serve_data *link;    /*!< Next server of the queue. */
+    struct _sif_serve_data *next;    /*!< Next pending request. */
+    struct _sif_queue_data *base;    /*!< Queue the server belongs to. */
 } sceSifServeData;
 
 /** A request queue one server thread drains. */
 typedef struct _sif_queue_data {
-    int key;                        /*!< Thread that drains the queue. */
-    int active;                     /*!< Nonzero while a request is being served. */
-    struct _sif_serve_data *link;   /*!< First registered server. */
-    struct _sif_serve_data *start;  /*!< First pending request. */
-    struct _sif_serve_data *end;    /*!< Last pending request. */
-    struct _sif_queue_data *next;   /*!< Next queue of the system. */
+    int key;                       /*!< Thread that drains the queue. */
+    int active;                    /*!< Nonzero while a request is being served. */
+    struct _sif_serve_data *link;  /*!< First registered server. */
+    struct _sif_serve_data *start; /*!< First pending request. */
+    struct _sif_serve_data *end;   /*!< Last pending request. */
+    struct _sif_queue_data *next;  /*!< Next queue of the system. */
 } sceSifQueueData;
 
 /**

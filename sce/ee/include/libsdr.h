@@ -13,16 +13,16 @@ extern "C" {
 
 /** Commands of sceSdRemote(), one per libsd call. */
 enum {
-    rSdInit = 0x8000,           /*!< sceSdInit(flag). */
-    rSdSetParam = 0x8010,       /*!< sceSdSetParam(entry, value). */
-    rSdGetParam = 0x8020,       /*!< sceSdGetParam(entry). */
-    rSdSetSwitch = 0x8030,      /*!< sceSdSetSwitch(entry, value). */
-    rSdGetSwitch = 0x8040,      /*!< sceSdGetSwitch(entry). */
-    rSdSetAddr = 0x8050,        /*!< sceSdSetAddr(entry, value). */
-    rSdGetAddr = 0x8060,        /*!< sceSdGetAddr(entry). */
-    rSdSetCoreAttr = 0x8070,    /*!< sceSdSetCoreAttr(entry, value). */
-    rSdGetCoreAttr = 0x8080,    /*!< sceSdGetCoreAttr(entry). */
-    rSdSetEffectAttr = 0x8130,  /*!< sceSdSetEffectAttr(core, attr). */
+    rSdInit = 0x8000,          /*!< sceSdInit(flag). */
+    rSdSetParam = 0x8010,      /*!< sceSdSetParam(entry, value). */
+    rSdGetParam = 0x8020,      /*!< sceSdGetParam(entry). */
+    rSdSetSwitch = 0x8030,     /*!< sceSdSetSwitch(entry, value). */
+    rSdGetSwitch = 0x8040,     /*!< sceSdGetSwitch(entry). */
+    rSdSetAddr = 0x8050,       /*!< sceSdSetAddr(entry, value). */
+    rSdGetAddr = 0x8060,       /*!< sceSdGetAddr(entry). */
+    rSdSetCoreAttr = 0x8070,   /*!< sceSdSetCoreAttr(entry, value). */
+    rSdGetCoreAttr = 0x8080,   /*!< sceSdGetCoreAttr(entry). */
+    rSdSetEffectAttr = 0x8130, /*!< sceSdSetEffectAttr(core, attr). */
 };
 
 /** Core selectors of an entry value. */

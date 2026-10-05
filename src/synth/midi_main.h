@@ -1,9 +1,10 @@
 #pragma once
 
-#include <libsdr.h>
-#include <sifrpc.h>
 #include <stdint.h>
 #include <vector>
+
+#include <libsdr.h>
+#include <sifrpc.h>
 
 #include "os/hxstr.h"
 #include "synth/callbackxferbdtoiop.h"

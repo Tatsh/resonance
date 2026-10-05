@@ -1,9 +1,10 @@
 #include "gfx/vram.h"
 
-#include <eekernel.h>
-#include <libgraph.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <eekernel.h>
+#include <libgraph.h>
 
 #include "gfx/gfxdevice.h"
 #include "os/log.h"

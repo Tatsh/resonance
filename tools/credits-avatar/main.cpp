@@ -1,12 +1,13 @@
-#include <argparse/argparse.hpp>
 #include <cstdlib>
 #include <exception>
 #include <filesystem>
 #include <format>
 #include <iostream>
-#include <spdlog/spdlog.h>
 #include <string>
 #include <system_error>
+
+#include <argparse/argparse.hpp>
+#include <spdlog/spdlog.h>
 
 #include "avatar.h"
 #include "creditsheader.h"

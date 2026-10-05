@@ -1,12 +1,13 @@
 #include "ezmpeg/audiodec.h"
 
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include <eekernel.h>
 #include <ezmpeg.h>
 #include <libsdr.h>
 #include <sifdev.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "os/log.h"
 
@@ -42,12 +43,8 @@ static int dmaToIop(int nIopDest, void *pSource, int nSize) {
 }
 
 // NTSC-U/C: 0x00567c78, PAL: 0x005a8140
-static void splitIopSpan(int *pWrite,
-                         int *pWriteLen,
-                         int *pWrap,
-                         int *pWrapLen,
-                         AudioDec *pWork,
-                         int nEnd) {
+static void
+splitIopSpan(int *pWrite, int *pWriteLen, int *pWrap, int *pWrapLen, AudioDec *pWork, int nEnd) {
     // Describe the span ending at nEnd as up to two processor side blocks, wrapping at the
     // buffer size. The first block starts at the write offset, and the second restarts at the
     // buffer base when the span crosses the end.
@@ -187,14 +184,8 @@ int audioDecSendToIOP(AudioDec *pAudioDec) {
     remaining = aligned - chunk;
     writePos = pAudioDec->iopOffset;
     if (ready + extra >= kBlockStep && chunk + remaining >= kBlockStep) {
-        transferred = sendWrappedToIop(span[0],
-                                       ready,
-                                       span[2],
-                                       extra,
-                                       pRead,
-                                       chunk,
-                                       pAudioDec->buffer,
-                                       remaining);
+        transferred = sendWrappedToIop(
+            span[0], ready, span[2], extra, pRead, chunk, pAudioDec->buffer, remaining);
     }
     writePos += transferred;
     pAudioDec->count -= transferred;

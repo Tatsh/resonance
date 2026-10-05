@@ -1,8 +1,9 @@
 #include "met/metdemostagesel.h"
 
 #ifdef VIDEO_STANDARD_PAL
-#include <libscf.h>
 #include <list>
+
+#include <libscf.h>
 
 #include "app/application.h"
 #include "game/gamemanagerimpl.h"

@@ -5,8 +5,9 @@
 #include <format>
 #include <fstream>
 #include <span>
-#include <spdlog/spdlog.h>
 #include <string_view>
+
+#include <spdlog/spdlog.h>
 
 #include "byteorder.h"
 #include "fileio.h"

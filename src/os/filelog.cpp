@@ -3,15 +3,16 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fstream>
-#include <libcconsole.h>
-#include <libcdvd.h>
 #include <ostream>
-#include <sifdev.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#include <libcconsole.h>
+#include <libcdvd.h>
+#include <sifdev.h>
 
 #include "os/async.h"
 #include "os/hostmode.h"

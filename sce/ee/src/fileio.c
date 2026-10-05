@@ -188,9 +188,9 @@ static const char *g_pFsAltVersion = g_abFsAltVersion;
 
 // NTSC-U/C: 0x00762b88, PAL: 0x007a5b20, the semaphores of calls made without waiting, or -1 for
 // a free slot.
-static int g_anFsPending[kFsPendingCount] = {
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+static int g_anFsPending[kFsPendingCount] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                                             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 // NTSC-U/C: 0x00762c08, PAL: 0x007a5ba0
 static int g_bFsBound;
@@ -327,9 +327,8 @@ static void FsCompletionHandler(void *pData, void *pArg) {
         }
         break;
     case kFsKindDirent:
-        memcpy(pResult->mBody.mFixed.pDest,
-               (const void *)pResult->mBody.mFixed.mData,
-               kFsDirentSize);
+        memcpy(
+            pResult->mBody.mFixed.pDest, (const void *)pResult->mBody.mFixed.mData, kFsDirentSize);
         break;
     case kFsKindStat:
         memcpy(pResult->mBody.mFixed.pDest, (const void *)pResult->mBody.mFixed.mData, kFsStatSize);
@@ -628,11 +627,8 @@ int sceLseek(int nDescriptor, int nOffset, int nWhence) {
     if ((nFlags & kFsHandleNoWait) != 0) {
         FsParkPending();
     }
-    return FsCall(kFsFunctionLseek,
-                  sizeof(FsLseekPacket),
-                  nSema,
-                  (nFlags & kFsHandleNoWait) != 0,
-                  &nResult);
+    return FsCall(
+        kFsFunctionLseek, sizeof(FsLseekPacket), nSema, (nFlags & kFsHandleNoWait) != 0, &nResult);
 }
 
 int sceRead(int nDescriptor, void *pBuffer, int nBytes) {
@@ -667,11 +663,8 @@ int sceRead(int nDescriptor, void *pBuffer, int nBytes) {
     // 0xa4 bytes cover the read's head and tail blocks.
     sceSifWriteBackDCache(&g_fsResult, 0xa4);
     sceSifWriteBackDCache(&g_fsPacket, sizeof(FsReadPacket));
-    return FsCall(kFsFunctionRead,
-                  sizeof(FsReadPacket),
-                  nSema,
-                  (nFlags & kFsHandleNoWait) != 0,
-                  &nResult);
+    return FsCall(
+        kFsFunctionRead, sizeof(FsReadPacket), nSema, (nFlags & kFsHandleNoWait) != 0, &nResult);
 }
 
 int sceWrite(int nDescriptor, const void *pBuffer, int nBytes) {
@@ -716,11 +709,8 @@ int sceWrite(int nDescriptor, const void *pBuffer, int nBytes) {
     for (i = 0; i < nHead; ++i) {
         g_fsPacket.mWrite.mHead[i] = pUncached[i];
     }
-    return FsCall(kFsFunctionWrite,
-                  sizeof(FsWritePacket),
-                  nSema,
-                  (nFlags & kFsHandleNoWait) != 0,
-                  &nResult);
+    return FsCall(
+        kFsFunctionWrite, sizeof(FsWritePacket), nSema, (nFlags & kFsHandleNoWait) != 0, &nResult);
 }
 
 int sceIoctl(int nDescriptor, int nRequest, void *pArg) {

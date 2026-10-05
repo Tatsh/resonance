@@ -1,10 +1,11 @@
 #include "os/async.h"
 
+#include <list>
+#include <string.h>
+
 #include <eekernel.h>
 #include <libcdvd.h>
-#include <list>
 #include <sifdev.h>
-#include <string.h>
 
 #include "os/asynccallback.h"
 #include "os/cycles.h"

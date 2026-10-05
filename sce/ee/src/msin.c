@@ -1,5 +1,6 @@
-#include <csl.h>
 #include <stddef.h>
+
+#include <csl.h>
 
 enum {
     // The input streams live in the second buffer group.
