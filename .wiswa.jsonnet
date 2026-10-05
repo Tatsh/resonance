@@ -44,7 +44,7 @@
     },
   },
   pre_commit_config+: {
-    exclude: '^src/python/(PC|patches)/',
+    exclude: '^(3rdparty|src/python/(PC|patches))/',
   },
   gitattributes+: ['/3rdparty/** -text linguist-vendored'],
   // Vendored upstream sources are not reformatted.
