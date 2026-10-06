@@ -126,5 +126,5 @@
     "format": "clang-format -i $(git ls-files 'sce/*.c' 'sce/*.h' 'src/*.h' 'src/*.cpp' 'tools/*.h' 'tools/*.cpp' ':!:src/python/*') && prettier --write . && markdownlint-cli2 --config package.json --configPointer /markdownlint-cli2 --fix",
     "qa": "yarn check-spelling && yarn check-formatting"
   },
-  "version": "0.0.0"
+  "version": "1.0.0"
 }

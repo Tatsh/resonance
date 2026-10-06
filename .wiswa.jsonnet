@@ -4,6 +4,7 @@
   project_type: 'c++',
   description: 'Reconstructed source of the PlayStation 2 game FreQuency.',
   keywords: ['decompilation', 'frequency', 'game', 'playstation 2', 'reverse engineering'],
+  security_policy_supported_versions: { '1.0.x': ':white_check_mark:' },
   want_codeql: false,
   want_tests: false,
   want_winget: false,
