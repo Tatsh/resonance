@@ -62,8 +62,7 @@ static void GreedyMatch(struct netflow_graph *graph, struct netflow_v_side *side
             ++matched;
         }
     }
-    const double percent =
-        (double)((float)matched * 100.0f / (float)graph->u_count);
+    const double percent = (double)((float)matched * 100.0f / (float)graph->u_count);
     printf("%d vertices in U were initially matched (%.1f%%).\n", matched, percent);
 }
 

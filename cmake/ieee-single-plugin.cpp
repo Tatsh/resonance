@@ -73,8 +73,8 @@ public:
                     continue;
                 }
                 const tree operand = gimple_assign_rhs1(pStatement);
-                gimple_assign_set_rhs_with_ops(&gsi, MINUS_EXPR, build_real(type, dconst0),
-                                               operand);
+                gimple_assign_set_rhs_with_ops(
+                    &gsi, MINUS_EXPR, build_real(type, dconst0), operand);
                 update_stmt(gsi_stmt(gsi));
             }
         }

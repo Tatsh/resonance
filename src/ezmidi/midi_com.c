@@ -1,8 +1,8 @@
 #include <stddef.h>
+#include <stdio.h>
 
 #include <kernel.h>
 #include <sifrpc.h>
-#include <stdio.h>
 
 #include "ezmidi/ezmidi.h"
 #include "ezmidi/hsyn.h"

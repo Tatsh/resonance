@@ -1,5 +1,9 @@
 #include "app/cutscene.h"
 
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include <eekernel.h>
 #include <eeregs.h>
 #include <ezmpeg.h>
@@ -8,9 +12,6 @@
 #include <libmpeg.h>
 #include <libpad.h>
 #include <libsdr.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "os/log.h"
 #include "os/mem.h"
@@ -42,7 +43,7 @@ enum {
     kVideoTagCount = 0x100,
     kVideoTagSize = 16,
     kVideoTagSlots = ((kVideoTagCount + 1) * kVideoTagSize + kBufferAlign - 1) / kBufferAlign *
-                     kBufferAlign / kVideoTagSize,
+        kBufferAlign / kVideoTagSize,
     kTimeStampCount = 0x200,
     kTimeStampSize = 0x18,
     kDefaultStackSize = 0x800,

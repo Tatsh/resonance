@@ -1,9 +1,9 @@
 #include <stddef.h>
+#include <stdio.h>
 
 #include <csl.h>
 #include <kernel.h>
 #include <libsd.h>
-#include <stdio.h>
 #include <sysclib.h>
 
 #include "ezmidi/hsyn.h"
@@ -730,10 +730,10 @@ int _fire_off_sample(int iSamp,
     pNote->fx = 0;
     pNote->bank = gChan[iChan].iBank;
     if (gChan[iChan].iFx & HSYN_CHAN_FX_CHORUS) {
-        int c_range = (xflags & kFireChorusVoice) ? gSynthConfig.chorus_depth[1]
-                                                  : gSynthConfig.chorus_depth[0];
-        int chorus_pitch = _note_2_pitch(
-            pSampOffs->baseNote, iNote + transpose, detune + c_range, samp_rate);
+        int c_range = (xflags & kFireChorusVoice) ? gSynthConfig.chorus_depth[1] :
+                                                    gSynthConfig.chorus_depth[0];
+        int chorus_pitch =
+            _note_2_pitch(pSampOffs->baseNote, iNote + transpose, detune + c_range, samp_rate);
 
         pNote->fx |= HSYN_FX_CHORUS;
         pNote->chr_rng = chorus_pitch - pitch_val;
@@ -811,8 +811,8 @@ int hs_note_on(int iChan, int iNote, int iVol) {
     }
     note1 = _fire_off_sample(sample, iNote, iChan, iVol, pProgOffs, pSplitOffs, 0);
     if (note1 >= 0 && (gChan[iChan].iFx & HSYN_CHAN_FX_CHORUS)) {
-        note2 = _fire_off_sample(
-            sample, iNote, iChan, iVol, pProgOffs, pSplitOffs, kFireChorusVoice);
+        note2 =
+            _fire_off_sample(sample, iNote, iChan, iVol, pProgOffs, pSplitOffs, kFireChorusVoice);
         gCurrentNotes[note1].slave = note2; // A failed second voice stores its error code.
     }
     return note1;
