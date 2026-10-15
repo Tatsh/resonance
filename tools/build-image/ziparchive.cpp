@@ -30,6 +30,8 @@ constexpr std::size_t kEndDirectoryOffset = 16;
 
 // The offsets below are within a central directory header.
 constexpr std::size_t kCentralMethod = 10;
+constexpr std::size_t kCentralTime = 12;
+constexpr std::size_t kCentralDate = 14;
 constexpr std::size_t kCentralCrc = 16;
 constexpr std::size_t kCentralCompressedSize = 20;
 constexpr std::size_t kCentralSize = 24;
@@ -44,6 +46,16 @@ constexpr std::size_t kLocalExtraLength = 28;
 
 std::unexpected<Error> notZip() {
     return artifactError("Artifact payload is not a zip archive.");
+}
+
+// An MS-DOS date and time has no zone. GitHub writes artifact archives in UTC.
+Seconds dosTime(std::uint16_t date, std::uint16_t time) {
+    constexpr int kDosYearBase = 1980;
+    const std::chrono::year_month_day day{std::chrono::year{kDosYearBase + (date >> 9)},
+                                          std::chrono::month{(date >> 5) & 0xFU},
+                                          std::chrono::day{date & 0x1FU}};
+    return std::chrono::sys_days{day} + std::chrono::hours{time >> 11} +
+           std::chrono::minutes{(time >> 5) & 0x3F} + std::chrono::seconds{(time & 0x1F) * 2};
 }
 
 } // namespace
@@ -87,7 +99,9 @@ std::expected<ZipArchive, Error> ZipArchive::open(std::vector<std::uint8_t> data
                                     readLittle32(bytes, offset + kCentralCrc),
                                     readLittle32(bytes, offset + kCentralCompressedSize),
                                     readLittle32(bytes, offset + kCentralSize),
-                                    readLittle32(bytes, offset + kCentralLocalOffset)});
+                                    readLittle32(bytes, offset + kCentralLocalOffset),
+                                    dosTime(readLittle16(bytes, offset + kCentralDate),
+                                            readLittle16(bytes, offset + kCentralTime))});
         offset += kCentralLength + nameLength + extraLength + commentLength;
     }
     return archive;
@@ -101,11 +115,24 @@ std::vector<std::string> ZipArchive::names() const {
     return names;
 }
 
-std::expected<std::vector<std::uint8_t>, Error> ZipArchive::extract(const std::string &name) const {
-    const auto member = std::ranges::find(members_, name, &Member::name);
-    if (member == members_.end()) {
+std::expected<const ZipArchive::Member *, Error> ZipArchive::member(const std::string &name) const {
+    const auto found = std::ranges::find(members_, name, &Member::name);
+    if (found == members_.end()) {
         return artifactError(std::format("Member {} is missing from the archive.", name));
     }
+    return &*found;
+}
+
+std::expected<Seconds, Error> ZipArchive::modified(const std::string &name) const {
+    return member(name).transform([](const Member *found) { return found->modified; });
+}
+
+std::expected<std::vector<std::uint8_t>, Error> ZipArchive::extract(const std::string &name) const {
+    const auto found = member(name);
+    if (!found) {
+        return std::unexpected(found.error());
+    }
+    const auto *member = *found;
     const std::span<const std::uint8_t> bytes = data_;
     const std::size_t local = member->localOffset;
     if (local + kLocalLength > bytes.size() || readLittle32(bytes, local) != kLocalSignature) {

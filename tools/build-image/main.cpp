@@ -59,9 +59,10 @@ struct Options {
     std::optional<std::string> token;
 };
 
+// The targets of the payloads are set once the original is identified.
 struct Payloads {
-    Payload executable;
-    Payload module;
+    Replacement executable;
+    Replacement module;
 };
 
 bool isRelativeTo(const fs::path &path, const fs::path &base) {
@@ -111,10 +112,29 @@ std::expected<std::string, Error> identify(const fs::path &inputImage) {
     });
 }
 
+std::expected<Replacement, Error> memberReplacement(const ZipArchive &archive,
+                                                    const std::string &name) {
+    auto data = archive.extract(name);
+    if (!data) {
+        return std::unexpected(std::move(data.error()));
+    }
+    return archive.modified(name).transform(
+        [&](Seconds modified) { return Replacement{std::string(), std::move(*data), modified}; });
+}
+
+std::expected<Replacement, Error> fileReplacement(const fs::path &path) {
+    auto data = readFile(path);
+    if (!data) {
+        return std::unexpected(std::move(data.error()));
+    }
+    return fileModificationTime(path).transform(
+        [&](Seconds modified) { return Replacement{std::string(), std::move(*data), modified}; });
+}
+
 // The executable is the one member whose name matches resonance-<VERSION>-<STD><LABEL>.elf.
-std::expected<Payload, Error> extractExecutable(const ZipArchive &archive,
-                                                const std::string &artifact,
-                                                const std::string &standardLabel) {
+std::expected<Replacement, Error> extractExecutable(const ZipArchive &archive,
+                                                    const std::string &artifact,
+                                                    const std::string &standardLabel) {
     const auto suffix = std::format("-{}{}", standardLabel, kExecutableSuffix);
     std::vector<std::string> matches;
     for (const auto &name : archive.names()) {
@@ -131,10 +151,10 @@ std::expected<Payload, Error> extractExecutable(const ZipArchive &archive,
                                          kExecutablePrefix,
                                          suffix));
     }
-    return archive.extract(matches.front());
+    return memberReplacement(archive, matches.front());
 }
 
-std::expected<Payload, Error>
+std::expected<Replacement, Error>
 extractModule(const ZipArchive &archive, const std::string &artifact, const std::string &standard) {
     const auto wanted = std::format("EZMIDI-{}.IRX", standard);
     const auto names = archive.names();
@@ -143,15 +163,15 @@ extractModule(const ZipArchive &archive, const std::string &artifact, const std:
     if (found == names.end()) {
         return artifactError(std::format("Artifact {} lacks {}.", artifact, wanted));
     }
-    return archive.extract(*found);
+    return memberReplacement(archive, *found);
 }
 
 // The video standard of the downloaded builds follows the disc being rebuilt. The Release
 // artifact provides the module whatever the build type.
 std::expected<Payloads, Error> resolvePayloads(const Options &options) {
     if (options.resonanceBin && options.ezmidiIrx) {
-        auto executable = readFile(*options.resonanceBin);
-        auto module = readFile(*options.ezmidiIrx);
+        auto executable = fileReplacement(*options.resonanceBin);
+        auto module = fileReplacement(*options.ezmidiIrx);
         if (!executable) {
             return std::unexpected(std::move(executable.error()));
         }
@@ -200,7 +220,7 @@ std::expected<Payloads, Error> resolvePayloads(const Options &options) {
 
     auto executable =
         options.resonanceBin ?
-            readFile(*options.resonanceBin) :
+            fileReplacement(*options.resonanceBin) :
             archive(releaseArtifact + label).and_then([&](const ZipArchive *found) {
                 return extractExecutable(*found, releaseArtifact + label, standard + label);
             });
@@ -208,7 +228,7 @@ std::expected<Payloads, Error> resolvePayloads(const Options &options) {
         return std::unexpected(std::move(executable.error()));
     }
     auto module = options.ezmidiIrx ?
-                      readFile(*options.ezmidiIrx) :
+                      fileReplacement(*options.ezmidiIrx) :
                       archive(releaseArtifact).and_then([&](const ZipArchive *found) {
                           return extractModule(*found, releaseArtifact, standard);
                       });
@@ -274,8 +294,10 @@ std::expected<std::uint32_t, Error> run(const Options &options) {
     }
     spdlog::info("Original is the {} release ({}).", isPal ? "PAL" : "NTSC-U/C", *target);
     std::vector<Replacement> replacements;
-    replacements.push_back({*target, std::move(payloads->executable)});
-    replacements.push_back({std::string(kTargetModule), std::move(payloads->module)});
+    payloads->executable.target = *target;
+    payloads->module.target = kTargetModule;
+    replacements.push_back(std::move(payloads->executable));
+    replacements.push_back(std::move(payloads->module));
     return ImageBuilder::plan(**source, std::move(replacements))
         .and_then([&options](ImageBuilder builder) { return builder.write(options.outputCue); });
 }

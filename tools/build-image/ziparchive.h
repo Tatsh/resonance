@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "error.h"
+#include "isodate.h"
 
 namespace Tools::BuildImage {
 
@@ -37,6 +38,15 @@ public:
     [[nodiscard]] std::expected<std::vector<std::uint8_t>, Error>
     extract(const std::string &name) const;
 
+    /**
+     * Read the modification time of one member.
+     *
+     * @param name Member name, as names() lists it.
+     * @return The time from the central directory, read as UTC, or an error when the member is
+     * missing.
+     */
+    [[nodiscard]] std::expected<Seconds, Error> modified(const std::string &name) const;
+
 private:
     struct Member {
         std::string name;
@@ -45,7 +55,10 @@ private:
         std::uint32_t compressedSize = 0;
         std::uint32_t size = 0;
         std::uint32_t localOffset = 0;
+        Seconds modified;
     };
+
+    [[nodiscard]] std::expected<const Member *, Error> member(const std::string &name) const;
 
     explicit ZipArchive(std::vector<std::uint8_t> data);
 

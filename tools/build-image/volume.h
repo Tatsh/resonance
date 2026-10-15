@@ -7,18 +7,27 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "error.h"
+#include "isodate.h"
 
 /** Writer of a FreQuency disc image with the built executable and module in place. */
 namespace Tools::BuildImage {
 
+/** The extent of a directory in the ISO9660 tree. */
+struct DirectoryExtent {
+    std::uint32_t lba = 0;  /*!< First sector, relative to the track start. */
+    std::uint32_t size = 0; /*!< Length in bytes. */
+};
+
 /** A file found in the ISO9660 tree. */
 struct LocatedFile {
-    std::uint32_t lba = 0;        /*!< First data sector, relative to the track start. */
-    std::uint32_t parentLba = 0;  /*!< First sector of the containing directory. */
-    std::uint32_t parentSize = 0; /*!< Length of the containing directory in bytes. */
-    std::uint32_t size = 0;       /*!< Data length in bytes. */
+    std::uint32_t lba = 0; /*!< First data sector, relative to the track start. */
+    /** The containing directory, then each ancestor up to the root directory. */
+    std::vector<DirectoryExtent> directories;
+    Seconds modified;       /*!< Date of the directory record, in UTC. */
+    std::uint32_t size = 0; /*!< Data length in bytes. */
 };
 
 /** The data sectors of an ISO9660 volume, from a disc image or built from a disc root. */

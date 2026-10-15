@@ -47,6 +47,7 @@ private:
     struct Record {
         bool isDirectory = false;
         std::uint32_t lba = 0;
+        Seconds modified;
         bool multiExtent = false;
         std::string name;
         std::uint32_t size = 0;
