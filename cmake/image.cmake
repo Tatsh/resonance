@@ -15,8 +15,14 @@ set(RESONANCE_IMAGE_OUTPUT
     "${CMAKE_BINARY_DIR}/resonance.cue"
     CACHE FILEPATH "Cue sheet the image target writes. The bin is written beside it.")
 # The console loads only the program segment, so the debug information is dead weight on the disc.
-# The stripped executable fits the original's extent and is written in place.
-option(RESONANCE_IMAGE_STRIP "Put an executable without debug information on the image." ON)
+# A Debug build puts it on the disc anyway, for a debugger reading the executable from the image.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(_resonance_image_strip_default OFF)
+else()
+  set(_resonance_image_strip_default ON)
+endif()
+option(RESONANCE_IMAGE_STRIP "Put an executable without debug information on the image."
+       ${_resonance_image_strip_default})
 
 if(NOT RESONANCE_DISC_IMAGE)
   message(STATUS "Set RESONANCE_DISC_IMAGE to an original disc image to enable the image target.")
