@@ -1225,6 +1225,7 @@ strequal
 strerror
 strfile
 stringobject
+stringop
 stropmodule
 strtol
 strtoul

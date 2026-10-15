@@ -102,6 +102,17 @@ target_compile_options(
 set(_python_upstream_srcs ${RESONANCE_PYTHON_SRCS})
 list(FILTER _python_upstream_srcs INCLUDE REGEX "/3rdparty/Python-2\\.0/")
 set(_python_upstream_warning_flags
+    -Wno-address
+    -Wno-cast-function-type
+    -Wno-char-subscripts
+    -Wno-format-overflow
+    -Wno-int-to-pointer-cast
+    -Wno-maybe-uninitialized
+    -Wno-missing-field-initializers
+    -Wno-pointer-to-int-cast
+    -Wno-sign-compare
+    -Wno-strict-aliasing
+    -Wno-stringop-truncation
     -Wno-unused-but-set-variable
     -Wno-unused-function
     -Wno-unused-parameter
