@@ -82,7 +82,6 @@ barsequencer
 barstatusmsg
 bartels
 bascus
-basenames
 bclr
 bdec
 begingamelocalmsg
@@ -92,6 +91,7 @@ besces
 bgtrackgraph
 bgtz
 biggem
+bindingset
 binintx
 bitbltbuf
 blak
@@ -100,6 +100,7 @@ blit
 bltinmodule
 bltz
 bluegrey
+bqrs
 breug
 bsky
 bsloadlevelpacket
@@ -112,6 +113,7 @@ bumpmsg
 bumppacket
 bumppowerup
 buttonpowmsg
+bylanguage
 cacceler
 callbackxferbdtoiop
 callbackxferhdtoiop
@@ -569,11 +571,14 @@ libdma
 libera
 libgcc
 libgifpk
+libgmp
 libgraph
 libkernel
 libkernl
 libmc
+libmpc
 libmpeg
+libmpfr
 libmtap
 libpad
 libscf
@@ -987,6 +992,7 @@ powx
 powy
 ppacb
 preapproved
+preinclude
 primaddr
 prmodecont
 prmodecontaddr
@@ -1024,6 +1030,8 @@ pythonpath
 pythonrun
 pythontype
 qfsrv
+qlpack
+qlpacks
 quadword
 quadwords
 quat
@@ -1095,6 +1103,7 @@ rpch
 rpcm
 rshift
 rtti
+sarif
 savefilemct
 saveglobalsettingsmct
 saveicon
@@ -1232,6 +1241,7 @@ strtoul
 structmember
 structmodule
 stuttereffector
+subpaths
 subu
 subx
 suby

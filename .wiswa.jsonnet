@@ -8,9 +8,9 @@
   want_codeql: true,
   github+: {
     codeql+: {
-      languages: ['c-cpp', 'actions'],
+      languages: ['actions'],
       runs_on: 'ubuntu-latest',
-      workflow_file: 'codeql.yml',
+      workflow_file: 'codeql-actions.yml',
     },
   },
   want_tests: false,

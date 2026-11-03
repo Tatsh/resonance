@@ -1,0 +1,53 @@
+private predicate reportedPair(Flow::PathNode sourceNode, Flow::PathNode sinkNode) {
+  exists(REPORT_DECLARATIONS |
+    REPORT_CONDITION
+  )
+}
+
+private predicate rawStep(Flow::PathNode a, Flow::PathNode b) {
+  Flow::PathGraph::edges(a, b, _, _)
+}
+
+private predicate reportedSource(Flow::PathNode source) { reportedPair(source, _) }
+
+bindingset[node, source]
+private int distanceFromSource(Flow::PathNode node, Flow::PathNode source) =
+  shortestDistances(reportedSource/1, rawStep/2)(source, node, result)
+
+bindingset[node, source]
+private Flow::PathNode chosenPredecessor(Flow::PathNode node, Flow::PathNode source) {
+  result = min(Flow::PathNode previous |
+    rawStep(previous, node) and
+    distanceFromSource(node, source) = distanceFromSource(previous, source) + 1
+  | previous order by previous.toStringWithContext(), previous.getLocation().toString())
+}
+
+private predicate selectedNode(Flow::PathNode node, Flow::PathNode source) {
+  reportedPair(source, node)
+  or
+  exists(Flow::PathNode successor |
+    selectedNode(successor, source) and node = chosenPredecessor(successor, source)
+  )
+}
+
+module CompactPathGraph {
+  query predicate edges(Flow::PathNode a, Flow::PathNode b, string key, string val) {
+    exists(Flow::PathNode source |
+      selectedNode(b, source) and a = chosenPredecessor(b, source)
+    ) and
+    Flow::PathGraph::edges(a, b, key, val)
+  }
+
+  query predicate nodes(Flow::PathNode node, string key, string val) {
+    selectedNode(node, _) and Flow::PathGraph::nodes(node, key, val)
+  }
+
+  query predicate subpaths(Flow::PathNode arg, Flow::PathNode par,
+    Flow::PathNode ret, Flow::PathNode out) {
+    Flow::PathGraph::subpaths(arg, par, ret, out) and
+    exists(Flow::PathNode source |
+      selectedNode(arg, source) and selectedNode(par, source) and
+      selectedNode(ret, source) and selectedNode(out, source)
+    )
+  }
+}

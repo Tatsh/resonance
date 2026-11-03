@@ -3,7 +3,16 @@ concurrency:
   group: '${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}'
 jobs:
   analyze:
-    name: 'Analyze'
+    env:
+      CODEQL_COMPONENT: '${{ matrix.component }}'
+      CODEQL_EXTRACTOR_CPP_OPTION_FRONTEND_OPTIONS: |-
+        --preinclude
+        ${{ github.workspace }}/.github/codeql/ps2-preinclude.h
+      PS2DEV: '${{ runner.temp }}/ps2dev'
+      PS2SDK: '${{ runner.temp }}/ps2dev/ps2sdk'
+      VIDEO_STANDARD: '${{ matrix.video-standard }}'
+    name: 'Analyze C/C++ (${{ matrix.target }})'
+    needs: 'validate-queries'
     permissions:
       actions: 'read'
       contents: 'read'
@@ -14,55 +23,127 @@ jobs:
         uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         with:
           persist-credentials: false
-      - name: 'Initialize CodeQL'
-        uses: 'github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+      - name: 'Install build dependencies'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ libgmp-dev libmpc-dev libmpfr-dev libssl-dev \
+            ninja-build zlib1g-dev
+      - if: matrix.component != 'tools'
+        name: 'Install PS2 toolchain'
+        env:
+          TOOLCHAIN_SHA256: 'a49d9f066771402d7bf54d092efa77e8bc4bd0bdaf2292e4aa37642865ad172d'
+        run: |
+          archive="$RUNNER_TEMP/ps2dev.tar.gz"
+          curl --fail --location --retry 3 --output "$archive" \
+            'https://github.com/ps2dev/ps2dev/releases/download/latest/ps2dev-ubuntu-latest.tar.gz'
+          printf '%s  %s\n' "$TOOLCHAIN_SHA256" "$archive" | sha256sum --check --strict
+          mkdir -p "$PS2DEV"
+          tar --extract --gzip --file "$archive" --strip-components 1 --directory "$PS2DEV"
+          printf '%s\n' "$PS2DEV/bin" "$PS2DEV/ee/bin" "$PS2DEV/iop/bin" "$PS2SDK/bin" \
+            >> "$GITHUB_PATH"
+      # Configuration builds desktop tools and a compiler plugin before console tracing starts.
+      # Console programs, desktop tools, and the compiler plugin use separate databases.
+      - if: matrix.component == 'game' || matrix.component == 'iop'
+        name: 'Configure console build'
+        run: |
+          cmake -B build-codeql -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="$PWD/cmake/ps2-ee-toolchain.cmake" \
+            -DCMAKE_BUILD_TYPE=Release -DVIDEO_STANDARD="$VIDEO_STANDARD"
+      - id: 'codeql'
+        name: 'Set up CodeQL'
+        uses: 'github/codeql-action/setup-codeql@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
         with:
-          build-mode: 'none'
-          languages: '${{ matrix.language }}'
-      - name: 'Perform CodeQL Analysis'
-        uses: 'github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+          languages: 'c-cpp'
+      - env:
+          CODEQL_BINARY: '${{ steps.codeql.outputs.codeql-path }}'
+        name: 'Prepare current security queries'
+        run: |
+          python3 .github/codeql/prepare-queries.py --codeql "$CODEQL_BINARY" \
+            --output "$RUNNER_TEMP/codeql-queries" --adapter .github/codeql/compact-paths.qll.in
+      - env:
+          CODEQL_BINARY: '${{ steps.codeql.outputs.codeql-path }}'
+        name: 'Trace compilation'
+        run: |
+          "$CODEQL_BINARY" database create "$RUNNER_TEMP/codeql-database" --language=cpp \
+            --source-root="$GITHUB_WORKSPACE" --command='bash .github/codeql/build.sh' \
+            --threads=4 --ram=14000
+      - env:
+          ANALYSIS_CATEGORY: '${{ matrix.category }}'
+          CODEQL_BINARY: '${{ steps.codeql.outputs.codeql-path }}'
+        name: 'Perform CodeQL Analysis'
+        run: |
+          "$CODEQL_BINARY" database analyze "$RUNNER_TEMP/codeql-database" \
+            "$RUNNER_TEMP/codeql-queries/queries.qls" --format=sarif-latest \
+            --sarif-category="$ANALYSIS_CATEGORY" --output="$RUNNER_TEMP/codeql-results.sarif" \
+            --threads=4 --ram=14000
+      - name: 'Upload CodeQL results'
+        uses: 'github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
         with:
-          category: '/language:${{matrix.language}}'
+          sarif_file: '${{ runner.temp }}/codeql-results.sarif'
     strategy:
       fail-fast: false
       matrix:
-        language:
-          - 'c-cpp'
-          - 'actions'
+        include:
+          - category: '/language:c-cpp'
+            component: 'game'
+            target: 'NTSC'
+            video-standard: 'NTSC'
+          - category: '/language:c-cpp/video-standard:PAL'
+            component: 'game'
+            target: 'PAL'
+            video-standard: 'PAL'
+          - category: '/language:c-cpp/component:iop/video-standard:NTSC'
+            component: 'iop'
+            target: 'IOP NTSC'
+            video-standard: 'NTSC'
+          - category: '/language:c-cpp/component:iop/video-standard:PAL'
+            component: 'iop'
+            target: 'IOP PAL'
+            video-standard: 'PAL'
+          - category: '/language:c-cpp/component:tools'
+            component: 'tools'
+            target: 'tools'
+          - category: '/language:c-cpp/component:plugin'
+            component: 'plugin'
+            target: 'plugin'
+  validate-queries:
+    name: 'Validate query findings and paths'
+    permissions:
+      actions: 'read'
+      contents: 'read'
+      security-events: 'write'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: 'Checkout repository'
+        uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+        with:
+          persist-credentials: false
+      - id: 'codeql'
+        name: 'Set up CodeQL'
+        uses: 'github/codeql-action/setup-codeql@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
+        with:
+          languages: 'c-cpp'
+      - env:
+          CODEQL_BINARY: '${{ steps.codeql.outputs.codeql-path }}'
+        name: 'Prepare current security queries'
+        run: |
+          python3 .github/codeql/prepare-queries.py --codeql "$CODEQL_BINARY" \
+            --output "$RUNNER_TEMP/codeql-queries" --adapter .github/codeql/compact-paths.qll.in
+      - env:
+          CODEQL_BINARY: '${{ steps.codeql.outputs.codeql-path }}'
+        name: 'Check finding and path equivalence'
+        run: |
+          python3 .github/codeql/test-queries.py --codeql "$CODEQL_BINARY" \
+            --queries "$RUNNER_TEMP/codeql-queries" --work-dir "$RUNNER_TEMP/codeql-self-test"
 name: 'CodeQL'
 'on':
   pull_request:
     branches:
       - 'master'
-    paths:
-      - '**/*.cpp'
-      - '**/*.cxx'
-      - '**/*.hpp'
-      - '**/*.hh'
-      - '**/*.hxx'
-      - '**/*.c'
-      - '**/*.cc'
-      - '**/*.h'
-      - '.github/workflows/*.yml'
-      - '.github/workflows/*.yaml'
-      - '**/action.yml'
-      - '**/action.yaml'
   push:
     branches:
       - 'master'
-    paths:
-      - '**/*.cpp'
-      - '**/*.cxx'
-      - '**/*.hpp'
-      - '**/*.hh'
-      - '**/*.hxx'
-      - '**/*.c'
-      - '**/*.cc'
-      - '**/*.h'
-      - '.github/workflows/*.yml'
-      - '.github/workflows/*.yaml'
-      - '**/action.yml'
-      - '**/action.yaml'
   schedule:
     - cron: '15 4 * * 3'
+  workflow_dispatch:
 permissions: {}
