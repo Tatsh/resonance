@@ -29,6 +29,7 @@ almodule
 amovieset
 analogl
 analogr
+analyzer
 andi
 anim
 animatables
@@ -522,6 +523,7 @@ isdir
 isrecordingmsg
 isub
 isubiu
+iterdir
 itof
 iwyu
 jalr
@@ -870,6 +872,7 @@ nocard
 nodefaultlibs
 nodisc
 nodoubt
+nojekyll
 nolattice
 nomacro
 nomemcard
@@ -926,6 +929,7 @@ parsetok
 particlesys
 particlesysanim
 pathconf
+pathlib
 pausegamesystemmsg
 pbck
 pcgth
