@@ -11,6 +11,17 @@
 add_library(resonance_common INTERFACE)
 target_compile_options(resonance_common INTERFACE -Wall -Wextra -Wno-unknown-pragmas)
 
+if(ENABLE_PATCHES)
+  include(FetchContent)
+  FetchContent_Declare(
+    fmt
+    URL https://github.com/fmtlib/fmt/archive/refs/tags/12.2.0.tar.gz
+    URL_HASH SHA256=8b852bb5aa6e7d8564f9e81394055395dd1d1936d38dfd3a17792a02bebd7af0
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
+  FetchContent_MakeAvailable(fmt)
+  target_link_libraries(resonance_common INTERFACE fmt::fmt-header-only)
+endif()
+
 # _EE selects the Emotion Engine side of the headers serving both processors.
 target_compile_definitions(resonance_common INTERFACE _EE)
 

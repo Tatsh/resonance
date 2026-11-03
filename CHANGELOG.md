@@ -11,6 +11,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Security
 
+- `ENABLE_PATCHES` formatting checks argument types and counts, bounds output, and copies invalid
+  templates literally.
+- `build-image` requires HTTPS for GitHub artefact downloads and restricts authentication tokens to
+  the original GitHub API origin.
 - Builds with `ENABLE_PATCHES` prevent format-string injection and buffer overflows in diagnostic
   messages and Python object representations.
 

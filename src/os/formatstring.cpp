@@ -21,17 +21,32 @@ char g_szFormatStringBuffer[kFormatStringBufferSize] = {};
 
 } // namespace
 
+#ifdef ENABLE_PATCHES
+const char *Rnd::FormatString(const char *pszFormat, fmt::printf_args args) {
+    if (pszFormat == nullptr) {
+        g_szFormatStringBuffer[0] = '\0';
+        return g_szFormatStringBuffer;
+    }
+    try {
+        // The pinned fmt version exposes bounded printf output through its internal buffer API.
+        fmt::detail::iterator_buffer<char *, char, fmt::detail::fixed_buffer_traits> buffer(
+            g_szFormatStringBuffer, sizeof(g_szFormatStringBuffer) - 1);
+        fmt::detail::vprintf(buffer, fmt::string_view(pszFormat), args);
+        *buffer.out() = '\0';
+    } catch (const fmt::format_error &) {
+        snprintf(g_szFormatStringBuffer, sizeof(g_szFormatStringBuffer), "%s", pszFormat);
+    }
+    return g_szFormatStringBuffer;
+}
+#else
 const char *Rnd::MakeString(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
-#ifdef ENABLE_PATCHES
-    vsnprintf(g_szFormatStringBuffer, sizeof(g_szFormatStringBuffer), pszFormat, args);
-#else
     vsprintf(g_szFormatStringBuffer, pszFormat, args);
-#endif
     va_end(args);
     return g_szFormatStringBuffer;
 }
+#endif
 
 const char *GetDirectoryFromPath(const char *pszPath) {
     strcpy(g_szDirectoryBuffer, pszPath);

@@ -90,20 +90,21 @@ std::expected<std::string, Error> GitHubClient::readUrl(const std::string &url) 
     return artifactError(std::format(
         "GitHub request failed for {}. This build-image was built without HTTPS support.", url));
 #else
-    static const std::regex kUrl(R"(^(https?://[^/]+)(/.*)?$)", std::regex::icase);
+    static const std::regex kUrl(R"(^(https://[^/]+)(/.*)?$)", std::regex::icase);
     auto current = url;
     std::string firstOrigin;
-    auto authorize = true;
+    auto authorize = false;
     for (int redirect = 0; redirect <= kMaximumRedirects; ++redirect) {
         std::smatch parts;
         if (!std::regex_match(current, parts, kUrl)) {
             return artifactError(std::format(
-                "GitHub request failed for {}. The URL {} is not valid.", url, current));
+                "GitHub request failed for {}. The URL {} requires HTTPS.", url, current));
         }
         const auto origin = parts[1].str();
         const auto path = parts[2].matched ? parts[2].str() : std::string("/");
         if (firstOrigin.empty()) {
             firstOrigin = origin;
+            authorize = origin == kGitHubApi;
         }
         authorize = authorize && origin == firstOrigin;
         httplib::Client client(origin);
@@ -122,7 +123,11 @@ std::expected<std::string, Error> GitHubClient::readUrl(const std::string &url) 
         if (response->status >= kFirstRedirectStatus && response->status < kFirstErrorStatus &&
             response->has_header("Location")) {
             const auto location = response->get_header_value("Location");
-            current = location.starts_with('/') ? origin + location : location;
+            if (location.starts_with("//")) {
+                current = "https:" + location;
+            } else {
+                current = location.starts_with('/') ? origin + location : location;
+            }
             continue;
         }
         if (response->status >= kFirstErrorStatus) {

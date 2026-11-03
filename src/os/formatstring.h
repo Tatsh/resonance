@@ -1,7 +1,35 @@
 #pragma once
 
+#ifdef ENABLE_PATCHES
+#include <fmt/printf.h>
+#endif
+
 namespace Rnd {
 
+#ifdef ENABLE_PATCHES
+/**
+ * Format typed arguments into the shared buffer, limited to 1023 bytes.
+ *
+ * Invalid templates are copied literally. The result remains valid until the next call.
+ *
+ * @param pszFormat A printf-style template, or null for an empty result.
+ * @param args Typed arguments for the template.
+ * @return The shared buffer.
+ */
+const char *FormatString(const char *pszFormat, fmt::printf_args args);
+
+/**
+ * Format typed arguments without interpreting C variadic arguments.
+ *
+ * @param pszFormat A printf-style template.
+ * @param args Arguments checked against the template at runtime.
+ * @return The shared buffer, limited to 1023 bytes.
+ */
+template <typename... Args>
+const char *MakeString(const char *pszFormat, const Args &...args) {
+    return FormatString(pszFormat, fmt::make_printf_args(args...));
+}
+#else
 /**
  * Format text into one shared buffer and return it.
  *
@@ -16,6 +44,7 @@ namespace Rnd {
  * @ghidraAddress PAL: 0x0058fcc8
  */
 const char *MakeString(const char *pszFormat, ...);
+#endif
 
 } // namespace Rnd
 
