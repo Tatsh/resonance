@@ -118,6 +118,9 @@
     "type": "git",
     "url": "git+https://github.com/Tatsh/resonance.git"
   },
+  "resolutions": {
+    "markdownlint/re2js": "2.8.7"
+  },
   "scripts": {
     "build": "cmake --preset=default -DBUILD_DOCS=ON && cmake --build build",
     "check-formatting": "clang-format --dry-run --Werror $(git ls-files 'sce/*.c' 'sce/*.h' 'src/*.h' 'src/*.cpp' 'tools/*.h' 'tools/*.cpp' ':!:src/python/*') && prettier --check . && markdownlint-cli2 --config package.json --configPointer /markdownlint-cli2",

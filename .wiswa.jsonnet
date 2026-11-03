@@ -92,6 +92,9 @@
     ReflowComments: true,
   },
   package_json+: {
+    resolutions+: {
+      'markdownlint/re2js': '2.8.7',
+    },
     cspell+: {
       ignorePaths+: ['3rdparty/**', 'src/python/PC/**', 'src/python/patches/**'],
     },
