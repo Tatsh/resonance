@@ -8,8 +8,6 @@ jobs:
       CODEQL_EXTRACTOR_CPP_OPTION_FRONTEND_OPTIONS: |-
         --preinclude
         ${{ github.workspace }}/.github/codeql/ps2-preinclude.h
-      PS2DEV: '${{ runner.temp }}/ps2dev'
-      PS2SDK: '${{ runner.temp }}/ps2dev/ps2sdk'
       VIDEO_STANDARD: '${{ matrix.video-standard }}'
     name: 'Analyze C/C++ (${{ matrix.target }})'
     needs: 'validate-queries'
@@ -25,6 +23,8 @@ jobs:
           persist-credentials: false
       - name: 'Install build dependencies'
         run: |
+          printf 'PS2DEV=%s/ps2dev\nPS2SDK=%s/ps2dev/ps2sdk\n' "$RUNNER_TEMP" "$RUNNER_TEMP" \
+            >> "$GITHUB_ENV"
           sudo apt-get update
           sudo apt-get install -y cmake g++ libgmp-dev libmpc-dev libmpfr-dev libssl-dev \
             ninja-build zlib1g-dev
