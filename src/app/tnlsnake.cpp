@@ -163,8 +163,13 @@ void TnlSnake::SetPointFrame(int nFrame, int nIndex) {
     const float flFrame = static_cast<float>(nFrame);
     const float flSwing = flFrame * kPi / kSwingHalfPeriod;
     const float flBlend = static_cast<float>(sinf(mPhase + flSwing) * kBlendScale + kBlendScale);
+#ifdef ENABLE_PATCHES
+    const float flTangent = static_cast<float>(
+        static_cast<double>(mAmplitude) * kTangentSwing * cosf(mPhase + flSwing) + kTangentBase);
+#else
     const float flTangent =
         static_cast<float>(mAmplitude * kTangentSwing * cosf(mPhase + flSwing) + kTangentBase);
+#endif
     Transform xfm;
     GetCachedTunnelObject()->ProjectSectionToCameraSpace(mRing, &xfm, flFrame, flBlend, flTangent);
     mString->SetPointPos(nIndex, xfm.mTranslation);

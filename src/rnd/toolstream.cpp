@@ -21,11 +21,19 @@ ToolStream::ToolStream()
 }
 
 void ToolStream::Connect() {
+#ifdef ENABLE_PATCHES
+    printf("ToolStream connect: %p %p %p %p\n",
+           static_cast<void *>(&mFill),
+           static_cast<void *>(&mArrived),
+           static_cast<void *>(&mConsumed),
+           static_cast<void *>(mBuffer));
+#else
     // Yes, the binary prints the four addresses through %u; they are 32 bits on the target.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
     printf("ToolStream connect: %u %u %u %u\n", &mFill, &mArrived, &mConsumed, mBuffer);
 #pragma GCC diagnostic pop
+#endif
 }
 
 ToolStream::~ToolStream() {

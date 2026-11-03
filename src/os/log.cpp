@@ -70,7 +70,11 @@ void Fatal(const char *pszFormat, ...) {
 
     va_list args;
     va_start(args, pszFormat);
+#ifdef ENABLE_PATCHES
+    vsnprintf(g_szFatalMessage, sizeof(g_szFatalMessage), pszFormat, args);
+#else
     vsprintf(g_szFatalMessage, pszFormat, args);
+#endif
     va_end(args);
 
     for (;;) {

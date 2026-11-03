@@ -24,7 +24,11 @@ char g_szFormatStringBuffer[kFormatStringBufferSize] = {};
 const char *Rnd::MakeString(const char *pszFormat, ...) {
     va_list args;
     va_start(args, pszFormat);
+#ifdef ENABLE_PATCHES
+    vsnprintf(g_szFormatStringBuffer, sizeof(g_szFormatStringBuffer), pszFormat, args);
+#else
     vsprintf(g_szFormatStringBuffer, pszFormat, args);
+#endif
     va_end(args);
     return g_szFormatStringBuffer;
 }

@@ -562,7 +562,11 @@ int Text::HowManyFit(const char *pText) {
     nCount = static_cast<int>(pSpace - pText) + 1;
     if (mWrapWidth < MeasureRun(pText, nCount - 1)) {
         // Even the first word overflows, so the break falls inside it.
+#ifdef ENABLE_PATCHES
+        while (nCount > 1) {
+#else
         while (pText != nullptr && *pText != '\0') {
+#endif
             --nCount;
             if (MeasureRun(pText, nCount - 1) <= mWrapWidth) {
                 return nCount;

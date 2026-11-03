@@ -208,8 +208,13 @@ file_dealloc(PyFileObject *f)
 static PyObject *
 file_repr(PyFileObject *f)
 {
+#ifdef ENABLE_PATCHES
+	char buf[320];
+	snprintf(buf, sizeof(buf), "<%s file '%.256s', mode '%.10s' at %p>",
+#else
 	char buf[300];
 	sprintf(buf, "<%s file '%.256s', mode '%.10s' at %p>",
+#endif
 		f->f_fp == NULL ? "closed" : "open",
 		PyString_AsString(f->f_name),
 		PyString_AsString(f->f_mode),

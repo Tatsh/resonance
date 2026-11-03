@@ -104,6 +104,16 @@ meth_getattr(PyCFunctionObject *m, char *name)
 static PyObject *
 meth_repr(PyCFunctionObject *m)
 {
+#ifdef ENABLE_PATCHES
+	char buf[224];
+	if (m->m_self == NULL)
+		snprintf(buf, sizeof(buf), "<built-in function %.80s>", m->m_ml->ml_name);
+	else
+		snprintf(buf, sizeof(buf),
+			"<built-in method %.80s of %.80s object at %p>",
+			m->m_ml->ml_name, m->m_self->ob_type->tp_name,
+			m->m_self);
+#else
 	char buf[200];
 	if (m->m_self == NULL)
 		sprintf(buf, "<built-in function %.80s>", m->m_ml->ml_name);
@@ -112,6 +122,7 @@ meth_repr(PyCFunctionObject *m)
 			"<built-in method %.80s of %.80s object at %p>",
 			m->m_ml->ml_name, m->m_self->ob_type->tp_name,
 			m->m_self);
+#endif
 	return PyString_FromString(buf);
 }
 

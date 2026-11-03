@@ -9,6 +9,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [unreleased]
 
+### Security
+
+- Builds with `ENABLE_PATCHES` prevent format-string injection and buffer overflows in diagnostic
+  messages and Python object representations.
+
+### Fixed
+
+- Builds with `ENABLE_PATCHES` correct diagnostic arguments, text wrapping, and tunnel animation
+  arithmetic.
+
 ## [1.0.1] - 2026-10-17
 
 ### Changed

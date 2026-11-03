@@ -117,5 +117,9 @@ void PyShell::ReportError(const HxStr &context, int bWithTraceback) {
     }
 
     PyErr_Clear();
+#ifdef ENABLE_PATCHES
+    Fatal("%s", message.mStr != nullptr ? message.mStr : g_szEmptyString);
+#else
     Fatal(message.mStr != nullptr ? message.mStr : g_szEmptyString); // The message is the format.
+#endif
 }

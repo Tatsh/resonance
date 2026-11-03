@@ -207,6 +207,13 @@ CheckPalEqual(const APalette *pPalMip0, const APalette *pPalMip, const char *psz
         return false;
     }
     if (pPalMip0->mEnd != pPalMip->mEnd) {
+#ifdef ENABLE_PATCHES
+        printf("CheckPalEqual(%s): Mipmap 0 pal is %d entries, mipmap %d is %d entries\n",
+               pszName,
+               pPalMip0->mEnd,
+               nMip,
+               pPalMip->mEnd);
+#else
         // The binary passes no fourth data argument, so the trailing entry count reads
         // indeterminate stack data.
 #pragma GCC diagnostic push
@@ -216,6 +223,7 @@ CheckPalEqual(const APalette *pPalMip0, const APalette *pPalMip, const char *psz
                pPalMip0->mEnd,
                nMip);
 #pragma GCC diagnostic pop
+#endif
         return false;
     }
     for (int nEntry = 0; nEntry < pPalMip0->mEnd; ++nEntry) {
