@@ -169,6 +169,7 @@ congrat
 contctrlmsg
 controllercmd
 controllerconfig
+copytree
 coveragerc
 cpdext
 cpdist
@@ -523,7 +524,6 @@ isdir
 isrecordingmsg
 isub
 isubiu
-iterdir
 itof
 iwyu
 jalr
@@ -1092,6 +1092,7 @@ riffrangefinder
 riffset
 ripgreprc
 rmode
+rmtree
 rndartt
 rndasyncload
 rndfile
@@ -1168,6 +1169,7 @@ shellformat
 shiftjis
 shoemake
 showeraseeffectmsg
+shutil
 sifcmd
 sifdev
 sifdma
