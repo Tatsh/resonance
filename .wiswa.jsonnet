@@ -5,7 +5,14 @@
   description: 'Reconstructed source of the PlayStation 2 game FreQuency.',
   keywords: ['decompilation', 'frequency', 'game', 'playstation 2', 'reverse engineering'],
   security_policy_supported_versions: { '1.0.x': ':white_check_mark:' },
-  want_codeql: false,
+  want_codeql: true,
+  github+: {
+    codeql+: {
+      languages: ['c-cpp', 'actions'],
+      runs_on: 'ubuntu-latest',
+      workflow_file: 'codeql.yml',
+    },
+  },
   want_tests: false,
   want_winget: false,
   clang_format_args: "$(git ls-files 'sce/*.c' 'sce/*.h' 'src/*.h' 'src/*.cpp' 'tools/*.h' " +
