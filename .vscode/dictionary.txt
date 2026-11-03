@@ -953,6 +953,7 @@ phrasepacket
 phraseplayer
 picure
 pinkgrey
+pipefail
 pipx
 pitchbend
 pitchingstg
