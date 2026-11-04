@@ -190,3 +190,4 @@
     },
   } },
 }
++ { static_analysis_paths: ['src', 'tools', '.github/codeql'] }

@@ -77,6 +77,8 @@ jobs:
             "$RUNNER_TEMP/codeql-queries/queries.qls" --format=sarif-latest \
             --sarif-category="$ANALYSIS_CATEGORY" --output="$RUNNER_TEMP/codeql-results.sarif" \
             --threads=4 --ram=14000
+      - name: Restrict native findings to project sources
+        run: python3 .github/scripts/static-analysis.py --sarif "$RUNNER_TEMP/codeql-results.sarif"
       - name: 'Upload CodeQL results'
         uses: 'github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370'
         with:
