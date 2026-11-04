@@ -31,12 +31,12 @@ jobs:
       - if: matrix.component != 'tools'
         name: 'Install PS2 toolchain'
         env:
-          TOOLCHAIN_SHA256: '1a4a3c3b9ba4f8d39cd9dab4ae42a8fa03c1892bd0aec8850aa871a9dcea5062'
+          TOOLCHAIN_SHA256: 'c8e5dedccf62084d476894e88cd0451b57f1ed288e741eb3c1263010aaffc028'
         run: |
           archive="$RUNNER_TEMP/ps2dev.tar.gz"
           curl --fail --location --retry 3 --header 'Accept: application/octet-stream' \
             --output "$archive" \
-            'https://api.github.com/repos/ps2dev/ps2dev/releases/assets/704763671'
+            'https://api.github.com/repos/ps2dev/ps2dev/releases/assets/422427014'
           printf '%s  %s\n' "$TOOLCHAIN_SHA256" "$archive" | sha256sum --check --strict
           mkdir -p "$PS2DEV"
           tar --extract --gzip --file "$archive" --strip-components 1 --directory "$PS2DEV"
