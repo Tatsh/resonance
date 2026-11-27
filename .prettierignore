@@ -3,6 +3,7 @@
 *.info
 *.iso
 *.kate-swp
+*.lock
 *.log
 *.min.js
 *.tsbuildinfo

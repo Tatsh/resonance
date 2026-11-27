@@ -55,7 +55,7 @@ IncludeBlocks: 'Regroup'
 IncludeCategories:
   - CaseSensitive: true
     Priority: 1
-    Regex: '^<(assert|complex|ctype|errno|fcntl|fenv|float|inttypes|iso646|limits|locale|math|pthread|setjmp|signal|spawn|stdalign|stdarg|stdatomic|stdbool|stddef|stdint|stdio|stdlib|stdnoreturn|string|strings|sys/[a-z_]+|tgmath|threads|time|uchar|unistd|wchar|wctype)\.h>$'
+    Regex: "^<(assert|complex|ctype|errno|fcntl|fenv|float|inttypes|iso646|limits|locale|math|pthread|setjmp|signal|spawn|stdalign|stdarg|stdatomic|stdbool|stddef|stdint|stdio|stdlib|stdnoreturn|string|strings|sys/[a-z_]+|tgmath|threads|time|uchar|unistd|wchar|wctype)\\.h>$"
   - CaseSensitive: true
     Priority: 1
     Regex: '^<[a-z_]+>$'
