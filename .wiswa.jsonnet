@@ -2,6 +2,7 @@
   uses_user_defaults: true,
   project_name: 'resonance',
   project_type: 'c++',
+  version: '1.0.1',
   description: 'Reconstructed source of the PlayStation 2 game FreQuency.',
   keywords: ['decompilation', 'frequency', 'game', 'playstation 2', 'reverse engineering'],
   security_policy_supported_versions: { '1.0.x': ':white_check_mark:' },
@@ -140,53 +141,5 @@
       ],
     },
   },
-}
-+ {
-  want_scan_build: true,
-  github+: { workflows+: {
-    scan_build+: {
-      scope: 'Host tools under tools/. PS2 target sources require the EE compiler.',
-      configure_command: 'cmake -S tools -B build-scan -DCMAKE_BUILD_TYPE=Debug',
-      documentation_steps: [
-        {
-          name: 'Install dependencies',
-          run: |||
-            sudo apt-get update
-            sudo apt-get install -y doxygen graphviz
-          |||,
-        },
-        {
-          name: 'Configure',
-          run: 'cmake -B "$GITHUB_WORKSPACE/build" -DBUILD_DOCS_ONLY=ON',
-        },
-        {
-          name: 'Build documentation',
-          run: 'cmake --build "$GITHUB_WORKSPACE/build" --target docs',
-        },
-        {
-          name: 'Page count',
-          run: |||
-            COUNT=$(find "$GITHUB_WORKSPACE/build/html" -name '*.html' | wc -l)
-            echo "Generated $COUNT page(s)"
-            test "$COUNT" -gt 0
-          |||,
-        },
-      ],
-      env: {},
-      setup_steps: [
-        {
-          name: 'Install build dependencies',
-          run: |||
-            sudo apt-get update
-            sudo apt-get install -y libssl-dev zlib1g-dev
-          |||,
-        },
-        {
-          name: 'Install current CMake',
-          run: 'pipx install cmake',
-        },
-      ],
-    },
-  } },
 }
 + { static_analysis_paths: ['src', 'tools', '.github/codeql'] }
